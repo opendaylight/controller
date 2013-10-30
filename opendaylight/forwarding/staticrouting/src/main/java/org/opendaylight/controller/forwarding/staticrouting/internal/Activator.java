@@ -9,11 +9,6 @@
 
 package org.opendaylight.controller.forwarding.staticrouting.internal;
 
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRouting;
 import org.opendaylight.controller.forwarding.staticrouting.IStaticRoutingAware;

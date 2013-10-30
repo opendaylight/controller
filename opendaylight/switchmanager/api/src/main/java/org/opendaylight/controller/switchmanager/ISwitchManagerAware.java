@@ -11,7 +11,6 @@ package org.opendaylight.controller.switchmanager;
 
 import org.opendaylight.controller.sal.core.Node;
 
-import org.opendaylight.controller.switchmanager.Subnet;
 
 /**
  * The interface provides methods to notify listeners about subnet and mode

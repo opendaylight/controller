@@ -23,7 +23,6 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 /**
  * Creates new modules by reflection. Provided class must have this constructor:

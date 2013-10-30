@@ -39,7 +39,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.osgi.service.device.Device;
 
 /**
  * Device manager allows interacting with devices on the network. Note that

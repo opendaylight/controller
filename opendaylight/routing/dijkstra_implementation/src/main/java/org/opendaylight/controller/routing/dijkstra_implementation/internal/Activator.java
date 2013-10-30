@@ -10,9 +10,7 @@
 package org.opendaylight.controller.routing.dijkstra_implementation.internal;
 
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Set;
 
 import org.apache.felix.dm.Component;
 import org.slf4j.Logger;

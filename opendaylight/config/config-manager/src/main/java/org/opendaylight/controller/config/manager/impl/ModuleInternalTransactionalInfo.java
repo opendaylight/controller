@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;
-import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator
         .TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;

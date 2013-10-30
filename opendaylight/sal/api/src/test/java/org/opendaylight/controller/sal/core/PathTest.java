@@ -21,11 +21,6 @@ import java.util.List;
 import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.Path;
 
 public class PathTest {
     @Test

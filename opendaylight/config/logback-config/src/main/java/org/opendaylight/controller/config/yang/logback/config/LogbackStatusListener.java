@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ch.qos.logback.core.status.Status;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;

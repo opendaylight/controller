@@ -18,10 +18,6 @@ package org.opendaylight.controller.sal.core;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
 
 public class EdgeTest {
     @Test

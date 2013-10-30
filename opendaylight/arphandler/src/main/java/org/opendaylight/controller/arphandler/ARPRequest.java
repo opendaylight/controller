@@ -11,7 +11,6 @@ package org.opendaylight.controller.arphandler;
 
 import java.net.InetAddress;
 
-import org.opendaylight.controller.arphandler.ARPEvent;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.switchmanager.Subnet;
 /*

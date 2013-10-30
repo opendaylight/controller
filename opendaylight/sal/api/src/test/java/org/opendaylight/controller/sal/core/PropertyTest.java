@@ -18,9 +18,6 @@ package org.opendaylight.controller.sal.core;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.sal.core.Bandwidth;
-import org.opendaylight.controller.sal.core.Latency;
-import org.opendaylight.controller.sal.core.Property;
 
 public class PropertyTest {
     @Test

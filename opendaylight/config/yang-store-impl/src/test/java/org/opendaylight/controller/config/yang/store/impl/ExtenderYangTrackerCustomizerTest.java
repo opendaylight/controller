@@ -24,7 +24,6 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 
 import com.google.common.collect.Lists;
 

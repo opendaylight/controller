@@ -12,7 +12,6 @@ package org.opendaylight.controller.sal.packet;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.packet.Ethernet;
 
 public class EthernetTest {
 

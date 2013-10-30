@@ -42,7 +42,6 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
-import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaClient;

@@ -1,15 +1,11 @@
 package org.opendaylight.controller.clustering.services_implementation.internal;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.infinispan.CacheImpl;
 import org.junit.Assert;

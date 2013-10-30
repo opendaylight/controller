@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
-import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 /**

@@ -9,7 +9,6 @@
 package org.opendaylight.controller.statisticsmanager.internal;
 
 import org.junit.Test;
-import org.opendaylight.controller.statisticsmanager.internal.StatisticsManager;
 
 public class StatisticsManagerTest {
 

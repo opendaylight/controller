@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
-import org.opendaylight.controller.clustering.stub.internal.ClusterGlobalManager;
 
 public class TestClusteringStub {
     @Test

@@ -11,7 +11,6 @@ package org.opendaylight.controller.sal.reader;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.sal.reader.NodeDescription;
 
 public class NodeDescriptionTest {
 

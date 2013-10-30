@@ -11,7 +11,6 @@ package org.opendaylight.controller.sal.reader;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.junit.Assert;

@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.config.spi;
 
-import javax.management.DynamicMBean;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;

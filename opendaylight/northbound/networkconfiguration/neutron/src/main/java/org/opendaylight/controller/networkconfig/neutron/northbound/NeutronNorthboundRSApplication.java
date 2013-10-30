@@ -14,11 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Application;
 import org.eclipse.persistence.jaxb.rs.MOXyJsonProvider;
-import org.opendaylight.controller.networkconfig.neutron.northbound.NeutronFloatingIPsNorthbound;
-import org.opendaylight.controller.networkconfig.neutron.northbound.NeutronNetworksNorthbound;
-import org.opendaylight.controller.networkconfig.neutron.northbound.NeutronPortsNorthbound;
-import org.opendaylight.controller.networkconfig.neutron.northbound.NeutronRoutersNorthbound;
-import org.opendaylight.controller.networkconfig.neutron.northbound.NeutronSubnetsNorthbound;
 
 
 /**

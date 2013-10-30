@@ -11,11 +11,8 @@ package org.opendaylight.controller.clustering.stub.internal;
 
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
-import org.opendaylight.controller.clustering.services.IClusterServices;
-import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.dm.Component;

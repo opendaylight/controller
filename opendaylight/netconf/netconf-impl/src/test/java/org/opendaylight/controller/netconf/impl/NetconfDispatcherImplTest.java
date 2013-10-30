@@ -14,7 +14,6 @@ import java.net.InetSocketAddress;
 import javax.net.ssl.SSLContext;
 
 import org.junit.Test;
-import org.opendaylight.controller.netconf.impl.*;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 
