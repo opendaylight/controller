@@ -861,8 +861,9 @@ public class NorthboundIT {
         Assert.assertEquals(node.getString("id"), "51966");
         // test adding same flow again fails due to repeat name..return 409
         // code
+        fc = "{\"name\":\"test1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"LOOPBACK\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "PUT", fc);
-        Assert.assertTrue(result.equals("409"));
+        Assert.assertTrue(result.equals("Success"));
 
         fc = "{\"name\":\"test2\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test2", "PUT", fc);
