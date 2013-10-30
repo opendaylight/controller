@@ -23,7 +23,8 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
     private final SessionIdProvider idProvider;
 
     public NetconfServerSessionListenerFactory(NetconfOperationServiceFactoryListener factoriesListener,
-            DefaultCommitNotificationProducer commitNotifier, SessionIdProvider idProvider) {
+            DefaultCommitNotificationProducer commitNotifier,
+            SessionIdProvider idProvider) {
         this.factoriesListener = factoriesListener;
         this.commitNotifier = commitNotifier;
         this.idProvider = idProvider;
@@ -36,8 +37,9 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
 
         CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationServiceSnapshot);
 
-        NetconfOperationRouterImpl operationRouter = new NetconfOperationRouterImpl(netconfOperationServiceSnapshot,
-                capabilityProvider, commitNotifier);
+        NetconfOperationRouterImpl operationRouter = new NetconfOperationRouterImpl(
+                netconfOperationServiceSnapshot, capabilityProvider,
+                commitNotifier);
 
         return new NetconfServerSessionListener(operationRouter);
     }
