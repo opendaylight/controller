@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -17,9 +18,20 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
+import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
@@ -28,6 +40,7 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslatorTest;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
+import org.osgi.framework.BundleContext;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -38,7 +51,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -452,20 +473,63 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         assertEquals(2, fieldDeclarations.size());
 
-        Set<String> expectedMethods = new HashSet<>(Arrays.asList("String getImplementationName()",
-                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.osgi.framework.BundleContext bundleContext)",
-                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.api.DynamicMBeanWithInstance old,org.osgi.framework.BundleContext bundleContext)",
-                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule handleChangedClass(org.opendaylight.controller.config.api.DynamicMBeanWithInstance old)",
-                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule oldModule,java.lang.AutoCloseable oldInstance,org.osgi.framework.BundleContext bundleContext)",
-                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.osgi.framework.BundleContext bundleContext)",
-                "java.util.Set<org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory,org.osgi.framework.BundleContext bundleContext)",
-                "boolean isModuleImplementingServiceInterface(Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface> serviceInterface)"));
-        assertEquals("Incorrenct number of generated methods", expectedMethods, visitor.methods);
+        assertFactoryMethods(visitor.methods, 8);
         assertEquals("Incorrenct number of generated method descriptions", 0,
                 visitor.methodDescriptions.size());
         assertEquals("Incorrenct number of generated method javadoc", 0,
                 visitor.methodJavadoc.size());
 
+    }
+
+    private void assertFactoryMethods(Set<String> methods, int expectedSize) {
+
+        List<ArgumentAssertion> args = Lists.newArrayList();
+        ArgumentAssertion oldInstanceArg = new ArgumentAssertion(DynamicMBeanWithInstance.class.getCanonicalName(), "old");
+        ArgumentAssertion instanceNameArg = new ArgumentAssertion(String.class.getSimpleName(), "instanceName");
+        ArgumentAssertion dependencyResolverArg = new ArgumentAssertion(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
+        ArgumentAssertion bundleContextArg = new ArgumentAssertion(BundleContext.class.getCanonicalName(), "bundleContext");
+
+        assertMethodPresent(methods, new MethodAssertion(String.class.getSimpleName(), "getImplementationName"));
+
+        args.add(instanceNameArg);
+        args.add(dependencyResolverArg);
+        args.add(bundleContextArg);
+        assertMethodPresent(methods, new MethodAssertion(Module.class.getCanonicalName(), "createModule", args));
+
+        args.add(2, oldInstanceArg);
+        assertMethodPresent(methods, new MethodAssertion(Module.class.getCanonicalName(), "createModule", args));
+
+        args.clear();
+        args.add(oldInstanceArg);
+        assertMethodPresent(methods, new MethodAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "handleChangedClass", args));
+
+        args.clear();
+        args.add(instanceNameArg);
+        args.add(dependencyResolverArg);
+        args.add(bundleContextArg);
+        assertMethodPresent(methods, new MethodAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "instantiateModule", args));
+
+
+        args.add(2, new ArgumentAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "oldModule"));
+        args.add(3, new ArgumentAssertion(AutoCloseable.class.getCanonicalName(), "oldInstance"));
+        assertMethodPresent(methods, new MethodAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "instantiateModule", args));
+
+        args.clear();
+        args.add(new ArgumentAssertion(DependencyResolverFactory.class.getCanonicalName(), "dependencyResolverFactory"));
+        args.add(bundleContextArg);
+        assertMethodPresent(methods, new MethodAssertion("java.util.Set<org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule>", "getDefaultModules", args));
+
+        args.clear();
+        args.add(new ArgumentAssertion("Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>", "serviceInterface"));
+        assertMethodPresent(methods, new MethodAssertion("boolean", "isModuleImplementingServiceInterface", args));
+
+        assertEquals(methods.size(), expectedSize);
+
+    }
+
+    private void assertMethodPresent(Set<String> methods, MethodAssertion methodAssertion) {
+        assertTrue(String.format("Generated methods did not contain %s, generated methods: %s",
+                methodAssertion.toString(), methods), methods.contains(methodAssertion.toString()));
     }
 
     private void assertAsyncEventBusModuleMXBean(MbeASTVisitor visitor) {
@@ -703,4 +767,53 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         return retVal;
     }
 
+    private static class MethodAssertion extends ArgumentAssertion{
+
+        private List<ArgumentAssertion> arguments;
+
+
+        MethodAssertion(String type, String name, List<ArgumentAssertion> arguments) {
+            super(type, name);
+            this.arguments = arguments;
+        }
+
+        MethodAssertion(String type, String name) {
+            this(type, name, Collections.<ArgumentAssertion>emptyList());
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer();
+            sb.append(type).append(' ');
+            sb.append(name).append('(');
+
+            int i = 0;
+            for (ArgumentAssertion argument : arguments) {
+                sb.append(argument.type).append(' ');
+                sb.append(argument.name);
+                if(++i != arguments.size())
+                    sb.append(',');
+            }
+            sb.append(')');
+            return sb.toString();
+        }
+    }
+
+    private static class ArgumentAssertion {
+
+        protected final String type, name;
+
+        private ArgumentAssertion(String type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer();
+            sb.append(type).append(' ');
+            sb.append(name);
+            return sb.toString();
+        }
+    }
 }
