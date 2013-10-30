@@ -33,6 +33,24 @@
       "revId": "101159d6c201d67b670151f3ba8e31985a4923b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_64f8e37c",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/test/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/JMXGeneratorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-10-30T10:08:05Z",
+      "side": 1,
+      "message": "I have addressed your suggestions in next commit. \nhttps://git.opendaylight.org/gerrit/#/c/2270/",
+      "parentUuid": "da6255ed_04c1272e",
+      "revId": "101159d6c201d67b670151f3ba8e31985a4923b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
