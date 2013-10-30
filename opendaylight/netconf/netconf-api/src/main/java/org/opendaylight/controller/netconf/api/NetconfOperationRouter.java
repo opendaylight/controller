@@ -12,7 +12,8 @@ import org.w3c.dom.Document;
 
 public interface NetconfOperationRouter extends AutoCloseable {
 
-    Document onNetconfMessage(Document message) throws NetconfDocumentedException;
+    Document onNetconfMessage(Document message, NetconfSession session)
+            throws NetconfDocumentedException;
 
     @Override
     void close();
