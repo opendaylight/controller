@@ -38,7 +38,7 @@ import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.Bundle;
