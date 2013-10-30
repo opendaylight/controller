@@ -38,7 +38,10 @@
                             javax.management,
                             org.opendaylight.controller.config.api.jmx,
                             org.opendaylight.protocol.framework,
-                            org.w3c.dom
+                            io.netty.channel,
+                            io.netty.util.concurrent,
+                            org.w3c.dom,
+                            org.slf4j
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.netconf.api,
@@ -46,7 +49,7 @@
                         </Export-Package>
                     </instructions>
                 </configuration>
-            </plugin>
+             </plugin>
         </plugins>
     </build>
 

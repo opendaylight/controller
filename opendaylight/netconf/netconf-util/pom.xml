@@ -53,6 +53,10 @@
             <version>${netconf.netty.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.siemens.ct.exi</groupId>
+            <artifactId>exificient</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.controller.thirdparty</groupId>
             <artifactId>ganymed</artifactId>
         </dependency>
@@ -71,6 +75,7 @@
                             org.opendaylight.controller.netconf.util.osgi,
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.messages,
+                            org.opendaylight.controller.netconf.util.handler,
                         </Export-Package>
                         <Import-Package>
                             org.opendaylight.controller.config.stat,
@@ -93,6 +98,7 @@
                             javax.xml.transform.stream,
                             javax.xml.validation,
                             javax.xml.xpath,
+                            javax.xml.transform.sax,
                             org.opendaylight.controller.netconf.api,
                             org.opendaylight.controller.netconf.mapping.api,
                             org.opendaylight.protocol.framework,
@@ -101,6 +107,13 @@
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax,
+                            com.siemens.ct.exi,
+                            com.siemens.ct.exi.api.sax,
+                            com.siemens.ct.exi.grammars,
+                            com.siemens.ct.exi.helpers,
+                            com.siemens.ct.exi.exceptions,
+                            com.siemens.ct.exi.api.dom,
+                            org.xml.sax.helpers,
                         </Import-Package>
                     </instructions>
                 </configuration>
