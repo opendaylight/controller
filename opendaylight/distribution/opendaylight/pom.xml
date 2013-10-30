@@ -71,6 +71,11 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-binding-config</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-broker-impl</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
