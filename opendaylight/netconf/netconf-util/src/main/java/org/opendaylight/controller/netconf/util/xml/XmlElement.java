@@ -103,6 +103,9 @@ public class XmlElement {
     }
 
     public String getName() {
+        if (element.getLocalName()!=null && !element.getLocalName().equals("")){
+            return element.getLocalName();
+        }
         return element.getTagName();
     }
 
@@ -112,6 +115,10 @@ public class XmlElement {
 
     public String getAttribute(String attributeName, String namespace) {
         return element.getAttributeNS(namespace, attributeName);
+    }
+
+    public NodeList getElementsByTagName(String name) {
+        return element.getElementsByTagName(name);
     }
 
     public void appendChild(Element element) {
@@ -273,8 +280,8 @@ public class XmlElement {
 
     public String getNamespaceAttribute() {
         String attribute = element.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY);
-        Preconditions.checkState(attribute != null && !attribute.equals(""), "Element %s must specify a %s attribute",
-                toString(), XmlUtil.XMLNS_ATTRIBUTE_KEY);
+        Preconditions.checkState(attribute != null && !attribute.equals(""), "Element %s must specify namespace",
+                toString());
         return attribute;
     }
 
@@ -367,6 +374,20 @@ public class XmlElement {
     @Override
     public int hashCode() {
         return element.hashCode();
+    }
+
+    public boolean hasNamespace() {
+        try {
+            getNamespaceAttribute();
+        } catch (IllegalStateException e) {
+            try {
+                getNamespace();
+            } catch (IllegalStateException e1) {
+                return false;
+            }
+            return true;
+        }
+        return true;
     }
 
     private static interface ElementFilteringStrategy {

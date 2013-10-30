@@ -8,16 +8,16 @@
 
 package org.opendaylight.controller.netconf.util.handler;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+
 import java.util.List;
 
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
 
 public class NetconfMessageAggregator extends ByteToMessageDecoder {
 
@@ -35,7 +35,7 @@ public class NetconfMessageAggregator extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         int index = indexOfSequence(in, eom);
         if (index == -1) {
-            logger.debug("Message is not complete, read agian.");
+            logger.debug("Message is not complete, read again.");
             ctx.read();
         } else {
             ByteBuf msg = in.readBytes(index);

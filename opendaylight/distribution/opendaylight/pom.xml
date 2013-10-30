@@ -230,10 +230,23 @@
           <artifactId>config-persister-impl</artifactId>
           <version>${netconf.version}</version>
         </dependency>
-
+        <dependency>
+          <groupId>org.opendaylight.controller.thirdparty</groupId>
+          <artifactId>exificient</artifactId>
+          <version>${exi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
+            <version>2.11.0_1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+            <artifactId>org.apache.xml.resolver</artifactId>
+            <version>1.2.0</version>
+        </dependency>
 
           <!-- toaster example I'm pretty sure we should trim -->
-
          <dependency>
           <groupId>org.opendaylight.controller.samples</groupId>
           <artifactId>sample-toaster</artifactId>
