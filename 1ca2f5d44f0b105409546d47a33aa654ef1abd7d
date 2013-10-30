@@ -16,6 +16,24 @@
       "revId": "1ca2f5d44f0b105409546d47a33aa654ef1abd7d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_6477c3d5",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-30T14:21:42Z",
+      "side": 1,
+      "message": "I did not modify the message style - the message was not using {} before my change as well.",
+      "parentUuid": "da6255ed_8ebbf671",
+      "revId": "1ca2f5d44f0b105409546d47a33aa654ef1abd7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
