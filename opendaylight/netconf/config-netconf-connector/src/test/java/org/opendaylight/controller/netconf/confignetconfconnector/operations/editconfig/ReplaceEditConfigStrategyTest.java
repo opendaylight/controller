@@ -25,8 +25,6 @@ import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 
 import com.google.common.collect.Sets;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigTest;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.ReplaceEditConfigStrategy;
 
 public class ReplaceEditConfigStrategyTest {
 

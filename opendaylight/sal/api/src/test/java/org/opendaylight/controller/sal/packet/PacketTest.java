@@ -14,7 +14,6 @@ import java.util.Map;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.packet.Ethernet;
 
 public class PacketTest {
 

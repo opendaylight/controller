@@ -9,9 +9,7 @@ package org.opendaylight.controller.config.manager.impl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;

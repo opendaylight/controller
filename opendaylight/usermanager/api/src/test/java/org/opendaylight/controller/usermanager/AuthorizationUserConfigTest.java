@@ -17,10 +17,6 @@ import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
-import org.opendaylight.controller.usermanager.AuthResponse;
-import org.opendaylight.controller.usermanager.AuthorizationConfig;
-import org.opendaylight.controller.usermanager.UserConfig;
-
 /*
  * This test case includes tests for UserConfig and the extending class AuthorizationConfig
  */

@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.protocol_plugin.openflow.internal.FlowConverter;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;

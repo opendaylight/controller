@@ -12,8 +12,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.management.ObjectName;
-
 /**
  * Indicates what service interface is expected to be obtained as a dependency
  * of a module. This annotation must be present for each dependency setter in

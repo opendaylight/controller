@@ -13,7 +13,6 @@ import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.osgi.framework.BundleContext;
 
-import javax.management.DynamicMBean;
 import java.util.Set;
 
 /**

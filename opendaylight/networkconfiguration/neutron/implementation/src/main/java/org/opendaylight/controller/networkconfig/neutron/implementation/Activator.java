@@ -20,11 +20,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
-import org.opendaylight.controller.networkconfig.neutron.implementation.NeutronFloatingIPInterface;
-import org.opendaylight.controller.networkconfig.neutron.implementation.NeutronNetworkInterface;
-import org.opendaylight.controller.networkconfig.neutron.implementation.NeutronPortInterface;
-import org.opendaylight.controller.networkconfig.neutron.implementation.NeutronRouterInterface;
-import org.opendaylight.controller.networkconfig.neutron.implementation.NeutronSubnetInterface;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 
 public class Activator extends ComponentActivatorAbstractBase {

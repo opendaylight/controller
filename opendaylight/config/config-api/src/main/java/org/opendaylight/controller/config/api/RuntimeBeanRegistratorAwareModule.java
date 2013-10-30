@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.config.api;
 
-import java.io.Closeable;
-
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
 import org.opendaylight.controller.config.spi.Module;
 

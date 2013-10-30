@@ -14,7 +14,6 @@ import java.util.Enumeration;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -10,7 +10,6 @@
 package org.opendaylight.controller.sal.packet;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.packet.ARP;
 
 import junit.framework.Assert;
 

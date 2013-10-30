@@ -36,7 +36,6 @@ package org.opendaylight.controller.hosttracker;
 import java.util.EnumSet;
 
 import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
-import org.osgi.service.device.Device;
 
 /**
  * Entities within an entity class are grouped into {@link Device} objects based

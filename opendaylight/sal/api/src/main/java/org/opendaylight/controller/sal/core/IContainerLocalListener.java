@@ -14,7 +14,6 @@
  */
 package org.opendaylight.controller.sal.core;
 
-import org.opendaylight.controller.sal.core.IContainerListener;
 
 /**
  * The interface describes methods used to publish the changes to a given

@@ -8,9 +8,8 @@
 
 package org.opendaylight.controller.samples.simpleforwarding;
 
-import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.packet.RawPacket;
-import org.opendaylight.controller.topologymanager.ITopologyManager;
+
 
 /**
  * Provides support for flooding/broadcasting of packets.

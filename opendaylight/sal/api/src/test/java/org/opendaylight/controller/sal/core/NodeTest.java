@@ -19,8 +19,6 @@ package org.opendaylight.controller.sal.core;
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Node;
 
 public class NodeTest {
     @Test

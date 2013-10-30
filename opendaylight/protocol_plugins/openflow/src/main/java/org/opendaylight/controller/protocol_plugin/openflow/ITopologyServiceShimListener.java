@@ -9,11 +9,8 @@
 package org.opendaylight.controller.protocol_plugin.openflow;
 
 import java.util.List;
-import java.util.Set;
 
 import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 
 /**

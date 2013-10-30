@@ -9,7 +9,6 @@
  */
 package org.opendaylight.controller.config.yang.test.impl;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
 
 /**
 *

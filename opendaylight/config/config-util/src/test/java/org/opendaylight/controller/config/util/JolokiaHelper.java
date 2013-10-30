@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.config.util;
 
-import java.io.IOException;
-
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JvmAgentConfig;
 

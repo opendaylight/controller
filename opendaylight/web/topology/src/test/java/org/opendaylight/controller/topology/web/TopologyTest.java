@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topology.web.Topology.NodeBean;
 
 public class TopologyTest {

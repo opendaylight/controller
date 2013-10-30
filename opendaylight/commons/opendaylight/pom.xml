@@ -1054,7 +1054,7 @@
         </executions>
         <configuration>
           <failsOnError>true</failsOnError>
-          <configLocation>controller/space_and_tabs_checks.xml</configLocation>
+          <configLocation>controller/checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>
