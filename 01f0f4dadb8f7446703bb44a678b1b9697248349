@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_07e48939",
+        "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 225
+      },
+      "writtenOn": "2013-10-31T07:59:42Z",
+      "side": 1,
+      "message": "This should be covered in a separate story to make it consistent across all NB APIs.",
+      "parentUuid": "da6255ed_6796a596",
+      "revId": "01f0f4dadb8f7446703bb44a678b1b9697248349",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_4793a1a3",
         "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2013-10-31T00:25:28Z",
       "side": 1,
       "message": "this is not needed",
+      "revId": "01f0f4dadb8f7446703bb44a678b1b9697248349",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e7d05555",
+        "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 225
+      },
+      "writtenOn": "2013-10-31T07:59:42Z",
+      "side": 1,
+      "message": "This has been done for code clarity. User would be easily be able to understand the code flow.",
+      "parentUuid": "da6255ed_4793a1a3",
       "revId": "01f0f4dadb8f7446703bb44a678b1b9697248349",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
