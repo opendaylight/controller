@@ -21,16 +21,34 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute.Dependency;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.*;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation.Parameter;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDeclaration;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 
 import javax.management.openmbean.SimpleType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class TemplateFactory {

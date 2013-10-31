@@ -7,7 +7,11 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.InstanceAlreadyExistsException;

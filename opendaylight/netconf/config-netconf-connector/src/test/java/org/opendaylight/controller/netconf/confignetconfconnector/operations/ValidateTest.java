@@ -18,7 +18,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 public class ValidateTest {
 

@@ -18,7 +18,12 @@ import org.opendaylight.controller.config.manager.testingservices.parallelapsp.T
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.spi.Module;
 
-import javax.management.*;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.DynamicMBean;
+import javax.management.JMX;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;

@@ -17,13 +17,23 @@ import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCommit;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultGetSchema;
-import org.opendaylight.controller.netconf.mapping.api.*;
+import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilterChain;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 

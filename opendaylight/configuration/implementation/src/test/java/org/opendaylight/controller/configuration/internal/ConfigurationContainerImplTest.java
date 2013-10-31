@@ -9,7 +9,8 @@
 
 package org.opendaylight.controller.configuration.internal;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 
 

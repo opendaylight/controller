@@ -8,6 +8,13 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -22,8 +29,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
-import java.util.*;
-import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;

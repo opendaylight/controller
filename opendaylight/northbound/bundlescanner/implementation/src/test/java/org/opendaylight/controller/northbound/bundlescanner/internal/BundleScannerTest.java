@@ -1,6 +1,6 @@
 package org.opendaylight.controller.northbound.bundlescanner.internal;
 
-import static org.junit.Assert.*;
+
 
 import java.io.File;
 import java.io.FileFilter;
@@ -29,6 +29,10 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
 import org.springframework.osgi.mock.MockBundle;
 import org.springframework.osgi.mock.MockBundleContext;
+
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class BundleScannerTest {
 

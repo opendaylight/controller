@@ -8,7 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes;
 
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 
 public abstract class AttributeIfcSwitchStatement<T> {
 

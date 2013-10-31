@@ -24,9 +24,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.ValidateTest;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.ValidateTest;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 
@@ -36,7 +36,11 @@ import java.util.Map;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class EditConfigTest {
 
