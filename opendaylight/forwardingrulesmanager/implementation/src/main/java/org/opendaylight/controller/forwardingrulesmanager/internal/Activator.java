@@ -75,6 +75,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Set<String> propSet = new HashSet<String>();
             propSet.add(ForwardingRulesManager.WORK_STATUS_CACHE);
             propSet.add(ForwardingRulesManager.WORK_ORDER_CACHE);
+            propSet.add(ForwardingRulesManager.INSTALLED_SW_VIEW_CACHE);
             props.put("cachenames", propSet);
 
             // export the service
