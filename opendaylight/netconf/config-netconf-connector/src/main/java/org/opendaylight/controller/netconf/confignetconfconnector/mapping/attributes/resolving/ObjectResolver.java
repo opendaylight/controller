@@ -16,7 +16,11 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 

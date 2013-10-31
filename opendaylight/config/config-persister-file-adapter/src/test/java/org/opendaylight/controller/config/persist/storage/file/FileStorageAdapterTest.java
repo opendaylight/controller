@@ -24,8 +24,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class FileStorageAdapterTest {
 

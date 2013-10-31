@@ -11,7 +11,11 @@ package org.opendaylight.controller.topologymanager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.protocol_plugins.stub.internal.TopologyServices;
-import org.opendaylight.controller.sal.core.*;
+import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
@@ -27,7 +31,12 @@ import javax.inject.Inject;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
 
 @RunWith(PaxExam.class)
 public class TopologyManagerIT {

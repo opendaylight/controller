@@ -9,12 +9,15 @@
 
 package org.opendaylight.controller.containermanager.internal;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 
 public class ContainerManagerTest {
 

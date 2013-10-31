@@ -27,7 +27,11 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.management.*;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServerConnection;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;

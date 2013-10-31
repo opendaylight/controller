@@ -15,7 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import javax.management.*;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.NotificationBroadcasterSupport;
+import javax.management.ObjectName;
 import java.util.Set;
 
 public class DefaultCommitNotificationProducer extends NotificationBroadcasterSupport implements

@@ -17,10 +17,17 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 import javax.management.openmbean.SimpleType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 public class RuntimeBeanEntryTest extends AbstractYangTest {

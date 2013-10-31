@@ -8,15 +8,7 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-
-import java.util.Map;
-
-import javax.management.Attribute;
-import javax.management.ObjectName;
-
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -24,7 +16,16 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 
-import com.google.common.collect.Sets;
+import javax.management.Attribute;
+import javax.management.ObjectName;
+import java.util.Map;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class ReplaceEditConfigStrategyTest {
 

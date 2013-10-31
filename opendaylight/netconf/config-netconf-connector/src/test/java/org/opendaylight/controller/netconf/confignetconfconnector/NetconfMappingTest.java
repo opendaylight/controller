@@ -12,7 +12,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,7 +26,32 @@ import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegist
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yang.store.impl.MbeParser;
-import org.opendaylight.controller.config.yang.test.impl.*;
+import org.opendaylight.controller.config.yang.test.impl.Asdf;
+import org.opendaylight.controller.config.yang.test.impl.ComplexDtoBInner;
+import org.opendaylight.controller.config.yang.test.impl.ComplexList;
+import org.opendaylight.controller.config.yang.test.impl.Deep;
+import org.opendaylight.controller.config.yang.test.impl.Deep2;
+import org.opendaylight.controller.config.yang.test.impl.Deep3;
+import org.opendaylight.controller.config.yang.test.impl.Deep4;
+import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.DtoAInner;
+import org.opendaylight.controller.config.yang.test.impl.DtoAInnerInner;
+import org.opendaylight.controller.config.yang.test.impl.DtoC;
+import org.opendaylight.controller.config.yang.test.impl.DtoD;
+import org.opendaylight.controller.config.yang.test.impl.InnerInnerRunningDataRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataAdditionalRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataRuntimeRegistration;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistration;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistrator;
+import org.opendaylight.controller.config.yang.test.impl.NotStateBean;
+import org.opendaylight.controller.config.yang.test.impl.NotStateBeanInternal;
+import org.opendaylight.controller.config.yang.test.impl.Peers;
+import org.opendaylight.controller.config.yang.test.impl.RetValContainer;
+import org.opendaylight.controller.config.yang.test.impl.RetValList;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
@@ -59,10 +83,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 
 public class NetconfMappingTest extends AbstractConfigTest {
     private static final Logger logger = LoggerFactory.getLogger(NetconfMappingTest.class);
@@ -286,8 +320,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
             try {
                 edit(file);
             } catch (NetconfDocumentedException e) {
-                Assert.assertThat(e.getMessage(), JUnitMatchers.containsString("Unrecognised elements"));
-                Assert.assertThat(e.getMessage(), JUnitMatchers.containsString("unknownAttribute"));
+                assertThat(e.getMessage(), JUnitMatchers.containsString("Unrecognised elements"));
+                assertThat(e.getMessage(), JUnitMatchers.containsString("unknownAttribute"));
                 continue;
             }
             fail("Unrecognised test should throw exception " + file);
@@ -312,8 +346,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         response = getConfigRunning();
         final int afterReplace = response.getElementsByTagName("instance").getLength();
 
-        Assert.assertEquals(4 + 4 /* Instances from services */, allInstances);
-        Assert.assertEquals(3 + 3, afterReplace);
+        assertEquals(4 + 4 /* Instances from services */, allInstances);
+        assertEquals(3 + 3, afterReplace);
     }
 
     @Test(expected = NetconfDocumentedException.class)

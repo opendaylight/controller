@@ -9,14 +9,15 @@
 
 package org.opendaylight.controller.containermanager.internal;
 
-import static org.junit.Assert.*;
-
-import java.util.Hashtable;
-
 import org.apache.felix.dm.impl.ComponentImpl;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+
+import java.util.Hashtable;
+
+import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
 
 public class ContainerImplTest {
 

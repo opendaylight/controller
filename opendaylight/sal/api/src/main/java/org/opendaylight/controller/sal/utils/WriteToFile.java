@@ -9,7 +9,9 @@
 
 package org.opendaylight.controller.sal.utils;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
