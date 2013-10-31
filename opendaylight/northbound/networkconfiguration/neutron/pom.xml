@@ -44,6 +44,16 @@
             <plugin>
                 <groupId>org.codehaus.enunciate</groupId>
                 <artifactId>maven-enunciate-plugin</artifactId>
+                <configuration>
+            <configFile>enunciate.xml</configFile>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>docs</goal>
+              </goals>
+            </execution>
+          </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
