@@ -36,6 +36,8 @@
   <!--  Base log level  -->
   <logger name="org.opendaylight" level="INFO"/>
 
+  <logger name="org.opendaylight.yangtools.yang.parser.util.ModuleDependencySort" level="ERROR"/>
+
   <!-- Controller log level -->
   <logger name="org.opendaylight.controller" level="INFO"/>
 
