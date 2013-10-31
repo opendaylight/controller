@@ -34,6 +34,24 @@
       "revId": "8fb3efcc3171cc5bd946e4b8458c899531a1858d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_272f8da3",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-31T20:09:12Z",
+      "side": 1,
+      "message": "Thanks Alissa for the explanation.\n\nI hear you about the inheritance. A bit more skeptical about the activator running in another package. \n\nThe reason why this constant was defined was because it needs to be visible by the activator class. And should not be visible to anybody else, given it provide the internal name of cluster cache used by TM.\nIf there was no activator, then there wouldn\u0027t even be this constant or it would be private.\nThese constants should not be accessed by any other class.\n\nI understand the general approach, but I think we should not miss the purpose of the code while cleaning it up.\n\nThere was a reason for making it package protected only.\nAnd AFAIK in OO the approach to follow for visibility is to choose the lowest grade of visibility that your code needs.\n\nI can see the case where a subclass could be interested in this cache update, so in that case it would need to know the cache name.\n\n\nSo, since you asked me, then I am ok if you make this constant protected.",
+      "parentUuid": "da6255ed_07aa4970",
+      "revId": "8fb3efcc3171cc5bd946e4b8458c899531a1858d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
