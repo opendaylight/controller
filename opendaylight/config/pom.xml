@@ -393,31 +393,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>nexus.opendaylight.org</id>
-            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <repositories>
-        <repository>
-            <id>opendaylight-snapshot</id>
-            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot</url>
-            <snapshots>
-                <updatePolicy>daily</updatePolicy>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
 </project>
