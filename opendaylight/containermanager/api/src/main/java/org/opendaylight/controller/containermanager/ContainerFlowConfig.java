@@ -707,6 +707,9 @@ public class ContainerFlowConfig implements Serializable {
         List<Match> matches = new ArrayList<Match>();
         Match match = new Match();
 
+        if (this.dlVlan != null && !this.dlVlan.trim().isEmpty()) {
+            match.setField(MatchType.DL_VLAN, this.getVlanId());
+        }
         if (this.nwSrc != null && !this.nwSrc.trim().isEmpty()) {
             String parts[] = this.nwSrc.split("/");
             InetAddress ip = NetUtils.parseInetAddress(parts[0]);
@@ -760,7 +763,7 @@ public class ContainerFlowConfig implements Serializable {
      */
     @Override
     public String toString() {
-        return "Container Flow={name:" + name + " nwSrc:" + nwSrc + " nwDst:" + nwDst + " " + "protocol:" + protocol
+        return "Container Flow={name:" + name + " dlVlan:" + dlVlan + " nwSrc:" + nwSrc + " nwDst:" + nwDst + " " + "protocol:" + protocol
                 + " tpSrc:" + tpSrc + " tpDst:" + tpDst + "}";
     }
 }
