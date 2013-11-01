@@ -77,77 +77,59 @@
     </properties>
 
     <pluginRepositories>
+        <!-- OpenDayLight Repo Mirror -->
         <pluginRepository>
-            <id>central</id>
-            <name>maven repo1</name>
-            <url>http://repo1.maven.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
+          <id>opendaylight-mirror</id>
+          <name>opendaylight-mirror</name>
+          <url>${nexusproxy}/groups/public/</url>
+          <snapshots>
+              <enabled>false</enabled>
+          </snapshots>
+          <releases>
+              <enabled>true</enabled>
+              <updatePolicy>never</updatePolicy>
+          </releases>
         </pluginRepository>
+        <!-- OpenDayLight Snapshot artifact -->
         <pluginRepository>
-            <id>opendaylight-snapshot</id>
-            <name>opendaylight-snapshot</name>
-            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>opendaylight.release</id>
-            <name>opendaylight.release</name>
-            <url>${nexusproxy}/repositories/opendaylight.release/</url>
+          <id>opendaylight-snapshot</id>
+          <name>opendaylight-snapshot</name>
+          <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
+          <snapshots>
+              <enabled>true</enabled>
+          </snapshots>
+          <releases>
+              <enabled>false</enabled>
+          </releases>
         </pluginRepository>
     </pluginRepositories>
 
 
     <repositories>
+        <!-- OpenDayLight Repo Mirror -->
         <repository>
-            <id>opendaylight-release</id>
-            <name>opendaylight-release</name>
-            <url>${nexusproxy}/repositories/opendaylight.release/</url>
-            <snapshots>
-                 <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                 <enabled>true</enabled>
-            </releases>
+          <id>opendaylight-mirror</id>
+          <name>opendaylight-mirror</name>
+          <url>${nexusproxy}/groups/public/</url>
+          <snapshots>
+              <enabled>false</enabled>
+          </snapshots>
+          <releases>
+              <enabled>true</enabled>
+              <updatePolicy>never</updatePolicy>
+          </releases>
         </repository>
         <!-- OpenDayLight Snapshot artifact -->
         <repository>
-            <id>opendaylight-snapshot</id>
-            <name>opendaylight-snapshot</name>
-            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>thirdparty</id>
-            <name>thirdparty</name>
-            <url>${nexusproxy}/repositories/thirdparty/</url>
-            <snapshots>
-                 <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <updatePolicy>never</updatePolicy>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>central</id>
-            <name>central</name>
-            <url>http://repo1.maven.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <updatePolicy>never</updatePolicy>
-                <enabled>true</enabled>
-            </releases>
+          <id>opendaylight-snapshot</id>
+          <name>opendaylight-snapshot</name>
+          <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
+          <snapshots>
+              <enabled>true</enabled>
+          </snapshots>
+          <releases>
+              <enabled>false</enabled>
+          </releases>
         </repository>
     </repositories>
 
@@ -244,7 +226,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -332,7 +314,7 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
                 </plugin>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
