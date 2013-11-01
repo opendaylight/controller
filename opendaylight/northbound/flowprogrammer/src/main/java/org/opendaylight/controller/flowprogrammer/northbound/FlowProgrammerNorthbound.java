@@ -506,7 +506,6 @@ public class FlowProgrammerNorthbound {
 
     @Path("/{containerName}/node/{nodeType}/{nodeId}/staticFlow/{name}")
     @DELETE
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
         @ResponseCode(code = 204, condition = "Flow Config deleted successfully"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
