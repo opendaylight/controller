@@ -49,8 +49,8 @@ public class HostSwitchTest {
         } catch (ConstructionException e) {
             return;
         }
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
         Assert.assertTrue(hsw1.equals(hsw2));
     }
 
@@ -81,8 +81,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
         Assert.assertTrue(!hsw1.equals(hsw2));
     }
 
@@ -113,8 +113,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2L));
         Assert.assertTrue(!hsw1.equals(hsw2));
     }
 
@@ -145,8 +145,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2L));
         Assert.assertTrue(!hsw1.equals(hsw2));
     }
 
@@ -176,8 +176,8 @@ public class HostSwitchTest {
         } catch (ConstructionException e) {
             return;
         }
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
         Assert.assertTrue(hsw1.hashCode() == hsw2.hashCode());
     }
 
@@ -208,8 +208,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
         Assert.assertTrue(hsw1.hashCode() == hsw2.hashCode());
     }
 
@@ -239,8 +239,8 @@ public class HostSwitchTest {
         } catch (ConstructionException e) {
             return;
         }
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
         Assert.assertTrue(hsw1.hashCode() != hsw2.hashCode());
     }
 
@@ -271,8 +271,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2L));
         Assert.assertTrue(hsw1.hashCode() != hsw2.hashCode());
     }
 
@@ -303,8 +303,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(2L));
         Assert.assertTrue(hsw1.hashCode() != hsw2.hashCode());
     }
 
@@ -335,8 +335,8 @@ public class HostSwitchTest {
             return;
         }
 
-        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1l));
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
+        HostNodePair hsw1 = new HostNodePair(h1, NodeCreator.createOFNode(1L));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
         HashMap<HostNodePair, Long> hm = new HashMap<HostNodePair, Long>();
         hm.put(hsw1, new Long(10));
         Assert.assertTrue(hm.get(hsw2) != null);
@@ -370,8 +370,8 @@ public class HostSwitchTest {
             return;
         }
         HostNodePair hsw1 = new HostNodePair(h1, null);
-        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1l));
-        hsw1.setNode(NodeCreator.createOFNode(1l));
+        HostNodePair hsw2 = new HostNodePair(h2, NodeCreator.createOFNode(1L));
+        hsw1.setNode(NodeCreator.createOFNode(1L));
         HashMap<HostNodePair, Long> hm = new HashMap<HostNodePair, Long>();
         hm.put(hsw1, new Long(10));
         Assert.assertTrue(hm.get(hsw2) != null);
