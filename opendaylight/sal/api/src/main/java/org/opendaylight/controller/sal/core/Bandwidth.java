@@ -52,7 +52,6 @@ public class Bandwidth extends Property {
     private Bandwidth() {
         super(BandwidthPropName);
         this.bandwidthValue = BWUNK;
-        ;
     }
 
     public Bandwidth(long bandwidth) {
