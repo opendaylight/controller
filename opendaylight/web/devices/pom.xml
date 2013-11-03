@@ -32,9 +32,11 @@
               org.opendaylight.controller.forwardingrulesmanager,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.sal.action,
+              org.opendaylight.controller.sal.connection,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.containermanager,
+              org.opendaylight.controller.connectionmanager,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.forwarding.staticrouting,
               org.opendaylight.controller.usermanager,
@@ -94,6 +96,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
       <version>0.4.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
