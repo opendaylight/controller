@@ -5,23 +5,13 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction.DataTransactionListener
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
-import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification
 import org.opendaylight.controller.md.sal.common.api.data.DataReader
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.yangtools.concepts.ListenerRegistration
-import static extension org.opendaylight.controller.sal.binding.impl.util.MapUtils.*;
-import java.util.Collection
-import java.util.Map.Entry
-import java.util.HashSet
-import java.util.Set
 import com.google.common.collect.Multimap
 import static com.google.common.base.Preconditions.*;
 import java.util.List
-import java.util.LinkedList
-import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider
 import com.google.common.collect.HashMultimap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Callable
@@ -30,15 +20,17 @@ import org.opendaylight.controller.sal.common.util.Rpcs
 import java.util.Collections
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
 import java.util.ArrayList
-import org.opendaylight.controller.sal.common.util.RpcErrors
+import org.opendaylight.controller.sal.binding.impl.util.BindingAwareDataReaderRouter
+import org.opendaylight.yangtools.concepts.CompositeObjectRegistration
+import java.util.Arrays
 
 class DataBrokerImpl extends DeprecatedDataAPISupport implements DataProviderService {
 
     @Property
     var ExecutorService executor;
 
-    Multimap<InstanceIdentifier, DataReaderRegistration> configReaders = HashMultimap.create();
-    Multimap<InstanceIdentifier, DataReaderRegistration> operationalReaders = HashMultimap.create();
+    val dataReadRouter = new BindingAwareDataReaderRouter;
+
     Multimap<InstanceIdentifier, DataChangeListenerRegistration> listeners = HashMultimap.create();
     Multimap<InstanceIdentifier, DataCommitHandlerRegistration> commitHandlers = HashMultimap.create();
 
@@ -47,13 +39,11 @@ class DataBrokerImpl extends DeprecatedDataAPISupport implements DataProviderSer
     }
 
     override readConfigurationData(InstanceIdentifier<? extends DataObject> path) {
-        val readers = configReaders.getAllChildren(path);
-        return readers.readConfiguration(path);
+        return dataReadRouter.readConfigurationData(path);
     }
 
     override readOperationalData(InstanceIdentifier<? extends DataObject> path) {
-        val readers = operationalReaders.getAllChildren(path);
-        return readers.readOperational(path);
+        return dataReadRouter.readOperationalData(path);
     }
 
     override registerCommitHandler(InstanceIdentifier<? extends DataObject> path,
@@ -69,20 +59,12 @@ class DataBrokerImpl extends DeprecatedDataAPISupport implements DataProviderSer
         return reg;
     }
 
-    override registerDataReader(InstanceIdentifier<? extends DataObject> path,
-        DataReader<InstanceIdentifier<? extends DataObject>, DataObject> provider) {
-        val ret = new DataReaderRegistration(provider, this);
-        ret.paths.add(path);
-        configReaders.put(path, ret);
-        operationalReaders.put(path, ret);
-        return ret;
-    }
-
-    protected def removeReader(DataReaderRegistration reader) {
-        for (path : reader.paths) {
-            operationalReaders.remove(path, reader);
-            configReaders.remove(path, reader);
-        }
+    override registerDataReader(InstanceIdentifier<? extends DataObject> path,DataReader<InstanceIdentifier<? extends DataObject>,DataObject> reader) {
+        
+        val confReg = dataReadRouter.registerConfigurationReader(path,reader);
+        val dataReg = dataReadRouter.registerOperationalReader(path,reader);
+        
+        return new CompositeObjectRegistration(reader,Arrays.asList(confReg,dataReg));
     }
 
     protected def removeListener(DataChangeListenerRegistration registration) {
@@ -92,39 +74,8 @@ class DataBrokerImpl extends DeprecatedDataAPISupport implements DataProviderSer
     protected def removeCommitHandler(DataCommitHandlerRegistration registration) {
         commitHandlers.remove(registration.path, registration);
     }
-
-    protected def DataObject readConfiguration(
-        Collection<Entry<? extends InstanceIdentifier, ? extends DataReaderRegistration>> entries,
-        InstanceIdentifier<? extends DataObject> path) {
-
-        val List<DataObject> partialResults = new LinkedList();
-        for (entry : entries) {
-            partialResults.add(entry.value.instance.readConfigurationData(path))
-        }
-        return merge(path, partialResults);
-    }
-
-    protected def DataObject readOperational(
-        Collection<Entry<? extends InstanceIdentifier, ? extends DataReaderRegistration>> entries,
-        InstanceIdentifier<? extends DataObject> path) {
-
-        val List<DataObject> partialResults = new LinkedList();
-        for (entry : entries) {
-            partialResults.add(entry.value.instance.readOperationalData(path))
-        }
-        return merge(path, partialResults);
-    }
-
-    protected def DataObject merge(InstanceIdentifier<? extends DataObject> identifier, List<DataObject> objects) {
-
-        // FIXME: implement real merge
-        if (objects.size > 0) {
-            return objects.get(0);
-        }
-    }
     
     protected def getActiveCommitHandlers() {
-        
         return commitHandlers.entries.map[ value.instance].toSet
     }
 
@@ -133,26 +84,6 @@ class DataBrokerImpl extends DeprecatedDataAPISupport implements DataProviderSer
         transaction.changeStatus(TransactionStatus.SUBMITED);
         val task = new TwoPhaseCommit(transaction, this);
         return executor.submit(task);
-    }
-
-}
-
-package class DataReaderRegistration extends //
-AbstractObjectRegistration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> {
-
-    DataBrokerImpl dataBroker;
-
-    @Property
-    val Set<InstanceIdentifier<? extends DataObject>> paths;
-
-    new(DataReader<InstanceIdentifier<? extends DataObject>, DataObject> instance, DataBrokerImpl broker) {
-        super(instance)
-        dataBroker = broker;
-        _paths = new HashSet();
-    }
-
-    override protected removeRegistration() {
-        dataBroker.removeReader(this);
     }
 
 }
