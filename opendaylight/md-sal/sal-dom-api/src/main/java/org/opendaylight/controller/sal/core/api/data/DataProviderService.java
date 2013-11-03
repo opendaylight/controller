@@ -10,8 +10,10 @@ package org.opendaylight.controller.sal.core.api.data;
 import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;;
 
 public interface DataProviderService extends 
     DataBrokerService, //
@@ -54,6 +56,11 @@ public interface DataProviderService extends
      */
     void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
 
+    
+    Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
+
+    Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
+    
     public interface DataRefresher extends Provider.ProviderFunctionality {
 
         /**

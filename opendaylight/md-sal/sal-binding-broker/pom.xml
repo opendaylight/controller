@@ -77,12 +77,14 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                        <Export-package>
+                            org.opendaylight.controller.sal.binding.spi.*,
+                        </Export-package>
                         <Private-Package>
                             org.opendaylight.controller.config.yang.md.sal.binding.impl,
-                            org.opendaylight.controller.sal.binding.spi,
-                            org.opendaylight.controller.sal.binding.spi.*,
                             org.opendaylight.controller.sal.binding.impl,
                             org.opendaylight.controller.sal.binding.impl.*,
+                            org.opendaylight.controller.sal.binding.codegen,
                             org.opendaylight.controller.sal.binding.codegen.*,
                         </Private-Package>
                     </instructions>

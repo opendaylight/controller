@@ -1,25 +1,23 @@
 package org.opendaylight.controller.sal.dom.broker
 
-import java.util.Collections
-import java.util.HashMap
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession
 import org.opendaylight.controller.sal.core.api.Provider
 import org.opendaylight.controller.sal.core.api.RpcImplementation
 import org.opendaylight.yangtools.yang.common.QName
 import org.osgi.framework.BundleContext
-import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration
-import static java.util.Collections.*
-import java.util.Collections
-import java.util.HashMap
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
+import org.opendaylight.yangtools.concepts.Registration
+
+import java.util.Set
+import java.util.HashSet
 
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
 
     @Property
     private val Provider provider;
 
-    private val rpcImpls = Collections.synchronizedMap(new HashMap<QName, RpcImplementation>());
+    private val Set<Registration<?>> registrations = new HashSet();
 
     new(Provider provider, BundleContext ctx) {
         super(null, ctx);
@@ -27,39 +25,22 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
     }
 
     override addRpcImplementation(QName rpcType, RpcImplementation implementation) throws IllegalArgumentException {
-        if (rpcType == null) {
-            throw new IllegalArgumentException("rpcType must not be null");
-        }
-        if (implementation == null) {
-            throw new IllegalArgumentException("Implementation must not be null");
-        }
-        broker.addRpcImplementation(rpcType, implementation);
-        rpcImpls.put(rpcType, implementation);
-
-        return new RpcRegistrationImpl(rpcType, implementation, this);
+        val origReg = broker.router.addRpcImplementation(rpcType, implementation);
+        val newReg = new RpcRegistrationWrapper(origReg);
+        registrations.add(newReg);
+        return newReg;
     }
 
-    def removeRpcImplementation(RpcRegistrationImpl implToRemove) throws IllegalArgumentException {
-        val localImpl = rpcImpls.get(implToRemove.type);
-        if (localImpl !== implToRemove.instance) {
-            throw new IllegalStateException("Implementation was not registered in this session");
-        }
-        broker.removeRpcImplementation(implToRemove.type, localImpl);
-        rpcImpls.remove(implToRemove.type);
+    protected def removeRpcImplementation(RpcRegistrationWrapper implToRemove) throws IllegalArgumentException {
+        registrations.remove(implToRemove);
     }
-
+    
     override close() {
-        removeAllRpcImlementations
-        super.close
-    }
-
-    private def removeAllRpcImlementations() {
-        if (!rpcImpls.empty) {
-            for (entry : rpcImpls.entrySet) {
-                broker.removeRpcImplementation(entry.key, entry.value);
-            }
-            rpcImpls.clear
+        
+        for (reg : registrations) {
+            reg.close()
         }
+        super.close
     }
 
     override addMountedRpcImplementation(QName rpcType, RpcImplementation implementation) {
@@ -71,30 +52,34 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
     }
 
     override getSupportedRpcs() {
-        broker.getSupportedRpcs();
+        broker.router.supportedRpcs;
     }
 
     override addRpcRegistrationListener(RpcRegistrationListener listener) {
-        broker.addRpcRegistrationListener(listener);
+        broker.router.addRpcRegistrationListener(listener);
     }
 }
 
-class RpcRegistrationImpl extends AbstractObjectRegistration<RpcImplementation> implements RpcRegistration {
+class RpcRegistrationWrapper implements RpcRegistration {
+
 
     @Property
-    val QName type
+    val RpcRegistration delegate
 
-    private var ProviderContextImpl context
-
-    new(QName type, RpcImplementation instance, ProviderContextImpl ctx) {
-        super(instance)
-        _type = type
-        context = ctx
+    new(RpcRegistration delegate) {
+        _delegate = delegate
     }
 
-    override protected removeRegistration() {
-        context.removeRpcImplementation(this)
-        context = null
+    override getInstance() {
+        delegate.instance
     }
 
+    override close() {
+        delegate.close
+    }
+
+    override getType() {
+        delegate.type
+    }
 }
+
