@@ -39,7 +39,7 @@ public class FlowTest {
 
     @Test
     public void testFlowEquality() throws Exception {
-        Node node = NodeCreator.createOFNode(1055l);
+        Node node = NodeCreator.createOFNode(1055L);
         Flow flow1 = getSampleFlowV6(node);
         Flow flow2 = getSampleFlowV6(node);
         Flow flow3 = getSampleFlow(node);
@@ -69,7 +69,7 @@ public class FlowTest {
 
     @Test
     public void testFlowCloning() throws UnknownHostException {
-        Node node = NodeCreator.createOFNode(55l);
+        Node node = NodeCreator.createOFNode(55L);
         Flow flow1 = getSampleFlowV6(node);
         Flow flow2 = flow1.clone();
 
@@ -81,7 +81,7 @@ public class FlowTest {
 
     @Test
     public void testFlowActions() throws UnknownHostException {
-        Node node = NodeCreator.createOFNode(55l);
+        Node node = NodeCreator.createOFNode(55L);
         Flow flow = getSampleFlowV6(node);
 
         List<Action> actions = flow.getActions();

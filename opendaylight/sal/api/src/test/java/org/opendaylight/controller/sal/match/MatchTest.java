@@ -24,7 +24,7 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 public class MatchTest {
     @Test
     public void testMatchCreation() {
-        Node node = NodeCreator.createOFNode(7l);
+        Node node = NodeCreator.createOFNode(7L);
         NodeConnector port = NodeConnectorCreator.createOFNodeConnector((short) 6, node);
         MatchField field = new MatchField(MatchType.IN_PORT, port);
 
@@ -60,7 +60,7 @@ public class MatchTest {
     public void testMatchSetGet() {
         Match x = new Match();
         short val = 2346;
-        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector(val, NodeCreator.createOFNode(1l));
+        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector(val, NodeCreator.createOFNode(1L));
         x.setField(MatchType.IN_PORT, inPort);
         Assert.assertTrue(((NodeConnector) x.getField(MatchType.IN_PORT).getValue()).equals(inPort));
         Assert.assertTrue((Short) ((NodeConnector) x.getField(MatchType.IN_PORT).getValue()).getID() == val);
@@ -175,7 +175,7 @@ public class MatchTest {
     @Test
     public void testMatchMask() {
         Match x = new Match();
-        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 6, NodeCreator.createOFNode(3l));
+        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 6, NodeCreator.createOFNode(3L));
         x.setField(MatchType.IN_PORT, inPort);
         x.setField(MatchType.DL_VLAN, (short) 28, (short) 0xfff);
         Assert.assertFalse(x.getMatches() == 0);
@@ -186,7 +186,7 @@ public class MatchTest {
     public void testMatchBitMask() {
         byte mac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 22, (byte) 12 };
         byte mask[] = { (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0 };
-        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 4095, NodeCreator.createOFNode(7l));
+        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 4095, NodeCreator.createOFNode(7L));
 
         MatchField x = new MatchField(MatchType.IN_PORT, inPort);
         Assert.assertTrue((x.getMask()) == null);
@@ -202,7 +202,7 @@ public class MatchTest {
     @Test
     public void testNullMask() {
         byte mac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 22, (byte) 12 };
-        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 2000, NodeCreator.createOFNode(7l));
+        NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 2000, NodeCreator.createOFNode(7L));
 
         MatchField x = new MatchField(MatchType.IN_PORT, inPort);
         Assert.assertTrue(x.getBitMask() == 0);
@@ -219,7 +219,7 @@ public class MatchTest {
 
     @Test
     public void testEquality() throws Exception {
-        Node node = NodeCreator.createOFNode(7l);
+        Node node = NodeCreator.createOFNode(7L);
         NodeConnector port = NodeConnectorCreator.createOFNodeConnector((short) 24, node);
         NodeConnector port2 = NodeConnectorCreator.createOFNodeConnector((short) 24, node);
         byte srcMac[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9a, (byte) 0xbc };
@@ -389,7 +389,7 @@ public class MatchTest {
 
     @Test
     public void testCloning() throws Exception {
-        Node node = NodeCreator.createOFNode(7l);
+        Node node = NodeCreator.createOFNode(7L);
         NodeConnector port = NodeConnectorCreator.createOFNodeConnector((short) 24, node);
         byte srcMac[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9a, (byte) 0xbc };
         byte dstMac[] = { (byte) 0x1a, (byte) 0x2b, (byte) 0x3c, (byte) 0x4d, (byte) 0x5e, (byte) 0x6f };
@@ -455,7 +455,7 @@ public class MatchTest {
 
     @Test
     public void testFlip() throws Exception {
-        Node node = NodeCreator.createOFNode(7l);
+        Node node = NodeCreator.createOFNode(7L);
         NodeConnector port = NodeConnectorCreator.createOFNodeConnector((short) 24, node);
         byte srcMac[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9a, (byte) 0xbc };
         byte dstMac[] = { (byte) 0x1a, (byte) 0x2b, (byte) 0x3c, (byte) 0x4d, (byte) 0x5e, (byte) 0x6f };
