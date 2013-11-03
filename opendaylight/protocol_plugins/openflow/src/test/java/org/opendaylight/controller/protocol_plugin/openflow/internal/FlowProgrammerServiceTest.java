@@ -51,7 +51,7 @@ public class FlowProgrammerServiceTest {
 
     @Test
     public void testSALtoOFFlowConverter() throws UnknownHostException {
-        Node node = NodeCreator.createOFNode(1000l);
+        Node node = NodeCreator.createOFNode(1000L);
         NodeConnector port = NodeConnectorCreator.createNodeConnector(
                 (short) 24, node);
         NodeConnector oport = NodeConnectorCreator.createNodeConnector(
@@ -180,7 +180,7 @@ public class FlowProgrammerServiceTest {
 
     @Test
     public void testVlanNoneIdFlowConversion() throws Exception {
-        Node node = NodeCreator.createOFNode(1000l);
+        Node node = NodeCreator.createOFNode(1000L);
 
         /*
          * The value 0 is used to indicate that no VLAN ID is set
@@ -229,7 +229,7 @@ public class FlowProgrammerServiceTest {
 
     @Test
     public void testV6toSALFlowConversion() throws Exception {
-        Node node = NodeCreator.createOFNode(12l);
+        Node node = NodeCreator.createOFNode(12L);
         NodeConnector port = NodeConnectorCreator.createNodeConnector(
                 (short) 34, node);
         NodeConnector oport = NodeConnectorCreator.createNodeConnector(
@@ -365,7 +365,7 @@ public class FlowProgrammerServiceTest {
     public void testV6MatchToSALMatchToV6MatchConversion()
             throws UnknownHostException {
         NodeConnector port = NodeConnectorCreator.createNodeConnector(
-                (short) 24, NodeCreator.createOFNode(6l));
+                (short) 24, NodeCreator.createOFNode(6L));
         byte srcMac[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78,
                 (byte) 0x9a, (byte) 0xbc };
         byte dstMac[] = { (byte) 0x1a, (byte) 0x2b, (byte) 0x3c, (byte) 0x4d,
