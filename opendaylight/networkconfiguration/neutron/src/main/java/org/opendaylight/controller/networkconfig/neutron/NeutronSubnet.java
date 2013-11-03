@@ -265,7 +265,7 @@ public class NeutronSubnet {
                 allocationPools = source.splitPool(gatewayIP);
             }
         } catch (Exception e) {
-            ;
+
         }
     }
 
@@ -341,15 +341,12 @@ public class NeutronSubnet {
         List<NeutronSubnet_IPAllocationPool> newList = new ArrayList<NeutronSubnet_IPAllocationPool>();    // we have to modify a separate list
         while (i.hasNext()) {
             NeutronSubnet_IPAllocationPool pool = i.next();
-            if (pool.getPoolEnd().equalsIgnoreCase(ipAddress) &&
-                    pool.getPoolStart().equalsIgnoreCase(ipAddress))
-                ; // do nothing, i.e. don't add the current pool to the new list
-            else
                 if (pool.contains(ipAddress)) {
                     List<NeutronSubnet_IPAllocationPool> pools = pool.splitPool(ipAddress);
                     newList.addAll(pools);
-                } else
+                } else  {
                     newList.add(pool);
+                }
         }
         allocationPools = newList;
     }
