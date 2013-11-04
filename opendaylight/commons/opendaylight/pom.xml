@@ -91,6 +91,7 @@
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
     <netty.version>4.0.10.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>
+    <ganymed.version>1.0-SNAPSHOT</ganymed.version>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
@@ -616,6 +617,11 @@
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
         <version>7.0.42</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.thirdparty</groupId>
+        <artifactId>ganymed</artifactId>
+        <version>1.0-SNAPSHOT</version>
       </dependency>
       <!-- yang model dependencies -->
       <dependency>

@@ -17,7 +17,6 @@
         <maven>3.0.4</maven>
     </prerequisites>
 
-
     <modules>
         <module>netconf-api</module>
         <module>netconf-impl</module>
@@ -27,6 +26,7 @@
         <module>config-persister-impl</module>
         <module>netconf-mapping-api</module>
         <module>netconf-client</module>
+        <module>../../third-party/ganymed</module>
     </modules>
 
     <properties>
@@ -169,6 +169,11 @@
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>logback-config</artifactId>
                 <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller.thirdparty</groupId>
+                <artifactId>ganymed</artifactId>
+                <version>${ganymed.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
