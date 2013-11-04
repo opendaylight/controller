@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_93e55aaa",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/JsonMapperTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-04T15:46:34Z",
+      "side": 0,
+      "message": "why is this test deleted?",
+      "revId": "450394b0ea81dc27ab3b1a7e97709c8b7a689014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
