@@ -34,12 +34,6 @@ public class BindingBrokerImplSingletonModuleFactory extends
     }
 
     @Override
-    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
-            DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
-        throw new UnsupportedOperationException("Only default instance supported.");
-    }
-    
-    @Override
     public Set<BindingBrokerImplSingletonModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
             BundleContext bundleContext) {
             if (SINGLETON == null) {
