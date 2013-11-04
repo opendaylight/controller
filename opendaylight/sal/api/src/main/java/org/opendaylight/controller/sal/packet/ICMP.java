@@ -80,6 +80,15 @@ public class ICMP extends Packet {
     }
 
     /**
+     * Returns the type field of the current ICMP packet
+     *
+     * @return The type code of the current ICMP packet
+     */
+    public byte getType() {
+        return BitBufferHelper.getByte(fieldValues.get(TYPE));
+    }
+
+    /**
      * Sets the ICMP code (type subtype) for the current ICMP object instance
      *
      * @param code
@@ -90,6 +99,15 @@ public class ICMP extends Packet {
         byte[] icmpCode = BitBufferHelper.toByteArray(code);
         fieldValues.put(CODE, icmpCode);
         return this;
+    }
+
+    /**
+     * Gets the ICMP code (type subtype) for the current ICMP object instance
+     *
+     * @return The ICMP message type subtype
+     */
+    public byte getCode() {
+        return BitBufferHelper.getByte(fieldValues.get(CODE));
     }
 
     /**
@@ -104,7 +122,7 @@ public class ICMP extends Packet {
     }
 
     /**
-     * Sets the ICMP identifier  for the current ICMP object instance
+     * Sets the ICMP identifier for the current ICMP object instance
      * @param short - identifier
      * @return ICMP
      */
@@ -112,6 +130,16 @@ public class ICMP extends Packet {
         byte[] icmpIdentifier = BitBufferHelper.toByteArray(identifier);
         fieldValues.put(IDENTIFIER, icmpIdentifier);
         return this;
+    }
+
+    /**
+     * Gets the ICMP identifier of the current ICMP object instance
+     *
+     * @return short - identifier
+     */
+
+    public short getIdentifier() {
+        return BitBufferHelper.getShort(fieldValues.get(IDENTIFIER));
     }
 
     /**
@@ -123,6 +151,16 @@ public class ICMP extends Packet {
         byte[] icmpSeqNumber = BitBufferHelper.toByteArray(seqNumber);
         fieldValues.put(SEQNUMBER, icmpSeqNumber);
         return this;
+    }
+
+    /**
+     * Gets the ICMP sequence number of the current ICMP object instance
+     *
+     * @return short - seqNumber
+     */
+
+    public short getSequenceNumber() {
+        return BitBufferHelper.getShort(fieldValues.get(SEQNUMBER));
     }
 
     /**
