@@ -16,6 +16,24 @@
       "revId": "450394b0ea81dc27ab3b1a7e97709c8b7a689014",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5396c2f1",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/JsonMapperTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2013-11-04T16:04:19Z",
+      "side": 0,
+      "message": "this scenario is covered in XmlProvidersTest.java and JsonMapper will be removed in next commit",
+      "parentUuid": "da6255ed_93e55aaa",
+      "revId": "450394b0ea81dc27ab3b1a7e97709c8b7a689014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
