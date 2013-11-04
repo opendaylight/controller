@@ -35,7 +35,10 @@ public final class BindingBrokerImplSingletonModule extends org.opendaylight.con
     }
 
     
-    
+    @Override
+    public boolean canReuseInstance(AbstractBindingBrokerImplSingletonModule oldModule) {
+        return true;
+    }
     
     
     public java.lang.AutoCloseable createInstance() {
