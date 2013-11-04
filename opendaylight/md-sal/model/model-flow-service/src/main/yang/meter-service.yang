@@ -2,26 +2,24 @@ module sal-meter {
     namespace "urn:opendaylight:meter:service";
     prefix meter;
 
-    import yang-ext {prefix ext;}
-    import opendaylight-inventory {prefix inv;}
-    import ietf-inet-types {prefix inet;}
-    import opendaylight-meter-types {prefix meter-type;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import opendaylight-meter-types {prefix meter-type;revision-date "2013-09-18";}
 
     revision "2013-09-18" {
         description "Initial revision of meter service";
     }        
     
     grouping node-meter {
-        leaf node {
-            ext:context-reference "inv:node-context";
-            type inv:node-ref;
-        }
+        uses "inv:node-context-ref";
         
         uses meter-type:meter;
     }
 
     /** Base configuration structure **/
     grouping meter-update {
+        uses "inv:node-context-ref";
+
         container original-meter {
             uses meter-type:meter;
         }
@@ -44,10 +42,6 @@ module sal-meter {
 
     rpc update-meter {
         input {
-            leaf node {
-                ext:context-reference "inv:node-context";
-                type inv:node-ref;
-            }
             uses meter-update;
         }
     }

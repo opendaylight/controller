@@ -2,10 +2,10 @@ module sal-flow {
     namespace "urn:opendaylight:flow:service";
     prefix flow;
 
-    import yang-ext {prefix ext;}
-    import opendaylight-inventory {prefix inv;}
-    import ietf-inet-types {prefix inet;}
-    import opendaylight-flow-types {prefix types;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import opendaylight-flow-types {prefix types;revision-date "2013-10-26";}
 
 
     revision "2013-08-19" {
@@ -18,10 +18,8 @@ module sal-flow {
     }
     
     grouping node-flow {
-        leaf node {
-            ext:context-reference "inv:node-context";
-            type inv:node-ref;
-        }
+        uses "inv:node-context-ref";
+
         leaf flow-table {
             type flow-table-ref;
         }
@@ -30,6 +28,8 @@ module sal-flow {
 
     /** Base configuration structure **/
     grouping flow-update {
+        uses "inv:node-context-ref";
+
         container original-flow {
             uses types:flow;
         }
@@ -52,10 +52,6 @@ module sal-flow {
 
     rpc update-flow {
         input {
-            leaf node {
-                ext:context-reference "inv:node-context";
-                type inv:node-ref;
-            }
             uses flow-update;
         }
     }

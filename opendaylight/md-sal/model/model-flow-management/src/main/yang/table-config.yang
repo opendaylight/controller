@@ -2,7 +2,7 @@ module table-management {
     namespace "urn:opendaylight:table:config";
     prefix table-cfg;
     
-    import opendaylight-inventory {prefix inv;}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-table-types {prefix table;}
 
     revision "2013-10-24" {
