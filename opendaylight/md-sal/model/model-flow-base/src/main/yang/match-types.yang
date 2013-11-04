@@ -2,9 +2,9 @@ module opendaylight-match-types {
     namespace "urn:opendaylight:model:match:types";
     prefix "match";
 
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;}
-    import opendaylight-l2-types {prefix l2t;}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import opendaylight-l2-types {prefix l2t;revision-date "2013-08-27";}
 
     revision "2013-10-26" {
         description "Initial revision of macth types";

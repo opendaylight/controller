@@ -2,8 +2,8 @@ module opendaylight-meter-types {
     namespace "urn:opendaylight:meter:types";
     prefix meter;
 
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
 
 
     revision "2013-09-18" {
@@ -18,9 +18,9 @@ module opendaylight-meter-types {
         leaf flags {
             type bits {
                 bit meter-kbps;
-                bit meter_pktps;
-                bit meter_burst;
-                bit meter_stats;
+                bit meter-pktps;
+                bit meter-burst;
+                bit meter-stats;
             }
         }
     }

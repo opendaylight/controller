@@ -2,9 +2,9 @@ module opendaylight-table-types {
     namespace "urn:opendaylight:table:types";
     prefix table;
 
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;}
-    import opendaylight-flow-types {prefix flow;}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import opendaylight-flow-types {prefix flow;revision-date 2013-10-26";}
 
 
     revision "2013-10-26" {
