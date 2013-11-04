@@ -2,9 +2,8 @@ module opendaylight-statistics-types {
     namespace "urn:opendaylight:model:statistics:types";
     prefix stat-types;
 
-    import ietf-yang-types {prefix yang;}
-    import opendaylight-inventory {prefix inv;}
-    //import opendaylight-port-inventory {prefix port-inv;}
+    import ietf-yang-types {prefix yang;revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     
     revision "2013-09-25" {
         description "Initial revision of flow service";
