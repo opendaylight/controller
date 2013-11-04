@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_53bb62e5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-04T12:02:16Z",
+      "side": 1,
+      "message": "cuncurrent--\u003econcurrent",
+      "revId": "849483b5bac4f74ce270c424cdb26303194f11b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_33c0ee4f",
+        "filename": "opendaylight/netconf/netconf-impl/src/test/java/org/opendaylight/controller/netconf/impl/ConcurrentClientsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-04T12:02:16Z",
+      "side": 1,
+      "message": "this is a very problematic testing approach because it will make the test end with error rather than failure.\nPlease consider junit \"fail\" method instead.",
+      "revId": "849483b5bac4f74ce270c424cdb26303194f11b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
