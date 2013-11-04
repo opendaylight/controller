@@ -91,6 +91,7 @@
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
     <netty.version>4.0.10.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>
+    <ganymed.ssh2.version>262patch-SNAPSHOT</ganymed.ssh2.version>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
