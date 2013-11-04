@@ -53,7 +53,7 @@ module opendaylight-inventory {
             key "id";
             ext:context-instance "node-connector-context";
 
-            use node-connector;
+            uses node-connector;
         }
 
     }
