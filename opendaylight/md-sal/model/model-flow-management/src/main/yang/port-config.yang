@@ -2,8 +2,8 @@ module port-management {
     namespace "urn:opendaylight:port:config";
     prefix port-cfg;
 
-    import yang-ext {prefix ext;}
-    import opendaylight-inventory {prefix inv;}    
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}    
     import opendaylight-port-types {prefix port;}
 
     revision "2013-10-24" {

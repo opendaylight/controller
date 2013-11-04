@@ -2,11 +2,10 @@ module packet-processing {
     namespace "urn:opendaylight:packet:service";
     prefix flow;
 
-    import yang-ext {prefix ext;}
-    import opendaylight-inventory {prefix inv;}
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;} 
-    import opendaylight-l2-types {prefix types;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import ietf-yang-types {prefix yang;revision-date "2010-09-24";} 
+    import opendaylight-l2-types {prefix types;revision-date "2013-08-27";}
     
     revision "2013-07-09" {
         description "";
@@ -45,13 +44,12 @@ module packet-processing {
 
     rpc transmit-packet {
     	input {
+            uses inv:node-context-ref;
+
             leaf cookie {
                 type cookie;
             }
-            leaf node {
-                ext:context-reference "inv:node-context";
-                type inv:node-ref;
-            }
+            
     		leaf egress {
     			type inv:node-connector-ref;
     		}

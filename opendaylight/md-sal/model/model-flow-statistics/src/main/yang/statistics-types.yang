@@ -3,8 +3,7 @@ module opendaylight-statistics-types {
     prefix stat-types;
 
     import ietf-yang-types {prefix yang;}
-    import opendaylight-inventory {prefix inv;}
-    //import opendaylight-port-inventory {prefix port-inv;}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     
     revision "2013-09-25" {
         description "Initial revision of flow service";

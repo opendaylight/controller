@@ -121,20 +121,20 @@ public class MDFlowMapping {
 
     public static def flowStatisticsInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
-        val it = new GetFlowStatisticsInputBuilder(source);
+        val it = new GetFlowStatisticsInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
         node = sourceNode.toNodeRef();
         return it.build();
     }
 
     public static def removeFlowInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
-        val it = new RemoveFlowInputBuilder(source);
+        val it = new RemoveFlowInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
         return it.build();
     }
 
     public static def addFlowInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
-        val it = new AddFlowInputBuilder(source);
+        val it = new AddFlowInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
         return it.build();
     }
 
@@ -142,9 +142,9 @@ public class MDFlowMapping {
         val it = new UpdateFlowInputBuilder();
         val sourceOld = flowAdded(newFlow);
 
-        val original = new OriginalFlowBuilder(sourceOld);
+        val original = new OriginalFlowBuilder(sourceOld as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
         val sourceNew = flowAdded(newFlow);
-        val updated = new UpdatedFlowBuilder(sourceNew);
+        val updated = new UpdatedFlowBuilder(sourceNew as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
         originalFlow = original.build()
         updatedFlow = updated.build();
         node = sourceNode.toNodeRef()

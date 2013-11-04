@@ -2,17 +2,16 @@ module flow-node-inventory {
     namespace "urn:opendaylight:flow:inventory";
     prefix flownode;
 
-    import yang-ext {prefix ext;}
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;}
-    import opendaylight-port-types {prefix port;}
-    import opendaylight-inventory {prefix inv;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import opendaylight-port-types {prefix port;revision-date "2013-09-25";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     
     revision "2013-08-19" {
-        description "Flow Capable Node extensions to the nventory model";
+        description "Flow Capable Node extensions to the Inventory model";
     }
-    
-    
+
     grouping feature {
         leaf support-state {
             type inv:support-type;

@@ -2,8 +2,8 @@ module flow-management {
     namespace "urn:opendaylight:flow:config";
     prefix flow-cfg;
 
-    import yang-ext {prefix ext;}
-    import opendaylight-inventory {prefix inv;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-flow-types {prefix flow;}
 
     revision "2013-08-19" {
