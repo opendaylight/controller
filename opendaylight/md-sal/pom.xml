@@ -35,13 +35,14 @@
         <!-- Base Models -->
         <module>model</module>
 
-        <!-- Compability Packages -->
-        <module>sal-compability</module>
 
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
-        <module>flow-management-compatibility</module>
+        <module>inventory-manager</module>
+        <!-- Compability Packages -->
+        <module>compatibility</module>
+
     </modules>
 
     <properties>
