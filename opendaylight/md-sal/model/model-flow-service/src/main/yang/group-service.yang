@@ -2,25 +2,25 @@ module sal-group {
     namespace "urn:opendaylight:group:service";
     prefix group;
 
-    import yang-ext {prefix ext;}
-    import opendaylight-inventory {prefix inv;}
-    import ietf-inet-types {prefix inet;}
-    import opendaylight-group-types {prefix group-type;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import ietf-inet-types {prefix inet;revision-date 2010-09-24;}
+    import opendaylight-group-types {prefix group-type;revision-date 2013-10-18;}
 
     revision "2013-09-18" {
         description "Initial revision of group service";
     }        
     
     grouping node-group {
-        leaf node {
-            ext:context-reference "inv:node-context";
-            type inv:node-ref;
-        }
+        uses "inv:node-context-ref";
+        
         uses group-type:group;
     }
 
     /** Base configuration structure **/
     grouping group-update {
+        uses "inv:node-context-ref";
+        
         container original-group {
             uses group-type:group;
         }
@@ -37,20 +37,12 @@ module sal-group {
 
     rpc remove-group {
         input {
-            leaf node {
-                ext:context-reference "inv:node-context";
-                type inv:node-ref;
-            }
             uses group-update;
         }
     }
 
     rpc update-group {
         input {
-            leaf node {
-                ext:context-reference "inv:node-context";
-                type inv:node-ref;
-            }
             uses group-update;
         }
     } 

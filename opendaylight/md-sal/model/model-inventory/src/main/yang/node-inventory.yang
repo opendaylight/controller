@@ -2,9 +2,9 @@ module opendaylight-inventory {
     namespace "urn:opendaylight:inventory";
     prefix inv;
 
-    import yang-ext {prefix ext;}
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
 
 
     revision "2013-08-19" {
@@ -41,7 +41,15 @@ module opendaylight-inventory {
     }
 
     identity node-connector-context {
+        description "Identity used to mark node connector context";
+    }
 
+    identity node-type {
+        description "Base identity for node types";
+    }
+
+    identity node-connector-type {
+        description "Base identity for node connectors type";
     }
 
     grouping node {
@@ -61,6 +69,15 @@ module opendaylight-inventory {
     grouping node-connector {
         leaf id {
             type node-connector-id;
+        }
+    }
+
+    grouping node-context-ref {
+        description 
+        "Helper grouping which contains a reference to node context.";
+        leaf node {
+            ext:context-reference "node-context";
+            type node-ref;
         }
     }
 

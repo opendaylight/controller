@@ -2,9 +2,8 @@ module opendaylight-port-types {
     namespace "urn:opendaylight:flow:types:port";
     prefix port-types;
 
-    import yang-ext {prefix ext;}
-    import ietf-inet-types {prefix inet;}
-    import ietf-yang-types {prefix yang;}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     
     revision "2013-09-25" {
         description "Initial revision of Port Inventory model";
@@ -22,9 +21,9 @@ module opendaylight-port-types {
     
     typedef port-state {
             type enumeration {
-                enum LINK-DOWN;
-                enum BLOCKED;
-                enum LIVE;
+                enum link-down;
+                enum blocked;
+                enum live;
         }
     }
 
