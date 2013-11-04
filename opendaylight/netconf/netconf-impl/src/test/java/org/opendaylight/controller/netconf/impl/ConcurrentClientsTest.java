@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -176,7 +176,11 @@ public class ConcurrentClientsTest {
 
         for (TestingThread thread : threads) {
             thread.join();
-            assertTrue(thread.success);
+            if(thread.thrownException.isPresent()) {
+                Exception exception = thread.thrownException.get();
+                logger.error("Thread for testing client failed", exception);
+                fail("Client thread " + thread + " failed: " + exception.getMessage());
+            }
         }
     }
 
@@ -196,12 +200,16 @@ public class ConcurrentClientsTest {
 
         for (BlockingThread thread : threads) {
             thread.join();
-            assertTrue(thread.success);
+            if(thread.thrownException.isPresent()) {
+                Exception exception = thread.thrownException.get();
+                logger.error("Thread for testing client failed", exception);
+                fail("Client thread " + thread + " failed: " + exception.getMessage());
+            }
         }
     }
 
     class BlockingThread extends Thread {
-        Boolean success;
+        private Optional<Exception> thrownException;
 
         public BlockingThread(String name) {
             super("client-" + name);
@@ -211,10 +219,9 @@ public class ConcurrentClientsTest {
         public void run() {
             try {
                 run2();
-                success = true;
+                thrownException = Optional.absent();
             } catch (Exception e) {
-                success = false;
-                throw new RuntimeException(e);
+                thrownException = Optional.of(e);
             }
         }
 
@@ -254,7 +261,7 @@ public class ConcurrentClientsTest {
 
         private final String clientId;
         private final int attempts;
-        private Boolean success;
+        private Optional<Exception> thrownException;
 
         TestingThread(String clientId, int attempts) {
             this.clientId = clientId;
@@ -275,10 +282,9 @@ public class ConcurrentClientsTest {
                 logger.info("Client with sessionid {} got result {}", sessionId, result);
                 netconfClient.close();
                 logger.info("Client with session id {} ended", sessionId);
-                success = true;
+                thrownException = Optional.absent();
             } catch (final Exception e) {
-                success = false;
-                throw new RuntimeException(e);
+                thrownException = Optional.of(e);
             }
         }
     }
