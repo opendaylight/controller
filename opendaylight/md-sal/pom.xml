@@ -28,20 +28,21 @@
         <module>sal-binding-config</module>
         <module>sal-binding-broker</module>
         <module>sal-binding-it</module>
-
+        <module>sal-binding-util</module>
         <!-- Samples -->
         <module>samples</module>
 
         <!-- Base Models -->
         <module>model</module>
 
-        <!-- Compability Packages -->
-        <module>sal-compability</module>
 
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
-        <module>flow-management-compatibility</module>
+        <module>inventory-manager</module>
+        <!-- Compability Packages -->
+        <module>compatibility</module>
+
     </modules>
 
     <properties>
