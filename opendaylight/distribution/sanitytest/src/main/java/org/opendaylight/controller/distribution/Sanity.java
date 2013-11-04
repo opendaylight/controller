@@ -28,9 +28,9 @@ public class Sanity {
         if(os.contains("windows")){
             script.add("cmd.exe");
             script.add("/c");
-            script.add("run.bat");
+            script.add("runsanity.bat");
         } else {
-            script.add("./run.sh");
+            script.add("./runsanity.sh");
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder();
