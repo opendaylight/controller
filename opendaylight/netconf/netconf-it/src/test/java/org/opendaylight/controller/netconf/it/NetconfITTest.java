@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.HashedWheelTimer;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeR
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
@@ -47,7 +49,6 @@ import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificat
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.protocol.util.SSLUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -55,18 +56,12 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.management.ObjectName;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -86,11 +81,12 @@ public class NetconfITTest extends AbstractConfigTest {
     // LoggerFactory.getLogger(NetconfITTest.class);
     //
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
-    private static final InetSocketAddress tlsAddress = new InetSocketAddress("127.0.0.1", 12024);
 
     private NetconfMessage getConfig, getConfigCandidate, editConfig, closeSession;
     private DefaultCommitNotificationProducer commitNot;
-    private NetconfServerDispatcher dispatch, dispatchS;
+    private NetconfServerDispatcher dispatch;
+
+    private static NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER = new NetconfClientDispatcher(Optional.<SSLContext>absent());
 
     @Before
     public void setUp() throws Exception {
@@ -106,10 +102,6 @@ public class NetconfITTest extends AbstractConfigTest {
 
         dispatch = createDispatcher(Optional.<SSLContext> absent(), factoriesListener);
         ChannelFuture s = dispatch.createServer(tcpAddress);
-        s.await();
-
-        dispatchS = createDispatcher(Optional.of(getSslContext()), factoriesListener);
-        s = dispatchS.createServer(tlsAddress);
         s.await();
     }
 
@@ -129,17 +121,11 @@ public class NetconfITTest extends AbstractConfigTest {
     public void tearDown() throws Exception {
         commitNot.close();
         dispatch.close();
-        dispatchS.close();
     }
 
-    private SSLContext getSslContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-            IOException, UnrecoverableKeyException, KeyManagementException {
-        final InputStream keyStore = getClass().getResourceAsStream("/keystore.jks");
-        final InputStream trustStore = getClass().getResourceAsStream("/keystore.jks");
-        SSLContext sslContext = SSLUtil.initializeSecureContext("password", keyStore, trustStore, KeyManagerFactory.getDefaultAlgorithm());
-        keyStore.close();
-        trustStore.close();
-        return sslContext;
+    @AfterClass
+    public static void tearDownStatic() {
+        NETCONF_CLIENT_DISPATCHER.close();
     }
 
     private void loadMessages() throws IOException, SAXException, ParserConfigurationException {
@@ -154,13 +140,13 @@ public class NetconfITTest extends AbstractConfigTest {
         return new HardcodedYangStoreService(yangDependencies);
     }
 
-    private Collection<InputStream> getBasicYangs() throws IOException {
+    static Collection<InputStream> getBasicYangs() throws IOException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
                 "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         for (String path : paths) {
-            final InputStream is = checkNotNull(getClass().getResourceAsStream(path), path + " not found");
+            final InputStream is = checkNotNull(NetconfITTest.class.getResourceAsStream(path), path + " not found");
             yangDependencies.add(is);
         }
         return yangDependencies;
@@ -176,7 +162,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testNetconfClientDemonstration() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000)) {
+        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER)) {
 
             Set<String> capabilitiesFromNetconfServer = netconfClient.getCapabilities();
             long sessionId = netconfClient.getSessionId();
@@ -191,8 +177,8 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000)) {
-            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000)) {
+        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER))  {
+            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER))  {
             }
         }
     }
@@ -204,13 +190,6 @@ public class NetconfITTest extends AbstractConfigTest {
         doReturn(Optional.absent()).when(persister).loadLastConfig();
         ConfigPersisterNotificationHandler h = new ConfigPersisterNotificationHandler(persister, tcpAddress, ManagementFactory.getPlatformMBeanServer());
         h.init();
-    }
-
-    @Test
-    public void testSecure() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tlsAddress, 4000, Optional.of(getSslContext()))) {
-
-        }
     }
 
     @Ignore
@@ -369,7 +348,7 @@ public class NetconfITTest extends AbstractConfigTest {
         // final InputStream resourceAsStream =
         // AbstractListenerTest.class.getResourceAsStream(fileName);
         // assertNotNull(resourceAsStream);
-        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000)) {
+        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000, NETCONF_CLIENT_DISPATCHER)) {
             // IOUtils.copy(resourceAsStream, netconfClient.getStream());
             // netconfClient.getOutputStream().write(NetconfMessageFactory.endOfMessage);
             // server should not write anything back
@@ -418,7 +397,7 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     private NetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
-        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000);
+        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000, NETCONF_CLIENT_DISPATCHER);
 
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
 
