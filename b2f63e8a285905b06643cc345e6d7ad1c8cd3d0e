@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_567a30f2",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-11-05T02:26:24Z",
+      "side": 1,
+      "message": "Consider renaming to changeUser()\nor better yet to addRemoveModiySendonvacation :)",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1684b8d2",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-11-05T02:26:24Z",
+      "side": 1,
+      "message": "I\u0027d move it into the default block, and have the status be \"UNIMPLEMENTED\" (the unknown action had to be in the enum)",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d66d0034",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-11-05T02:26:24Z",
+      "side": 1,
+      "message": "you can remove this",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
