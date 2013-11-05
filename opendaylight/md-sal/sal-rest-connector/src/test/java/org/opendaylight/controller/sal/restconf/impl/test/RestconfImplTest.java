@@ -19,13 +19,13 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestconfImplTest {
 
-    private static final RestconfImpl restconfImpl = new RestconfImpl();
+    private static final RestconfImpl restconfImpl = RestconfImpl.getInstance();
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
         Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs").getPath());
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
-        ControllerContext controllerContext = new ControllerContext();
+        ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
         restconfImpl.setControllerContext(controllerContext);
     }

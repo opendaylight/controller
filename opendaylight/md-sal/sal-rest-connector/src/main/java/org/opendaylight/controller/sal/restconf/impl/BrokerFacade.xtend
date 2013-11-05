@@ -10,11 +10,22 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 
 class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
+    var static BrokerFacade instance = null;
+
     @Property
     private ConsumerSession context;
 
     @Property
     private DataBrokerService dataService;
+    
+    private new() {}
+    
+    def static getInstance() {
+        if (instance === null) {
+            instance = new BrokerFacade
+        }
+        return instance
+    }
 
     override readConfigurationData(InstanceIdentifier path) {
         return dataService.readConfigurationData(path);
@@ -40,5 +51,5 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         transaction.putConfigurationData(path, payload);
         return transaction.commit()
     }
-
+    
 }

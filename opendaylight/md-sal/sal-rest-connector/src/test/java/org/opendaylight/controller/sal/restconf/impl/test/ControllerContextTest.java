@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ControllerContextTest {
 
-    private static final ControllerContext controllerContext = new ControllerContext();
+    private static final ControllerContext controllerContext = ControllerContext.getInstance();
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
@@ -56,7 +56,7 @@ public class ControllerContextTest {
         assertTrue(instanceIdentifier.getSchemaNode() instanceof ContainerSchemaNode);
         assertEquals(2, ((ContainerSchemaNode)instanceIdentifier.getSchemaNode()).getChildNodes().size());
     }
-    
+
     @Test
     public void testToInstanceIdentifierChoice() throws FileNotFoundException {
         InstanceIdWithSchemaNode instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:food/beer");
