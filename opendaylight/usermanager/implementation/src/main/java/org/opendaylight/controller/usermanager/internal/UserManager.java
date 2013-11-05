@@ -93,6 +93,25 @@ public class UserManager implements IUserManager, IObjectReader,
     private IContainerAuthorization containerAuthorizationClient;
     private Set<IResourceAuthorization> applicationAuthorizationClients;
     private ISessionManager sessionMgr = new SessionManager();
+    protected enum Command {
+        ADD("add", "added"),
+        MODIFY("modify", "modified"),
+        REMOVE("remove", "removed");
+        private String action;
+        private String postAction;
+        private Command(String action, String postAction) {
+            this.action = action;
+            this.postAction = postAction;
+        }
+
+        public String getAction() {
+            return action;
+        }
+
+        public String getPostAction() {
+            return postAction;
+        }
+    }
 
     public boolean addAAAProvider(IAAAProvider provider) {
         if (provider == null || provider.getName() == null
@@ -480,7 +499,7 @@ public class UserManager implements IUserManager, IObjectReader,
     /*
      * Interaction with GUI START
      */
-    private Status addRemoveLocalUser(UserConfig AAAconf, boolean delete) {
+    private Status addRemoveLocalUser(UserConfig AAAconf, Command command) {
         // UserConfig Validation check
         Status validCheck = AAAconf.validate();
         if (!validCheck.isSuccess()) {
@@ -491,28 +510,53 @@ public class UserManager implements IUserManager, IObjectReader,
 
         // Check default admin user
         if (user.equals(UserManager.DEFAULT_ADMIN)) {
-            String msg = "Invalid Request: Default Network Admin  User cannot be " + ((delete)? "removed" : "added");
+            String msg = String.format("Invalid Request: Default Network Admin  User cannot be %s", command.getPostAction());
             logger.debug(msg);
             return new Status(StatusCode.NOTALLOWED, msg);
         }
 
         // Check user presence/conflict
+        UserConfig currentAAAconf = localUserConfigList.get(user);
         StatusCode statusCode = null;
         String reason = null;
-        if (delete && !localUserConfigList.containsKey(user)) {
-            reason = "not found";
-            statusCode = StatusCode.NOTFOUND;
-        } else if (!delete && localUserConfigList.containsKey(user)) {
-            reason = "already present";
-            statusCode = StatusCode.CONFLICT;
+        switch (command) {
+        case ADD:
+            if (currentAAAconf != null) {
+                reason = "already present";
+                statusCode = StatusCode.CONFLICT;
+            }
+            break;
+        case MODIFY:
+        case REMOVE:
+            if (currentAAAconf == null) {
+                reason = "not found";
+                statusCode = StatusCode.NOTFOUND;
+            }
+            break;
+        default:
+            break;
+
         }
         if (statusCode != null) {
+            String action = String.format("Failed to % user %s: ", command.getAction(), user);
             String msg = String.format("User %s %s in configuration database", user, reason);
-            logger.debug(msg);
+            logger.debug(action + msg);
             return new Status(statusCode, msg);
         }
 
-        return addRemoveLocalUserInternal(AAAconf, delete);
+        switch (command) {
+        case ADD:
+            return addRemoveLocalUserInternal(AAAconf, false);
+        case MODIFY:
+            addRemoveLocalUserInternal(currentAAAconf, true);
+            return addRemoveLocalUserInternal(AAAconf, false);
+        case REMOVE:
+            return addRemoveLocalUserInternal(AAAconf, true);
+        default:
+            break;
+
+        }
+        return new Status(StatusCode.INTERNALERROR, "Unknown action");
     }
 
     private Status addRemoveLocalUserInternal(UserConfig AAAconf, boolean delete) {
@@ -571,12 +615,17 @@ public class UserManager implements IUserManager, IObjectReader,
 
     @Override
     public Status addLocalUser(UserConfig AAAconf) {
-        return addRemoveLocalUser(AAAconf, false);
+        return addRemoveLocalUser(AAAconf, Command.ADD);
+    }
+
+    @Override
+    public Status modifyLocalUser(UserConfig AAAconf) {
+        return addRemoveLocalUser(AAAconf, Command.MODIFY);
     }
 
     @Override
     public Status removeLocalUser(UserConfig AAAconf) {
-        return addRemoveLocalUser(AAAconf, true);
+        return addRemoveLocalUser(AAAconf, Command.REMOVE);
     }
 
     @Override
@@ -589,7 +638,7 @@ public class UserManager implements IUserManager, IObjectReader,
             return new Status(StatusCode.NOTFOUND, "User does not exist");
         }
 
-        return addRemoveLocalUser(localUserConfigList.get(userName), true);
+        return addRemoveLocalUser(localUserConfigList.get(userName), Command.REMOVE);
     }
 
     @Override
