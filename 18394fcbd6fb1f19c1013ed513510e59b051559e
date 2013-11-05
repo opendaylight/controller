@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c772e87b",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-11-05T21:57:02Z",
+      "side": 1,
+      "message": "Can we move this check to the very top of the method in the form of:\nif (in instanceof EmptyByteBuf)\n    return;\n?\n\nThat will prevent instantiating factories and setting them up when we won\u0027t use them anyway...",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a748142e",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-11-05T21:57:02Z",
+      "side": 1,
+      "message": "Does domBuilder.parse() close exiIS? If not we have a resource leak. If it does, we need to have a comment to that effect.",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e7460c23",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-11-05T21:57:02Z",
+      "side": 1,
+      "message": "Our target environment is Java 7, so this looks like a case for try-with..",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a76ff491",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-11-05T21:57:02Z",
+      "side": 1,
+      "message": "Could this result in a ClassCastException?",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
