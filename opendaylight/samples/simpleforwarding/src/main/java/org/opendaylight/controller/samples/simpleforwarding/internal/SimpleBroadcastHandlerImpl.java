@@ -48,7 +48,7 @@ public class SimpleBroadcastHandlerImpl implements IBroadcastHandler, IListenDat
 
     protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    BroadcastMode mode = BroadcastMode.DISABLED;
+    BroadcastMode mode = BroadcastMode.BROADCAST_TO_NONINTERNAL;
 
     @Override
     public PacketResult receiveDataPacket(RawPacket inPkt) {

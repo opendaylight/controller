@@ -41,6 +41,7 @@ import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
+import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -253,7 +254,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
          */
         if ((targetIP.equals(subnet.getNetworkAddress()))
                 && (NetUtils.isBroadcastMACAddr(targetMAC) || Arrays.equals(targetMAC, getControllerMAC()))) {
-            if (connectionManager.isLocal(p.getNode())){
+            if (connectionManager.getLocalityStatus(p.getNode()) == ConnectionLocality.LOCAL){
                 if (log.isTraceEnabled()){
                     log.trace("Received local ARP req. for default gateway. Replying with controller MAC: {}",
                             HexEncode.bytesToHexString(getControllerMAC()));
@@ -292,7 +293,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
              */
             if (NetUtils.isBroadcastMACAddr(targetMAC) || Arrays.equals(host.getDataLayerAddressBytes(), targetMAC)) {
                 log.trace("Received ARP req. for known host {}, sending reply...", targetIP);
-                if (connectionManager.isLocal(p.getNode())) {
+                if (connectionManager.getLocalityStatus(p.getNode()) == ConnectionLocality.LOCAL) {
                     sendARPReply(p,
                             host.getDataLayerAddressBytes(),
                             host.getNetworkAddress(),
@@ -317,7 +318,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
     }
 
-    /*
+    /**
      *  Send a broadcast ARP Request to the switch/ ports  using
      *  the networkAddress of the subnet as sender IP
      *  the controller's MAC as sender MAC
@@ -335,9 +336,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             nodeConnectors = subnet.getNodeConnectors();
         }
         byte[] targetHardwareAddress = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+
+        //TODO: should use IBroadcastHandler instead
         for (NodeConnector p : nodeConnectors) {
-            //fiter out any non-local or internal ports
-            if (! connectionManager.isLocal(p.getNode()) || topologyManager.isInternal(p)) {
+            //filter out any non-local or internal ports
+            if (!(connectionManager.getLocalityStatus(p.getNode()) == ConnectionLocality.LOCAL) || topologyManager.isInternal(p)) {
                 continue;
             }
             log.trace("Sending toward nodeConnector:{}", p);
@@ -357,7 +360,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
     }
 
-    /*
+    /**
      * Send a unicast ARP Request to the known host on a specific switch/port as
      * defined in the host.
      * The sender IP is the networkAddress of the subnet
@@ -418,7 +421,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             return;
         }
 
-        if (connectionManager.isLocal(host.getnodeconnectorNode())){
+        if (connectionManager.getLocalityStatus(host.getnodeconnectorNode()) == ConnectionLocality.LOCAL){
             log.trace("Send a ucast ARP req. to: {}", host);
             sendUcastARPRequest(host, subnet);
         } else {
@@ -427,10 +430,13 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
     }
 
-    /*
+    /**
      * An IP packet is punted to the controller, this means that the
      * destination host is not known to the controller.
      * Need to discover it by sending a Broadcast ARP Request
+     *
+     * @param pkt
+     * @param p
      */
     protected void handlePuntedIPPacket(IPv4 pkt, NodeConnector p) {
 
@@ -439,6 +445,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
            return;
         }
 
+        // try to find a matching subnet
         Subnet subnet = null;
         if (switchManager != null) {
             subnet = switchManager.getSubnetByNetworkAddress(dIP);
@@ -447,12 +454,28 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             log.debug("Can't find subnet matching {}, drop packet", dIP);
             return;
         }
-        log.trace("Punted IP pkt from {}, sending bcast ARP event...", dIP);
-        /*
-         * unknown destination host, initiate bcast ARP request
-         */
-        arpRequestReplyEvent.put(new ARPRequest(dIP, subnet), false);
-        return;
+
+        // see if we know about the host
+        HostNodeConnector host = hostTracker.hostFind(dIP);
+
+        if (host == null) {
+            // if we don't, know about the host, try to find it
+            log.trace("Punted IP pkt from {}, sending bcast ARP event...",
+                      dIP);
+            /*
+             * unknown destination host, initiate bcast ARP request
+             */
+            arpRequestReplyEvent.put(new ARPRequest(dIP, subnet), false);
+        }else{
+
+            // we know about the host, send the packet the right place
+            NodeConnector nc = host.getnodeConnector();
+
+            // re-encode the Ethernet packet (the parent of the IPv4 packet)
+            RawPacket rp = this.dataPacketService.encodeDataPacket(pkt.getParent());
+            rp.setOutgoingNodeConnector(nc);
+            this.dataPacketService.transmitDataPacket(rp);
+        }
     }
 
     public byte[] getControllerMAC() {
@@ -476,7 +499,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         retrieveCaches();
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         ConcurrentMap<?,?> map;
 
@@ -493,7 +516,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (clusterContainerService == null){
             nonClusterObjectCreate();
@@ -610,7 +632,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     private void startPeriodicTimer() {
         this.periodicTimer = new Timer("ArpHandler Periodic Timer");
         this.periodicTimer.scheduleAtFixedRate(new TimerTask() {
-            @SuppressWarnings("deprecation")
             @Override
             public void run() {
                 Set<InetAddress> targetIPs = countDownTimers.keySet();
@@ -670,7 +691,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                               HexEncode.bytesToHexString(host.getDataLayerAddressBytes()),
                               host.getNetworkAddress() });
             }
-            if (connectionManager.isLocal(host.getnodeconnectorNode())){
+            if (connectionManager.getLocalityStatus(host.getnodeconnectorNode()) == ConnectionLocality.LOCAL){
                 sendARPReply(host.getnodeConnector(),
                         sourceMAC,
                         sourceIP,
@@ -740,7 +761,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                             sendBcastARPRequest(req.getTargetIP(), req.getSubnet());
 
                         //If unicast and local, send reply
-                        } else if (connectionManager.isLocal(req.getHost().getnodeconnectorNode())) {
+                        } else if (connectionManager.getLocalityStatus(req.getHost().getnodeconnectorNode()) == ConnectionLocality.LOCAL) {
                             log.trace("ARPCacheEventHandler - sendUcatARPRequest upon receipt of {}", req);
                             sendUcastARPRequest(req.getHost(), req.getSubnet());
                         }
@@ -751,7 +772,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                             log.trace("Trigger a generateAndSendReply in response to {}", rep);
                             generateAndSendReply(rep.getTargetIP(), rep.getTargetMac());
                         // Otherwise, a specific reply. If local, send out.
-                        } else if (connectionManager.isLocal(rep.getPort().getNode())) {
+                        } else if (connectionManager.getLocalityStatus(rep.getPort().getNode()) == ConnectionLocality.LOCAL) {
                             log.trace("ARPCacheEventHandler - sendUcatARPReply locally in response to {}", rep);
                             sendARPReply(rep.getPort(),
                                     rep.getSourceMac(),

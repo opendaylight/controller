@@ -28,6 +28,7 @@
           <instructions>
             <Import-Package>
               org.opendaylight.controller.connectionmanager,
+              org.opendaylight.controller.sal.connection,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
