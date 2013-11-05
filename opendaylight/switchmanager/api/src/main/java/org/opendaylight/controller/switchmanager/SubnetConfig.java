@@ -104,6 +104,9 @@ public class SubnetConfig implements Cloneable, Serializable {
         if (!NetUtils.isIPAddressValid(subnet)) {
             return new Status(StatusCode.BADREQUEST, String.format("Invalid Subnet configuration: Invalid address: %s", subnet));
         }
+        if((this.getIPMaskLen() == 0) || (this.getIPMaskLen() == 32)) {
+            return new Status(StatusCode.BADREQUEST, String.format("Invalid Subnet configuration: Invalid mask: %s", this.getIPMaskLen()));
+        }
         byte[] bytePrefix = NetUtils.getSubnetPrefix(this.getIPAddress(), this.getIPMaskLen()).getAddress();
         long prefix = BitBufferHelper.getLong(bytePrefix);
         if (prefix == 0) {
