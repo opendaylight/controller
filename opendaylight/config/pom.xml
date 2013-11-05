@@ -30,6 +30,7 @@
         <module>yang-store-impl</module>
         <module>yang-test</module>
         <module>logback-config</module>
+        <module>threadpool-config-api</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
