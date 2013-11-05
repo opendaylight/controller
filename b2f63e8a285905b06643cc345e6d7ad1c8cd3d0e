@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_f6eda48c",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-05T04:05:42Z",
+      "side": 1,
+      "message": "I will. What is \"sendon\" ?",
+      "parentUuid": "da6255ed_567a30f2",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_1684b8d2",
         "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_b6ff2c34",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-05T04:05:42Z",
+      "side": 1,
+      "message": "I wouldn\u0027t add a UNIMPLEMENTED command. But I would move the return in the default switch statement.  Thanks.\nStatusCode.UNIMPLEMENTED is more for something which we plan to support but we have not implemented. Now if somebody put the command Command.PREPARE_COFFEE, I don\u0027t think we should return UNIMPLEMENTED...\nAlso, given this Command is added only here in this file and the methods and enum are all private, this is a super controlled environment and it will surely never happen the compiler let you pass a non-existent command, like GO_TAKE_A_NAP.",
+      "parentUuid": "da6255ed_1684b8d2",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_d66d0034",
         "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2013-11-05T02:26:24Z",
       "side": 1,
       "message": "you can remove this",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_36f45c5a",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-05T04:05:42Z",
+      "side": 1,
+      "message": "Thanks, I will remove it.",
+      "parentUuid": "da6255ed_d66d0034",
       "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
