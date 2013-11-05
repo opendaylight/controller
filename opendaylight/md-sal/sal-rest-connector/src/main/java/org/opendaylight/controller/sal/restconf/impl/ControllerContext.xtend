@@ -27,13 +27,25 @@ import static com.google.common.base.Preconditions.*
 
 class ControllerContext {
     
+    val static ControllerContext INSTANCE = new ControllerContext
+    
     val static NULL_VALUE = "null"
-
+    
     @Property
     SchemaContext schemas;
 
     private val BiMap<URI, String> uriToModuleName = HashBiMap.create();
     private val Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
+
+    private new() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Already instantiated");
+        }
+    }
+
+    static def getInstance() {
+        return INSTANCE
+    }
 
     public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
         val ret = InstanceIdentifier.builder();

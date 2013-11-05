@@ -1,29 +1,31 @@
 package org.opendaylight.controller.sal.restconf.impl
 
-import org.opendaylight.controller.sal.core.api.model.SchemaService
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
-
-import static com.google.common.base.Preconditions.*
+import org.opendaylight.controller.sal.rest.api.RestconfService
 
 class RestconfImpl implements RestconfService {
+    
+    val static RestconfImpl INSTANCE = new RestconfImpl
 
     @Property
     BrokerFacade broker
 
     @Property
     extension ControllerContext controllerContext
-
-    val JsonMapper jsonMapper = new JsonMapper;
-
-    def init(SchemaService schemaService) {
-        checkState(broker !== null)
-        checkState(controllerContext !== null)
-        checkState(schemaService !== null)
-        controllerContext.schemas = schemaService.globalContext
+    
+    private new() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Already instantiated");
+        }
+    }
+    
+    static def getInstance() {
+        return INSTANCE
     }
 
     override readAllData() {
-        return broker.readOperationalData("".removePrefixes.toInstanceIdentifier.getInstanceIdentifier);
+//        return broker.readOperationalData("".toInstanceIdentifier.getInstanceIdentifier);
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
     override getModules() {
@@ -36,26 +38,24 @@ class RestconfImpl implements RestconfService {
     }
 
     override readData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.removePrefixes.toInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
-        jsonMapper.convert(instanceIdentifierWithSchemaNode.getSchemaNode, data)
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
-        return broker.commitConfigurationDataCreate(identifier.removePrefixes.toInstanceIdentifier.getInstanceIdentifier, payload);
+//        return broker.commitConfigurationDataCreate(identifier.toInstanceIdentifier.getInstanceIdentifier, payload);
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
-        return broker.commitConfigurationDataCreate(identifier.removePrefixes.toInstanceIdentifier.getInstanceIdentifier, payload);
+//        return broker.commitConfigurationDataCreate(identifier.toInstanceIdentifier.getInstanceIdentifier, payload);
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
-        val rpcResult = broker.invokeRpc(identifier.removePrefixes.toRpcQName, payload);
-        jsonMapper.convert(identifier.removePrefixes.toInstanceIdentifier.getSchemaNode, rpcResult.result);
-    }
-
-    private def String removePrefixes(String path) {
-        return path;
+        val rpcResult = broker.invokeRpc(identifier.toRpcQName, payload);
+        return new StructuredData(rpcResult.result, identifier.toInstanceIdentifier.getSchemaNode)
     }
 
 }

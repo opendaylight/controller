@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.restconf.impl;
+package org.opendaylight.controller.sal.rest.api;
 
 import static org.opendaylight.controller.sal.restconf.impl.MediaTypes.API;
 
@@ -16,6 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
@@ -59,26 +60,26 @@ public interface RestconfService {
 
     @GET
     @Path("/datastore/{identifier}")
-    @Produces({API+XML})
-    public Object readData(@PathParam("identifier") String identifier);
+    @Produces({API+JSON,API+XML})
+    public StructuredData readData(@PathParam("identifier") String identifier);
 
     @PUT
     @Path("/datastore/{identifier}")
-    @Produces({API+XML})
+    @Produces({API+JSON,API+XML})
     public Object createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @POST
     @Path("/datastore/{identifier}")
-    @Produces({API+XML})
+    @Produces({API+JSON,API+XML})
     public Object updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @GET
     @Path("/modules")
-    @Produces(API+XML)
+    @Produces({API+JSON,API+XML})
     public Object getModules();
 
     @POST
     @Path("/operations/{identifier}")
-    @Produces(API+XML)
-    public Object invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
+    @Produces({API+JSON,API+XML})
+    public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
 }
