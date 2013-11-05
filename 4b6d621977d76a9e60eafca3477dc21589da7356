@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7c2cf3ab",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/SubnetConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-05T19:49:06Z",
+      "side": 1,
+      "message": "can you put a \u0027/\u0027 so that it will show:\n\"[...] Invalid mask: /0\" or \"[...] Invalid mask: /32\"",
+      "revId": "4b6d621977d76a9e60eafca3477dc21589da7356",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
