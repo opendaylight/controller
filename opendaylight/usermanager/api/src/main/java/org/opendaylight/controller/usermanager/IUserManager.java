@@ -79,6 +79,17 @@ public interface IUserManager extends UserDetailsService {
     public Status addLocalUser(UserConfig configObject);
 
     /**
+     * Modify a local user
+     *
+     * @param configObject
+     *            {@link org.opendaylight.controller.usermanager.internal.UserConfig}
+     *            The new User Configuration
+     * @return refer to {@link org.opendaylight.controller.sal.utils.Status}
+     *         status code
+     */
+    public Status modifyLocalUser(UserConfig configObject);
+
+    /**
      * Remove a local user
      *
      * @param configObject
