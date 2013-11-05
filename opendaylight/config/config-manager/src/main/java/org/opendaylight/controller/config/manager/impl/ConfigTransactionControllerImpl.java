@@ -345,7 +345,7 @@ class ConfigTransactionControllerImpl implements
             ModuleIdentifier name = entry.getKey();
             try {
                 logger.debug("About to commit {} in transaction {}",
-                        transactionIdentifier, name);
+                        name, transactionIdentifier);
                 module.getInstance();
             } catch (Exception e) {
                 logger.error("Commit failed on {} in transaction {}", name,

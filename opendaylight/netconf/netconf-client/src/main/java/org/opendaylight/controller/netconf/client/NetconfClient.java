@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.netty.util.concurrent.Future;
@@ -20,7 +19,6 @@ import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -42,15 +40,14 @@ public class NetconfClient implements Closeable {
 
     // TODO test reconnecting constructor
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectionAttempts,
-            int attemptMsTimeout) throws InterruptedException {
-        this(clientLabelForLogging, address, getReconnectStrategy(connectionAttempts, attemptMsTimeout), Optional
-                .<SSLContext> absent());
+            int attemptMsTimeout, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
+        this(clientLabelForLogging, address, getReconnectStrategy(connectionAttempts, attemptMsTimeout),
+                netconfClientDispatcher);
     }
 
-    private NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat,
-            Optional<SSLContext> maybeSSLContext) throws InterruptedException {
+    private NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this.label = clientLabelForLogging;
-        dispatch = new NetconfClientDispatcher(maybeSSLContext);
+        dispatch = netconfClientDispatcher;
 
         sessionListener = new NetconfClientSessionListener();
         Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strat);
@@ -70,27 +67,15 @@ public class NetconfClient implements Closeable {
     }
 
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
-            Optional<SSLContext> maybeSSLContext) throws InterruptedException {
+            NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this(clientLabelForLogging, address,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), maybeSSLContext);
+                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), netconfClientDispatcher);
     }
 
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs)
-            throws InterruptedException {
-        this(clientLabelForLogging, address,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), Optional
-                        .<SSLContext> absent());
-    }
-
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address) throws InterruptedException {
+    public NetconfClient(String clientLabelForLogging, InetSocketAddress address,
+            NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this(clientLabelForLogging, address, new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
-                DEFAULT_CONNECT_TIMEOUT), Optional.<SSLContext> absent());
-    }
-
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, Optional<SSLContext> maybeSSLContext)
-            throws InterruptedException {
-        this(clientLabelForLogging, address, new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
-                DEFAULT_CONNECT_TIMEOUT), maybeSSLContext);
+                DEFAULT_CONNECT_TIMEOUT), netconfClientDispatcher);
     }
 
     public NetconfMessage sendMessage(NetconfMessage message) {
@@ -112,7 +97,6 @@ public class NetconfClient implements Closeable {
     @Override
     public void close() throws IOException {
         clientSession.close();
-        dispatch.close();
     }
 
     private static ReconnectStrategy getReconnectStrategy(int connectionAttempts, int attemptMsTimeout) {
