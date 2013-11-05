@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_19450970",
+        "filename": "opendaylight/md-sal/sal-compability/src/main/java/org/opendaylight/controller/sal/compability/ToSalPropertyClassUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-05T13:43:50Z",
+      "side": 1,
+      "message": "Tony, this only provides conversion for some of the properties but given a Property attached to a node connector can be just any subclass of Property, the conversion done by this has limited scope. Hence not quite sure how much is going to be useful this utility class, where do you plan on using it?",
+      "revId": "75149973687e86602427ecbb6ef275cb33c6a10a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
