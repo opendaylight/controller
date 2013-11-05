@@ -104,6 +104,24 @@
       "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_369b3c1a",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-05T04:15:00Z",
+      "side": 1,
+      "message": "This was actually needed, this is the API which removes by username and passes the localUserConfigList.get(userName) to the next one.",
+      "parentUuid": "da6255ed_36f45c5a",
+      "revId": "b2f63e8a285905b06643cc345e6d7ad1c8cd3d0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
