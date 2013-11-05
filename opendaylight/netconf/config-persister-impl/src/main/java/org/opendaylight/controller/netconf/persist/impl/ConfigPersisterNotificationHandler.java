@@ -17,6 +17,7 @@ import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
 import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
 import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -32,6 +33,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
+import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +52,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
 
     private final InetSocketAddress address;
+    private final NetconfClientDispatcher dispatcher;
 
     private NetconfClient netconfClient;
 
@@ -73,6 +76,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         this.address = address;
         this.mbeanServer = mbeanServer;
         this.timeout = timeout;
+        this.dispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent());
     }
 
     public void init() throws InterruptedException {
@@ -117,7 +121,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
             attempt++;
 
             try {
-                netconfClient = new NetconfClient(this.toString(), address, delay);
+                netconfClient = new NetconfClient(this.toString(), address, delay, dispatcher);
                 // TODO is this correct ex to catch ?
             } catch (IllegalStateException e) {
                 logger.debug("Netconf {} was not initialized or is not stable, attempt {}", address, attempt, e);
@@ -307,6 +311,12 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
             } catch (Exception e) {
                 logger.warn("Unable to close connection to netconf {}", netconfClient, e);
             }
+        }
+
+        try {
+            dispatcher.close();
+        } catch (Exception e) {
+            logger.warn("Unable to close netconf client dispatcher {}", dispatcher, e);
         }
 
         // unregister from JMX

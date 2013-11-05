@@ -14,6 +14,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.util.HashedWheelTimer;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -26,6 +27,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
@@ -62,6 +64,7 @@ import static org.mockito.Mockito.mock;
 public class ConcurrentClientsTest {
 
     private static final int CONCURRENCY = 16;
+    public static final NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER = new NetconfClientDispatcher(Optional.<SSLContext>absent());
     @Mock
     private YangStoreService yangStoreService;
     @Mock
@@ -104,6 +107,11 @@ public class ConcurrentClientsTest {
 
         ChannelFuture s = dispatch.createServer(netconfAddress);
         s.await();
+    }
+
+    @AfterClass
+    public static void tearDownStatic() {
+        NETCONF_CLIENT_DISPATCHER.close();
     }
 
     private NetconfOperationServiceFactory mockOpF() {
@@ -257,7 +265,7 @@ public class ConcurrentClientsTest {
         @Override
         public void run() {
             try {
-                final NetconfClient netconfClient = new NetconfClient(clientId, netconfAddress);
+                final NetconfClient netconfClient = new NetconfClient(clientId, netconfAddress, NETCONF_CLIENT_DISPATCHER);
                 long sessionId = netconfClient.getSessionId();
                 logger.info("Client with sessionid {} hello exchanged", sessionId);
 

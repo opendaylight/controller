@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.HashedWheelTimer;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeR
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
@@ -92,6 +94,8 @@ public class NetconfITTest extends AbstractConfigTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch, dispatchS;
 
+    private static NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER = new NetconfClientDispatcher(Optional.<SSLContext>absent());
+
     @Before
     public void setUp() throws Exception {
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(getModuleFactories().toArray(
@@ -130,6 +134,11 @@ public class NetconfITTest extends AbstractConfigTest {
         commitNot.close();
         dispatch.close();
         dispatchS.close();
+    }
+
+    @AfterClass
+    public static void tearDownStatic() {
+        NETCONF_CLIENT_DISPATCHER.close();
     }
 
     private SSLContext getSslContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
@@ -176,7 +185,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testNetconfClientDemonstration() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000)) {
+        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER)) {
 
             Set<String> capabilitiesFromNetconfServer = netconfClient.getCapabilities();
             long sessionId = netconfClient.getSessionId();
@@ -191,8 +200,8 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000)) {
-            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000)) {
+        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER))  {
+            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER))  {
             }
         }
     }
@@ -208,7 +217,8 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testSecure() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tlsAddress, 4000, Optional.of(getSslContext()))) {
+        try (NetconfClientDispatcher dispatch = new NetconfClientDispatcher(Optional.of(getSslContext()));
+             NetconfClient netconfClient = new NetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
 
         }
     }
@@ -369,7 +379,7 @@ public class NetconfITTest extends AbstractConfigTest {
         // final InputStream resourceAsStream =
         // AbstractListenerTest.class.getResourceAsStream(fileName);
         // assertNotNull(resourceAsStream);
-        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000)) {
+        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000, NETCONF_CLIENT_DISPATCHER)) {
             // IOUtils.copy(resourceAsStream, netconfClient.getStream());
             // netconfClient.getOutputStream().write(NetconfMessageFactory.endOfMessage);
             // server should not write anything back
@@ -418,7 +428,7 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     private NetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
-        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000);
+        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000, NETCONF_CLIENT_DISPATCHER);
 
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
 
