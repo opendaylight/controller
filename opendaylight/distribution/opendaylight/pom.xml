@@ -81,7 +81,7 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-compability</artifactId>
+          <artifactId>sal-compatibility</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
         <dependency>

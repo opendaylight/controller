@@ -28,6 +28,7 @@
         <module>model-flow-service</module>
         <module>model-flow-statistics</module>
         <module>model-flow-management</module>
+        <module>model-topology</module>
     </modules>
 
     <build>
