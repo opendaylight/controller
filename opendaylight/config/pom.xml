@@ -29,6 +29,7 @@
         <module>yang-store-impl</module>
         <module>yang-test</module>
         <module>logback-config</module>
+        <module>threadpool-config-api</module>
     </modules>
 
     <profiles>
