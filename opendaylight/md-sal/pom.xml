@@ -42,6 +42,11 @@
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
         <module>flow-management-compatibility</module>
+
+        <!-- Clustered Data Store -->
+        <module>clustered-data-store/implementation</module>
+        <module>clustered-data-store/integrationtest</module>
+
     </modules>
 
     <properties>
