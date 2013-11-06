@@ -24,6 +24,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -88,7 +89,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     static final String ACTIVE_HOST_CACHE = "hosttracker.ActiveHosts";
     static final String INACTIVE_HOST_CACHE = "hosttracker.InactiveHosts";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
-    protected IHostFinder hostFinder;
+    protected final Set<IHostFinder> hostFinder = new CopyOnWriteArraySet<IHostFinder>();;
     protected ConcurrentMap<InetAddress, HostNodeConnector> hostsDB;
     /*
      * Following is a list of hosts which have been requested by NB APIs to be
@@ -237,13 +238,15 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     public void setArpHandler(IHostFinder hostFinder) {
-        this.hostFinder = hostFinder;
+        if (this.hostFinder != null) {
+            this.hostFinder.add(hostFinder);
+        }
     }
 
     public void unsetArpHandler(IHostFinder hostFinder) {
-        if (this.hostFinder == hostFinder) {
+        if (this.hostFinder != null) {
             logger.debug("Arp Handler Service removed!");
-            this.hostFinder = null;
+            this.hostFinder.remove(hostFinder);
         }
     }
 
@@ -343,8 +346,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 networkAddress.getHostAddress());
 
         /* host is not found, initiate a discovery */
-
-        hostFinder.find(networkAddress);
+        for (IHostFinder hf : hostFinder) {
+            hf.find(networkAddress);
+        }
         return null;
     }
 
@@ -512,8 +516,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
     @Override
     public void hostListener(HostNodeConnector host) {
-
-        logger.debug("ARP received for Host: IP {}, MAC {}, {}", host.getNetworkAddress().getHostAddress(),
+        logger.debug("Received for Host: IP {}, MAC {}, {}", host.getNetworkAddress().getHostAddress(),
                 HexEncode.bytesToHexString(host.getDataLayerAddressBytes()), host);
         if (hostExists(host)) {
             HostNodeConnector existinghost = hostsDB.get(host.getNetworkAddress());
@@ -908,7 +911,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                     continue;
                 }
                 logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
-                hostFinder.find(arphost.getHostIP());
+                for (IHostFinder hf : hostFinder) {
+                    hf.find(arphost.getHostIP());
+                }
             }
         }
     }
@@ -944,7 +949,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                         logger.warn("ARPHandler Services are not available for Outstanding ARPs");
                         continue;
                     }
-                    hostFinder.find(arphost.getHostIP());
+                    for (IHostFinder hf : hostFinder) {
+                        hf.find(arphost.getHostIP());
+                    }
                     arphost.sent_count++;
                     logger.debug("ARP Sent from ARPPending List, IP: {}", arphost.getHostIP().getHostAddress());
                 } else if (arphost.getSent_count() >= hostRetryCount) {
@@ -1028,7 +1035,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                         logger.trace("ARPHandler is not avaialable, can't send the probe");
                         continue;
                     }
-                    hostFinder.probe(host);
+                    for (IHostFinder hf : hostFinder) {
+                        hf.probe(host);
+                    }
                 }
             }
         }
@@ -1333,7 +1342,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             try {
                 byte[] dataLayerAddress = NetUtils.getBroadcastMACAddr();
                 host = new HostNodeConnector(dataLayerAddress, arphost.getHostIP(), nodeConnector, (short) 0);
-                hostFinder.probe(host);
+                for (IHostFinder hf : hostFinder) {
+                    hf.probe(host);
+                }
             } catch (ConstructionException e) {
                 logger.debug("HostNodeConnector couldn't be created for Host: {}, NodeConnector: {}",
                         arphost.getHostIP(), nodeConnector);
