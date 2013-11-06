@@ -18,6 +18,7 @@
        <module name="UnusedImports"/>
        <module name="AvoidStarImport"/>
        <module name="UpperEll"/>
+       <module name="EmptyStatement"/>
     </module>
 
 </module>
