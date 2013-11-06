@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_bc72667a",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/utils/NodeConnectorCreator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-06T16:20:09Z",
+      "side": 1,
+      "message": "Jason i would remove this one. We should slowly remove those onePK hardcoding from this code. It seems too proprietary.",
+      "revId": "512499ae7ce46dfa172f155d0f6958a9427f6b35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
