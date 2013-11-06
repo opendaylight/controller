@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_fcab3e87",
+        "filename": "opendaylight/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/NeutronSubnet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-06T16:59:12Z",
+      "side": 1,
+      "message": "I would still log the problem properly.",
+      "revId": "1c6cc2a47328235d82055c75a4d7c281dac416c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
