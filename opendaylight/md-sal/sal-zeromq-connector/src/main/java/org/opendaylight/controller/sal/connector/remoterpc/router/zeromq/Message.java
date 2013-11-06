@@ -1,16 +1,15 @@
-package org.opendaylight.controller.sal.connector.zeromq;
+package org.opendaylight.controller.sal.connector.remoterpc.router.zeromq;
 
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 
 import java.io.*;
-import java.util.Arrays;
 
 public class Message implements Serializable {
 
- public enum MessageType {
-    ANNOUNCE((byte) 0),
+ public static enum MessageType {
+    ANNOUNCE((byte) 0),  //TODO: Remove announce, add rpc registration and deregistration
     HEARTBEAT((byte) 1),
     REQUEST((byte) 2),
     RESPONSE((byte) 3);
@@ -101,27 +100,15 @@ public class Message implements Serializable {
     return o.readObject();
   }
 
-  public static byte[] toJsonBytes(Message m){
+  public static byte[] toJsonBytes(Message m) throws IOException {
     ObjectMapper o = new ObjectMapper();
-    try {
-      System.out.println(o.writeValueAsString(m));
-      return o.writeValueAsBytes(m);
-    } catch (IOException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    return null;
+    return o.writeValueAsBytes(m);
   }
 
-  public static Message fromJsonBytes(byte [] bytes){
+  public static Message fromJsonBytes(byte [] bytes) throws IOException {
 
     ObjectMapper o = new ObjectMapper();
-    Message m = null;
-    try {
-      m = o.readValue(bytes, Message.class);
-    } catch (IOException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    return m;
+    return o.readValue(bytes, Message.class);
   }
 
   public static class Response extends Message implements RpcRouter.RpcReply {
@@ -146,5 +133,41 @@ public class Message implements Serializable {
     }
   }
 
+  /**
+   * Builds a {@link Message} object
+   */
+  public static class MessageBuilder{
+
+    private Message message;
+
+    public MessageBuilder(){
+      message = new Message();
+    }
+
+
+    public MessageBuilder type(MessageType type){
+      message.setType(type);
+      return this;
+    }
+
+    public MessageBuilder sender(String sender){
+      message.setSender(sender);
+      return this;
+    }
+
+    public MessageBuilder route(RpcRouter.RouteIdentifier route){
+      message.setRoute(route);
+      return this;
+    }
+
+    public MessageBuilder payload(Object obj){
+      message.setPayload(obj);
+      return this;
+    }
+
+    public Message build(){
+      return message;
+    }
+  }
 }
 
