@@ -224,6 +224,8 @@ class ConfigTransactionControllerImpl implements
                 maybeOldConfigBeanInfo, transactionModuleJMXRegistration);
 
         dependencyResolverManager.put(moduleInternalTransactionalInfo);
+        // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
+        dependencyResolverManager.getOrCreate(moduleIdentifier);
         return writableON;
     }
 
