@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_5f311ceb",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 69
+      },
+      "writtenOn": "2013-11-06T19:06:53Z",
+      "side": 1,
+      "message": "Can you change this to \"Received Notification for Host ..\" as opposed to \"Received for Host ...\". It is easier to understand as to what is going on..",
+      "revId": "9139d6ad1d16ba323d5fef0f71fdfde83b679125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
