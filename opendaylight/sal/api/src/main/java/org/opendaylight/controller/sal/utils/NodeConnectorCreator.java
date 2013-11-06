@@ -45,6 +45,14 @@ public abstract class NodeConnectorCreator {
                 logger.error("",e1);
                 return null;
             }
+        } else if (node.getType().equals(NodeIDType.ONEPK)) {
+            try {
+                return new NodeConnector(NodeConnectorIDType.ONEPK,
+                        (String) portId, node);
+            } catch (ConstructionException e1) {
+                logger.error("",e1);
+                return null;
+            }
         }
         return null;
     }
