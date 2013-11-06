@@ -16,6 +16,24 @@
       "revId": "75149973687e86602427ecbb6ef275cb33c6a10a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_fc09fe2c",
+        "filename": "opendaylight/md-sal/sal-compability/src/main/java/org/opendaylight/controller/sal/compability/ToSalPropertyClassUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-11-06T15:29:50Z",
+      "side": 1,
+      "message": "This utility class will be extended to support more, should be used in AD-to-MD SAL adaptation and vice versa.",
+      "parentUuid": "da6255ed_19450970",
+      "revId": "75149973687e86602427ecbb6ef275cb33c6a10a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
