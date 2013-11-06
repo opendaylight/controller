@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_88f2bd98",
+        "filename": "opendaylight/northbound/networkconfiguration/bridgedomain/src/main/java/org/opendaylight/controller/networkconfig/bridgedomain/northbound/BridgeDomainNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-06T13:59:52Z",
+      "side": 1,
+      "message": "Madhu, is this map that users pass a map of keys and complex object?\nor perhaps it\u0027s more suitable to make it a map of string,string?",
+      "revId": "f6214e98679ce95cbd74e500d722f41d907a45a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
