@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_cd7c4723",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-06T08:48:52Z",
+      "side": 1,
+      "message": "This capability should not be advertised by config-netconf-connector since it is already provided (in server-hello message) and handled by default by netconf-impl.",
+      "revId": "09529aafc8246a619b6eb884137f54ae83d4029d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2d952333",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/NetconfServerSession.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-06T08:48:52Z",
+      "side": 1,
+      "message": "NetconfServerSession and NetconfClientSession contain the same code related to handler manipulation. Might be pulled to an abstract class.",
+      "revId": "09529aafc8246a619b6eb884137f54ae83d4029d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
