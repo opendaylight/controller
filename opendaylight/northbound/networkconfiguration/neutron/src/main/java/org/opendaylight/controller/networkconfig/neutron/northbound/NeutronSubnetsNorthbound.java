@@ -33,6 +33,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.northbound.commons.RestMessages;
+import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
@@ -191,7 +192,9 @@ public class NeutronSubnetsNorthbound {
                 return Response.status(404).build();
             if (!singleton.isValidCIDR())
                 return Response.status(400).build();
-            singleton.initDefaults();
+            if (!singleton.initDefaults()) {
+            	throw new InternalServerErrorException("subnet object could not be initialized properly");
+            }
             if (singleton.gatewayIP_Pool_overlap())
                 return Response.status(409).build();
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
@@ -225,7 +228,9 @@ public class NeutronSubnetsNorthbound {
                  *  and that the bulk request doesn't already contain a subnet with this id
                  */
 
-                test.initDefaults();
+                if (!test.initDefaults()) {
+                	throw new InternalServerErrorException("subnet object could not be initialized properly");
+                }
                 if (subnetInterface.subnetExists(test.getID()))
                     return Response.status(400).build();
                 if (testMap.containsKey(test.getID()))
