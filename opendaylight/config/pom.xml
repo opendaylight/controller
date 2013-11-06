@@ -24,7 +24,7 @@
         <module>config-persister-api</module>
         <module>config-persister-file-adapter</module>
         <module>yang-jmx-generator</module>
-        <module>yang-jmx-generator-plugin</module>
+        <!-- <module>yang-jmx-generator-plugin</module> -->
         <module>yang-jmx-generator-it</module>
         <module>yang-store-api</module>
         <module>yang-store-impl</module>
