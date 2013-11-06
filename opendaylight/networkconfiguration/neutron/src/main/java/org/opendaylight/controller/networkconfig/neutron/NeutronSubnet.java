@@ -244,7 +244,7 @@ public class NeutronSubnet {
         return false;
     }
 
-    public void initDefaults() {
+    public boolean initDefaults() {
         if (enableDHCP == null)
             enableDHCP = true;
         if (ipVersion == null)
@@ -265,8 +265,9 @@ public class NeutronSubnet {
                 allocationPools = source.splitPool(gatewayIP);
             }
         } catch (Exception e) {
-            ;
+            return false;
         }
+        return true;
     }
 
     public List<NeutronPort> getPortsInSubnet() {
