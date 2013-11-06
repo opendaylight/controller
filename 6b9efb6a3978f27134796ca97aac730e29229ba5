@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a2c7e244",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-11-06T04:01:45Z",
+      "side": 1,
+      "message": "there are two spaces between Admin and User, and why does User has first Capital?",
+      "revId": "6b9efb6a3978f27134796ca97aac730e29229ba5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
