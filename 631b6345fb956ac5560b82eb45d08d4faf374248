@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_227ad288",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 541,
+      "author": {
+        "id": 225
+      },
+      "writtenOn": "2013-11-06T01:24:32Z",
+      "side": 1,
+      "message": "This should be %s.",
+      "revId": "631b6345fb956ac5560b82eb45d08d4faf374248",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
