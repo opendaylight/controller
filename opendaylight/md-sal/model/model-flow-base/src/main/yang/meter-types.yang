@@ -10,8 +10,8 @@ module opendaylight-meter-types {
         description "Initial revision of meter service";
     }
 
-    typedef meter-ref {
-            type instance-identifier;
+    typedef meter-id {
+            type uint32;
     }
     
     grouping meter-flags {
@@ -82,7 +82,7 @@ module opendaylight-meter-types {
         uses meter-flags;        
         
         leaf meter-id {
-            type meter-ref;
+            type meter-id;
         }
         
         container meter-band-headers {

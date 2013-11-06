@@ -10,8 +10,8 @@ module opendaylight-group-types {
         description "Initial revision of group service";
     }
 
-    typedef group-ref {
-        type instance-identifier;
+    typedef group-id {
+        type uint32;
     }
     
     grouping group-types {
@@ -30,7 +30,7 @@ module opendaylight-group-types {
         uses group-types;
         
         leaf group-id {
-            type group-ref;
+            type group-id;
         }
         
         leaf group-name {
