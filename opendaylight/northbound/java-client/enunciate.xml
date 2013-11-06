@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.26.xsd">
+
+  <services>
+    <!-- The [nb-name] is undefined in the generated docs since enunciate
+         cannot handle multiple REST subcontexts -->
+    <rest defaultRestSubcontext="/controller/nb/v2/NB-NAME"/>
+  </services>
+
+  <modules>
+    <!-- generate combined docs. The only issue with merged docs is that
+         the REST subcontext is not filled in. -->
+    <docs docsDir="rest" title="OpenDayLight REST API"
+          includeExampleXml="true" includeExampleJson="true"/>
+
+    <!-- Disable all the client generation tools -->
+    <basic-app disabled="true" />
+    <c disabled="true" />
+    <csharp disabled="true" />
+    <jaxws-client disabled="true" />
+    <jaxws-ri disabled="true" />
+    <jaxws-support disabled="true" />
+    <obj-c disabled="true" />
+    <ruby disabled="true"/>
+    <php disabled="true"/>
+
+    <!-- enable only the java clients -->
+    <xml disabled="false" />
+    <java-client disabled="false"/>
+  </modules>
+
+  <api-classes>
+    <include pattern="org.opendaylight.controller.**"/>
+  </api-classes>
+
+  <api-import pattern="org.opendaylight.controller.**"/>
+</enunciate>
