@@ -265,7 +265,6 @@ public class NeutronSubnet {
                 allocationPools = source.splitPool(gatewayIP);
             }
         } catch (Exception e) {
-            ;
         }
     }
 
