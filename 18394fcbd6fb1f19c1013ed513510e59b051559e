@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_2d7ac388",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-06T07:14:48Z",
+      "side": 1,
+      "message": "Sure, I\u0027ll move it to the top.",
+      "parentUuid": "da6255ed_c772e87b",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_a748142e",
         "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-05T21:57:02Z",
       "side": 1,
       "message": "Does domBuilder.parse() close exiIS? If not we have a resource leak. If it does, we need to have a comment to that effect.",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ad6593e2",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-06T07:14:48Z",
+      "side": 1,
+      "message": "It doesn\u0027t, will fix that.",
+      "parentUuid": "da6255ed_a748142e",
       "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_2def6320",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-06T07:14:48Z",
+      "side": 1,
+      "message": "Will try-that.",
+      "parentUuid": "da6255ed_e7460c23",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_a76ff491",
         "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2013-11-05T21:57:02Z",
       "side": 1,
       "message": "Could this result in a ClassCastException?",
+      "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4dea9710",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/ExiUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-06T07:14:48Z",
+      "side": 1,
+      "message": "That\u0027s an old part of code used for former tests, will remove that.",
+      "parentUuid": "da6255ed_a76ff491",
       "revId": "18394fcbd6fb1f19c1013ed513510e59b051559e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
