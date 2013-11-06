@@ -3,7 +3,7 @@
         <target>
             <candidate/>
         </target>
-        <default-operation>replace</default-operation>
+        <default-operation>merge</default-operation>
 
         <config>
         </config>
