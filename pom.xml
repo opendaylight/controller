@@ -152,5 +152,14 @@
                 <module>opendaylight/distribution/sanitytest/</module>
             </modules>
         </profile>
+        <profile>
+           <id>docs</id>
+           <activation>
+               <activeByDefault>false</activeByDefault>
+           </activation>
+            <modules>
+              <module>opendaylight/northbound/java-client</module>
+            </modules>
+        </profile>
     </profiles>
 </project>
