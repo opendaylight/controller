@@ -27,7 +27,6 @@
         <module>sal-binding-api</module>
         <module>sal-binding-config</module>
         <module>sal-binding-broker</module>
-        <module>sal-binding-it</module>
 
         <!-- Samples -->
         <module>samples</module>
@@ -43,6 +42,19 @@
         <module>sal-rest-connector</module>
         <module>flow-management-compatibility</module>
     </modules>
+
+
+    <profiles>
+        <profile>
+           <id>integrationtests</id>
+           <activation>
+               <activeByDefault>false</activeByDefault>
+           </activation>
+            <modules>
+                <module>sal-binding-it</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
