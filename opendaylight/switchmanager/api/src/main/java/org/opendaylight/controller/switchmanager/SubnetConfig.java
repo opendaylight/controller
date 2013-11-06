@@ -124,10 +124,20 @@ public class SubnetConfig implements Cloneable, Serializable {
         return new Status(StatusCode.SUCCESS);
     }
 
+    private Status validateName() {
+        if (name == null || name.trim().isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "Invalid name");
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
+
     public Status validate() {
-        Status status = validateSubnetAddress();
+        Status status = validateName();
         if (status.isSuccess()) {
-            status = validatePorts(this.nodeConnectors);
+            status = validateSubnetAddress();
+            if (status.isSuccess()) {
+                status = validatePorts(this.nodeConnectors);
+            }
         }
         return status;
     }
