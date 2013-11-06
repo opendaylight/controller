@@ -61,11 +61,15 @@ public class ClusteredDataStoreManager implements ClusteredDataStore {
      */
     void init(Component c) {
         try {
-            clusteredDataStore = new ClusteredDataStoreImpl(clusterGlobalServices);
+        	//Adding creation of the clustered data store in its own method to make the method unit testable
+            clusteredDataStore = createClusteredDataStore(c);
         } catch (CacheExistException e) {
             throw new IllegalStateException("could not construct clusteredDataStore");
         } catch (CacheConfigException e) {
             throw new IllegalStateException("could not construct clusteredDataStore");
         }
+    }
+    protected ClusteredDataStoreImpl createClusteredDataStore(Component c) throws CacheExistException,CacheConfigException{
+    	return  new ClusteredDataStoreImpl(clusterGlobalServices);
     }
 }
