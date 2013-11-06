@@ -12,10 +12,12 @@ package org.opendaylight.controller.networkconfig.bridgedomain.northbound;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -79,6 +81,7 @@ public class BridgeDomainNorthbound {
      * @param nodeType Node Type of the node with the management session.
      * @param nodeId Node Identifier of the node with the management session.
      * @param bridgeName Name / Identifier for a bridge to be created.
+     * @param bridgeConfigs Additional Bridge Configurations.
      */
 
    @Path("/bridge/{nodeType}/{nodeId}/{bridgeName}")
@@ -91,7 +94,8 @@ public class BridgeDomainNorthbound {
    public Response createBridge(
            @PathParam(value = "nodeType") String nodeType,
            @PathParam(value = "nodeId") String nodeId,
-           @PathParam(value = "bridgeName") String name) {
+           @PathParam(value = "bridgeName") String name,
+           Map<String, Object> bridgeConfigs) {
 
        IBridgeDomainConfigService configurationService = getConfigurationService();
        if (configurationService == null) {
@@ -101,7 +105,8 @@ public class BridgeDomainNorthbound {
        Node node = Node.fromString(nodeType, nodeId);
        Status status = null;
        try {
-           status = configurationService.createBridgeDomain(node, name, null);
+           Map<ConfigConstants, Object> configs = this.buildConfig(bridgeConfigs);
+           status = configurationService.createBridgeDomain(node, name, configs);
            if (status.getCode().equals(StatusCode.SUCCESS)) {
                return Response.status(Response.Status.CREATED).build();
            }
@@ -125,10 +130,12 @@ public class BridgeDomainNorthbound {
     * @param nodeId Node Identifier of the node with the management session.
     * @param bridgeName Name / Identifier of the bridge to which a Port is being added.
     * @param portName Name / Identifier of a Port that is being added to a bridge.
+    * @param portConfigs Additional Port Configurations.
     */
 
    @Path("/port/{nodeType}/{nodeId}/{bridgeName}/{portName}")
    @POST
+   @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
    @StatusCodes( { @ResponseCode(code = 201, condition = "Port added successfully"),
        @ResponseCode(code = 404, condition = "Could not add Port to the Bridge"),
        @ResponseCode(code = 412, condition = "Failed to add Port due to an exception"),
@@ -138,7 +145,8 @@ public class BridgeDomainNorthbound {
            @PathParam(value = "nodeType") String nodeType,
            @PathParam(value = "nodeId") String nodeId,
            @PathParam(value = "bridgeName") String bridge,
-           @PathParam(value = "portName") String port) {
+           @PathParam(value = "portName") String port,
+           Map<String, Object> portConfigs) {
 
        IBridgeDomainConfigService configurationService = getConfigurationService();
        if (configurationService == null) {
@@ -148,7 +156,8 @@ public class BridgeDomainNorthbound {
        Node node = Node.fromString(nodeType, nodeId);
        Status status = null;
        try {
-           status = configurationService.addPort(node, bridge, port, null);
+           Map<ConfigConstants, Object> configs = this.buildConfig(portConfigs);
+           status = configurationService.addPort(node, bridge, port, configs);
            if (status.getCode().equals(StatusCode.SUCCESS)) {
                return Response.status(Response.Status.CREATED).build();
            }
@@ -158,7 +167,16 @@ public class BridgeDomainNorthbound {
        throw new ResourceNotFoundException(status.getDescription());
    }
 
-   /**
+   private Map<ConfigConstants, Object> buildConfig(Map<String, Object> rawConfigs) {
+       if (rawConfigs == null) return null;
+       Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
+       for (String key : rawConfigs.keySet()) {
+           ConfigConstants cc = ConfigConstants.valueOf(key.toUpperCase());
+           configs.put(cc, rawConfigs.get(key));
+       }
+       return configs;
+   }
+/**
     * Add a Port,Vlan to a Bridge
     * <pre>
     *
