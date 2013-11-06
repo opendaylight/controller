@@ -108,7 +108,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException
                 | NotCompliantMBeanException | IllegalStateException e) {
             throw new IllegalStateException(
-                    "Error occured during mbean registration ", e);
+                    "Error occured during mbean registration with name " + objectNameInternal, e);
         }
 
         NotificationListener listener = new NotificationListener() {
