@@ -67,6 +67,8 @@ public class EditConfigTest {
         doNothing().when(provider).abortTestTransaction(any(ObjectName.class));
         doReturn(mockOn).when(provider).getOrCreateTransaction();
 
+        doNothing().when(provider).wipeTestTransaction(any(ObjectName.class));
+
         doReturn(configTransactionClient).when(configRegistry).getConfigTransactionClient(any(ObjectName.class));
         doReturn("mockConfigTransactionClient").when(configTransactionClient).toString();
 
