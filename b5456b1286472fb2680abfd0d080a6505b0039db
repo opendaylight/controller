@@ -16,6 +16,24 @@
       "revId": "b5456b1286472fb2680abfd0d080a6505b0039db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3c2796b8",
+        "filename": "opendaylight/md-sal/sal-connector-api/src/main/java/org/opendaylight/controller/sal/connector/api/BindingAwareRpcRouter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-11-06T15:32:31Z",
+      "side": 1,
+      "message": "No specific reason, seems that Eclipse expanded it.",
+      "parentUuid": "da6255ed_884e3dc0",
+      "revId": "b5456b1286472fb2680abfd0d080a6505b0039db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
