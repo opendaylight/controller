@@ -23,11 +23,22 @@
         <module>netconf-impl</module>
         <module>config-netconf-connector</module>
         <module>netconf-util</module>
-        <module>netconf-it</module>
         <module>config-persister-impl</module>
         <module>netconf-mapping-api</module>
         <module>netconf-client</module>
     </modules>
+
+    <profiles>
+        <profile>
+           <id>integrationtests</id>
+           <activation>
+               <activeByDefault>false</activeByDefault>
+           </activation>
+            <modules>
+              <module>netconf-it</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <properties>
         <osgi.version>5.0.0</osgi.version>

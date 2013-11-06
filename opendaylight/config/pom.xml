@@ -25,12 +25,24 @@
         <module>config-persister-file-adapter</module>
         <module>yang-jmx-generator</module>
         <module>yang-jmx-generator-plugin</module>
-        <module>yang-jmx-generator-it</module>
         <module>yang-store-api</module>
         <module>yang-store-impl</module>
         <module>yang-test</module>
         <module>logback-config</module>
     </modules>
+
+    <profiles>
+      <profile>
+        <id>integrationtests</id>
+        <activation>
+          <activeByDefault>false</activeByDefault>
+        </activation>
+        <modules>
+          <module>yang-jmx-generator-it</module>
+        </modules>
+      </profile>
+    </profiles>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version.source>1.7</java.version.source>

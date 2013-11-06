@@ -21,12 +21,20 @@ HOW TO BUILD
 ============
 In order to build it's required to have JDK 1.7+ and Maven 3+, to get
 a build going it's needed to:
-1) Choose the distribution, from within opendaylight/distribution
-2) Go in the directory and run
+1) From the root directory run
    "mvn clean install"
-3) On succesfull completion go in the target directory to pick the zip
-file of the distribution or controller can be executed right from
-there going into the distribution directory.
+2) On succesfull completion go in the directory:
+"opendaylight/distribution/opendaylight/target"
+
+to pick the zip file of the distribution or controller can be executed
+right from there going into the distribution directory.
+
+Please note that this way no integration tests but only UT will be
+executed, if you are planning on committing code be aware that the
+code will be tested also for Integrations tests hence make sure before
+submitting a patch to build using the command:
+   "mvn clean install -Pintegrationtests"
+to get IT executed.
 
 HOW TO RELEASE ARTIFACTS
 ========================
