@@ -186,7 +186,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     def <T extends RpcService> registerRpcImplementation(Class<T> type, T service, OsgiProviderContext context,
         Hashtable<String, String> properties) {
         val proxy = getManagedDirectProxy(type)
-        checkState(proxy.delegate === null, "The Service for type {} is already registered", type)
+        checkState(proxy.delegate === null, "The Service for type %s is already registered", type)
 
         val osgiReg = context.bundleContext.registerService(type, service, properties);
         proxy.delegate = service;
