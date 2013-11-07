@@ -22,6 +22,7 @@ public class DataTransactionImpl extends AbstractDataModification<InstanceIdenti
     final DataBrokerImpl broker;
 
     public DataTransactionImpl(DataBrokerImpl dataBroker) {
+        super(dataBroker);
         identifier = new Object();
         broker = dataBroker;
         status = TransactionStatus.NEW;

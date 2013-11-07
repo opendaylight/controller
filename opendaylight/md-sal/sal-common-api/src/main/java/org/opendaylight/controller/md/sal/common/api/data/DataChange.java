@@ -49,6 +49,8 @@ public interface DataChange<P/* extends Path<P> */, D> {
      */
     Map<P, D> getUpdatedConfigurationData();
 
+
+
     /**
      * Returns a set of paths of removed objects.
      * 
@@ -82,33 +84,4 @@ public interface DataChange<P/* extends Path<P> */, D> {
      * @return map of paths and original state of updated and removed objectd.
      */
     Map<P, D> getOriginalOperationalData();
-
-    /**
-     * Returns a original subtree of data, which starts at the path
-     * where listener was registered.
-     * 
-     */
-    D getOriginalConfigurationSubtree();
-
-    /**
-     * Returns a original subtree of data, which starts at the path
-     * where listener was registered.
-     * 
-     */
-    D getOriginalOperationalSubtree();
-
-    /**
-     * Returns a new subtree of data, which starts at the path
-     * where listener was registered.
-     * 
-     */
-    D getUpdatedConfigurationSubtree();
-
-    /**
-     * Returns a new subtree of data, which starts at the path
-     * where listener was registered.
-     * 
-     */
-    D getUpdatedOperationalSubtree();
-
 }
