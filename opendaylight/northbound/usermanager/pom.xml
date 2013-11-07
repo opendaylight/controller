@@ -41,6 +41,7 @@
               com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.usermanager,
+              com.google.gson,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind,
@@ -80,6 +81,10 @@
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
       <version>${enunciate.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
