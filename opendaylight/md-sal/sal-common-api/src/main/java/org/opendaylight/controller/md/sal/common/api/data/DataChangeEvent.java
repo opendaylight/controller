@@ -11,4 +11,17 @@ import org.opendaylight.yangtools.concepts.Immutable;
 
 public interface DataChangeEvent<P,D> extends DataChange<P, D>, Immutable {
 
+    /**
+     * Returns a new subtree of data, which starts at the path
+     * where listener was registered.
+     * 
+     */
+    D getUpdatedConfigurationSubtree();
+
+    /**
+     * Returns a new subtree of data, which starts at the path
+     * where listener was registered.
+     * 
+     */
+    D getUpdatedOperationalSubtree();
 }

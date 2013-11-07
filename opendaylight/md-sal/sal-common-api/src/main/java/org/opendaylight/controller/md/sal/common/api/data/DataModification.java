@@ -16,7 +16,7 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 // import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-public interface DataModification<P/* extends Path<P> */, D> extends DataReader<P, D> {
+public interface DataModification<P/* extends Path<P> */, D> extends DataChange<P, D>, DataReader<P, D> {
 
     /**
      * Returns transaction identifier
@@ -27,21 +27,29 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataReader<
 
     TransactionStatus getStatus();
 
+    /**
+     * 
+     * Use {@link #putOperationalData(Object, Object)} instead.
+     * 
+     * @param path
+     * @param data
+     */
     void putRuntimeData(P path, D data);
+
+    void putOperationalData(P path, D data);
 
     void putConfigurationData(P path, D data);
 
+    /**
+     * Use {@link #removeOperationalData(Object)}
+     * 
+     * @param path
+     */
     void removeRuntimeData(P path);
 
+    void removeOperationalData(P path);
+
     void removeConfigurationData(P path);
-
-    public Map<P, D> getUpdatedConfigurationData();
-
-    public Map<P, D> getUpdatedOperationalData();
-
-    public Set<P> getRemovedConfigurationData();
-
-    public Set<P> getRemovedOperationalData();
 
     /**
      * Initiates a two-phase commit of modification.
