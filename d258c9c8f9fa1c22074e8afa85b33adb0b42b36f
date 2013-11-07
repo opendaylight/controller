@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_4ba71a50",
+        "filename": "opendaylight/md-sal/model/model-host/src/main/yang/host-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-11-07T20:59:01Z",
+      "side": 1,
+      "message": "Minor nit, but using both tabs and spaces is probably a bad idea.",
+      "revId": "d258c9c8f9fa1c22074e8afa85b33adb0b42b36f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2b64e620",
+        "filename": "opendaylight/md-sal/model/model-host/src/main/yang/host-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-11-07T20:59:01Z",
+      "side": 1,
+      "message": "More spaces rather than tabs here.",
+      "revId": "d258c9c8f9fa1c22074e8afa85b33adb0b42b36f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_0b6922f9",
+        "filename": "opendaylight/md-sal/model/model-host/src/main/yang/host-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-11-07T20:59:01Z",
+      "side": 1,
+      "message": "This provides ways to have other implementations for DL addr and NW addr, shoudl we have a more general type for VLAN ID too?",
+      "revId": "d258c9c8f9fa1c22074e8afa85b33adb0b42b36f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_eb6dae05",
+        "filename": "opendaylight/md-sal/model/model-host/src/main/yang/host-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-11-07T20:59:01Z",
+      "side": 1,
+      "message": "More spaces again.",
+      "revId": "d258c9c8f9fa1c22074e8afa85b33adb0b42b36f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
