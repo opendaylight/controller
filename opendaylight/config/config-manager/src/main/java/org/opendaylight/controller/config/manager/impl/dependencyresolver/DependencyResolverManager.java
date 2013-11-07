@@ -7,15 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.InstanceAlreadyExistsException;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -25,6 +16,14 @@ import org.opendaylight.controller.config.manager.impl.ModuleInternalTransaction
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.InstanceAlreadyExistsException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Holds information about modules being created and destroyed within this
@@ -80,7 +79,7 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
         List<ModuleIdentifier> result = new ArrayList<>(
                 moduleIdentifiersToDependencyResolverMap.size());
         for (DependencyResolverImpl dri : getAllSorted()) {
-            ModuleIdentifier driName = dri.getName();
+            ModuleIdentifier driName = dri.getIdentifier();
             result.add(driName);
         }
         return result;

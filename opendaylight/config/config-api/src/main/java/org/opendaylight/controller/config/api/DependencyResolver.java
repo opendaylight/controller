@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.api;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
 /**
  * Each new {@link org.opendaylight.controller.config.spi.Module} can receive
@@ -18,7 +19,7 @@ import org.opendaylight.controller.config.api.annotations.AbstractServiceInterfa
  *
  * @see org.opendaylight.controller.config.spi.Module
  */
-public interface DependencyResolver {
+public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
 
     /**
      * To be used during validation phase to validate serice interface of
