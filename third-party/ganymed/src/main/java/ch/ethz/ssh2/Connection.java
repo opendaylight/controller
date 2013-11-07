@@ -7,6 +7,7 @@ package ch.ethz.ssh2;
 
 import java.io.CharArrayWriter;
 import java.io.File;
+import java.net.Socket;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
