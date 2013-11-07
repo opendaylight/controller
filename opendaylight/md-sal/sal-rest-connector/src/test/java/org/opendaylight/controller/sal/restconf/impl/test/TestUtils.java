@@ -45,7 +45,9 @@ final class TestUtils {
         }
         for (int i = 0; i < fileList.length; i++) {
             String fileName = fileList[i];
-            testFiles.add(new File(testDir, fileName));
+            if (new File(testDir, fileName).isDirectory() == false) {
+                testFiles.add(new File(testDir, fileName));
+            }
         }
         return parser.parseYangModels(testFiles);
     }
