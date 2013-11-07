@@ -6,14 +6,14 @@ module sal-group {
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import ietf-inet-types {prefix inet;revision-date 2010-09-24;}
     import opendaylight-group-types {prefix group-type;revision-date 2013-10-18;}
+    import flow-capable-transaction {prefix tr;}
 
     revision "2013-09-18" {
         description "Initial revision of group service";
     }        
     
     grouping node-group {
-        uses "inv:node-context-ref";
-        
+        uses "inv:node-context-ref";        
         uses group-type:group;
     }
 
@@ -32,18 +32,30 @@ module sal-group {
     rpc add-group {
         input {
             uses node-group;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 
     rpc remove-group {
         input {
             uses group-update;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 
     rpc update-group {
         input {
             uses group-update;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     } 
 

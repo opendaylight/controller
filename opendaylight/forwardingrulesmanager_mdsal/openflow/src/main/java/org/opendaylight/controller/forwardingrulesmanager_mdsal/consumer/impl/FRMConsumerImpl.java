@@ -10,16 +10,23 @@
 package org.opendaylight.controller.forwardingrulesmanager_mdsal.consumer.impl;
 
 
+import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.core.IContainer;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class FRMConsumerImpl extends AbstractBindingAwareProvider {
+public class FRMConsumerImpl extends AbstractBindingAwareProvider implements CommandProvider{
 	protected static final Logger logger = LoggerFactory.getLogger(FRMConsumerImpl.class);
 	private static ProviderContext p_session;
     private static DataBrokerService dataBrokerService; 	 
@@ -28,10 +35,20 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider {
 	private GroupConsumerImpl groupImplRef;
 	private static DataProviderService dataProviderService;  
 
+	private static IClusterContainerServices clusterContainerService = null;
+	private static ISwitchManager switchManager;
+	private static IContainer container;
+	
 	@Override
     public void onSessionInitiated(ProviderContext session) {
     	
         FRMConsumerImpl.p_session = session;
+        
+        if (!getDependentModule()) {
+            logger.error("Unable to fetch handlers for dependent modules");
+            System.out.println("Unable to fetch handlers for dependent modules");
+            return;
+        }
         
         if (null != session) {
           	notificationService = session.getSALService(NotificationService.class);
@@ -44,7 +61,8 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider {
         			
         			if (null != dataProviderService) {
         				flowImplRef = new FlowConsumerImpl();
-        				groupImplRef = new GroupConsumerImpl();
+        		//		groupImplRef = new GroupConsumerImpl();
+        				registerWithOSGIConsole();
         			}
         			else {
         				logger.error("Data Provider Service is down or NULL. " +
@@ -69,17 +87,84 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider {
         }
   
     }
+	
+	public static IClusterContainerServices getClusterContainerService() {
+        return clusterContainerService;
+    }
 
-	public static DataProviderService getDataProviderService() {
+    public static void setClusterContainerService(
+            IClusterContainerServices clusterContainerService) {
+        FRMConsumerImpl.clusterContainerService = clusterContainerService;
+    }
+
+    public static ISwitchManager getSwitchManager() {
+        return switchManager;
+    }
+
+    public static void setSwitchManager(ISwitchManager switchManager) {
+        FRMConsumerImpl.switchManager = switchManager;
+    }
+
+    public static IContainer getContainer() {
+        return container;
+    }
+
+    public static void setContainer(IContainer container) {
+        FRMConsumerImpl.container = container;
+    }
+
+    private void registerWithOSGIConsole() {
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this, null);
+    }
+	
+	private boolean getDependentModule() {
+	    do {
+        clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(IClusterContainerServices.class, this);
+        try {
+            Thread.sleep(4);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	    } while(clusterContainerService == null);
+	    
+	    do {
+	        
+	    
+        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+        try {
+            Thread.sleep(5);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	    } while (container == null);
+	    
+	    do {
+	        switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, container.getName(), this);
+	        try {
+	            Thread.sleep(5);
+	        } catch (InterruptedException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	        }
+	    } while(null == switchManager);
+        return true;
+	}
+
+	
+
+    public static DataProviderService getDataProviderService() {
 		return dataProviderService;
 	}
 
 	public FlowConsumerImpl getFlowImplRef() {
-		return flowImplRef;
+	    return flowImplRef;
 	}
 
 	public GroupConsumerImpl getGroupImplRef() {
-			return groupImplRef;
+	    return groupImplRef;
 	}
 	 
 	public static ProviderContext getProviderSession() {
@@ -93,6 +178,15 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider {
 	public static DataBrokerService getDataBrokerService() {
 		return dataBrokerService;
 	}
+	
+	/*
+     * OSGI COMMANDS
+     */
+    @Override
+    public String getHelp() {
+        StringBuffer help = new StringBuffer();
+        return help.toString();
+    }
 
 }
 	

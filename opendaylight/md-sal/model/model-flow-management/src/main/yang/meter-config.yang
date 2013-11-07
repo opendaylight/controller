@@ -11,11 +11,9 @@ module meter-management {
     }
 
     grouping meter-entry {
-    
         leaf node {
             type inv:node-ref;
         }
-        
         uses meter:meter;
     }   
      

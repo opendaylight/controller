@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.Flows;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
@@ -27,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Flow
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -61,6 +63,7 @@ public class FlowConsumerImpl {
 		}
 		
 		listener = new FlowDataListener();
+		
 		if (null == FRMConsumerImpl.getDataBrokerService().registerDataChangeListener(path, listener)) {
 			logger.error("Failed to listen on flow data modifcation events");
         	System.out.println("Consumer SAL Service is down or NULL.");
@@ -75,7 +78,7 @@ public class FlowConsumerImpl {
         	System.out.println("Consumer SAL Service is down or NULL.");
         	return;
 		}
-		addFlowTest();
+		//addFlowTest();
 		System.out.println("-------------------------------------------------------------------");
 		allocateCaches();
 		commitHandler = new FlowDataCommitHandler();
@@ -120,11 +123,19 @@ public class FlowConsumerImpl {
     private void addFlow(InstanceIdentifier<?> path, Flow dataObject) {
 
         AddFlowInputBuilder input = new AddFlowInputBuilder();
+        List<Instruction> inst = (dataObject).getInstructions().getInstruction();
         input.setNode((dataObject).getNode());
         input.setPriority((dataObject).getPriority());
         input.setMatch((dataObject).getMatch());
         input.setCookie((dataObject).getCookie());
-        input.setAction((dataObject).getAction());
+        input.setInstructions((dataObject).getInstructions());
+        dataObject.getMatch().getLayer3Match()
+        for (int i=0;i<inst.size();i++) {
+            System.out.println("i = "+ i + inst.get(i).getInstruction().toString());
+            System.out.println("i = "+ i + inst.get(i).toString());
+        }
+        
+        System.out.println("Instruction list" + (dataObject).getInstructions().getInstruction().toString());
 
         // We send flow to the sounthbound plugin
         flowService.addFlow(input.build());
@@ -132,9 +143,11 @@ public class FlowConsumerImpl {
     
     private void commitToPlugin(internalTransaction transaction) {
         for(Entry<InstanceIdentifier<?>, Flow> entry :transaction.additions.entrySet()) {
+            System.out.println("Coming add cc in FlowDatacommitHandler");
             addFlow(entry.getKey(),entry.getValue());
         }
-        for(@SuppressWarnings("unused") Entry<InstanceIdentifier<?>, Flow> entry :transaction.additions.entrySet()) {
+        for(@SuppressWarnings("unused") Entry<InstanceIdentifier<?>, Flow> entry :transaction.updates.entrySet()) {
+            System.out.println("Coming update cc in FlowDatacommitHandler");
            // updateFlow(entry.getKey(),entry.getValue());
         }
         
@@ -196,9 +209,11 @@ public class FlowConsumerImpl {
             Flow original = originalSwView.get(key);
             if (original != null) {
                 // It is update for us
+                System.out.println("Coming update  in FlowDatacommitHandler");
                 updates.put(key, flow);
             } else {
                 // It is addition for us
+                System.out.println("Coming add in FlowDatacommitHandler");
                 additions.put(key, flow);
             }
         }
@@ -273,7 +288,7 @@ public class FlowConsumerImpl {
 			for (DataObject dataObject : additions) {
 			    if (dataObject instanceof NodeFlow) {
 			    	NodeRef nodeOne = createNodeRef("foo:node:1");
-					// validating the dataObject here
+					// validating the dataObject here			    	
 				    AddFlowInputBuilder input = new AddFlowInputBuilder();
 				    input.setNode(((NodeFlow) dataObject).getNode());
 				    input.setNode(nodeOne);
@@ -300,18 +315,6 @@ public class FlowConsumerImpl {
         return new NodeRef(path);
     }
 	    
-	  /*  private void loadFlowData() {
 	
-		    DataModification modification = (DataModification) dataservice.beginTransaction();
-		    String id = "abc";
-		    FlowKey key = new FlowKey(id, new NodeRef());
-		    InstanceIdentifier<?> path1;
-		    FlowBuilder flow = new FlowBuilder();
-		    flow.setKey(key);
-		    path1 = InstanceIdentifier.builder().node(Flows.class).node(Flow.class, key).toInstance();
-		    DataObject cls = (DataObject) modification.readConfigurationData(path);
-		    modification.putConfigurationData(path, flow.build());
-		    modification.commit();
-		}*/
 
 }

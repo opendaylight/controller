@@ -5,6 +5,7 @@ module sal-meter {
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-meter-types {prefix meter-type;revision-date "2013-09-18";}
+    import flow-capable-transaction {prefix tr;}
 
     revision "2013-09-18" {
         description "Initial revision of meter service";
@@ -31,18 +32,30 @@ module sal-meter {
     rpc add-meter {
         input {
             uses node-meter;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 
     rpc remove-meter {
         input {
             uses node-meter;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 
     rpc update-meter {
         input {
             uses meter-update;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
         
