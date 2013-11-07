@@ -25,6 +25,11 @@
             <artifactId>sal-common-util</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+                <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-common-impl</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-impl</artifactId>
@@ -60,7 +65,7 @@
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                         <Bundle-Activator>org.opendaylight.controller.sal.dom.broker.BrokerActivator</Bundle-Activator>
                         <Private-Package>
-                            org.opendaylight.controller.sal.dom.broker,
+                            org.opendaylight.controller.sal.dom.broker.*
                         </Private-Package>
                     </instructions>
                 </configuration>

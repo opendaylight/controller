@@ -84,7 +84,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  */
 public interface DataCommitHandler<P/* extends Path<P> */,D> {
 
-
+    
     DataCommitTransaction<P, D> requestCommit(DataModification<P,D> modification);
 
     public interface DataCommitTransaction<P/* extends Path<P> */,D> {
