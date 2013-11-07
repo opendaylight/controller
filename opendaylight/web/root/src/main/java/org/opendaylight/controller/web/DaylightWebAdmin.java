@@ -161,16 +161,16 @@ public class DaylightWebAdmin {
      */
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     @ResponseBody
-    public String saveLocalUserConfig(@RequestParam(required = true) String json,
+    public Status saveLocalUserConfig(@RequestParam(required = true) String json,
             @RequestParam(required = true) String action, HttpServletRequest request) {
 
         IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
-            return "Internal Error";
+            return new Status(StatusCode.NOSERVICE, "User Manager unavailable");
         }
 
         if (!authorize(userManager, UserLevel.NETWORKADMIN, request)) {
-            return "Operation not permitted";
+            return new Status(StatusCode.UNAUTHORIZED, "Operation not permitted");
         }
 
         Gson gson = new Gson();
@@ -191,35 +191,80 @@ public class DaylightWebAdmin {
             } else {
                 DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), userAction, config.getUser());
             }
-            return "Success";
         }
-        return result.getDescription();
+        return result;
     }
+
+    @RequestMapping(value = "/user/modify", method = RequestMethod.POST)
+    @ResponseBody
+    public Status modifyUser(@RequestParam(required = true) String json,
+            @RequestParam(required = true) String action, HttpServletRequest request) {
+
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
+        if (userManager == null) {
+            return new Status(StatusCode.NOSERVICE, "User Manager unavailable");
+        }
+
+        if (!authorize(userManager, UserLevel.NETWORKADMIN, request)) {
+            return new Status(StatusCode.UNAUTHORIZED, "Operation not permitted");
+        }
+
+        UserConfig newConfig = gson.fromJson(json, UserConfig.class);
+        List<UserConfig> currentUserConfig = userManager.getLocalUserList();
+        String password = null;
+        String user = newConfig.getUser();
+        for (UserConfig userConfig : currentUserConfig) {
+            if(userConfig.getUser().equals(user)){
+                password = userConfig.getPassword();
+                break;
+            }
+        }
+        if (password == null) {
+            String msg = String.format("User %s not found in configuration database", user);
+            return new Status(StatusCode.NOTFOUND, msg);
+        }
+        json = json.replace("\"roles\"", "\"password\":\""+ password + "\",\"roles\"");
+        Gson gson = new Gson();
+        newConfig = gson.fromJson(json, UserConfig.class);
+
+        Status result = userManager.modifyLocalUser(newConfig);
+        if (result.isSuccess()) {
+            String userRoles = "";
+            for (String userRole : newConfig.getRoles()) {
+                userRoles = userRoles + userRole + ",";
+            }
+            DaylightWebUtil.auditlog("Roles of", request.getUserPrincipal().getName(), "updated", newConfig.getUser()
+                    + " to " + userRoles.substring(0, userRoles.length() - 1));
+        }
+        return result;
+    }
+
 
     @RequestMapping(value = "/users/{username}", method = RequestMethod.POST)
     @ResponseBody
-    public String removeLocalUser(@PathVariable("username") String userName, HttpServletRequest request) {
+    public Status removeLocalUser(@PathVariable("username") String userName, HttpServletRequest request) {
 
-        String username = request.getUserPrincipal().getName();
-        if (username.equals(userName)) {
-            return "Invalid Request: User cannot delete itself";
+        String loggedInUser = request.getUserPrincipal().getName();
+        if (loggedInUser.equals(userName)) {
+            String msg = "Invalid Request: User cannot delete itself";
+            return new Status(StatusCode.NOTALLOWED, msg);
         }
 
         IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
-            return "Internal Error";
+            return new Status(StatusCode.NOSERVICE, "User Manager unavailable");
         }
 
         if (!authorize(userManager, UserLevel.NETWORKADMIN, request)) {
-            return "Operation not permitted";
+            return new Status(StatusCode.UNAUTHORIZED, "Operation not permitted");
         }
 
-        Status result = userManager.removeLocalUser(userName);
-        if (result.isSuccess()) {
+        Status status = userManager.removeLocalUser(userName);
+        if (status.isSuccess()) {
             DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "removed", userName);
-            return "Success";
+            return status;
         }
-        return result.getDescription();
+        return status;
     }
 
     @RequestMapping(value = "/users/password/{username}", method = RequestMethod.POST)
@@ -280,7 +325,7 @@ public class DaylightWebAdmin {
         }
 
         if (status.isSuccess()) {
-            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), " changed password for User ",
+            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "changed password for",
                     username);
         }
         return status;
