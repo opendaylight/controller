@@ -551,6 +551,31 @@ public class TransportManager
         receiveThread.start();
     }
 
+    public void clientInit(Socket socket, String softwareversion, CryptoWishList cwl,
+                           ServerHostKeyVerifier verifier, DHGexParameters dhgex, SecureRandom rnd) throws IOException
+    {
+		/* First, establish the TCP connection to the SSH-2 server */
+
+        sock = socket;
+
+		/* Parse the server line and say hello - important: this information is later needed for the
+		 * key exchange (to stop man-in-the-middle attacks) - that is why we wrap it into an object
+		 * for later use.
+		 */
+
+        ClientServerHello csh = ClientServerHello.clientHello(softwareversion, sock.getInputStream(),
+                sock.getOutputStream());
+
+        tc = new TransportConnection(sock.getInputStream(), sock.getOutputStream(), rnd);
+        String hostname = sock.getInetAddress().getHostName();
+        int port = sock.getPort();
+
+        km = new ClientKexManager(this, csh, cwl, hostname, port, verifier, rnd);
+        km.initiateKEX(cwl, dhgex, null, null);
+
+        startReceiver();
+    }
+
     public void clientInit(String hostname, int port, String softwareversion, CryptoWishList cwl,
                            ServerHostKeyVerifier verifier, DHGexParameters dhgex, int connectTimeout, SecureRandom rnd,
                            ProxyData proxyData) throws IOException

@@ -60,6 +60,14 @@ public class Connection
 
     private SecureRandom generator;
 
+    private Socket precreatedSocket;
+
+    public Connection(Socket socket) {
+        this.precreatedSocket = socket;
+        this.hostname = socket.getInetAddress().getHostName();
+        this.port = socket.getPort();
+    }
+
     /**
      * Unless you know what you are doing, you will never need this.
      *
@@ -745,8 +753,14 @@ public class Connection
 
             try
             {
-                tm.clientInit(hostname, port, softwareversion, cryptoWishList, verifier, dhgexpara, connectTimeout,
-                        getOrCreateSecureRND(), proxyData);
+
+                if (precreatedSocket != null) {
+                    tm.clientInit(precreatedSocket, softwareversion, cryptoWishList, verifier, dhgexpara,
+                            getOrCreateSecureRND());
+                } else {
+                    tm.clientInit(hostname, port, softwareversion, cryptoWishList, verifier, dhgexpara, connectTimeout,
+                            getOrCreateSecureRND(), proxyData);
+                }
             }
             catch (SocketTimeoutException se)
             {
