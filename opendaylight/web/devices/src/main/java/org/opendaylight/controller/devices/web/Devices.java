@@ -751,9 +751,11 @@ public class Devices implements IDaylightWeb {
 
         Set<Node> nodes = connectionManager.getLocalNodes();
         List<NodeJsonBean> result = new LinkedList<NodeJsonBean>();
+        if (nodes == null) return result;
         for (Node node : nodes) {
             Description descriptionProperty = (Description) switchManager.getNodeProp(node, "description");
-            String description = descriptionProperty.getValue();
+            String description = node.toString();
+            if (descriptionProperty != null) description = descriptionProperty.getValue();
             NodeJsonBean nodeBean = new NodeJsonBean();
             nodeBean.setNodeId(node.getNodeIDString());
             nodeBean.setNodeType(node.getType());
