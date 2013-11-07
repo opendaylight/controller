@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <parent>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-subsystem</artifactId>
+      <version>0.2.2-SNAPSHOT</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <artifactId>threadpool-config-impl</artifactId>
+   <name>${project.artifactId}</name>
+   <packaging>bundle</packaging>
+   <prerequisites>
+      <maven>3.0.4</maven>
+   </prerequisites>
+
+   <dependencies>
+      <dependency>
+         <groupId>${project.groupId}</groupId>
+         <artifactId>config-api</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>${project.groupId}</groupId>
+         <artifactId>threadpool-config-api</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <configuration>
+               <instructions>
+                  <Private-Package>
+                     org.opendaylight.controller.config.threadpool.util,
+                     javax.annotation.*,
+                     org.opendaylight.controller.config.yang.threadpool.impl,
+                  </Private-Package>
+                  <Import-Package>
+                     org.opendaylight.controller.config.api.*,
+                     org.opendaylight.controller.config.spi.*,
+                     org.opendaylight.controller.config.threadpool,
+                     org.opendaylight.controller.config.yang.threadpool,
+                     javax.management,
+                     org.osgi.framework,
+                     org.slf4j,
+                     com.google.common.*
+                  </Import-Package>
+                  <Export-Package>
+                     org.opendaylight.controller.config.threadpool.util
+                  </Export-Package>
+               </instructions>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+         </plugin>
+
+         <plugin>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-maven-plugin</artifactId>
+         </plugin>
+      </plugins>
+   </build>
+
+</project>
