@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_2b198688",
+        "filename": "opendaylight/md-sal/model/model-host/src/main/yang/host-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-11-07T21:59:03Z",
+      "side": 1,
+      "message": "Ah... you mean like more subdescriminators... perhaps a list of them? (for ordering).  So I could have a vlan, vti, etc?",
+      "parentUuid": "da6255ed_0b6922f9",
+      "revId": "d258c9c8f9fa1c22074e8afa85b33adb0b42b36f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_eb6dae05",
         "filename": "opendaylight/md-sal/model/model-host/src/main/yang/host-inventory.yang",
         "patchSetId": 1
