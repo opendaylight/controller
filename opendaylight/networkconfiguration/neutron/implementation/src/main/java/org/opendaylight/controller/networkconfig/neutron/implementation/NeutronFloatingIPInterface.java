@@ -183,8 +183,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
     }
 
     public NeutronFloatingIP getFloatingIP(String uuid) {
-        if (!floatingIPExists(uuid))
+        if (!floatingIPExists(uuid)) {
             return null;
+        }
         return floatingIPDB.get(uuid);
     }
 
@@ -205,12 +206,14 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
         INeutronSubnetCRUD subnetCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
-        if (floatingIPExists(input.getID()))
+        if (floatingIPExists(input.getID())) {
             return false;
+        }
         //if floating_ip_address isn't there, allocate from the subnet pool
         NeutronSubnet subnet = subnetCRUD.getSubnet(networkCRUD.getNetwork(input.getFloatingNetworkUUID()).getSubnets().get(0));
-        if (input.getFloatingIPAddress() == null)
+        if (input.getFloatingIPAddress() == null) {
             input.setFloatingIPAddress(subnet.getLowAddr());
+        }
         subnet.allocateIP(input.getFloatingIPAddress());
 
         //if port_id is there, bind port to this floating ip
@@ -228,8 +231,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
         INeutronSubnetCRUD subnetCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
-        if (!floatingIPExists(uuid))
+        if (!floatingIPExists(uuid)) {
             return false;
+        }
         NeutronFloatingIP floatIP = getFloatingIP(uuid);
         //if floating_ip_address isn't there, allocate from the subnet pool
         NeutronSubnet subnet = subnetCRUD.getSubnet(networkCRUD.getNetwork(floatIP.getFloatingNetworkUUID()).getSubnets().get(0));
@@ -245,8 +249,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
     public boolean updateFloatingIP(String uuid, NeutronFloatingIP delta) {
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
-        if (!floatingIPExists(uuid))
+        if (!floatingIPExists(uuid)) {
             return false;
+        }
         NeutronFloatingIP target = floatingIPDB.get(uuid);
         if (target.getPortUUID() != null) {
             NeutronPort port = portCRUD.getPort(target.getPortUUID());

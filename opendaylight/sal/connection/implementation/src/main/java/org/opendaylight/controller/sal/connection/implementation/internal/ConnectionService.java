@@ -98,20 +98,26 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
      * @return true if node is local to this controller. false otherwise.
      */
     public boolean isLocal(Node node) {
-        if (this.connectionListener == null) return false;
+        if (this.connectionListener == null) {
+            return false;
+        }
         return connectionListener.isLocal(node);
     }
 
     @Override
     public ConnectionLocality getLocalityStatus(Node node) {
-        if (this.connectionListener == null) return ConnectionLocality.NOT_CONNECTED;
+        if (this.connectionListener == null) {
+            return ConnectionLocality.NOT_CONNECTED;
+        }
         return connectionListener.getLocalityStatus(node);
     }
 
     @Override
     public Node connect (String type, String connectionIdentifier, Map<ConnectionConstants, String> params) {
         IPluginInConnectionService s = pluginService.get(type);
-        if (s != null) return s.connect(connectionIdentifier, params);
+        if (s != null) {
+            return s.connect(connectionIdentifier, params);
+        }
         return null;
     }
 
@@ -121,7 +127,9 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
             for (String pluginType : this.pluginService.keySet()) {
                 IPluginInConnectionService s = pluginService.get(pluginType);
                 Node node = s.connect(connectionIdentifier, params);
-                if (node != null) return node;
+                if (node != null) {
+                    return node;
+                }
             }
         }
         return null;
@@ -130,7 +138,9 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
     @Override
     public Status disconnect(Node node) {
         IPluginInConnectionService s = pluginService.get(node.getType());
-        if (s != null) return s.disconnect(node);
+        if (s != null) {
+            return s.disconnect(node);
+        }
         return new Status(StatusCode.NOTFOUND);
     }
 

@@ -24,7 +24,9 @@ class AnyControllerScheme extends AbstractScheme {
     @Override
     public boolean isConnectionAllowedInternal(Node node) {
         Set <InetAddress> controllers = nodeConnections.get(node);
-        if (controllers == null || controllers.size() == 0) return true;
+        if (controllers == null || controllers.size() == 0) {
+            return true;
+        }
         return (controllers.size() == 1 && controllers.contains(clusterServices.getMyAddress()));
     }
 }

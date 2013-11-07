@@ -67,8 +67,9 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
 
     @Nullable
     public ModuleInternalInfo getOldInternalInfo() {
-        if (maybeOldInternalInfo == null)
+        if (maybeOldInternalInfo == null) {
             throw new NullPointerException();
+        }
         return maybeOldInternalInfo;
     }
 

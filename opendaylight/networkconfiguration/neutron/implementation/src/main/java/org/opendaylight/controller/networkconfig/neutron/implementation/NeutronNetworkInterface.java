@@ -175,8 +175,9 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
     }
 
     public NeutronNetwork getNetwork(String uuid) {
-        if (!networkExists(uuid))
+        if (!networkExists(uuid)) {
             return null;
+        }
         return networkDB.get(uuid);
     }
 
@@ -193,34 +194,39 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
     }
 
     public boolean addNetwork(NeutronNetwork input) {
-        if (networkExists(input.getID()))
+        if (networkExists(input.getID())) {
             return false;
+        }
         networkDB.putIfAbsent(input.getID(), input);
       //TODO: add code to find INeutronNetworkAware services and call newtorkCreated on them
         return true;
     }
 
     public boolean removeNetwork(String uuid) {
-        if (!networkExists(uuid))
+        if (!networkExists(uuid)) {
             return false;
+        }
         networkDB.remove(uuid);
       //TODO: add code to find INeutronNetworkAware services and call newtorkDeleted on them
         return true;
     }
 
     public boolean updateNetwork(String uuid, NeutronNetwork delta) {
-        if (!networkExists(uuid))
+        if (!networkExists(uuid)) {
             return false;
+        }
         NeutronNetwork target = networkDB.get(uuid);
         return overwrite(target, delta);
     }
 
     public boolean networkInUse(String netUUID) {
-        if (!networkExists(netUUID))
+        if (!networkExists(netUUID)) {
             return true;
+        }
         NeutronNetwork target = networkDB.get(netUUID);
-        if (target.getPortsOnNetwork().size() > 0)
+        if (target.getPortsOnNetwork().size() > 0) {
             return true;
+        }
         return false;
     }
 }

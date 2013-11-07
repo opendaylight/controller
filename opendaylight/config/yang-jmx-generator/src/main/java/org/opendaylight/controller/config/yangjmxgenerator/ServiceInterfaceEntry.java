@@ -192,25 +192,33 @@ public class ServiceInterfaceEntry extends AbstractEntry {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         ServiceInterfaceEntry that = (ServiceInterfaceEntry) o;
 
-        if (!maybeBaseCache.equals(that.maybeBaseCache))
+        if (!maybeBaseCache.equals(that.maybeBaseCache)) {
             return false;
-        if (!nullableDescription.equals(that.nullableDescription))
+        }
+        if (!nullableDescription.equals(that.nullableDescription)) {
             return false;
-        if (!exportedOsgiClassName.equals(that.exportedOsgiClassName))
+        }
+        if (!exportedOsgiClassName.equals(that.exportedOsgiClassName)) {
             return false;
-        if (!qName.equals(that.qName))
+        }
+        if (!qName.equals(that.qName)) {
             return false;
-        if (!packageName.equals(that.packageName))
+        }
+        if (!packageName.equals(that.packageName)) {
             return false;
-        if (!typeName.equals(that.typeName))
+        }
+        if (!typeName.equals(that.typeName)) {
             return false;
+        }
 
         return true;
     }

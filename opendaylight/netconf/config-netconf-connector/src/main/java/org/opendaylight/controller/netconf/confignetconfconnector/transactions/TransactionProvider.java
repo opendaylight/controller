@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.transactions;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.config.api.ValidationException;
@@ -17,12 +23,6 @@ import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class TransactionProvider implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(TransactionProvider.class);
@@ -54,8 +54,9 @@ public class TransactionProvider implements AutoCloseable {
 
     public Optional<ObjectName> getTransaction() {
 
-        if (transaction == null)
+        if (transaction == null) {
             return Optional.absent();
+        }
 
         // Transaction was already closed somehow
         if (isStillOpenTransaction(transaction) == false) {
@@ -75,8 +76,9 @@ public class TransactionProvider implements AutoCloseable {
     public synchronized ObjectName getOrCreateTransaction() {
         Optional<ObjectName> ta = getTransaction();
 
-        if (ta.isPresent())
+        if (ta.isPresent()) {
             return ta.get();
+        }
         transaction = configRegistryClient.beginConfig();
         allOpenedTransactions.add(transaction);
         return transaction;
@@ -148,10 +150,12 @@ public class TransactionProvider implements AutoCloseable {
             try {
                 transactionClient.destroyModule(instance);
             } catch (InstanceNotFoundException e) {
-                if (isTest)
+                if (isTest) {
                     logger.debug("Unable to clean configuration in transactiom {}", taON, e);
-                else
+                }
+                else {
                     logger.warn("Unable to clean configuration in transactiom {}", taON, e);
+                }
 
                 throw new IllegalStateException("Unable to clean configuration in transactiom " + taON, e);
             }

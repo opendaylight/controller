@@ -73,10 +73,14 @@ import org.slf4j.LoggerFactory;
     }
 
     private boolean matches(Pattern pattern, Set<String> values) {
-        if (pattern == null) return true;
+        if (pattern == null) {
+            return true;
+        }
         //LOGGER.debug("Matching: {} {}", pattern.toString(), values);
         for (String s : values) {
-            if (pattern.matcher(s).find()) return true;
+            if (pattern.matcher(s).find()) {
+                return true;
+            }
         }
         return false;
     }
@@ -130,7 +134,9 @@ import org.slf4j.LoggerFactory;
             Bundle initBundle, Set<String> excludes)
     {
         for (BundleInfo other : bundlesToScan) {
-            if (other.getId() == target.getId()) continue;
+            if (other.getId() == target.getId()) {
+                continue;
+            }
             if (target.isDependantOn(other)) {
                 if (!visited.contains(other)) {
                     classes.addAll(BundleScanner.loadClasses(
@@ -146,7 +152,9 @@ import org.slf4j.LoggerFactory;
 
     private boolean isDependantOn(BundleInfo other) {
         for (String pkg : importPkgs) {
-            if (other.exportPkgs.contains(pkg)) return true;
+            if (other.exportPkgs.contains(pkg)) {
+                return true;
+            }
         }
         return false;
     }
@@ -154,14 +162,18 @@ import org.slf4j.LoggerFactory;
     public List<BundleInfo> getDependencies(Collection<BundleInfo> bundles) {
         List<BundleInfo> result = new ArrayList<BundleInfo>();
         for(BundleInfo bundle : bundles) {
-            if (isDependantOn(bundle)) result.add(bundle);
+            if (isDependantOn(bundle)) {
+                result.add(bundle);
+            }
         }
         return result;
     }
 
 
     private static Set<String> parsePackages(String packageString) {
-        if (packageString == null) return Collections.emptySet();
+        if (packageString == null) {
+            return Collections.emptySet();
+        }
         String[] packages = packageString.split(",");
         Set<String> result = new HashSet<String>();
         for (int i=0; i<packages.length; i++) {

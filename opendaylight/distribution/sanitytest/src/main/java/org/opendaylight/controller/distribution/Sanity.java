@@ -12,7 +12,9 @@ public class Sanity {
     static void copy(InputStream in, OutputStream out) throws IOException {
       while (true) {
         int c = in.read();
-        if (c == -1) break;
+        if (c == -1) {
+            break;
+        }
         out.write((char)c);
       }
     }

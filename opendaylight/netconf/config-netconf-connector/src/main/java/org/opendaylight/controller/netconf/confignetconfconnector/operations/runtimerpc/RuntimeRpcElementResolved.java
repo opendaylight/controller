@@ -8,18 +8,18 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.management.ObjectName;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-
-import javax.management.ObjectName;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Represents parsed xpath to runtime bean instance
@@ -88,8 +88,9 @@ public final class RuntimeRpcElementResolved {
         HashMap<String, String> additionalAttributes = Maps.<String, String> newHashMap();
         String runtimeBeanYangName = moduleName;
         for (String additionalKeyValue : additionalString.split("/")) {
-            if (Strings.isNullOrEmpty(additionalKeyValue))
+            if (Strings.isNullOrEmpty(additionalKeyValue)) {
                 continue;
+            }
             matcher = additionalPattern.matcher(additionalKeyValue);
             Preconditions
                     .checkState(

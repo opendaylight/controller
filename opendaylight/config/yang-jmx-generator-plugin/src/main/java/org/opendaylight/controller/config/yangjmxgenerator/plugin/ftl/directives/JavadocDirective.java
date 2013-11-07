@@ -34,15 +34,17 @@ public class JavadocDirective implements TemplateDirectiveModel {
         String javadoc = "";
 
         if (object != null) {
-            if (object instanceof SimpleScalar)
+            if (object instanceof SimpleScalar) {
                 javadoc = ((SimpleScalar) object).getAsString();
+            }
             else if (object instanceof FtlTemplate) {
                 javadoc = ((FtlTemplate) object).getJavadoc();
-            } else
+            } else {
                 throw new IllegalArgumentException(
                         "Object must be a String or instance of "
                                 + FtlTemplate.class + "but was "
                                 + object.getClass());
+            }
         }
 
         Writer out = env.getOut();

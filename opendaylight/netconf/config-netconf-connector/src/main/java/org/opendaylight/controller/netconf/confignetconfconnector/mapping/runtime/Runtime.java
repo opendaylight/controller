@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
+import java.util.Map;
+import java.util.Set;
+import javax.management.ObjectName;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -16,10 +20,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.Map;
-import java.util.Set;
 
 public class Runtime {
 
@@ -63,8 +63,9 @@ public class Runtime {
             for (String moduleName : moduleRuntimes.get(localNamespace).keySet()) {
                 Multimap<String, ObjectName> instanceToRbe = moduleToInstances.get(moduleName);
 
-                if (instanceToRbe == null)
+                if (instanceToRbe == null) {
                     continue;
+                }
 
                 ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
                 Element innerXml = moduleRuntime.toXml(localNamespace, instanceToRbe, document);

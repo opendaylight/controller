@@ -30,8 +30,9 @@ public class ArrayAttributeMappingStrategy extends AbstractAttributeMappingStrat
 
     @Override
     public Optional<List<Object>> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null) {
             return Optional.absent();
+        }
 
         Preconditions.checkArgument(value.getClass().isArray(), "Value has to be instanceof Array ");
 
@@ -50,8 +51,9 @@ public class ArrayAttributeMappingStrategy extends AbstractAttributeMappingStrat
 
             Optional<?> mapAttribute = innerElementStrategy.mapAttribute(innerValue);
 
-            if (mapAttribute.isPresent())
+            if (mapAttribute.isPresent()) {
                 retVal.add(mapAttribute.get());
+            }
         }
 
         return Optional.of(retVal);

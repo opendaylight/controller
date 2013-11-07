@@ -90,10 +90,12 @@ public class AttachmentPoint {
     }
 
     public void setLastSeen(long lastSeen) {
-        if (this.lastSeen + INACTIVITY_INTERVAL < lastSeen)
+        if (this.lastSeen + INACTIVITY_INTERVAL < lastSeen) {
             this.activeSince = lastSeen;
-        if (this.lastSeen < lastSeen)
+        }
+        if (this.lastSeen < lastSeen) {
             this.lastSeen = lastSeen;
+        }
     }
 
     @Override
@@ -106,18 +108,23 @@ public class AttachmentPoint {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AttachmentPoint other = (AttachmentPoint) obj;
         if (port == null) {
-            if (other.port != null)
+            if (other.port != null) {
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!port.equals(other.port)) {
             return false;
+        }
         return true;
     }
 

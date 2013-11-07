@@ -19,14 +19,16 @@ public abstract class AbstractMockedModule implements Module {
     protected abstract AutoCloseable prepareMockedInstance() throws Exception;
 
     public AbstractMockedModule(DynamicMBeanWithInstance old, ModuleIdentifier id) {
-        if(old!=null)
+        if(old!=null) {
             instance = old.getInstance();
-        else
+        }
+        else {
             try {
                 instance = prepareMockedInstance();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
 
         this.id = id==null ? new ModuleIdentifier(getClass().getCanonicalName(), "mock") : id;
     }

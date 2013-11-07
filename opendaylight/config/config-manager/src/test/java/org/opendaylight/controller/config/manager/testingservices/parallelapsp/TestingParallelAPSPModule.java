@@ -78,8 +78,9 @@ public class TestingParallelAPSPModule implements Module,
 
     @Override
     public Integer getMaxNumberOfThreads() {
-        if (instance == null)
+        if (instance == null) {
             return null;
+        }
         return instance.getMaxNumberOfThreads();
     }
 

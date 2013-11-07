@@ -14,12 +14,14 @@ public class ModuleIdentifier implements Identifier {
     private final String factoryName, instanceName;
 
     public ModuleIdentifier(String factoryName, String instanceName) {
-        if (factoryName == null)
+        if (factoryName == null) {
             throw new IllegalArgumentException(
                     "Parameter 'factoryName' is null");
-        if (instanceName == null)
+        }
+        if (instanceName == null) {
             throw new IllegalArgumentException(
                     "Parameter 'instanceName' is null");
+        }
         this.factoryName = factoryName;
         this.instanceName = instanceName;
     }
@@ -34,17 +36,21 @@ public class ModuleIdentifier implements Identifier {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o)  {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         ModuleIdentifier that = (ModuleIdentifier) o;
 
-        if (!factoryName.equals(that.factoryName))
+        if (!factoryName.equals(that.factoryName)) {
             return false;
-        if (!instanceName.equals(that.instanceName))
+        }
+        if (!instanceName.equals(that.instanceName)) {
             return false;
+        }
 
         return true;
     }

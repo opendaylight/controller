@@ -264,8 +264,9 @@ public class V6StatsReply extends OFVendorStatistics {
     public void readFrom(ByteBuffer data) {
         short i;
         this.length = data.getShort();
-        if (length < MINIMUM_LENGTH)
+        if (length < MINIMUM_LENGTH) {
             return; //TBD - Spurious Packet?
+        }
         this.tableId = data.get();
         data.get(); // pad
         this.durationSeconds = data.getInt();
@@ -282,16 +283,18 @@ public class V6StatsReply extends OFVendorStatistics {
         if (this.length == MINIMUM_LENGTH) {
             return; //TBD - can this happen??
         }
-        if (this.match == null)
+        if (this.match == null) {
             this.match = new V6Match();
+        }
         ByteBuffer mbuf = ByteBuffer.allocate(match_len);
         for (i = 0; i < match_len; i++) {
             mbuf.put(data.get());
         }
         mbuf.rewind();
         this.match.readFrom(mbuf);
-        if (this.actionFactory == null)
+        if (this.actionFactory == null) {
             throw new RuntimeException("OFActionFactory not set");
+        }
         /*
          * action list may be preceded by a padding of 0 to 7 bytes based upon this:
          */
@@ -300,8 +303,9 @@ public class V6StatsReply extends OFVendorStatistics {
             data.get();
         }
         int action_len = this.length - MINIMUM_LENGTH - (match_len + pad_size);
-        if (action_len > 0)
+        if (action_len > 0) {
             this.actions = this.actionFactory.parseActions(data, action_len);
+        }
     }
 
     @Override
@@ -340,49 +344,69 @@ public class V6StatsReply extends OFVendorStatistics {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         V6StatsReply other = (V6StatsReply) obj;
         if (actions == null) {
-            if (other.actions != null)
+            if (other.actions != null) {
                 return false;
-        } else if (!actions.equals(other.actions))
+            }
+        } else if (!actions.equals(other.actions)) {
             return false;
-        if (byteCount != other.byteCount)
+        }
+        if (byteCount != other.byteCount) {
             return false;
-        if (cookie != other.cookie)
+        }
+        if (cookie != other.cookie) {
             return false;
-        if (durationNanoseconds != other.durationNanoseconds)
+        }
+        if (durationNanoseconds != other.durationNanoseconds) {
             return false;
-        if (durationSeconds != other.durationSeconds)
+        }
+        if (durationSeconds != other.durationSeconds) {
             return false;
-        if (hardAge != other.hardAge)
+        }
+        if (hardAge != other.hardAge) {
             return false;
-        if (hardTimeout != other.hardTimeout)
+        }
+        if (hardTimeout != other.hardTimeout) {
             return false;
-        if (idleAge != other.idleAge)
+        }
+        if (idleAge != other.idleAge) {
             return false;
-        if (idleTimeout != other.idleTimeout)
+        }
+        if (idleTimeout != other.idleTimeout) {
             return false;
-        if (length != other.length)
+        }
+        if (length != other.length) {
             return false;
+        }
         if (match == null) {
-            if (other.match != null)
+            if (other.match != null) {
                 return false;
-        } else if (!match.equals(other.match))
+            }
+        } else if (!match.equals(other.match)) {
             return false;
-        if (match_len != other.match_len)
+        }
+        if (match_len != other.match_len) {
             return false;
-        if (packetCount != other.packetCount)
+        }
+        if (packetCount != other.packetCount)  {
             return false;
-        if (priority != other.priority)
+        }
+        if (priority != other.priority) {
             return false;
-        if (tableId != other.tableId)
+        }
+        if (tableId != other.tableId) {
             return false;
+        }
         return true;
     }
 

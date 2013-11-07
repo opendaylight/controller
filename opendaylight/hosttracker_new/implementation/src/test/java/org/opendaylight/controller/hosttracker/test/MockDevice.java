@@ -72,8 +72,9 @@ public class MockDevice extends Device {
     public Integer[] getIPv4Addresses() {
         TreeSet<Integer> vals = new TreeSet<Integer>();
         for (Entity e : entities) {
-            if (e.getIpv4Address() == null)
+            if (e.getIpv4Address() == null){
                 continue;
+            }
             vals.add(e.getIpv4Address());
         }
 

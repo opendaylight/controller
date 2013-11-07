@@ -27,8 +27,9 @@ public abstract class AbstractAttributeReadingStrategy<A extends AttributeIfc> i
 
     @Override
     public AttributeConfigElement readElement(List<XmlElement> configNodes) {
-        if (configNodes.size() == 0)
+        if (configNodes.size() == 0) {
             return AttributeConfigElement.createNullValue(attributeIfc);
+        }
 
         return readElementHook(configNodes);
     }

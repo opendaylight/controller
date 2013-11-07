@@ -8,16 +8,16 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
+import java.util.Collection;
+import java.util.Set;
+import javax.management.ObjectName;
+
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Set;
 
 public class ModuleRuntime {
 
@@ -35,8 +35,9 @@ public class ModuleRuntime {
 
     private ObjectName findRoot(Collection<ObjectName> runtimeBeanOns) {
         for (ObjectName objectName : runtimeBeanOns) {
-            if (objectName.getKeyPropertyList().size() == 3)
+            if (objectName.getKeyPropertyList().size() == 3) {
                 return objectName;
+            }
         }
         throw new IllegalStateException("Root runtime bean not found among " + runtimeBeanOns);
     }

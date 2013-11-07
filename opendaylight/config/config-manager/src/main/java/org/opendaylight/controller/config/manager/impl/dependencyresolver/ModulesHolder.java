@@ -103,8 +103,9 @@ class ModulesHolder implements TransactionHolder {
             ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo found = commitMap
                 .remove(moduleIdentifier);
-        if (found == null)
+        if (found == null) {
             throw new IllegalStateException("Not found:" + moduleIdentifier);
+        }
         if (found.hasOldModule()) {
             unorderedDestroyedFromPreviousTransactions.add(found);
         }

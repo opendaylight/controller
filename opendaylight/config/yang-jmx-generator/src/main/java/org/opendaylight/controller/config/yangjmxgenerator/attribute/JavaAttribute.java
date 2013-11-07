@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
-
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+
+import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 
 public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
@@ -55,24 +55,30 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
         JavaAttribute that = (JavaAttribute) o;
 
         if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
+        }
         if (nullableDescription != null ? !nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
-        if (type != null ? !type.equals(that.type) : that.type != null)
+        }
+        if (type != null ? !type.equals(that.type) : that.type != null) {
             return false;
+        }
 
         return true;
     }
@@ -121,8 +127,9 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     // TODO verify
     private boolean isPrimitive(String innerTypeFullyQName) {
-        if (innerTypeFullyQName.contains("."))
+        if (innerTypeFullyQName.contains(".")) {
             return false;
+        }
 
         return true;
     }

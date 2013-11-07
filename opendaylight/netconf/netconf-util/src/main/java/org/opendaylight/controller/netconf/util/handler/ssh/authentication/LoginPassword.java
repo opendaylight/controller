@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.netconf.util.handler.ssh.authentication;
 
-import ch.ethz.ssh2.Connection;
-
 import java.io.IOException;
+
+import ch.ethz.ssh2.Connection;
 
 /**
  * Class Providing username/password authentication option to {@link org.opendaylight.controller.netconf.util.handler.ssh.SshHandler}
@@ -28,6 +28,8 @@ public class LoginPassword extends AuthenticationHandler {
     public void authenticate(Connection connection) throws IOException {
         boolean isAuthenticated = connection.authenticateWithPassword(username, password);
 
-        if (isAuthenticated == false) throw new IOException("Authentication failed.");
+        if (isAuthenticated == false) {
+            throw new IOException("Authentication failed.");
+        }
     }
 }

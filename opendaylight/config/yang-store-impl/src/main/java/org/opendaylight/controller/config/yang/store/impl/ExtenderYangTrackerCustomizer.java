@@ -7,6 +7,15 @@
  */
 package org.opendaylight.controller.config.yang.store.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -25,15 +34,6 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Note on consistency:
@@ -74,8 +74,9 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
         // system bundle might have config-api on classpath &&
         // config-api contains yang files =>
         // system bundle might contain yang files from that bundle
-        if (bundle.getBundleId() == 0)
+        if (bundle.getBundleId() == 0) {
             return bundle;
+        }
 
         Enumeration<URL> enumeration = bundle.findEntries("META-INF/yang", "*.yang", false);
         if (enumeration != null && enumeration.hasMoreElements()) {

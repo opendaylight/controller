@@ -38,7 +38,9 @@ public class Activator extends ComponentActivatorAbstractBase {
 
     @Override
     protected void configureGlobalInstance(Component c, Object imp) {
-        if (!imp.equals(BundleScanServiceImpl.class)) return;
+        if (!imp.equals(BundleScanServiceImpl.class)) {
+            return;
+        }
         // export service
         c.setInterface(
                 new String[] { IBundleScanService.class.getName() },

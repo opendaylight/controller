@@ -38,11 +38,13 @@ public class DefaultStopExi extends AbstractNetconfOperation implements DefaultN
     @Override
     protected HandlingPriority canHandle(String operationName,
             String netconfOperationNamespace) {
-        if (operationName.equals(STOP_EXI) == false)
+        if (operationName.equals(STOP_EXI) == false) {
             return HandlingPriority.CANNOT_HANDLE;
+        }
         if (netconfOperationNamespace
-                .equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0) == false)
+                .equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0) == false) {
             return HandlingPriority.CANNOT_HANDLE;
+        }
 
         return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY;
     }

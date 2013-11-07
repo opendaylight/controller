@@ -85,15 +85,19 @@ public class Capabilities extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Capabilities other = (Capabilities) obj;
-        if (capabilitiesValue != other.capabilitiesValue)
+        if (capabilitiesValue != other.capabilitiesValue) {
             return false;
+        }
         return true;
     }
 

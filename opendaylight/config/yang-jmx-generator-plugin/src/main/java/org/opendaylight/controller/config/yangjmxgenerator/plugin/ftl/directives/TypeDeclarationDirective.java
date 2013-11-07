@@ -47,10 +47,12 @@ public class TypeDeclarationDirective implements TemplateDirectiveModel {
 
         Writer out = env.getOut();
         StringBuilder build = new StringBuilder("public ");
-        if (type.isAbstract())
+        if (type.isAbstract()) {
             build.append("abstract ");
-        if (type.isFinal())
+        }
+        if (type.isFinal()) {
             build.append("final ");
+        }
         build.append(type.getType() + " ");
         build.append(type.getName() + " ");
 
@@ -64,8 +66,9 @@ public class TypeDeclarationDirective implements TemplateDirectiveModel {
 
     private void generateExtendOrImplement(StringBuilder build, String prefix,
             Collection<String> elements) {
-        if (elements.isEmpty())
+        if (elements.isEmpty()) {
             return;
+        }
 
         build.append(prefix + " ");
 

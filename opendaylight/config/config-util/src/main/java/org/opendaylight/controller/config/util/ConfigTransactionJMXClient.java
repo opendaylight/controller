@@ -171,9 +171,10 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     @Override
     public void setAttribute(ObjectName on, String attrName, Attribute attribute) {
-        if (ObjectNameUtil.getTransactionName(on) == null)
+        if (ObjectNameUtil.getTransactionName(on) == null) {
             throw new IllegalArgumentException("Not in transaction instance "
                     + on + ", no transaction name present");
+        }
 
         try {
             configMBeanServer.setAttribute(on, attribute);

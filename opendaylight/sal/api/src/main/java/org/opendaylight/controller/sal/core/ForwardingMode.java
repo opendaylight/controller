@@ -58,15 +58,19 @@ public class ForwardingMode extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ForwardingMode other = (ForwardingMode) obj;
-        if (modeValue != other.modeValue)
+        if (modeValue != other.modeValue) {
             return false;
+        }
         return true;
     }
 

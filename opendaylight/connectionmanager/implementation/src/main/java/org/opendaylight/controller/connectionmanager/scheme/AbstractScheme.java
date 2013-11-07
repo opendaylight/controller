@@ -55,7 +55,9 @@ public abstract class AbstractScheme {
         ConcurrentMap <InetAddress, Set<Node>> controllerNodesMap = new ConcurrentHashMap <InetAddress, Set<Node>>();
         for (Node node : nodeConnections.keySet()) {
             Set<InetAddress> controllers = nodeConnections.get(node);
-            if (controllers == null) continue;
+            if (controllers == null) {
+                continue;
+            }
             for (InetAddress controller : controllers) {
                 Set<Node> nodes = controllerNodesMap.get(controller);
                 if (nodes == null) {
@@ -134,7 +136,9 @@ public abstract class AbstractScheme {
     }
 
     public Set<InetAddress> getControllers(Node node) {
-        if (nodeConnections != null) return nodeConnections.get(node);
+        if (nodeConnections != null) {
+            return nodeConnections.get(node);
+        }
         return Collections.emptySet();
     }
 
@@ -143,16 +147,22 @@ public abstract class AbstractScheme {
     }
 
     public boolean isLocal(Node node) {
-        if (nodeConnections == null) return false;
+        if (nodeConnections == null) {
+            return false;
+        }
         InetAddress myController = clusterServices.getMyAddress();
         Set<InetAddress> controllers = nodeConnections.get(node);
         return (controllers != null && controllers.contains(myController));
     }
 
     public ConnectionLocality getLocalityStatus(Node node) {
-        if (nodeConnections == null) return ConnectionLocality.NOT_CONNECTED;
+        if (nodeConnections == null) {
+            return ConnectionLocality.NOT_CONNECTED;
+        }
         Set<InetAddress> controllers = nodeConnections.get(node);
-        if (controllers == null || controllers.size() == 0) return ConnectionLocality.NOT_CONNECTED;
+        if (controllers == null || controllers.size() == 0) {
+            return ConnectionLocality.NOT_CONNECTED;
+        }
         InetAddress myController = clusterServices.getMyAddress();
         return controllers.contains(myController) ? ConnectionLocality.LOCAL:
                                                     ConnectionLocality.NOT_LOCAL;

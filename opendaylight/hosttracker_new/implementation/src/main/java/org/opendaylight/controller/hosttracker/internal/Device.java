@@ -259,14 +259,16 @@ public class Device implements IDevice {
      */
     private Map<Long, AttachmentPoint> getAPMap(List<AttachmentPoint> apList) {
 
-        if (apList == null)
+        if (apList == null) {
             return null;
+        }
         // ITopologyService topology = deviceManager.topology;
 
         // Get the old attachment points and sort them.
         List<AttachmentPoint> oldAP = new ArrayList<AttachmentPoint>();
-        if (apList != null)
+        if (apList != null) {
             oldAP.addAll(apList);
+        }
 
         // Remove invalid attachment points before sorting.
         List<AttachmentPoint> tempAP = new ArrayList<AttachmentPoint>();
@@ -285,8 +287,9 @@ public class Device implements IDevice {
         for (int i = 0; i < oldAP.size(); ++i) {
             AttachmentPoint ap = oldAP.get(i);
             // if this is not a valid attachment point, continue
-            if (!deviceManager.isValidAttachmentPoint(ap.getPort()))
+            if (!deviceManager.isValidAttachmentPoint(ap.getPort())) {
                 continue;
+            }
 
             // long id = topology.getL2DomainId(ap.getSw());
             // XXX - Missing functionality
@@ -295,8 +298,9 @@ public class Device implements IDevice {
             apMap.put(id, ap);
         }
 
-        if (apMap.isEmpty())
+        if (apMap.isEmpty()) {
             return null;
+        }
         return apMap;
     }
 
@@ -311,8 +315,9 @@ public class Device implements IDevice {
 
         List<AttachmentPoint> expiredAPs = new ArrayList<AttachmentPoint>();
 
-        if (apList == null)
+        if (apList == null) {
             return false;
+        }
 
         for (AttachmentPoint ap : apList) {
             if (ap.getLastSeen() + AttachmentPoint.INACTIVITY_INTERVAL < System.currentTimeMillis()) {
@@ -345,15 +350,17 @@ public class Device implements IDevice {
         long timeThreshold = System.currentTimeMillis()
                 - AttachmentPoint.INACTIVITY_INTERVAL;
 
-        if (oldAPList == null || apMap == null)
+        if (oldAPList == null || apMap == null) {
             return dupAPs;
+        }
 
         for (AttachmentPoint ap : oldAPList) {
             long id = 0;
             AttachmentPoint trueAP = apMap.get(id);
 
-            if (trueAP == null)
+            if (trueAP == null) {
                 continue;
+            }
             boolean c = true;
             boolean active = (ap.getActiveSince() > trueAP.getActiveSince());
             boolean last = ap.getLastSeen() > timeThreshold;
@@ -375,12 +382,14 @@ public class Device implements IDevice {
     protected boolean updateAttachmentPoint() {
         boolean moved = false;
         this.oldAPs = attachmentPoints;
-        if (attachmentPoints == null || attachmentPoints.isEmpty())
+        if (attachmentPoints == null || attachmentPoints.isEmpty()) {
             return false;
+        }
 
         List<AttachmentPoint> apList = new ArrayList<AttachmentPoint>();
-        if (attachmentPoints != null)
+        if (attachmentPoints != null) {
             apList.addAll(attachmentPoints);
+        }
         Map<Long, AttachmentPoint> newMap = getAPMap(apList);
         if (newMap == null || newMap.size() != apList.size()) {
             moved = true;
@@ -391,8 +400,9 @@ public class Device implements IDevice {
             log.info("updateAttachmentPoint: ap {}  newmap {} ",
                     attachmentPoints, newMap);
             List<AttachmentPoint> newAPList = new ArrayList<AttachmentPoint>();
-            if (newMap != null)
+            if (newMap != null) {
                 newAPList.addAll(newMap.values());
+            }
             this.attachmentPoints = newAPList;
         }
 
@@ -416,16 +426,19 @@ public class Device implements IDevice {
         List<AttachmentPoint> apList;
         boolean oldAPFlag = false;
 
-        if (!deviceManager.isValidAttachmentPoint(port))
+        if (!deviceManager.isValidAttachmentPoint(port)) {
             return false;
+        }
         AttachmentPoint newAP = new AttachmentPoint(port, lastSeen);
         // Copy the oldAP and ap list.
         apList = new ArrayList<AttachmentPoint>();
-        if (attachmentPoints != null)
+        if (attachmentPoints != null) {
             apList.addAll(attachmentPoints);
+        }
         oldAPList = new ArrayList<AttachmentPoint>();
-        if (oldAPs != null)
+        if (oldAPs != null) {
             oldAPList.addAll(oldAPs);
+        }
 
         // if the sw, port is in old AP, remove it from there
         // and update the lastSeen in that object.
@@ -487,8 +500,9 @@ public class Device implements IDevice {
                     apMap.values());
 
             oldAPList = new ArrayList<AttachmentPoint>();
-            if (oldAPs != null)
+            if (oldAPs != null) {
                 oldAPList.addAll(oldAPs);
+            }
             oldAPList.add(oldAP);
             this.oldAPs = oldAPList;
             return true;
@@ -496,8 +510,9 @@ public class Device implements IDevice {
             // retain oldAP as is. Put the newAP in oldAPs for flagging
             // possible duplicates.
             oldAPList = new ArrayList<AttachmentPoint>();
-            if (oldAPs != null)
+            if (oldAPs != null) {
                 oldAPList.addAll(oldAPs);
+            }
             // Add to oldAPList only if it was picked up from the oldAPList
             oldAPList.add(newAP);
             this.oldAPs = oldAPList;
@@ -546,17 +561,20 @@ public class Device implements IDevice {
     public SwitchPort[] getOldAP() {
         List<SwitchPort> sp = new ArrayList<SwitchPort>();
         SwitchPort[] returnSwitchPorts = new SwitchPort[] {};
-        if (oldAPs == null)
+        if (oldAPs == null) {
             return returnSwitchPorts;
-        if (oldAPs.isEmpty())
+        }
+        if (oldAPs.isEmpty()) {
             return returnSwitchPorts;
+        }
 
         // copy ap list.
         List<AttachmentPoint> oldAPList;
         oldAPList = new ArrayList<AttachmentPoint>();
 
-        if (oldAPs != null)
+        if (oldAPs != null) {
             oldAPList.addAll(oldAPs);
+        }
         removeExpiredAttachmentPoints(oldAPList);
 
         if (oldAPList != null) {
@@ -577,10 +595,12 @@ public class Device implements IDevice {
     public SwitchPort[] getAttachmentPoints(boolean includeError) {
         List<SwitchPort> sp = new ArrayList<SwitchPort>();
         SwitchPort[] returnSwitchPorts = new SwitchPort[] {};
-        if (attachmentPoints == null)
+        if (attachmentPoints == null) {
             return returnSwitchPorts;
-        if (attachmentPoints.isEmpty())
+        }
+        if (attachmentPoints.isEmpty()) {
             return returnSwitchPorts;
+        }
 
         // copy ap list.
         List<AttachmentPoint> apList = attachmentPoints;
@@ -592,17 +612,20 @@ public class Device implements IDevice {
             }
         }
 
-        if (!includeError)
+        if (!includeError) {
             return sp.toArray(new SwitchPort[sp.size()]);
+        }
 
         List<AttachmentPoint> oldAPList;
         oldAPList = new ArrayList<AttachmentPoint>();
 
-        if (oldAPs != null)
+        if (oldAPs != null) {
             oldAPList.addAll(oldAPs);
+        }
 
-        if (removeExpiredAttachmentPoints(oldAPList))
+        if (removeExpiredAttachmentPoints(oldAPList)) {
             this.oldAPs = oldAPList;
+        }
 
         List<AttachmentPoint> dupList;
         // get AP map.
@@ -648,8 +671,9 @@ public class Device implements IDevice {
 
         TreeSet<Integer> vals = new TreeSet<Integer>();
         for (Entity e : entities) {
-            if (e.getIpv4Address() == null)
+            if (e.getIpv4Address() == null) {
                 continue;
+            }
 
             // We have an IP address only if among the devices within the class
             // we have the most recent entity with that IP.
@@ -658,8 +682,9 @@ public class Device implements IDevice {
                     entityClass, ipv4Fields, e);
             while (devices.hasNext()) {
                 Device d = devices.next();
-                if (deviceKey.equals(d.getDeviceKey()))
+                if (deviceKey.equals(d.getDeviceKey())) {
                     continue;
+                }
                 for (Entity se : d.entities) {
                     if (se.getIpv4Address() != null
                             && se.getIpv4Address().equals(e.getIpv4Address())
@@ -670,12 +695,14 @@ public class Device implements IDevice {
                         break;
                     }
                 }
-                if (!validIP)
+                if (!validIP) {
                     break;
+                }
             }
 
-            if (validIP)
+            if (validIP) {
                 vals.add(e.getIpv4Address());
+            }
         }
 
         return vals.toArray(new Integer[vals.size()]);
@@ -702,8 +729,9 @@ public class Device implements IDevice {
         Date d = null;
         for (int i = 0; i < entities.length; i++) {
             if (d == null
-                    || entities[i].getLastSeenTimestamp().compareTo(d) > 0)
+                    || entities[i].getLastSeenTimestamp().compareTo(d) > 0) {
                 d = entities[i].getLastSeenTimestamp();
+            }
         }
         return d;
     }
@@ -754,17 +782,22 @@ public class Device implements IDevice {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Device other = (Device) obj;
-        if (!deviceKey.equals(other.deviceKey))
+        if (!deviceKey.equals(other.deviceKey)) {
             return false;
-        if (!Arrays.equals(entities, other.entities))
+        }
+        if (!Arrays.equals(entities, other.entities)) {
             return false;
+        }
         return true;
     }
 
@@ -773,8 +806,9 @@ public class Device implements IDevice {
         try {
             Entity e = this.entities[this.entities.length-1];
             NodeConnector n = null;
-            if(e!=null)
+            if(e!=null) {
                  n = e.getPort();
+            }
             InetAddress ip = InetAddress.getByName(ipv4s[ipv4s.length - 1]
                     .toString());
             byte[] macAddr = macLongToByte(this.getMACAddress());
@@ -815,8 +849,9 @@ public class Device implements IDevice {
         builder.append(", IPs=[");
         boolean isFirst = true;
         for (Integer ip : getIPv4Addresses()) {
-            if (!isFirst)
+            if (!isFirst) {
                 builder.append(", ");
+            }
             isFirst = false;
             builder.append(ip);
         }

@@ -256,8 +256,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                     .getKeyFields();
             boolean keyFieldsMatchPrimary = primaryKeyFields.equals(keyFields);
 
-            if (!keyFieldsMatchPrimary)
+            if (!keyFieldsMatchPrimary) {
                 classIndex = new DeviceUniqueIndex(keyFields);
+            }
 
             secondaryIndexMap = new HashMap<EnumSet<DeviceField>, DeviceIndex>();
             for (EnumSet<DeviceField> fields : perClassIndices) {
@@ -370,8 +371,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             // We expect that the last seen of the new AP is higher than
             // old AP, if it is not, just reverse and send the negative
             // of the result.
-            if (oldAP.getActiveSince() > newAP.getActiveSince())
+            if (oldAP.getActiveSince() > newAP.getActiveSince()) {
                 return -compare(newAP, oldAP);
+            }
 
             long activeOffset = 0;
 
@@ -447,8 +449,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     public void stop() {
         stopped = true;
-        if (ses != null)
+        if (ses != null) {
             ses.shutdownNow();
+        }
     }
 
     public void start() {
@@ -477,9 +480,10 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             @Override
             public void run() {
                 cleanupEntities();
-                if (!stopped)
+                if (!stopped) {
                     entityCleanupTask.reschedule(ENTITY_CLEANUP_INTERVAL,
                             TimeUnit.SECONDS);
+                }
             }
         };
         entityCleanupTask = new SingletonTask(ses, ecr);
@@ -519,10 +523,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     @Override
     public IDevice findDevice(long macAddress, Short vlan, Integer ipv4Address,
             NodeConnector port) throws IllegalArgumentException {
-        if (vlan != null && vlan.shortValue() <= 0)
+        if (vlan != null && vlan.shortValue() <= 0) {
             vlan = null;
-        if (ipv4Address != null && ipv4Address == 0)
+        }
+        if (ipv4Address != null && ipv4Address == 0) {
             ipv4Address = null;
+        }
         Entity e = new Entity(macAddress, vlan, ipv4Address, port, null);
         if (!allKeyFieldsPresent(e, entityClassifier.getKeyFields())) {
             throw new IllegalArgumentException("Not all key fields specified."
@@ -534,10 +540,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     @Override
     public IDevice findClassDevice(IEntityClass entityClass, long macAddress,
             Short vlan, Integer ipv4Address) throws IllegalArgumentException {
-        if (vlan != null && vlan.shortValue() <= 0)
+        if (vlan != null && vlan.shortValue() <= 0) {
             vlan = null;
-        if (ipv4Address != null && ipv4Address == 0)
+        }
+        if (ipv4Address != null && ipv4Address == 0) {
             ipv4Address = null;
+        }
         Entity e = new Entity(macAddress, vlan, ipv4Address, null, null);
         if (entityClass == null
                 || !allKeyFieldsPresent(e, entityClass.getKeyFields())) {
@@ -750,12 +758,15 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         // XXX - missing functionality -- need topology module
         // if (topology.isAttachmentPointPort(port) == false)
         // return false;
-        if (topology.isInternal(port))
+        if (topology.isInternal(port)) {
             return false;
-        if (!switchManager.isNodeConnectorEnabled(port))
+        }
+        if (!switchManager.isNodeConnectorEnabled(port)) {
             return false;
-        if (suppressAPs.contains(new SwitchPort(port)))
+        }
+        if (suppressAPs.contains(new SwitchPort(port))) {
             return false;
+        }
 
         return true;
     }
@@ -794,8 +805,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         long dlAddr = toLong(dlAddrArr);
 
         // Ignore broadcast/multicast source
-        if ((dlAddrArr[0] & 0x1) != 0)
+        if ((dlAddrArr[0] & 0x1) != 0) {
             return null;
+        }
 
         // XXX missing functionality
         // short vlan = 0;
@@ -811,8 +823,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     protected void learnDeviceFromArpResponseData(Ethernet eth,
             NodeConnector port) {
 
-        if (!(eth.getPayload() instanceof ARP))
+        if (!(eth.getPayload() instanceof ARP)) {
             return;
+        }
         ARP arp = (ARP) eth.getPayload();
 
         byte[] dlAddrArr = eth.getSourceMACAddress();
@@ -821,12 +834,14 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         byte[] senderHardwareAddr = arp.getSenderHardwareAddress();
         long senderAddr = toLong(senderHardwareAddr);
 
-        if (dlAddr == senderAddr)
+        if (dlAddr == senderAddr) {
             return;
+        }
 
         // Ignore broadcast/multicast source
-        if ((senderHardwareAddr[0] & 0x1) != 0)
+        if ((senderHardwareAddr[0] & 0x1) != 0) {
             return;
+        }
 
         // short vlan = eth.getVlanID();
         int nwSrc = toIPv4Address(arp.getSenderProtocolAddress());
@@ -869,8 +884,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 deviceKey = classState.classIndex.findByEntity(entity);
             }
         }
-        if (deviceKey == null)
+        if (deviceKey == null) {
             return null;
+        }
         return deviceMap.get(deviceKey);
     }
 
@@ -908,8 +924,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             }
             deviceKey = classState.classIndex.findByEntity(dstEntity);
         }
-        if (deviceKey == null)
+        if (deviceKey == null) {
             return null;
+        }
         return deviceMap.get(deviceKey);
     }
 
@@ -1024,8 +1041,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
                 // update indices
                 if (!updateIndices(device, deviceKey)) {
-                    if (deleteQueue == null)
+                    if (deleteQueue == null) {
                         deleteQueue = new ArrayList<Long>();
+                    }
                     deleteQueue.add(deviceKey);
                     continue;
                 }
@@ -1093,8 +1111,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 // If replace returns false, restart the process from the
                 // beginning (this implies another thread concurrently
                 // modified this Device).
-                if (!res)
+                if (!res) {
                     continue;
+                }
                 oldDevice = device;
                 device = newDevice;
                 // update indices
@@ -1163,30 +1182,37 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         EnumSet<DeviceField> changedFields = EnumSet.of(DeviceField.IPV4,
                 DeviceField.VLAN, DeviceField.SWITCHPORT);
 
-        if (newEntity.getIpv4Address() == null)
+        if (newEntity.getIpv4Address() == null) {
             changedFields.remove(DeviceField.IPV4);
-        if (newEntity.getVlan() == null)
+        }
+        if (newEntity.getVlan() == null) {
             changedFields.remove(DeviceField.VLAN);
-        if (newEntity.getPort() == null)
+        }
+        if (newEntity.getPort() == null) {
             changedFields.remove(DeviceField.SWITCHPORT);
+        }
 
-        if (changedFields.size() == 0)
+        if (changedFields.size() == 0) {
             return changedFields;
+        }
 
         for (Entity entity : device.getEntities()) {
             if (newEntity.getIpv4Address() == null
                     || (entity.getIpv4Address() != null && entity
                             .getIpv4Address()
-                            .equals(newEntity.getIpv4Address())))
+                            .equals(newEntity.getIpv4Address()))) {
                 changedFields.remove(DeviceField.IPV4);
+            }
             if (newEntity.getVlan() == null
                     || (entity.getVlan() != null && entity.getVlan().equals(
-                            newEntity.getVlan())))
+                            newEntity.getVlan()))) {
                 changedFields.remove(DeviceField.VLAN);
+            }
             if (newEntity.getPort() == null
                     || (entity.getPort() != null && entity.getPort().equals(
-                            newEntity.getPort())))
+                            newEntity.getPort()))) {
                 changedFields.remove(DeviceField.SWITCHPORT);
+            }
         }
 
         return changedFields;
@@ -1199,8 +1225,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
      *            the updates to process.
      */
     protected void processUpdates(Queue<DeviceUpdate> updates) {
-        if (updates == null)
+        if (updates == null) {
             return;
+        }
         DeviceUpdate update = null;
         while (null != (update = updates.poll())) {
             if (logger.isTraceEnabled()) {
@@ -1334,12 +1361,14 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 // MAC address is always present
                 break;
             case IPV4:
-                if (e.getIpv4Address() == null)
+                if (e.getIpv4Address() == null) {
                     return false;
+                }
                 break;
             case SWITCHPORT:
-                if (e.getPort() == null)
+                if (e.getPort() == null) {
                     return false;
+                }
                 break;
             case VLAN:
                 // FIXME: vlan==null is ambiguous: it can mean: not present
@@ -1357,10 +1386,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     private LinkedList<DeviceUpdate> updateUpdates(
             LinkedList<DeviceUpdate> list, DeviceUpdate update) {
-        if (update == null)
+        if (update == null) {
             return list;
-        if (list == null)
+        }
+        if (list == null) {
             list = new LinkedList<DeviceUpdate>();
+        }
         list.add(update);
 
         return list;
@@ -1376,8 +1407,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
      */
     private ClassState getClassState(IEntityClass clazz) {
         ClassState classState = classStateMap.get(clazz.getName());
-        if (classState != null)
+        if (classState != null) {
             return classState;
+        }
 
         classState = new ClassState(clazz);
         ClassState r = classStateMap.putIfAbsent(clazz.getName(), classState);
@@ -1406,8 +1438,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         ClassState classState = getClassState(entityClass);
 
         if (classState.classIndex != null) {
-            if (!classState.classIndex.updateIndex(device, deviceKey))
+            if (!classState.classIndex.updateIndex(device, deviceKey)) {
                 return false;
+            }
         }
         return true;
     }
@@ -1497,8 +1530,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                         // need to use device that is the map now for the next
                         // iteration
                         d = deviceMap.get(d.getDeviceKey());
-                        if (null != d)
+                        if (null != d) {
                             continue;
+                        }
                     }
                     if (update != null) {
                         // need to count after all possibly continue stmts in
@@ -1513,8 +1547,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                         // need to use device that is the map now for the next
                         // iteration
                         d = deviceMap.get(d.getDeviceKey());
-                        if (null != d)
+                        if (null != d) {
                             continue;
+                        }
                         // debugCounters.updateCounter(CNT_DEVICE_DELETED);
                     }
                     deviceUpdates.add(update);
@@ -1562,9 +1597,10 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                     device.getDeviceKey(), emptyToKeep);
         }
         if (!deviceMap.remove(device.getDeviceKey(), device)) {
-            if (logger.isDebugEnabled())
+            if (logger.isDebugEnabled()) {
                 logger.debug("device map does not have this device -"
                         + device.toString());
+            }
         }
     }
 
@@ -1574,14 +1610,18 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         // case correctly. Note that the code will still work correctly.
         // But we might do a full device search instead of using an index.
         EnumSet<DeviceField> keys = EnumSet.noneOf(DeviceField.class);
-        if (macAddress != null)
+        if (macAddress != null) {
             keys.add(DeviceField.MAC);
-        if (vlan != null)
+        }
+        if (vlan != null) {
             keys.add(DeviceField.VLAN);
-        if (ipv4Address != null)
+        }
+        if (ipv4Address != null) {
             keys.add(DeviceField.IPV4);
-        if (port != null)
+        }
+        if (port != null) {
             keys.add(DeviceField.SWITCHPORT);
+        }
         return keys;
     }
 
@@ -1589,8 +1629,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             EnumSet<DeviceField> keyFields, Entity entity) {
         ClassState classState = getClassState(clazz);
         DeviceIndex index = classState.secondaryIndexMap.get(keyFields);
-        if (index == null)
+        if (index == null) {
             return Collections.<Device> emptySet().iterator();
+        }
         return new DeviceIndexInterator(this, index.queryByEntity(entity));
     }
 
@@ -1629,8 +1670,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 }
             }
         }
-        if (newAPs.isEmpty())
+        if (newAPs.isEmpty()) {
             newAPs = null;
+        }
         Device d = new Device(this, device.getDeviceKey(),
                 device.getDHCPClientName(), newAPs, null, entities,
                 device.getEntityClass());
@@ -1681,8 +1723,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         while (diter.hasNext()) {
             Device d = diter.next();
             if (d.getEntityClass() == null
-                    || entityClassNames.contains(d.getEntityClass().getName()))
+                    || entityClassNames.contains(d.getEntityClass().getName())) {
                 reclassifyDevice(d);
+            }
         }
     }
 
@@ -1758,8 +1801,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         this.deleteDevice(device);
         deviceUpdates.add(new DeviceUpdate(device, DeviceUpdate.Change.DELETE,
                 null));
-        if (!deviceUpdates.isEmpty())
+        if (!deviceUpdates.isEmpty()) {
             processUpdates(deviceUpdates);
+        }
         for (Entity entity : device.entities) {
             this.learnDeviceByEntity(entity);
         }
@@ -1940,8 +1984,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         Set<HostNodeConnector> nc = new HashSet<HostNodeConnector>();
         while (i.hasNext()) {
             Device device = i.next();
-            if (device.isStaticHost())
+            if (device.isStaticHost()) {
                 nc.add(device.toHostNodeConnector());
+            }
         }
         return nc;
     }
@@ -2024,8 +2069,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     @Override
     public void notifyNode(Node node, UpdateType type,
             Map<String, Property> propMap) {
-        if (node == null)
+        if (node == null) {
             return;
+        }
         List<IDeviceListener> listeners = deviceListeners.getOrderedListeners();
         switch (type) {
         case REMOVED:
@@ -2053,8 +2099,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     @Override
     public void notifyNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Map<String, Property> propMap) {
-        if (nodeConnector == null)
+        if (nodeConnector == null) {
             return;
+        }
         List<IDeviceListener> listeners = deviceListeners.getOrderedListeners();
         boolean up = false;
         switch (type) {

@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -30,12 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public final class InstanceConfig {
     private static final Logger logger = LoggerFactory.getLogger(InstanceConfig.class);
@@ -61,16 +61,18 @@ public final class InstanceConfig {
         for (Entry<String, AttributeIfc> configDefEntry : jmxToAttrConfig.entrySet()) {
 
             // Skip children runtime beans as they are mapped by InstanceRuntime
-            if (configDefEntry.getValue() instanceof RuntimeBeanEntry)
+            if (configDefEntry.getValue() instanceof RuntimeBeanEntry) {
                 continue;
+            }
 
             Object value = configRegistryClient.getAttributeCurrentValue(on, configDefEntry.getKey());
             try {
                 AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = mappingStrategies
                         .get(configDefEntry.getKey());
                 Optional<?> a = attributeMappingStrategy.mapAttribute(value);
-                if (a.isPresent() == false)
+                if (a.isPresent() == false) {
                     continue;
+                }
 
                 toXml.put(configDefEntry.getValue().getAttributeYangName(), a.get());
             } catch (Exception e) {

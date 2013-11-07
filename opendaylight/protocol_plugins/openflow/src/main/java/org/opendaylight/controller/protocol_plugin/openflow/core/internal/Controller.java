@@ -391,7 +391,9 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     @Override
     public Status disconnect(Node node) {
         ISwitch sw = getSwitch((Long) node.getID());
-        if (sw != null) disconnectSwitch(sw);
+        if (sw != null) {
+            disconnectSwitch(sw);
+        }
         return new Status(StatusCode.SUCCESS);
     }
 
@@ -415,6 +417,8 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     @Override
     public void notifyNodeDisconnectFromMaster(Node node) {
         ISwitch sw = switches.get((Long)node.getID());
-        if (sw != null) notifySwitchAdded(sw);
+        if (sw != null) {
+            notifySwitchAdded(sw);
+        }
     }
 }

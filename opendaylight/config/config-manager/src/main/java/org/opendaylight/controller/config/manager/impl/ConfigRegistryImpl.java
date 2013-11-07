@@ -7,6 +7,25 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
@@ -28,25 +47,6 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Singleton that is responsible for creating and committing Config
@@ -255,9 +255,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         for (ModuleIdentifier moduleIdentifier : orderedModuleIdentifiers) {
             ModuleInternalTransactionalInfo entry = commitInfo.getCommitted()
                     .get(moduleIdentifier);
-            if (entry == null)
+            if (entry == null) {
                 throw new NullPointerException("Module not found "
                         + moduleIdentifier);
+            }
             Module module = entry.getModule();
             ObjectName primaryReadOnlyON = ObjectNameUtil
                     .createReadOnlyModuleON(moduleIdentifier);
@@ -467,10 +468,12 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     @Override
     public Set<ObjectName> lookupRuntimeBeans(String moduleName,
             String instanceName) {
-        if (moduleName == null)
+        if (moduleName == null) {
             moduleName = "*";
-        if (instanceName == null)
+        }
+        if (instanceName == null) {
             instanceName = "*";
+        }
         ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
                 moduleName, instanceName);
         return baseJMXRegistrator.queryNames(namePattern, null);

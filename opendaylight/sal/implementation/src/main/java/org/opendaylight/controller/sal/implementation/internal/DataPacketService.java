@@ -97,20 +97,26 @@ public class DataPacketService implements IPluginOutDataPacketService,
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             DataPacketListener other = (DataPacketListener) obj;
-            if (!getOuterType().equals(other.getOuterType()))
+            if (!getOuterType().equals(other.getOuterType())) {
                 return false;
+            }
             if (listenerName == null) {
-                if (other.listenerName != null)
+                if (other.listenerName != null) {
                     return false;
-            } else if (!listenerName.equals(other.listenerName))
+                }
+            } else if (!listenerName.equals(other.listenerName)) {
                 return false;
+            }
             return true;
         }
 

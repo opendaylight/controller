@@ -82,8 +82,9 @@ public class JMXGenerator implements CodeGenerator {
 
         packageTranslator = new PackageTranslator(namespaceToPackageMapping);
 
-        if (!outputBaseDir.exists())
+        if (!outputBaseDir.exists()) {
             outputBaseDir.mkdirs();
+        }
 
         GeneratedFilesTracker generatedFiles = new GeneratedFilesTracker();
         Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
@@ -182,10 +183,11 @@ public class JMXGenerator implements CodeGenerator {
 
     @Override
     public void setAdditionalConfig(Map<String, String> additionalCfg) {
-        if (logger != null)
+        if (logger != null) {
             logger.debug(getClass().getCanonicalName(),
                     ": Additional configuration received: ",
                     additionalCfg.toString());
+        }
         this.namespaceToPackageMapping = extractNamespaceMapping(additionalCfg);
         this.generateModuleFactoryFile = extractModuleFactoryBoolean(additionalCfg);
     }
@@ -193,10 +195,12 @@ public class JMXGenerator implements CodeGenerator {
     private boolean extractModuleFactoryBoolean(
             Map<String, String> additionalCfg) {
         String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
-        if (bool == null)
+        if (bool == null) {
             return true;
-        if (bool.equals("false"))
+        }
+        if (bool.equals("false")) {
             return false;
+        }
         return true;
     }
 
@@ -248,9 +252,10 @@ public class JMXGenerator implements CodeGenerator {
     public void setMavenProject(MavenProject project) {
         this.projectBaseDir = project.getBasedir();
 
-        if (logger != null)
+        if (logger != null) {
             logger.debug(getClass().getCanonicalName(), " project base dir: ",
                     projectBaseDir);
+        }
     }
 
     @VisibleForTesting

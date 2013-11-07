@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
+import java.util.Date;
+import java.util.Map;
+import javax.management.openmbean.SimpleType;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-
-import javax.management.openmbean.SimpleType;
-import java.util.Date;
-import java.util.Map;
 
 public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStrategy<String, SimpleType<?>> {
 
@@ -25,8 +25,9 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
 
     @Override
     public Optional<String> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null) {
             return Optional.absent();
+        }
 
         String expectedClass = getOpenType().getClassName();
         String realClass = value.getClass().getName();

@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import java.io.IOException;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
 
 /**
  * {@link Persister} implementation that delegates persisting functionality to
@@ -56,15 +56,17 @@ public final class PersisterImpl implements Persister {
     private static Class<?> resolveClass(String storageAdapterClass, Class<?> baseType) throws ClassNotFoundException {
         Class<?> clazz = Class.forName(storageAdapterClass);
 
-        if (!isImplemented(baseType, clazz))
+        if (!isImplemented(baseType, clazz)) {
             throw new IllegalArgumentException("Storage adapter " + clazz + " has to implement " + baseType);
+        }
         return clazz;
     }
 
     private static boolean isImplemented(Class<?> expectedIface, Class<?> byClazz) {
         for (Class<?> iface : byClazz.getInterfaces()) {
-            if (iface.equals(expectedIface))
+            if (iface.equals(expectedIface)) {
                 return true;
+            }
         }
         return false;
     }

@@ -134,8 +134,9 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
                 appendersBefore.add(appenderIt.next());
             }
             return Optional.of(appendersBefore);
-        } else
+        } else {
             return Optional.absent();
+        }
 
     }
 

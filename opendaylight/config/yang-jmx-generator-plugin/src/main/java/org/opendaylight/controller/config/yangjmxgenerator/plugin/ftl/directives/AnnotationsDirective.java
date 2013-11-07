@@ -39,23 +39,26 @@ public class AnnotationsDirective implements TemplateDirectiveModel {
         List<Annotation> annotations = Lists.newArrayList();
 
         if (object != null) {
-            if (object instanceof SimpleSequence)
+            if (object instanceof SimpleSequence) {
                 annotations = ((SimpleSequence) object).toList();
+            }
             else if (object instanceof FtlTemplate) {
                 annotations = ((FtlTemplate) object).getAnnotations();
-            } else
+            } else {
                 throw new IllegalArgumentException(
                         "Object must be a SimpleSequence or instance of "
                                 + FtlTemplate.class + "but was "
                                 + object.getClass());
+            }
         }
 
         Writer out = env.getOut();
         StringBuilder build = new StringBuilder();
         writeAnnotations(annotations, build, "");
 
-        if (!annotations.isEmpty())
+        if (!annotations.isEmpty()) {
             out.write(build.toString().toCharArray());
+        }
     }
 
     static void writeAnnotations(List<Annotation> annotations,

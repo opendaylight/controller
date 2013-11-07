@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import java.io.InputStream;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -25,8 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.collect.Maps;
 
 public class DefaultCommit implements NetconfOperationFilter {
 
@@ -89,8 +88,9 @@ public class DefaultCommit implements NetconfOperationFilter {
     }
 
     private boolean canHandle(OperationNameAndNamespace operationNameAndNamespace) {
-        if (operationNameAndNamespace.getOperationName().equals("commit") == false)
+        if (operationNameAndNamespace.getOperationName().equals("commit") == false) {
             return false;
+        }
         return operationNameAndNamespace.getNamespace().equals(
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
@@ -107,8 +107,9 @@ public class DefaultCommit implements NetconfOperationFilter {
 
         String attr = xmlElement.getAttribute(NOTIFY_ATTR);
 
-        if (attr == null || attr.equals(""))
+        if (attr == null || attr.equals("")) {
             return false;
+        }
         else if (attr.equals(Boolean.toString(false))) {
             logger.debug("Commit operation received with notify=false attribute {}", message);
             return true;

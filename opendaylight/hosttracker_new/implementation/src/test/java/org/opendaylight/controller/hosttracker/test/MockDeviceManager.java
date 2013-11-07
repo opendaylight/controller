@@ -74,10 +74,12 @@ public class MockDeviceManager extends DeviceManagerImpl {
             deviceListeners.clearListeners();
         }
 
-        if (vlan != null && vlan.shortValue() <= 0)
+        if (vlan != null && vlan.shortValue() <= 0) {
             vlan = null;
-        if (ipv4Address != null && ipv4Address == 0)
+        }
+        if (ipv4Address != null && ipv4Address == 0) {
             ipv4Address = null;
+        }
         IDevice res = learnDeviceByEntity(new Entity(macAddress, vlan,
                 ipv4Address, port, new Date()));
         // Restore listeners

@@ -7,6 +7,22 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -31,22 +47,6 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Holds information about runtime bean to be generated. There are two kinds of
@@ -165,14 +165,16 @@ public class RuntimeBeanEntry {
             ContainerSchemaNode input = rpc.getInput();
             for (UsesNode uses : input.getUses()) {
 
-                if (uses.getGroupingPath().getPath().size() != 1)
+                if (uses.getGroupingPath().getPath().size() != 1) {
                     continue;
+                }
 
                 // check grouping path
                 QName qname = uses.getGroupingPath().getPath().get(0);
                 if (false == qname
-                        .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME))
+                        .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME)) {
                     continue;
+                }
 
                 for (SchemaNode refinedNode : uses.getRefines().values()) {
 
@@ -343,8 +345,9 @@ public class RuntimeBeanEntry {
         for (UnknownSchemaNode unknownSchemaNode : child
                 .getUnknownSchemaNodes()) {
             if (unknownSchemaNode.getNodeType().equals(
-                    ConfigConstants.INNER_STATE_BEAN_EXTENSION_QNAME))
+                    ConfigConstants.INNER_STATE_BEAN_EXTENSION_QNAME)) {
                 return true;
+            }
         }
         return false;
     }

@@ -58,8 +58,9 @@ final class DependencyResolverImpl implements DependencyResolver,
             throw new NullPointerException(
                     "Parameter 'expectedServiceInterface' is null");
         }
-        if (jmxAttribute == null)
+        if (jmxAttribute == null) {
             throw new NullPointerException("Parameter 'jmxAttribute' is null");
+        }
 
         JmxAttributeValidationException.checkNotNull(dependentModuleReadOnlyON,
                 "is null, " + "expected dependency implementing "

@@ -161,8 +161,9 @@ public class ConnectionManager implements IConnectionManager,
             AbstractScheme scheme = schemes.get(activeScheme);
             for (Node localNode : localNodes) {
                 connectionService.disconnect(localNode);
-                if (scheme != null)
+                if (scheme != null) {
                     scheme.removeNode(localNode);
+                }
             }
         }
     }
@@ -175,32 +176,36 @@ public class ConnectionManager implements IConnectionManager,
     @Override
     public Set<Node> getNodes(InetAddress controller) {
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return null;
+        }
         return scheme.getNodes(controller);
     }
 
     @Override
     public Set<Node> getLocalNodes() {
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return null;
+        }
         return scheme.getNodes();
     }
 
     @Override
     public boolean isLocal(Node node) {
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return false;
+        }
         return scheme.isLocal(node);
     }
 
     @Override
     public ConnectionLocality getLocalityStatus(Node node) {
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return ConnectionLocality.NOT_CONNECTED;
+        }
         return scheme.getLocalityStatus(node);
     }
 
@@ -208,8 +213,9 @@ public class ConnectionManager implements IConnectionManager,
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
         logger.debug("updateNode: {} type {} props {}", node, type, props);
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return;
+        }
         switch (type) {
         case ADDED:
             scheme.addNode(node);
@@ -228,8 +234,9 @@ public class ConnectionManager implements IConnectionManager,
         logger.debug("updateNodeConnector: {} type {} props {}", nodeConnector,
                 type, props);
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return;
+        }
         switch (type) {
         case ADDED:
             scheme.addNode(nodeConnector.getNode());
@@ -247,46 +254,54 @@ public class ConnectionManager implements IConnectionManager,
     @Override
     public Node connect(String connectionIdentifier,
             Map<ConnectionConstants, String> params) {
-        if (connectionService == null)
+        if (connectionService == null) {
             return null;
+        }
         Node node = connectionService.connect(connectionIdentifier, params);
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme != null && node != null)
+        if (scheme != null && node != null) {
             scheme.addNode(node);
+        }
         return node;
     }
 
     @Override
     public Node connect(String type, String connectionIdentifier,
             Map<ConnectionConstants, String> params) {
-        if (connectionService == null)
+        if (connectionService == null) {
             return null;
+        }
         Node node = connectionService.connect(connectionIdentifier, params);
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme != null && node != null)
+        if (scheme != null && node != null) {
             scheme.addNode(node);
+        }
         return node;
     }
 
     @Override
     public Status disconnect(Node node) {
-        if (node == null)
+        if (node == null) {
             return new Status(StatusCode.BADREQUEST);
-        if (connectionService == null)
+        }
+        if (connectionService == null) {
             return new Status(StatusCode.NOSERVICE);
+        }
         Status status = connectionService.disconnect(node);
         if (status.isSuccess()) {
             AbstractScheme scheme = schemes.get(activeScheme);
-            if (scheme != null)
+            if (scheme != null) {
                 scheme.removeNode(node);
+            }
         }
         return status;
     }
 
     @Override
     public void entryCreated(Node key, String cacheName, boolean originLocal) {
-        if (originLocal)
+        if (originLocal){
             return;
+        }
     }
 
     /*
@@ -299,8 +314,9 @@ public class ConnectionManager implements IConnectionManager,
     @Override
     public void entryUpdated(Node node, Set<InetAddress> newControllers,
             String cacheName, boolean originLocal) {
-        if (originLocal)
+        if (originLocal) {
             return;
+        }
         Set<InetAddress> existingControllers = existingConnections.get(node);
         if (existingControllers != null) {
             logger.debug(
@@ -324,8 +340,9 @@ public class ConnectionManager implements IConnectionManager,
 
     @Override
     public void entryDeleted(Node key, String cacheName, boolean originLocal) {
-        if (originLocal)
+        if (originLocal) {
             return;
+        }
         logger.debug("Deleted : {} cache : {}", key, cacheName);
         notifyNodeDisconnectedEvent(key);
     }
@@ -373,8 +390,9 @@ public class ConnectionManager implements IConnectionManager,
                         break;
                     case CLUSTER_VIEW_CHANGED:
                         AbstractScheme scheme = schemes.get(activeScheme);
-                        if (scheme == null)
+                        if (scheme == null) {
                             return;
+                        }
                         scheme.handleClusterViewChanged();
                         connectionService.notifyClusterViewChanged();
                         break;
@@ -448,8 +466,9 @@ public class ConnectionManager implements IConnectionManager,
     @Override
     public Set<InetAddress> getControllers(Node node) {
         AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null)
+        if (scheme == null) {
             return Collections.emptySet();
+        }
         return scheme.getControllers(node);
     }
 }

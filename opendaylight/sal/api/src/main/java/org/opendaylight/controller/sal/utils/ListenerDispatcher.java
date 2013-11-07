@@ -77,8 +77,9 @@ public class ListenerDispatcher<U, T extends IListener<U>> {
      */
     public void addListener(U type, T listener) {
         List<T> newlisteners = new ArrayList<T>();
-        if (listeners != null)
+        if (listeners != null) {
             newlisteners.addAll(listeners);
+        }
 
         newlisteners.add(listener);
         // Find nodes without outgoing edges

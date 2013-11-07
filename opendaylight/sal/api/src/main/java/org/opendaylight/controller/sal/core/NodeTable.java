@@ -261,28 +261,37 @@ public class NodeTable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         NodeTable other = (NodeTable) obj;
         if (nodeTableID == null) {
-            if (other.nodeTableID != null)
+            if (other.nodeTableID != null) {
                 return false;
-        } else if (!nodeTableID.equals(other.nodeTableID))
+            }
+        } else if (!nodeTableID.equals(other.nodeTableID)) {
             return false;
+        }
         if (nodeTableNode == null) {
-            if (other.nodeTableNode != null)
+            if (other.nodeTableNode != null) {
                 return false;
-        } else if (!nodeTableNode.equals(other.nodeTableNode))
+            }
+        } else if (!nodeTableNode.equals(other.nodeTableNode)) {
             return false;
+        }
         if (nodeTableType == null) {
-            if (other.nodeTableType != null)
+            if (other.nodeTableType != null) {
                 return false;
-        } else if (!nodeTableType.equals(other.nodeTableType))
+            }
+        } else if (!nodeTableType.equals(other.nodeTableType)) {
             return false;
+        }
         return true;
     }
 

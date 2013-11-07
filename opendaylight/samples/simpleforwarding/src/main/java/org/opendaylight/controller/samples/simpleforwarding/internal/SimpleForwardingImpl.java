@@ -842,8 +842,9 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     @Override
     public void notifyNode(Node node, UpdateType type,
             Map<String, Property> propMap) {
-        if (node == null)
+        if (node == null) {
             return;
+        }
 
         switch (type) {
         case REMOVED:
@@ -858,9 +859,9 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     @Override
     public void notifyNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Map<String, Property> propMap) {
-        if (nodeConnector == null)
+        if (nodeConnector == null)  {
             return;
-
+        }
         boolean up = false;
         switch (type) {
         case ADDED:

@@ -148,7 +148,9 @@ public class BundleScannerTest {
 
     private static Bundle findBundle(String symName) {
         for (Bundle bundle : bundles) {
-            if (bundle.getSymbolicName().equals(symName)) return bundle;
+            if (bundle.getSymbolicName().equals(symName)) {
+                return bundle;
+            }
         }
         return null;
     }
@@ -163,7 +165,9 @@ public class BundleScannerTest {
     }
 
     private static List<URL> findClasses(String pkg) throws URISyntaxException {
-        if (pkg == null) return Collections.EMPTY_LIST;
+        if (pkg == null) {
+            return Collections.EMPTY_LIST;
+        }
         String npkg = pkg.replaceAll("\\.", "/");
         URL dirUrl = BundleScannerTest.class.getClassLoader().getResource(npkg);
         final List<URL> result = new ArrayList<URL>();

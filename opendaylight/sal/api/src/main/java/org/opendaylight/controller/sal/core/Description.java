@@ -49,18 +49,23 @@ public class Description extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Description other = (Description) obj;
         if (descriptionValue == null) {
-            if (other.descriptionValue != null)
+            if (other.descriptionValue != null) {
                 return false;
-        } else if (!descriptionValue.equals(other.descriptionValue))
+            }
+        } else if (!descriptionValue.equals(other.descriptionValue)) {
             return false;
+        }
         return true;
     }
 

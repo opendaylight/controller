@@ -103,12 +103,15 @@ public class NeutronNetworksNorthbound {
             Boolean bAdminStateUp = null;
             Boolean bShared = null;
             Boolean bRouterExternal = null;
-            if (queryAdminStateUp != null)
+            if (queryAdminStateUp != null) {
                 bAdminStateUp = Boolean.valueOf(queryAdminStateUp);
-            if (queryShared != null)
+            }
+            if (queryShared != null) {
                 bShared = Boolean.valueOf(queryShared);
-            if (queryRouterExternal != null)
+            }
+            if (queryRouterExternal != null) {
                 bRouterExternal = Boolean.valueOf(queryRouterExternal);
+            }
             if ((queryID == null || queryID.equals(oSN.getID())) &&
                     (queryName == null || queryName.equals(oSN.getNetworkName())) &&
                     (bAdminStateUp == null || bAdminStateUp.booleanValue() == oSN.isAdminStateUp()) &&
@@ -116,10 +119,12 @@ public class NeutronNetworksNorthbound {
                     (bShared == null || bShared.booleanValue() == oSN.isShared()) &&
                     (bRouterExternal == null || bRouterExternal.booleanValue() == oSN.isRouterExternal()) &&
                     (queryTenantID == null || queryTenantID.equals(oSN.getTenantID()))) {
-                if (fields.size() > 0)
+                if (fields.size() > 0) {
                     ans.add(extractFields(oSN,fields));
-                else
+                }
+                else {
                     ans.add(oSN);
+                }
             }
         }
         //TODO: apply pagination to results
@@ -148,15 +153,17 @@ public class NeutronNetworksNorthbound {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!networkInterface.networkExists(netUUID))
+        if (!networkInterface.networkExists(netUUID)) {
             return Response.status(404).build();
+        }
         if (fields.size() > 0) {
             NeutronNetwork ans = networkInterface.getNetwork(netUUID);
             return Response.status(200).entity(
                     new NeutronNetworkRequest(extractFields(ans, fields))).build();
-        } else
+        } else {
             return Response.status(200).entity(
                     new NeutronNetworkRequest(networkInterface.getNetwork(netUUID))).build();
+        }
     }
 
     /**
@@ -181,16 +188,18 @@ public class NeutronNetworksNorthbound {
             /*
              * network ID can't already exist
              */
-            if (networkInterface.networkExists(singleton.getID()))
+            if (networkInterface.networkExists(singleton.getID())) {
                 return Response.status(400).build();
+            }
 
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronNetworkAware service = (INeutronNetworkAware) instance;
                     int status = service.canCreateNetwork(singleton);
-                    if (status < 200 || status > 299)
+                    if (status < 200 || status > 299) {
                         return Response.status(status).build();
+                    }
                 }
             }
 
@@ -215,16 +224,19 @@ public class NeutronNetworksNorthbound {
                  * network ID can't already exist, nor can there be an entry for this UUID
                  * already in this bulk request
                  */
-                if (networkInterface.networkExists(test.getID()))
+                if (networkInterface.networkExists(test.getID())) {
                     return Response.status(400).build();
-                if (testMap.containsKey(test.getID()))
+                }
+                if (testMap.containsKey(test.getID())) {
                     return Response.status(400).build();
+                }
                 if (instances != null) {
                     for (Object instance: instances) {
                         INeutronNetworkAware service = (INeutronNetworkAware) instance;
                         int status = service.canCreateNetwork(test);
-                        if (status < 200 || status > 299)
+                        if (status < 200 || status > 299) {
                             return Response.status(status).build();
+                        }
                     }
                 }
                 testMap.put(test.getID(),test);
@@ -271,18 +283,21 @@ public class NeutronNetworksNorthbound {
         /*
          * network has to exist and only a single delta is supported
          */
-        if (!networkInterface.networkExists(netUUID))
+        if (!networkInterface.networkExists(netUUID)) {
             return Response.status(404).build();
-        if (!input.isSingleton())
+        }
+        if (!input.isSingleton()) {
             return Response.status(400).build();
+        }
         NeutronNetwork delta = input.getSingleton();
 
         /*
          * transitions forbidden by Neutron
          */
         if (delta.getID() != null || delta.getTenantID() != null ||
-                delta.getStatus() != null)
+                delta.getStatus() != null) {
             return Response.status(400).build();
+        }
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
         if (instances != null) {
@@ -290,8 +305,9 @@ public class NeutronNetworksNorthbound {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
                 NeutronNetwork original = networkInterface.getNetwork(netUUID);
                 int status = service.canUpdateNetwork(delta, original);
-                if (status < 200 || status > 299)
+                if (status < 200 || status > 299) {
                     return Response.status(status).build();
+                }
             }
         }
 
@@ -329,10 +345,12 @@ public class NeutronNetworksNorthbound {
         /*
          * network has to exist and not be in use before it can be removed
          */
-        if (!networkInterface.networkExists(netUUID))
+        if (!networkInterface.networkExists(netUUID)) {
             return Response.status(404).build();
-        if (networkInterface.networkInUse(netUUID))
+        }
+        if (networkInterface.networkInUse(netUUID)) {
             return Response.status(409).build();
+        }
 
         NeutronNetwork singleton = networkInterface.getNetwork(netUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
@@ -340,8 +358,9 @@ public class NeutronNetworksNorthbound {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
                 int status = service.canDeleteNetwork(singleton);
-                if (status < 200 || status > 299)
+                if (status < 200 || status > 299) {
                     return Response.status(status).build();
+                }
             }
         }
         networkInterface.removeNetwork(netUUID);

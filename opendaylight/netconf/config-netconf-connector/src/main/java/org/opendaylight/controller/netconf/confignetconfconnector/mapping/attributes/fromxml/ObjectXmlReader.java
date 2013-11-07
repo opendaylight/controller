@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.SimpleType;
+
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
@@ -15,11 +20,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
-
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.SimpleType;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadingStrategy> {
 
@@ -42,8 +42,9 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
 
     @Override
     protected AttributeReadingStrategy caseJavaAttribute(JavaAttribute attributeIfc) {
-        if (attributeIfc.getOpenType() instanceof SimpleType<?>)
+        if (attributeIfc.getOpenType() instanceof SimpleType<?>) {
             return new SimpleAttributeReadingStrategy(attributeIfc);
+        }
         else if (attributeIfc.getOpenType() instanceof ArrayType<?>) {
             SimpleAttributeReadingStrategy innerStrategy = new SimpleAttributeReadingStrategy(
                     ((ArrayType<?>) attributeIfc.getOpenType()).getElementOpenType());

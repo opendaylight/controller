@@ -8,9 +8,10 @@
 
 package org.opendaylight.controller.netconf.util;
 
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Timeout;
@@ -19,7 +20,6 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
@@ -36,8 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends NetconfSession>
         extends AbstractSessionNegotiator<NetconfMessage, S> {
@@ -81,8 +79,9 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
                     start();
                 }
             });
-        } else
+        } else {
             start();
+        }
     }
 
     private static Optional<SslHandler> getSslHandler(Channel channel) {
@@ -170,12 +169,15 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
     }
 
     private static boolean isStateChangePermitted(State state, State newState) {
-        if (state == State.IDLE && newState == State.OPEN_WAIT)
+        if (state == State.IDLE && newState == State.OPEN_WAIT) {
             return true;
-        if (state == State.OPEN_WAIT && newState == State.ESTABLISHED)
+        }
+        if (state == State.OPEN_WAIT && newState == State.ESTABLISHED) {
             return true;
-        if (state == State.OPEN_WAIT && newState == State.FAILED)
+        }
+        if (state == State.OPEN_WAIT && newState == State.FAILED) {
             return true;
+        }
 
         return false;
     }

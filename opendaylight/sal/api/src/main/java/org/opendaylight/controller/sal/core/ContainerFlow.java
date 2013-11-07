@@ -54,18 +54,23 @@ public class ContainerFlow implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ContainerFlow other = (ContainerFlow) obj;
         if (match == null) {
-            if (other.match != null)
+            if (other.match != null) {
                 return false;
-        } else if (!match.equals(other.match))
+            }
+        } else if (!match.equals(other.match)) {
             return false;
+        }
         return true;
     }
 

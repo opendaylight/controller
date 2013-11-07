@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.netconf.util.handler.ssh.virtualsocket;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,6 +17,9 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
+
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 
 /**
  * Handler class providing Socket functionality to OIO client application. By using VirtualSocket user can
@@ -80,7 +81,9 @@ public class VirtualSocket extends Socket implements ChannelHandler {
     public InetAddress getInetAddress() {
         InetSocketAddress isa = getInetSocketAddress();
 
-        if (isa == null) throw new VirtualSocketException();
+        if (isa == null) {
+            throw new VirtualSocketException();
+        }
 
         return getInetSocketAddress().getAddress();
     }

@@ -49,12 +49,15 @@ public class StaticRoute implements Serializable{
         }
 
         public static NextHopType fromString(String str) {
-            if (str == null)
+            if (str == null) {
                 return IPADDRESS;
-            if (str.equals(IPADDRESS.toString()))
+            }
+            if (str.equals(IPADDRESS.toString())) {
                 return IPADDRESS;
-            if (str.equals(SWITCHPORT.toString()))
+            }
+            if (str.equals(SWITCHPORT.toString())) {
                 return SWITCHPORT;
+            }
             return IPADDRESS;
         }
     }
@@ -231,17 +234,22 @@ public class StaticRoute implements Serializable{
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         StaticRoute other = (StaticRoute) obj;
-        if (!networkAddress.equals(other.networkAddress))
+        if (!networkAddress.equals(other.networkAddress)) {
             return false;
-        if (!mask.equals(other.mask))
+        }
+        if (!mask.equals(other.mask)) {
             return false;
+        }
         return true;
     }
 
@@ -301,8 +309,9 @@ public class StaticRoute implements Serializable{
      * @return: 0 if they are the same
      */
     public int compareTo(StaticRoute s) {
-        if (s == null)
+        if (s == null) {
             return 1;
+        }
         if ((networkAddress instanceof Inet6Address)
                 || (s.getNetworkAddress() instanceof Inet6Address)) {
             // HANDLE IPv6 Later

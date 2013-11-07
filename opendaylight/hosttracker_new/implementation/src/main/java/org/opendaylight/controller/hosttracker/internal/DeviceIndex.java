@@ -137,8 +137,9 @@ public abstract class DeviceIndex {
         IndexedEntity ie = new IndexedEntity(keyFields, entity);
         for (Entity o : others) {
             IndexedEntity oio = new IndexedEntity(keyFields, o);
-            if (oio.equals(ie))
+            if (oio.equals(ie)) {
                 return;
+            }
         }
 
         Iterator<Long> keyiter = this.queryByEntity(entity);

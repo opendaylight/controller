@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
+import java.util.Arrays;
+import java.util.Map;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -20,9 +23,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Map;
 
 public class EditConfigXmlParser {
 
@@ -73,17 +73,18 @@ public class EditConfigXmlParser {
                 .getOnlyChildElementWithSameNamespaceOptionally(EditConfigXmlParser.ERROR_OPTION_KEY);
         if (errorOptionElement.isPresent()) {
             String errorOptionParsed = errorOptionElement.get().getTextContent();
-            if (false == errorOptionParsed.equals(EditConfigXmlParser.DEFAULT_ERROR_OPTION))
+            if (false == errorOptionParsed.equals(EditConfigXmlParser.DEFAULT_ERROR_OPTION)) {
                 throw new UnsupportedOperationException("Only " + EditConfigXmlParser.DEFAULT_ERROR_OPTION
                         + " supported for " + EditConfigXmlParser.ERROR_OPTION_KEY + ", was " + errorOptionParsed);
+            }
         }
 
         // Default op
         Optional<XmlElement> defaultContent = xml
                 .getOnlyChildElementWithSameNamespaceOptionally(EditConfigXmlParser.DEFAULT_OPERATION_KEY);
-        if (defaultContent.isPresent())
+        if (defaultContent.isPresent()) {
             EditStrategyType.setDefaultStrategy(EditStrategyType.valueOf(defaultContent.get().getTextContent()));
-
+        }
         XmlElement configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
 
         return new EditConfigXmlParser.EditConfigExecution(xml, cfgMapping, configElement, testOption);

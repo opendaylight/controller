@@ -207,8 +207,9 @@ public class StaticRouteConfig implements Serializable {
         if (getNextHopType().equalsIgnoreCase(
                 StaticRoute.NextHopType.SWITCHPORT.toString())) {
             String pieces[] = nextHop.split("/");
-            if (pieces.length < 2)
+            if (pieces.length < 2) {
                 return false;
+            }
             return isValidSwitchId(pieces[0]);
         }
         return false;
@@ -350,20 +351,26 @@ public class StaticRouteConfig implements Serializable {
         }
         StaticRouteConfig other = (StaticRouteConfig) obj;
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
+        }
         if (nextHop == null) {
-            if (other.nextHop != null)
+            if (other.nextHop != null) {
                 return false;
-        } else if (!nextHop.equals(other.nextHop))
+            }
+        } else if (!nextHop.equals(other.nextHop)) {
             return false;
+        }
         if (staticRoute == null) {
-            if (other.staticRoute != null)
+            if (other.staticRoute != null) {
                 return false;
-        } else if (!staticRoute.equals(other.staticRoute))
+            }
+        } else if (!staticRoute.equals(other.staticRoute)) {
             return false;
+        }
         return true;
     }
 

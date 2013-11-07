@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.get;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.management.ObjectName;
+
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
@@ -28,12 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class Get extends AbstractConfigNetconfOperation {
 
@@ -64,12 +64,14 @@ public class Get extends AbstractConfigNetconfOperation {
                 RuntimeBeanEntry root = null;
                 for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
                     cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap()));
-                    if (rbe.isRoot())
+                    if (rbe.isRoot()) {
                         root = rbe;
+                    }
                 }
 
-                if (root == null)
+                if (root == null) {
                     continue;
+                }
 
                 InstanceRuntime rootInstanceRuntime = createInstanceRuntime(root, cache);
                 ModuleRuntime moduleRuntime = new ModuleRuntime(module, rootInstanceRuntime);
@@ -103,8 +105,9 @@ public class Get extends AbstractConfigNetconfOperation {
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         // Filter option - unsupported
-        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0)
+        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0) {
             throw new UnsupportedOperationException("Unsupported option " + XmlNetconfConstants.FILTER + " for " + GET);
+        }
     }
 
     @Override

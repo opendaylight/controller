@@ -59,15 +59,19 @@ public class Tier extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Tier other = (Tier) obj;
-        if (tierValue != other.tierValue)
+        if (tierValue != other.tierValue) {
             return false;
+        }
         return true;
     }
 

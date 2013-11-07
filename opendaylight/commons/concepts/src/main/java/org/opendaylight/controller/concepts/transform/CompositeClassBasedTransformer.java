@@ -68,9 +68,10 @@ public abstract class CompositeClassBasedTransformer<I, P> implements
         @SuppressWarnings("unchecked")
         InputClassBasedTransformer<I, I, P> transformer = (InputClassBasedTransformer<I, I, P>) transformers
                 .get(input.getClass());
-        if (transformer == null)
+        if (transformer == null) {
             throw new IllegalArgumentException("Transformation of: " + input
                     + " is not supported");
+        }
         return transformer.transform(input);
     }
 
@@ -85,11 +86,13 @@ public abstract class CompositeClassBasedTransformer<I, P> implements
     public void addTransformer(
             InputClassBasedTransformer<I, ? extends I, P> transformer)
             throws IllegalStateException {
-        if (transformer == null)
+        if (transformer == null) {
             throw new IllegalArgumentException("Transformer should not be null");
-        if (transformer.getInputClass() == null)
+        }
+        if (transformer.getInputClass() == null) {
             throw new IllegalArgumentException(
                     "Transformer should specify input class.");
+        }
         transformers.put(transformer.getInputClass(), transformer);
     }
 

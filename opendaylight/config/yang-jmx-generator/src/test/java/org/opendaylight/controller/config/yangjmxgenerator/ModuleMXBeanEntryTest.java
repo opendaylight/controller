@@ -131,8 +131,9 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
     protected RuntimeBeanEntry findFirstByYangName(
             Collection<RuntimeBeanEntry> runtimeBeans, String yangName) {
         for (RuntimeBeanEntry rb : runtimeBeans) {
-            if (yangName.equals(rb.getYangName()))
+            if (yangName.equals(rb.getYangName())) {
                 return rb;
+            }
         }
         throw new IllegalArgumentException("Yang name not found:" + yangName
                 + " in " + runtimeBeans);

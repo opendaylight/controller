@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -15,10 +19,6 @@ import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 public class CapabilityProviderImpl implements CapabilityProvider {
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
@@ -55,12 +55,15 @@ public class CapabilityProviderImpl implements CapabilityProvider {
             final Set<Capability> caps = netconfOperationService.getCapabilities();
 
             for (Capability cap : caps) {
-                if (cap.getModuleName().isPresent() == false)
+                if (cap.getModuleName().isPresent() == false) {
                     continue;
-                if (cap.getRevision().isPresent() == false)
+                }
+                if (cap.getRevision().isPresent() == false) {
                     continue;
-                if (cap.getCapabilitySchema().isPresent() == false)
+                }
+                if (cap.getCapabilitySchema().isPresent() == false) {
                     continue;
+                }
 
                 final String currentModuleName = cap.getModuleName().get();
                 Map<String, String> revisionMap = mappedModulesToRevisionToSchema.get(currentModuleName);

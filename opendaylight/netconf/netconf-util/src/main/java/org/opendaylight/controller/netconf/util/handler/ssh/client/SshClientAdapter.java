@@ -8,14 +8,15 @@
 
 package org.opendaylight.controller.netconf.util.handler.ssh.client;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.opendaylight.controller.netconf.util.handler.ssh.virtualsocket.VirtualSocketException;
 
 /**
@@ -76,7 +77,9 @@ public class SshClientAdapter implements Runnable {
             sshClient.close();
 
             synchronized (lock) {
-                if(disconnectPromise != null) ctx.disconnect(disconnectPromise);
+                if(disconnectPromise != null) {
+                    ctx.disconnect(disconnectPromise);
+                }
             }
         }
     }
@@ -84,7 +87,9 @@ public class SshClientAdapter implements Runnable {
     // TODO: needs rework to match netconf framer API.
     public void write(String message) throws IOException {
         synchronized (lock) {
-            if (stdIn == null) throw new IllegalStateException("StdIn not available");
+            if (stdIn == null) {
+                throw new IllegalStateException("StdIn not available");
+            }
         }
         stdIn.write(message.getBytes());
         stdIn.flush();
@@ -98,7 +103,9 @@ public class SshClientAdapter implements Runnable {
     }
 
     public void start(ChannelHandlerContext ctx) {
-        if(this.ctx != null) return; // context is already associated.
+        if(this.ctx != null) {
+            return; // context is already associated.
+        }
 
         this.ctx = ctx;
         new Thread(this).start();

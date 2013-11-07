@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.util.handler.ssh.virtualsocket;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Class provides {@link InputStream} functionality to users of virtual socket.
@@ -39,7 +39,9 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
 
             b[off] = (byte)c;
 
-            if(this.bb.readableBytes() == 0) return bytesRead;
+            if(this.bb.readableBytes() == 0) {
+                return bytesRead;
+            }
 
             int ltr = len-1;
             ltr = (ltr <= bb.readableBytes()) ? ltr : bb.readableBytes();

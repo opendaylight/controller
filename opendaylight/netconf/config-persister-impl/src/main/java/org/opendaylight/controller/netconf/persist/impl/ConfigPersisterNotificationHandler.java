@@ -8,6 +8,20 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.Set;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServerConnection;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
+import javax.net.ssl.SSLContext;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -26,20 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServerConnection;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
-import javax.net.ssl.SSLContext;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Responsible for listening for notifications from netconf containing latest
@@ -159,8 +159,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
     private boolean isSubset(Set<String> currentCapabilities, Set<String> expectedCaps) {
         for (String exCap : expectedCaps) {
-            if (currentCapabilities.contains(exCap) == false)
+            if (currentCapabilities.contains(exCap) == false) {
                 return false;
+            }
         }
         return true;
     }
@@ -175,8 +176,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
     @Override
     public void handleNotification(Notification notification, Object handback) {
-        if (notification instanceof NetconfJMXNotification == false)
+        if (notification instanceof NetconfJMXNotification == false) {
             return;
+        }
 
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called
@@ -190,8 +192,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
                 logger.warn("Exception occured during notification handling: ", e);
                 throw e;
             }
-        } else
+        } else {
             throw new IllegalStateException("Unknown config registry notification type " + notification);
+        }
     }
 
     private void handleAfterCommitNotification(final CommitJMXNotification notification) {

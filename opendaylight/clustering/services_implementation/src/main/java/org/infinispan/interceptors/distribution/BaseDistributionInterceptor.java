@@ -173,7 +173,9 @@ public abstract class BaseDistributionInterceptor extends ClusteringInterceptor 
             boolean isSyncForwarding = isSync || isNeedReliableReturnValues(command);
             Map<Address, Response> addressResponseMap = rpcManager.invokeRemotely(Collections.singletonList(primaryOwner), command,
                   rpcManager.getDefaultRpcOptions(isSyncForwarding));
-            if (!isSyncForwarding) return localResult;
+            if (!isSyncForwarding) {
+                return localResult;
+            }
 
             return getResponseFromPrimaryOwner(primaryOwner, addressResponseMap);
          }

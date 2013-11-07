@@ -86,21 +86,28 @@ public class V6Error extends OFError {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         V6Error other = (V6Error) obj;
-        if (!Arrays.equals(V6ErrorData, other.V6ErrorData))
+        if (!Arrays.equals(V6ErrorData, other.V6ErrorData)) {
             return false;
-        if (V6VendorErrorCode != other.V6VendorErrorCode)
+        }
+        if (V6VendorErrorCode != other.V6VendorErrorCode) {
             return false;
-        if (V6VendorErrorType != other.V6VendorErrorType)
+        }
+        if (V6VendorErrorType != other.V6VendorErrorType) {
             return false;
-        if (V6VendorId != other.V6VendorId)
+        }
+        if (V6VendorId != other.V6VendorId) {
             return false;
+        }
         return true;
     }
 }

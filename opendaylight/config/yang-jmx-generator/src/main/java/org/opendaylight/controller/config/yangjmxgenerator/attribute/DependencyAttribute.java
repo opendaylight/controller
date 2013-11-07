@@ -52,25 +52,31 @@ public class DependencyAttribute extends AbstractAttribute implements
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
         DependencyAttribute that = (DependencyAttribute) o;
 
         if (dependency != null ? !dependency.equals(that.dependency)
-                : that.dependency != null)
+                : that.dependency != null) {
             return false;
+        }
         if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
+        }
         if (nullableDescription != null ? !nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
+        }
 
         return true;
     }
@@ -118,17 +124,21 @@ public class DependencyAttribute extends AbstractAttribute implements
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
 
             Dependency that = (Dependency) o;
 
-            if (mandatory != that.mandatory)
+            if (mandatory != that.mandatory) {
                 return false;
-            if (!sie.equals(that.sie))
+            }
+            if (!sie.equals(that.sie)) {
                 return false;
+            }
 
             return true;
         }

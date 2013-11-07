@@ -62,15 +62,19 @@ public class Config extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Config other = (Config) obj;
-        if (configValue != other.configValue)
+        if (configValue != other.configValue) {
             return false;
+        }
         return true;
     }
 

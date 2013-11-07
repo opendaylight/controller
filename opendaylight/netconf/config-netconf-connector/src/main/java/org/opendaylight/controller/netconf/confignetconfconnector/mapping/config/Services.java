@@ -8,6 +8,16 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.annotation.Nullable;
+import javax.management.ObjectName;
+
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -17,16 +27,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.annotation.Nullable;
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class Services {
 
@@ -192,8 +192,9 @@ public final class Services {
 
         while (true) {
             refName = intitialRefName + "_" + suffix++;
-            if (refNamesAsSet.contains(refName) == false)
+            if (refNamesAsSet.contains(refName) == false) {
                 return refName;
+            }
         }
     }
 
@@ -286,23 +287,30 @@ public final class Services {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ServiceInstance other = (ServiceInstance) obj;
             if (instanceName == null) {
-                if (other.instanceName != null)
+                if (other.instanceName != null) {
                     return false;
-            } else if (!instanceName.equals(other.instanceName))
+                }
+            } else if (!instanceName.equals(other.instanceName)) {
                 return false;
+            }
             if (moduleName == null) {
-                if (other.moduleName != null)
+                if (other.moduleName != null) {
                     return false;
-            } else if (!moduleName.equals(other.moduleName))
+                }
+            } else if (!moduleName.equals(other.moduleName)) {
                 return false;
+            }
             return true;
         }
 

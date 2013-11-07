@@ -87,20 +87,26 @@ public class TimeStamp extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         TimeStamp other = (TimeStamp) obj;
-        if (timestamp != other.timestamp)
+        if (timestamp != other.timestamp) {
             return false;
+        }
         if (timestampName == null) {
-            if (other.timestampName != null)
+            if (other.timestampName != null) {
                 return false;
-        } else if (!timestampName.equals(other.timestampName))
+            }
+        } else if (!timestampName.equals(other.timestampName)) {
             return false;
+        }
         return true;
     }
 

@@ -131,8 +131,9 @@ abstract class ListableJolokiaClient {
     }
 
     private static void checkArgument(boolean b, String string) {
-        if (b == false)
+        if (b == false) {
             throw new IllegalArgumentException(string);
+        }
     }
 
     public String getUrl() {
@@ -253,8 +254,9 @@ abstract class ListableJolokiaClient {
         } catch (RuntimeException e) {
             if (e.getMessage() != null
                     && e.getMessage().startsWith(
-                            InstanceNotFoundException.class.getName()))
+                            InstanceNotFoundException.class.getName())) {
                 throw new InstanceNotFoundException();
+            }
             throw e;
         }
     }

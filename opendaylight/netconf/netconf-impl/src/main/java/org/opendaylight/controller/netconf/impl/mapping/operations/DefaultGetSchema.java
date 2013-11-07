@@ -11,6 +11,8 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -25,9 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 
 public final class DefaultGetSchema extends AbstractNetconfOperation implements DefaultNetconfOperation {
 
@@ -47,10 +46,12 @@ public final class DefaultGetSchema extends AbstractNetconfOperation implements 
 
     @Override
     protected HandlingPriority canHandle(String netconfOperationName, String namespace) {
-        if (netconfOperationName.equals("get-schema") == false)
+        if (netconfOperationName.equals("get-schema") == false) {
             return HandlingPriority.CANNOT_HANDLE;
-        if (namespace.equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING) == false)
+        }
+        if (namespace.equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING) == false) {
             return HandlingPriority.CANNOT_HANDLE;
+        }
 
         return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY;
     }

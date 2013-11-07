@@ -70,13 +70,15 @@ public abstract class FilterIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        if (next != null)
+        if (next != null) {
             return true;
+        }
 
         while (subIterator.hasNext()) {
             next = subIterator.next();
-            if (matches(next))
+            if (matches(next)) {
                 return true;
+            }
         }
         next = null;
         return false;

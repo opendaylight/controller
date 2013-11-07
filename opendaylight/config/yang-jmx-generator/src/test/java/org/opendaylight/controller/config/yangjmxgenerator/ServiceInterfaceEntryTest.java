@@ -133,8 +133,9 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
     }
 
     static String trimInnerSpacesOrNull(String input) {
-        if (input == null)
+        if (input == null) {
             return null;
+        }
         return input.replaceAll("\\s{2,}", " ");
     }
 }

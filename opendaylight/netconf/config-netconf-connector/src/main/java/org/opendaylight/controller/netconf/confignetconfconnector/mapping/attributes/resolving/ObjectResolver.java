@@ -65,8 +65,9 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
 
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaAttribute(JavaAttribute attributeIfc) {
-        if (attributeIfc.getOpenType() instanceof SimpleType<?>)
+        if (attributeIfc.getOpenType() instanceof SimpleType<?>) {
             return new SimpleAttributeResolvingStrategy((SimpleType<?>) openType);
+        }
         else if (attributeIfc.getOpenType() instanceof ArrayType<?>) {
             ArrayType<?> arrayType = (ArrayType<?>) openType;
             SimpleType<?> innerType = (SimpleType<?>) arrayType.getElementOpenType();

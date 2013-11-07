@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.config.persist.storage.file;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
@@ -20,12 +26,6 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Set;
 
 /**
  * StorageAdapter that stores configuration in a plan file.
@@ -68,8 +68,9 @@ public class FileStorageAdapter implements StorageAdapter {
             logger.debug("Storage file does not exist, creating empty file");
             try {
                 boolean result = storage.createNewFile();
-                if (result == false)
+                if (result == false) {
                     throw new RuntimeException("Unable to create storage file " + storage);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Unable to create storage file " + storage, e);
             }
@@ -229,8 +230,9 @@ public class FileStorageAdapter implements StorageAdapter {
             final String xmlContent = snapshotBuffer.toString();
             if (xmlContent == null || xmlContent.equals("")) {
                 return Optional.absent();
-            } else
+            } else {
                 return Optional.of(xmlContent);
+            }
         }
 
         Set<String> getCapabilities() throws IOException, SAXException, ParserConfigurationException {

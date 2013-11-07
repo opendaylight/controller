@@ -7,6 +7,23 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import static java.lang.String.format;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.DynamicMBean;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
@@ -26,23 +43,6 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.DynamicMBean;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static java.lang.String.format;
 
 /**
  * This is a JMX bean representing current transaction. It contains
@@ -269,8 +269,9 @@ class ConfigTransactionControllerImpl implements
 
     @Override
     public synchronized void validateConfig() throws ValidationException {
-        if (configBeanModificationDisabled.get())
+        if (configBeanModificationDisabled.get()) {
             throw new IllegalStateException("Cannot start validation");
+        }
         configBeanModificationDisabled.set(true);
         try {
             validate_noLocks();

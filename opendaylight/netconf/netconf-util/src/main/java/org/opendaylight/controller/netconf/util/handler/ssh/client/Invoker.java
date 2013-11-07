@@ -27,7 +27,9 @@ public abstract class Invoker {
         return new Invoker() {
             @Override
             void invoke(SshSession session) throws IOException {
-                if (isInvoked() == true) throw new IllegalStateException("Already invoked.");
+                if (isInvoked() == true) {
+                    throw new IllegalStateException("Already invoked.");
+                }
 
                 session.startSubSystem(subsystem);
             }

@@ -63,24 +63,32 @@ class PriorityMessage {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         PriorityMessage other = (PriorityMessage) obj;
         if (msg == null) {
-            if (other.msg != null)
+            if (other.msg != null) {
                 return false;
-        } else if (!msg.equals(other.msg))
+            }
+        } else if (!msg.equals(other.msg)) {
             return false;
-        if (priority != other.priority)
+        }
+        if (priority != other.priority) {
             return false;
-        if (seqNum != other.seqNum)
+        }
+        if (seqNum != other.seqNum) {
             return false;
-        if (syncReply != other.syncReply)
+        }
+        if (syncReply != other.syncReply) {
             return false;
+        }
         return true;
     }
 

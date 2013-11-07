@@ -207,10 +207,12 @@ public class ObjectNameUtil {
 
     public static ObjectName createModulePattern(String moduleName,
             String instanceName) {
-        if (moduleName == null)
+        if (moduleName == null) {
             moduleName = "*";
-        if (instanceName == null)
+        }
+        if (instanceName == null) {
             instanceName = "*";
+        }
         // do not return object names containing transaction name
         ObjectName namePattern = ObjectNameUtil
                 .createON(ObjectNameUtil.ON_DOMAIN + ":"
@@ -246,13 +248,15 @@ public class ObjectNameUtil {
             String expectedType) {
         checkType(objectName, expectedType);
         String factoryName = getFactoryName(objectName);
-        if (factoryName == null)
+        if (factoryName == null) {
             throw new IllegalArgumentException(
                     "ObjectName does not contain module name");
+        }
         String instanceName = getInstanceName(objectName);
-        if (instanceName == null)
+        if (instanceName == null) {
             throw new IllegalArgumentException(
                     "ObjectName does not contain instance name");
+        }
         return new ModuleIdentifier(factoryName, instanceName);
     }
 

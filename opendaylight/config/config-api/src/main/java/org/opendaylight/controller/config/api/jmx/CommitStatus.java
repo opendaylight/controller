@@ -80,28 +80,37 @@ public class CommitStatus {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         CommitStatus other = (CommitStatus) obj;
         if (newInstances == null) {
-            if (other.newInstances != null)
+            if (other.newInstances != null) {
                 return false;
-        } else if (!newInstances.equals(other.newInstances))
+            }
+        } else if (!newInstances.equals(other.newInstances)) {
             return false;
+        }
         if (recreatedInstances == null) {
-            if (other.recreatedInstances != null)
+            if (other.recreatedInstances != null) {
                 return false;
-        } else if (!recreatedInstances.equals(other.recreatedInstances))
+            }
+        } else if (!recreatedInstances.equals(other.recreatedInstances)) {
             return false;
+        }
         if (reusedInstances == null) {
-            if (other.reusedInstances != null)
+            if (other.reusedInstances != null) {
                 return false;
-        } else if (!reusedInstances.equals(other.reusedInstances))
+            }
+        } else if (!reusedInstances.equals(other.reusedInstances)) {
             return false;
+        }
         return true;
     }
 

@@ -158,21 +158,28 @@ public class V6StatsRequest extends OFVendorStatistics {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         V6StatsRequest other = (V6StatsRequest) obj;
-        if (match_len != other.match_len)
+        if (match_len != other.match_len) {
             return false;
-        if (msgsubtype != other.msgsubtype)
+        }
+        if (msgsubtype != other.msgsubtype) {
             return false;
-        if (outPort != other.outPort)
+        }
+        if (outPort != other.outPort) {
             return false;
-        if (tableId != other.tableId)
+        }
+        if (tableId != other.tableId) {
             return false;
+        }
         return true;
     }
 }

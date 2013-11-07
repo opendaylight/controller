@@ -82,8 +82,9 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
     public synchronized void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException,
             MBeanException, ReflectionException {
-        if (configBeanModificationDisabled.get() == true)
+        if (configBeanModificationDisabled.get() == true) {
             throw new IllegalStateException("Operation is not allowed now");
+        }
 
         if (attribute.getName().equals("Attribute")) {
             setAttribute((Attribute) attribute.getValue());

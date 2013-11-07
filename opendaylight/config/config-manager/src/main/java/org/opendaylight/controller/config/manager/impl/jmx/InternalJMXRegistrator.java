@@ -69,10 +69,11 @@ public class InternalJMXRegistrator implements Closeable {
     private synchronized void unregisterMBean(ObjectName on) {
         // first check that on was registered using this instance
         boolean removed = registeredObjectNames.remove(on);
-        if (!removed)
+        if (!removed) {
             throw new IllegalStateException(
                     "Cannot unregister - ObjectName not found in 'registeredObjectNames': "
                             + on);
+        }
         try {
             configMBeanServer.unregisterMBean(on);
         } catch (Exception e) {

@@ -7,21 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.store.impl;
 
-import com.google.common.collect.Lists;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.osgi.framework.Bundle;
-
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Mockito.doNothing;
@@ -30,6 +15,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.yang.store.api.YangStoreException;
+import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
+import org.osgi.framework.Bundle;
 
 public class ExtenderYangTrackerCustomizerTest {
 
@@ -100,10 +100,12 @@ public class ExtenderYangTrackerCustomizerTest {
         Enumeration<URL> abc = new TestEnumeration(urls);
 
         doReturn(abc).when(mock).findEntries("META-INF/yang", "*.yang", false);
-        if (system)
+        if (system) {
             doReturn(0L).when(mock).getBundleId();
-        else
+        }
+        else {
             doReturn(1L).when(mock).getBundleId();
+        }
 
         doReturn("mockedBundle").when(mock).toString();
 

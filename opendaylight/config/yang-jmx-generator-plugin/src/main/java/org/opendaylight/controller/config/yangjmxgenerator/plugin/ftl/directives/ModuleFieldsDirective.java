@@ -39,15 +39,17 @@ public class ModuleFieldsDirective implements TemplateDirectiveModel {
         List<ModuleField> fields = Lists.newArrayList();
 
         if (object != null) {
-            if (object instanceof SimpleSequence)
+            if (object instanceof SimpleSequence) {
                 fields = ((SimpleSequence) object).toList();
+            }
             else if (object instanceof AbstractModuleTemplate) {
                 fields = ((AbstractModuleTemplate) object).getModuleFields();
-            } else
+            } else {
                 throw new IllegalArgumentException(
                         "Object must be a SimpleSequence or instance of "
                                 + AbstractModuleTemplate.class + "but was "
                                 + object.getClass());
+            }
         }
 
         Writer out = env.getOut();
@@ -67,8 +69,9 @@ public class ModuleFieldsDirective implements TemplateDirectiveModel {
             }
             build.append(field.getType() + " ");
             build.append(field.getName());
-            if (field.getNullableDefault() != null)
+            if (field.getNullableDefault() != null) {
                 build.append(" = " + field.getNullableDefault());
+            }
             build.append(";");
 
             if (field.isDependent()) {
@@ -82,7 +85,8 @@ public class ModuleFieldsDirective implements TemplateDirectiveModel {
 
         }
 
-        if (!fields.isEmpty())
+        if (!fields.isEmpty()) {
             out.write(build.toString().toCharArray());
+        }
     }
 }

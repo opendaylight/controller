@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
+import java.io.InputStream;
+import java.util.Map.Entry;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -23,11 +28,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import java.io.InputStream;
-import java.util.Map.Entry;
 
 public class SendErrorExceptionUtil {
     private static final Logger logger = LoggerFactory.getLogger(SendErrorExceptionUtil.class);
@@ -68,8 +68,9 @@ public class SendErrorExceptionUtil {
             for (int i = 0; i < incomingAttributes.getLength(); i++) {
                 final Attr attr = (Attr) incomingAttributes.item(i);
                 // skip namespace
-                if (attr.getNodeName().equals(XmlUtil.XMLNS_ATTRIBUTE_KEY))
+                if (attr.getNodeName().equals(XmlUtil.XMLNS_ATTRIBUTE_KEY)) {
                     continue;
+                }
                 rpcReply.setAttributeNode((Attr) errorDocument.importNode(attr, true));
             }
         } catch (final Exception e) {

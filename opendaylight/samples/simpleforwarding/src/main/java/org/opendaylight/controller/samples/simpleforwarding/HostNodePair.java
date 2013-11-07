@@ -58,23 +58,30 @@ public class HostNodePair implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         HostNodePair other = (HostNodePair) obj;
         if (host == null) {
-            if (other.host != null)
+            if (other.host != null) {
                 return false;
-        } else if (!host.equals(other.host))
+            }
+        } else if (!host.equals(other.host)) {
             return false;
+        }
         if (node == null) {
-            if (other.node != null)
+            if (other.node != null) {
                 return false;
-        } else if (!node.equals(other.node))
+            }
+        } else if (!node.equals(other.node)) {
             return false;
+        }
         return true;
     }
 

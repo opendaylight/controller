@@ -8,6 +8,18 @@
 
 package org.opendaylight.controller.config.persist.storage.file;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -18,18 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.persist.api.Persister;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 public class FileStorageAdapterTest {
 
     private static int i;
@@ -38,8 +38,9 @@ public class FileStorageAdapterTest {
     @Before
     public void setUp() throws Exception {
         file = Files.createTempFile("testFilePersist", ".txt").toFile();
-        if (!file.exists())
+        if (!file.exists()) {
             return;
+        }
         com.google.common.io.Files.write("", file, Charsets.UTF_8);
         i = 1;
     }
@@ -69,8 +70,9 @@ public class FileStorageAdapterTest {
 
                     @Override
                     public boolean apply(String input) {
-                        if (input.equals(""))
+                        if (input.equals("")) {
                             return false;
+                        }
                         return true;
                     }
                 });
@@ -117,8 +119,9 @@ public class FileStorageAdapterTest {
 
                     @Override
                     public boolean apply(String input) {
-                        if (input.equals(""))
+                        if (input.equals("")) {
                             return false;
+                        }
                         return true;
                     }
                 });
@@ -156,8 +159,9 @@ public class FileStorageAdapterTest {
 
                     @Override
                     public boolean apply(String input) {
-                        if (input.equals(""))
+                        if (input.equals("")) {
                             return false;
+                        }
                         return true;
                     }
                 });
@@ -174,8 +178,9 @@ public class FileStorageAdapterTest {
     @Test
     public void testNoLastConfig() throws Exception {
         File file = Files.createTempFile("testFilePersist", ".txt").toFile();
-        if (!file.exists())
+        if (!file.exists()) {
             return;
+        }
         FileStorageAdapter storage = new FileStorageAdapter();
         storage.setFileStorage(file);
 

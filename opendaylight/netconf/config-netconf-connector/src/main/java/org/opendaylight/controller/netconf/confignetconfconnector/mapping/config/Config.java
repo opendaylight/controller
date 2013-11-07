@@ -8,12 +8,16 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.management.ObjectName;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -27,11 +31,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 
 public class Config {
 
@@ -56,8 +55,9 @@ public class Config {
                 String moduleName = mbeEntry.getKey();
                 Collection<ObjectName> instances = moduleToInstances.get(moduleName);
 
-                if (instances == null)
+                if (instances == null) {
                     continue;
+                }
 
                 innerRetVal.put(moduleName, instances);
 

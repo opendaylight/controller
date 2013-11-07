@@ -102,23 +102,30 @@ public class Host implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Host other = (Host) obj;
         if (dataLayerAddress == null) {
-            if (other.dataLayerAddress != null)
+            if (other.dataLayerAddress != null) {
                 return false;
-        } else if (!dataLayerAddress.equals(other.dataLayerAddress))
+            }
+        } else if (!dataLayerAddress.equals(other.dataLayerAddress)) {
             return false;
+        }
         if (networkAddress == null) {
-            if (other.networkAddress != null)
+            if (other.networkAddress != null) {
                 return false;
-        } else if (!networkAddress.equals(other.networkAddress))
+            }
+        } else if (!networkAddress.equals(other.networkAddress)) {
             return false;
+        }
         return true;
     }
 

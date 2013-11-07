@@ -43,14 +43,18 @@ public class TopologyUserLinkConfig implements Serializable {
         }
 
         public static STATUS fromString(String str) {
-            if (str == null)
+            if (str == null) {
                 return LINKDOWN;
-            if (str.equals(SUCCESS.toString()))
+            }
+            if (str.equals(SUCCESS.toString())) {
                 return SUCCESS;
-            if (str.equals(LINKDOWN.toString()))
+            }
+            if (str.equals(LINKDOWN.toString())) {
                 return LINKDOWN;
-            if (str.equals(INCORRECT.toString()))
+            }
+            if (str.equals(INCORRECT.toString())) {
                 return INCORRECT;
+            }
             return LINKDOWN;
         }
     }
@@ -112,7 +116,9 @@ public class TopologyUserLinkConfig implements Serializable {
 
     public boolean isValidNodeConnector(String nodeConnectorStr) {
         NodeConnector nc = NodeConnector.fromString(nodeConnectorStr);
-        if (nc == null) return false;
+        if (nc == null) {
+            return false;
+        }
         return true;
     }
 
@@ -146,23 +152,30 @@ public class TopologyUserLinkConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null)  {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         TopologyUserLinkConfig other = (TopologyUserLinkConfig) obj;
         if (dstNodeConnector == null) {
-            if (other.dstNodeConnector != null)
+            if (other.dstNodeConnector != null) {
                 return false;
-        } else if (!dstNodeConnector.equals(other.dstNodeConnector))
+            }
+        } else if (!dstNodeConnector.equals(other.dstNodeConnector)) {
             return false;
+        }
         if (srcNodeConnector == null) {
-            if (other.srcNodeConnector != null)
+            if (other.srcNodeConnector != null) {
                 return false;
-        } else if (!srcNodeConnector.equals(other.srcNodeConnector))
+            }
+        } else if (!srcNodeConnector.equals(other.srcNodeConnector)) {
             return false;
+        }
         return true;
     }
 

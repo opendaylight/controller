@@ -301,23 +301,30 @@ public class Node implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Node other = (Node) obj;
         if (nodeID == null) {
-            if (other.nodeID != null)
+            if (other.nodeID != null) {
                 return false;
-        } else if (!nodeID.equals(other.nodeID))
+            }
+        } else if (!nodeID.equals(other.nodeID)) {
             return false;
+        }
         if (nodeType == null) {
-            if (other.nodeType != null)
+            if (other.nodeType != null) {
                 return false;
-        } else if (!nodeType.equals(other.nodeType))
+            }
+        } else if (!nodeType.equals(other.nodeType)) {
             return false;
+        }
         return true;
     }
 
@@ -450,8 +457,9 @@ public class Node implements Serializable {
             //The protocol plugin being used depends on typeStr.
             INodeFactory f = (INodeFactory) ServiceHelper
                     .getGlobalInstance(INodeFactory.class, new Node(), "(protocolName="+typeStr+")");
-            if(f==null)
+            if(f==null) {
                 return null;
+            }
             return f.fromString(typeStr, IDStr);
         }
     }

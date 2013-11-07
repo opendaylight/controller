@@ -124,18 +124,23 @@ public class CompositeConditionalTransformer<I, P> implements
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             TransformerWithPriority<?,?> other = (TransformerWithPriority<?,?>) obj;
             if (transformer == null) {
-                if (other.transformer != null)
+                if (other.transformer != null) {
                     return false;
-            } else if (!transformer.equals(other.transformer))
+                }
+            } else if (!transformer.equals(other.transformer)) {
                 return false;
+            }
             return true;
         }
 

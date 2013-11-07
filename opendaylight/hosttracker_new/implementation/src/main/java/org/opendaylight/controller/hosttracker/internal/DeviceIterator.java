@@ -87,8 +87,9 @@ public class DeviceIterator extends FilterIterator<Device> {
         boolean match;
         if (entityClasses != null) {
             IEntityClass clazz = value.getEntityClass();
-            if (clazz == null)
+            if (clazz == null) {
                 return false;
+            }
 
             match = false;
             for (IEntityClass entityClass : entityClasses) {
@@ -97,27 +98,32 @@ public class DeviceIterator extends FilterIterator<Device> {
                     break;
                 }
             }
-            if (!match)
+            if (!match) {
                 return false;
+            }
         }
         if (macAddress != null) {
-            if (macAddress.longValue() != value.getMACAddress())
+            if (macAddress.longValue() != value.getMACAddress()) {
                 return false;
+            }
         }
         if (vlan != null) {
             Short[] vlans = value.getVlanId();
-            if (Arrays.binarySearch(vlans, vlan) < 0)
+            if (Arrays.binarySearch(vlans, vlan) < 0) {
                 return false;
+            }
         }
         if (ipv4Address != null) {
             Integer[] ipv4Addresses = value.getIPv4Addresses();
-            if (Arrays.binarySearch(ipv4Addresses, ipv4Address) < 0)
+            if (Arrays.binarySearch(ipv4Addresses, ipv4Address) < 0) {
                 return false;
+            }
         }
         if (port != null) {
             SwitchPort[] sps = value.getAttachmentPoints();
-            if (sps == null)
+            if (sps == null) {
                 return false;
+            }
 
             match = false;
             for (SwitchPort sp : sps) {
@@ -126,8 +132,9 @@ public class DeviceIterator extends FilterIterator<Device> {
                     break;
                 }
             }
-            if (!match)
+            if (!match) {
                 return false;
+            }
         }
         return true;
     }

@@ -348,8 +348,9 @@ abstract public class ComponentActivatorAbstractBase implements
 
                         //Now lets keep track in our shadow database of the
                         //association
-                        if (c != null)
+                        if (c != null) {
                             this.dbGlobalInstances.put(key, c);
+                        }
                     } else {
                         logger.error("I have been asked again to create an "
                                 + "instance " + " Global for object: "

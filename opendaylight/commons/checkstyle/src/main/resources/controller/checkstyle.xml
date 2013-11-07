@@ -20,6 +20,7 @@
        <module name="UpperEll"/>
        <module name="EmptyStatement"/>
        <module name="EqualsHashCode"/>
+       <module name="NeedBraces"/>
     </module>
 
 </module>

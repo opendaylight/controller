@@ -198,10 +198,11 @@ public class TemplateFactory {
                 Lists.<MethodDeclaration> newArrayList());
         sieTemplate.setJavadoc(sie.getNullableDescription());
 
-        if (sie.getNullableDescription() != null)
+        if (sie.getNullableDescription() != null) {
             sieTemplate.getAnnotations().add(
                     Annotation.createDescriptionAnnotation(sie
                             .getNullableDescription()));
+        }
         sieTemplate.getAnnotations().add(Annotation.createSieAnnotation(sie.getQName(), sie.getExportedOsgiClassName
                 ()));
 
@@ -267,10 +268,11 @@ public class TemplateFactory {
                 attrProcessor.getMethods(), generateRuntime,
                 registratorFullyQualifiedName);
 
-        if (mbe.getNullableDescription() != null)
+        if (mbe.getNullableDescription() != null) {
             abstractModuleTemplate.getAnnotations().add(
                     Annotation.createDescriptionAnnotation(mbe
                             .getNullableDescription()));
+        }
         return abstractModuleTemplate;
     }
 
@@ -333,12 +335,15 @@ public class TemplateFactory {
         for (Rpc rpc : rbe.getRpcs()) {
             AttributeIfc returnType = rpc.getReturnType();
 
-            if (returnType == VoidAttribute.getInstance())
+            if (returnType == VoidAttribute.getInstance()) {
                 continue;
-            if (returnType instanceof JavaAttribute)
+            }
+            if (returnType instanceof JavaAttribute) {
                 continue;
-            if (returnType instanceof ListAttribute && returnType.getOpenType() instanceof SimpleType)
+            }
+            if (returnType instanceof ListAttribute && returnType.getOpenType() instanceof SimpleType) {
                 continue;
+            }
 
             Preconditions.checkState(yangPropertiesToTypesMap.containsKey(returnType.getAttributeYangName()) == false,
                     "Duplicate TO %s for %s", returnType.getAttributeYangName(), rbe);
@@ -446,10 +451,10 @@ public class TemplateFactory {
                                         .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
 
                         fullyQualifiedName = "java.util.List<" + innerTpe + ">";
-                    } else
+                    } else {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
-
+                    }
                     fields.add(new Field(fullyQualifiedName, varName));
 
                     String getterName = "get" + innerName;

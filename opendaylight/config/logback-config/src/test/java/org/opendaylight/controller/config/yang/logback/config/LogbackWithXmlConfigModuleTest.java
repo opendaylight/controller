@@ -50,8 +50,9 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
         configurator.setContext(lc);
         configurator.doConfigure("src/test/resources/simple_config_logback.xml");
         File f = new File("target/it");
-        if (f.exists())
+        if (f.exists()) {
             FileUtils.cleanDirectory(f);
+        }
     }
 
     /**

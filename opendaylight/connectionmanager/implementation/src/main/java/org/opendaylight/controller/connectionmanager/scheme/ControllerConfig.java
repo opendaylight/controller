@@ -40,18 +40,23 @@ public class ControllerConfig {
     }
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ControllerConfig other = (ControllerConfig) obj;
         if (controllerId == null) {
-            if (other.controllerId != null)
+            if (other.controllerId != null) {
                 return false;
-        } else if (!controllerId.equals(other.controllerId))
+            }
+        } else if (!controllerId.equals(other.controllerId)) {
             return false;
+        }
         return true;
     }
     @Override

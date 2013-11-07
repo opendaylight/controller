@@ -136,18 +136,23 @@ public class Path implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj)  {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Path other = (Path) obj;
         if (edges == null) {
-            if (other.edges != null)
+            if (other.edges != null) {
                 return false;
-        } else if (!edges.equals(other.edges))
+            }
+        } else if (!edges.equals(other.edges)) {
             return false;
+        }
         return true;
     }
 

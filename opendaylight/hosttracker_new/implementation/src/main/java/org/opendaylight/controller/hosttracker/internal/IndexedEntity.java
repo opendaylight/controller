@@ -66,16 +66,19 @@ public class IndexedEntity {
             case MAC:
                 return true;
             case IPV4:
-                if (entity.getIpv4Address() != null)
+                if (entity.getIpv4Address() != null) {
                     return true;
+                }
                 break;
             case SWITCHPORT:
-                if (entity.getPort() != null)
+                if (entity.getPort() != null) {
                     return true;
+                }
                 break;
             case VLAN:
-                if (entity.getVlan() != null)
+                if (entity.getVlan() != null) {
                     return true;
+                }
                 break;
             }
         }
@@ -124,44 +127,54 @@ public class IndexedEntity {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         IndexedEntity other = (IndexedEntity) obj;
 
-        if (!keyFields.equals(other.keyFields))
+        if (!keyFields.equals(other.keyFields)) {
             return false;
-
+        }
         for (IDeviceService.DeviceField f : keyFields) {
             switch (f) {
             case MAC:
-                if (entity.getMacAddress() != other.entity.getMacAddress())
+                if (entity.getMacAddress() != other.entity.getMacAddress()) {
                     return false;
+                }
                 break;
             case IPV4:
                 if (entity.getIpv4Address() == null) {
-                    if (other.entity.getIpv4Address() != null)
+                    if (other.entity.getIpv4Address() != null) {
                         return false;
+                    }
                 } else if (!entity.getIpv4Address().equals(
-                        other.entity.getIpv4Address()))
+                        other.entity.getIpv4Address())) {
                     return false;
+                }
                 break;
             case SWITCHPORT:
                 if (entity.getPort() == null) {
-                    if (other.entity.getPort() != null)
+                    if (other.entity.getPort() != null) {
                         return false;
-                } else if (!entity.getPort().equals(other.entity.getPort()))
+                    }
+                } else if (!entity.getPort().equals(other.entity.getPort())) {
                     return false;
+                }
                 break;
             case VLAN:
                 if (entity.getVlan() == null) {
-                    if (other.entity.getVlan() != null)
+                    if (other.entity.getVlan() != null) {
                         return false;
-                } else if (!entity.getVlan().equals(other.entity.getVlan()))
+                    }
+                } else if (!entity.getVlan().equals(other.entity.getVlan())) {
                     return false;
+                }
                 break;
             }
         }

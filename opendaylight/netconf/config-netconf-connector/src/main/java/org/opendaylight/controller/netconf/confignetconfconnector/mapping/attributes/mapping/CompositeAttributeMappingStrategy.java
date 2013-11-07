@@ -8,16 +8,16 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
+import java.util.Map;
+import java.util.Set;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenType;
-import java.util.Map;
-import java.util.Set;
 
 public class CompositeAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<Map<String, Object>, CompositeType> {
@@ -35,8 +35,9 @@ public class CompositeAttributeMappingStrategy extends
 
     @Override
     public Optional<Map<String, Object>> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null) {
             return Optional.absent();
+        }
 
         Util.checkType(value, CompositeDataSupport.class);
 
@@ -59,8 +60,9 @@ public class CompositeAttributeMappingStrategy extends
             AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies
                     .get(innerAttrJmxName);
             Optional<?> mapAttribute = attributeMappingStrategy.mapAttribute(innerValue);
-            if (mapAttribute.isPresent())
+            if (mapAttribute.isPresent()) {
                 retVal.put(jmxToJavaNameMapping.get(innerAttrJmxName), mapAttribute.get());
+            }
         }
 
         return Optional.of(retVal);

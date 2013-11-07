@@ -204,11 +204,13 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         File factoryFile = new File(generatedResourcesDir, "META-INF"
                 + File.separator + "services" + File.separator
                 + ModuleFactory.class.getName());
-        if (!shouldBePresent)
+        if (!shouldBePresent) {
             assertFalse("Factory file should not be generated",
                     factoryFile.exists());
-        else
+        }
+        else {
             assertTrue("Factory file should be generated", factoryFile.exists());
+        }
     }
 
     public static List<String> toFileNames(Collection<File> files) {
@@ -345,16 +347,21 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             String name = file.getName();
             MbeASTVisitor visitor = new MbeASTVisitor();
             verifiers.put(name, visitor);
-            if (name.equals("AbstractDynamicThreadPoolModule.java"))
+            if (name.equals("AbstractDynamicThreadPoolModule.java")) {
                 abstractDynamicThreadPoolModuleVisitor = visitor;
-            if (name.equals("AsyncEventBusModuleMXBean.java"))
+            }
+            if (name.equals("AsyncEventBusModuleMXBean.java")) {
                 asyncEventBusModuleMXBeanVisitor = visitor;
-            if (name.equals("AbstractNamingThreadFactoryModuleFactory.java"))
+            }
+            if (name.equals("AbstractNamingThreadFactoryModuleFactory.java")) {
                 abstractNamingThreadFactoryModuleFactoryVisitor = visitor;
-            if (name.equals("AsyncEventBusModule.java"))
+            }
+            if (name.equals("AsyncEventBusModule.java")) {
                 asyncEventBusModuleVisitor = visitor;
-            if (name.equals("EventBusModuleFactory.java"))
+            }
+            if (name.equals("EventBusModuleFactory.java")) {
                 eventBusModuleFactoryVisitor = visitor;
+            }
         }
 
         processGeneratedCode(javaFiles, verifiers);
@@ -682,8 +689,9 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         @Override
         public boolean visit(MethodDeclaration node) {
-            if (node.isConstructor())
+            if (node.isConstructor()) {
                 constructors.add(node.toString());
+            }
             else {
                 String methodSignature = node.getReturnType2() + " " + node.getName() + "(";
                 boolean first = true;
@@ -742,19 +750,22 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             for (IProblem c : cu.getProblems()) {
                 // 1610613332 = Syntax error, annotations are only available if
                 // source level is 5.0
-                if (c.getID() == 1610613332)
+                if (c.getID() == 1610613332) {
                     continue;
+                }
                 // 1610613332 = Syntax error, parameterized types are only
                 // available if source level is 5.0
-                if (c.getID() == 1610613329)
+                if (c.getID() == 1610613329) {
                     continue;
+                }
                 fail("Error in generated source code " + file + ":"
                         + c.getSourceLineNumber() + " " + c.toString());
             }
 
             ASTVisitor visitor = verifiers.get(file.getName());
-            if (visitor == null)
+            if (visitor == null) {
                 fail("Unknown generated file " + file.getName());
+            }
             cu.accept(visitor);
 
         }
@@ -798,8 +809,9 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             for (ArgumentAssertion argument : arguments) {
                 sb.append(argument.type).append(' ');
                 sb.append(argument.name);
-                if(++i != arguments.size())
+                if(++i != arguments.size()) {
                     sb.append(',');
+                }
             }
             sb.append(')');
             return sb.toString();

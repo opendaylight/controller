@@ -259,15 +259,18 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
     }
 
     protected ObjectName fixObjectName(ObjectName on) {
-        if (!ObjectNameUtil.ON_DOMAIN.equals(on.getDomain()))
+        if (!ObjectNameUtil.ON_DOMAIN.equals(on.getDomain())) {
             throw new IllegalArgumentException("Wrong domain, expected "
                     + ObjectNameUtil.ON_DOMAIN + " setter on " + on);
+        }
         // if on contains transaction name, remove it
         String transactionName = ObjectNameUtil.getTransactionName(on);
-        if (transactionName != null)
+        if (transactionName != null) {
             return ObjectNameUtil.withoutTransactionName(on);
-        else
+        }
+        else {
             return on;
+        }
     }
 
     @Override

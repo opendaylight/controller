@@ -268,14 +268,17 @@ public class LoadBalancerNorthbound {
                                                 + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if(!configManager.poolExists(poolName))
+        if(!configManager.poolExists(poolName)) {
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
+        }
 
-        if(configManager.getVIPAttachedPool(name)!=null)
+        if(configManager.getVIPAttachedPool(name)!=null) {
             throw new MethodNotAllowedException(NBConst.RES_VIP_POOL_EXIST);
+        }
 
-        if(configManager.updateVIP(name, poolName)!= null)
+        if(configManager.updateVIP(name, poolName)!= null) {
             return Response.status(Response.Status.ACCEPTED).build();
+        }
 
         throw new InternalServerErrorException(NBConst.RES_VIP_UPDATE_FAILED);
     }
@@ -293,17 +296,18 @@ public class LoadBalancerNorthbound {
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "vipName") String vipName) {
 
-        if(vipName.isEmpty())
+        if(vipName.isEmpty()) {
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
-
+        }
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer"
                                             + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if(!configManager.vipExists(vipName))
+        if(!configManager.vipExists(vipName)) {
             throw new ResourceNotFoundException(NBConst.RES_VIP_NOT_FOUND);
+        }
 
         for(VIP vip : configManager.getAllVIPs()){
             if(vip.getName().equals(vipName)){
@@ -365,8 +369,9 @@ public class LoadBalancerNorthbound {
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "poolName") String poolName) {
 
-        if(poolName.isEmpty())
+        if(poolName.isEmpty()) {
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
+        }
 
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
@@ -374,8 +379,9 @@ public class LoadBalancerNorthbound {
                                         + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if(!configManager.poolExists(poolName))
+        if(!configManager.poolExists(poolName)) {
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
+        }
 
         for(Pool pool:configManager.getAllPools()){
             if(pool.getName().equals(poolName)){
@@ -416,16 +422,17 @@ public class LoadBalancerNorthbound {
                                         + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if(!configManager.poolExists(poolName))
+        if(!configManager.poolExists(poolName)) {
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
+        }
 
         if(!configManager.memberExists(name, memberIP, poolName)){
 
             PoolMember poolMember = configManager.addPoolMember(name, memberIP, poolName);
-            if ( poolMember != null){
+            if ( poolMember != null) {
                 return Response.status(Response.Status.CREATED).build();
             }
-        }else{
+        }else {
             throw new ResourceConflictException(NBConst.RES_POOLMEMBER_ALREADY_EXIST);
         }
         throw new InternalServerErrorException(NBConst.RES_POOLMEMBER_CREATION_FAILED);
@@ -446,9 +453,9 @@ public class LoadBalancerNorthbound {
             @PathParam(value = "poolName") String poolName) {
 
         if(poolMemberName.isEmpty()||
-                poolName.isEmpty())
+                poolName.isEmpty()) {
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
-
+        }
         IConfigManager configManager = getConfigManagerService(containerName);
 
         if (configManager == null) {
@@ -456,10 +463,11 @@ public class LoadBalancerNorthbound {
                                         + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if(!configManager.poolExists(poolName))
+        if(!configManager.poolExists(poolName)) {
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
+        }
 
-        if(configManager.memberExists(poolMemberName, poolName)){
+        if(configManager.memberExists(poolMemberName, poolName)) {
 
             configManager.removePoolMember(poolMemberName, poolName);
 

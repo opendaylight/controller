@@ -53,7 +53,9 @@ public class BridgeDomainNorthbound {
 
     @Context
     public void setSecurityContext(SecurityContext context) {
-        if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
+        if (context != null && context.getUserPrincipal() != null) {
+            username = context.getUserPrincipal().getName();
+        }
     }
     protected String getUserName() {
         return username;
@@ -271,7 +273,9 @@ public class BridgeDomainNorthbound {
    }
 
    private Map<ConfigConstants, Object> buildConfig(Map<String, Object> rawConfigs) {
-       if (rawConfigs == null) return null;
+       if (rawConfigs == null) {
+           return null;
+       }
        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
        for (String key : rawConfigs.keySet()) {
            ConfigConstants cc = ConfigConstants.valueOf(key.toUpperCase());

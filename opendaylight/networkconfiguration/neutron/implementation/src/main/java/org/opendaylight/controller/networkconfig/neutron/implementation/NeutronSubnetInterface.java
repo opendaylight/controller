@@ -181,8 +181,9 @@ public class NeutronSubnetInterface implements INeutronSubnetCRUD {
     }
 
     public NeutronSubnet getSubnet(String uuid) {
-        if (!subnetExists(uuid))
+        if (!subnetExists(uuid)) {
             return null;
+        }
         return subnetDB.get(uuid);
     }
 
@@ -200,8 +201,9 @@ public class NeutronSubnetInterface implements INeutronSubnetCRUD {
 
     public boolean addSubnet(NeutronSubnet input) {
         String id = input.getID();
-        if (subnetExists(id))
+        if (subnetExists(id)) {
             return false;
+        }
         subnetDB.putIfAbsent(id, input);
         INeutronNetworkCRUD networkIf = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
 
@@ -211,8 +213,9 @@ public class NeutronSubnetInterface implements INeutronSubnetCRUD {
     }
 
     public boolean removeSubnet(String uuid) {
-        if (!subnetExists(uuid))
+        if (!subnetExists(uuid)) {
             return false;
+        }
         NeutronSubnet target = subnetDB.get(uuid);
         INeutronNetworkCRUD networkIf = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
 
@@ -223,15 +226,17 @@ public class NeutronSubnetInterface implements INeutronSubnetCRUD {
     }
 
     public boolean updateSubnet(String uuid, NeutronSubnet delta) {
-        if (!subnetExists(uuid))
+        if (!subnetExists(uuid)) {
             return false;
+        }
         NeutronSubnet target = subnetDB.get(uuid);
         return overwrite(target, delta);
     }
 
     public boolean subnetInUse(String subnetUUID) {
-        if (!subnetExists(subnetUUID))
+        if (!subnetExists(subnetUUID)) {
             return true;
+        }
         NeutronSubnet target = subnetDB.get(subnetUUID);
         return (target.getPortsInSubnet().size() > 0);
     }

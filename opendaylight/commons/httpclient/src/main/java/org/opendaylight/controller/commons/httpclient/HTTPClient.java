@@ -26,8 +26,9 @@ public class HTTPClient {
     static public HTTPResponse sendRequest(HTTPRequest request) throws Exception {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        if (httpclient == null)
+        if (httpclient == null) {
             throw new ClientProtocolException("Couldn't create an HTTP client");
+        }
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(request.getTimeout())
             .setConnectTimeout(request.getTimeout()).build();
         HttpRequestBase httprequest;
@@ -80,8 +81,9 @@ public class HTTPClient {
                 Header h = it.nextHeader();
                 String name = h.getName();
                 String value = h.getValue();
-                if (headerMap.containsKey(name))
+                if (headerMap.containsKey(name)) {
                     headerMap.get(name).add(value);
+                }
                 else {
                     List<String> list = new ArrayList<String>();
                     list.add(value);
@@ -96,10 +98,12 @@ public class HTTPClient {
                 return ans;
             }
             ans.setStatus(response.getStatusLine().getStatusCode());
-            if (receivedEntity != null)
+            if (receivedEntity != null) {
                 ans.setEntity(EntityUtils.toString(receivedEntity));
-            else
+            }
+            else {
                 ans.setEntity(null);
+            }
             return ans;
         } finally {
             response.close();

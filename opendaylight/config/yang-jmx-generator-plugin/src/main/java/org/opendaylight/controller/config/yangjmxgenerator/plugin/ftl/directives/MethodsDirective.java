@@ -41,22 +41,25 @@ public class MethodsDirective implements TemplateDirectiveModel {
         List<? extends Method> methods = Lists.newArrayList();
 
         if (object != null) {
-            if (object instanceof SimpleSequence)
+            if (object instanceof SimpleSequence) {
                 methods = ((SimpleSequence) object).toList();
+            }
             else if (object instanceof FtlTemplate) {
                 methods = ((FtlTemplate) object).getMethods();
-            } else
+            } else {
                 throw new IllegalArgumentException(
                         "Object must be a SimpleSequence or instance of "
                                 + FtlTemplate.class + "but was "
                                 + object.getClass());
+            }
         }
 
         Writer out = env.getOut();
         StringBuilder build = new StringBuilder();
         for (Method method : methods) {
-            if (method.getJavadoc() != null)
+            if (method.getJavadoc() != null) {
                 JavadocDirective.writeJavadoc(build, method.getJavadoc(), "    ");
+            }
 
             if (!method.getAnnotations().isEmpty()) {
                 AnnotationsDirective.writeAnnotations(method.getAnnotations(),
@@ -77,8 +80,9 @@ public class MethodsDirective implements TemplateDirectiveModel {
                 build.append(param.getType() + " ");
                 build.append(param.getName() + ", ");
             }
-            if (method.getParameters().isEmpty())
+            if (method.getParameters().isEmpty()) {
                 build.append(")");
+            }
             else {
                 build.deleteCharAt(build.length() - 1);
                 build.deleteCharAt(build.length() - 1);
@@ -90,8 +94,9 @@ public class MethodsDirective implements TemplateDirectiveModel {
                 build.append(System.lineSeparator());
             } else if (method instanceof MethodDefinition) {
                 if (!((MethodDefinition) method).getThrowsExceptions()
-                        .isEmpty())
+                        .isEmpty()) {
                     build.append(" throws ");
+                }
                 for (String ex : ((MethodDefinition) method)
                         .getThrowsExceptions()) {
                     build.append(ex + " ");
@@ -109,7 +114,8 @@ public class MethodsDirective implements TemplateDirectiveModel {
 
         }
 
-        if (!methods.isEmpty())
+        if (!methods.isEmpty()) {
             out.write(build.toString().toCharArray());
+        }
     }
 }

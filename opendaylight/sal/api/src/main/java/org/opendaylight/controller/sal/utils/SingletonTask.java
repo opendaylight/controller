@@ -74,8 +74,9 @@ public class SingletonTask {
         @Override
         public void run() {
             synchronized (parent.context) {
-                if (canceled || !parent.context.taskShouldRun)
+                if (canceled || !parent.context.taskShouldRun) {
                     return;
+                }
 
                 parent.context.taskRunning = true;
                 parent.context.taskShouldRun = false;

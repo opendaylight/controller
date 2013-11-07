@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
+import javax.management.ObjectName;
+import javax.management.openmbean.SimpleType;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-
-import javax.management.ObjectName;
-import javax.management.openmbean.SimpleType;
 
 public class ObjectNameAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
@@ -30,8 +30,9 @@ public class ObjectNameAttributeMappingStrategy extends
 
     @Override
     public Optional<MappedDependency> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null) {
             return Optional.absent();
+        }
 
         String expectedClass = getOpenType().getClassName();
         String realClass = value.getClass().getName();

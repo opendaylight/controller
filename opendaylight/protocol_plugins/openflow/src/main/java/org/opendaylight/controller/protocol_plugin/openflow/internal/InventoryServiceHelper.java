@@ -79,10 +79,12 @@ public class InventoryServiceHelper {
      */
     public static Config OFPortToConfig(int portConfig) {
         Config config;
-        if ((OFPortConfig.OFPPC_PORT_DOWN.getValue() & portConfig) != 0)
+        if ((OFPortConfig.OFPPC_PORT_DOWN.getValue() & portConfig) != 0) {
             config = new Config(Config.ADMIN_DOWN);
-        else
+        }
+        else {
             config = new Config(Config.ADMIN_UP);
+        }
         return config;
     }
 
@@ -91,10 +93,12 @@ public class InventoryServiceHelper {
      */
     public static State OFPortToState(int portState) {
         State state;
-        if ((OFPortState.OFPPS_LINK_DOWN.getValue() & portState) != 0)
+        if ((OFPortState.OFPPS_LINK_DOWN.getValue() & portState) != 0) {
             state = new State(State.EDGE_DOWN);
-        else
+        }
+        else {
             state = new State(State.EDGE_UP);
+        }
         return state;
     }
 

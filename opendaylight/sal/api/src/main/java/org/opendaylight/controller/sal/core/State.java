@@ -63,15 +63,19 @@ public class State extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         State other = (State) obj;
-        if (stateValue != other.stateValue)
+        if (stateValue != other.stateValue) {
             return false;
+        }
         return true;
     }
 

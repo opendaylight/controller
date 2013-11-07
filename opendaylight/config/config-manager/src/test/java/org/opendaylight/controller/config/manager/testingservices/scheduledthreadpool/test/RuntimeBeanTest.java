@@ -77,8 +77,9 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
 
     private void checkRuntimeBeans() throws Exception {
         // check runtime bean - on 2 places
-        for (ObjectName on : allObjectNames)
+        for (ObjectName on : allObjectNames) {
             checkRuntimeBean(on);
+        }
     }
 
     private void checkRuntimeBean(ObjectName on) throws Exception {
@@ -154,8 +155,9 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
         configTransaction.destroyModule(ObjectNameUtil
                 .createTransactionModuleON(configTransaction.getTransactionName(), createdConfigBean));
         configTransaction.commit();
-        for (ObjectName on : allObjectNames)
+        for (ObjectName on : allObjectNames) {
             checkRuntimeBeanDoesNotExist(on);
+        }
     }
 
 }

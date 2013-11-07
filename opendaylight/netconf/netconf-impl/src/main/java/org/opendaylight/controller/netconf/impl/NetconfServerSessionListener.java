@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -24,9 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 public class NetconfServerSessionListener implements
         SessionListener<NetconfMessage, NetconfServerSession, NetconfTerminationReason> {
@@ -124,8 +123,9 @@ public class NetconfServerSessionListener implements
     private static boolean isCloseSession(final NetconfMessage incommingDocument) {
         final Document document = incommingDocument.getDocument();
         XmlElement rpcElement = XmlElement.fromDomDocument(document);
-        if (rpcElement.getOnlyChildElementOptionally("close-session").isPresent())
+        if (rpcElement.getOnlyChildElementOptionally("close-session").isPresent()) {
             return true;
+        }
 
         return false;
     }

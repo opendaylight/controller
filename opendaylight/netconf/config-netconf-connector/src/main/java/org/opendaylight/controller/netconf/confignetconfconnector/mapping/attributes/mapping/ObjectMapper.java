@@ -8,6 +8,13 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
@@ -16,13 +23,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
-
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingStrategy<?, ? extends OpenType<?>>> {
 
@@ -58,8 +58,9 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaAttribute(JavaAttribute attributeIfc) {
 
-        if (attributeIfc.getOpenType() instanceof SimpleType<?>)
+        if (attributeIfc.getOpenType() instanceof SimpleType<?>) {
             return new SimpleAttributeMappingStrategy((SimpleType<?>) attributeIfc.getOpenType());
+        }
         else if (attributeIfc.getOpenType() instanceof ArrayType<?>) {
             ArrayType<?> arrayType = (ArrayType<?>) attributeIfc.getOpenType();
             AttributeMappingStrategy<?, ? extends OpenType<?>> innerStrategy = new SimpleAttributeMappingStrategy(

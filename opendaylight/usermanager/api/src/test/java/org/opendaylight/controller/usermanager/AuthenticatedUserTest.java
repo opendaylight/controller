@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.usermanager;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class AuthenticatedUserTest {
 
@@ -51,8 +51,9 @@ public class AuthenticatedUserTest {
                 user = new AuthenticatedUser("auser");
                 user.setRoleList(roleArray);
                 retrievedRoleList = user.getUserRoles();
-                for (int i = 0; i < roleArray.length; i++)
+                for (int i = 0; i < roleArray.length; i++) {
                         Assert.assertTrue(roleArray[i].equals(retrievedRoleList.get(i)));
+                }
 
                 // test addUserRole
                 user.addUserRole("AnotherRole");

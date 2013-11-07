@@ -53,15 +53,17 @@ public class Activator implements BundleActivator {
                             if (state != Bundle.RESOLVED) {
                                 System.out.println("------ Failed to activate/resolve fragment = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
                                 failed = true;
-                                if (state == Bundle.STARTING)
+                                if (state == Bundle.STARTING) {
                                     resolved = false;
+                                }
                             }
                         } else {
                             if(state != Bundle.ACTIVE) {
                                 System.out.println("------ Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
                                 failed = true;
-                                if (state == Bundle.STARTING)
+                                if (state == Bundle.STARTING) {
                                     resolved = false;
+                                }
                             }
                         }
                     }
@@ -75,8 +77,9 @@ public class Activator implements BundleActivator {
                                 System.out.println("Thread.sleep interuptted.");
                                 break;
                             }
-                        } else
+                        } else {
                             resolved = true;
+                        }
                     }
                 }
 

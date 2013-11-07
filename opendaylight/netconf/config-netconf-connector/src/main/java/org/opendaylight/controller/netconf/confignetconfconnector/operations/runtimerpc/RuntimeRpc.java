@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc;
 
+import java.util.Map;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -35,10 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-import java.util.Map;
 
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
@@ -124,8 +124,9 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         final Optional<XmlElement> contextInstanceElement = operationElement
                 .getOnlyChildElementOptionally(CONTEXT_INSTANCE);
 
-        if (contextInstanceElement.isPresent() == false)
+        if (contextInstanceElement.isPresent() == false) {
             return HandlingPriority.CANNOT_HANDLE;
+        }
 
         final RuntimeRpcElementResolved id = RuntimeRpcElementResolved.fromXpath(contextInstanceElement.get()
                 .getTextContent(), netconfOperationName, netconfOperationNamespace);

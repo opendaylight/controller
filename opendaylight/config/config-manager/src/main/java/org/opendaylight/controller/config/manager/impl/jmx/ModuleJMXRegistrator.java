@@ -46,9 +46,10 @@ public class ModuleJMXRegistrator implements Closeable {
     public ModuleJMXRegistration registerMBean(Object object, ObjectName on)
             throws InstanceAlreadyExistsException {
         ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_MODULE);
-        if (ObjectNameUtil.getTransactionName(on) != null)
+        if (ObjectNameUtil.getTransactionName(on) != null) {
             throw new IllegalArgumentException(
                     "Transaction name not expected in " + on);
+        }
         return new ModuleJMXRegistration(childJMXRegistrator.registerMBean(
                 object, on));
     }

@@ -93,15 +93,19 @@ public class Bandwidth extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Bandwidth other = (Bandwidth) obj;
-        if (bandwidthValue != other.bandwidthValue)
+        if (bandwidthValue != other.bandwidthValue) {
             return false;
+        }
         return true;
     }
 

@@ -71,18 +71,22 @@ public class TOAttribute extends AbstractAttribute {
             TypeProviderWrapper typeProviderWrapper) {
         Class<? extends DataSchemaNode> type = isAllowedType(dataSchemaNode);
 
-        if (type.equals(LeafSchemaNode.class))
+        if (type.equals(LeafSchemaNode.class)) {
             return new JavaAttribute((LeafSchemaNode) dataSchemaNode,
                     typeProviderWrapper);
-        else if (type.equals(ListSchemaNode.class))
+        }
+        else if (type.equals(ListSchemaNode.class)) {
             return ListAttribute.create((ListSchemaNode) dataSchemaNode,
                     typeProviderWrapper);
-        else if (type.equals(LeafListSchemaNode.class))
+        }
+        else if (type.equals(LeafListSchemaNode.class)) {
             return ListAttribute.create((LeafListSchemaNode) dataSchemaNode,
                     typeProviderWrapper);
-        else if (type.equals(ContainerSchemaNode.class))
+        }
+        else if (type.equals(ContainerSchemaNode.class)) {
             return TOAttribute.create((ContainerSchemaNode) dataSchemaNode,
                     typeProviderWrapper);
+        }
 
         throw new IllegalStateException("This should never happen");
     }
@@ -90,8 +94,9 @@ public class TOAttribute extends AbstractAttribute {
     private static Class<? extends DataSchemaNode> isAllowedType(
             DataSchemaNode dataSchemaNode) {
         for (Class<? extends DataSchemaNode> allowedType : ALLOWED_CHILDREN) {
-            if (allowedType.isAssignableFrom(dataSchemaNode.getClass()) == true)
+            if (allowedType.isAssignableFrom(dataSchemaNode.getClass()) == true) {
                 return allowedType;
+            }
         }
         throw new IllegalArgumentException("Illegal child node for TO: "
                 + dataSchemaNode.getClass() + " allowed node types: "
@@ -153,26 +158,32 @@ public class TOAttribute extends AbstractAttribute {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
         TOAttribute that = (TOAttribute) o;
 
         if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
+        }
         if (nullableDescription != null ? !nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
+        }
         if (yangNameToAttributeMap != null ? !yangNameToAttributeMap
                 .equals(that.yangNameToAttributeMap)
-                : that.yangNameToAttributeMap != null)
+                : that.yangNameToAttributeMap != null) {
             return false;
+        }
 
         return true;
     }

@@ -40,34 +40,43 @@ public class HandlingPriority implements Comparable<HandlingPriority> {
 
     @Override
     public int compareTo(HandlingPriority o) {
-        if (this == o)
+        if (this == o) {
             return 0;
-        if (this == CANNOT_HANDLE)
+        }
+        if (this == CANNOT_HANDLE) {
             return -1;
-        if (o == CANNOT_HANDLE)
+        }
+        if (o == CANNOT_HANDLE) {
             return 1;
+        }
 
-        if (priority > o.priority)
+        if (priority > o.priority) {
             return 1;
-        if (priority == o.priority)
+        }
+        if (priority == o.priority) {
             return 0;
-        if (priority < o.priority)
+        }
+        if (priority < o.priority) {
             return -1;
+        }
 
         throw new IllegalStateException("Unexpected state");
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof HandlingPriority))
+        }
+        if (!(o instanceof HandlingPriority)) {
             return false;
+        }
 
         HandlingPriority that = (HandlingPriority) o;
 
-        if (priority != null ? !priority.equals(that.priority) : that.priority != null)
+        if (priority != null ? !priority.equals(that.priority) : that.priority != null) {
             return false;
+        }
 
         return true;
     }

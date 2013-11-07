@@ -140,23 +140,30 @@ public class Edge implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Edge other = (Edge) obj;
         if (headNodeConnector == null) {
-            if (other.headNodeConnector != null)
+            if (other.headNodeConnector != null) {
                 return false;
-        } else if (!headNodeConnector.equals(other.headNodeConnector))
+            }
+        } else if (!headNodeConnector.equals(other.headNodeConnector)) {
             return false;
+        }
         if (tailNodeConnector == null) {
-            if (other.tailNodeConnector != null)
+            if (other.tailNodeConnector != null) {
                 return false;
-        } else if (!tailNodeConnector.equals(other.tailNodeConnector))
+            }
+        } else if (!tailNodeConnector.equals(other.tailNodeConnector)) {
             return false;
+        }
         return true;
     }
 

@@ -8,6 +8,14 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -24,14 +32,6 @@ import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.osgi.framework.BundleContext;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
 *
@@ -161,10 +161,12 @@ public class LogbackModuleFactory extends
                 context.getLogger(Logger.ROOT_LOGGER_NAME));
         for (org.slf4j.Logger log : loggersToBeAdd) {
             LoggerTO logger = new LoggerTO();
-            if (((Logger) log).getLevel() != null)
+            if (((Logger) log).getLevel() != null) {
                 logger.setLevel(((Logger) log).getLevel().levelStr);
-            else
+            }
+            else {
                 logger.setLevel(((Logger) log).getEffectiveLevel().levelStr);
+            }
             logger.setLoggerName(log.getName());
             Iterator<Appender<ILoggingEvent>> iter = ((Logger) log).iteratorForAppenders();
             while (iter.hasNext()) {

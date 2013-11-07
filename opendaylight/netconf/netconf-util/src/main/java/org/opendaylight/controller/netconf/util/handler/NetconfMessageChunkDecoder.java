@@ -55,11 +55,13 @@ public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
         ByteBuf chunkSize = Unpooled.buffer(NetconfMessageConstants.MIN_HEADER_LENGTH,
                 NetconfMessageConstants.MAX_HEADER_LENGTH);
         byte b = in.readByte();
-        if (b != 10)
+        if (b != 10) {
             return -1;
+        }
         b = in.readByte();
-        if (b != 35)
+        if (b != 35) {
             return -1;
+        }
         while ((b = in.readByte()) != 10) {
             chunkSize.writeByte(b);
         }

@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -15,9 +18,6 @@ import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NetconfClientSessionListener implements
         SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> {
@@ -65,8 +65,9 @@ public class NetconfClientSessionListener implements
                 }
             }
 
-            if (up.get() == false)
+            if (up.get() == false) {
                 throw new IllegalStateException("Session ended while trying to read message");
+            }
             Thread.sleep(attemptMsDelay);
         }
 

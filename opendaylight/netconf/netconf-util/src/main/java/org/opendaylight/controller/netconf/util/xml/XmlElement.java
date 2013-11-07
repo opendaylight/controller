@@ -8,6 +8,14 @@
 
 package org.opendaylight.controller.netconf.util.xml;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -22,14 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class XmlElement {
 
@@ -153,10 +153,12 @@ public class XmlElement {
         final List<XmlElement> result = new ArrayList<>();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
-            if (item instanceof Element == false)
+            if (item instanceof Element == false) {
                 continue;
-            if (strat.accept((Element) item))
+            }
+            if (strat.accept((Element) item)) {
                 result.add(new XmlElement((Element) item));
+            }
         }
 
         return result;
@@ -358,15 +360,18 @@ public class XmlElement {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         XmlElement that = (XmlElement) o;
 
-        if (!element.isEqualNode(that.element))
+        if (!element.isEqualNode(that.element)) {
             return false;
+        }
 
         return true;
     }

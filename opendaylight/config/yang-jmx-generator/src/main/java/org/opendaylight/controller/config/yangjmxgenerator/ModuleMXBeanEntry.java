@@ -550,8 +550,9 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private static int getChildNodeSizeWithoutUses(ContainerSchemaNode csn) {
         int result = 0;
         for (DataSchemaNode dsn : csn.getChildNodes()) {
-            if (dsn.isAddedByUses() == false)
+            if (dsn.isAddedByUses() == false) {
                 result++;
+            }
         }
         return result;
     }

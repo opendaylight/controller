@@ -8,17 +8,17 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving;
 
-import com.google.common.base.Optional;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.lang.reflect.Array;
+import java.util.List;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
-import java.lang.reflect.Array;
-import java.util.List;
+
+import com.google.common.base.Optional;
+import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<Object, ArrayType<?>> {
 
@@ -45,28 +45,31 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
 
         if (innerTypeResolvingStrategy.getOpenType() instanceof CompositeType) {
             innerTypeClass = CompositeDataSupport.class;
-        } else
+        } else  {
             try {
                 innerTypeClass = Class.forName(getOpenType().getElementOpenType().getClassName());
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Unable to locate class for "
                         + getOpenType().getElementOpenType().getClassName(), e);
             }
+        }
 
         Object parsedArray = null;
 
         if (getOpenType().isPrimitiveArray()) {
             Class<?> primitiveType = getPrimitiveType(innerTypeClass);
             parsedArray = Array.newInstance(primitiveType, valueList.size());
-        } else
+        } else {
             parsedArray = Array.newInstance(innerTypeClass, valueList.size());
+        }
 
         int i = 0;
         for (Object innerValue : valueList) {
             Optional<?> parsedElement = innerTypeResolvingStrategy.parseAttribute(attrName + "_" + i, innerValue);
 
-            if (!parsedElement.isPresent())
+            if (!parsedElement.isPresent()) {
                 continue;
+            }
 
             Array.set(parsedArray, i, parsedElement.get());
             // parsedArray[i] = parsedElement.get();

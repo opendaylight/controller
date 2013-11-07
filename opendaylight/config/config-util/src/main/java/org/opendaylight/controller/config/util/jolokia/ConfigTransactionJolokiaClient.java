@@ -57,8 +57,9 @@ public class ConfigTransactionJolokiaClient extends ListableJolokiaClient
         } catch (RuntimeException e) {
             if (e.getMessage() != null
                     && e.getMessage().startsWith(
-                            InstanceAlreadyExistsException.class.getName()))
+                            InstanceAlreadyExistsException.class.getName())) {
                 throw new InstanceAlreadyExistsException();
+            }
             throw e;
         }
     }

@@ -177,8 +177,9 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
     }
 
     public NeutronRouter getRouter(String uuid) {
-        if (!routerExists(uuid))
+        if (!routerExists(uuid)) {
             return null;
+        }
         return routerDB.get(uuid);
     }
 
@@ -195,29 +196,33 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
     }
 
     public boolean addRouter(NeutronRouter input) {
-        if (routerExists(input.getID()))
+        if (routerExists(input.getID())) {
             return false;
+        }
         routerDB.putIfAbsent(input.getID(), input);
         return true;
     }
 
     public boolean removeRouter(String uuid) {
-        if (!routerExists(uuid))
+        if (!routerExists(uuid)) {
             return false;
+        }
         routerDB.remove(uuid);
         return true;
     }
 
     public boolean updateRouter(String uuid, NeutronRouter delta) {
-        if (!routerExists(uuid))
+        if (!routerExists(uuid)) {
             return false;
+        }
         NeutronRouter target = routerDB.get(uuid);
         return overwrite(target, delta);
     }
 
     public boolean routerInUse(String routerUUID) {
-        if (!routerExists(routerUUID))
+        if (!routerExists(routerUUID)) {
             return true;
+        }
         NeutronRouter target = routerDB.get(routerUUID);
         return (target.getInterfaces().size() > 0);
     }

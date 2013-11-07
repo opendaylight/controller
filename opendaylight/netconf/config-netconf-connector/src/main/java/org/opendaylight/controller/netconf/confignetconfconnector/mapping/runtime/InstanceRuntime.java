@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.ObjectName;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
@@ -15,12 +21,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class InstanceRuntime {
 
@@ -53,12 +53,15 @@ public class InstanceRuntime {
             public boolean apply(ObjectName on) {
                 Hashtable<String, String> localProperties = on.getKeyPropertyList();
                 for (Entry<String, String> propertyEntry : wantedProperties.entrySet()) {
-                    if (!localProperties.containsKey(propertyEntry.getKey()))
+                    if (!localProperties.containsKey(propertyEntry.getKey())) {
                         return false;
-                    if (!localProperties.get(propertyEntry.getKey()).equals(propertyEntry.getValue()))
+                    }
+                    if (!localProperties.get(propertyEntry.getKey()).equals(propertyEntry.getValue())) {
                         return false;
-                    if (localProperties.size() <= wantedProperties.size())
+                    }
+                    if (localProperties.size() <= wantedProperties.size()) {
                         return false;
+                    }
                 }
                 return true;
             }
@@ -74,10 +77,12 @@ public class InstanceRuntime {
 
             @Override
             public boolean apply(ObjectName on) {
-                if (on.getKeyPropertyList().size() != keyListSize + 1)
+                if (on.getKeyPropertyList().size() != keyListSize + 1) {
                     return false;
-                if (!on.getKeyPropertyList().containsKey(string))
+                }
+                if (!on.getKeyPropertyList().containsKey(string)) {
                     return false;
+                }
                 return true;
             }
         }));

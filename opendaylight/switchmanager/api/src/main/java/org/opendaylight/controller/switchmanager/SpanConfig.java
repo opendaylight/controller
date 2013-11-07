@@ -73,23 +73,30 @@ public class SpanConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SpanConfig other = (SpanConfig) obj;
         if (nodeId == null) {
-            if (other.nodeId != null)
+            if (other.nodeId != null) {
                 return false;
-        } else if (!nodeId.equals(other.nodeId))
+            }
+        } else if (!nodeId.equals(other.nodeId)) {
             return false;
+        }
         if (spanPort == null) {
-            if (other.spanPort != null)
+            if (other.spanPort != null) {
                 return false;
-        } else if (!spanPort.equals(other.spanPort))
+            }
+        } else if (!spanPort.equals(other.spanPort)) {
             return false;
+        }
         return true;
     }
 

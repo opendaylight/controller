@@ -38,24 +38,27 @@ public class ConstructorsDirective implements TemplateDirectiveModel {
         List<Constructor> constructors = Lists.newArrayList();
 
         if (object != null) {
-            if (object instanceof SimpleSequence)
+            if (object instanceof SimpleSequence) {
                 constructors = ((SimpleSequence) object).toList();
+            }
             else if (object instanceof GeneralClassTemplate) {
                 constructors = ((GeneralClassTemplate) object)
                         .getConstructors();
-            } else
+            } else {
                 throw new IllegalArgumentException(
                         "Object must be a SimpleSequence or instance of "
                                 + GeneralClassTemplate.class + "but was "
                                 + object.getClass());
+            }
         }
 
         Writer out = env.getOut();
         StringBuilder build = new StringBuilder();
         for (Constructor constr : constructors) {
             build.append("    ");
-            if (constr.isPublic())
+            if (constr.isPublic()) {
                 build.append("public ");
+            }
             build.append(constr.getTypeName() + " ");
             build.append("() {");
             build.append(System.lineSeparator());
@@ -69,8 +72,9 @@ public class ConstructorsDirective implements TemplateDirectiveModel {
             build.append(System.lineSeparator());
         }
 
-        if (!constructors.isEmpty())
+        if (!constructors.isEmpty()) {
             out.write(build.toString().toCharArray());
+        }
     }
 
 }

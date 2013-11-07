@@ -36,13 +36,14 @@ public class StubNodeFactory implements INodeFactory
       }
 
       public Node fromString(String nodeType, String nodeId){
-          if(nodeType.equals("STUB"))
+          if(nodeType.equals("STUB")) {
               try{
                   return new Node("STUB", Integer.parseInt(nodeId));
               } catch(ConstructionException e)
               {
                   return null;
               }
+          }
           return null;
       }
 }

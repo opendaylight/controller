@@ -38,15 +38,17 @@ public class FieldsDirectiveProg implements TemplateDirectiveModel {
         List<Field> fields = Lists.newArrayList();
 
         if (object != null) {
-            if (object instanceof SimpleSequence)
+            if (object instanceof SimpleSequence) {
                 fields = ((SimpleSequence) object).toList();
+            }
             else if (object instanceof FtlTemplate) {
                 fields = ((FtlTemplate) object).getFields();
-            } else
+            } else {
                 throw new IllegalArgumentException(
                         "Object must be a SimpleSequence or instance of "
                                 + FtlTemplate.class + "but was "
                                 + object.getClass());
+            }
         }
 
         Writer out = env.getOut();
@@ -58,14 +60,16 @@ public class FieldsDirectiveProg implements TemplateDirectiveModel {
             }
             build.append(field.getType() + " ");
             build.append(field.getName());
-            if (field.getDefinition() != null)
+            if (field.getDefinition() != null) {
                 build.append(" = " + field.getDefinition());
+            }
             build.append(";");
             build.append(System.lineSeparator());
         }
 
-        if (!fields.isEmpty())
+        if (!fields.isEmpty()) {
             out.write(build.toString().toCharArray());
+        }
     }
 
     // String templateStr = "Hello ${user}";

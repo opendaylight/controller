@@ -69,15 +69,17 @@ public class MultiIterator<T> implements Iterator<T> {
 
     @Override
     public T next() {
-        if (hasNext())
+        if (hasNext()) {
             return current.next();
+        }
         throw new NoSuchElementException();
     }
 
     @Override
     public void remove() {
-        if (hasNext())
+        if (hasNext()) {
             current.remove();
+        }
         throw new NoSuchElementException();
     }
 }

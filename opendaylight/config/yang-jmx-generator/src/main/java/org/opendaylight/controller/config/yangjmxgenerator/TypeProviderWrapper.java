@@ -24,9 +24,10 @@ public class TypeProviderWrapper {
         try {
             javaType = typeProvider.javaTypeForSchemaDefinitionType(
                     leaf.getType(), leaf);
-            if (javaType == null)
+            if (javaType == null) {
                 throw new IllegalArgumentException("Unknown type received for "
                         + leaf.toString());
+            }
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Error while resolving type of "
                     + leaf, e);
@@ -40,9 +41,10 @@ public class TypeProviderWrapper {
         try {
             javaType = typeProvider.javaTypeForSchemaDefinitionType(
                     leaf.getType(), leaf);
-            if (javaType == null)
+            if (javaType == null) {
                 throw new IllegalArgumentException(
                         "Unknown type received for  " + leaf.toString());
+            }
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Error while resolving type of "
                     + leaf, e);

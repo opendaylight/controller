@@ -70,8 +70,9 @@ public class DeviceMultiIndex extends DeviceIndex {
     public Iterator<Long> queryByEntity(Entity entity) {
         IndexedEntity ie = new IndexedEntity(keyFields, entity);
         Collection<Long> devices = index.get(ie);
-        if (devices != null)
+        if (devices != null) {
             return devices.iterator();
+        }
 
         return Collections.<Long> emptySet().iterator();
     }
@@ -95,16 +96,18 @@ public class DeviceMultiIndex extends DeviceIndex {
         Collection<Long> devices = null;
 
         IndexedEntity ie = new IndexedEntity(keyFields, entity);
-        if (!ie.hasNonNullKeys())
+        if (!ie.hasNonNullKeys()) {
             return;
+        }
 
         devices = index.get(ie);
         if (devices == null) {
             Map<Long, Boolean> chm = new ConcurrentHashMap<Long, Boolean>();
             devices = Collections.newSetFromMap(chm);
             Collection<Long> r = index.putIfAbsent(ie, devices);
-            if (r != null)
+            if (r != null) {
                 devices = r;
+            }
         }
 
         devices.add(deviceKey);
@@ -120,7 +123,8 @@ public class DeviceMultiIndex extends DeviceIndex {
     public void removeEntity(Entity entity, Long deviceKey) {
         IndexedEntity ie = new IndexedEntity(keyFields, entity);
         Collection<Long> devices = index.get(ie);
-        if (devices != null)
+        if (devices != null) {
             devices.remove(deviceKey);
+        }
     }
 }

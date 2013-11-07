@@ -56,20 +56,26 @@ public class ResourceGroup implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ResourceGroup other = (ResourceGroup) obj;
         if (groupName == null) {
-            if (other.groupName != null)
+            if (other.groupName != null) {
                 return false;
-        } else if (!groupName.equals(other.groupName))
+            }
+        } else if (!groupName.equals(other.groupName)) {
             return false;
-        if (privilege != other.privilege)
+        }
+        if (privilege != other.privilege) {
             return false;
+        }
         return true;
     }
 
