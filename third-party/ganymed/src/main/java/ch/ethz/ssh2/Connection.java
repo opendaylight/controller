@@ -5,16 +5,6 @@
 
 package ch.ethz.ssh2;
 
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketTimeoutException;
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.Vector;
-
 import ch.ethz.ssh2.auth.AuthenticationManager;
 import ch.ethz.ssh2.channel.ChannelManager;
 import ch.ethz.ssh2.crypto.CryptoWishList;
@@ -25,6 +15,17 @@ import ch.ethz.ssh2.transport.KexManager;
 import ch.ethz.ssh2.transport.TransportManager;
 import ch.ethz.ssh2.util.TimeoutService;
 import ch.ethz.ssh2.util.TimeoutService.TimeoutToken;
+
+import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A <code>Connection</code> is used to establish an encrypted TCP/IP
@@ -59,6 +60,14 @@ public class Connection
 	 */
 
     private SecureRandom generator;
+
+    private Socket precreatedSocket;
+
+    public Connection(Socket socket) {
+        this.precreatedSocket = socket;
+        this.hostname = socket.getInetAddress().getHostName();
+        this.port = socket.getPort();
+    }
 
     /**
      * Unless you know what you are doing, you will never need this.
@@ -745,8 +754,14 @@ public class Connection
 
             try
             {
-                tm.clientInit(hostname, port, softwareversion, cryptoWishList, verifier, dhgexpara, connectTimeout,
-                        getOrCreateSecureRND(), proxyData);
+
+                if (precreatedSocket != null) {
+                    tm.clientInit(precreatedSocket, softwareversion, cryptoWishList, verifier, dhgexpara,
+                            getOrCreateSecureRND());
+                } else {
+                    tm.clientInit(hostname, port, softwareversion, cryptoWishList, verifier, dhgexpara, connectTimeout,
+                            getOrCreateSecureRND(), proxyData);
+                }
             }
             catch (SocketTimeoutException se)
             {

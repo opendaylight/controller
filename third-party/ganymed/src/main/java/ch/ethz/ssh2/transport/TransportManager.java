@@ -5,25 +5,7 @@
 
 package ch.ethz.ssh2.transport;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.Vector;
-
-import ch.ethz.ssh2.ConnectionInfo;
-import ch.ethz.ssh2.ConnectionMonitor;
-import ch.ethz.ssh2.DHGexParameters;
-import ch.ethz.ssh2.HTTPProxyData;
-import ch.ethz.ssh2.HTTPProxyException;
-import ch.ethz.ssh2.ProxyData;
-import ch.ethz.ssh2.ServerHostKeyVerifier;
+import ch.ethz.ssh2.*;
 import ch.ethz.ssh2.crypto.Base64;
 import ch.ethz.ssh2.crypto.CryptoWishList;
 import ch.ethz.ssh2.crypto.cipher.BlockCipher;
@@ -37,6 +19,14 @@ import ch.ethz.ssh2.signature.DSAPrivateKey;
 import ch.ethz.ssh2.signature.RSAPrivateKey;
 import ch.ethz.ssh2.util.StringEncoder;
 import ch.ethz.ssh2.util.Tokenizer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.*;
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.Vector;
 
 /*
  * Yes, the "standard" is a big mess. On one side, the say that arbitary channel
@@ -549,6 +539,31 @@ public class TransportManager
 
         receiveThread.setDaemon(true);
         receiveThread.start();
+    }
+
+    public void clientInit(Socket socket, String softwareversion, CryptoWishList cwl,
+                           ServerHostKeyVerifier verifier, DHGexParameters dhgex, SecureRandom rnd) throws IOException
+    {
+		/* First, establish the TCP connection to the SSH-2 server */
+
+        sock = socket;
+
+		/* Parse the server line and say hello - important: this information is later needed for the
+		 * key exchange (to stop man-in-the-middle attacks) - that is why we wrap it into an object
+		 * for later use.
+		 */
+
+        ClientServerHello csh = ClientServerHello.clientHello(softwareversion, sock.getInputStream(),
+                sock.getOutputStream());
+
+        tc = new TransportConnection(sock.getInputStream(), sock.getOutputStream(), rnd);
+        String hostname = sock.getInetAddress().getHostName();
+        int port = sock.getPort();
+
+        km = new ClientKexManager(this, csh, cwl, hostname, port, verifier, rnd);
+        km.initiateKEX(cwl, dhgex, null, null);
+
+        startReceiver();
     }
 
     public void clientInit(String hostname, int port, String softwareversion, CryptoWishList cwl,
