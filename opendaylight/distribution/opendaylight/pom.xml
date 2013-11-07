@@ -287,7 +287,7 @@
            <version>2.4</version>
          </dependency>
 
-           <dependency>
+         <dependency>
           <groupId>org.opendaylight.yangtools.thirdparty</groupId>
           <artifactId>antlr4-runtime-osgi-nohead</artifactId>
           <version>4.0</version>
@@ -334,11 +334,15 @@
           <artifactId>yang-model-api</artifactId>
          </dependency>
 
-          <dependency>
-           <groupId>org.opendaylight.yangtools.model</groupId>
-           <artifactId>yang-ext</artifactId>
-          </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>yang-ext</artifactId>
+         </dependency>
 
+        <dependency>
+         <groupId>org.opendaylight.controller.thirdparty</groupId>
+         <artifactId>ganymed</artifactId>
+        </dependency>
       </dependencies>
     </profile>
   </profiles>
