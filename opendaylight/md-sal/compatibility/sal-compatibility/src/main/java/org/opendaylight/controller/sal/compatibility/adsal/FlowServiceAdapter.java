@@ -5,10 +5,10 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.common.util.Futures;
 import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.compatibility.InventoryMapping;
 import org.opendaylight.controller.sal.compatibility.NodeMapping;
 import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
 import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
@@ -18,6 +18,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Flow
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,58 +33,52 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
     private NotificationProviderService publish;
 
     @Override
-    public void flowRemoved(Node node, Flow flow) {
+    public void flowRemoved(org.opendaylight.controller.sal.core.Node node, Flow flow) {
         FlowRemovedBuilder flowRemovedBuilder = new FlowRemovedBuilder();
-        flowRemovedBuilder.setNode(NodeMapping.toNodeRef(node));
+        flowRemovedBuilder.setNode(InventoryMapping.toNodeRef(node));
         publish.publish(flowRemovedBuilder.build());
     }
 
     @Override
-    public void flowErrorReported(Node node, long rid, Object err) {
+    public void flowErrorReported(org.opendaylight.controller.sal.core.Node node, long rid, Object err) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
     public Future<RpcResult<Void>> addFlow(AddFlowInput input) {
-        try {
-            Flow flow = ToSalConversionsUtils.toFlow(input);
-            Node node = NodeMapping.toADNode(input.getNode());
-            Status status = delegate.addFlowAsync(node, flow);
-            Void rpcResultType = null;
-            return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
-        } catch (ConstructionException e) {
-            LOG.error(e.getMessage());
-        }
-        return null;
+
+        Flow flow = ToSalConversionsUtils.toFlow(input);
+        @SuppressWarnings("unchecked")
+        org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
+                .getNode().getValue());
+        Status status = delegate.addFlowAsync(node, flow);
+        Void rpcResultType = null;
+        return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
     }
 
     @Override
     public Future<RpcResult<Void>> removeFlow(RemoveFlowInput input) {
-        try {
-            Flow flow = ToSalConversionsUtils.toFlow(input);
-            Node node = NodeMapping.toADNode(input.getNode());
-            Status status = delegate.removeFlowAsync(node, flow);
-            Void rpcResultType = null;
-            return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
-        } catch (ConstructionException e) {
-            LOG.error(e.getMessage());
-        }
-        return null;
+
+        Flow flow = ToSalConversionsUtils.toFlow(input);
+        @SuppressWarnings("unchecked")
+        org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
+                .getNode().getValue());
+        Status status = delegate.removeFlowAsync(node, flow);
+        Void rpcResultType = null;
+        return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
+
     }
 
     @Override
     public Future<RpcResult<Void>> updateFlow(UpdateFlowInput input) {
-        try {
-            Node node = NodeMapping.toADNode(input.getNode());
-            Flow originalFlow = ToSalConversionsUtils.toFlow(input.getOriginalFlow());
-            Flow updatedFlow = ToSalConversionsUtils.toFlow(input.getUpdatedFlow());
-            Status status = delegate.modifyFlowAsync(node, originalFlow, updatedFlow);
-            Void rpcResultType = null;
-            return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
-        } catch (ConstructionException e) {
-            LOG.error(e.getMessage());
-        }
-        return null;
+        @SuppressWarnings("unchecked")
+        org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
+                .getNode().getValue());
+        Flow originalFlow = ToSalConversionsUtils.toFlow(input.getOriginalFlow());
+        Flow updatedFlow = ToSalConversionsUtils.toFlow(input.getUpdatedFlow());
+        Status status = delegate.modifyFlowAsync(node, originalFlow, updatedFlow);
+        Void rpcResultType = null;
+        return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
     }
 }
