@@ -19,6 +19,7 @@
        <module name="AvoidStarImport"/>
        <module name="UpperEll"/>
        <module name="EmptyStatement"/>
+       <module name="EqualsHashCode"/>
     </module>
 
 </module>
