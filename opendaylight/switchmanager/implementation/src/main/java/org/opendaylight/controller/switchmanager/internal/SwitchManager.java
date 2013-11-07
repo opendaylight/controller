@@ -111,6 +111,19 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     private boolean isDefaultContainer = true;
     private static final int REPLACE_RETRY = 1;
 
+    /* Information about the default subnet. If there have been no configured subnets, i.e.,
+     * subnets.size() == 0 or subnetsConfigList.size() == 0, then this subnet will be the
+     * only subnet returned. As soon as a user-configured subnet is created this one will
+     * vanish.
+     */
+    protected static SubnetConfig DEFAULT_SUBNETCONFIG;
+    protected static Subnet DEFAULT_SUBNET;
+    protected static String DEFAULT_SUBNET_NAME = "default (cannot be modifed)";
+    static{
+        DEFAULT_SUBNETCONFIG = new SubnetConfig(DEFAULT_SUBNET_NAME, "0.0.0.0/0", new ArrayList<String>());
+        DEFAULT_SUBNET = new Subnet(DEFAULT_SUBNETCONFIG);
+    }
+
     public void notifySubnetChange(Subnet sub, boolean add) {
         synchronized (switchManagerAware) {
             for (Object subAware : switchManagerAware) {
@@ -295,12 +308,22 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public List<SubnetConfig> getSubnetsConfigList() {
-        return new ArrayList<SubnetConfig>(subnetsConfigList.values());
+        // if there are no subnets, return the default subnet
+        if(subnetsConfigList.size() == 0){
+            return Collections.singletonList(DEFAULT_SUBNETCONFIG);
+        }else{
+            return new ArrayList<SubnetConfig>(subnetsConfigList.values());
+        }
     }
 
     @Override
     public SubnetConfig getSubnetConfig(String subnet) {
-        return subnetsConfigList.get(subnet);
+        // if there are no subnets, return the default subnet
+        if(subnetsConfigList.size() == 0 && subnet == DEFAULT_SUBNET_NAME){
+            return DEFAULT_SUBNETCONFIG;
+        }else{
+            return subnetsConfigList.get(subnet);
+        }
     }
 
     private List<SpanConfig> getSpanConfigList(Node node) {
@@ -646,6 +669,11 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public Subnet getSubnetByNetworkAddress(InetAddress networkAddress) {
+        // if there are no subnets, return the default subnet
+        if (subnets.size() == 0) {
+            return DEFAULT_SUBNET;
+        }
+
         Subnet sub;
         Set<InetAddress> indices = subnets.keySet();
         for (InetAddress i : indices) {

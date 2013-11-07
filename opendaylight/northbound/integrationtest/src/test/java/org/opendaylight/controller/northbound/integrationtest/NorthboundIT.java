@@ -310,7 +310,7 @@ public class NorthboundIT {
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         JSONArray subnetConfigs = json.getJSONArray("subnetConfig");
-        Assert.assertEquals(subnetConfigs.length(), 0);
+        Assert.assertEquals(subnetConfigs.length(), 1); // should only get the default subnet
 
         // Test GET subnet1 expecting 404
         result = getJsonResult(baseURL + "default/subnet/" + name1);
