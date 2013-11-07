@@ -52,6 +52,10 @@
             <artifactId>netty-handler</artifactId>
             <version>${netconf.netty.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>ganymed</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,6 +76,7 @@
                             org.opendaylight.controller.config.stat,
                             com.google.common.base,
                             com.google.common.collect,
+                            ch.ethz.ssh2,
                             io.netty.buffer,
                             io.netty.channel,
                             io.netty.channel.socket,
