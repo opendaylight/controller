@@ -44,7 +44,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  *         <li>/version (field)
  *     </ul>
  */
-@Path("restconf")
+@Path("/")
 public interface RestconfService {
 
     public static final String XML = "+xml";
@@ -59,17 +59,17 @@ public interface RestconfService {
     public Object readAllData();
 
     @GET
-    @Path("/datastore/{identifier}")
+    @Path("/datastore/{identifier:.+}")
     @Produces({API+JSON,API+XML})
     public StructuredData readData(@PathParam("identifier") String identifier);
 
     @PUT
-    @Path("/datastore/{identifier}")
+    @Path("/datastore/{identifier:.+}")
     @Produces({API+JSON,API+XML})
     public Object createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @POST
-    @Path("/datastore/{identifier}")
+    @Path("/datastore/{identifier:.+}")
     @Produces({API+JSON,API+XML})
     public Object updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
