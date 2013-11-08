@@ -5,13 +5,15 @@ module sal-table {
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-table-types {prefix table-type;revision-date "2013-10-26";}
+    import flow-capable-transaction {prefix tr;}
 
     revision "2013-10-26" {
         description "Initial revision of table service";
-    }        
+    }
     
     /** Base configuration structure **/
     grouping table-update {
+        uses "inv:node-context-ref";
         container original-table {
             uses table-type:table-features;
         }
@@ -22,11 +24,11 @@ module sal-table {
     
     rpc update-table {
         input {
-            leaf node {
-                ext:context-reference "inv:node-context";
-                type inv:node-ref;
-            }
             uses table-update;
+            uses tr:transaction-aware;
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }     
 }

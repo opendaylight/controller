@@ -85,6 +85,17 @@ module opendaylight-meter-types {
             type meter-id;
         }
         
+        leaf install {
+            type boolean; 
+        }
+        leaf meter-name {
+            type string;
+        }
+        
+        leaf container-name {
+            type string; 
+        }
+        
         container meter-band-headers {
             list meter-band-header {
                 key "order";

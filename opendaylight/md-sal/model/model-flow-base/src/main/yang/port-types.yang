@@ -20,10 +20,10 @@ module opendaylight-port-types {
     }
     
     typedef port-state {
-            type enumeration {
-                enum link-down;
-                enum blocked;
-                enum live;
+        type enumeration {
+            enum link-down;
+            enum blocked;
+            enum live;
         }
     }
 
@@ -125,7 +125,7 @@ module opendaylight-port-types {
                 uses common-port;
                 
                 leaf mask {
-                    type uint32;
+                    type port-config;
                     description "Bitmap of OFPPC-* flags to be changed";
                 }      
                 
@@ -135,7 +135,11 @@ module opendaylight-port-types {
             
                 leaf port-name {
                     type string; 
-                }                
+                } 
+
+                leaf barrier {
+                    type boolean; 
+                } 
             }            
         }    
     }
