@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_866f4992",
+        "filename": "opendaylight/distribution/opendaylight/opendaylight-application.launch",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-08T03:22:53Z",
+      "side": 1,
+      "message": "Do you really need to commit the changes to the launch file ?",
+      "revId": "fde2662cbff982221ffee2e6b025069f4f9edf52",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
