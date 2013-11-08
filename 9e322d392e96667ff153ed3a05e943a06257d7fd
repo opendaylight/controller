@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_66fc553f",
+        "filename": "opendaylight/netconf/netconf-api/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-08T09:06:40Z",
+      "side": 1,
+      "message": "Unnecessary dependency, please remove",
+      "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c6a42159",
+        "filename": "opendaylight/netconf/netconf-client/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-08T09:06:40Z",
+      "side": 1,
+      "message": "Is this necessary ?",
+      "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_469031ec",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-08T09:06:40Z",
+      "side": 1,
+      "message": "It might be useful to send some netconf message e.g. get-config while doing exi.",
+      "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
