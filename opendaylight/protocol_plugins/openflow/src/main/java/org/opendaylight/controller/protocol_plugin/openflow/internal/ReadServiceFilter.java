@@ -412,7 +412,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
                 }
             }
         }
-        return true;
+        return false;
     }
 
     @Override
