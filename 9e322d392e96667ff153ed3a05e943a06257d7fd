@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_264bfd88",
+        "filename": "opendaylight/netconf/netconf-api/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-08T09:24:17Z",
+      "side": 1,
+      "message": "This dependency will be removed.",
+      "parentUuid": "da6255ed_66fc553f",
+      "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_c6a42159",
         "filename": "opendaylight/netconf/netconf-client/pom.xml",
         "patchSetId": 10
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_c649c18c",
+        "filename": "opendaylight/netconf/netconf-client/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-08T09:24:17Z",
+      "side": 1,
+      "message": "Not anymore, former development left-over.",
+      "parentUuid": "da6255ed_c6a42159",
+      "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_469031ec",
         "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITTest.java",
         "patchSetId": 10
@@ -47,6 +83,24 @@
       "writtenOn": "2013-11-08T09:06:40Z",
       "side": 1,
       "message": "It might be useful to send some netconf message e.g. get-config while doing exi.",
+      "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a65ecd43",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-08T09:24:17Z",
+      "side": 1,
+      "message": "Ok, I\u0027ll insert one more operation.",
+      "parentUuid": "da6255ed_469031ec",
       "revId": "9e322d392e96667ff153ed3a05e943a06257d7fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
