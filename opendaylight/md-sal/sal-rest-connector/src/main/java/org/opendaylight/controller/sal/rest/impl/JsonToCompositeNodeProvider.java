@@ -24,8 +24,7 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
