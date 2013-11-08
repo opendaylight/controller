@@ -13,16 +13,20 @@
       <maven>3.0.4</maven>
    </prerequisites>
 
-   <dependencies>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-      </dependency>
-   </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+        </dependency>
+    </dependencies>
 
    <build>
       <plugins>
@@ -34,6 +38,7 @@
                   <Import-Package>
                      org.opendaylight.controller.config.api.*,
                      com.google.common.eventbus,
+                     io.netty.channel,
                   </Import-Package>
                   <Export-Package>
                      org.opendaylight.controller.config.threadpool,
