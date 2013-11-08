@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.core.api.model;
 
 import org.opendaylight.controller.sal.core.api.BrokerService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -39,4 +40,6 @@ public interface SchemaService extends BrokerService {
      * @return
      */
     SchemaContext getGlobalContext();
+    
+    ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener listener);
 }

@@ -37,16 +37,13 @@ public class BrokerImpl implements Broker {
     private val Set<ConsumerContextImpl> sessions = Collections.synchronizedSet(new HashSet<ConsumerContextImpl>());
     private val Set<ProviderContextImpl> providerSessions = Collections.synchronizedSet(
         new HashSet<ProviderContextImpl>());
-    private val Set<BrokerModule> modules = Collections.synchronizedSet(new HashSet<BrokerModule>());
-    private val Map<Class<? extends BrokerService>, BrokerModule> serviceProviders = Collections.
-        synchronizedMap(new HashMap<Class<? extends BrokerService>, BrokerModule>());
 
     // Implementation specific
     @Property
     private var ExecutorService executor = Executors.newFixedThreadPool(5);
     @Property
     private var BundleContext bundleContext;
-    
+
     @Property
     private var RpcRouter router;
 
@@ -68,29 +65,6 @@ public class BrokerImpl implements Broker {
         return session;
     }
 
-    public def addModule(BrokerModule module) {
-        log.info("Registering broker module " + module);
-        if(modules.contains(module)) {
-            log.error("Module already registered");
-            throw new IllegalArgumentException("Module already exists.");
-        }
-
-        val provServices = module.getProvidedServices();
-        for (Class<? extends BrokerService> serviceType : provServices) {
-            log.info("  Registering session service implementation: " + serviceType.getCanonicalName());
-            serviceProviders.put(serviceType, module);
-        }
-    }
-
-    public def <T extends BrokerService> T serviceFor(Class<T> service, ConsumerContextImpl session) {
-        val prov = serviceProviders.get(service);
-        if(prov == null) {
-            log.warn("Service " + service.toString() + " is not supported");
-            return null;
-        }
-        return prov.getServiceForSession(service, session);
-    }
-
     protected def Future<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
         val result = executor.submit([|router.invokeRpc(rpc, input)] as Callable<RpcResult<CompositeNode>>);
         return result;
@@ -98,20 +72,20 @@ public class BrokerImpl implements Broker {
 
     // Validation
     private def void checkPredicates(Provider prov) {
-        if(prov == null)
+        if (prov == null)
             throw new IllegalArgumentException("Provider should not be null.");
         for (ProviderContextImpl session : providerSessions) {
-            if(prov.equals(session.getProvider()))
+            if (prov.equals(session.getProvider()))
                 throw new IllegalStateException("Provider already registered");
         }
 
     }
 
     private def void checkPredicates(Consumer cons) {
-        if(cons == null)
+        if (cons == null)
             throw new IllegalArgumentException("Consumer should not be null.");
         for (ConsumerContextImpl session : sessions) {
-            if(cons.equals(session.getConsumer()))
+            if (cons.equals(session.getConsumer()))
                 throw new IllegalStateException("Consumer already registered");
         }
     }
