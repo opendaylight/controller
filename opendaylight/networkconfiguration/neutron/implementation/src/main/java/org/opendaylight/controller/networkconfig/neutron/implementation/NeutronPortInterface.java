@@ -46,26 +46,26 @@ public class NeutronPortInterface implements INeutronPortCRUD {
 
     void setClusterContainerService(IClusterContainerServices s) {
         logger.debug("Cluster Service set");
-        this.clusterContainerService = s;
+        clusterContainerService = s;
     }
 
     void unsetClusterContainerService(IClusterContainerServices s) {
-        if (this.clusterContainerService == s) {
+        if (clusterContainerService == s) {
             logger.debug("Cluster Service removed!");
-            this.clusterContainerService = null;
+            clusterContainerService = null;
         }
     }
 
     @SuppressWarnings("deprecation")
     private void allocateCache() {
-        if (this.clusterContainerService == null) {
+        if (clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't create cache");
             return;
         }
         logger.debug("Creating Cache for OpenDOVE");
         try {
             // neutron caches
-            this.clusterContainerService.createCache("neutronPorts",
+            clusterContainerService.createCache("neutronPorts",
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("Cache couldn't be created for OpenDOVE -  check cache mode");
@@ -77,13 +77,13 @@ public class NeutronPortInterface implements INeutronPortCRUD {
 
     @SuppressWarnings({ "unchecked", "deprecation" })
     private void retrieveCache() {
-        if (this.clusterContainerService == null) {
+        if (clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't retrieve cache");
             return;
         }
 
         logger.debug("Retrieving cache for Neutron Ports");
-        portDB = (ConcurrentMap<String, NeutronPort>) this.clusterContainerService
+        portDB = (ConcurrentMap<String, NeutronPort>) clusterContainerService
         .getCache("neutronPorts");
         if (portDB == null) {
             logger.error("Cache couldn't be retrieved for Neutron Ports");
@@ -93,12 +93,12 @@ public class NeutronPortInterface implements INeutronPortCRUD {
 
     @SuppressWarnings("deprecation")
     private void destroyCache() {
-        if (this.clusterContainerService == null) {
+        if (clusterContainerService == null) {
             logger.error("un-initialized clusterMger, can't destroy cache");
             return;
         }
         logger.debug("Destroying Cache for HostTracker");
-        this.clusterContainerService.destroyCache("neutronPorts");
+        clusterContainerService.destroyCache("neutronPorts");
     }
 
     private void startUp() {
@@ -114,11 +114,11 @@ public class NeutronPortInterface implements INeutronPortCRUD {
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
         if (props != null) {
-            this.containerName = (String) props.get("containerName");
-            logger.debug("Running containerName: {}", this.containerName);
+            containerName = (String) props.get("containerName");
+            logger.debug("Running containerName: {}", containerName);
         } else {
             // In the Global instance case the containerName is empty
-            this.containerName = "";
+            containerName = "";
         }
         startUp();
     }
@@ -179,16 +179,20 @@ public class NeutronPortInterface implements INeutronPortCRUD {
 
     // IfNBPortCRUD methods
 
+    @Override
     public boolean portExists(String uuid) {
         return portDB.containsKey(uuid);
     }
 
+    @Override
     public NeutronPort getPort(String uuid) {
-        if (!portExists(uuid))
+        if (!portExists(uuid)) {
             return null;
+        }
         return portDB.get(uuid);
     }
 
+    @Override
     public List<NeutronPort> getAllPorts() {
         Set<NeutronPort> allPorts = new HashSet<NeutronPort>();
         for (Entry<String, NeutronPort> entry : portDB.entrySet()) {
@@ -201,9 +205,11 @@ public class NeutronPortInterface implements INeutronPortCRUD {
         return ans;
     }
 
+    @Override
     public boolean addPort(NeutronPort input) {
-        if (portExists(input.getID()))
+        if (portExists(input.getID())) {
             return false;
+        }
         portDB.putIfAbsent(input.getID(), input);
         // if there are no fixed IPs, allocate one for each subnet in the network
         INeutronSubnetCRUD systemCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
@@ -212,16 +218,18 @@ public class NeutronPortInterface implements INeutronPortCRUD {
             Iterator<NeutronSubnet> subnetIterator = systemCRUD.getAllSubnets().iterator();
             while (subnetIterator.hasNext()) {
                 NeutronSubnet subnet = subnetIterator.next();
-                if (subnet.getNetworkUUID().equals(input.getNetworkUUID()))
+                if (subnet.getNetworkUUID().equals(input.getNetworkUUID())) {
                     list.add(new Neutron_IPs(subnet.getID()));
+                }
             }
         }
         Iterator<Neutron_IPs> fixedIPIterator = input.getFixedIPs().iterator();
         while (fixedIPIterator.hasNext()) {
             Neutron_IPs ip = fixedIPIterator.next();
             NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
-            if (ip.getIpAddress() == null)
+            if (ip.getIpAddress() == null) {
                 ip.setIpAddress(subnet.getLowAddr());
+            }
             if (!ip.getIpAddress().equals(subnet.getGatewayIP())) {
                 subnet.allocateIP(ip.getIpAddress());
             }
@@ -237,9 +245,11 @@ public class NeutronPortInterface implements INeutronPortCRUD {
         return true;
     }
 
+    @Override
     public boolean removePort(String uuid) {
-        if (!portExists(uuid))
+        if (!portExists(uuid)) {
             return false;
+        }
         NeutronPort port = getPort(uuid);
         portDB.remove(uuid);
         INeutronNetworkCRUD networkCRUD = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
@@ -262,43 +272,47 @@ public class NeutronPortInterface implements INeutronPortCRUD {
         return true;
     }
 
+    @Override
     public boolean updatePort(String uuid, NeutronPort delta) {
-        if (!portExists(uuid))
+        if (!portExists(uuid)) {
             return false;
+        }
         NeutronPort target = portDB.get(uuid);
         // remove old Fixed_IPs
-        NeutronPort port = getPort(uuid);
-        INeutronSubnetCRUD systemCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
-        Iterator<Neutron_IPs> fixedIPIterator = port.getFixedIPs().iterator();
-        while (fixedIPIterator.hasNext()) {
-            Neutron_IPs ip = fixedIPIterator.next();
-            NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
-            subnet.releaseIP(ip.getIpAddress());
-        }
+        if (delta.getFixedIPs() != null) {
+            NeutronPort port = getPort(uuid);
+            INeutronSubnetCRUD systemCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
+            for (Neutron_IPs ip: port.getFixedIPs()) {
+                NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
+                subnet.releaseIP(ip.getIpAddress());
+            }
 
-        // allocate new Fixed_IPs
-        fixedIPIterator = delta.getFixedIPs().iterator();
-        while (fixedIPIterator.hasNext()) {
-            Neutron_IPs ip = fixedIPIterator.next();
-            NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
-            if (ip.getIpAddress() == null)
-                ip.setIpAddress(subnet.getLowAddr());
-            subnet.allocateIP(ip.getIpAddress());
+            // allocate new Fixed_IPs
+            for (Neutron_IPs ip: delta.getFixedIPs()) {
+                NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
+                if (ip.getIpAddress() == null) {
+                    ip.setIpAddress(subnet.getLowAddr());
+                }
+                subnet.allocateIP(ip.getIpAddress());
+            }
         }
         return overwrite(target, delta);
     }
 
+    @Override
     public boolean macInUse(String macAddress) {
         List<NeutronPort> ports = getAllPorts();
         Iterator<NeutronPort> portIterator = ports.iterator();
         while (portIterator.hasNext()) {
             NeutronPort port = portIterator.next();
-            if (macAddress.equalsIgnoreCase(port.getMacAddress()))
+            if (macAddress.equalsIgnoreCase(port.getMacAddress())) {
                 return true;
+            }
         }
         return false;
     }
 
+    @Override
     public NeutronPort getGatewayPort(String subnetUUID) {
         INeutronSubnetCRUD systemCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         NeutronSubnet subnet = systemCRUD.getSubnet(subnetUUID);
@@ -307,8 +321,9 @@ public class NeutronPortInterface implements INeutronPortCRUD {
             NeutronPort port = portIterator.next();
             List<Neutron_IPs> fixedIPs = port.getFixedIPs();
             if (fixedIPs.size() == 1) {
-                if (subnet.getGatewayIP().equals(fixedIPs.get(0).getIpAddress()))
+                if (subnet.getGatewayIP().equals(fixedIPs.get(0).getIpAddress())) {
                     return port;
+                }
             }
         }
         return null;
