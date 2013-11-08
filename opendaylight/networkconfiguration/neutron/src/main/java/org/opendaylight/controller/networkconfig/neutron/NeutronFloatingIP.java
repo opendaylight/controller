@@ -109,18 +109,24 @@ public class NeutronFloatingIP {
         Iterator<String> i = fields.iterator();
         while (i.hasNext()) {
             String s = i.next();
-            if (s.equals("id"))
+            if (s.equals("id")) {
                 ans.setFloatingIPUUID(this.getFloatingIPUUID());
-            if (s.equals("floating_network_id"))
+            }
+            if (s.equals("floating_network_id")) {
                 ans.setFloatingNetworkUUID(this.getFloatingNetworkUUID());
-            if (s.equals("port_id"))
+            }
+            if (s.equals("port_id")) {
                 ans.setPortUUID(this.getPortUUID());
-            if (s.equals("fixed_ip_address"))
+            }
+            if (s.equals("fixed_ip_address")) {
                 ans.setFixedIPAddress(this.getFixedIPAddress());
-            if (s.equals("floating_ip_address"))
+            }
+            if (s.equals("floating_ip_address")) {
                 ans.setFloatingIPAddress(this.getFloatingIPAddress());
-            if (s.equals("tenant_id"))
+            }
+            if (s.equals("tenant_id")) {
                 ans.setTenantUUID(this.getTenantUUID());
+            }
         }
         return ans;
     }

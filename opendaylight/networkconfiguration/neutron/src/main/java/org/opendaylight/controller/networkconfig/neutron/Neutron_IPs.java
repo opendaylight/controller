@@ -28,7 +28,7 @@ public class Neutron_IPs {
     public Neutron_IPs() { }
 
     public Neutron_IPs(String uuid) {
-        this.subnetUUID = uuid;
+        subnetUUID = uuid;
     }
 
     public String getIpAddress() {

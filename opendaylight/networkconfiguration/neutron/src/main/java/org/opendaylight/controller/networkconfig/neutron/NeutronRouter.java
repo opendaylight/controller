@@ -68,15 +68,16 @@ public class NeutronRouter {
     }
 
     public boolean isAdminStateUp() {
-        if (adminStateUp == null)
+        if (adminStateUp == null) {
             return true;
+        }
         return adminStateUp;
     }
 
     public Boolean getAdminStateUp() { return adminStateUp; }
 
     public void setAdminStateUp(Boolean newValue) {
-        this.adminStateUp = newValue;
+        adminStateUp = newValue;
     }
 
     public String getStatus() {
@@ -118,16 +119,21 @@ public class NeutronRouter {
         Iterator<String> i = fields.iterator();
         while (i.hasNext()) {
             String s = i.next();
-            if (s.equals("id"))
+            if (s.equals("id")) {
                 ans.setRouterUUID(this.getRouterUUID());
-            if (s.equals("name"))
+            }
+            if (s.equals("name")) {
                 ans.setName(this.getName());
-            if (s.equals("admin_state_up"))
+            }
+            if (s.equals("admin_state_up")) {
                 ans.setAdminStateUp(this.getAdminStateUp());
-            if (s.equals("status"))
+            }
+            if (s.equals("status")) {
                 ans.setStatus(this.getStatus());
-            if (s.equals("tenant_id"))
+            }
+            if (s.equals("tenant_id")) {
                 ans.setTenantID(this.getTenantID());
+            }
             if (s.equals("external_gateway_info")) {
                 ans.setExternalGatewayInfo(this.getExternalGatewayInfo());
             }
