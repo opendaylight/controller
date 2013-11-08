@@ -24,6 +24,7 @@ import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
+import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.slf4j.Logger;
@@ -98,6 +99,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                    IClusterContainerServices.class).setCallbacks(
                    "setClusterContainerService", "unsetClusterContainerService")
                    .setRequired(true));
+
+            c.add(createContainerServiceDependency(containerName).setService(
+                   IRouting.class).setCallbacks("setRouting","unsetRouting")
+                   .setRequired(false));
 
             // the Host Listener is optional
             c.add(createContainerServiceDependency(containerName).setService(
