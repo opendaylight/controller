@@ -5,7 +5,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>netconf-impl</artifactId>
@@ -126,7 +126,6 @@
                             org.w3c.dom,
                             org.xml.sax,
                             org.opendaylight.controller.netconf.util.messages,
-                            org.opendaylight.controller.config.stat,
                             com.siemens.ct.exi.exceptions
                         </Import-Package>
                     </instructions>

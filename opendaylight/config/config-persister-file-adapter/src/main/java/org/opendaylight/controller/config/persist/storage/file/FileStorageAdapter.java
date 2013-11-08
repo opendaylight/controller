@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
-import org.opendaylight.controller.config.stat.ConfigProvider;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -55,8 +55,8 @@ public class FileStorageAdapter implements StorageAdapter {
     private File storage;
 
     @Override
-    public void setProperties(ConfigProvider configProvider) {
-        File storage = extractStorageFileFromProperties(configProvider);
+    public void setProperties(BundleContext bundleContext) {
+        File storage = extractStorageFileFromProperties(bundleContext);
         logger.debug("Using file {}", storage.getAbsolutePath());
         // Create file if it does not exist
         File parentFile = storage.getAbsoluteFile().getParentFile();
@@ -92,12 +92,12 @@ public class FileStorageAdapter implements StorageAdapter {
         numberOfStoredBackups = numberOfBackups;
     }
 
-    private static File extractStorageFileFromProperties(ConfigProvider configProvider) {
-        String fileStorageProperty = configProvider.getProperty(FILE_STORAGE_PROP);
+    private static File extractStorageFileFromProperties(BundleContext bundleContext) {
+        String fileStorageProperty = bundleContext.getProperty(FILE_STORAGE_PROP);
         Preconditions.checkNotNull(fileStorageProperty, "Unable to find " + FILE_STORAGE_PROP
-                + " in received properties :" + configProvider);
+                + " in received context :" + bundleContext);
         File result = new File(fileStorageProperty);
-        String numberOfBAckupsAsString = configProvider.getProperty(NUMBER_OF_BACKUPS);
+        String numberOfBAckupsAsString = bundleContext.getProperty(NUMBER_OF_BACKUPS);
         if (numberOfBAckupsAsString != null) {
             numberOfStoredBackups = Integer.valueOf(numberOfBAckupsAsString);
         } else {

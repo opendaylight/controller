@@ -10,7 +10,7 @@ package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.base.Optional;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
-import org.opendaylight.controller.config.stat.ConfigProvider;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +20,8 @@ public class NoOpStorageAdapter implements StorageAdapter {
     private static final Logger logger = LoggerFactory.getLogger(NoOpStorageAdapter.class);
 
     @Override
-    public void setProperties(ConfigProvider configProvider) {
-        logger.debug("setProperties called with {}", configProvider);
+    public void setProperties(BundleContext bundleContext) {
+        logger.debug("setProperties called with {}", bundleContext);
     }
 
     @Override

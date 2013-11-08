@@ -7,7 +7,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <properties>
-        <netconf.version>0.2.2-SNAPSHOT</netconf.version>
+        <netconf.version>0.2.3-SNAPSHOT</netconf.version>
     </properties>
     <artifactId>sal-netconf-connector</artifactId>
     <scm>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>netconf-client</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
+            <version>${netconf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>

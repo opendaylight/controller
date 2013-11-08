@@ -8,21 +8,19 @@
 
 package org.opendaylight.controller.netconf.util.osgi;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.Optional;
+import org.opendaylight.protocol.util.SSLUtil;
+import org.osgi.framework.BundleContext;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-
-import org.opendaylight.controller.config.stat.ConfigProvider;
-import org.opendaylight.protocol.util.SSLUtil;
-
-import com.google.common.base.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class NetconfConfigUtil {
     private static final String PREFIX_PROP = "netconf.";
@@ -37,19 +35,19 @@ public class NetconfConfigUtil {
     private static final String NETCONF_TLS_KEYSTORE_PROP = PREFIX_PROP + InfixProp.tls + ".keystore";
     private static final String NETCONF_TLS_KEYSTORE_PASSWORD_PROP = NETCONF_TLS_KEYSTORE_PROP + ".password";
 
-    public static Optional<InetSocketAddress> extractTCPNetconfAddress(ConfigProvider configProvider) {
-        return extractSomeNetconfAddress(configProvider, InfixProp.tcp);
+    public static Optional<InetSocketAddress> extractTCPNetconfAddress(BundleContext context) {
+        return extractSomeNetconfAddress(context, InfixProp.tcp);
     }
 
-    public static Optional<TLSConfiguration> extractTLSConfiguration(ConfigProvider configProvider) {
-        Optional<InetSocketAddress> address = extractSomeNetconfAddress(configProvider, InfixProp.tls);
+    public static Optional<TLSConfiguration> extractTLSConfiguration(BundleContext context) {
+        Optional<InetSocketAddress> address = extractSomeNetconfAddress(context, InfixProp.tls);
         if (address.isPresent()) {
-            String keystoreFileName = configProvider.getProperty(NETCONF_TLS_KEYSTORE_PROP);
+            String keystoreFileName = context.getProperty(NETCONF_TLS_KEYSTORE_PROP);
             File keystoreFile = new File(keystoreFileName);
             checkState(keystoreFile.exists() && keystoreFile.isFile() && keystoreFile.canRead(),
                     "Keystore file %s does not exist or is not readable file", keystoreFileName);
             keystoreFile = keystoreFile.getAbsoluteFile();
-            String keystorePassword = configProvider.getProperty(NETCONF_TLS_KEYSTORE_PASSWORD_PROP);
+            String keystorePassword = context.getProperty(NETCONF_TLS_KEYSTORE_PASSWORD_PROP);
             checkNotNull(keystoreFileName, "Property %s must be defined for tls netconf server",
                     NETCONF_TLS_KEYSTORE_PROP);
             keystorePassword = keystorePassword != null ? keystorePassword : "";
@@ -98,7 +96,7 @@ public class NetconfConfigUtil {
     }
 
     /**
-     * @param configProvider
+     * @param context
      *            from which properties are being read.
      * @param infixProp
      *            either tcp or tls
@@ -107,14 +105,14 @@ public class NetconfConfigUtil {
      * @throws IllegalStateException
      *             if address or port are invalid
      */
-    private static Optional<InetSocketAddress> extractSomeNetconfAddress(ConfigProvider configProvider,
+    private static Optional<InetSocketAddress> extractSomeNetconfAddress(BundleContext context,
             InfixProp infixProp) {
-        String address = configProvider.getProperty(PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
+        String address = context.getProperty(PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
         if (address == null) {
             return Optional.absent();
         }
         String portKey = PREFIX_PROP + infixProp + PORT_SUFFIX_PROP;
-        String portString = configProvider.getProperty(portKey);
+        String portString = context.getProperty(portKey);
         checkNotNull(portString, "Netconf port must be specified in properties file with " + portKey);
         try {
             int port = Integer.valueOf(portString);

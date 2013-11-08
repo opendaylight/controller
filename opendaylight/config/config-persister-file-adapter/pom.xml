@@ -6,7 +6,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>config-persister-file-adapter</artifactId>
@@ -80,7 +80,6 @@
                             javax.xml.transform.stream,
                             org.apache.commons.lang3,
                             org.opendaylight.controller.config.persist.api,
-                            org.opendaylight.controller.config.stat,
                             org.opendaylight.controller.config.persist.api.storage,
                             org.slf4j,
                             org.w3c.dom,

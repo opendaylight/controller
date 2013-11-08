@@ -9,7 +9,7 @@
 package org.opendaylight.controller.config.persist.api.storage;
 
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.stat.ConfigProvider;
+import org.osgi.framework.BundleContext;
 
 /**
  * Plugins for {@link org.opendaylight.controller.config.persist.api.Persister}
@@ -17,6 +17,6 @@ import org.opendaylight.controller.config.stat.ConfigProvider;
  */
 public interface StorageAdapter extends Persister {
 
-    void setProperties(ConfigProvider configProvider);
+    void setProperties(BundleContext bundleContext);
 
 }
