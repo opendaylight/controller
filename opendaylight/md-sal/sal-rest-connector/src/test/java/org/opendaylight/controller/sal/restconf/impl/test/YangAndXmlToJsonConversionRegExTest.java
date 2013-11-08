@@ -1,22 +1,14 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.*;
-import java.util.Set;
-import java.util.regex.*;
+import java.util.regex.Pattern;
 
-import javax.ws.rs.WebApplicationException;
+import org.junit.Test;
 
-import org.junit.*;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.model.api.*;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+public class YangAndXmlToJsonConversionRegExTest {
 
-public class YangAndXmlToJsonConversion {
-
-    @Ignore
     @Test
     /**
      * Test for simple yang types (leaf, list, leaf-list, container and various combination of them)
@@ -25,15 +17,14 @@ public class YangAndXmlToJsonConversion {
     public void simpleYangTypesTest() {
         String jsonOutput = null;
 
-        jsonOutput = convertXmlDataAndYangToJson("/yang-to-json-conversion/simple-yang-types/xml/data.xml",
-                "/yang-to-json-conversion/simple-yang-types");
+//        jsonOutput = TestUtils.convertXmlDataAndYangToJson("/yang-to-json-conversion/simple-yang-types/xml/data.xml",
+//                "/yang-to-json-conversion/simple-yang-types");
 
-//         jsonOutput =
-//         readJsonFromFile("/yang-to-json-conversion/simple-yang-types/xml/output.json");
+         jsonOutput =
+         TestUtils.readJsonFromFile("/yang-to-json-conversion/simple-yang-types/xml/awaited_output.json",true);
 
         verifyJsonOutputForSimpleYangTypes(jsonOutput);
-
-    }
+    }    
 
     private void verifyJsonOutputForSimpleYangTypes(String jsonOutput) {
 
@@ -149,125 +140,69 @@ public class YangAndXmlToJsonConversion {
         return null;
     }
 
-    private String readJsonFromFile(String path) {
-        String fullPath = YangAndXmlToJsonConversion.class.getResource(path).getPath();
-        assertNotNull("Path to file can't be null.", fullPath);
-        File file = new File(fullPath);
-        assertNotNull("File can't be null", file);
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        assertNotNull("File reader can't be null.", fileReader);
 
-        StringBuilder strBuilder = new StringBuilder();
-        char[] buffer = new char[1000];
 
-        while (true) {
-            int loadedCharNum;
-            try {
-                loadedCharNum = fileReader.read(buffer);
-            } catch (IOException e) {
-                break;
-            }
-            if (loadedCharNum == -1) {
-                break;
-            }
-            strBuilder.append(buffer, 0, loadedCharNum);
-        }
-        try {
-            fileReader.close();
-        } catch (IOException e) {
-            System.out.println("The file wasn't closed");
-            ;
-        }
-        String rawStr = strBuilder.toString();
-        rawStr = rawStr.replace("\n", "");
-        rawStr = rawStr.replace("\r", "");
-        rawStr = rawStr.replace("\t", "");
-        rawStr = removeSpaces(rawStr);
 
-        return rawStr;
-    }
+//    private String convertXmlDataAndYangToJson(String xmlDataPath, String yangPath) {
+//        String jsonResult = null;
+//        Set<Module> modules = null;
+//
+//        try {
+//            modules = TestUtils.loadModules(YangAndXmlToJsonConversionJsonReaderTest.class.getResource(yangPath).getPath());
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        assertNotNull("modules can't be null.", modules);
+//
+//        InputStream xmlStream = YangAndXmlToJsonConversionJsonReaderTest.class.getResourceAsStream(xmlDataPath);
+//        CompositeNode compositeNode = null;
+//        try {
+//            compositeNode = TestUtils.loadCompositeNode(xmlStream);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        assertNotNull("Composite node can't be null", compositeNode);
+//
+//        StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
+//        for (Module module : modules) {
+//            for (DataSchemaNode dataSchemaNode : module.getChildNodes()) {
+//                StructuredData structuredData = new StructuredData(compositeNode, dataSchemaNode);
+//                ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+//                try {
+//                    structuredDataToJsonProvider.writeTo(structuredData, null, null, null, null, null, byteArrayOS);
+//                } catch (WebApplicationException | IOException e) {
+//                    e.printStackTrace();
+//                }
+//                assertFalse(
+//                        "Returning JSON string can't be empty for node " + dataSchemaNode.getQName().getLocalName(),
+//                        byteArrayOS.toString().isEmpty());
+//                jsonResult = byteArrayOS.toString();
+//                try {
+//                    outputToFile(byteArrayOS);
+//                } catch (IOException e) {
+//                    System.out.println("Output file wasn't cloased sucessfuly.");
+//                }
+//            }
+//        }
+//        return jsonResult;
+//    }
+//
+//    private void outputToFile(ByteArrayOutputStream outputStream) throws IOException {
+//        FileOutputStream fileOS = null;
+//        try {
+//            String path = YangAndXmlToJsonConversionJsonReaderTest.class.getResource("/yang-to-json-conversion/xml").getPath();
+//            File outFile = new File(path + "/data.json");
+//            fileOS = new FileOutputStream(outFile);
+//            try {
+//                fileOS.write(outputStream.toByteArray());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            fileOS.close();
+//        } catch (FileNotFoundException e1) {
+//            e1.printStackTrace();
+//        }
+//    }
+    
 
-    private String removeSpaces(String rawStr) {
-        StringBuilder strBuilder = new StringBuilder();
-        int i = 0;
-        int quoteCount = 0;
-        while (i < rawStr.length()) {
-            if (rawStr.substring(i, i + 1).equals("\"")) {
-                quoteCount++;
-            }
-
-            if (!rawStr.substring(i, i + 1).equals(" ") || (quoteCount % 2 == 1)) {
-                strBuilder.append(rawStr.charAt(i));
-            }
-            i++;
-        }
-
-        return strBuilder.toString();
-    }
-
-    private String convertXmlDataAndYangToJson(String xmlDataPath, String yangPath) {
-        String jsonResult = null;
-        Set<Module> modules = null;
-
-        try {
-            modules = TestUtils.loadModules(YangAndXmlToJsonConversion.class.getResource(yangPath).getPath());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        assertNotNull("modules can't be null.", modules);
-
-        InputStream xmlStream = YangAndXmlToJsonConversion.class.getResourceAsStream(xmlDataPath);
-        CompositeNode compositeNode = null;
-        try {
-            compositeNode = TestUtils.loadCompositeNode(xmlStream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        assertNotNull("Composite node can't be null", compositeNode);
-
-        StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
-        for (Module module : modules) {
-            for (DataSchemaNode dataSchemaNode : module.getChildNodes()) {
-                StructuredData structuredData = new StructuredData(compositeNode, dataSchemaNode);
-                ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-                try {
-                    structuredDataToJsonProvider.writeTo(structuredData, null, null, null, null, null, byteArrayOS);
-                } catch (WebApplicationException | IOException e) {
-                    e.printStackTrace();
-                }
-                assertFalse(
-                        "Returning JSON string can't be empty for node " + dataSchemaNode.getQName().getLocalName(),
-                        byteArrayOS.toString().isEmpty());
-                jsonResult = byteArrayOS.toString();
-                try {
-                    outputToFile(byteArrayOS);
-                } catch (IOException e) {
-                    System.out.println("Output file wasn't cloased sucessfuly.");
-                }
-            }
-        }
-        return jsonResult;
-    }
-
-    private void outputToFile(ByteArrayOutputStream outputStream) throws IOException {
-        FileOutputStream fileOS = null;
-        try {
-            String path = YangAndXmlToJsonConversion.class.getResource("/yang-to-json-conversion/xml").getPath();
-            File outFile = new File(path + "/data.json");
-            fileOS = new FileOutputStream(outFile);
-            try {
-                fileOS.write(outputStream.toByteArray());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            fileOS.close();
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        }
-    }
 }
