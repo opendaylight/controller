@@ -1,4 +1,4 @@
-package org.opendaylight.controller.sal.connector.zeromq;
+package org.opendaylight.controller.sal.connector.remoterpc.router.zeromq;
 
 import org.opendaylight.controller.sal.core.api.AbstractProvider;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;

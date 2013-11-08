@@ -1,4 +1,4 @@
-package org.opendaylight.controller.sal.connector.zeromq;
+package org.opendaylight.controller.sal.connector.remoterpc.router.zeromq;
 
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.yangtools.yang.common.QName;
