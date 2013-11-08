@@ -84,7 +84,7 @@ public class XmlProvidersTest extends JerseyTest {
     public void testStructuredDataToXmlProvider() throws FileNotFoundException {
         URI uri = null;
         try {
-            uri = new URI("/restconf/datastore/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
+            uri = new URI("/datastore/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
         } catch (UnsupportedEncodingException | URISyntaxException e) {
             e.printStackTrace();
         }
@@ -101,7 +101,7 @@ public class XmlProvidersTest extends JerseyTest {
     public void testXmlToCompositeNodeProvider() throws ParserConfigurationException, SAXException, IOException {
         URI uri = null;
         try {
-            uri = new URI("/restconf/operations/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
+            uri = new URI("/operations/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
         } catch (UnsupportedEncodingException | URISyntaxException e) {
             e.printStackTrace();
         }
@@ -138,7 +138,7 @@ public class XmlProvidersTest extends JerseyTest {
     public void testXmlToCompositeNodeProviderExceptions() {
         URI uri = null;
         try {
-            uri = new URI("/restconf/operations/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
+            uri = new URI("/operations/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
         } catch (UnsupportedEncodingException | URISyntaxException e) {
             e.printStackTrace();
         }

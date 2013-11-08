@@ -24,13 +24,14 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 import static com.google.common.base.Preconditions.*
+import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
 
-class ControllerContext {
-    
+class ControllerContext implements SchemaServiceListener {
+
     val static ControllerContext INSTANCE = new ControllerContext
-    
+
     val static NULL_VALUE = "null"
-    
+
     @Property
     SchemaContext schemas;
 
@@ -208,6 +209,7 @@ class ControllerContext {
         if (targetNode instanceof ListSchemaNode) {
             val listNode = targetNode as ListSchemaNode;
             val keysSize = listNode.keyDefinition.size
+
             // every key has to be filled
             if ((strings.length - consumed) < keysSize) {
                 return null;
@@ -217,6 +219,7 @@ class ControllerContext {
             var i = 0;
             for (key : listNode.keyDefinition) {
                 val uriKeyValue = uriKeyValues.get(i);
+
                 // key value cannot be NULL
                 if (uriKeyValue.equals(NULL_VALUE)) {
                     return null
@@ -227,6 +230,7 @@ class ControllerContext {
             consumed = consumed + i;
             builder.nodeWithKey(targetNode.QName, keyValues);
         } else {
+
             // Only one instance of node is allowed
             builder.node(targetNode.QName);
         }
@@ -270,4 +274,9 @@ class ControllerContext {
 
     public def QName toRpcQName(String name) {
     }
+
+    override onGlobalContextUpdated(SchemaContext context) {
+        this.schemas = context;
+    }
+
 }
