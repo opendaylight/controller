@@ -1,13 +1,15 @@
 package org.opendaylight.controller.sal.dom.broker
 
-import java.util.Collections
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession
-import java.util.HashMap
 import org.opendaylight.controller.sal.core.api.BrokerService
 import org.opendaylight.controller.sal.core.api.Consumer
 import org.osgi.framework.BundleContext
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.controller.sal.dom.broker.osgi.AbstractBrokerServiceProxy
+import com.google.common.collect.ClassToInstanceMap
+import com.google.common.collect.MutableClassToInstanceMap
+import org.opendaylight.controller.sal.dom.broker.osgi.ProxyFactory
 
 class ConsumerContextImpl implements ConsumerSession {
 
@@ -17,8 +19,7 @@ class ConsumerContextImpl implements ConsumerSession {
     @Property
     private var BrokerImpl broker;
 
-    private val instantiatedServices = Collections.synchronizedMap(
-        new HashMap<Class<? extends BrokerService>, BrokerService>());
+    private val ClassToInstanceMap<BrokerService> instantiatedServices = MutableClassToInstanceMap.create();
     private boolean closed = false;
 
     private BundleContext context;
@@ -33,14 +34,20 @@ class ConsumerContextImpl implements ConsumerSession {
     }
 
     override <T extends BrokerService> T getService(Class<T> service) {
-        val potential = instantiatedServices.get(service);
-        if(potential != null) {
-            val ret = potential as T;
-            return ret;
+        val localProxy = instantiatedServices.getInstance(service);
+        if(localProxy != null) {
+            return localProxy;
         }
-        val ret = broker.serviceFor(service, this);
+        val serviceRef = context.getServiceReference(service);
+        if(serviceRef == null) {
+            return null;
+        }
+        val serviceImpl = context.getService(serviceRef);
+        
+        
+        val ret = ProxyFactory.createProxy(serviceRef,serviceImpl);
         if(ret != null) {
-            instantiatedServices.put(service, ret);
+            instantiatedServices.putInstance(service, ret);
         }
         return ret;
     }
@@ -49,7 +56,9 @@ class ConsumerContextImpl implements ConsumerSession {
         val toStop = instantiatedServices.values();
         this.closed = true;
         for (BrokerService brokerService : toStop) {
-            //brokerService.closeSession();
+            if(brokerService instanceof AbstractBrokerServiceProxy<?>) {
+                (brokerService as AutoCloseable).close();
+            } 
         }
         broker.consumerSessionClosed(this);
     }
