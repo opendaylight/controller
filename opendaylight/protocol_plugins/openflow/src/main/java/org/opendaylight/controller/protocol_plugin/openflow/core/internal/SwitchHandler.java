@@ -359,8 +359,6 @@ public class SwitchHandler implements ISwitch {
         }
 
         if (msgs == null) {
-            logger.info("{} is down", this);
-            reportSwitchStateChange(false);
             return;
         }
         for (OFMessage msg : msgs) {
@@ -369,16 +367,15 @@ public class SwitchHandler implements ISwitch {
             OFType type = msg.getType();
             switch (type) {
             case HELLO:
-                // send feature request
-                OFMessage featureRequest = factory.getMessage(OFType.FEATURES_REQUEST);
-                asyncFastSend(featureRequest);
-                this.state = SwitchState.WAIT_FEATURES_REPLY;
-                startSwitchTimer();
+                sendFeaturesRequest();
                 break;
             case ECHO_REQUEST:
                 OFEchoReply echoReply = (OFEchoReply) factory.getMessage(OFType.ECHO_REPLY);
                 // respond immediately
                 asyncSendNow(echoReply, msg.getXid());
+
+                // send features request if not sent yet
+                sendFeaturesRequest();
                 break;
             case ECHO_REPLY:
                 this.probeSent = false;
@@ -505,6 +502,16 @@ public class SwitchHandler implements ISwitch {
     @Override
     public Long getId() {
         return this.sid;
+    }
+
+    private void sendFeaturesRequest() {
+        if (!isOperational() && (this.state != SwitchState.WAIT_FEATURES_REPLY)) {
+            // send feature request
+            OFMessage featureRequest = factory.getMessage(OFType.FEATURES_REQUEST);
+            asyncFastSend(featureRequest);
+            this.state = SwitchState.WAIT_FEATURES_REPLY;
+            startSwitchTimer();
+        }
     }
 
     private void processFeaturesReply(OFFeaturesReply reply) {
