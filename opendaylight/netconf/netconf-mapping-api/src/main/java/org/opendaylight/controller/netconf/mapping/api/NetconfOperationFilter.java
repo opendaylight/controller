@@ -21,6 +21,6 @@ public interface NetconfOperationFilter extends Comparable<NetconfOperationFilte
     Document doFilter(Document message, NetconfOperationRouter operationRouter, NetconfOperationFilterChain filterChain)
             throws NetconfDocumentedException;
 
-    int getSoringOrder();
+    int getSortingOrder();
 
 }

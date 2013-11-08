@@ -44,9 +44,12 @@ import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
+import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
+import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -80,9 +83,11 @@ public class NetconfITTest extends AbstractConfigTest {
     // private static final Logger logger =
     // LoggerFactory.getLogger(NetconfITTest.class);
     //
+
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
 
-    private NetconfMessage getConfig, getConfigCandidate, editConfig, closeSession;
+    private NetconfMessage getConfig, getConfigCandidate, editConfig,
+            closeSession, startExi, stopExi;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
@@ -132,6 +137,10 @@ public class NetconfITTest extends AbstractConfigTest {
         this.editConfig = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/edit_config.xml");
         this.getConfig = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
         this.getConfigCandidate = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig_candidate.xml");
+        this.startExi = XmlFileLoader
+                .xmlFileToNetconfMessage("netconfMessages/startExi.xml");
+        this.stopExi = XmlFileLoader
+                .xmlFileToNetconfMessage("netconfMessages/stopExi.xml");
         this.closeSession = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/closeSession.xml");
     }
 
@@ -270,6 +279,7 @@ public class NetconfITTest extends AbstractConfigTest {
             final Element rpcReply = message.getDocument().getDocumentElement();
             final XmlElement resultElement = XmlElement.fromDomElement(rpcReply).getOnlyChildElement();
             assertEquals("result", resultElement.getName());
+
             final String namespace = resultElement.getNamespaceAttribute();
             assertEquals(expectedNamespace, namespace);
         }
@@ -299,14 +309,43 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     @Test
+//    @Ignore
+    public void testStartExi() throws Exception {
+        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+
+
+            Document rpcReply = netconfClient.sendMessage(this.startExi)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+            ExiParameters exiParams = new ExiParameters();
+            exiParams.setParametersFromXmlElement(XmlElement.fromDomDocument(this.startExi.getDocument()));
+
+            netconfClient.getClientSession().addExiDecoder(ExiDecoderHandler.HANDLER_NAME, new ExiDecoderHandler(exiParams));
+            netconfClient.getClientSession().addExiEncoder(ExiEncoderHandler.HANDLER_NAME, new ExiEncoderHandler(exiParams));
+
+            rpcReply = netconfClient.sendMessage(this.editConfig)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+            rpcReply = netconfClient.sendMessage(this.stopExi)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+        }
+    }
+
+    @Test
     public void testCloseSession() throws Exception {
         try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
 
             // edit config
-            Document rpcReply = netconfClient.sendMessage(this.editConfig).getDocument();
+            Document rpcReply = netconfClient.sendMessage(this.editConfig)
+                    .getDocument();
             assertIsOK(rpcReply);
 
-            rpcReply = netconfClient.sendMessage(this.closeSession).getDocument();
+            rpcReply = netconfClient.sendMessage(this.closeSession)
+                    .getDocument();
 
             assertIsOK(rpcReply);
         }
@@ -336,7 +375,7 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     private void assertIsOK(final Document rpcReply) {
-        assertEquals("rpc-reply", rpcReply.getDocumentElement().getTagName());
+        assertEquals("rpc-reply", rpcReply.getDocumentElement().getLocalName());
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
     }
 
@@ -398,9 +437,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
     private NetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
         final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000, NETCONF_CLIENT_DISPATCHER);
-
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
-
         return netconfClient;
     }
 

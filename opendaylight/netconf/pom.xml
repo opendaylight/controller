@@ -27,6 +27,7 @@
         <module>netconf-mapping-api</module>
         <module>netconf-client</module>
         <module>../../third-party/ganymed</module>
+        <module>../../third-party/com.siemens.ct.exi</module>
     </modules>
 
     <profiles>
@@ -46,6 +47,7 @@
         <maven.bundle.version>2.3.7</maven.bundle.version>
         <slf4j.version>1.7.2</slf4j.version>
         <netconf.netty.version>4.0.10.Final</netconf.netty.version>
+        <ct.exi.version>0.9.2</ct.exi.version>
     </properties>
 
     <dependencies>
@@ -181,6 +183,11 @@
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>logback-config</artifactId>
                 <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.siemens.ct.exi</groupId>
+                <artifactId>exificient</artifactId>
+                <version>${ct.exi.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
