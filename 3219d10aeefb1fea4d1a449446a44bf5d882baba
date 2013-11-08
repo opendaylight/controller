@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_31145843",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-08T16:43:01Z",
+      "side": 1,
+      "message": "Thanks for taking care of this functions returning now the Status object.",
+      "revId": "3219d10aeefb1fea4d1a449446a44bf5d882baba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_81097333",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-08T16:43:01Z",
+      "side": 1,
+      "message": "PLease combine this if with the following",
+      "revId": "3219d10aeefb1fea4d1a449446a44bf5d882baba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_61067f22",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-08T16:43:01Z",
+      "side": 1,
+      "message": "I think it would be neater if you convert the getRoles() toString() and then do a replace of the spaces with commas",
+      "revId": "3219d10aeefb1fea4d1a449446a44bf5d882baba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_710ad022",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-08T16:43:01Z",
+      "side": 1,
+      "message": "Please add a comment to explain.\nSomething like:\nInjecting the current hashed password in the new UserConfig json representation.",
+      "revId": "3219d10aeefb1fea4d1a449446a44bf5d882baba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_510d8c36",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-08T16:43:01Z",
+      "side": 1,
+      "message": "Here as well, see if you can replace this loop with a replace after converting the list to string.",
+      "revId": "3219d10aeefb1fea4d1a449446a44bf5d882baba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
