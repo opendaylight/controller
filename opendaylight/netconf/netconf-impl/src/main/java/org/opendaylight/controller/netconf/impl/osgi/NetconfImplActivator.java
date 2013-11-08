@@ -9,7 +9,6 @@ package org.opendaylight.controller.netconf.impl.osgi;
 
 import com.google.common.base.Optional;
 import io.netty.util.HashedWheelTimer;
-import org.opendaylight.controller.config.stat.ConfigProvider;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
@@ -39,9 +38,8 @@ public class NetconfImplActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final ConfigProvider configProvider = new ConfigProvider.ConfigProviderImpl(context);
-        maybeTCPAddress = NetconfConfigUtil.extractTCPNetconfAddress(configProvider);
-        maybeTLSConfiguration = NetconfConfigUtil.extractTLSConfiguration(configProvider);
+        maybeTCPAddress = NetconfConfigUtil.extractTCPNetconfAddress(context);
+        maybeTLSConfiguration = NetconfConfigUtil.extractTLSConfiguration(context);
         if (maybeTCPAddress.isPresent() == false && maybeTLSConfiguration.isPresent() == false) {
             throw new IllegalStateException("TCP nor TLS is configured, netconf not available.");
         }

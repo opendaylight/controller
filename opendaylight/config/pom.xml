@@ -10,7 +10,7 @@
     </parent>
 
 
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
     <artifactId>config-subsystem</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>

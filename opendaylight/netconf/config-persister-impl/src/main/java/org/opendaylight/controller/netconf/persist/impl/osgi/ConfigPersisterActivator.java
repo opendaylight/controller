@@ -12,7 +12,6 @@ import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.NoOpStorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.PersisterImpl;
-import org.opendaylight.controller.config.stat.ConfigProvider;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil.TLSConfiguration;
 import org.osgi.framework.BundleActivator;
@@ -38,16 +37,15 @@ public class ConfigPersisterActivator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         logger.debug("ConfigPersister activator started");
 
-        ConfigProvider configProvider = new ConfigProvider.ConfigProviderImpl(context);
-        Optional<PersisterImpl> maybePersister = PersisterImpl.createFromProperties(configProvider);
+        Optional<PersisterImpl> maybePersister = PersisterImpl.createFromProperties(context);
         if (maybePersister.isPresent() == false) {
             throw new IllegalStateException("No persister is defined in " + PersisterImpl.STORAGE_ADAPTER_CLASS_PROP
                     + " property. For noop persister use " + NoOpStorageAdapter.class.getCanonicalName()
                     + " . Persister is not operational");
         }
 
-        Optional<TLSConfiguration> maybeTLSConfiguration = NetconfConfigUtil.extractTLSConfiguration(configProvider);
-        Optional<InetSocketAddress> maybeTCPAddress = NetconfConfigUtil.extractTCPNetconfAddress(configProvider);
+        Optional<TLSConfiguration> maybeTLSConfiguration = NetconfConfigUtil.extractTLSConfiguration(context);
+        Optional<InetSocketAddress> maybeTCPAddress = NetconfConfigUtil.extractTCPNetconfAddress(context);
 
         InetSocketAddress address;
         if (maybeTLSConfiguration.isPresent()) {

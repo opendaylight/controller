@@ -12,7 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
-import org.opendaylight.controller.config.stat.ConfigProvider;
+import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
 
@@ -36,8 +36,8 @@ public final class PersisterImpl implements Persister {
         this.storage = storage;
     }
 
-    public static Optional<PersisterImpl> createFromProperties(ConfigProvider configProvider) {
-        String storageAdapterClass = configProvider.getProperty(STORAGE_ADAPTER_CLASS_PROP);
+    public static Optional<PersisterImpl> createFromProperties(BundleContext bundleContext) {
+        String storageAdapterClass = bundleContext.getProperty(STORAGE_ADAPTER_CLASS_PROP);
         StorageAdapter storage;
         if (storageAdapterClass == null || storageAdapterClass.equals("")) {
             return Optional.absent();
@@ -45,7 +45,7 @@ public final class PersisterImpl implements Persister {
 
         try {
             storage = StorageAdapter.class.cast(resolveClass(storageAdapterClass, StorageAdapter.class).newInstance());
-            storage.setProperties(configProvider);
+            storage.setProperties(bundleContext);
 
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             throw new IllegalArgumentException("Unable to instantiate storage adapter from " + storageAdapterClass, e);

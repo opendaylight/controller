@@ -16,7 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
 import org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter;
-import org.opendaylight.controller.config.stat.ConfigProvider;
+import org.osgi.framework.BundleContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 
 public class PersisterImplTest {
     @Mock
-    ConfigProvider mockedConfigProvider;
+    BundleContext mockedContext;
 
     @Before
     public void setUpMocks() {
@@ -43,10 +43,10 @@ public class PersisterImplTest {
 
     @Test
     public void testFromProperties() throws Exception {
-        doReturn(MockAdapter.class.getName()).when(mockedConfigProvider).getProperty(
+        doReturn(MockAdapter.class.getName()).when(mockedContext).getProperty(
                 PersisterImpl.STORAGE_ADAPTER_CLASS_PROP);
 
-        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(mockedConfigProvider).get();
+        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(mockedContext).get();
         persisterImpl.persistConfig(null);
         persisterImpl.loadLastConfig();
         persisterImpl.persistConfig(null);
@@ -59,29 +59,29 @@ public class PersisterImplTest {
 
     @Test
     public void testFromProperties2() throws Exception {
-        mockedConfigProvider = mock(ConfigProvider.class);
-        doReturn(FileStorageAdapter.class.getName()).when(mockedConfigProvider).getProperty(
+        mockedContext = mock(BundleContext.class);
+        doReturn(FileStorageAdapter.class.getName()).when(mockedContext).getProperty(
                 PersisterImpl.STORAGE_ADAPTER_CLASS_PROP);
         doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
-                mockedConfigProvider).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
-        doReturn("mockedConfigProvider").when(mockedConfigProvider).toString();
-        doReturn(null).when(mockedConfigProvider).getProperty("numberOfBackups");
+                mockedContext).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
+        doReturn("mockedContext").when(mockedContext).toString();
+        doReturn(null).when(mockedContext).getProperty("numberOfBackups");
 
-        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(mockedConfigProvider).get();
+        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(mockedContext).get();
         assertTrue(persisterImpl.getStorage() instanceof FileStorageAdapter);
     }
 
     @Test
     public void testFromProperties3() throws Exception {
-        mockedConfigProvider = mock(ConfigProvider.class);
-        doReturn(FileStorageAdapter.class.getName()).when(mockedConfigProvider).getProperty(
+        mockedContext = mock(BundleContext.class);
+        doReturn(FileStorageAdapter.class.getName()).when(mockedContext).getProperty(
                 PersisterImpl.STORAGE_ADAPTER_CLASS_PROP);
         doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
-                mockedConfigProvider).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
-        doReturn("mockedConfigProvider").when(mockedConfigProvider).toString();
-        doReturn("0").when(mockedConfigProvider).getProperty("numberOfBackups");
+                mockedContext).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
+        doReturn("mockedContext").when(mockedContext).toString();
+        doReturn("0").when(mockedContext).getProperty("numberOfBackups");
         try {
-            PersisterImpl.createFromProperties(mockedConfigProvider).get();
+            PersisterImpl.createFromProperties(mockedContext).get();
             fail();
         } catch (RuntimeException e) {
             assertThat(
@@ -123,7 +123,7 @@ public class PersisterImplTest {
         static int props = 0;
 
         @Override
-        public void setProperties(ConfigProvider configProvider) {
+        public void setProperties(BundleContext configProvider) {
             props++;
         }
 

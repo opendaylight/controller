@@ -441,8 +441,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         Element response = get();
 
-        System.err.println(XmlUtil.toString(response));
-
         assertEquals(2, getElementsSize(response, "instance"));
         assertEquals(2, getElementsSize(response, "asdf"));
         assertEquals(5, getElementsSize(response, "inner-running-data"));

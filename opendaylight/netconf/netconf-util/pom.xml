@@ -5,7 +5,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3-SNAPSHOT</version>
     </parent>
     <artifactId>netconf-util</artifactId>
     <name>${project.artifactId}</name>
@@ -78,7 +78,6 @@
                             org.opendaylight.controller.netconf.util.handler,
                         </Export-Package>
                         <Import-Package>
-                            org.opendaylight.controller.config.stat,
                             com.google.common.base,
                             com.google.common.collect,
                             ch.ethz.ssh2,

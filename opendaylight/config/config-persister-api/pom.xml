@@ -4,7 +4,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>config-persister-api</artifactId>
@@ -33,7 +33,6 @@
                             com.google.common.base,
                             org.w3c.dom,
                             org.osgi.framework,
-                            org.opendaylight.controller.config.stat
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.persist.api,
