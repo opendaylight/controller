@@ -12,7 +12,9 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6FlowMod;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
@@ -20,6 +22,7 @@ import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.FloodAll;
 import org.opendaylight.controller.sal.action.HwPath;
@@ -745,6 +748,52 @@ public class FlowConverter {
                 actionsList);
         logger.trace("SAL Flow: {}", flow);
         return flow;
+    }
+
+    private static final Map<Integer, Class<? extends Action>> actionMap = new HashMap<Integer, Class<? extends Action>>() {
+        private static final long serialVersionUID = 1L;
+        {
+            put(1 << 0, Output.class);
+            put(1 << 1, SetVlanId.class);
+            put(1 << 2, SetVlanPcp.class);
+            put(1 << 3, PopVlan.class);
+            put(1 << 4, SetDlSrc.class);
+            put(1 << 5, SetDlDst.class);
+            put(1 << 6, SetNwSrc.class);
+            put(1 << 7, SetNwDst.class);
+            put(1 << 8, SetNwTos.class);
+            put(1 << 9, SetTpSrc.class);
+            put(1 << 10, SetTpDst.class);
+            put(1 << 11, Enqueue.class);
+        }
+    };
+
+    /**
+     * Returns the supported flow actions for the netwrok node given the bitmask
+     * representing the actions the Openflow 1.0 switch supports
+     *
+     * @param ofActionBitmask
+     *            OF 1.0 action bitmask
+     * @return The correspondent list of SAL Action classes
+     */
+    public static List<Class<? extends Action>> getFlowActions(int ofActionBitmask) {
+        List<Class<? extends Action>> list = new ArrayList<Class<? extends Action>>();
+
+        for (int i = 0; i < Integer.SIZE; i++) {
+            int index = 1 << i;
+            if ((index & ofActionBitmask) > 0) {
+                if (actionMap.containsKey(index)) {
+                    list.add(actionMap.get(index));
+                }
+            }
+        }
+        // Add implicit SAL actions
+        list.add(Controller.class);
+        list.add(SwPath.class);
+        list.add(HwPath.class);
+        list.add(Drop.class);
+
+        return list;
     }
 
 }

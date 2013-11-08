@@ -26,9 +26,9 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
+import org.opendaylight.controller.sal.action.SupportedFlowActions;
 import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
-import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ContainerFlow;
@@ -503,7 +503,7 @@ public class InventoryServiceShim implements IContainerListener,
             props.add(c);
         }
         int act = sw.getActions();
-        Actions a = new Actions(act);
+        SupportedFlowActions a = new SupportedFlowActions(FlowConverter.getFlowActions(act));
         if (a != null) {
             props.add(a);
         }
