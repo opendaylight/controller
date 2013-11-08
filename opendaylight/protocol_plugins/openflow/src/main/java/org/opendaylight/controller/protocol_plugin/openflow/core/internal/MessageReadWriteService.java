@@ -132,12 +132,17 @@ public class MessageReadWriteService implements IMessageReadWrite {
             throw new AsynchronousCloseException();
         }
 
-        inBuffer.flip();
-        msgs = factory.parseMessages(inBuffer);
-        if (inBuffer.hasRemaining()) {
-            inBuffer.compact();
-        } else {
+        try {
+            inBuffer.flip();
+            msgs = factory.parseMessages(inBuffer);
+            if (inBuffer.hasRemaining()) {
+                inBuffer.compact();
+            } else {
+                inBuffer.clear();
+            }
+        } catch (Exception e) {
             inBuffer.clear();
+            logger.debug("Caught exception: ", e);
         }
         return msgs;
     }
