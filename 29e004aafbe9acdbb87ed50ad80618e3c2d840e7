@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_462cb1ab",
+        "filename": "opendaylight/config/netty-threadgroup-config/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-08T09:49:17Z",
+      "side": 1,
+      "message": "Nitpick but why is PCEP-API mentioned here?",
+      "revId": "29e004aafbe9acdbb87ed50ad80618e3c2d840e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_061eb970",
+        "filename": "opendaylight/config/netty-threadgroup-config/src/main/yang/nsos-netty-threadgroup.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-08T09:49:17Z",
+      "side": 1,
+      "message": "Consider moving the API to threadpool-api if it is ready, otherwise add a TODO to split it from implementation",
+      "revId": "29e004aafbe9acdbb87ed50ad80618e3c2d840e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
