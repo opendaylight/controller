@@ -394,8 +394,8 @@ public class HostTrackerNorthbound {
      * &#x20;&lt;nodeId&gt;00:00:00:00:00:00:00:01&lt;/nodeId&gt;
      * &#x20;&lt;nodeConnectorType&gt;OF&lt;/nodeConnectorType&gt;
      * &#x20;&lt;nodeConnectorId&gt;9&lt;/nodeConnectorId&gt;
-     * &#x20;&lt;vlan&gt;0&lt;/vlan&gt;
-     * &#x20;&lt;staticHost&gt;false&lt;/staticHost&gt;
+     * &#x20;&lt;vlan&gt;1&lt;/vlan&gt;
+     * &#x20;&lt;staticHost&gt;true&lt;/staticHost&gt;
      * &lt;/hostConfig&gt;
      *
      * Request body in JSON:
@@ -406,8 +406,8 @@ public class HostTrackerNorthbound {
      * &#x20;"nodeId":"00:00:00:00:00:00:00:01",
      * &#x20;"nodeConnectorType":"OF",
      * &#x20;"nodeConnectorId":"9",
-     * &#x20;"vlan":"0",
-     * &#x20;"staticHost":"false",
+     * &#x20;"vlan":"1",
+     * &#x20;"staticHost":"true",
      * &#x20;"networkAddress":"1.1.1.1"
      * }
      * </pre>
