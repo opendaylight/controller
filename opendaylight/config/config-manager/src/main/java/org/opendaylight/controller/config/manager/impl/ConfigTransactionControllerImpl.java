@@ -138,8 +138,10 @@ class ConfigTransactionControllerImpl implements
         for (ModuleFactory moduleFactory : toBeAdded) {
             Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager, bundleContext);
             for (Module module : defaultModules) {
+                // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
+                DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
                 try {
-                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null);
+                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null, dependencyResolver);
                 } catch (InstanceAlreadyExistsException e) {
                     throw new IllegalStateException(e);
                 }
@@ -179,7 +181,7 @@ class ConfigTransactionControllerImpl implements
                     "Error while copying old configuration from %s to %s",
                     oldConfigBeanInfo, moduleFactory), e);
         }
-        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo);
+        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo, dependencyResolver);
     }
 
     @Override
@@ -196,18 +198,23 @@ class ConfigTransactionControllerImpl implements
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
         Module module = moduleFactory.createModule(instanceName, dependencyResolver, bundleContext);
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
-                moduleFactory, null);
+                moduleFactory, null, dependencyResolver);
     }
 
     private synchronized ObjectName putConfigBeanToJMXAndInternalMaps(
             ModuleIdentifier moduleIdentifier, Module module,
             ModuleFactory moduleFactory,
-            @Nullable ModuleInternalInfo maybeOldConfigBeanInfo)
+            @Nullable ModuleInternalInfo maybeOldConfigBeanInfo, DependencyResolver dependencyResolver)
             throws InstanceAlreadyExistsException {
+
         logger.debug("Adding module {} to transaction {}", moduleIdentifier, this);
         if (moduleIdentifier.equals(module.getIdentifier())==false) {
             throw new IllegalStateException("Incorrect name reported by module. Expected "
              + moduleIdentifier + ", got " + module.getIdentifier());
+        }
+        if (dependencyResolver.getIdentifier().equals(moduleIdentifier) == false ) {
+            throw new IllegalStateException("Incorrect name reported by dependency resolver. Expected "
+                    + moduleIdentifier + ", got " + dependencyResolver.getIdentifier());
         }
         DynamicMBean writableDynamicWrapper = new DynamicWritableWrapper(
                 module, moduleIdentifier, transactionIdentifier,
@@ -224,8 +231,6 @@ class ConfigTransactionControllerImpl implements
                 maybeOldConfigBeanInfo, transactionModuleJMXRegistration);
 
         dependencyResolverManager.put(moduleInternalTransactionalInfo);
-        // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
-        dependencyResolverManager.getOrCreate(moduleIdentifier);
         return writableON;
     }
 

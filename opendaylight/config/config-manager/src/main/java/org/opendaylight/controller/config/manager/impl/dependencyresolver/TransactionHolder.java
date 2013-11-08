@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import java.util.Map;
-
-import javax.management.InstanceAlreadyExistsException;
-
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.CommitInfo;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+
+import javax.management.InstanceAlreadyExistsException;
+import java.util.Map;
 
 interface TransactionHolder {
     CommitInfo toCommitInfo();

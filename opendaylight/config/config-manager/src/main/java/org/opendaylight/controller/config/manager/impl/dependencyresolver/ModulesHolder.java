@@ -7,18 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.InstanceAlreadyExistsException;
-
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -27,6 +15,17 @@ import org.opendaylight.controller.config.manager.impl.DestroyedModule;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.InstanceAlreadyExistsException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents modules to be committed.
@@ -117,8 +116,7 @@ class ModulesHolder implements TransactionHolder {
             throws InstanceAlreadyExistsException {
         if (commitMap.containsKey(moduleIdentifier)) {
             throw new InstanceAlreadyExistsException(
-                    "There is an instance registered with name "
-                            + moduleIdentifier);
+                    "There is an instance registered with name " + moduleIdentifier);
         }
     }
 

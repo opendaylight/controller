@@ -7,15 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import static java.lang.String.format;
-
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
@@ -25,7 +16,14 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.concepts.Identifiable;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.ObjectName;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static java.lang.String.format;
 
 /**
  * Protect {@link org.opendaylight.controller.config.spi.Module#getInstance()}
@@ -33,7 +31,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * during validation. Tracks dependencies for ordering purposes.
  */
 final class DependencyResolverImpl implements DependencyResolver,
-       Identifiable<ModuleIdentifier>, Comparable<DependencyResolverImpl> {
+       Comparable<DependencyResolverImpl> {
     private final ModulesHolder modulesHolder;
     private final ModuleIdentifier name;
     private final TransactionStatus transactionStatus;
@@ -45,11 +43,6 @@ final class DependencyResolverImpl implements DependencyResolver,
         this.name = currentModule;
         this.transactionStatus = transactionStatus;
         this.modulesHolder = modulesHolder;
-    }
-
-    @Deprecated
-    public ModuleIdentifier getName() {
-        return name;
     }
 
     /**
@@ -177,7 +170,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         int maxDepth = 0;
         LinkedHashSet<ModuleIdentifier> chainForDetectingCycles2 = new LinkedHashSet<>(
                 chainForDetectingCycles);
-        chainForDetectingCycles2.add(impl.getName());
+        chainForDetectingCycles2.add(impl.getIdentifier());
         for (ModuleIdentifier dependencyName : impl.dependencies) {
             DependencyResolverImpl dependentDRI = manager
                     .getOrCreate(dependencyName);
