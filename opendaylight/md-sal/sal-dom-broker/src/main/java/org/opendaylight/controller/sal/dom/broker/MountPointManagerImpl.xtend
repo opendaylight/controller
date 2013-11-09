@@ -6,15 +6,27 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentHashMap
 import static com.google.common.base.Preconditions.*;
+import org.opendaylight.controller.sal.core.api.data.DataProviderService
 
 class MountPointManagerImpl implements MountProvisionService {
+    
+    @Property
+    DataProviderService dataBroker;
     
     ConcurrentMap<InstanceIdentifier,MountPointImpl> mounts = new ConcurrentHashMap();
     
     override createMountPoint(InstanceIdentifier path) {
         checkState(!mounts.containsKey(path),"Mount already created");
         val mount = new MountPointImpl(path);
+        registerMountPoint(mount);
         mounts.put(path,mount);
+        return mount;
+    }
+    
+    def registerMountPoint(MountPointImpl impl) {
+        dataBroker?.registerConfigurationReader(impl.mountPath,impl.readWrapper);
+        dataBroker?.registerOperationalReader(impl.mountPath,impl.readWrapper);
+        
     }
     
     
@@ -30,6 +42,4 @@ class MountPointManagerImpl implements MountProvisionService {
     override getMountPoint(InstanceIdentifier path) {
         mounts.get(path);
     }
-    
-    
 }

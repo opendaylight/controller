@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.sal.core.api.mount;
 
+import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 
-public interface MountService {
+public interface MountService extends BrokerService {
 
     MountInstance getMountPoint(InstanceIdentifier path);
 }
