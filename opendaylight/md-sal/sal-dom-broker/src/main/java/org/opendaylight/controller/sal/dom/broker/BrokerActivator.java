@@ -6,6 +6,8 @@ import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
+import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -20,6 +22,9 @@ public class BrokerActivator implements BundleActivator {
     private ServiceRegistration<DataProviderService> dataProviderReg;
     private SchemaServiceImpl schemaService;
     private DataBrokerImpl dataService;
+    private MountPointManagerImpl mountService;
+    private ServiceRegistration<MountService> mountReg;
+    private ServiceRegistration<MountProvisionService> mountProviderReg;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -38,7 +43,11 @@ public class BrokerActivator implements BundleActivator {
         dataReg = context.registerService(DataBrokerService.class, dataService, emptyProperties);
         dataProviderReg = context.registerService(DataProviderService.class, dataService, emptyProperties);
         
+        mountService = new MountPointManagerImpl();
+        mountService.setDataBroker(dataService);
         
+        mountReg = context.registerService(MountService.class, mountService, emptyProperties);
+        mountProviderReg =  context.registerService(MountProvisionService.class, mountService, emptyProperties);
     }
 
     @Override
