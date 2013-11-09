@@ -282,12 +282,17 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
                     peerNetData.position(), peerNetData.limit());
         }
 
-        peerAppData.flip();
-        msgs = factory.parseMessages(peerAppData);
-        if (peerAppData.hasRemaining()) {
-            peerAppData.compact();
-        } else {
+        try {
+            peerAppData.flip();
+            msgs = factory.parseMessages(peerAppData);
+            if (peerAppData.hasRemaining()) {
+                peerAppData.compact();
+            } else {
+                peerAppData.clear();
+            }
+        } catch (Exception e) {
             peerAppData.clear();
+            logger.debug("Caught exception: ", e);
         }
 
         this.socket.register(this.selector, SelectionKey.OP_READ, this);
