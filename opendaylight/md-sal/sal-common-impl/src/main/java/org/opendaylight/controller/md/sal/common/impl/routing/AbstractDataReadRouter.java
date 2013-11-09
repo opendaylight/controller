@@ -75,7 +75,7 @@ public abstract class AbstractDataReadRouter<P extends Path<?>, D> implements Da
         return new Function<DataReader<P, D>, D>() {
             @Override
             public D apply(DataReader<P, D> input) {
-                return input.readConfigurationData(path);
+                return input.readOperationalData(path);
             }
         };
     }
