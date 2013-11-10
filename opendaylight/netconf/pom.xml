@@ -48,6 +48,7 @@
         <slf4j.version>1.7.2</slf4j.version>
         <netconf.netty.version>4.0.10.Final</netconf.netty.version>
         <ct.exi.version>0.9.2</ct.exi.version>
+        <sal.core.api>1.0-SNAPSHOT</sal.core.api>
     </properties>
 
     <dependencies>
@@ -188,6 +189,11 @@
                 <groupId>com.siemens.ct.exi</groupId>
                 <artifactId>exificient</artifactId>
                 <version>${ct.exi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-core-api</artifactId>
+                <version>${sal.core.api}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

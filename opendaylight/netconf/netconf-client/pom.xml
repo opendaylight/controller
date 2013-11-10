@@ -34,6 +34,10 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-core-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -62,6 +66,7 @@
                             org.opendaylight.controller.netconf.util,
                             org.opendaylight.controller.netconf.util.xml,
                             org.opendaylight.protocol.framework,
+                            org.opendaylight.controller.sal.core.api.notify,
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax

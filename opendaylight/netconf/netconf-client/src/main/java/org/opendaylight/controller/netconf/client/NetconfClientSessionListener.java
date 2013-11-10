@@ -12,9 +12,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
+import org.opendaylight.controller.sal.core.api.notify.NotificationService;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,9 +48,21 @@ public class NetconfClientSessionListener implements
 
     @Override
     public synchronized void onMessage(NetconfClientSession session, NetconfMessage message) {
-        synchronized (messages) {
-            this.messages.add(message);
+        if (isNotification(message)) {
+            NotificationService ns ;
+            // TODO: Publish to SAL.
+        } else {
+            synchronized (messages) {
+                this.messages.add(message);
+            }
         }
+    }
+
+    private static final String NOTIFICATION_ELEMENT_NAME = "notification";
+    private boolean isNotification(NetconfMessage message) {
+        Document doc = message.getDocument();
+        String nodeName = doc.getDocumentElement().getNodeName();
+        return nodeName.equals(NOTIFICATION_ELEMENT_NAME);
     }
 
     private int lastReadMessage = -1;
