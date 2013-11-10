@@ -1,5 +1,6 @@
 package org.opendaylight.controller.test.restconf.it;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -8,14 +9,27 @@ import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
+import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.connect.netconf.InventoryUtils;
+import org.opendaylight.controller.sal.connect.netconf.NetconfDeviceManager;
+import org.opendaylight.controller.sal.connect.netconf.NetconfInventoryUtils;
+import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.test.sal.binding.it.TestHelper;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -34,23 +48,55 @@ public class ServiceProviderController {
     public static final String YANG = "org.opendaylight.yangtools";
     public static final String SAMPLE = "org.opendaylight.controller.samples";
 
+    private static QName CONFIG_MODULES = new QName(
+            URI.create("urn:opendaylight:params:xml:ns:yang:controller:config"), null, "modules");
+    private static QName CONFIG_SERVICES = new QName(
+            URI.create("urn:opendaylight:params:xml:ns:yang:controller:config"), null, "modules");
+    @Inject
+    BundleContext context;
+
+    @Inject
+    MountProvisionService mountService;
+
+    @Inject
+    DataBrokerService dataBroker;
+
+    @Inject
+    NetconfDeviceManager netconfManager;
+
     @Test
     public void properInitialized() throws Exception {
 
-        Thread.sleep(30*60*1000); // Waiting for services to get wired.
-        assertTrue(true);
+        Map<QName, String> arg = Collections.singletonMap(InventoryUtils.INVENTORY_ID, "foo");
+
+        InstanceIdentifier path = InstanceIdentifier.builder(InventoryUtils.INVENTORY_PATH)
+                .nodeWithKey(InventoryUtils.INVENTORY_NODE, InventoryUtils.INVENTORY_ID, "foo").toInstance();
+
+        netconfManager.netconfNodeAdded(path, new InetSocketAddress("127.0.0.1", 8383));
+
+        
+        InstanceIdentifier mountPointPath = path;
+        
+        /** We retrive a mountpoint **/
+        MountProvisionInstance mountPoint = mountService.getMountPoint(mountPointPath);
+        CompositeNode data = mountPoint.readOperationalData(InstanceIdentifier.builder().node(CONFIG_MODULES)
+                .toInstance());
+        assertNotNull(data);
+        assertEquals(CONFIG_MODULES, data.getNodeType());
+
+        CompositeNode data2 = mountPoint.readOperationalData(InstanceIdentifier.builder().toInstance());
+        assertNotNull(data2);
+
+        InstanceIdentifier fullPath = InstanceIdentifier.builder(mountPointPath).node(CONFIG_MODULES).toInstance();
+
+        CompositeNode data3 = dataBroker.readOperationalData(fullPath);
+        assertNotNull(data3);
+        assertEquals(CONFIG_MODULES, data.getNodeType());
+
+        //Thread.sleep(30 * 60 * 1000); // Waiting for services to get wired.
+        //assertTrue(true);
         // assertTrue(consumer.createToast(WhiteBread.class, 5));
-
     }
-
-    // @Inject
-    // BindingAwareBroker broker;
-
-    // @Inject
-    // ToastConsumer consumer;
-
-    @Inject
-    BundleContext ctx;
 
     @Configuration
     public Option[] config() {
@@ -63,6 +109,7 @@ public class ServiceProviderController {
                 mdSalCoreBundles(),
                 baseModelBundles(),
                 flowCapableModelBundles(),
+                configMinumumBundles(),
 
                 // mavenBundle(ODL,
                 // "sal-binding-broker-impl").versionAsInProject().update(), //
@@ -79,6 +126,7 @@ public class ServiceProviderController {
                 // mavenBundle(SAMPLE,
                 // "zeromq-test-provider").versionAsInProject(), //
                 mavenBundle(ODL, "sal-rest-connector").versionAsInProject(), //
+                mavenBundle(ODL, "sal-netconf-connector").versionAsInProject(), //
 
                 mavenBundle(YANG, "concepts").versionAsInProject(),
                 mavenBundle(YANG, "yang-binding").versionAsInProject(), //
@@ -89,6 +137,7 @@ public class ServiceProviderController {
                 mavenBundle(YANG, "yang-model-util").versionAsInProject(), //
                 mavenBundle(YANG, "yang-parser-api").versionAsInProject(),
                 mavenBundle(YANG, "yang-parser-impl").versionAsInProject(),
+
                 mavenBundle(YANG + ".thirdparty", "xtend-lib-osgi").versionAsInProject(), //
                 mavenBundle(YANG + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //
@@ -105,8 +154,15 @@ public class ServiceProviderController {
                 // earlier.
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
 
+                systemProperty("netconf.tcp.address").value("127.0.0.1"),
+                systemProperty("netconf.tcp.port").value("8383"),
+
                 // Set the systemPackages (used by clustering)
                 systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
+
+                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.xerces", "2.11.0_1"),
+                mavenBundle("org.eclipse.birt.runtime.3_7_1", "org.apache.xml.resolver", "1.2.0"),
+
                 mavenBundle("org.slf4j", "jcl-over-slf4j").versionAsInProject(),
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
@@ -139,6 +195,40 @@ public class ServiceProviderController {
 
                 // mavenBundle("commons-fileupload",
                 // "commons-fileupload").versionAsInProject(),
+
+                mavenBundle("io.netty", "netty-handler").versionAsInProject(),
+                mavenBundle("io.netty", "netty-codec").versionAsInProject(),
+                mavenBundle("io.netty", "netty-buffer").versionAsInProject(),
+                mavenBundle("io.netty", "netty-transport").versionAsInProject(),
+                mavenBundle("io.netty", "netty-common").versionAsInProject(),
+
+                mavenBundle(ODL, "config-api").versionAsInProject(),
+                mavenBundle(ODL, "config-manager").versionAsInProject(),
+                mavenBundle(ODL, "config-util").versionAsInProject(),
+                mavenBundle(ODL, "yang-jmx-generator").versionAsInProject(),
+                mavenBundle(ODL, "yang-store-api").versionAsInProject(),
+                mavenBundle(ODL, "yang-store-impl").versionAsInProject(),
+                mavenBundle(ODL, "logback-config").versionAsInProject(),
+                mavenBundle(ODL, "config-persister-api").versionAsInProject(),
+                // mavenBundle(ODL,"config-persister-file-adapter").versionAsInProject(),
+                mavenBundle(ODL, "netconf-api").versionAsInProject(),
+                mavenBundle(ODL, "netconf-impl").versionAsInProject(),
+                mavenBundle(ODL, "netconf-client").versionAsInProject(),
+                mavenBundle(ODL, "netconf-util").versionAsInProject(),
+                mavenBundle(ODL + ".thirdparty", "ganymed", "1.0-SNAPSHOT"),
+                mavenBundle(ODL, "netconf-mapping-api").versionAsInProject(),
+                mavenBundle(ODL, "config-netconf-connector").versionAsInProject(),
+                mavenBundle(ODL, "config-persister-impl").versionAsInProject(),
+
+                mavenBundle("org.opendaylight.bgpcep", "framework").versionAsInProject(),
+                mavenBundle("org.opendaylight.bgpcep", "util").versionAsInProject(),
+                mavenBundle(YANG, "binding-generator-spi").versionAsInProject(), //
+                mavenBundle(YANG, "binding-model-api").versionAsInProject(), //
+                mavenBundle(YANG, "binding-generator-util").versionAsInProject(),
+                mavenBundle(YANG, "yang-parser-impl").versionAsInProject(),
+                mavenBundle(YANG, "binding-type-provider").versionAsInProject(),
+
+                mavenBundle("org.opendaylight.controller.thirdparty", "exificient", "0.9.2"),
 
                 mavenBundle("equinoxSDK381", "javax.servlet").versionAsInProject(),
                 mavenBundle("equinoxSDK381", "javax.servlet.jsp").versionAsInProject(),
