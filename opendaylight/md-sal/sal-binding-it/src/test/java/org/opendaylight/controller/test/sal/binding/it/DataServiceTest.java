@@ -11,6 +11,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -21,9 +22,15 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+import com.google.inject.Inject;
+
 public class DataServiceTest extends AbstractTest {
 
     protected DataBrokerService consumerDataService;
+    
+    
+    @Inject
+    Broker broker2;
 
     @Before
     public void setUp() throws Exception {
@@ -61,9 +68,9 @@ public class DataServiceTest extends AbstractTest {
         assertNotNull(result.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
         
-        DataObject readedData = consumerDataService.readConfigurationData(node1.getValue());
+        Node readedData = (Node) consumerDataService.readConfigurationData(node1.getValue());
         assertNotNull(readedData);
-        assertEquals(nodeData1, readedData);
+        assertEquals(nodeData1.getKey(), readedData.getKey());
         
         
         DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
@@ -97,7 +104,9 @@ public class DataServiceTest extends AbstractTest {
     
     private static Node createNode(String string) {
         NodeBuilder ret = new NodeBuilder();
-        ret.setId(new NodeId(string));
+        NodeId id = new NodeId(string);
+        ret.setKey(new NodeKey(id));
+        ret.setId(id);
         return ret.build();
     }
 }
