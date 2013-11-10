@@ -35,7 +35,7 @@ public abstract class AbstractDataReadRouter<P extends Path<?>, D> implements Da
     @Override
     public D readOperationalData(P path) {
         FluentIterable<D> dataBits = FluentIterable //
-                .from(getReaders(configReaders, path)).transform(operationalRead(path));
+                .from(getReaders(operationalReaders, path)).transform(operationalRead(path));
         return merge(path,dataBits);
 
     }

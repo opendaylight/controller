@@ -33,7 +33,7 @@ import java.util.Arrays
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
 import java.util.HashSet
-import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
+import static org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils.*
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
 import java.util.Set

@@ -40,10 +40,11 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.yangtools.yang.binding.BaseIdentity
 import com.google.common.collect.Multimap
 import com.google.common.collect.HashMultimap
-import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
+import static org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils.*
 import java.util.concurrent.Executors
 import java.util.Collections
 import org.opendaylight.yangtools.yang.binding.DataObject
+import org.opendaylight.controller.sal.binding.impl.connect.dom.ConnectorActivator
 
 class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
@@ -86,7 +87,8 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     
     ServiceRegistration<DataBrokerService> dataConsumerRegistration
     
-    private HashMapDataStore store = new HashMapDataStore();
+    ConnectorActivator connectorActivator
+   
     
     public new(BundleContext bundleContext) {
         _brokerBundleContext = bundleContext;
@@ -115,11 +117,9 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
         notifyConsumerRegistration = brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
         dataProviderRegistration = brokerBundleContext.registerService(DataProviderService, dataBroker, brokerProperties)
         dataConsumerRegistration = brokerBundleContext.registerService(DataBrokerService, dataBroker, brokerProperties)
-        
-        
-        getDataBroker().registerDataReader(root, store);
-        getDataBroker().registerCommitHandler(root, store)
-        
+
+        connectorActivator = new ConnectorActivator(dataBroker,brokerBundleContext);
+        connectorActivator.start();
         log.info("MD-SAL: Binding Aware Broker Started");
     }
 

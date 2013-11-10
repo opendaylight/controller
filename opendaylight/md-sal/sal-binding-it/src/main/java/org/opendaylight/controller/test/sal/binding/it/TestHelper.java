@@ -25,6 +25,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), //
                 
+                mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //
                 mavenBundle(YANGTOOLS + ".thirdparty", "xtend-lib-osgi").versionAsInProject() //
         );
@@ -44,8 +45,32 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(),
                 mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), //
                 mavenBundle("org.javassist", "javassist").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject() //
-        );
+                mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), //
+        
+                mavenBundle(YANGTOOLS, "yang-data-api").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-data-impl").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-model-api").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-model-util").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-parser-api").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(),
+                
+                
+                mavenBundle(YANGTOOLS, "binding-generator-spi").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "binding-model-api").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "binding-generator-util").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-type-provider").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-generator-api").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-generator-spi").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-generator-impl").versionAsInProject(),
+                
+                
+                mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
+                mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
+                
+                mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject() //
+       );
 
     }
 
