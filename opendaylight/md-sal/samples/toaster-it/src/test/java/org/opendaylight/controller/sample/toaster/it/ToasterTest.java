@@ -23,6 +23,10 @@ public class ToasterTest {
 
     public static final String ODL = "org.opendaylight.controller";
     public static final String YANG = "org.opendaylight.yangtools";
+    public static final String CONTROLLER = "org.opendaylight.controller";
+    public static final String YANGTOOLS = "org.opendaylight.yangtools";
+    
+    
     public static final String SAMPLE = "org.opendaylight.controller.samples";
 
     @Test
@@ -50,9 +54,6 @@ public class ToasterTest {
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
-                mavenBundle(ODL, "sal-binding-api").versionAsInProject(), //
-                mavenBundle(ODL, "sal-binding-config").versionAsInProject(), 
-                mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject(), //
                 
                 mavenBundle(ODL, "sal-common").versionAsInProject(), //
                 mavenBundle(ODL, "sal-common-api").versionAsInProject(),//
@@ -62,7 +63,37 @@ public class ToasterTest {
                 mavenBundle(ODL, "config-api").versionAsInProject(), //
                 mavenBundle(ODL, "config-manager").versionAsInProject(), //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(),
+                mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(),
                 
+                mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(),
+                mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), //
+                mavenBundle("org.javassist", "javassist").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), //
+        
+                mavenBundle(YANGTOOLS, "yang-data-api").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-data-impl").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-model-api").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-model-util").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "yang-parser-api").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(),
+                
+                
+                mavenBundle(YANGTOOLS, "binding-generator-spi").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "binding-model-api").versionAsInProject(), //
+                mavenBundle(YANGTOOLS, "binding-generator-util").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-type-provider").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-generator-api").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-generator-spi").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "binding-generator-impl").versionAsInProject(),
+                
+                
+                mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
+                mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
+                
+                mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
                 
                 mavenBundle(SAMPLE, "sample-toaster").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster-consumer").versionAsInProject(), //

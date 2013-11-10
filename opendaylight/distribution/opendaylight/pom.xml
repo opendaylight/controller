@@ -281,17 +281,22 @@
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>binding-generator-spi</artifactId>
+          <version>${yangtools.binding.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>binding-generator-api</artifactId>
+          <version>${yangtools.binding.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-util</artifactId>
           <version>${yangtools.binding.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-model-api</artifactId>
-          <version>${yangtools.binding.version}</version>
-         </dependency>
-         <dependency>
-          <groupId>org.opendaylight.yangtools</groupId>
-          <artifactId>binding-generator-spi</artifactId>
           <version>${yangtools.binding.version}</version>
          </dependency>
          <dependency>

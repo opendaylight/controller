@@ -8,7 +8,11 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader
 class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
 
     override protected merge(InstanceIdentifier path, Iterable<CompositeNode> data) {
-        return data.iterator.next
+        val iterator = data.iterator;
+        if(iterator.hasNext) {
+            return data.iterator.next
+        }
+        return null;
     }
 
 }
