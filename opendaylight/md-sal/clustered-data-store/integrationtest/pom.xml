@@ -18,15 +18,50 @@
   <artifactId>clustered-datastore.integrationtest</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <dependencies>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-common-api</artifactId>
+          <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-common-util</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-common-impl</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-broker-impl</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal</artifactId>
+        <version>0.5.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>clustering.services</artifactId>
+        <version>0.4.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-binding</artifactId>
+      </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>protocol_plugins.stub</artifactId>
       <version>0.4.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
     </dependency>
      <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -45,11 +80,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-      <version>0.4.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.stub</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
@@ -59,7 +89,33 @@
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
 
-  </dependencies>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-common</artifactId>
+          <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-common</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>concepts</artifactId>
+          <version>0.1.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+       <groupId>org.mockito</groupId>
+       <artifactId>mockito-all</artifactId>
+       <version>1.9.5</version>
+       <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.core</artifactId>
+          <version>5.0.0</version>
+      </dependency>
+
+</dependencies>
   <properties>
     <!-- Sonar jacoco plugin to get integration test coverage info -->
     <sonar.jacoco.reportPath>../implementation/target/jacoco.exec</sonar.jacoco.reportPath>
