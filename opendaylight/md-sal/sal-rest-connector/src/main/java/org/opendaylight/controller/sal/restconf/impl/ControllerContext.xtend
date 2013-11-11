@@ -25,6 +25,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 import static com.google.common.base.Preconditions.*
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition
+import java.util.concurrent.ConcurrentHashMap
 
 class ControllerContext implements SchemaServiceListener {
 
@@ -37,6 +39,8 @@ class ControllerContext implements SchemaServiceListener {
 
     private val BiMap<URI, String> uriToModuleName = HashBiMap.create();
     private val Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
+    private val Map<QName,RpcDefinition> qnameToRpc = new ConcurrentHashMap();
+    
 
     private new() {
         if (INSTANCE != null) {
@@ -272,11 +276,23 @@ class ControllerContext implements SchemaServiceListener {
         }
     }
 
-    public def QName toRpcQName(String name) {
+    public def QName toQName(String name) {
+        val module = name.toModuleName;
+        val node = name.toNodeName;
+        val namespace = moduleNameToUri.get(module);
+        return new QName(namespace,null,node);
     }
 
     override onGlobalContextUpdated(SchemaContext context) {
         this.schemas = context;
+        for(operation : context.operations) {
+            val qname = new QName(operation.QName.namespace,null,operation.QName.localName);
+            qnameToRpc.put(qname,operation);
+        }
+    }
+    
+    def ContainerSchemaNode getRpcOutputSchema(QName name) {
+        qnameToRpc.get(name)?.output;
     }
 
 }
