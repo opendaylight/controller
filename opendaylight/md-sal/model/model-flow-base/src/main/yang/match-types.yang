@@ -50,6 +50,10 @@ module opendaylight-match-types {
                 mandatory true;
                 type l2t:ether-type; // Needs to define that as general model
             }
+
+            leaf mask {
+                type binary;
+            }
         }
     }
 
@@ -92,67 +96,30 @@ module opendaylight-match-types {
             description "IP Proto (IPv4 or IPv6 Protocol Number).";
             type inet:ip-version; 
         }
-    }
-
-    grouping "ipv4-source-address" {
-        leaf ipv4-source {
-            description "IPv4 source address.";
-            type inet:ipv4-address;
-        }
-        
-        leaf source-mask {
-            description "IPv4 source address mask.";
-            type inet:ipv4-prefix;
-        }
-    }
-    
-    grouping "ipv4-destination-address" {
-        leaf ipv4-destination {
-            description "IPv4 destination address.";
-            type inet:ipv4-address;
-        }
-        
-        leaf destination-mask {
-            description "IPv4 source address mask.";
-            type inet:ipv4-prefix;
-        }
-    }
+    } 
     
     grouping "ipv4-match-fields" {
-        container "ipv4-address" {
-            uses ipv4-source-address;        
-            uses ipv4-destination-address;
-        }
-    }
-    
-    grouping "ipv6-destination-address" {
-        leaf ipv6-destination {
-            description "IPv6 destination address.";
-            type inet:ipv6-address;
+        leaf ipv4-source {
+            description "IPv4 source address.";
+            type inet:ipv4-prefix;
         }
         
-        leaf ipv6-destination-mask {
-            description "IPv6 source address mask.";
-            type inet:ipv6-prefix;
-        }
-    }
-    
-    grouping "ipv6-source-address" {
-        leaf ipv6-source {
-            description "IPv6 source address.";
-            type inet:ipv6-address;
+        leaf ipv4-destination {
+            description "IPv4 destination address.";
+            type inet:ipv4-prefix;
         }
         
-        leaf ipv6-source-mask {
-            description "IPv6 source address mask.";
-            type inet:ipv6-prefix;
-        }
     }
     
     grouping "ipv6-match-fields" {
-        container "ipv6-address" {
-            uses ipv6-source-address;        
-            uses ipv6-destination-address;
+        leaf ipv6-source {
+            description "IPv6 source address.";
+            type inet:ipv6-prefix;
+        }
+    
+        leaf ipv6-destination {
+            description "IPv6 destination address.";
+            type inet:ipv6-prefix;
         }
         
         leaf ipv6-nd-target {
@@ -315,7 +282,7 @@ module opendaylight-match-types {
             }
             
             leaf tunnel-mask {
-                type boolean;
+                type binary;
             }
         }
         

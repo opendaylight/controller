@@ -46,7 +46,7 @@
 
         <module>inventory-manager</module>
         <!-- Compability Packages -->
-        <module>compatibility</module>
+      <!--  <module>compatibility</module> -->
 
         <module>sal-zeromq-connector</module>
         <module>test</module>
