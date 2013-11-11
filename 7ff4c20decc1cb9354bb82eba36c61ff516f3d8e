@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_4097f090",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/match-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 536
+      },
+      "writtenOn": "2013-11-11T11:28:51Z",
+      "side": 1,
+      "message": "It should be ipv6-adress.",
+      "revId": "7ff4c20decc1cb9354bb82eba36c61ff516f3d8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2092bc9f",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/match-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 536
+      },
+      "writtenOn": "2013-11-11T11:28:51Z",
+      "side": 1,
+      "message": "It should be ipv6-prefix.",
+      "revId": "7ff4c20decc1cb9354bb82eba36c61ff516f3d8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
