@@ -98,7 +98,7 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
         return null;
     }
 
-    public static def toStatus(RpcResult<Void> result) {
+    public static def toStatus(RpcResult<?> result) {
         if (result.isSuccessful()) {
             return new Status(StatusCode.SUCCESS);
         } else {
