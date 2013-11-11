@@ -25,7 +25,7 @@ class RestconfImpl implements RestconfService {
 
     override readAllData() {
 //        return broker.readOperationalData("".toInstanceIdentifier.getInstanceIdentifier);
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        throw new UnsupportedOperationException("Reading all data is currently not supported.")
     }
 
     override getModules() {
@@ -33,8 +33,7 @@ class RestconfImpl implements RestconfService {
     }
 
     override getRoot() {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
-
+        return null;
     }
 
     override readData(String identifier) {
@@ -44,18 +43,50 @@ class RestconfImpl implements RestconfService {
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
-//        return broker.commitConfigurationDataCreate(identifier.toInstanceIdentifier.getInstanceIdentifier, payload);
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
-//        return broker.commitConfigurationDataCreate(identifier.toInstanceIdentifier.getInstanceIdentifier, payload);
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
-        val rpcResult = broker.invokeRpc(identifier.toRpcQName, payload);
-        return new StructuredData(rpcResult.result, identifier.toInstanceIdentifier.getSchemaNode)
+        val rpc = identifier.toQName;
+        val rpcResult = broker.invokeRpc(rpc, payload);
+        val schema = controllerContext.getRpcOutputSchema(rpc);
+        return new StructuredData(rpcResult.result, schema);
+    }
+    
+    override readConfigurationData(String identifier) {
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
+    }
+    
+    override readOperationalData(String identifier) {
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
+    }
+    
+    override updateConfigurationDataLegacy(String identifier, CompositeNode payload) {
+        updateConfigurationData(identifier,payload);
+    }
+    
+    override createConfigurationDataLegacy(String identifier, CompositeNode payload) {
+        createConfigurationData(identifier,payload);
+    }
+    
+    override createOperationalData(String identifier, CompositeNode payload) {
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
+    }
+    
+    override updateOperationalData(String identifier, CompositeNode payload) {
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
     }
 
 }
