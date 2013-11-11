@@ -49,7 +49,6 @@
         <module>compatibility</module>
 
         <module>sal-zeromq-connector</module>
-        <module>test</module>
     </modules>
 
 
@@ -62,6 +61,7 @@
             <modules>
                 <module>sal-binding-it</module>
                 <module>clustered-data-store/integrationtest</module>
+                <module>test</module>
             </modules>
         </profile>
     </profiles>
@@ -248,34 +248,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse
-                    m2e settings only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                  <pluginExecutionFilter>
-                                    <groupId>org.jacoco</groupId>
-                                    <artifactId>jacoco-maven-plugin</artifactId>
-                                    <versionRange>[0.0,)</versionRange>
-                                    <goals>
-                                      <goal>prepare-agent</goal>
-                                      <goal>pre-test</goal>
-                                      <goal>post-test</goal>
-                                    </goals>
-                                  </pluginExecutionFilter>
-                                  <action>
-                                    <ignore />
-                                  </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
@@ -346,40 +318,42 @@
                             <pluginExecutions>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>
-                                            org.opendaylight.yangtools
-                                        </groupId>
-                                        <artifactId>
-                                            yang-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [0.5,)
-                                        </versionRange>
+                                        <groupId>org.opendaylight.yangtools</groupId>
+                                        <artifactId>yang-maven-plugin</artifactId>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
-                                            <goal>
-                                                generate-sources
-                                            </goal>
+                                            <goal>generate-sources</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>net.alchim31.maven</groupId>
+                                        <artifactId>scala-maven-plugin</artifactId>
+                                        <versionRange>[0,)</versionRange>
+                                        <goals>
+                                            <goal>compile</goal>
+                                            <goal>testCompile</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                      <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>org.jacoco</groupId>
-                                        <artifactId>
-                                            jacoco-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [0.5.3.201107060350,)
-                                        </versionRange>
+                                        <artifactId>jacoco-maven-plugin</artifactId>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
                                             <goal>prepare-agent</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>

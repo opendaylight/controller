@@ -111,6 +111,10 @@
             <artifactId>mockito-configuration</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>commons.logback_settings</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

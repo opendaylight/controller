@@ -743,6 +743,12 @@
         <artifactId>jolokia-osgi</artifactId>
         <version>${jolokia.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>commons.logback_settings</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -946,37 +952,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>${propertymavenplugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>set-system-properties</goal>
-            </goals>
-            <configuration>
-              <properties>
-                <property>
-                  <name>logback.configurationFile</name>
-                  <value>${project.parent.basedir}/logback.xml</value>
-                </property>
-              </properties>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-        <artifactId>maven-java-formatter-plugin</artifactId>
-        <version>0.3.1</version>
-        <configuration>
-          <compilerSource>1.6</compilerSource>
-          <compilerCompliance>1.6</compilerCompliance>
-          <compilerTargetPlatform>1.6</compilerTargetPlatform>
-          <configFile>${project.parent.basedir}/sun_coding_style.xml</configFile>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${checkstyle.version}</version>
@@ -1011,6 +986,12 @@
         <version>${failsafe.version}</version>
         <configuration>
           <argLine>${testvm.argLine}</argLine>
+          <systemProperties>
+            <property>
+              <name>logback.configurationFile</name>
+              <value>logback.xml</value>
+            </property>
+          </systemProperties>
         </configuration>
         <executions>
           <execution>
@@ -1033,6 +1014,14 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
+        <configuration>
+          <systemProperties>
+            <property>
+              <name>logback.configurationFile</name>
+              <value>logback.xml</value>
+            </property>
+          </systemProperties>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -1181,6 +1170,13 @@
               </goals>
             </execution>
           </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>commons.logback_settings</artifactId>
+              <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
