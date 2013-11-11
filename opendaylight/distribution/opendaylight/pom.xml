@@ -79,11 +79,11 @@
           <artifactId>sal-binding-broker-impl</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
-        <dependency>
+      <!-- <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-compatibility</artifactId>
           <version>${mdsal.version}</version>
-        </dependency>
+        </dependency> -->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-connector-api</artifactId>
@@ -200,7 +200,7 @@
 
 
        <!-- Netconf -->
-        <dependency>
+      <!--  <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-api</artifactId>
           <version>${netconf.version}</version>
@@ -239,7 +239,7 @@
           <groupId>org.opendaylight.controller.thirdparty</groupId>
           <artifactId>exificient</artifactId>
           <version>${exi.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
