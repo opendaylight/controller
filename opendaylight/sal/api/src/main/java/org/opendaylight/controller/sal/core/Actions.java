@@ -20,8 +20,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @brief  Class representing actions
  *
  * Describes supported actions
+ * @Deprecated This class is OF 1.0 specific. Use SupportedFlowActions instead.
  */
-
+@Deprecated
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Actions extends Property {
@@ -92,15 +93,19 @@ public class Actions extends Property {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Actions other = (Actions) obj;
-        if (actionsValue != other.actionsValue)
+        if (actionsValue != other.actionsValue) {
             return false;
+        }
         return true;
     }
 
