@@ -3,8 +3,8 @@ module opendaylight-group-types {
     prefix group;
 
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
-    import opendaylight-flow-types {prefix flow-types;revision-date 2013-10-26";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}   
+    import opendaylight-action-types {prefix action;}
 
     revision "2013-10-18" {
         description "Initial revision of group service";
@@ -41,6 +41,10 @@ module opendaylight-group-types {
             type string; 
         }
         
+        leaf install {
+            type boolean; 
+        } 
+        
         leaf barrier {
             type boolean; 
         }       
@@ -64,16 +68,7 @@ module opendaylight-group-types {
                     type uint32;
                 }
                 
-                container actions {
-                    list action {
-                        key "action-order";
-                        leaf action-order {
-                            type int32;
-                        }
-            
-                        uses flow-types:action;
-                    }
-                }
+                uses action:action-list;
             }
         }
     }
@@ -164,6 +159,7 @@ module opendaylight-group-types {
             }
             
             uses group-types;
+            
             leaf capabilities { 
                 type enumeration {
                     enum select-weight;

@@ -8,6 +8,7 @@ repository
 workspace
 *~
 target
+target-ide
 .classpath
 .project
 .settings

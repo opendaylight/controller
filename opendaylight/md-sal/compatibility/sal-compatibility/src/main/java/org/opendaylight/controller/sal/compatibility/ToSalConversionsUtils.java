@@ -33,40 +33,40 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.ActionList;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.VlanCfi;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.ControllerAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.DropAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.FloodAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.FloodAllAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.HwPathAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.LoopbackAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.OutputAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PopMplsAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PopVlanAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PushMplsAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PushPbbAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PushVlanAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetDlDstAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetDlSrcAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetDlTypeAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetMplsTtlAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNextHopAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwDstAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwSrcAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwTosAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwTtlAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetQueueAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetTpDstAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetTpSrcAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetVlanCfiAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetVlanIdAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetVlanPcpAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SwPathAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.Address;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv4;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.ActionList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.VlanCfi;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAllAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.HwPathAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.LoopbackAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushMplsAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushPbbAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlTypeAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetMplsTtlAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNextHopAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTtlAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetQueueAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanCfiAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
@@ -159,7 +159,7 @@ public class ToSalConversionsUtils {
     public static List<org.opendaylight.controller.sal.action.Action> actionFrom(List<Action> actions) {
         List<org.opendaylight.controller.sal.action.Action> targetAction = new ArrayList<>();
         for (Action action : actions) {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.Action sourceAction = action
+        	org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action sourceAction = action
                     .getAction();
 
             if (sourceAction instanceof ControllerAction) {
