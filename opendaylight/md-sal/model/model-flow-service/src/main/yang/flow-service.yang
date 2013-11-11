@@ -2,7 +2,6 @@ module sal-flow {
     namespace "urn:opendaylight:flow:service";
     prefix flow;
 
-
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
@@ -12,7 +11,6 @@ module sal-flow {
     revision "2013-08-19" {
         description "Initial revision of flow service";
     }
-
 
     typedef flow-table-ref {
         type instance-identifier;

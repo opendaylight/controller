@@ -1,0 +1,213 @@
+module opendaylight-action-types {
+    namespace "urn:opendaylight:action:types";
+    prefix action;
+
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import opendaylight-l2-types {prefix l2t; revision-date "2013-08-27";}
+    
+    revision "2013-11-12" {
+        description "Initial revision of action service";
+    }
+    
+    typedef vlan-cfi {
+        type int32;    
+    }
+
+    grouping address {
+        choice address {
+            case ipv4 {
+                leaf ipv4-address {
+                    type inet:ipv4-prefix;
+                }
+            }
+            case ipv6 {
+                leaf ipv6-address {
+                    type inet:ipv6-prefix;
+                }
+            }
+        }
+    }  
+    
+    grouping action-list {
+        list actions {
+            key "order";
+            leaf order {
+                type int32;
+            }
+            uses action;
+        }
+    }
+    
+    grouping action {
+        choice action {
+            case output-action {
+                leaf-list output-node-connector {
+                    type inet:uri;
+                }
+                
+                leaf max-length {
+                    type uint16 {
+                        range "0..65294";
+                    }
+                }                
+            }
+
+            case controller-action {
+                leaf max-length {
+                    type uint16 {
+                        range "0..65294";
+                    }
+                }
+            }
+
+            case set-queue-action {
+                leaf queue {
+                    type string; 
+                }
+            }
+
+            case pop-mpls-action {
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
+            }
+
+            case set-mpls-ttl-action {
+                leaf mpls-ttl {
+                    type uint8;
+                }
+            }
+
+            case set-nw-ttl-action {
+                leaf nw-ttl {
+                    type uint8;
+                }
+            }
+
+            case push-pbb-action {
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
+            }
+
+            case pop-pbb-action {
+                
+            }
+            
+            case push-mpls-action {
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
+            }
+            
+            case dec-mpls-ttl {
+            }
+            
+            case dec-nw-ttl {
+            }
+            
+            case drop-action {
+            }
+            
+            case flood-action {
+            }
+            
+            case flood-all-action {
+            }
+            
+            case hw-path-action {
+            }
+            
+            case loopback-action {
+            }
+            
+            case pop-vlan-action {
+            }
+            
+            case push-vlan-action {
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
+            }
+            
+            case copy-ttl-out {
+            }
+            
+            case copy-ttl-in {
+            }
+            
+            case set-dl-dst-action {
+                leaf address {
+                    type yang:mac-address;
+                }
+            }
+            
+            case set-dl-src-action {
+                leaf address {
+                    type yang:mac-address;
+                }
+            }
+            case group-action {
+                leaf group {
+                    type string;
+                }
+            }
+            
+            case set-dl-type-action {
+                leaf dl-type {
+                    type l2t:ether-type;
+                }
+            }
+            
+            case set-next-hop-action {
+                uses address;
+            }
+            
+            case set-nw-dst-action {
+                uses address;            
+            }
+            
+            case set-nw-src-action{
+                uses address;            
+            }
+            
+            case set-nw-tos-action {
+                leaf tos {
+                    type int32;
+                }
+            }
+            
+            case set-tp-dst-action {
+                leaf port {
+                    type inet:port-number;
+                }                
+            }
+            case set-tp-src-action {
+                leaf port {
+                    type inet:port-number;
+                }                
+            }
+            case set-vlan-cfi-action {
+                leaf vlan-cfi {
+                    type vlan-cfi;
+                }
+            }
+            
+            case set-vlan-id-action {
+                leaf vlan-id {
+                    type l2t:vlan-id;
+                } 
+            }
+            
+            case set-vlan-pcp-action {
+                leaf vlan-pcp {
+                    type l2t:vlan-pcp;
+                }            
+            }
+            
+            case sw-path-action {            
+            }  
+        }
+    }
+}
