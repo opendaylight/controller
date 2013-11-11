@@ -17,7 +17,7 @@ import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
-import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
+import org.opendaylight.controller.netconf.util.AbstractSslChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
@@ -48,18 +48,18 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
             }
 
             private void initialize(SocketChannel ch, Promise<NetconfClientSession> promise) {
-                new ClientChannelInitializer(maybeContext, negotatorFactory, sessionListener).initialize(ch, promise);
+                new ClientSslChannelInitializer(maybeContext, negotatorFactory, sessionListener).initialize(ch, promise);
             }
         });
     }
 
-    private static class ClientChannelInitializer extends AbstractChannelInitializer {
+    private static class ClientSslChannelInitializer extends AbstractSslChannelInitializer {
 
         private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
         private final NetconfClientSessionListener sessionListener;
 
-        private ClientChannelInitializer(Optional<SSLContext> maybeContext,
-                NetconfClientSessionNegotiatorFactory negotiatorFactory, NetconfClientSessionListener sessionListener) {
+        private ClientSslChannelInitializer(Optional<SSLContext> maybeContext,
+                                            NetconfClientSessionNegotiatorFactory negotiatorFactory, NetconfClientSessionListener sessionListener) {
             super(maybeContext);
             this.negotiatorFactory = negotiatorFactory;
             this.sessionListener = sessionListener;
