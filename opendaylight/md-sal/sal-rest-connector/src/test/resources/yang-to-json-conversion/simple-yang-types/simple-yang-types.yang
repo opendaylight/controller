@@ -40,6 +40,16 @@ module simple-yang-types {
 	  			}
 	  		}
 	  	}
+	  	list lst111 {
+	  		leaf lf1111 {
+	  			type int32;
+	  		}
+	  	}
+	  	list lst112 {
+	  		leaf lf1121 {
+	  			type string;
+	  		}
+	  	}	  	
 	  }
 	  
   }

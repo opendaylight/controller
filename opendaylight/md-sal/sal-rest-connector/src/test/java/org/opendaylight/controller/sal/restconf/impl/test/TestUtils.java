@@ -17,7 +17,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.*;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -114,19 +114,19 @@ final class TestUtils {
         }
 
     }
-    
-    static String convertXmlDataAndYangToJson(String xmlDataPath, String yangPath) {
+
+    static String convertXmlDataAndYangToJson(String xmlDataPath, String yangPath, String outputPath) {
         String jsonResult = null;
         Set<Module> modules = null;
 
         try {
-            modules = TestUtils.loadModules(YangAndXmlToJsonConversionJsonReaderTest.class.getResource(yangPath).getPath());
+            modules = TestUtils.loadModules(YangAndXmlToJsonBasicDataTypesTest.class.getResource(yangPath).getPath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         assertNotNull("modules can't be null.", modules);
 
-        InputStream xmlStream = YangAndXmlToJsonConversionJsonReaderTest.class.getResourceAsStream(xmlDataPath);
+        InputStream xmlStream = YangAndXmlToJsonBasicDataTypesTest.class.getResourceAsStream(xmlDataPath);
         CompositeNode compositeNode = null;
         try {
             compositeNode = TestUtils.loadCompositeNode(xmlStream);
@@ -137,9 +137,9 @@ final class TestUtils {
 
         StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
         for (Module module : modules) {
+            ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             for (DataSchemaNode dataSchemaNode : module.getChildNodes()) {
                 StructuredData structuredData = new StructuredData(compositeNode, dataSchemaNode);
-                ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
                 try {
                     structuredDataToJsonProvider.writeTo(structuredData, null, null, null, null, null, byteArrayOS);
                 } catch (WebApplicationException | IOException e) {
@@ -148,21 +148,22 @@ final class TestUtils {
                 assertFalse(
                         "Returning JSON string can't be empty for node " + dataSchemaNode.getQName().getLocalName(),
                         byteArrayOS.toString().isEmpty());
-                jsonResult = byteArrayOS.toString();
-                try {
-                    outputToFile(byteArrayOS);
-                } catch (IOException e) {
-                    System.out.println("Output file wasn't cloased sucessfuly.");
-                }
             }
+            jsonResult = byteArrayOS.toString();
+            try {
+                outputToFile(byteArrayOS, outputPath);
+            } catch (IOException e) {
+                System.out.println("Output file wasn't cloased sucessfuly.");
+            }
+
         }
         return jsonResult;
     }
-    
-    static void outputToFile(ByteArrayOutputStream outputStream) throws IOException {
+
+    static void outputToFile(ByteArrayOutputStream outputStream, String outputDir) throws IOException {
         FileOutputStream fileOS = null;
         try {
-            String path = YangAndXmlToJsonConversionJsonReaderTest.class.getResource("/yang-to-json-conversion/xml").getPath();
+            String path = YangAndXmlToJsonBasicDataTypesTest.class.getResource(outputDir).getPath();
             File outFile = new File(path + "/data.json");
             fileOS = new FileOutputStream(outFile);
             try {
@@ -174,9 +175,9 @@ final class TestUtils {
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
         }
-    }    
-    
-    static String readJsonFromFile(String path,boolean removeWhiteChars) {
+    }
+
+    static String readJsonFromFile(String path, boolean removeWhiteChars) {
         FileReader fileReader = getFileReader(path);
 
         StringBuilder strBuilder = new StringBuilder();
@@ -200,7 +201,7 @@ final class TestUtils {
             System.out.println("The file wasn't closed");
         }
         String rawStr = strBuilder.toString();
-        if (removeWhiteChars) {        
+        if (removeWhiteChars) {
             rawStr = rawStr.replace("\n", "");
             rawStr = rawStr.replace("\r", "");
             rawStr = rawStr.replace("\t", "");
@@ -209,9 +210,9 @@ final class TestUtils {
 
         return rawStr;
     }
-    
+
     private static FileReader getFileReader(String path) {
-        String fullPath = YangAndXmlToJsonConversionJsonReaderTest.class.getResource(path).getPath();
+        String fullPath = YangAndXmlToJsonBasicDataTypesTest.class.getResource(path).getPath();
         assertNotNull("Path to file can't be null.", fullPath);
         File file = new File(fullPath);
         assertNotNull("File can't be null", file);
@@ -241,8 +242,6 @@ final class TestUtils {
         }
 
         return strBuilder.toString();
-    }    
-    
-    
+    }
 
 }
