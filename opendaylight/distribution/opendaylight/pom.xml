@@ -119,6 +119,11 @@
           <artifactId>model-flow-management</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>inventory-manager</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
