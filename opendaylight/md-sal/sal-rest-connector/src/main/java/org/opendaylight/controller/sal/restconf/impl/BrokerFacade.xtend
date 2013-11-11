@@ -42,15 +42,15 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         return future.get;
     }
 
-    def commitConfigurationDataUpdate(InstanceIdentifier path, CompositeNode payload) {
+    def commitConfigurationDataPut(InstanceIdentifier path, CompositeNode payload) {
         val transaction = dataService.beginTransaction;
         transaction.putConfigurationData(path, payload);
         return transaction.commit()
     }
 
-    def commitConfigurationDataCreate(InstanceIdentifier path, CompositeNode payload) {
+    def commitOperationalDataPut(InstanceIdentifier path, CompositeNode payload) {
         val transaction = dataService.beginTransaction;
-        transaction.putConfigurationData(path, payload);
+        transaction.putOperationalData(path, payload);
         return transaction.commit()
     }
     

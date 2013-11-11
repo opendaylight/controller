@@ -16,7 +16,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
@@ -25,7 +27,9 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  *  Section 5 for details on each URI.
  *    <ul>
  *    <li><b>/restconf</b> - {@link #getRoot()}
- *     <ul><li><b>/datastore</b> - {@link #readAllData()}
+ *     <ul><li><b>/config</b> 
+ *         <li><b>/operational</b> - {@link #readAllData()} - Added in Draft02
+ *         <li><b>/datastore</b> - {@link #readAllData()}
  *         <ul>
  *            <li>/(top-level-data-nodes) (config=true or false)
  *         </ul>
@@ -45,7 +49,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  *     </ul>
  */
 @Path("/")
-public interface RestconfService {
+public interface RestconfService extends RestconfServiceLegacy {
 
     public static final String XML = "+xml";
     public static final String JSON = "+json";
@@ -53,33 +57,49 @@ public interface RestconfService {
     @GET
     public Object getRoot();
 
-    @GET
-    @Path("/datastore")
-    @Produces({API+JSON,API+XML})
-    public Object readAllData();
-
-    @GET
-    @Path("/datastore/{identifier:.+}")
-    @Produces({API+JSON,API+XML})
-    public StructuredData readData(@PathParam("identifier") String identifier);
-
-    @PUT
-    @Path("/datastore/{identifier:.+}")
-    @Produces({API+JSON,API+XML})
-    public Object createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
-
-    @POST
-    @Path("/datastore/{identifier:.+}")
-    @Produces({API+JSON,API+XML})
-    public Object updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @GET
     @Path("/modules")
     @Produces({API+JSON,API+XML})
-    public Object getModules();
+    public StructuredData getModules();
 
     @POST
     @Path("/operations/{identifier}")
-    @Produces({API+JSON,API+XML})
+    @Produces({Draft02.MediaTypes.API+JSON,Draft02.MediaTypes.API+XML,API+JSON,API+XML})
     public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
+    
+    
+    @GET
+    @Path("/config/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML})
+    public StructuredData readConfigurationData(@PathParam("identifier") String identifier);
+
+    
+    
+    @PUT
+    @Path("/config/{identifier:.+}")
+    @Produces({API+JSON,API+XML})
+    public RpcResult<TransactionStatus> createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @POST
+    @Path("/config/{identifier:.+}")
+    @Produces({API+JSON,API+XML})
+    public RpcResult<TransactionStatus> updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @GET
+    @Path("/operational/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML})
+    public StructuredData readOperationalData(@PathParam("identifier") String identifier);
+
+    @PUT
+    @Path("/operational/{identifier:.+}")
+    @Produces({API+JSON,API+XML})
+    public RpcResult<TransactionStatus> createOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @POST
+    @Path("/operational/{identifier:.+}")
+    @Produces({API+JSON,API+XML})
+    public RpcResult<TransactionStatus> updateOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    
 }
