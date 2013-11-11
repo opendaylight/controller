@@ -1,8 +1,8 @@
 package org.opendaylight.controller.md.sal.common.impl;
 
+import static org.opendaylight.controller.md.sal.common.api.TransactionStatus.NEW;
+
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,9 +10,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
-import org.opendaylight.yangtools.concepts.Path;
-
-import static org.opendaylight.controller.md.sal.common.api.TransactionStatus.NEW;
 
 public abstract class AbstractDataModification<P /* extends Path<P> */, D> implements DataModification<P, D> {
 
@@ -86,7 +83,7 @@ public abstract class AbstractDataModification<P /* extends Path<P> */, D> imple
 
     @Override
     public final void putRuntimeData(P path, D data) {
-        putRuntimeData(path, data);
+        putOperationalData(path, data);
     }
 
     @Override
