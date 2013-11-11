@@ -11,6 +11,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
+import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.BundleContext;
 
 @RunWith(PaxExam.class)
@@ -48,6 +49,9 @@ public abstract class AbstractTest {
     public Option[] config() {
         return options(systemProperty("osgi.console").value("2401"), mavenBundle("org.slf4j", "slf4j-api")
                 .versionAsInProject(), //
+                systemProperty("logback.configurationFile").value(
+                        "file:" + PathUtils.getBaseDir()
+                                + "/src/test/resources/logback.xml"),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //

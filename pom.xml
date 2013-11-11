@@ -128,6 +128,7 @@
     <module>opendaylight/commons/checkstyle</module>
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/parent</module>
+    <module>opendaylight/commons/logback_settings</module>
   </modules>
 
     <profiles>

@@ -17,6 +17,7 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import org.ops4j.pax.exam.util.PathUtils;
 
 @RunWith(PaxExam.class)
 public class ToasterTest {
@@ -50,6 +51,9 @@ public class ToasterTest {
     @Configuration
     public Option[] config() {
         return options(systemProperty("osgi.console").value("2401"), 
+                systemProperty("logback.configurationFile").value(
+                    "file:" + PathUtils.getBaseDir()
+                    + "/src/test/resources/logback.xml"),
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(), //
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //

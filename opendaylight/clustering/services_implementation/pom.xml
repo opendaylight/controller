@@ -157,5 +157,9 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.logback_settings</artifactId>
+    </dependency>
   </dependencies>
 </project>
