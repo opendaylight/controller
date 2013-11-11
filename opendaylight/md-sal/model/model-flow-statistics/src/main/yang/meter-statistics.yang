@@ -1,0 +1,87 @@
+module opendaylight-meter-statistics {
+    namespace "urn:opendaylight:meter:statistics";
+    prefix meterstat;
+
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import opendaylight-meter-types {prefix meter-types;revision-date "2013-09-18";}
+    import flow-capable-transaction {prefix tr;}
+    
+
+    revision "2013-11-11" {
+        description "Initial revision of meter statistics service";
+    }
+
+	// RPC calls
+	rpc get-all-meter-statistics {
+		input {
+            uses inv:node-context-ref;
+        }
+        output {
+            list meter-statistics {
+                uses meter-types:meter-statistics;
+                uses tr:transaction-aware;
+            }
+        }
+	
+	}
+	
+	rpc get-meter-statistics {
+		description "RPC Method to send meter statistics request to the give switch for specific meter"; 
+		input {
+            uses inv:node-context-ref;
+            leaf meter-id{
+            	type meter-types:meter-id;
+            }
+        }
+        output {
+            uses meter-types:meter-statistics;
+            uses tr:transaction-aware;
+        }
+	
+	}
+	
+	rpc get-meter-config-statistics {
+		input {
+            uses inv:node-context-ref;
+            leaf meter-id{
+            	type meter-types:meter-id;
+            }
+        }
+        output {
+        	uses meter-types:meter-config-stats;
+            uses tr:transaction-aware;
+        }
+	}
+	
+	rpc get-meter-features {
+		input {
+            uses inv:node-context-ref;
+            leaf meter-id{
+            	type meter-types:meter-id;
+	        }
+        }
+        output {
+        	uses meter-types:meter-features;
+            uses tr:transaction-aware;
+        }
+	}
+	
+
+	//Notification calls
+	
+	notification meter-statistics-updated {
+		uses meter-types:meter-statistics;
+        uses tr:transaction-aware;
+	}
+	
+	notification meter-config-stats-updated {
+		uses meter-types:meter-config-stats;
+        uses tr:transaction-aware;
+	}
+
+	notification meter-features {
+		uses meter-types:meter-features;
+        uses tr:transaction-aware;
+	}
+}
