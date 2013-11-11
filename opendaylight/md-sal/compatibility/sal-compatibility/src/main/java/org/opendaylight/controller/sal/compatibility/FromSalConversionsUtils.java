@@ -4,13 +4,10 @@ import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
 import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
 import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
 
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 import org.opendaylight.controller.sal.compatibility.MDFlowMapping;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -28,9 +25,9 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.Address;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv4Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv6Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
