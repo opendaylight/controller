@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a0c0ece0",
+        "filename": "opendaylight/netconf/netconf-client/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-11T15:24:07Z",
+      "side": 1,
+      "message": "I am not sure if netconf client should depend directly on sal-api. It would be better if client accepted some kind of notification handler and you would implement your handler with sal.\n\nAnyone who would use client in OSGi would have to deploy sal api bundle as well.",
+      "revId": "10f2a53f68c2e07a76c25b7b8c50b1a13e0bb03d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_60baf46f",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-11T15:24:07Z",
+      "side": 1,
+      "message": "Introduce general NotificationHandler that will wrap your communication with sal",
+      "revId": "10f2a53f68c2e07a76c25b7b8c50b1a13e0bb03d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_40b1308e",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-11T15:24:07Z",
+      "side": 1,
+      "message": "There is a class for Netconf string constants. XmlUtil i think.",
+      "revId": "10f2a53f68c2e07a76c25b7b8c50b1a13e0bb03d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_00ab381e",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-11-11T15:24:07Z",
+      "side": 1,
+      "message": "Take a look at XmlElement class somewhere in netconf-util, it provides utility methods for getting information out of DOM elements/documents.",
+      "revId": "10f2a53f68c2e07a76c25b7b8c50b1a13e0bb03d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
