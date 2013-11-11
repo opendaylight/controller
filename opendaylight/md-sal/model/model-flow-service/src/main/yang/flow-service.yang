@@ -2,11 +2,12 @@ module sal-flow {
     namespace "urn:opendaylight:flow:service";
     prefix flow;
 
+
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import opendaylight-flow-types {prefix types;revision-date "2013-10-26";}
-
+    import flow-capable-transaction {prefix tr;}
 
     revision "2013-08-19" {
         description "Initial revision of flow service";
@@ -41,18 +42,30 @@ module sal-flow {
     rpc add-flow {
         input {
             uses node-flow;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 
     rpc remove-flow {
         input {
             uses node-flow;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 
     rpc update-flow {
         input {
             uses flow-update;
+            uses tr:transaction-aware;            
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
 

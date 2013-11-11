@@ -12,11 +12,9 @@ module opendaylight-flow-types {
         description "Initial revision of flow service";
     }
     
-    
     typedef vlan-cfi {
-           type int32;    
+        type int32;    
     }
-    
     
     grouping action-list {
         list action {
@@ -273,6 +271,12 @@ module opendaylight-flow-types {
             
             case sw-path-action {            
             }  
+            
+            case set-field-action {    
+                container match {
+                   uses match:match;
+                } 
+            }
         }
     }
 
@@ -282,6 +286,7 @@ module opendaylight-flow-types {
             bit RESET_COUNTS;
             bit NO_PKT_COUNTS;
             bit NO_BYT_COUNTS;
+            bit SEND_FLOW_REM;
         }
     }
     
@@ -341,6 +346,20 @@ module opendaylight-flow-types {
         leaf flow-name{
             type string;
         }
+        
+        leaf installHw {
+            type boolean;
+        }
+
+        leaf barrier {
+            type boolean;
+        }
+
+        leaf strict {
+            type boolean;
+            default "false";
+        }
+
     }
 
     grouping flow-statistics {
