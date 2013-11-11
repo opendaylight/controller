@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_853cdae3",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-11T09:56:54Z",
+      "side": 1,
+      "message": "Colin, can you make this dependency as optional? Your patch is actually an optimization that can take place in case the routing provider is there. I\u0027d like to avoid that ARPHandler assume routing is there in the end there is no correlation to the two",
+      "revId": "d73d5c37762758ff5598bdd01b927af15992b6c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
