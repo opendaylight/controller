@@ -11,6 +11,7 @@ import org.opendaylight.controller.sal.common.util.Rpcs
 import java.util.Collections
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import static extension org.opendaylight.controller.sal.dom.broker.impl.DataUtils.*;
 
 class HashMapDataStore //
 implements //
@@ -20,12 +21,15 @@ DataReader<InstanceIdentifier, CompositeNode>, DataCommitHandler<InstanceIdentif
     val Map<InstanceIdentifier, CompositeNode> operational = new ConcurrentHashMap();
 
     override readConfigurationData(InstanceIdentifier path) {
-        configuration.get(path);
+        configuration.read(path);
     }
 
     override readOperationalData(InstanceIdentifier path) {
-        operational.get(path);
+        operational.read(path);
     }
+    
+
+
 
     override requestCommit(DataModification<InstanceIdentifier, CompositeNode> modification) {
         return new HashMapDataStoreTransaction(modification, this);
