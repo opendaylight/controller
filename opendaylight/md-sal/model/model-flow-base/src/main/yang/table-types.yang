@@ -5,7 +5,7 @@ module opendaylight-table-types {
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-flow-types {prefix flow;revision-date 2013-10-26";}
-
+    import opendaylight-action-types {prefix action;}
 
     revision "2013-10-26" {
         description "Initial revision of table service";
@@ -61,25 +61,25 @@ module opendaylight-table-types {
             
             case write-actions {   
                 container write-actions {
-                    uses flow:action-list;
+                    uses action:action-list;
                 } 
             }
             
             case write-actions-miss {   
                 container write-actions-miss {
-                    uses flow:action-list;
+                    uses action:action-list;
                 } 
             }
             
             case apply-actions {   
                 container apply-actions {
-                    uses flow:action-list;
+                    uses action:action-list;
                 } 
             }
             
             case apply-actions-miss {   
                 container apply-actions-miss {
-                    uses flow:action-list;
+                    uses action:action-list;
                 } 
             }
             
