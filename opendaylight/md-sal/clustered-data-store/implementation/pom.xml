@@ -29,6 +29,7 @@
         <configuration>
           <instructions>
             <Export-Package>
+              org.opendaylight.controller.datastore
             </Export-Package>
             <Import-Package>
               javax.xml.bind.annotation,
@@ -38,6 +39,7 @@
               org.opendaylight.controller.sal.topology,
               org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.md.sal.common.api.data,
+              org.opendaylight.controller.sal.common.util,
               org.opendaylight.yangtools.yang.binding,
               org.osgi.service.component,
               org.slf4j,
@@ -45,7 +47,8 @@
               org.apache.commons.lang3.builder,
               org.apache.commons.lang3.tuple,
               org.eclipse.osgi.framework.console,
-              org.osgi.framework
+              org.osgi.framework,
+              com.google.common.base
             </Import-Package>
             <Bundle-Activator>
               org.opendaylight.controller.datastore.internal.Activator
