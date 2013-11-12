@@ -2906,58 +2906,6 @@ public class ForwardingRulesManager implements
         return saveConfig();
     }
 
-    public void _frmNodeFlows(CommandInterpreter ci) {
-        String nodeId = ci.nextArgument();
-        Node node = Node.fromString(nodeId);
-        if (node == null) {
-            ci.println("frmNodeFlows <node> [verbose]");
-            return;
-        }
-        boolean verbose = false;
-        String verboseCheck = ci.nextArgument();
-        if (verboseCheck != null) {
-            verbose = verboseCheck.equals("true");
-        }
-
-        if (!nodeFlows.containsKey(node)) {
-            return;
-        }
-        // Dump per node database
-        for (FlowEntryInstall entry : nodeFlows.get(node)) {
-            if (!verbose) {
-                ci.println(node + " " + installedSwView.get(entry).getFlowName());
-            } else {
-                ci.println(node + " " + installedSwView.get(entry).toString());
-            }
-        }
-    }
-
-    public void _frmGroupFlows(CommandInterpreter ci) {
-        String group = ci.nextArgument();
-        if (group == null) {
-            ci.println("frmGroupFlows <group> [verbose]");
-            return;
-        }
-        boolean verbose = false;
-        String verboseCheck = ci.nextArgument();
-        if (verboseCheck != null) {
-            verbose = verboseCheck.equalsIgnoreCase("true");
-        }
-
-        if (!groupFlows.containsKey(group)) {
-            return;
-        }
-        // Dump per node database
-        ci.println("Group " + group + ":\n");
-        for (FlowEntryInstall flowEntry : groupFlows.get(group)) {
-            if (!verbose) {
-                ci.println(flowEntry.getNode() + " " + flowEntry.getFlowName());
-            } else {
-                ci.println(flowEntry.getNode() + " " + flowEntry.toString());
-            }
-        }
-    }
-
     public void _frmProcessErrorEvent(CommandInterpreter ci) throws UnknownHostException {
         Node node = null;
         long reqId = 0L;

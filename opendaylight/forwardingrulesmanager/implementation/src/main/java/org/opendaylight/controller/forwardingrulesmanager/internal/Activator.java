@@ -104,4 +104,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             }
         }
     }
+
+    @Override
+    protected Object[] getGlobalImplementations() {
+        final Object[] res = { ForwardingRulesManagerCLI.class };
+        return res;
+    }
 }
