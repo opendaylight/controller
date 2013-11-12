@@ -7,15 +7,18 @@
  */
 package org.opendaylight.controller.usermanager.northbound;
 
+import java.net.URI;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -49,9 +52,12 @@ import org.slf4j.LoggerFactory;
 
 @Path("/")
 public class UserManagerNorthbound {
+
     protected static final Logger logger = LoggerFactory.getLogger(UserManagerNorthbound.class);
 
     private String username;
+    @Context
+    UriInfo uriInfo;
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -79,10 +85,8 @@ public class UserManagerNorthbound {
     /**
      * Add a user
      *
-     * @param userName
-     *           name of new user to be added
      * @param userConfigData
-     *           the {@link UserConfig} user config structure in request body
+     *            the {@link UserConfig} user config structure in request body
      *
      * @return Response as dictated by the HTTP Response Status code
      *
@@ -90,18 +94,18 @@ public class UserManagerNorthbound {
      * Example:
      *
      * Request URL:
-     * https://localhost/controller/nb/v2/usermanager/user/testuser
+     * https://localhost/controller/nb/v2/usermanager/users
      *
      * Request body in XML:
      *  &lt;userConfig&gt;
-     *      &lt;name&gt;testuser&lt;/name&gt;
+     *      &lt;user&gt;testuser&lt;/user&gt;
      *      &lt;roles&gt;Network-Admin&lt;/roles&gt;
      *      &lt;password&gt;pass!23&lt;/password&gt;
      *  &lt;/userConfig&gt;
      *
      * Request body in JSON:
      * {
-     *  "name":"testuser",
+     *  "user":"testuser",
      *  "password":"pass!23",
      *  "roles":[
      *       "Network-Admin"
@@ -110,8 +114,8 @@ public class UserManagerNorthbound {
      * </pre>
      */
 
-    @Path("/user/{userName}")
-    @PUT
+    @Path("/users")
+    @POST
     @StatusCodes({ @ResponseCode(code = 201, condition = "User created successfully"),
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
@@ -120,7 +124,7 @@ public class UserManagerNorthbound {
         @ResponseCode(code = 500, condition = "Internal Server Error: Addition of user failed"),
         @ResponseCode(code = 503, condition = "Service unavailable") })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Response addLocalUser(@PathParam("userName") String newUserName,@TypeHint(UserConfig.class) UserConfig userConfigData) {
+    public Response addLocalUser(@TypeHint(UserConfig.class) UserConfig userConfigData) {
 
         if (!isAdminUser()) {
             throw new UnauthorizedException("User is not authorized to perform user management operations ");
@@ -130,8 +134,6 @@ public class UserManagerNorthbound {
         UserConfig userCfgObject = new UserConfig(userConfigData.getUser(),userConfigData.getPassword(),
                  userConfigData.getRoles());
 
-        handleNameMismatch(userCfgObject.getUser(), newUserName);
-
         IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -139,8 +141,9 @@ public class UserManagerNorthbound {
         Status status = userManager.addLocalUser(userCfgObject);
         if (status.isSuccess()) {
 
-            NorthboundUtils.auditlog("User", username, "added", newUserName);
-            return Response.status(Response.Status.CREATED).build();
+            NorthboundUtils.auditlog("User", username, "added", userCfgObject.getUser());
+            URI uri = uriInfo.getAbsolutePathBuilder().path("/"+userCfgObject.getUser()).build();
+            return Response.created(uri).build();
         }
         return NorthboundUtils.getResponse(status);
     }
@@ -156,11 +159,11 @@ public class UserManagerNorthbound {
      * Example:
      *
      * Request URL:
-     * https://localhost/controller/nb/v2/usermanager/user/testuser
+     * https://localhost/controller/nb/v2/usermanager/users/testuser
      *
      * </pre>
      */
-    @Path("/user/{userName}")
+    @Path("/users/{userName}")
     @DELETE
     @StatusCodes({ @ResponseCode(code = 204, condition = "User Deleted Successfully"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
