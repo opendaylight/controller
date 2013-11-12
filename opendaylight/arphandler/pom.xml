@@ -32,6 +32,7 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
+              org.opendaylight.controller.sal.routing,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.topologymanager,
               org.opendaylight.controller.clustering.services,

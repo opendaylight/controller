@@ -53,6 +53,7 @@ import org.opendaylight.controller.sal.packet.IPv4;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
@@ -69,6 +70,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     private ISwitchManager switchManager;
     private ITopologyManager topologyManager;
     private IDataPacketService dataPacketService;
+    private IRouting routing;
     private IClusterContainerServices clusterContainerService;
     private IConnectionManager connectionManager;
     private Set<IfHostListener> hostListeners = new CopyOnWriteArraySet<IfHostListener>();
@@ -105,6 +107,16 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     void unsetClusterContainerService(IClusterContainerServices s) {
         if (this.clusterContainerService == s) {
             this.clusterContainerService = null;
+        }
+    }
+
+    void setRouting(IRouting r) {
+        this.routing = r;
+    }
+
+    void unsetRouting(IRouting r) {
+        if (this.routing == r) {
+            this.routing = null;
         }
     }
 
@@ -460,21 +472,36 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
 
         if (host == null) {
             // if we don't, know about the host, try to find it
-            log.trace("Punted IP pkt from {}, sending bcast ARP event...",
+            log.trace("Punted IP pkt to {}, sending bcast ARP event...",
                       dIP);
             /*
              * unknown destination host, initiate bcast ARP request
              */
             arpRequestReplyEvent.put(new ARPRequest(dIP, subnet), false);
-        }else{
 
-            // we know about the host, send the packet the right place
+        } else if (routing == null ||
+                   routing.getRoute(p.getNode(), host.getnodeconnectorNode()) != null) {
+            /* if IRouting is available, make sure that this packet can get it's
+             * destination normally before teleporting it there. If it's not
+             * available, then assume it's reachable.
+             *
+             * TODO: come up with a way to do this in the absence of IRouting
+             */
+
+            log.trace("forwarding punted IP pkt to {} received at {}", dIP, p);
+
+            /* if we know where the host is and there's a path from where this
+             * packet was punted to where the host is, then deliver it to the
+             * host for now */
             NodeConnector nc = host.getnodeConnector();
 
             // re-encode the Ethernet packet (the parent of the IPv4 packet)
             RawPacket rp = this.dataPacketService.encodeDataPacket(pkt.getParent());
             rp.setOutgoingNodeConnector(nc);
             this.dataPacketService.transmitDataPacket(rp);
+        } else {
+            log.trace("ignoring punted IP pkt to {} because there is no route from {}",
+                      dIP, p);
         }
     }
 
