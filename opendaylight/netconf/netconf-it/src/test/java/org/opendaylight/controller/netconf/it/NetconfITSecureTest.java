@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.it;
 
 import com.google.common.base.Optional;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import org.junit.After;
 import org.junit.Before;
@@ -51,6 +53,8 @@ public class NetconfITSecureTest extends AbstractConfigTest {
 
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatchS;
+    private EventLoopGroup nettyThreadgroup;
+
 
     @Before
     public void setUp() throws Exception {
@@ -61,6 +65,8 @@ public class NetconfITSecureTest extends AbstractConfigTest {
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
+
+        nettyThreadgroup = new NioEventLoopGroup();
 
         dispatchS = createDispatcher(Optional.of(getSslContext()), factoriesListener);
         ChannelFuture s = dispatchS.createServer(tlsAddress);
@@ -76,13 +82,15 @@ public class NetconfITSecureTest extends AbstractConfigTest {
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
 
-        return new NetconfServerDispatcher(sslC, serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
+                sslC, serverNegotiatorFactory, listenerFactory);
+        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 
     @After
     public void tearDown() throws Exception {
         commitNot.close();
-        dispatchS.close();
+        nettyThreadgroup.shutdownGracefully();
     }
 
     private SSLContext getSslContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
@@ -106,8 +114,8 @@ public class NetconfITSecureTest extends AbstractConfigTest {
 
     @Test
     public void testSecure() throws Exception {
-        try (NetconfClientDispatcher dispatch = new NetconfClientDispatcher(Optional.of(getSslContext()));
-             NetconfClient netconfClient = new NetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
+        NetconfClientDispatcher dispatch = new NetconfClientDispatcher(Optional.of(getSslContext()), nettyThreadgroup, nettyThreadgroup);
+        try (NetconfClient netconfClient = new NetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
 
         }
     }

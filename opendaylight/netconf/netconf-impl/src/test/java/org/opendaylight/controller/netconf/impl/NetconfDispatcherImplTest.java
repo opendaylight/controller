@@ -8,21 +8,34 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-
-import javax.net.ssl.SSLContext;
-
+import com.google.common.base.Optional;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 
-import com.google.common.base.Optional;
-
-import io.netty.channel.ChannelFuture;
-import io.netty.util.HashedWheelTimer;
+import javax.net.ssl.SSLContext;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
 
 public class NetconfDispatcherImplTest {
+
+    private EventLoopGroup nettyGroup;
+
+    @Before
+    public void setUp() throws Exception {
+        nettyGroup = new NioEventLoopGroup();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        nettyGroup.shutdownGracefully();
+    }
 
     @Test
     public void test() throws Exception {
@@ -37,13 +50,15 @@ public class NetconfDispatcherImplTest {
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
-        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(Optional.<SSLContext> absent(),
-                serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(Optional.<SSLContext>absent(), serverNegotiatorFactory, listenerFactory);
+
+
+        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(
+                serverChannelInitializer, nettyGroup, nettyGroup);
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 8333);
         ChannelFuture s = dispatch.createServer(addr);
 
         commitNot.close();
-        dispatch.close();
     }
 }

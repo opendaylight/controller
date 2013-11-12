@@ -11,6 +11,8 @@ package org.opendaylight.controller.netconf.persist.impl;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
@@ -53,6 +55,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
     private final InetSocketAddress address;
     private final NetconfClientDispatcher dispatcher;
+    private final EventLoopGroup nettyThreadgroup;
 
     private NetconfClient netconfClient;
 
@@ -76,7 +79,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         this.address = address;
         this.mbeanServer = mbeanServer;
         this.timeout = timeout;
-        this.dispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent());
+
+        this.nettyThreadgroup = new NioEventLoopGroup();
+        this.dispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
     }
 
     public void init() throws InterruptedException {
@@ -314,9 +319,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         }
 
         try {
-            dispatcher.close();
+            nettyThreadgroup.shutdownGracefully();
         } catch (Exception e) {
-            logger.warn("Unable to close netconf client dispatcher {}", dispatcher, e);
+            logger.warn("Unable to close netconf client thread group {}", dispatcher, e);
         }
 
         // unregister from JMX

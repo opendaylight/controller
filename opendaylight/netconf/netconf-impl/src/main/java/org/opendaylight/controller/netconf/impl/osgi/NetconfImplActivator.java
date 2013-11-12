@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.impl.osgi;
 
 import com.google.common.base.Optional;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
@@ -35,6 +36,7 @@ public class NetconfImplActivator implements BundleActivator {
     private NetconfOperationServiceFactoryTracker factoriesTracker;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
+    private NioEventLoopGroup eventLoopGroup;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -56,10 +58,14 @@ public class NetconfImplActivator implements BundleActivator {
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
 
+        eventLoopGroup = new NioEventLoopGroup();
+
         if (maybeTCPAddress.isPresent()) {
             Optional<SSLContext> maybeSSLContext = Optional.absent();
             InetSocketAddress address = maybeTCPAddress.get();
-            dispatch = new NetconfServerDispatcher(maybeSSLContext, serverNegotiatorFactory, listenerFactory);
+            NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
+                    maybeSSLContext, serverNegotiatorFactory, listenerFactory);
+            dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
             logger.info("Starting TCP netconf server at {}", address);
             dispatch.createServer(address);
@@ -67,7 +73,9 @@ public class NetconfImplActivator implements BundleActivator {
         if (maybeTLSConfiguration.isPresent()) {
             Optional<SSLContext> maybeSSLContext = Optional.of(maybeTLSConfiguration.get().getSslContext());
             InetSocketAddress address = maybeTLSConfiguration.get().getAddress();
-            dispatch = new NetconfServerDispatcher(maybeSSLContext, serverNegotiatorFactory, listenerFactory);
+            NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
+                    maybeSSLContext, serverNegotiatorFactory, listenerFactory);
+            dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
             logger.info("Starting TLS netconf server at {}", address);
             dispatch.createServer(address);
@@ -79,6 +87,6 @@ public class NetconfImplActivator implements BundleActivator {
         logger.info("Shutting down netconf because YangStoreService service was removed");
 
         commitNot.close();
-        dispatch.close();
+        eventLoopGroup.shutdownGracefully();
     }
 }
