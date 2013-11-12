@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.client;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.Future;
@@ -32,7 +33,8 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
     private final Optional<SSLContext> maybeContext;
     private final NetconfClientSessionNegotiatorFactory negotatorFactory;
 
-    public NetconfClientDispatcher(final Optional<SSLContext> maybeContext) {
+    public NetconfClientDispatcher(final Optional<SSLContext> maybeContext, EventLoopGroup bossGroup, EventLoopGroup workerGroup) {
+        super(bossGroup, workerGroup);
         this.maybeContext = Preconditions.checkNotNull(maybeContext);
         this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(new HashedWheelTimer());
     }

@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Optional;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -25,13 +26,11 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
 
     private final ServerChannelInitializer initializer;
 
-    public NetconfServerDispatcher(final Optional<SSLContext> maybeContext,
-            NetconfServerSessionNegotiatorFactory serverNegotiatorFactory,
-            NetconfServerSessionListenerFactory listenerFactory) {
-        this.initializer = new ServerChannelInitializer(maybeContext, serverNegotiatorFactory, listenerFactory);
+    public NetconfServerDispatcher(ServerChannelInitializer serverChannelInitializer, EventLoopGroup bossGroup,
+            EventLoopGroup workerGroup) {
+        super(bossGroup, workerGroup);
+        this.initializer = serverChannelInitializer;
     }
-
-    // FIXME change headers for all new source code files
 
     // TODO test create server with same address twice
     public ChannelFuture createServer(InetSocketAddress address) {
@@ -44,12 +43,12 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         });
     }
 
-    private static class ServerChannelInitializer extends AbstractChannelInitializer {
+    public static class ServerChannelInitializer extends AbstractChannelInitializer {
 
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
         private final NetconfServerSessionListenerFactory listenerFactory;
 
-        private ServerChannelInitializer(Optional<SSLContext> maybeContext,
+        public ServerChannelInitializer(Optional<SSLContext> maybeContext,
                 NetconfServerSessionNegotiatorFactory negotiatorFactory,
                 NetconfServerSessionListenerFactory listenerFactory) {
             super(maybeContext);

@@ -111,6 +111,7 @@
                             io.netty.util.concurrent,
                             io.netty.buffer,
                             io.netty.handler.codec,
+                            io.netty.channel.nio,
                             javax.management,
                             javax.net.ssl,
                             javax.xml.namespace,
