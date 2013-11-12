@@ -14,7 +14,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
-import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
+import org.opendaylight.controller.netconf.util.AbstractSslChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 
 import javax.net.ssl.SSLContext;
@@ -23,12 +23,12 @@ import java.net.InetSocketAddress;
 
 public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, NetconfServerSessionListener> {
 
-    private final ServerChannelInitializer initializer;
+    private final ServerSslChannelInitializer initializer;
 
     public NetconfServerDispatcher(final Optional<SSLContext> maybeContext,
             NetconfServerSessionNegotiatorFactory serverNegotiatorFactory,
             NetconfServerSessionListenerFactory listenerFactory) {
-        this.initializer = new ServerChannelInitializer(maybeContext, serverNegotiatorFactory, listenerFactory);
+        this.initializer = new ServerSslChannelInitializer(maybeContext, serverNegotiatorFactory, listenerFactory);
     }
 
     // FIXME change headers for all new source code files
@@ -44,14 +44,14 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         });
     }
 
-    private static class ServerChannelInitializer extends AbstractChannelInitializer {
+    private static class ServerSslChannelInitializer extends AbstractSslChannelInitializer {
 
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
         private final NetconfServerSessionListenerFactory listenerFactory;
 
-        private ServerChannelInitializer(Optional<SSLContext> maybeContext,
-                NetconfServerSessionNegotiatorFactory negotiatorFactory,
-                NetconfServerSessionListenerFactory listenerFactory) {
+        private ServerSslChannelInitializer(Optional<SSLContext> maybeContext,
+                                            NetconfServerSessionNegotiatorFactory negotiatorFactory,
+                                            NetconfServerSessionListenerFactory listenerFactory) {
             super(maybeContext);
             this.negotiatorFactory = negotiatorFactory;
             this.listenerFactory = listenerFactory;
