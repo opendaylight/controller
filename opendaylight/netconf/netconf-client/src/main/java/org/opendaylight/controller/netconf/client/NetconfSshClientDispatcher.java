@@ -8,8 +8,11 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import io.netty.channel.EventLoopGroup;
+
 public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
-    public NetconfSshClientDispatcher() {
-        super(null);
+
+    public NetconfSshClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup) {
+        super(null, bossGroup, workerGroup);
     }
 }

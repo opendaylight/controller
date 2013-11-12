@@ -12,9 +12,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -90,8 +91,9 @@ public class NetconfITTest extends AbstractConfigTest {
             closeSession, startExi, stopExi;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
+    private EventLoopGroup nettyThreadgroup;
 
-    private static NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER = new NetconfClientDispatcher(Optional.<SSLContext>absent());
+    private NetconfClientDispatcher clientDispatcher;
 
     @Before
     public void setUp() throws Exception {
@@ -103,11 +105,15 @@ public class NetconfITTest extends AbstractConfigTest {
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
 
+        nettyThreadgroup = new NioEventLoopGroup();
+
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
         dispatch = createDispatcher(Optional.<SSLContext> absent(), factoriesListener);
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
+
+        clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
     }
 
     private NetconfServerDispatcher createDispatcher(Optional<SSLContext> sslC,
@@ -119,18 +125,15 @@ public class NetconfITTest extends AbstractConfigTest {
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
 
-        return new NetconfServerDispatcher(sslC, serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
+                sslC, serverNegotiatorFactory, listenerFactory);
+        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 
     @After
     public void tearDown() throws Exception {
         commitNot.close();
-        dispatch.close();
-    }
-
-    @AfterClass
-    public static void tearDownStatic() {
-        NETCONF_CLIENT_DISPATCHER.close();
+        nettyThreadgroup.shutdownGracefully();
     }
 
     private void loadMessages() throws IOException, SAXException, ParserConfigurationException {
@@ -171,7 +174,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testNetconfClientDemonstration() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER)) {
+        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
 
             Set<String> capabilitiesFromNetconfServer = netconfClient.getCapabilities();
             long sessionId = netconfClient.getSessionId();
@@ -186,8 +189,8 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER))  {
-            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000, NETCONF_CLIENT_DISPATCHER))  {
+        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000, clientDispatcher))  {
+            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000, clientDispatcher))  {
             }
         }
     }
@@ -387,7 +390,7 @@ public class NetconfITTest extends AbstractConfigTest {
         // final InputStream resourceAsStream =
         // AbstractListenerTest.class.getResourceAsStream(fileName);
         // assertNotNull(resourceAsStream);
-        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000, NETCONF_CLIENT_DISPATCHER)) {
+        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000, clientDispatcher)) {
             // IOUtils.copy(resourceAsStream, netconfClient.getStream());
             // netconfClient.getOutputStream().write(NetconfMessageFactory.endOfMessage);
             // server should not write anything back
@@ -436,7 +439,7 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     private NetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
-        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000, NETCONF_CLIENT_DISPATCHER);
+        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000, clientDispatcher);
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
         return netconfClient;
     }

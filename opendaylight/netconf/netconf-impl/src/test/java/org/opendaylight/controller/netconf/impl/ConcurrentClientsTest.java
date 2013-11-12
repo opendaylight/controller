@@ -11,6 +11,8 @@ package org.opendaylight.controller.netconf.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -64,7 +66,10 @@ import static org.mockito.Mockito.mock;
 public class ConcurrentClientsTest {
 
     private static final int CONCURRENCY = 16;
-    public static final NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER = new NetconfClientDispatcher(Optional.<SSLContext>absent());
+    private static EventLoopGroup nettyGroup = new NioEventLoopGroup();
+    public static final NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER = new NetconfClientDispatcher(
+            Optional.<SSLContext> absent(), nettyGroup, nettyGroup);
+
     @Mock
     private YangStoreService yangStoreService;
     @Mock
@@ -76,6 +81,7 @@ public class ConcurrentClientsTest {
 
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
+
 
     @Before
     public void setUp() throws Exception {
@@ -103,7 +109,9 @@ public class ConcurrentClientsTest {
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
-        dispatch = new NetconfServerDispatcher(Optional.<SSLContext> absent(), serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
+                Optional.<SSLContext> absent(), serverNegotiatorFactory, listenerFactory);
+        dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);
 
         ChannelFuture s = dispatch.createServer(netconfAddress);
         s.await();
@@ -111,7 +119,7 @@ public class ConcurrentClientsTest {
 
     @AfterClass
     public static void tearDownStatic() {
-        NETCONF_CLIENT_DISPATCHER.close();
+        nettyGroup.shutdownGracefully();
     }
 
     private NetconfOperationServiceFactory mockOpF() {
@@ -160,7 +168,6 @@ public class ConcurrentClientsTest {
     @After
     public void cleanUp() throws Exception {
         commitNot.close();
-        dispatch.close();
     }
 
     @Test

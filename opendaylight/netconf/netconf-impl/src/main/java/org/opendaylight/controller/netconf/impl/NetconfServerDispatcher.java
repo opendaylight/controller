@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Optional;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -25,13 +26,11 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
 
     private final ServerSslChannelInitializer initializer;
 
-    public NetconfServerDispatcher(final Optional<SSLContext> maybeContext,
-            NetconfServerSessionNegotiatorFactory serverNegotiatorFactory,
-            NetconfServerSessionListenerFactory listenerFactory) {
-        this.initializer = new ServerSslChannelInitializer(maybeContext, serverNegotiatorFactory, listenerFactory);
+    public NetconfServerDispatcher(ServerSslChannelInitializer serverChannelInitializer, EventLoopGroup bossGroup,
+            EventLoopGroup workerGroup) {
+        super(bossGroup, workerGroup);
+        this.initializer = serverChannelInitializer;
     }
-
-    // FIXME change headers for all new source code files
 
     // TODO test create server with same address twice
     public ChannelFuture createServer(InetSocketAddress address) {
@@ -44,12 +43,12 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         });
     }
 
-    private static class ServerSslChannelInitializer extends AbstractSslChannelInitializer {
+    public static class ServerSslChannelInitializer extends AbstractSslChannelInitializer {
 
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
         private final NetconfServerSessionListenerFactory listenerFactory;
 
-        private ServerSslChannelInitializer(Optional<SSLContext> maybeContext,
+        public ServerSslChannelInitializer(Optional<SSLContext> maybeContext,
                                             NetconfServerSessionNegotiatorFactory negotiatorFactory,
                                             NetconfServerSessionListenerFactory listenerFactory) {
             super(maybeContext);
