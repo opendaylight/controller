@@ -257,12 +257,6 @@
           <artifactId>sample-toaster-provider</artifactId>
           <version>${mdsal.version}</version>
          </dependency>
-         <dependency>
-          <groupId>org.opendaylight.controller.samples</groupId>
-          <artifactId>sample-toaster-it</artifactId>
-          <version>${mdsal.version}</version>
-         </dependency>
-
          <!-- yangtools dependencies I'm pretty sure we can trim -->
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
