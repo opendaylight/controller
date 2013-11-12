@@ -11,7 +11,6 @@ package org.opendaylight.controller.forwardingrulesmanager.internal;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -29,8 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
@@ -69,7 +66,6 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
@@ -78,8 +74,6 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
 import org.opendaylight.controller.switchmanager.Subnet;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +91,6 @@ public class ForwardingRulesManager implements
         IInventoryListener,
         IObjectReader,
         ICacheUpdateAware<Object,Object>,
-        CommandProvider,
         IFlowProgrammerListener {
 
     private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManager.class);
@@ -1176,11 +1169,6 @@ public class ForwardingRulesManager implements
         portGroupData = new ConcurrentHashMap<PortGroupConfig, Map<Node, PortGroup>>();
         staticFlows = new ConcurrentHashMap<Integer, FlowConfig>();
         inactiveFlows = new ConcurrentHashMap<FlowEntry, FlowEntry>();
-    }
-
-    private void registerWithOSGIConsole() {
-        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        bundleContext.registerService(CommandProvider.class.getName(), this, null);
     }
 
     @Override
@@ -2470,8 +2458,6 @@ public class ForwardingRulesManager implements
 
         cacheStartup();
 
-        registerWithOSGIConsole();
-
         /*
          * If we are not the first cluster node to come up, do not initialize
          * the static flow entries ordinal
@@ -2892,100 +2878,9 @@ public class ForwardingRulesManager implements
         }
     }
 
-    /*
-     * OSGI COMMANDS
-     */
-    @Override
-    public String getHelp() {
-        StringBuffer help = new StringBuffer();
-        return help.toString();
-    }
-
     @Override
     public Status saveConfiguration() {
         return saveConfig();
-    }
-
-    public void _frmNodeFlows(CommandInterpreter ci) {
-        String nodeId = ci.nextArgument();
-        Node node = Node.fromString(nodeId);
-        if (node == null) {
-            ci.println("frmNodeFlows <node> [verbose]");
-            return;
-        }
-        boolean verbose = false;
-        String verboseCheck = ci.nextArgument();
-        if (verboseCheck != null) {
-            verbose = verboseCheck.equals("true");
-        }
-
-        if (!nodeFlows.containsKey(node)) {
-            return;
-        }
-        // Dump per node database
-        for (FlowEntryInstall entry : nodeFlows.get(node)) {
-            if (!verbose) {
-                ci.println(node + " " + installedSwView.get(entry).getFlowName());
-            } else {
-                ci.println(node + " " + installedSwView.get(entry).toString());
-            }
-        }
-    }
-
-    public void _frmGroupFlows(CommandInterpreter ci) {
-        String group = ci.nextArgument();
-        if (group == null) {
-            ci.println("frmGroupFlows <group> [verbose]");
-            return;
-        }
-        boolean verbose = false;
-        String verboseCheck = ci.nextArgument();
-        if (verboseCheck != null) {
-            verbose = verboseCheck.equalsIgnoreCase("true");
-        }
-
-        if (!groupFlows.containsKey(group)) {
-            return;
-        }
-        // Dump per node database
-        ci.println("Group " + group + ":\n");
-        for (FlowEntryInstall flowEntry : groupFlows.get(group)) {
-            if (!verbose) {
-                ci.println(flowEntry.getNode() + " " + flowEntry.getFlowName());
-            } else {
-                ci.println(flowEntry.getNode() + " " + flowEntry.toString());
-            }
-        }
-    }
-
-    public void _frmProcessErrorEvent(CommandInterpreter ci) throws UnknownHostException {
-        Node node = null;
-        long reqId = 0L;
-        String nodeId = ci.nextArgument();
-        if (nodeId == null) {
-            ci.print("Node id not specified");
-            return;
-        }
-        String requestId = ci.nextArgument();
-        if (requestId == null) {
-            ci.print("Request id not specified");
-            return;
-        }
-        try {
-            node = NodeCreator.createOFNode(Long.valueOf(nodeId));
-        } catch (NumberFormatException e) {
-            ci.print("Node id not a number");
-            return;
-        }
-        try {
-            reqId = Long.parseLong(requestId);
-        } catch (NumberFormatException e) {
-            ci.print("Request id not a number");
-            return;
-        }
-        // null for error object is good enough for now
-        ErrorReportedEvent event = new ErrorReportedEvent(reqId, node, null);
-        this.processErrorEvent(event);
     }
 
     @Override
