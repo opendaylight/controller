@@ -31,6 +31,8 @@ public class XmlNetconfConstants {
     public static final String RPC_REPLY_KEY = "rpc-reply";
     public static final String RPC_ERROR = "rpc-error";
     public static final String NAME_KEY = "name";
+    public static final String NOTIFICATION_ELEMENT_NAME = "notification";
+
     //
     //
     public static final String RFC4741_TARGET_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";
