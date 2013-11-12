@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_9ab79486",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManagerCLI.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-12T19:34:54Z",
+      "side": 1,
+      "message": "We could have a generic showFlows [\u003cnode\u003e|\u003cgroup\u003e] [verbose]\nwhere if node \u003d\u003d \u003cspecial value\u003e \u003d\u003e print the flows on all nodes\nsame for group.\n\nBut this is a furter enhancement not related to the one yo uare addressing here, so we can take care of it on another patch.",
+      "revId": "c20c0f9dff9816ea81a7099b2120fb589e34b6e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
