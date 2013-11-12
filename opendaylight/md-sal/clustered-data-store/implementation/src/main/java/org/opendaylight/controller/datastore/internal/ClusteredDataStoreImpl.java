@@ -35,19 +35,19 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
     public static final String OPERATIONAL_DATA_CACHE = "clustered_data_store.operational_data_cache";
     public static final String CONFIGURATION_DATA_CACHE = "clustered_data_store.configuration_data_cache";
 
-    private ConcurrentMap operationalDataCache;
-    private ConcurrentMap configurationDataCache;
+    private final ConcurrentMap operationalDataCache;
+    private final ConcurrentMap configurationDataCache;
 
     public ClusteredDataStoreImpl(IClusterGlobalServices clusterGlobalServices) throws CacheExistException, CacheConfigException {
         Preconditions.checkNotNull(clusterGlobalServices, "clusterGlobalServices cannot be null");
 
-        operationalDataCache = clusterGlobalServices.createCache(OPERATIONAL_DATA_CACHE, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+        operationalDataCache = getOrCreateCache(clusterGlobalServices, OPERATIONAL_DATA_CACHE);
 
         if(operationalDataCache == null){
             Preconditions.checkNotNull(operationalDataCache, "operationalDataCache cannot be null");
         }
 
-        configurationDataCache = clusterGlobalServices.createCache(CONFIGURATION_DATA_CACHE, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+        configurationDataCache = getOrCreateCache(clusterGlobalServices, CONFIGURATION_DATA_CACHE);
 
         if(configurationDataCache == null){
             Preconditions.checkNotNull(configurationDataCache, "configurationDataCache cannot be null");
@@ -93,6 +93,20 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
     private RpcResult<Void> rollback(final ClusteredDataStoreTransaction transaction) {
       Set<RpcError> _emptySet = Collections.<RpcError>emptySet();
       return Rpcs.<Void>getRpcResult(true, null, _emptySet);
+    }
+
+
+    private ConcurrentMap getOrCreateCache(IClusterGlobalServices clusterGlobalServices, String name) throws CacheConfigException {
+        ConcurrentMap cache = clusterGlobalServices.getCache(name);
+
+        if(cache == null) {
+            try {
+                cache = clusterGlobalServices.createCache(name, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+            } catch (CacheExistException e) {
+                cache = clusterGlobalServices.getCache(name);
+            }
+        }
+        return cache;
     }
 
     private class ClusteredDataStoreTransaction implements DataCommitTransaction<InstanceIdentifier<? extends Object>, Object> {

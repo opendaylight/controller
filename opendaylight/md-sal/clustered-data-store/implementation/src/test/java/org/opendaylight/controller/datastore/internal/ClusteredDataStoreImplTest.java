@@ -65,6 +65,31 @@ public class ClusteredDataStoreImplTest {
     }
 
     @Test
+    public void constructor_WhenOperationalDataCacheIsAlreadyPresent_ShouldNotAttemptToCreateCache() throws CacheExistException, CacheConfigException {
+        IClusterGlobalServices mockClusterGlobalServices = mock(IClusterGlobalServices.class);
+
+        Mockito.<ConcurrentMap<?,?>>when(mockClusterGlobalServices.getCache(ClusteredDataStoreImpl.OPERATIONAL_DATA_CACHE)).thenReturn(new ConcurrentHashMap<Object, Object>());
+        Mockito.<ConcurrentMap<?,?>>when(mockClusterGlobalServices.getCache(ClusteredDataStoreImpl.CONFIGURATION_DATA_CACHE)).thenReturn(new ConcurrentHashMap<Object, Object>());
+
+        new ClusteredDataStoreImpl(mockClusterGlobalServices);
+
+        verify(mockClusterGlobalServices, never()).createCache(ClusteredDataStoreImpl.OPERATIONAL_DATA_CACHE, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+    }
+
+    @Test
+    public void constructor_WhenConfigurationDataCacheIsAlreadyPresent_ShouldNotAttemptToCreateCache() throws CacheExistException, CacheConfigException {
+        IClusterGlobalServices mockClusterGlobalServices = mock(IClusterGlobalServices.class);
+
+        Mockito.<ConcurrentMap<?,?>>when(mockClusterGlobalServices.getCache(ClusteredDataStoreImpl.OPERATIONAL_DATA_CACHE)).thenReturn(new ConcurrentHashMap<Object, Object>());
+        Mockito.<ConcurrentMap<?,?>>when(mockClusterGlobalServices.getCache(ClusteredDataStoreImpl.CONFIGURATION_DATA_CACHE)).thenReturn(new ConcurrentHashMap<Object, Object>());
+
+        new ClusteredDataStoreImpl(mockClusterGlobalServices);
+
+        verify(mockClusterGlobalServices, never()).createCache(ClusteredDataStoreImpl.CONFIGURATION_DATA_CACHE, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+    }
+
+
+    @Test
     public void constructor_WhenPassedAValidClusteringServices_ShouldNotThrowAnyExceptions() throws CacheExistException, CacheConfigException {
         IClusterGlobalServices mockClusterGlobalServices = createClusterGlobalServices();
 
