@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -33,8 +35,18 @@ class JsonMapper {
     
     public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
         writer.beginObject();
-        writeChildrenOfParent(writer, data, schema);
+        
+        if (schema instanceof ContainerSchemaNode) {
+            writeContainer(writer, (CompositeNode) data, (ContainerSchemaNode) schema);
+        } else if (schema instanceof ListSchemaNode) {
+            writeList(writer, (CompositeNode) data, (ListSchemaNode) schema);
+        } else {
+            throw new UnsupportedDataTypeException(
+                    "Schema can be ContainerSchemaNode or ListSchemaNode. Other types are not supported yet.");
+        }
+        
         writer.endObject();
+        
         foundLeafLists.clear();
         foundLists.clear();
     }
@@ -45,6 +57,11 @@ class JsonMapper {
         
         for (Node<?> child : parent.getChildren()) {
             DataSchemaNode childSchema = findSchemaForNode(child, parentSchema.getChildNodes());
+            if (childSchema == null) {
+                throw new UnsupportedDataTypeException("Probably the data node \"" + child.getNodeType().getLocalName()
+                        + "\" is not conform to schema");
+            }
+            
             if (childSchema instanceof ContainerSchemaNode) {
                 writeContainer(writer, (CompositeNode) child, (ContainerSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
@@ -59,6 +76,9 @@ class JsonMapper {
                 }
             } else if (childSchema instanceof LeafSchemaNode) {
                 writeLeaf(writer, (SimpleNode<?>) child, (LeafSchemaNode) childSchema);
+            } else {
+                throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode, ListSchemaNode, "
+                        + "LeafListSchemaNode, or LeafSchemaNode. Other types are not supported yet.");
             }
         }
         
@@ -145,7 +165,9 @@ class JsonMapper {
         } else if (type instanceof BooleanTypeDefinition) {
             writer.value(Boolean.parseBoolean(value));
         } else if (type instanceof EmptyTypeDefinition) {
-            writer.value("[null]");
+            writer.beginArray();
+            writer.nullValue();
+            writer.endArray();
         } else {
             writer.value(value);
         }
