@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_ba081892",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2961,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-12T17:05:17Z",
+      "side": 0,
+      "message": "Can you please also remove this last one. I do not see a need for such a command.\nIf you do so, please remove the registerWithOSGIConsole(), do not implement the ICommandProvider and remove related import from pom.xml",
+      "revId": "a9e07305d0f806384e6ddf14ebc2e1aa9d40562e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

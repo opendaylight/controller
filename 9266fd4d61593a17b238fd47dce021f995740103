@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7a02a070",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManagerCLI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-12T17:05:17Z",
+      "side": 1,
+      "message": "Could you please rename the comamnds as:\nshowRequestedGroupFlows\nshowInstalledGroupFlows\nshowRequestedNodeFlows\nshowInstalledNodeFlows",
+      "revId": "9266fd4d61593a17b238fd47dce021f995740103",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
