@@ -1,0 +1,44 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module netty-event-executor {
+    yang-version 1;
+	namespace "urn:opendaylight:params:xml:ns:yang:controller:netty:eventexecutor";
+    prefix "netty-t";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import threadpool { prefix th; revision-date 2013-04-09; }
+
+    organization "Cisco Systems, Inc.";
+
+    contact "Milos Fabian <milfabia@cisco.com>";
+
+    description
+        "This module contains the base YANG definitions for NS-OS
+         thread-related services.
+
+        Copyright (c)2013 Cisco Systems, Inc. All rights reserved.;
+        
+        This program and the accompanying materials are made available
+		under the terms of the Eclipse Public License v1.0 which
+		accompanies this distribution, and is available at
+		http://www.eclipse.org/legal/epl-v10.html";
+
+    revision "2013-11-12" {
+        description
+            "Initial revision";
+    }
+    
+    identity netty-global-event-executor {
+        base config:module-type;
+        config:provided-service th:netty-event-executor;
+        config:java-name-prefix GlobalEventExecutor;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netty-global-event-executor {
+            when "/config:modules/config:module/config:type = 'netty-global-event-executor'";
+
+        }
+    }
+
+
+}

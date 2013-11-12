@@ -39,6 +39,7 @@
                      org.opendaylight.controller.config.api.*,
                      com.google.common.eventbus,
                      io.netty.channel,
+                     io.netty.util.concurrent
                   </Import-Package>
                   <Export-Package>
                      org.opendaylight.controller.config.threadpool,
