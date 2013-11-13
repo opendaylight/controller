@@ -75,8 +75,12 @@ public class BrokerIntegrationTest {
         
         mappingService.onGlobalContextUpdated(MappingServiceTest.getContext(yangFiles));
     }
-    
+
     @Test
+    public void doNothing(){
+
+    }
+    
     public void simpleModifyOperation() throws Exception {
         
         DataModificationTransaction transaction = baDataService.beginTransaction();
