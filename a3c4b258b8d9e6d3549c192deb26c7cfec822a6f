@@ -16,6 +16,24 @@
       "revId": "a3c4b258b8d9e6d3549c192deb26c7cfec822a6f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_906f75c5",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/util/ClassLoaderUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-11-13T17:48:50Z",
+      "side": 1,
+      "message": "This is tied to runtime code generation for serializers / deserializers and MD-SAL.\n\nIt is used to make sure that we load classes from specific classloader.\nThis is allways tied with the other method - withClassLoader - when we are generating some interface we capture it\u0027s bundle classloader and make sure everything is run and generated in the context of that classloader.\n\nWe can not use broker classloader for that, because broker itself does not depend on any specific model or model bundle.\n\nWIthout switching classloader for code generation, it is not possible to generate classes.\n\nSame operational model in OSGI is also common for Hibernate or any other framework which does runtime code generation.",
+      "parentUuid": "da6255ed_50421d3f",
+      "revId": "a3c4b258b8d9e6d3549c192deb26c7cfec822a6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
