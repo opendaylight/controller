@@ -50,14 +50,15 @@ public class NodeMapping {
     public static def toNodeRef(Node node) {
         checkArgument(MD_SAL_TYPE.equals(node.getType()));
         val nodeKey = node.ID.checkInstanceOf(NodeKey);
-        val nodePath = InstanceIdentifier.builder().node(Nodes).node(NODE_CLASS, nodeKey).toInstance();
+        val nodePath = InstanceIdentifier.builder().node(Nodes).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
 
     public static def toNodeConnectorRef(NodeConnector nodeConnector) {
         val node = nodeConnector.node.toNodeRef();
+        val nodePath = node.getValue() as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
         val connectorKey = nodeConnector.ID.checkInstanceOf(NodeConnectorKey);
-        val path = InstanceIdentifier.builder(node.getValue()).node(NODECONNECTOR_CLASS, connectorKey).toInstance();
+        val path = InstanceIdentifier.builder(nodePath).child(NODECONNECTOR_CLASS, connectorKey).toInstance();
         return new NodeConnectorRef(path);
     }
 
