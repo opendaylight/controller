@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_50421d3f",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/util/ClassLoaderUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-13T17:33:53Z",
+      "side": 1,
+      "message": "Tony please avoid to load in OSGi environment via the TCCL. Equinox provides one but it\u0027s heuristic, it\u0027s much better if you use the bundle classloader for the class itself.",
+      "revId": "a3c4b258b8d9e6d3549c192deb26c7cfec822a6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
