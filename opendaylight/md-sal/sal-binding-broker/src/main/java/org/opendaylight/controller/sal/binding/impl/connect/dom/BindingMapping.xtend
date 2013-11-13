@@ -47,10 +47,20 @@ import org.opendaylight.yangtools.yang.data.api.SimpleNode
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil
 import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils
 import org.opendaylight.yangtools.yang.model.api.type.BinaryTypeDefinition
+import com.google.common.collect.HashMultimap
+import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.Multimap
+import java.util.Collection
+import org.opendaylight.yangtools.sal.binding.model.api.MethodSignature
 
 class BindingMapping {
 
+
+
+    @Property
     val Map<Type, GeneratedTypeBuilder> typeToDefinition = new HashMap();
+    
+    @Property
     val Map<Type, SchemaNode> typeToSchemaNode = new HashMap();
 
     def QName getSchemaNode(Class<?> cls) {
@@ -91,7 +101,7 @@ class BindingMapping {
 
     }
 
-    def dispatch PathArgument toDataDomPathArgument(IdentifiableItem argument, Class<? extends DataObject> parent) {
+    private def dispatch PathArgument toDataDomPathArgument(IdentifiableItem argument, Class<? extends DataObject> parent) {
         val Class rawType = argument.type;
         val ref = Types.typeForClass(rawType);
         val schemaType = typeToSchemaNode.get(ref);
@@ -103,13 +113,13 @@ class BindingMapping {
         return new NodeIdentifierWithPredicates(qname, predicates);
     }
     
-    def dispatch PathArgument toDataDomPathArgument(Item<?> argument, Class<? extends DataObject> parent) {
+    private def dispatch PathArgument toDataDomPathArgument(Item<?> argument, Class<? extends DataObject> parent) {
         val ref = Types.typeForClass(argument.type);
         val qname = typeToSchemaNode.get(ref).QName
         return new NodeIdentifier(qname);
     }
 
-    def Map<QName, Object> toPredicates(Object identifier, ListSchemaNode node) {
+    private def Map<QName, Object> toPredicates(Object identifier, ListSchemaNode node) {
         val keyDefinitions = node.keyDefinition;
         val map = new HashMap<QName, Object>();
         for (keydef : keyDefinitions) {
@@ -192,7 +202,7 @@ class BindingMapping {
         return Collections.emptyList();
     }
 
-    def getSimpleValues(DataContainer container, LeafListSchemaNode node) {
+    private def getSimpleValues(DataContainer container, LeafListSchemaNode node) {
         return Collections.emptyList();
     }
 
@@ -226,35 +236,35 @@ class BindingMapping {
         return it;
     }
 
-    private def dispatch Node<?> getSimpleValue(Object container, QName name, ExtendedType type) {
+    public static def dispatch Node<?> getSimpleValue(Object container, QName name, ExtendedType type) {
         getSimpleValue(container, name, type.baseType);
     }
 
-    private def dispatch Node<?> getSimpleValue(Object container, QName name, StringTypeDefinition type) {
+    public static def dispatch Node<?> getSimpleValue(Object container, QName name, StringTypeDefinition type) {
         val value = container.getValue(name, String);
         if(value === null) return null;
         return new SimpleNodeTOImpl(name, null, value);
     }
 
-    private def dispatch Node<?> getSimpleValue(Object container, QName name, TypeDefinition<?> type) {
+    public static def dispatch Node<?> getSimpleValue(Object container, QName name, TypeDefinition<?> type) {
         val value = container.getValue(name, Object);
         if(value === null) return null;
         return new SimpleNodeTOImpl(name, null, value);
     }
 
-    private def dispatch Node<?> getSimpleValue(Object container, QName name, BooleanTypeDefinition type) {
+    public static def dispatch Node<?> getSimpleValue(Object container, QName name, BooleanTypeDefinition type) {
         val value = container.getValue(name, Boolean);
         if(value === null) return null;
         return new SimpleNodeTOImpl(name, null, value);
     }
 
-    private def dispatch Node<?> getSimpleValue(Object container, QName name, BinaryTypeDefinition type) {
+    public static def dispatch Node<?> getSimpleValue(Object container, QName name, BinaryTypeDefinition type) {
         val Object value = container.getValue(name, Object); //Constants.BYTES_CLASS);
         if(value === null) return null;
         return new SimpleNodeTOImpl(name, null, value);
     }
 
-    private def <T> T getValue(Object object, QName node, Class<T> type) {
+    public static def <T> T getValue(Object object, QName node, Class<T> type) {
         val methodName = BindingGeneratorImpl.getterMethodName(node.localName, Types.typeForClass(type));
         var clz = object.class;
         if (object instanceof DataContainer) {
@@ -274,7 +284,7 @@ class BindingMapping {
         return value.getEncapsulatedValue(type);
     }
 
-    private def <T> T getEncapsulatedValue(Object value, Class<T> type) {
+    public static def <T> T getEncapsulatedValue(Object value, Class<T> type) {
         val method = value.class.getMethod("getValue");
         if (method !== null && type.isAssignableFrom(method.returnType)) {
             return method.invoke(value) as T;
@@ -303,7 +313,7 @@ class BindingMapping {
         return buildMethod.invoke(builder) as DataObject;
     }
 
-    def dispatch void fillDataObject(CompositeNode node, Object builder, ClassLoader loader, GeneratedType type,
+    private def dispatch void fillDataObject(CompositeNode node, Object builder, ClassLoader loader, GeneratedType type,
         ListSchemaNode schema) {
 
         if (schema.keyDefinition !== null && !schema.keyDefinition.empty) {
@@ -311,14 +321,56 @@ class BindingMapping {
             val value = node.keyToBindingKey(loader, type, schema);
             builder.setProperty("key", value);
         }
+        node.fillBuilderFromContainer(builder,loader,type,schema);
     }
+    
+    
 
-    def dispatch void fillDataObject(CompositeNode node, Object builder, ClassLoader loader, GeneratedType type,
+    private def dispatch void fillDataObject(CompositeNode node, Object builder, ClassLoader loader, GeneratedType type,
         ContainerSchemaNode schema) {
+        node.fillBuilderFromContainer(builder,loader,type,schema);
     }
 
     
-    def Object keyToBindingKey(CompositeNode node, ClassLoader loader, GeneratedType type, ListSchemaNode schema) {
+    private def void fillBuilderFromContainer(CompositeNode node, Object builder, ClassLoader loader, GeneratedType type, DataNodeContainer schema) {
+        val Multimap<QName,Node<?>> dataMap = ArrayListMultimap.create();
+        for(child :node.children) {
+            dataMap.put(child.nodeType,node);
+        }
+        for(entry : dataMap.asMap.entrySet) {
+            val entrySchema = schema.getDataChildByName(entry.key);
+            val entryType = type.methodDefinitions.byQName(entry.key);
+            entry.value.addValueToBuilder(builder,loader,entryType,entrySchema);
+        }
+    }
+    
+    private def Type byQName(List<MethodSignature> signatures, QName name) {
+      
+    }
+    
+    private def dispatch addValueToBuilder(Collection<Node<? extends Object>> nodes, Object object, ClassLoader loader, Object object2, LeafSchemaNode container) {
+        
+    }
+    
+    
+    
+    private def dispatch addValueToBuilder(Collection<Node<? extends Object>> nodes, Object object, ClassLoader loader, Object object2, ContainerSchemaNode container) {
+        
+    }
+    
+    
+    private def dispatch addValueToBuilder(Collection<Node<? extends Object>> nodes, Object object, ClassLoader loader, Object object2, ListSchemaNode container) {
+        
+    }
+    
+    private def dispatch addValueToBuilder(Collection<Node<? extends Object>> nodes, Object object, ClassLoader loader, Object object2, LeafListSchemaNode container) {
+        
+    }
+    
+    
+    
+    
+    private def Object keyToBindingKey(CompositeNode node, ClassLoader loader, GeneratedType type, ListSchemaNode schema) {
         val keyClass = loader.loadClass(type.keyFQN);
         val constructor = keyClass.constructors.get(0);
         val keyType = type.keyTypeProperties;
@@ -336,22 +388,22 @@ class BindingMapping {
         return ClassLoaderUtils.construct(constructor, args);
     }
 
-    def dispatch Object deserializeSimpleValue(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
+    private def dispatch Object deserializeSimpleValue(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
         LeafSchemaNode node2) {
         deserializeSimpleValueImpl(node, loader, type, node2.type);
     }
 
-    def dispatch Object deserializeSimpleValue(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
+    private def dispatch Object deserializeSimpleValue(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
         LeafListSchemaNode node2) {
         deserializeSimpleValueImpl(node, loader, type, node2.type);
     }
 
-    def dispatch Object deserializeSimpleValueImpl(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
+    private def dispatch Object deserializeSimpleValueImpl(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
         ExtendedType definition) {
         deserializeSimpleValueImpl(node, loader, type, definition.baseType);
     }
 
-    def dispatch Object deserializeSimpleValueImpl(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
+    private def dispatch Object deserializeSimpleValueImpl(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
         StringTypeDefinition definition) {
         if (type instanceof GeneratedTransferObject) {
             val cls = loader.getClassForType(type);
@@ -362,16 +414,16 @@ class BindingMapping {
         return node.value;
     }
 
-    def Class<?> getClassForType(ClassLoader loader, Type type) {
+    private def Class<?> getClassForType(ClassLoader loader, Type type) {
         loader.loadClass(type.fullyQualifiedName);
     }
 
-    def dispatch Object deserializeSimpleValueImpl(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
+    private def dispatch Object deserializeSimpleValueImpl(SimpleNode<? extends Object> node, ClassLoader loader, Type type,
         TypeDefinition definition) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
-    def Map<String, GeneratedProperty> getKeyTypeProperties(GeneratedType type) {
+    private def Map<String, GeneratedProperty> getKeyTypeProperties(GeneratedType type) {
         val method = FluentIterable.from(type.methodDefinitions).findFirst[name == "getKey"]
         val key = method.returnType as GeneratedTransferObject;
         val ret = new HashMap<String, GeneratedProperty>();
@@ -381,16 +433,16 @@ class BindingMapping {
         return ret;
     }
 
-    def void setProperty(Object object, String property, Object value) {
+    private def void setProperty(Object object, String property, Object value) {
         val cls = object.class;
         val valMethod = cls.getMethod("set" + property.toFirstUpper, value.class);
         if (valMethod != null)
             valMethod.invoke(object, value);
     }
 
-    def String getBuilderFQN(Type type) '''«type.fullyQualifiedName»Builder'''
+    private def String getBuilderFQN(Type type) '''«type.fullyQualifiedName»Builder'''
 
-    def String getKeyFQN(Type type) '''«type.fullyQualifiedName»Key'''
+    private def String getKeyFQN(Type type) '''«type.fullyQualifiedName»Key'''
 
 }
 

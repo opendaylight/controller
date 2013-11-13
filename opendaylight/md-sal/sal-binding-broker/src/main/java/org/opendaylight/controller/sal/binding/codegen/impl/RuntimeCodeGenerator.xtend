@@ -12,9 +12,6 @@ import org.opendaylight.yangtools.yang.binding.RpcService
 
 import javassist.CtClass
 import static com.google.common.base.Preconditions.*
-
-import javassist.CtField
-import javassist.Modifier
 import javassist.CtMethod
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext
@@ -22,13 +19,11 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity
 
 import java.util.Map
 import java.util.HashMap
-import javassist.NotFoundException
-import javassist.LoaderClassPath
-import org.opendaylight.controller.sal.binding.codegen.impl.JavassistUtils.MethodGenerator
-import org.opendaylight.controller.sal.binding.codegen.impl.JavassistUtils.ClassGenerator
+
+
 import org.opendaylight.yangtools.yang.binding.NotificationListener
 import org.opendaylight.yangtools.yang.binding.Notification
-import java.util.Arrays
+
 
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
@@ -39,19 +34,21 @@ import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.No
 import java.util.Set
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
 import java.util.WeakHashMap
-import javassist.ClassClassPath
 import org.opendaylight.yangtools.yang.binding.annotations.QName
 import org.opendaylight.yangtools.yang.binding.DataContainer
 import org.opendaylight.yangtools.yang.binding.RpcImplementation
+import org.opendaylight.controller.sal.binding.codegen.util.JavassistUtils
 
 class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
 
     val CtClass BROKER_NOTIFICATION_LISTENER;
     val ClassPool classPool;
+    val extension JavassistUtils utils;
     val Map<Class<? extends NotificationListener>, RuntimeGeneratedInvokerPrototype> invokerClasses;
 
     public new(ClassPool pool) {
         classPool = pool;
+        utils = new JavassistUtils(pool);
         invokerClasses = new WeakHashMap();
         BROKER_NOTIFICATION_LISTENER = org.opendaylight.controller.sal.binding.api.NotificationListener.asCtClass;
     }
@@ -216,65 +213,9 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener>);
     }
 
-    private def void method(CtClass it, Class<?> returnType, String name, Class<?> parameter, MethodGenerator function1) {
-        val method = new CtMethod(returnType.asCtClass, name, Arrays.asList(parameter.asCtClass), it);
-        function1.process(method);
-        it.addMethod(method);
-    }
+    
 
-    private def void implementMethodsFrom(CtClass target, CtClass source, MethodGenerator function1) {
-        for (method : source.methods) {
-            if (method.declaringClass == source) {
-                val redeclaredMethod = new CtMethod(method, target, null);
-                function1.process(redeclaredMethod);
-                target.addMethod(redeclaredMethod);
-            }
-        }
-    }
 
-    private def CtClass createClass(String fqn, ClassGenerator cls) {
-        val target = classPool.makeClass(fqn);
-        cls.process(target);
-        return target;
-    }
-
-    private def CtClass createClass(String fqn, CtClass superInterface, ClassGenerator cls) {
-        val target = classPool.makeClass(fqn);
-        target.implementsType(superInterface);
-        cls.process(target);
-        return target;
-    }
-
-    private def void implementsType(CtClass it, CtClass supertype) {
-        checkArgument(supertype.interface, "Supertype must be interface");
-        addInterface(supertype);
-    }
-
-    private def asCtClass(Class<?> class1) {
-        classPool.get(class1);
-    }
-
-    private def CtField field(CtClass it, String name, Class<?> returnValue) {
-        val field = new CtField(returnValue.asCtClass, name, it);
-        field.modifiers = Modifier.PUBLIC
-        addField(field);
-        return field;
-    }
-
-    def get(ClassPool pool, Class<?> cls) {
-        try {
-            return pool.get(cls.name)
-        } catch (NotFoundException e) {
-            pool.appendClassPath(new LoaderClassPath(cls.classLoader));
-            try {
-                return pool.get(cls.name)
-
-            } catch (NotFoundException ef) {
-                pool.appendClassPath(new ClassClassPath(cls));
-                return pool.get(cls.name)
-            }
-        }
-    }
 
     protected def resolveInvokerClass(Class<? extends NotificationListener> class1) {
         val invoker = invokerClasses.get(class1);

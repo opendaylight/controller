@@ -10,8 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.opendaylight.yangtools.yang.binding.Identifier;
-
 public class ClassLoaderUtils {
     
     public static <V> V withClassLoader(ClassLoader cls,Callable<V> function) throws Exception {
@@ -32,5 +30,10 @@ public class ClassLoaderUtils {
     public static Object construct(Constructor<? extends Object> constructor, ArrayList<Object> objects) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     Object[] initargs = objects.toArray(new Object[]{});
     return constructor.newInstance(initargs);
+    }
+    
+    
+    public static Class<?> loadClassWithTCCL(String name) throws ClassNotFoundException {
+        return Thread.currentThread().getContextClassLoader().loadClass(name);
     }
 }

@@ -3,7 +3,10 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 import java.util.Collection;
 import java.util.Collections;
 
+import javassist.ClassPool;
+
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.binding.dom.serializer.impl.TransformerGenerator;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -38,10 +41,12 @@ public class ConnectorActivator implements Provider, ServiceTrackerCustomizer<Br
     @Override
     public void onSessionInitiated(ProviderSession session) {
 
-        MappingServiceImpl mappingImpl = new MappingServiceImpl();
-        mappingImpl.setSchemaService(session.getService(SchemaService.class));
+        RuntimeGeneratedMappingServiceImpl mappingImpl = new RuntimeGeneratedMappingServiceImpl();
+        SchemaService schemaService = (session.getService(SchemaService.class));
+        ClassPool pool = new ClassPool();
+        mappingImpl.setBinding(new TransformerGenerator(pool));
         mappingImpl.start();
-
+        schemaService.registerSchemaServiceListener(mappingImpl);
         mappingService = mappingImpl;
         dataConnector = new BindingIndependentDataServiceConnector();
         dataConnector.setBaDataService(baDataService);
