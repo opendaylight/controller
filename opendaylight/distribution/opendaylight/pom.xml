@@ -149,17 +149,7 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
-          <artifactId>config-util</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-jmx-generator</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>yang-jmx-generator-plugin</artifactId>
           <version>${config.version}</version>
         </dependency>
         <dependency>
