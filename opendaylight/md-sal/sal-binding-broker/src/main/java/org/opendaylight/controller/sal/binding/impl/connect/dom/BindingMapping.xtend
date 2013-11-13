@@ -324,7 +324,10 @@ class BindingMapping {
         val keyType = type.keyTypeProperties;
         val args = new ArrayList();
         for (key : schema.keyDefinition) {
-            val keyProperty = keyType.get(BindingGeneratorUtil.parseToClassName(key.localName));
+            var keyProperty = keyType.get(BindingGeneratorUtil.parseToClassName(key.localName));
+            if (keyProperty == null) {
+                keyProperty = keyType.get(BindingGeneratorUtil.parseToValidParamName(key.localName));
+            }
             val domKeyValue = node.getFirstSimpleByName(key);
             val keyValue = domKeyValue.deserializeSimpleValue(loader, keyProperty.returnType,
                 schema.getDataChildByName(key));
