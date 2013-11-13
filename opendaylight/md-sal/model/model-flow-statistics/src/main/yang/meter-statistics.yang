@@ -12,6 +12,45 @@ module opendaylight-meter-statistics {
         description "Initial revision of meter statistics service";
     }
 
+    typedef meter-stats-ref {
+        type instance-identifier;
+    }
+    
+    grouping meter-stats-res {
+        uses "inv:node-context-ref";
+
+        leaf meter-stats-id {
+            type meter-stats-ref;
+        }
+        uses meter-types:meter-statistics;
+    }
+
+    typedef meter-config-ref {
+        type instance-identifier;
+    }
+    
+    grouping meter-config-res {
+        uses "inv:node-context-ref";
+
+        leaf meter-config-id {
+            type meter-config-ref;
+        }
+        uses meter-types:meter-config-stats;
+    }
+
+    typedef meter-features-ref {
+        type instance-identifier;
+    }
+    
+    grouping meter-features-res {
+        uses "inv:node-context-ref";
+
+        leaf meter-features-id {
+            type meter-features-ref;
+        }
+        uses meter-types:meter-features;
+    }
+
 	// RPC calls
 	rpc get-all-meter-statistics {
 		input {
@@ -19,7 +58,7 @@ module opendaylight-meter-statistics {
         }
         output {
             list meter-statistics {
-                uses meter-types:meter-statistics;
+                uses meter-stats-res;
                 uses tr:transaction-aware;
             }
         }
@@ -35,7 +74,7 @@ module opendaylight-meter-statistics {
             }
         }
         output {
-            uses meter-types:meter-statistics;
+            uses meter-stats-res;
             uses tr:transaction-aware;
         }
 	
@@ -49,7 +88,7 @@ module opendaylight-meter-statistics {
             }
         }
         output {
-        	uses meter-types:meter-config-stats;
+        	uses meter-config-res;
             uses tr:transaction-aware;
         }
 	}
@@ -62,7 +101,7 @@ module opendaylight-meter-statistics {
 	        }
         }
         output {
-        	uses meter-types:meter-features;
+        	uses meter-features-res;
             uses tr:transaction-aware;
         }
 	}
@@ -71,17 +110,17 @@ module opendaylight-meter-statistics {
 	//Notification calls
 	
 	notification meter-statistics-updated {
-		uses meter-types:meter-statistics;
+		uses meter-stats-res;
         uses tr:transaction-aware;
 	}
 	
 	notification meter-config-stats-updated {
-		uses meter-types:meter-config-stats;
+		uses meter-config-res;
         uses tr:transaction-aware;
 	}
 
-	notification meter-features {
-		uses meter-types:meter-features;
+	notification meter-features-updated {
+		uses meter-features-res;
         uses tr:transaction-aware;
 	}
 }
