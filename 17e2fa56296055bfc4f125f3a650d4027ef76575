@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7d861a15",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-11-13T11:37:58Z",
+      "side": 1,
+      "message": "This is not an acceptable mergable solution\n\nHowever, because it makes it easier for folks on openflowplugin to work while Prassana works on fixing this patch by allowing them to cherrypick this change in and move forward, we are doing it as a temporary fix.",
+      "revId": "17e2fa56296055bfc4f125f3a650d4027ef76575",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
