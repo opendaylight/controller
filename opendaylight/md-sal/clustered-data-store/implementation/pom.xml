@@ -41,6 +41,7 @@
               org.opendaylight.controller.md.sal.common.api.data,
               org.opendaylight.controller.sal.common.util,
               org.opendaylight.yangtools.yang.binding,
+              org.opendaylight.yangtools.yang.data.api,
               org.osgi.service.component,
               org.slf4j,
               org.apache.felix.dm,
@@ -48,7 +49,8 @@
               org.apache.commons.lang3.tuple,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
-              com.google.common.base
+              com.google.common.base,
+
             </Import-Package>
             <Bundle-Activator>
               org.opendaylight.controller.datastore.internal.Activator
@@ -104,5 +106,10 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-binding</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-data-api</artifactId>
+    </dependency>
+
   </dependencies>
 </project>

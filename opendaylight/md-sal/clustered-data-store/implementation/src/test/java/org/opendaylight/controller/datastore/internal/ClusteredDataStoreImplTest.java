@@ -9,7 +9,8 @@ import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -127,9 +128,9 @@ public class ClusteredDataStoreImplTest {
 
         IClusterGlobalServices mockClusterGlobalServices = createClusterGlobalServices();
 
-        ConcurrentMap mockOperationalDataCache = mock(ConcurrentMap.class);
+        ConcurrentMap<InstanceIdentifier, CompositeNode> mockOperationalDataCache = mock(ConcurrentMap.class);
 
-        Object valueObject = mock(Object.class);
+        CompositeNode valueObject = mock(CompositeNode.class);
 
         when(mockOperationalDataCache.get(path)).thenReturn(valueObject);
 
@@ -176,9 +177,9 @@ public class ClusteredDataStoreImplTest {
 
         IClusterGlobalServices mockClusterGlobalServices = createClusterGlobalServices();
 
-        ConcurrentMap mockConfigurationDataCache = mock(ConcurrentMap.class);
+        ConcurrentMap<InstanceIdentifier, CompositeNode> mockConfigurationDataCache = mock(ConcurrentMap.class);
 
-        Object valueObject = mock(Object.class);
+        CompositeNode valueObject = mock(CompositeNode.class);
 
         when(mockConfigurationDataCache.get(path)).thenReturn(valueObject);
 
@@ -223,7 +224,7 @@ public class ClusteredDataStoreImplTest {
         when(mockModification.getUpdatedConfigurationData()).thenReturn(configurationData);
         when(mockModification.getUpdatedOperationalData()).thenReturn(operationalData);
 
-        DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends Object>, Object> transaction = store.requestCommit(mockModification);
+        DataCommitHandler.DataCommitTransaction<InstanceIdentifier, CompositeNode> transaction = store.requestCommit(mockModification);
 
         transaction.finish();
 
@@ -252,7 +253,7 @@ public class ClusteredDataStoreImplTest {
         when(mockModification.getUpdatedConfigurationData()).thenReturn(configurationData);
         when(mockModification.getUpdatedOperationalData()).thenReturn(operationalData);
 
-        DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends Object>, Object> transaction = store.requestCommit(mockModification);
+        DataCommitHandler.DataCommitTransaction<InstanceIdentifier, CompositeNode> transaction = store.requestCommit(mockModification);
 
         transaction.rollback();
 

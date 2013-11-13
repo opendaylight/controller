@@ -17,7 +17,8 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+
 
 public class ClusteredDataStoreManagerTest {
 	
@@ -92,7 +94,7 @@ public class ClusteredDataStoreManagerTest {
 		 
 		 clusteredDSManager.init(c);
 		 
-		 Object o = mock(Object.class);
+		 CompositeNode o = mock(CompositeNode.class);
 		 
 		 when(clusteredDSImpl.readOperationalData(any(InstanceIdentifier.class))).thenReturn(o);
 		 assertEquals(o,clusteredDSManager.readOperationalData(any(InstanceIdentifier.class)));
@@ -108,7 +110,7 @@ public class ClusteredDataStoreManagerTest {
 		 Component c = mock(Component.class);
 		 
 		 clusteredDSManager.init(c);
-		 Object o = mock(Object.class);
+         CompositeNode o = mock(CompositeNode.class);
 		 
 		 when(clusteredDSImpl.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(o);
 		 assertEquals(o,clusteredDSManager.readConfigurationData(any(InstanceIdentifier.class)));

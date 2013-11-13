@@ -8,13 +8,15 @@
 
 package org.opendaylight.controller.datastore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import org.eclipse.osgi.framework.internal.core.BundleHost;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.DataModification;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -26,21 +28,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import static org.mockito.Mockito.mock;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 @RunWith(PaxExam.class)
 public class ClusteredDataStoreIT {
@@ -98,6 +98,14 @@ public class ClusteredDataStoreIT {
                 mavenBundle("org.opendaylight.controller", "protocol_plugins.stub")
                     .versionAsInProject(),
 
+
+                //sal-common-impl
+                mavenBundle("org.eclipse.xtend", "org.eclipse.xtend.lib")
+                    .versionAsInProject(),
+                mavenBundle("org.eclipse.xtext", "org.eclipse.xtext.xbase.lib")
+                    .versionAsInProject(),
+
+
                 //clustered-data-store-implementation dependencies
                 mavenBundle("com.google.guava", "guava")
                     .versionAsInProject(),
@@ -109,6 +117,7 @@ public class ClusteredDataStoreIT {
                     .versionAsInProject(),
                 mavenBundle("org.opendaylight.yangtools", "yang-binding")
                     .versionAsInProject(),
+
 
 
                 //sal-common-api dependencies
@@ -123,6 +132,12 @@ public class ClusteredDataStoreIT {
                 //adding new maven bundles
                 mavenBundle("org.mockito", "mockito-all")
                     .versionAsInProject(),
+
+                //yang-data-api
+                mavenBundle("org.opendaylight.yangtools", "yang-data-api")
+                    .versionAsInProject(),
+
+
 
                 // needed by hosttracker
                 mavenBundle("org.opendaylight.controller", "clustered-datastore-implementation")
@@ -153,14 +168,22 @@ public class ClusteredDataStoreIT {
 
     @Before
     public void areWeReady() {
+
         assertNotNull(bc);
         boolean debugit = false;
         Bundle b[] = bc.getBundles();
         for (int i = 0; i < b.length; i++) {
             int state = b[i].getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.debug("Bundle:" + b[i].getSymbolicName() + " state:"
+                log.error("Bundle:" + b[i].getSymbolicName() + " state:"
                           + stateToString(state));
+
+                final ServiceReference[] registeredServices = b[i].getRegisteredServices();
+                final ServiceReference[] servicesInUse = b[i].getServicesInUse();
+
+                if(b[i] instanceof BundleHost){
+                    ((BundleHost) b[i]).getResolutionFailureException().printStackTrace();
+                }
                 debugit = true;
             }
         }
@@ -188,13 +211,13 @@ public class ClusteredDataStoreIT {
         HashMap map = new HashMap();
         List list = new ArrayList();
         list.add("key");
-        InstanceIdentifier key = new InstanceIdentifier(list,String.class);
-        map.put(key, "value");
+        InstanceIdentifier key = new InstanceIdentifier(list);
+        map.put(key, mock(CompositeNode.class));
         when(dataModification.getUpdatedConfigurationData()).thenReturn(map);
         DataCommitTransaction dataCommitTrans = clusteredDS.requestCommit(dataModification);
         dataCommitTrans.finish();
-        String value = (String)clusteredDS.readConfigurationData(key);
-        assertEquals("value",value);
+        Object value = clusteredDS.readConfigurationData(key);
+        Assert.assertNotNull(value);
     }
 
     @Test(expected = NullPointerException.class)
@@ -210,13 +233,13 @@ public class ClusteredDataStoreIT {
         HashMap map = new HashMap();
         List list = new ArrayList();
         list.add("key");
-        InstanceIdentifier key = new InstanceIdentifier(list,String.class);
-        map.put(key, "value");
+        InstanceIdentifier key = new InstanceIdentifier(list);
+        map.put(key, mock(CompositeNode.class));
         when(dataModification.getUpdatedOperationalData()).thenReturn(map);
         DataCommitTransaction dataCommitTrans = clusteredDS.requestCommit(dataModification);
         dataCommitTrans.finish();
-        String value = (String)clusteredDS.readOperationalData(key);
-        assertEquals("value",value);
+        Object value = clusteredDS.readOperationalData(key);
+        Assert.assertNotNull(value);
     }
 
     @Test
@@ -225,16 +248,16 @@ public class ClusteredDataStoreIT {
         HashMap map = new HashMap();
         List list = new ArrayList();
         list.add("key");
-        InstanceIdentifier key = new InstanceIdentifier(list,String.class);
+        InstanceIdentifier key = new InstanceIdentifier(list);
         map.put(key, "value");
         when(dataModification.getUpdatedConfigurationData()).thenReturn(map);
         DataCommitTransaction dataCommitTrans = clusteredDS.requestCommit(dataModification);
         dataCommitTrans.finish();
         list = new ArrayList();
         list.add("key1");
-        InstanceIdentifier key1 = new InstanceIdentifier(list,String.class);
+        InstanceIdentifier key1 = new InstanceIdentifier(list);
 
-        String value = (String)clusteredDS.readConfigurationData(key1);
+        Object value = clusteredDS.readConfigurationData(key1);
         assertNull(value);
     }
 
@@ -244,16 +267,16 @@ public class ClusteredDataStoreIT {
         HashMap map = new HashMap();
         List list = new ArrayList();
         list.add("key");
-        InstanceIdentifier key = new InstanceIdentifier(list,String.class);
-        map.put(key, "value");
+        InstanceIdentifier key = new InstanceIdentifier(list);
+        map.put(key, mock(CompositeNode.class));
         when(dataModification.getUpdatedOperationalData()).thenReturn(map);
         DataCommitTransaction dataCommitTrans = clusteredDS.requestCommit(dataModification);
         dataCommitTrans.finish();
         list = new ArrayList();
         list.add("key1");
-        InstanceIdentifier key1 = new InstanceIdentifier(list,String.class);
+        InstanceIdentifier key1 = new InstanceIdentifier(list);
 
-        String value = (String)clusteredDS.readOperationalData(key1);
+        Object value = clusteredDS.readOperationalData(key1);
         assertNull(value);
     }
 
@@ -263,12 +286,12 @@ public class ClusteredDataStoreIT {
         HashMap map = new HashMap();
         List list = new ArrayList();
         list.add("key");
-        InstanceIdentifier key = new InstanceIdentifier(list,String.class);
+        InstanceIdentifier key = new InstanceIdentifier(list);
         map.put(key, "value");
         when(dataModification.getUpdatedConfigurationData()).thenReturn(map);
         DataCommitTransaction dataCommitTrans = clusteredDS.requestCommit(dataModification);
         dataCommitTrans.finish();
-        String value = (String)clusteredDS.readConfigurationData(null);
+        Object value = clusteredDS.readConfigurationData(null);
     }
 
     @Test(expected = NullPointerException.class)
@@ -277,11 +300,12 @@ public class ClusteredDataStoreIT {
         HashMap map = new HashMap();
         List list = new ArrayList();
         list.add("key");
-        InstanceIdentifier key = new InstanceIdentifier(list,String.class);
+        InstanceIdentifier key = new InstanceIdentifier(list);
         map.put(key, "value");
         when(dataModification.getOriginalOperationalData()).thenReturn(map);
         DataCommitTransaction dataCommitTrans = clusteredDS.requestCommit(dataModification);
         dataCommitTrans.finish();
-        String value = (String)clusteredDS.readOperationalData(null);
+        Object value = clusteredDS.readOperationalData(null);
     }
+
 }

@@ -17,9 +17,12 @@ import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.datastore.ClusteredDataStore;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -35,10 +38,13 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
     public static final String OPERATIONAL_DATA_CACHE = "clustered_data_store.operational_data_cache";
     public static final String CONFIGURATION_DATA_CACHE = "clustered_data_store.configuration_data_cache";
 
-    private final ConcurrentMap operationalDataCache;
-    private final ConcurrentMap configurationDataCache;
+    private final ConcurrentMap<InstanceIdentifier, CompositeNode> operationalDataCache;
+    private final ConcurrentMap<InstanceIdentifier, CompositeNode> configurationDataCache;
+
+    private Logger logger = LoggerFactory.getLogger(ClusteredDataStoreImpl.class);
 
     public ClusteredDataStoreImpl(IClusterGlobalServices clusterGlobalServices) throws CacheExistException, CacheConfigException {
+        logger.info("Constructing clustered data store");
         Preconditions.checkNotNull(clusterGlobalServices, "clusterGlobalServices cannot be null");
 
         operationalDataCache = getOrCreateCache(clusterGlobalServices, OPERATIONAL_DATA_CACHE);
@@ -56,33 +62,33 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
     }
 
     @Override
-    public DataCommitTransaction<InstanceIdentifier<? extends Object>, Object> requestCommit(DataModification<InstanceIdentifier<? extends Object>, Object> modification) {
+    public DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(DataModification<InstanceIdentifier, CompositeNode> modification) {
         return new ClusteredDataStoreTransaction(modification);
     }
 
     @Override
-    public Object readOperationalData(InstanceIdentifier<? extends Object> path) {
+    public CompositeNode readOperationalData(InstanceIdentifier path) {
         Preconditions.checkNotNull(path, "path cannot be null");
         return operationalDataCache.get(path);
     }
 
     @Override
-    public Object readConfigurationData(InstanceIdentifier<? extends Object> path) {
+    public CompositeNode readConfigurationData(InstanceIdentifier path) {
         Preconditions.checkNotNull(path, "path cannot be null");
         return configurationDataCache.get(path);
     }
 
     private RpcResult<Void> finish(final ClusteredDataStoreTransaction transaction) {
-      final DataModification<InstanceIdentifier<? extends Object>,Object> modification = transaction.getModification();
+      final DataModification<InstanceIdentifier,CompositeNode> modification = transaction.getModification();
 
       this.configurationDataCache.putAll(modification.getUpdatedConfigurationData());
       this.operationalDataCache.putAll(modification.getUpdatedOperationalData());
 
-      for (final InstanceIdentifier<? extends Object> removal : modification.getRemovedConfigurationData()) {
+      for (final InstanceIdentifier removal : modification.getRemovedConfigurationData()) {
         this.configurationDataCache.remove(removal);
       }
 
-      for (final InstanceIdentifier<? extends Object> removal : modification.getRemovedOperationalData()) {
+      for (final InstanceIdentifier removal : modification.getRemovedOperationalData()) {
         this.operationalDataCache.remove(removal  );
       }
 
@@ -109,17 +115,17 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
         return cache;
     }
 
-    private class ClusteredDataStoreTransaction implements DataCommitTransaction<InstanceIdentifier<? extends Object>, Object> {
-        private final DataModification<InstanceIdentifier<? extends Object>,Object> modification;
+    private class ClusteredDataStoreTransaction implements DataCommitTransaction<InstanceIdentifier, CompositeNode> {
+        private final DataModification<InstanceIdentifier,CompositeNode> modification;
 
-        public ClusteredDataStoreTransaction(DataModification<InstanceIdentifier<? extends Object>,Object> modification){
+        public ClusteredDataStoreTransaction(DataModification<InstanceIdentifier,CompositeNode> modification){
             Preconditions.checkNotNull(modification, "modification cannot be null");
 
             this.modification = modification;
         }
 
         @Override
-        public DataModification<InstanceIdentifier<? extends Object>, Object> getModification() {
+        public DataModification<InstanceIdentifier, CompositeNode> getModification() {
             return this.modification;
         }
 

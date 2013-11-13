@@ -18,7 +18,8 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.datastore.ClusteredDataStore;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 public class ClusteredDataStoreManager implements ClusteredDataStore {
 
@@ -26,19 +27,19 @@ public class ClusteredDataStoreManager implements ClusteredDataStore {
     private IClusterGlobalServices clusterGlobalServices = null;
 
     @Override
-    public DataCommitTransaction<InstanceIdentifier<? extends Object>, Object> requestCommit(DataModification<InstanceIdentifier<? extends Object>, Object> modification) {
+    public DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(DataModification<InstanceIdentifier, CompositeNode> modification) {
         Preconditions.checkState(clusteredDataStore != null, "clusteredDataStore cannot be null");
         return clusteredDataStore.requestCommit(modification);
     }
 
     @Override
-    public Object readOperationalData(InstanceIdentifier<? extends Object> path) {
+    public CompositeNode readOperationalData(InstanceIdentifier path) {
         Preconditions.checkState(clusteredDataStore != null, "clusteredDataStore cannot be null");
         return clusteredDataStore.readOperationalData(path);
     }
 
     @Override
-    public Object readConfigurationData(InstanceIdentifier<? extends Object> path) {
+    public CompositeNode readConfigurationData(InstanceIdentifier path) {
         Preconditions.checkState(clusteredDataStore != null, "clusteredDataStore cannot be null");
         return clusteredDataStore.readConfigurationData(path);
     }
