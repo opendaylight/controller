@@ -14,7 +14,9 @@ import org.opendaylight.controller.sal.binding.api.data.DataModificationTransact
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
+import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.MappingServiceImpl;
+import org.opendaylight.controller.sal.binding.impl.connect.dom.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -34,8 +36,8 @@ public class BrokerIntegrationTest {
 
     DataBrokerService biDataService;
     DataProviderService baDataService;
-    private MappingServiceImpl mappingServiceImpl;
-    private MappingServiceImpl mappingService;
+    private RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
+    private BindingIndependentMappingService mappingService;
     private DataBrokerImpl baDataImpl;
     private org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
     private ListeningExecutorService executor;
@@ -60,9 +62,9 @@ public class BrokerIntegrationTest {
         biDataImpl.registerOperationalReader(treeRoot, dataStore);
         biDataImpl.registerCommitHandler(treeRoot, dataStore);
         
-        mappingServiceImpl = new MappingServiceImpl();
+        mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl();
         mappingService = mappingServiceImpl;
-        
+        mappingServiceImpl.start();
         
         connectorServiceImpl = new BindingIndependentDataServiceConnector();
         connectorServiceImpl.setBaDataService(baDataService);
@@ -73,20 +75,21 @@ public class BrokerIntegrationTest {
         String[] yangFiles = new String[] { "yang-ext.yang", "ietf-inet-types.yang", "ietf-yang-types.yang",
         "node-inventory.yang" };
         
-        mappingService.onGlobalContextUpdated(MappingServiceTest.getContext(yangFiles));
+        mappingServiceImpl.onGlobalContextUpdated(MappingServiceTest.getContext(yangFiles));
+        
     }
     
     @Test
     public void simpleModifyOperation() throws Exception {
         
-        DataModificationTransaction transaction = baDataService.beginTransaction();
-        assertNotNull(transaction);
         
         NodeRef node1 = createNodeRef("0");
         DataObject  node = baDataService.readConfigurationData(node1.getValue());
         assertNull(node);
         Node nodeData1 = createNode("0");
         
+        
+        DataModificationTransaction transaction = baDataService.beginTransaction();
         transaction.putConfigurationData(node1.getValue(), nodeData1);
         Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
         assertNotNull(commitResult);
@@ -102,18 +105,50 @@ public class BrokerIntegrationTest {
         assertEquals(nodeData1.getKey(), readedData.getKey());
         
         
-        DataModificationTransaction transaction2 = baDataService.beginTransaction();
-        assertNotNull(transaction);
+        NodeRef nodeFoo = createNodeRef("foo");
+        NodeRef nodeBar = createNodeRef("bar");
+        Node nodeFooData = createNode("foo");
+        Node nodeBarData = createNode("bar");
         
-        transaction2.removeConfigurationData(node1.getValue());
         
-        Future<RpcResult<TransactionStatus>> commitResult2 = transaction2.commit();
-        assertNotNull(commitResult2);
-        
-        RpcResult<TransactionStatus> result2 = commitResult2.get();
+        DataModificationTransaction insertMoreTr = baDataService.beginTransaction();
+        insertMoreTr.putConfigurationData(nodeFoo.getValue(), nodeFooData);
+        insertMoreTr.putConfigurationData(nodeBar.getValue(), nodeBarData);
+        RpcResult<TransactionStatus> result2 = insertMoreTr.commit().get();
         
         assertNotNull(result2);
         assertNotNull(result2.getResult());
+        assertEquals(TransactionStatus.COMMITED, result.getResult());
+        
+        Nodes allNodes = (Nodes) baDataService.readConfigurationData(InstanceIdentifier.builder().node(Nodes.class).toInstance());
+        assertNotNull(allNodes);
+        assertNotNull(allNodes.getNode());
+        assertEquals(3, allNodes.getNode().size());
+        
+        
+        /**
+         * We create transaction no 2
+         * 
+         */
+        DataModificationTransaction removalTransaction = baDataService.beginTransaction();
+        assertNotNull(transaction);
+        
+        /**
+         * We remove node 1
+         * 
+         */
+        removalTransaction.removeConfigurationData(node1.getValue());
+        
+        /**
+         * We commit transaction
+         */
+        Future<RpcResult<TransactionStatus>> commitResult2 = removalTransaction.commit();
+        assertNotNull(commitResult2);
+        
+        RpcResult<TransactionStatus> result3 = commitResult2.get();
+        
+        assertNotNull(result3);
+        assertNotNull(result3.getResult());
         assertEquals(TransactionStatus.COMMITED, result2.getResult());
     
         DataObject readedData2 = baDataService.readConfigurationData(node1.getValue());
