@@ -30,7 +30,7 @@ module opendaylight-action-types {
     }  
     
     grouping action-list {
-        list actions {
+        list action {
             key "order";
             leaf order {
                 type int32;
