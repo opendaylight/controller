@@ -24,6 +24,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), //
+                mavenBundle(CONTROLLER,  "clustered-datastore-implementation").versionAsInProject(), //
                 
                 mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //

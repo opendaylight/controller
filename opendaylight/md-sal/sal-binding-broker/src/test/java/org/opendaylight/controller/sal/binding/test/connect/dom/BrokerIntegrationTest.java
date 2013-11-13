@@ -75,7 +75,7 @@ public class BrokerIntegrationTest {
         
         mappingService.onGlobalContextUpdated(MappingServiceTest.getContext(yangFiles));
     }
-    
+
     @Test
     public void simpleModifyOperation() throws Exception {
         

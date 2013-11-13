@@ -12,7 +12,8 @@ package org.opendaylight.controller.datastore;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public interface ClusteredDataStore extends DataReader<InstanceIdentifier<? extends Object>, Object>, DataCommitHandler<InstanceIdentifier<? extends Object>,Object> {
+public interface ClusteredDataStore extends DataReader<InstanceIdentifier, CompositeNode>, DataCommitHandler<InstanceIdentifier ,CompositeNode> {
 }
