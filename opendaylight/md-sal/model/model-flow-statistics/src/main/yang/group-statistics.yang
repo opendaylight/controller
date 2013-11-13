@@ -10,6 +10,45 @@ module opendaylight-group-statistics {
     revision "2013-11-11" {
         description "Initial revision of group statistics service";
     }
+    
+    typedef group-stats-ref {
+        type instance-identifier;
+    }
+    
+    grouping group-stats-response {
+        uses "inv:node-context-ref";
+
+        leaf group-stats-id {
+            type group-stats-ref;
+        }
+        uses group-types:group-statistics;
+    }
+
+    typedef group-features-ref {
+        type instance-identifier;
+    }
+    
+    grouping group-features-response {
+        uses "inv:node-context-ref";
+
+        leaf group-features-id {
+            type group-features-ref;
+        }
+        uses group-types:group-features;
+    }
+
+    typedef group-desc-ref {
+        type instance-identifier;
+    }
+    
+    grouping group-desc-response {
+        uses "inv:node-context-ref";
+
+        leaf group-desc-id {
+            type group-desc-ref;
+        }
+        uses group-types:group-desc-stats;
+    }
 
 	// RPC calls
 	rpc get-all-group-statistics {
@@ -18,7 +57,7 @@ module opendaylight-group-statistics {
         }
         output {
             list group-statistics {
-                uses group-types:group-statistics;
+                uses group-stats-response;
             }
             uses tr:transaction-aware;
         }
@@ -33,7 +72,7 @@ module opendaylight-group-statistics {
             }
         }
         output {
-            uses group-types:group-statistics;
+            uses group-stats-response;
             uses tr:transaction-aware;
         }
 	
@@ -47,7 +86,7 @@ module opendaylight-group-statistics {
             }
         }
         output {
-        	uses group-types:group-desc-stats;
+            uses group-desc-response;
             uses tr:transaction-aware;
         }
 	}
@@ -60,7 +99,7 @@ module opendaylight-group-statistics {
             }
         }
         output {
-        	uses group-types:group-features;
+            uses group-features-response;
             uses tr:transaction-aware;
         }
 	}
@@ -69,17 +108,17 @@ module opendaylight-group-statistics {
 	//Notification calls
 	
 	notification group-statistics-updated {
-		uses group-types:group-statistics;
+		uses group-stats-response;
         uses tr:transaction-aware;
 	}
 	
 	notification group-desc-stats-updated {
-		uses group-types:group-desc-stats;
+		uses group-desc-response;
         uses tr:transaction-aware;
 	}
 
-	notification group-features {
-		uses group-types:group-features;
+	notification group-features-updated {
+		uses group-features-response;
         uses tr:transaction-aware;
 	}
 }
