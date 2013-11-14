@@ -26,6 +26,7 @@ import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefi
 import org.opendaylight.yangtools.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.stream.JsonWriter;
 
 class JsonMapper {
@@ -34,12 +35,16 @@ class JsonMapper {
     private final Set<ListSchemaNode> foundLists = new HashSet<>();
     
     public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
+        Preconditions.checkNotNull(writer);
+        Preconditions.checkNotNull(data);
+        Preconditions.checkNotNull(schema);
+
         writer.beginObject();
         
         if (schema instanceof ContainerSchemaNode) {
-            writeContainer(writer, (CompositeNode) data, (ContainerSchemaNode) schema);
+            writeContainer(writer, data, (ContainerSchemaNode) schema);
         } else if (schema instanceof ListSchemaNode) {
-            writeList(writer, (CompositeNode) data, (ListSchemaNode) schema);
+            writeList(writer, data, (ListSchemaNode) schema);
         } else {
             throw new UnsupportedDataTypeException(
                     "Schema can be ContainerSchemaNode or ListSchemaNode. Other types are not supported yet.");
@@ -56,25 +61,33 @@ class JsonMapper {
         checkNotNull(parentSchema);
         
         for (Node<?> child : parent.getChildren()) {
-            DataSchemaNode childSchema = findSchemaForNode(child, parentSchema.getChildNodes());
+            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
             if (childSchema == null) {
                 throw new UnsupportedDataTypeException("Probably the data node \"" + child.getNodeType().getLocalName()
                         + "\" is not conform to schema");
             }
             
             if (childSchema instanceof ContainerSchemaNode) {
+                Preconditions.checkState(child instanceof CompositeNode,
+                        "Data representation of Container should be CompositeNode - " + child.getNodeType());
                 writeContainer(writer, (CompositeNode) child, (ContainerSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
                 if (!foundLists.contains(childSchema)) {
+                    Preconditions.checkState(child instanceof CompositeNode,
+                            "Data representation of List should be CompositeNode - " + child.getNodeType());
                     foundLists.add((ListSchemaNode) childSchema);
                     writeList(writer, (CompositeNode) child, (ListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafListSchemaNode) {
                 if (!foundLeafLists.contains(childSchema)) {
+                    Preconditions.checkState(child instanceof SimpleNode<?>,
+                            "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
                     foundLeafLists.add((LeafListSchemaNode) childSchema);
                     writeLeafList(writer, (SimpleNode<?>) child, (LeafListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafSchemaNode) {
+                Preconditions.checkState(child instanceof SimpleNode<?>,
+                        "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
                 writeLeaf(writer, (SimpleNode<?>) child, (LeafSchemaNode) childSchema);
             } else {
                 throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode, ListSchemaNode, "
@@ -83,7 +96,7 @@ class JsonMapper {
         }
         
         for (Node<?> child : parent.getChildren()) {
-            DataSchemaNode childSchema = findSchemaForNode(child, parentSchema.getChildNodes());
+            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
             if (childSchema instanceof LeafListSchemaNode) {
                 foundLeafLists.remove((LeafListSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
@@ -92,7 +105,7 @@ class JsonMapper {
         }
     }
     
-    private DataSchemaNode findSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
+    private DataSchemaNode findFirstSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
         for (DataSchemaNode dsn : dataSchemaNode) {
             if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
                 return dsn;
@@ -169,7 +182,7 @@ class JsonMapper {
             writer.nullValue();
             writer.endArray();
         } else {
-            writer.value(value);
+            writer.value(value != null ? value : "");
         }
     }
     
