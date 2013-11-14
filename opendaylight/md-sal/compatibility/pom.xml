@@ -8,7 +8,7 @@
     </parent>
     <artifactId>compatibility-parent</artifactId>
     <packaging>pom</packaging>
-    <name>MD-SAL to AD-SAL Adaptation</name>
+    <name>MD-SAL to AD-SAL Adaptation Parent</name>
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>

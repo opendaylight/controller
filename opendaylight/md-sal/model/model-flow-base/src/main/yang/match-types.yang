@@ -19,6 +19,16 @@ module opendaylight-match-types {
             type binary;
         }
     }
+    
+    grouping "of-metadata" {
+        leaf metadata {
+            type uint64;
+        }
+        
+        leaf metadata-mask {
+            type binary;
+        }
+    }
 
      /** Match Groupings **/
     grouping "ethernet-match-fields" {
@@ -40,6 +50,7 @@ module opendaylight-match-types {
                 mandatory true;
                 type l2t:ether-type; // Needs to define that as general model
             }
+
             leaf mask {
                 type binary;
             }
@@ -85,25 +96,27 @@ module opendaylight-match-types {
             description "IP Proto (IPv4 or IPv6 Protocol Number).";
             type inet:ip-version; 
         }
-    }
-
+    } 
+    
     grouping "ipv4-match-fields" {
         leaf ipv4-source {
             description "IPv4 source address.";
             type inet:ipv4-prefix;
         }
+        
         leaf ipv4-destination {
             description "IPv4 destination address.";
             type inet:ipv4-prefix;
         }
+        
     }
-
+    
     grouping "ipv6-match-fields" {
         leaf ipv6-source {
             description "IPv6 source address.";
             type inet:ipv6-prefix;
         }
-        
+    
         leaf ipv6-destination {
             description "IPv6 destination address.";
             type inet:ipv6-prefix;
@@ -111,11 +124,17 @@ module opendaylight-match-types {
         
         leaf ipv6-nd-target {
             description "IPv6 target address for neighbour discovery message";
-            type inet:ipv6-prefix;
+            type inet:ipv6-address;
         }
         
-        leaf ipv6-flabel {
-            type inet:ipv6-flow-label;
+        container "ipv6-label" {
+            leaf ipv6-flabel {
+                type inet:ipv6-flow-label;
+            }
+            
+            leaf flabel-mask {
+                type binary;
+            }
         }
         
         leaf ipv6-nd-sll {
@@ -161,11 +180,16 @@ module opendaylight-match-types {
             type uint8;
         }
         
-        leaf pbb-isid {
-            description "I-SID in the first PBB service instance tag";
-            type uint32;
-        }   
-        
+        container "pbb" {
+            leaf pbb-isid {
+                description "I-SID in the first PBB service instance tag";
+                type uint32;
+            }  
+
+            leaf pbb-mask {
+                type binary;
+            }
+        }
     }
     
     grouping "tcp-match-fields" {
@@ -247,13 +271,19 @@ module opendaylight-match-types {
             type uint32;
         }
         
-        leaf metadata {
-            type uint64;
+        container "metadata" {
+            uses of-metadata;
         }
         
-        leaf tunnel-id {
-            description "Metadata associated in the logical port";
-            type uint64;
+        container "tunnel" {
+            leaf tunnel-id {
+                description "Metadata associated in the logical port";
+                type uint64;
+            }
+            
+            leaf tunnel-mask {
+                type binary;
+            }
         }
         
         container "ethernet-match" {
