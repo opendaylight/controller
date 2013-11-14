@@ -24,7 +24,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.Meters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.MeterKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInputBuilder;
@@ -34,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.Met
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.UpdatedMeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.BandType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.Drop;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.DscpRemark;
@@ -214,7 +214,7 @@ public class MeterConsumerImpl {
                 meterBuilder.setMeterBandHeaders(meterAddDataObject.getMeterBandHeaders());
                 meterBuilder.setMeterId(meterAddDataObject.getMeterId());
                 meterBuilder.setNode(meterAddDataObject.getNode());
-                originalSwMeterView.put(meterKey, meterAddDataObject);
+                installedSwMeterView.put(meterKey, meterAddDataObject);
                 meterService.addMeter(meterBuilder.build());
             }
             
@@ -235,17 +235,31 @@ public class MeterConsumerImpl {
      */
     private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
         MeterKey meterKey = meterUpdateDataObject.getKey();
+        UpdatedMeterBuilder updateMeterBuilder = null;
+        
         
         if (null != meterKey && 
-                validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
-            if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();  
-                
+                validateMeter(meterUpdateDataObject, FRMUtil.operation.UPDATE).isSuccess()) {
+            
+            if (originalSwMeterView.containsKey(meterKey)) {
+                originalSwMeterView.remove(meterKey);
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
-                meterService.updateMeter(updateMeterBuilder.build());
             }
             
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);            
+            if (meterUpdateDataObject.isInstall()) {
+                UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder(); 
+                updateMeterBuilder = new UpdatedMeterBuilder();
+                updateMeterBuilder.fieldsFrom(meterUpdateDataObject);
+                updateMeterInputBuilder.setUpdatedMeter(updateMeterBuilder.build());
+                
+                if (installedSwMeterView.containsKey(meterKey)) {
+                    installedSwMeterView.remove(meterKey);
+                    installedSwMeterView.put(meterKey, meterUpdateDataObject);
+                }
+                
+                meterService.updateMeter(updateMeterInputBuilder.build());
+            }
+                        
         }
         else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
@@ -268,7 +282,7 @@ public class MeterConsumerImpl {
             if (meterUpdateDataObject.isInstall()) {
                 UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();                
                 
-                originalSwMeterView.put(meterKey, meterUpdateDataObject);
+                installedSwMeterView.put(meterKey, meterUpdateDataObject);
                 meterService.updateMeter(updateMeterBuilder.build());
             }
             
@@ -380,7 +394,7 @@ public class MeterConsumerImpl {
                 return Rpcs.getRpcResult(false, null, null);
             }
         }
-        for(@SuppressWarnings("unused") Entry<InstanceIdentifier<?>, Meter> entry :transaction.updates.entrySet()) {
+        for(Entry<InstanceIdentifier<?>, Meter> entry :transaction.updates.entrySet()) {
            
             if (!updateMeter(entry.getKey(),entry.getValue()).isSuccess()) {
                 return Rpcs.getRpcResult(false, null, null);

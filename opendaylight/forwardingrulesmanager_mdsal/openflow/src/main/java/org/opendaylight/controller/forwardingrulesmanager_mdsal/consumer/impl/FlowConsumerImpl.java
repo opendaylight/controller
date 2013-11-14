@@ -22,12 +22,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -55,6 +57,7 @@ public class FlowConsumerImpl {
     public FlowConsumerImpl() {    	
 		InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Flows.class).toInstance();
     	flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
+		FlowRemoved a = null;
 		
 		if (null == flowService) {
 			logger.error("Consumer SAL Service is down or NULL. FRM may not function as intended");
@@ -106,7 +109,7 @@ public class FlowConsumerImpl {
 				System.out.println("ConsumerFlowService is NULL");
 			}
 			@SuppressWarnings("unused")
-			Future<RpcResult<java.lang.Void>> result1 = flowService.addFlow(firstMsg);
+			Future<RpcResult<AddFlowOutput>> result1 = flowService.addFlow(firstMsg);
 			
 			
 		} catch (Exception e) {
@@ -129,7 +132,7 @@ public class FlowConsumerImpl {
         input.setMatch((dataObject).getMatch());
         input.setCookie((dataObject).getCookie());
         input.setInstructions((dataObject).getInstructions());
-        dataObject.getMatch().getLayer3Match()
+        dataObject.getMatch().getLayer3Match();
         for (int i=0;i<inst.size();i++) {
             System.out.println("i = "+ i + inst.get(i).getInstruction().toString());
             System.out.println("i = "+ i + inst.get(i).toString());
@@ -268,6 +271,12 @@ public class FlowConsumerImpl {
 	    public void onFlowUpdated(FlowUpdated notification) {
 	        updatedFlows.add(notification);
 	    }
+
+		@Override
+        public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
+	        // TODO Auto-generated method stub
+	        
+        }
 	
 	}
 	
@@ -298,8 +307,9 @@ public class FlowConsumerImpl {
 					//input.setCookie(((NodeFlow) dataObject).getCookie());
 					//input.setAction(((NodeFlow) dataObject).getAction());
 	
-			    	@SuppressWarnings("unused")
-					Future<RpcResult<java.lang.Void>> result = flowService.addFlow(input.build());
+			    	
+					@SuppressWarnings("unused")
+                    Future<RpcResult<AddFlowOutput>> result = flowService.addFlow(input.build());
 	            }
 			}	
 		} 
