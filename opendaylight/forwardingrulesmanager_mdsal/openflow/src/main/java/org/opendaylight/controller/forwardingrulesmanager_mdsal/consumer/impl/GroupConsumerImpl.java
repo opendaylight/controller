@@ -25,7 +25,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.Groups;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.groups.GroupKey;
@@ -49,58 +48,59 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unused")
 public class GroupConsumerImpl {
-    
+
     protected static final Logger logger = LoggerFactory.getLogger(GroupConsumerImpl.class);
     private GroupEventListener groupEventListener = new GroupEventListener();
     private Registration<NotificationListener> groupListener;
-    private SalGroupService groupService;    
+    private SalGroupService groupService;
     private GroupDataCommitHandler commitHandler;
-    
+
     private ConcurrentMap<GroupKey, Group> originalSwGroupView;
     private ConcurrentMap<GroupKey, Group> installedSwGroupView;
-    
+
     private ConcurrentMap<Node, List<Group>> nodeGroups;
     private ConcurrentMap<GroupKey, Group> inactiveGroups;
-    
-    private IClusterContainerServices clusterGroupContainerService = null;   
+
+    private IClusterContainerServices clusterGroupContainerService = null;
     private IContainer container;
-    
+
     public GroupConsumerImpl() {
-	    InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Groups.class).node(Group.class).toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Groups.class)
+                .node(Group.class).toInstance();
         groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);
-        
-        clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();        
+
+        clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();
         container = FRMConsumerImpl.getContainer();
-        
+
         if (!(cacheStartup())) {
             logger.error("Unanle to allocate/retrieve group cache");
             System.out.println("Unable to allocate/retrieve group cache");
         }
-        
+
         if (null == groupService) {
             logger.error("Consumer SAL Group Service is down or NULL. FRM may not function as intended");
             System.out.println("Consumer SAL Group Service is down or NULL.");
             return;
-        }     
-        
+        }
+
         // For switch events
         groupListener = FRMConsumerImpl.getNotificationService().registerNotificationListener(groupEventListener);
-        
+
         if (null == groupListener) {
             logger.error("Listener to listen on group data modifcation events");
             System.out.println("Listener to listen on group data modifcation events.");
             return;
-        }       
-        
+        }
+
         commitHandler = new GroupDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
-	}
-	
+    }
+
     private boolean allocateGroupCaches() {
         if (this.clusterGroupContainerService == null) {
             logger.warn("Group: Un-initialized clusterGroupContainerService, can't create cache");
             return false;
-        }       
+        }
 
         try {
             clusterGroupContainerService.createCache("frm.originalSwGroupView",
@@ -114,32 +114,36 @@ public class GroupConsumerImpl {
 
             clusterGroupContainerService.createCache("frm.nodeGroups",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-            
-//TODO for cluster mode
-           /* clusterGroupContainerService.createCache(WORK_STATUS_CACHE,
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL, IClusterServices.cacheMode.ASYNC));
 
-            clusterGroupContainerService.createCache(WORK_ORDER_CACHE,
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL, IClusterServices.cacheMode.ASYNC));*/
-            
-        } catch (CacheConfigException cce) {            
+            // TODO for cluster mode
+            /*
+             * clusterGroupContainerService.createCache(WORK_STATUS_CACHE,
+             * EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
+             * IClusterServices.cacheMode.ASYNC));
+             *
+             * clusterGroupContainerService.createCache(WORK_ORDER_CACHE,
+             * EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
+             * IClusterServices.cacheMode.ASYNC));
+             */
+
+        } catch (CacheConfigException cce) {
             logger.error("Group CacheConfigException");
             return false;
-            
+
         } catch (CacheExistException cce) {
-            logger.error(" Group CacheExistException");           
+            logger.error(" Group CacheExistException");
         }
-        
+
         return true;
     }
-    
+
     private void nonClusterGroupObjectCreate() {
         originalSwGroupView = new ConcurrentHashMap<GroupKey, Group>();
         installedSwGroupView = new ConcurrentHashMap<GroupKey, Group>();
-        nodeGroups = new ConcurrentHashMap<Node, List<Group>>();        
+        nodeGroups = new ConcurrentHashMap<Node, List<Group>>();
         inactiveGroups = new ConcurrentHashMap<GroupKey, Group>();
     }
-    
+
     @SuppressWarnings({ "unchecked" })
     private boolean retrieveGroupCaches() {
         ConcurrentMap<?, ?> map;
@@ -148,7 +152,7 @@ public class GroupConsumerImpl {
             logger.warn("Group: un-initialized clusterGroupContainerService, can't retrieve cache");
             nonClusterGroupObjectCreate();
             return false;
-        }       
+        }
 
         map = clusterGroupContainerService.getCache("frm.originalSwGroupView");
         if (map != null) {
@@ -181,84 +185,82 @@ public class GroupConsumerImpl {
             logger.error("Retrieval of cache(nodeGroup) failed");
             return false;
         }
-        
+
         return true;
     }
-	
+
     private boolean cacheStartup() {
         if (allocateGroupCaches()) {
             if (retrieveGroupCaches()) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     public Status validateGroup(Group group, FRMUtil.operation operation) {
         String containerName;
         String groupName;
         Iterator<Bucket> bucketIterator;
         boolean returnResult;
         Buckets groupBuckets;
-        
+
         if (null != group) {
             containerName = group.getContainerName();
-            
+
             if (null == containerName) {
                 containerName = GlobalConstants.DEFAULT.toString();
-            }
-            else if (!FRMUtil.isNameValid(containerName)) {
+            } else if (!FRMUtil.isNameValid(containerName)) {
                 logger.error("Container Name is invalid %s" + containerName);
                 return new Status(StatusCode.BADREQUEST, "Container Name is invalid");
             }
-            
+
             groupName = group.getGroupName();
             if (!FRMUtil.isNameValid(groupName)) {
                 logger.error("Group Name is invalid %s" + groupName);
                 return new Status(StatusCode.BADREQUEST, "Group Name is invalid");
             }
-            
+
             returnResult = doesGroupEntryExists(group.getKey(), groupName, containerName);
-            
+
             if (FRMUtil.operation.ADD == operation && returnResult) {
                 logger.error("Record with same Group Name exists");
                 return new Status(StatusCode.BADREQUEST, "Group record exists");
-            }
-            else if (!returnResult) {
+            } else if (!returnResult) {
                 logger.error("Group record does not exist");
                 return new Status(StatusCode.BADREQUEST, "Group record does not exist");
             }
-            
-            if (!(group.getGroupType().getIntValue() >= GroupType.GroupAll.getIntValue() && 
-                    group.getGroupType().getIntValue() <= GroupType.GroupFf.getIntValue())) {
+
+            if (!(group.getGroupType().getIntValue() >= GroupType.GroupAll.getIntValue() && group.getGroupType()
+                    .getIntValue() <= GroupType.GroupFf.getIntValue())) {
                 logger.error("Invalid Group type %d" + group.getGroupType().getIntValue());
-                return new Status(StatusCode.BADREQUEST, "Invalid Group type");                
+                return new Status(StatusCode.BADREQUEST, "Invalid Group type");
             }
-            
+
             groupBuckets = group.getBuckets();
-                    
+
             if (null != groupBuckets && null != groupBuckets.getBucket()) {
                 bucketIterator = groupBuckets.getBucket().iterator();
-                
+
                 while (bucketIterator.hasNext()) {
-                    if(!(FRMUtil.areActionsValid(bucketIterator.next().getActions()))) {
+                    if (!(FRMUtil.validateActions(bucketIterator.next().getAction()))) {
                         logger.error("Error in action bucket");
                         return new Status(StatusCode.BADREQUEST, "Invalid Group bucket contents");
-                    }                                
+                    }
                 }
-            }                
+            }
         }
-        
+
         return new Status(StatusCode.SUCCESS);
-        
+
     }
-    
+
     private boolean doesGroupEntryExists(GroupKey key, String groupName, String containerName) {
-        if (! originalSwGroupView.containsKey(key)) {
+        if (!originalSwGroupView.containsKey(key)) {
             return false;
         }
-        
+
         for (ConcurrentMap.Entry<GroupKey, Group> entry : originalSwGroupView.entrySet()) {
             if (entry.getValue().getGroupName().equals(groupName)) {
                 if (entry.getValue().getContainerName().equals(containerName)) {
@@ -269,40 +271,40 @@ public class GroupConsumerImpl {
         return false;
     }
 
-    
     /**
-     * Update Group entries to the southbound plugin/inventory and our internal database
+     * Update Group entries to the southbound plugin/inventory and our internal
+     * database
      *
      * @param path
      * @param dataObject
      */
     private Status updateGroup(InstanceIdentifier<?> path, Group groupUpdateDataObject) {
-        GroupKey groupKey = groupUpdateDataObject.getKey();        
+        GroupKey groupKey = groupUpdateDataObject.getKey();
         Status groupOperationStatus = validateGroup(groupUpdateDataObject, FRMUtil.operation.UPDATE);
-        
+
         if (!groupOperationStatus.isSuccess()) {
             logger.error("Group data object validation failed %s" + groupUpdateDataObject.getGroupName());
             return groupOperationStatus;
         }
-            
+
         originalSwGroupView.remove(groupKey);
         originalSwGroupView.put(groupKey, groupUpdateDataObject);
-        
+
         if (groupUpdateDataObject.isInstall()) {
             UpdateGroupInputBuilder groupData = new UpdateGroupInputBuilder();
-            //TODO how to get original group and modified group. 
-            
+            // TODO how to get original group and modified group.
+
             if (installedSwGroupView.containsKey(groupKey)) {
                 installedSwGroupView.remove(groupKey);
             }
-            
+
             installedSwGroupView.put(groupKey, groupUpdateDataObject);
             groupService.updateGroup(groupData.build());
         }
-        
+
         return groupOperationStatus;
     }
-    
+
     /**
      * Adds Group to the southbound plugin and our internal database
      *
@@ -312,60 +314,61 @@ public class GroupConsumerImpl {
     private Status addGroup(InstanceIdentifier<?> path, Group groupAddDataObject) {
         GroupKey groupKey = groupAddDataObject.getKey();
         Status groupOperationStatus = validateGroup(groupAddDataObject, FRMUtil.operation.ADD);
-        
+
         if (!groupOperationStatus.isSuccess()) {
             logger.error("Group data object validation failed %s" + groupAddDataObject.getGroupName());
             return groupOperationStatus;
         }
-        
+
         originalSwGroupView.put(groupKey, groupAddDataObject);
-        
+
         if (groupAddDataObject.isInstall()) {
             AddGroupInputBuilder groupData = new AddGroupInputBuilder();
             groupData.setBuckets(groupAddDataObject.getBuckets());
             groupData.setContainerName(groupAddDataObject.getContainerName());
             groupData.setGroupId(groupAddDataObject.getGroupId());
             groupData.setGroupType(groupAddDataObject.getGroupType());
-            groupData.setNode(groupAddDataObject.getNode());  
+            groupData.setNode(groupAddDataObject.getNode());
             installedSwGroupView.put(groupKey, groupAddDataObject);
             groupService.addGroup(groupData.build());
         }
-        
+
         return groupOperationStatus;
     }
-    
-	private RpcResult<Void> commitToPlugin(internalTransaction transaction) {
-        for(Entry<InstanceIdentifier<?>, Group> entry :transaction.additions.entrySet()) {
-            
-            if (!addGroup(entry.getKey(),entry.getValue()).isSuccess()) {
+
+    private RpcResult<Void> commitToPlugin(internalTransaction transaction) {
+        for (Entry<InstanceIdentifier<?>, Group> entry : transaction.additions.entrySet()) {
+
+            if (!addGroup(entry.getKey(), entry.getValue()).isSuccess()) {
                 return Rpcs.getRpcResult(false, null, null);
             }
         }
-        for(@SuppressWarnings("unused") Entry<InstanceIdentifier<?>, Group> entry :transaction.additions.entrySet()) {
-           
-            if (!updateGroup(entry.getKey(),entry.getValue()).isSuccess()) {
+        for (@SuppressWarnings("unused")
+        Entry<InstanceIdentifier<?>, Group> entry : transaction.additions.entrySet()) {
+
+            if (!updateGroup(entry.getKey(), entry.getValue()).isSuccess()) {
                 return Rpcs.getRpcResult(false, null, null);
             }
         }
-        
-        for(InstanceIdentifier<?> removal : transaction.removals) {
-           // removeFlow(removal);
+
+        for (InstanceIdentifier<?> removal : transaction.removals) {
+            // removeFlow(removal);
         }
-        
+
         return Rpcs.getRpcResult(true, null, null);
     }
-    
+
     private final class GroupDataCommitHandler implements DataCommitHandler<InstanceIdentifier<?>, DataObject> {
 
-         @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         @Override
-         public DataCommitTransaction requestCommit(DataModification<InstanceIdentifier<?>, DataObject> modification) {
-             // We should verify transaction
-             System.out.println("Coming in GroupDatacommitHandler");
-             internalTransaction transaction = new internalTransaction(modification);
-             transaction.prepareUpdate();
-             return transaction;
-         }
+        public DataCommitTransaction<InstanceIdentifier<?>, DataObject> requestCommit(DataModification<InstanceIdentifier<?>, DataObject> modification) {
+            // We should verify transaction
+            System.out.println("Coming in GroupDatacommitHandler");
+            internalTransaction transaction = new internalTransaction(modification);
+            transaction.prepareUpdate();
+            return transaction;
+        }
     }
 
     private final class internalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
@@ -388,14 +391,14 @@ public class GroupConsumerImpl {
         /**
          * We create a plan which flows will be added, which will be updated and
          * which will be removed based on our internal state.
-         * 
+         *
          */
         void prepareUpdate() {
 
             Set<Entry<InstanceIdentifier<?>, DataObject>> puts = modification.getUpdatedConfigurationData().entrySet();
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
-                if (entry.getValue() instanceof Group) {                    
-                    Group group = (Group) entry.getValue();                    
+                if (entry.getValue() instanceof Group) {
+                    Group group = (Group) entry.getValue();
                     preparePutEntry(entry.getKey(), group);
                 }
 
@@ -405,72 +408,70 @@ public class GroupConsumerImpl {
         }
 
         private void preparePutEntry(InstanceIdentifier<?> key, Group group) {
-            
+
             Group original = originalSwGroupView.get(key);
             if (original != null) {
                 // It is update for us
-                
-                updates.put(key, group);               
+
+                updates.put(key, group);
             } else {
                 // It is addition for us
-                
+
                 additions.put(key, group);
             }
         }
 
         /**
          * We are OK to go with execution of plan
-         * 
+         *
          */
         @Override
         public RpcResult<Void> finish() throws IllegalStateException {
-            
+
             RpcResult<Void> rpcStatus = commitToPlugin(this);
             // We return true if internal transaction is successful.
-          //  return Rpcs.getRpcResult(true, null, Collections.emptySet());
+            // return Rpcs.getRpcResult(true, null, Collections.emptySet());
             return rpcStatus;
         }
 
         /**
-         * 
+         *
          * We should rollback our preparation
-         * 
+         *
          */
         @Override
         public RpcResult<Void> rollback() throws IllegalStateException {
             // NOOP - we did not modified any internal state during
             // requestCommit phase
-           // return Rpcs.getRpcResult(true, null, Collections.emptySet());
+            // return Rpcs.getRpcResult(true, null, Collections.emptySet());
             return Rpcs.getRpcResult(true, null, null);
-            
+
         }
-        
+
     }
-    
-	
-	final class GroupEventListener implements SalGroupListener {
-	    
+
+    final class GroupEventListener implements SalGroupListener {
+
         List<GroupAdded> addedGroups = new ArrayList<>();
         List<GroupRemoved> removedGroups = new ArrayList<>();
         List<GroupUpdated> updatedGroups = new ArrayList<>();
-       
 
         @Override
         public void onGroupAdded(GroupAdded notification) {
             System.out.println("added Group..........................");
-            addedGroups.add(notification);            
+            addedGroups.add(notification);
         }
 
         @Override
         public void onGroupRemoved(GroupRemoved notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void onGroupUpdated(GroupUpdated notification) {
             // TODO Auto-generated method stub
-            
-        }    
+
+        }
     }
 }

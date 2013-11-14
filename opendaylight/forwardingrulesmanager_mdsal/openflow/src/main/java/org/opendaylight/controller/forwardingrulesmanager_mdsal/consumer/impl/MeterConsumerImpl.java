@@ -24,7 +24,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.Meters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.MeterKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInputBuilder;
@@ -51,56 +50,55 @@ public class MeterConsumerImpl {
     protected static final Logger logger = LoggerFactory.getLogger(MeterConsumerImpl.class);
     private MeterEventListener meterEventListener = new MeterEventListener();
     private Registration<NotificationListener> meterListener;
-    private SalMeterService meterService;    
+    private SalMeterService meterService;
     private MeterDataCommitHandler commitHandler;
-    
+
     private ConcurrentMap<MeterKey, Meter> originalSwMeterView;
     private ConcurrentMap<MeterKey, Meter> installedSwMeterView;
-    
+
     private ConcurrentMap<Node, List<Meter>> nodeMeters;
     private ConcurrentMap<MeterKey, Meter> inactiveMeters;
-    
-    private IClusterContainerServices clusterMeterContainerService = null; 
+
+    private IClusterContainerServices clusterMeterContainerService = null;
     private IContainer container;
-    
+
     public MeterConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class).node(Meter.class).toInstance();
-        meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);        
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class)
+                .node(Meter.class).toInstance();
+        meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);
         clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
-        
+
         container = FRMConsumerImpl.getContainer();
-        
+
         if (!(cacheStartup())) {
             logger.error("Unable to allocate/retrieve meter cache");
             System.out.println("Unable to allocate/retrieve meter cache");
         }
-        
+
         if (null == meterService) {
             logger.error("Consumer SAL Meter Service is down or NULL. FRM may not function as intended");
             System.out.println("Consumer SAL Meter Service is down or NULL.");
             return;
-        } 
-        
+        }
+
         // For switch/plugin events
         meterListener = FRMConsumerImpl.getNotificationService().registerNotificationListener(meterEventListener);
-        
+
         if (null == meterListener) {
             logger.error("Listener to listen on meter data modifcation events");
             System.out.println("Listener to listen on meter data modifcation events.");
             return;
-        }       
-        
+        }
+
         commitHandler = new MeterDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
     }
-    
-    
-    
+
     private boolean allocateMeterCaches() {
         if (this.clusterMeterContainerService == null) {
             logger.warn("Meter: Un-initialized clusterMeterContainerService, can't create cache");
             return false;
-        }       
+        }
 
         try {
             clusterMeterContainerService.createCache("frm.originalSwMeterView",
@@ -114,32 +112,36 @@ public class MeterConsumerImpl {
 
             clusterMeterContainerService.createCache("frm.nodeMeters",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-            
-//TODO for cluster mode
-           /* clusterMeterContainerService.createCache(WORK_STATUS_CACHE,
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL, IClusterServices.cacheMode.ASYNC));
 
-            clusterMeterContainerService.createCache(WORK_ORDER_CACHE,
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL, IClusterServices.cacheMode.ASYNC));*/
-            
-        } catch (CacheConfigException cce) {            
+            // TODO for cluster mode
+            /*
+             * clusterMeterContainerService.createCache(WORK_STATUS_CACHE,
+             * EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
+             * IClusterServices.cacheMode.ASYNC));
+             *
+             * clusterMeterContainerService.createCache(WORK_ORDER_CACHE,
+             * EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
+             * IClusterServices.cacheMode.ASYNC));
+             */
+
+        } catch (CacheConfigException cce) {
             logger.error("Meter CacheConfigException");
             return false;
-            
+
         } catch (CacheExistException cce) {
-            logger.error(" Meter CacheExistException");           
+            logger.error(" Meter CacheExistException");
         }
-        
+
         return true;
     }
-    
+
     private void nonClusterMeterObjectCreate() {
         originalSwMeterView = new ConcurrentHashMap<MeterKey, Meter>();
         installedSwMeterView = new ConcurrentHashMap<MeterKey, Meter>();
-        nodeMeters = new ConcurrentHashMap<Node, List<Meter>>();        
+        nodeMeters = new ConcurrentHashMap<Node, List<Meter>>();
         inactiveMeters = new ConcurrentHashMap<MeterKey, Meter>();
     }
-    
+
     @SuppressWarnings({ "unchecked" })
     private boolean retrieveMeterCaches() {
         ConcurrentMap<?, ?> map;
@@ -148,7 +150,7 @@ public class MeterConsumerImpl {
             logger.warn("Meter: un-initialized clusterMeterContainerService, can't retrieve cache");
             nonClusterMeterObjectCreate();
             return false;
-        }       
+        }
 
         map = clusterMeterContainerService.getCache("frm.originalSwMeterView");
         if (map != null) {
@@ -181,34 +183,33 @@ public class MeterConsumerImpl {
             logger.error("Retrieval of cache(nodeMeter) failed");
             return false;
         }
-        
+
         return true;
     }
-    
+
     private boolean cacheStartup() {
         if (allocateMeterCaches()) {
             if (retrieveMeterCaches()) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Adds Meter to the southbound plugin and our internal database
      *
      * @param path
      * @param dataObject
      */
-    private Status addMeter(InstanceIdentifier<?> path, Meter meterAddDataObject) {        
+    private Status addMeter(InstanceIdentifier<?> path, Meter meterAddDataObject) {
         MeterKey meterKey = meterAddDataObject.getKey();
-        
-        if (null != meterKey && 
-                validateMeter(meterAddDataObject, FRMUtil.operation.ADD).isSuccess()) {
+
+        if (null != meterKey && validateMeter(meterAddDataObject, FRMUtil.operation.ADD).isSuccess()) {
             if (meterAddDataObject.isInstall()) {
                 AddMeterInputBuilder meterBuilder = new AddMeterInputBuilder();
-                
+
                 meterBuilder.setContainerName(meterAddDataObject.getContainerName());
                 meterBuilder.setFlags(meterAddDataObject.getFlags());
                 meterBuilder.setMeterBandHeaders(meterAddDataObject.getMeterBandHeaders());
@@ -217,151 +218,144 @@ public class MeterConsumerImpl {
                 originalSwMeterView.put(meterKey, meterAddDataObject);
                 meterService.addMeter(meterBuilder.build());
             }
-            
-            originalSwMeterView.put(meterKey, meterAddDataObject);            
-        }
-        else {
+
+            originalSwMeterView.put(meterKey, meterAddDataObject);
+        } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
-      
+
         return new Status(StatusCode.SUCCESS);
     }
-    
+
     /*
      * Update Meter to the southbound plugin and our internal database
      *
      * @param path
+     *
      * @param dataObject
      */
-    private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
+    private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
         MeterKey meterKey = meterUpdateDataObject.getKey();
-        
-        if (null != meterKey && 
-                validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
+
+        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
             if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();  
-                
+                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();
+
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
                 meterService.updateMeter(updateMeterBuilder.build());
             }
-            
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);            
-        }
-        else {
+
+            originalSwMeterView.put(meterKey, meterUpdateDataObject);
+        } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
-      
+
         return new Status(StatusCode.SUCCESS);
     }
-    
+
     /*
      * Remove Meter to the southbound plugin and our internal database
      *
      * @param path
+     *
      * @param dataObject
      */
-    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
+    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
         MeterKey meterKey = meterUpdateDataObject.getKey();
-        
-        if (null != meterKey && 
-                validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
+
+        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
             if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();                
-                
+                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();
+
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
                 meterService.updateMeter(updateMeterBuilder.build());
             }
-            
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);            
-        }
-        else {
+
+            originalSwMeterView.put(meterKey, meterUpdateDataObject);
+        } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
-      
+
         return new Status(StatusCode.SUCCESS);
     }
-    
+
     public Status validateMeter(Meter meter, FRMUtil.operation operation) {
         String containerName;
         String meterName;
         Status returnStatus = null;
         boolean returnResult;
-        
+
         if (null != meter) {
             containerName = meter.getContainerName();
-            
+
             if (null == containerName) {
                 containerName = GlobalConstants.DEFAULT.toString();
-            }
-            else if (!FRMUtil.isNameValid(containerName)) {
+            } else if (!FRMUtil.isNameValid(containerName)) {
                 logger.error("Container Name is invalid %s" + containerName);
                 returnStatus = new Status(StatusCode.BADREQUEST, "Container Name is invalid");
                 return returnStatus;
             }
-            
+
             meterName = meter.getMeterName();
             if (!FRMUtil.isNameValid(meterName)) {
                 logger.error("Meter Name is invalid %s" + meterName);
                 returnStatus = new Status(StatusCode.BADREQUEST, "Meter Name is invalid");
                 return returnStatus;
             }
-            
+
             returnResult = doesMeterEntryExists(meter.getKey(), meterName, containerName);
-            
+
             if (FRMUtil.operation.ADD == operation && returnResult) {
                 logger.error("Record with same Meter Name exists");
                 returnStatus = new Status(StatusCode.BADREQUEST, "Meter record exists");
                 return returnStatus;
-            }
-            else if (!returnResult) {
+            } else if (!returnResult) {
                 logger.error("Group record does not exist");
                 returnStatus = new Status(StatusCode.BADREQUEST, "Meter record does not exist");
                 return returnStatus;
             }
-          
+
             for (int i = 0; i < meter.getMeterBandHeaders().getMeterBandHeader().size(); i++) {
                 if (!meter.getFlags().isMeterBurst()) {
                     if (0 < meter.getMeterBandHeaders().getMeterBandHeader().get(i).getBurstSize()) {
                         logger.error("Burst size should only be associated when Burst FLAG is set");
-                        returnStatus = new Status(StatusCode.BADREQUEST, "Burst size should only be associated when Burst FLAG is set");
+                        returnStatus = new Status(StatusCode.BADREQUEST,
+                                "Burst size should only be associated when Burst FLAG is set");
                         break;
                     }
                 }
             }
-            
+
             if (null != returnStatus && !returnStatus.isSuccess()) {
                 return returnStatus;
-            }
-            else {
+            } else {
                 BandType setBandType = null;
                 DscpRemark dscpRemark = null;
                 for (int i = 0; i < meter.getMeterBandHeaders().getMeterBandHeader().size(); i++) {
                     setBandType = meter.getMeterBandHeaders().getMeterBandHeader().get(i).getBandType();
-                    if ( setBandType instanceof DscpRemark) {   
-                        dscpRemark = (DscpRemark)setBandType;
+                    if (setBandType instanceof DscpRemark) {
+                        dscpRemark = (DscpRemark) setBandType;
                         if (0 > dscpRemark.getRate()) {
-                           
+
                         }
-                    }
-                    else if (setBandType instanceof Drop) {
+                    } else if (setBandType instanceof Drop) {
                         if (0 < dscpRemark.getPercLevel()) {
                             logger.error("Number of drop Precedence level");
-                        }                        
+                        }
+                    } else if (setBandType instanceof Experimenter) {
+
                     }
-                    else if (setBandType instanceof Experimenter) {
-                        
-                    }
-                }                
+                }
             }
         }
         return new Status(StatusCode.SUCCESS);
     }
-    
+
     private boolean doesMeterEntryExists(MeterKey key, String meterName, String containerName) {
-        if (! originalSwMeterView.containsKey(key)) {
+        if (!originalSwMeterView.containsKey(key)) {
             return false;
         }
-        
+
         for (Entry<MeterKey, Meter> entry : originalSwMeterView.entrySet()) {
             if (entry.getValue().getMeterName().equals(meterName)) {
                 if (entry.getValue().getContainerName().equals(containerName)) {
@@ -372,30 +366,31 @@ public class MeterConsumerImpl {
         return false;
     }
 
-    
     private RpcResult<Void> commitToPlugin(internalTransaction transaction) {
-        for(Entry<InstanceIdentifier<?>, Meter> entry :transaction.additions.entrySet()) {
-            
-            if (!addMeter(entry.getKey(),entry.getValue()).isSuccess()) {
+        for (Entry<InstanceIdentifier<?>, Meter> entry : transaction.additions.entrySet()) {
+
+            if (!addMeter(entry.getKey(), entry.getValue()).isSuccess()) {
                 return Rpcs.getRpcResult(false, null, null);
             }
         }
-        for(@SuppressWarnings("unused") Entry<InstanceIdentifier<?>, Meter> entry :transaction.updates.entrySet()) {
-           
-            if (!updateMeter(entry.getKey(),entry.getValue()).isSuccess()) {
+        for (@SuppressWarnings("unused")
+        Entry<InstanceIdentifier<?>, Meter> entry : transaction.updates.entrySet()) {
+
+            if (!updateMeter(entry.getKey(), entry.getValue()).isSuccess()) {
                 return Rpcs.getRpcResult(false, null, null);
             }
         }
-        
-        for(InstanceIdentifier<?> removal : transaction.removals) {
-           /* if (!removeMeter(entry.getKey(),entry.getValue()).isSuccess()) {
-                return Rpcs.getRpcResult(false, null, null);
-            }*/
+
+        for (InstanceIdentifier<?> removal : transaction.removals) {
+            /*
+             * if (!removeMeter(entry.getKey(),entry.getValue()).isSuccess()) {
+             * return Rpcs.getRpcResult(false, null, null); }
+             */
         }
-        
+
         return Rpcs.getRpcResult(true, null, null);
     }
-    
+
     private final class internalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
 
         private final DataModification<InstanceIdentifier<?>, DataObject> modification;
@@ -416,14 +411,14 @@ public class MeterConsumerImpl {
         /**
          * We create a plan which flows will be added, which will be updated and
          * which will be removed based on our internal state.
-         * 
+         *
          */
         void prepareUpdate() {
 
             Set<Entry<InstanceIdentifier<?>, DataObject>> puts = modification.getUpdatedConfigurationData().entrySet();
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
-                if (entry.getValue() instanceof Meter) {                    
-                    Meter Meter = (Meter) entry.getValue();                    
+                if (entry.getValue() instanceof Meter) {
+                    Meter Meter = (Meter) entry.getValue();
                     preparePutEntry(entry.getKey(), Meter);
                 }
 
@@ -433,46 +428,46 @@ public class MeterConsumerImpl {
         }
 
         private void preparePutEntry(InstanceIdentifier<?> key, Meter meter) {
-            
+
             Meter original = originalSwMeterView.get(key);
             if (original != null) {
                 // It is update for us
-                
-                updates.put(key, meter);               
+
+                updates.put(key, meter);
             } else {
                 // It is addition for us
-                
+
                 additions.put(key, meter);
             }
         }
 
         /**
          * We are OK to go with execution of plan
-         * 
+         *
          */
         @Override
         public RpcResult<Void> finish() throws IllegalStateException {
-            
+
             RpcResult<Void> rpcStatus = commitToPlugin(this);
             // We return true if internal transaction is successful.
-          //  return Rpcs.getRpcResult(true, null, Collections.emptySet());
+            // return Rpcs.getRpcResult(true, null, Collections.emptySet());
             return rpcStatus;
         }
 
         /**
-         * 
+         *
          * We should rollback our preparation
-         * 
+         *
          */
         @Override
         public RpcResult<Void> rollback() throws IllegalStateException {
             // NOOP - we did not modified any internal state during
             // requestCommit phase
-           // return Rpcs.getRpcResult(true, null, Collections.emptySet());
+            // return Rpcs.getRpcResult(true, null, Collections.emptySet());
             return Rpcs.getRpcResult(true, null, null);
-            
+
         }
-        
+
     }
 
     private final class MeterDataCommitHandler implements DataCommitHandler<InstanceIdentifier<?>, DataObject> {
@@ -486,9 +481,9 @@ public class MeterConsumerImpl {
             return transaction;
         }
     }
-    
+
     final class MeterEventListener implements SalMeterListener {
-        
+
         List<MeterAdded> addedMeter = new ArrayList<>();
         List<MeterRemoved> removeMeter = new ArrayList<>();
         List<MeterUpdated> updatedMeter = new ArrayList<>();
@@ -496,19 +491,19 @@ public class MeterConsumerImpl {
         @Override
         public void onMeterAdded(MeterAdded notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void onMeterRemoved(MeterRemoved notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void onMeterUpdated(MeterUpdated notification) {
             // TODO Auto-generated method stub
-            
-        }    
+
+        }
     }
 }
