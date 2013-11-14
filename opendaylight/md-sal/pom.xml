@@ -45,6 +45,7 @@
         <module>clustered-data-store/implementation</module>
 
         <module>inventory-manager</module>
+        <module>statistics-manager</module>
         <!-- Compability Packages -->
         <module>compatibility</module>
 
