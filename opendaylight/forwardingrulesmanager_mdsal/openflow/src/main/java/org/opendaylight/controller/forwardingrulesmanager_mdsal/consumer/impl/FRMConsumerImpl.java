@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Ericsson , Inc. and others.  All rights reserved.
  *
@@ -8,7 +7,6 @@
  */
 
 package org.opendaylight.controller.forwardingrulesmanager_mdsal.consumer.impl;
-
 
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
@@ -25,75 +23,69 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class FRMConsumerImpl extends AbstractBindingAwareProvider implements CommandProvider{
-	protected static final Logger logger = LoggerFactory.getLogger(FRMConsumerImpl.class);
-	private static ProviderContext p_session;
-    private static DataBrokerService dataBrokerService; 	 
-    private static NotificationService notificationService;	
+public class FRMConsumerImpl extends AbstractBindingAwareProvider implements CommandProvider {
+    protected static final Logger logger = LoggerFactory.getLogger(FRMConsumerImpl.class);
+    private static ProviderContext p_session;
+    private static DataBrokerService dataBrokerService;
+    private static NotificationService notificationService;
     private FlowConsumerImpl flowImplRef;
-	private GroupConsumerImpl groupImplRef;
-	private static DataProviderService dataProviderService;  
+    private GroupConsumerImpl groupImplRef;
+    private static DataProviderService dataProviderService;
 
-	private static IClusterContainerServices clusterContainerService = null;
-	private static ISwitchManager switchManager;
-	private static IContainer container;
-	
-	@Override
+    private static IClusterContainerServices clusterContainerService = null;
+    private static ISwitchManager switchManager;
+    private static IContainer container;
+
+    @Override
     public void onSessionInitiated(ProviderContext session) {
-    	
+
         FRMConsumerImpl.p_session = session;
-        
+
         if (!getDependentModule()) {
             logger.error("Unable to fetch handlers for dependent modules");
             System.out.println("Unable to fetch handlers for dependent modules");
             return;
         }
-        
+
         if (null != session) {
-          	notificationService = session.getSALService(NotificationService.class);
-        	
-        	if (null != notificationService) {
-        		dataBrokerService = session.getSALService(DataBrokerService.class);
-        		
-        		if (null != dataBrokerService) {
-        			dataProviderService = session.getSALService(DataProviderService.class);
-        			
-        			if (null != dataProviderService) {
-        				flowImplRef = new FlowConsumerImpl();
-        		//		groupImplRef = new GroupConsumerImpl();
-        				registerWithOSGIConsole();
-        			}
-        			else {
-        				logger.error("Data Provider Service is down or NULL. " +
-        						"Accessing data from configuration data store will not be possible");
-                    	System.out.println("Data Broker Service is down or NULL.");
-        			}
-        				
-        		}
-        		else {
-        			logger.error("Data Broker Service is down or NULL.");
-                	System.out.println("Data Broker Service is down or NULL.");
-        		}
-        	}
-        	else {
-        		logger.error("Notification Service is down or NULL.");
-            	System.out.println("Notification Service is down or NULL.");
-        	}        		
+            notificationService = session.getSALService(NotificationService.class);
+
+            if (null != notificationService) {
+                dataBrokerService = session.getSALService(DataBrokerService.class);
+
+                if (null != dataBrokerService) {
+                    dataProviderService = session.getSALService(DataProviderService.class);
+
+                    if (null != dataProviderService) {
+                        flowImplRef = new FlowConsumerImpl();
+                        // groupImplRef = new GroupConsumerImpl();
+                        registerWithOSGIConsole();
+                    } else {
+                        logger.error("Data Provider Service is down or NULL. "
+                                + "Accessing data from configuration data store will not be possible");
+                        System.out.println("Data Broker Service is down or NULL.");
+                    }
+
+                } else {
+                    logger.error("Data Broker Service is down or NULL.");
+                    System.out.println("Data Broker Service is down or NULL.");
+                }
+            } else {
+                logger.error("Notification Service is down or NULL.");
+                System.out.println("Notification Service is down or NULL.");
+            }
+        } else {
+            logger.error("Consumer session is NULL. Please check if provider is registered");
+            System.out.println("Consumer session is NULL. Please check if provider is registered");
         }
-        else {
-        	logger.error("Consumer session is NULL. Please check if provider is registered");
-        	System.out.println("Consumer session is NULL. Please check if provider is registered");
-        }
-  
+
     }
-	
-	public static IClusterContainerServices getClusterContainerService() {
+
+    public static IClusterContainerServices getClusterContainerService() {
         return clusterContainerService;
     }
 
-    public static void setClusterContainerService(
-            IClusterContainerServices clusterContainerService) {
+    public static void setClusterContainerService(IClusterContainerServices clusterContainerService) {
         FRMConsumerImpl.clusterContainerService = clusterContainerService;
     }
 
@@ -117,69 +109,67 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this, null);
     }
-	
-	private boolean getDependentModule() {
-	    do {
-        clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(IClusterContainerServices.class, this);
-        try {
-            Thread.sleep(4);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-	    } while(clusterContainerService == null);
-	    
-	    do {
-	        
-	    
-        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
-        try {
-            Thread.sleep(5);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-	    } while (container == null);
-	    
-	    do {
-	        switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, container.getName(), this);
-	        try {
-	            Thread.sleep(5);
-	        } catch (InterruptedException e) {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();
-	        }
-	    } while(null == switchManager);
-        return true;
-	}
 
-	
+    private boolean getDependentModule() {
+        do {
+            clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
+                    IClusterContainerServices.class, this);
+            try {
+                Thread.sleep(4);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } while (clusterContainerService == null);
+
+        do {
+
+            container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } while (container == null);
+
+        do {
+            switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, container.getName(), this);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } while (null == switchManager);
+        return true;
+    }
 
     public static DataProviderService getDataProviderService() {
-		return dataProviderService;
-	}
+        return dataProviderService;
+    }
 
-	public FlowConsumerImpl getFlowImplRef() {
-	    return flowImplRef;
-	}
+    public FlowConsumerImpl getFlowImplRef() {
+        return flowImplRef;
+    }
 
-	public GroupConsumerImpl getGroupImplRef() {
-	    return groupImplRef;
-	}
-	 
-	public static ProviderContext getProviderSession() {
-		return p_session;
-	}	
+    public GroupConsumerImpl getGroupImplRef() {
+        return groupImplRef;
+    }
 
-	public static NotificationService getNotificationService() {
-		return notificationService;
-	}
+    public static ProviderContext getProviderSession() {
+        return p_session;
+    }
 
-	public static DataBrokerService getDataBrokerService() {
-		return dataBrokerService;
-	}
-	
-	/*
+    public static NotificationService getNotificationService() {
+        return notificationService;
+    }
+
+    public static DataBrokerService getDataBrokerService() {
+        return dataBrokerService;
+    }
+
+    /*
      * OSGI COMMANDS
      */
     @Override
@@ -189,4 +179,3 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
     }
 
 }
-	
