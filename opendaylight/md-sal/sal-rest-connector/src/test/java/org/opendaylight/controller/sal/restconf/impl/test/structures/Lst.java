@@ -10,9 +10,13 @@ public class Lst extends YangElement {
         lstItems = new HashSet<>();
     }
 
-    public void addLstItem(LstItem lstItem) {
+    public Lst addLstItem(LstItem lstItem) {
         lstItem.setLstName(name);
+        while (this.lstItems.contains(lstItem)) {
+            lstItem.incNumOfEqualItems();
+        }
         this.lstItems.add(lstItem);
+        return this;
     }
 
     public Set<LstItem> getLstItems() {
@@ -31,7 +35,11 @@ public class Lst extends YangElement {
             return false;
         }
         Lst lst = (Lst) obj;
-        if (!this.lstItems.equals(lst.lstItems)) {
+        if (this.lstItems == null) {
+            if (lst.lstItems != null) {
+                return false;
+            }
+        } else if (!this.lstItems.equals(lst.lstItems)) {
             return false;
         }
         return true;

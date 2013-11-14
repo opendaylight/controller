@@ -24,7 +24,11 @@ public class Cont extends LstItem {
             return false;
         }
         Cont cont = (Cont) obj;
-        if (!this.name.equals(cont.name)) {
+        if (this.name == null) {
+            if (cont.name != null) {
+                return false;
+            }
+        } else if (!this.name.equals(cont.name)) {
             return false;
         }
         return true;

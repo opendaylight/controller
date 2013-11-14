@@ -29,13 +29,13 @@ import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinit
 import com.google.gson.stream.JsonWriter;
 
 class JsonMapper {
-    
+
     private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
     private final Set<ListSchemaNode> foundLists = new HashSet<>();
-    
+
     public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
         writer.beginObject();
-        
+
         if (schema instanceof ContainerSchemaNode) {
             writeContainer(writer, (CompositeNode) data, (ContainerSchemaNode) schema);
         } else if (schema instanceof ListSchemaNode) {
@@ -44,30 +44,31 @@ class JsonMapper {
             throw new UnsupportedDataTypeException(
                     "Schema can be ContainerSchemaNode or ListSchemaNode. Other types are not supported yet.");
         }
-        
+
         writer.endObject();
-        
+
         foundLeafLists.clear();
         foundLists.clear();
     }
 
-    private void writeChildrenOfParent(JsonWriter writer, CompositeNode parent, DataNodeContainer parentSchema) throws IOException {
+    private void writeChildrenOfParent(JsonWriter writer, CompositeNode parent, DataNodeContainer parentSchema)
+            throws IOException {
         checkNotNull(parent);
         checkNotNull(parentSchema);
-        
+
         for (Node<?> child : parent.getChildren()) {
             DataSchemaNode childSchema = findSchemaForNode(child, parentSchema.getChildNodes());
             if (childSchema == null) {
                 throw new UnsupportedDataTypeException("Probably the data node \"" + child.getNodeType().getLocalName()
                         + "\" is not conform to schema");
             }
-            
+
             if (childSchema instanceof ContainerSchemaNode) {
-                writeContainer(writer, (CompositeNode) child, (ContainerSchemaNode) childSchema);
+                writeContainer(writer, child, (ContainerSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
                 if (!foundLists.contains(childSchema)) {
                     foundLists.add((ListSchemaNode) childSchema);
-                    writeList(writer, (CompositeNode) child, (ListSchemaNode) childSchema);
+                    writeList(writer, child, (ListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafListSchemaNode) {
                 if (!foundLeafLists.contains(childSchema)) {
@@ -81,7 +82,7 @@ class JsonMapper {
                         + "LeafListSchemaNode, or LeafSchemaNode. Other types are not supported yet.");
             }
         }
-        
+
         for (Node<?> child : parent.getChildren()) {
             DataSchemaNode childSchema = findSchemaForNode(child, parentSchema.getChildNodes());
             if (childSchema instanceof LeafListSchemaNode) {
@@ -91,7 +92,7 @@ class JsonMapper {
             }
         }
     }
-    
+
     private DataSchemaNode findSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
         for (DataSchemaNode dsn : dataSchemaNode) {
             if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
@@ -100,66 +101,80 @@ class JsonMapper {
         }
         return null;
     }
-    
-    private void writeContainer(JsonWriter writer, CompositeNode node, ContainerSchemaNode schema) throws IOException {
+
+    private void writeContainer(JsonWriter writer, Node<?> node, ContainerSchemaNode schema) throws IOException {
         writer.name(node.getNodeType().getLocalName());
         writer.beginObject();
-        writeChildrenOfParent(writer, node, schema);
+        if (node instanceof CompositeNode) {
+            writeChildrenOfParent(writer, (CompositeNode) node, schema);
+        }
         writer.endObject();
     }
-    
-    private void writeList(JsonWriter writer, CompositeNode node, ListSchemaNode schema) throws IOException {
-            writer.name(node.getNodeType().getLocalName());
-            writer.beginArray();
-            
-            if (node.getParent() != null) {
-                CompositeNode parent = node.getParent();
-                List<CompositeNode> nodeLists = parent.getCompositesByName(node.getNodeType());
-                for (CompositeNode nodeList : nodeLists) {
-                    writer.beginObject();
-                    writeChildrenOfParent(writer, nodeList, schema);
-                    writer.endObject();
-                }
-            } else {
+
+    private void writeList(JsonWriter writer, Node<?> node, ListSchemaNode schema) throws IOException {
+        writer.name(node.getNodeType().getLocalName());
+        writer.beginArray();
+
+        if (node.getParent() != null) {
+            CompositeNode parent = node.getParent();
+            List<CompositeNode> nodeLists = parent.getCompositesByName(node.getNodeType());
+            for (CompositeNode nodeList : nodeLists) {
                 writer.beginObject();
-                writeChildrenOfParent(writer, node, schema);
+                writeChildrenOfParent(writer, nodeList, schema);
                 writer.endObject();
             }
-            
-            writer.endArray();
-    }
-    
-    private void writeLeafList(JsonWriter writer, SimpleNode<?> node, LeafListSchemaNode schema) throws IOException {
-            writer.name(node.getNodeType().getLocalName());
-            writer.beginArray();
-            
-            CompositeNode parent = node.getParent();
-            List<SimpleNode<?>> nodeLeafLists = parent.getSimpleNodesByName(node.getNodeType());
-            for (SimpleNode<?> nodeLeafList : nodeLeafLists) {
-                writeValueOfNodeByType(writer, nodeLeafList, schema.getType());
+            List<SimpleNode<?>> simpleNodes = parent.getSimpleNodesByName(node.getNodeType());
+            for (SimpleNode<?> simpleNode : simpleNodes) {
+                writer.beginObject();
+                writer.endObject();
             }
-            
-            writer.endArray();
+        } else {
+            writer.beginObject();
+            if (node instanceof CompositeNode) {
+                writeChildrenOfParent(writer, (CompositeNode) node, schema);
+            }
+            writer.endObject();
+        }
+
+        writer.endArray();
     }
-    
+
+    private void writeLeafList(JsonWriter writer, SimpleNode<?> node, LeafListSchemaNode schema) throws IOException {
+        writer.name(node.getNodeType().getLocalName());
+        writer.beginArray();
+
+        CompositeNode parent = node.getParent();
+        List<SimpleNode<?>> nodeLeafLists = parent.getSimpleNodesByName(node.getNodeType());
+        for (SimpleNode<?> nodeLeafList : nodeLeafLists) {
+            writeValueOfNodeByType(writer, nodeLeafList, schema.getType());
+        }
+
+        writer.endArray();
+    }
+
     private void writeLeaf(JsonWriter writer, SimpleNode<?> node, LeafSchemaNode schema) throws IOException {
         writer.name(node.getNodeType().getLocalName());
         writeValueOfNodeByType(writer, node, schema.getType());
     }
-    
-    private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type) throws IOException {
+
+    private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type)
+            throws IOException {
         if (!(node.getValue() instanceof String)) {
             throw new IllegalStateException("Value in SimpleNode should be type String");
         }
-        
+
         String value = (String) node.getValue();
-        // TODO check Leafref, InstanceIdentifierTypeDefinition, IdentityrefTypeDefinition, UnionTypeDefinition
+        // TODO check Leafref, InstanceIdentifierTypeDefinition,
+        // IdentityrefTypeDefinition, UnionTypeDefinition
+        if (!(type instanceof EmptyTypeDefinition) && value.isEmpty()) {
+            writer.nullValue();
+            return;
+        }
         if (type.getBaseType() != null) {
             writeValueOfNodeByType(writer, node, type.getBaseType());
         } else if (type instanceof InstanceIdentifierTypeDefinition) {
             writer.value(((InstanceIdentifierTypeDefinition) type).getPathStatement().toString());
-        } else if (type instanceof DecimalTypeDefinition 
-                || type instanceof IntegerTypeDefinition
+        } else if (type instanceof DecimalTypeDefinition || type instanceof IntegerTypeDefinition
                 || type instanceof UnsignedIntegerTypeDefinition) {
             writer.value(new NumberForJsonWriter(value));
         } else if (type instanceof BooleanTypeDefinition) {
@@ -168,16 +183,18 @@ class JsonMapper {
             writer.beginArray();
             writer.nullValue();
             writer.endArray();
-        } else {
+        } else if (!value.isEmpty()) {
             writer.value(value);
+        } else {
+            writer.nullValue();
         }
     }
-    
+
     private static final class NumberForJsonWriter extends Number {
-        
+
         private static final long serialVersionUID = -3147729419814417666L;
         private final String value;
-        
+
         public NumberForJsonWriter(String value) {
             this.value = value;
         }
@@ -206,7 +223,7 @@ class JsonMapper {
         public String toString() {
             return value;
         }
-        
+
     }
 
 }

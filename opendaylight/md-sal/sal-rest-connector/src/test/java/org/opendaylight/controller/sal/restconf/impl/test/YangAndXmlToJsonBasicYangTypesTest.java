@@ -14,7 +14,7 @@ import javax.validation.constraints.AssertFalse;
 import org.junit.Test;
 import org.opendaylight.controller.sal.restconf.impl.test.structures.*;
 
-import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.*;
 
 public class YangAndXmlToJsonBasicYangTypesTest {
 
@@ -29,6 +29,50 @@ public class YangAndXmlToJsonBasicYangTypesTest {
                 "/yang-to-json-conversion/simple-yang-types", "/yang-to-json-conversion/simple-yang-types/xml");
 
         verifyJsonOutput(jsonOutput);
+
+    }
+
+    @Test
+    public void simpleYangTypesWithJsonReaderEmptyDataTest() {
+        String jsonOutput;
+        // jsonOutput =
+        // TestUtils.readJsonFromFile("/yang-to-json-conversion/simple-yang-types/xml/awaited_output.json",
+        // false);
+
+        jsonOutput = TestUtils.convertXmlDataAndYangToJson(
+                "/yang-to-json-conversion/simple-yang-types/xml/empty_data.xml",
+                "/yang-to-json-conversion/simple-yang-types", "/yang-to-json-conversion/simple-yang-types/xml");
+
+        verifyJsonOutputForEmpty(jsonOutput);
+    }
+
+    private void verifyJsonOutputForEmpty(String jsonOutput) {
+        StringReader strReader = new StringReader(jsonOutput);
+        JsonReader jReader = new JsonReader(strReader);
+
+        String exception = null;
+        Cont dataFromJson = null;
+        try {
+            dataFromJson = jsonReadCont1(jReader);
+        } catch (IOException e) {
+            exception = e.getMessage();
+        }
+
+        assertNotNull("Data structures from json are missing.", dataFromJson);
+        checkDataFromJsonEmpty(dataFromJson);
+
+        assertNull("Error during reading Json output: " + exception, exception);
+    }
+
+    private void jsonReadCont1Empty(JsonReader jReader) throws IOException {
+        jReader.beginObject();
+        assertEquals("cont1", jReader.nextName());
+        jsonReadCont1ElementsEmpty(jReader);
+        jReader.skipValue();
+        jReader.endObject();
+    }
+
+    private void jsonReadCont1ElementsEmpty(JsonReader jReader) {
 
     }
 
@@ -68,7 +112,7 @@ public class YangAndXmlToJsonBasicYangTypesTest {
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf11")) {
-                redData.addLf(new Lf(keyName, jReader.nextString()));
+                redData.addLf(new Lf(keyName, nextValue(jReader)));
             } else if (keyName.equals("lflst11")) {
                 LfLst lfLst = new LfLst(keyName);
                 lfLst = jsonReadLflstValues(jReader, lfLst);
@@ -107,9 +151,9 @@ public class YangAndXmlToJsonBasicYangTypesTest {
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf111")) {
-                lstItem.addLf(new Lf(keyName, jReader.nextString()));
+                lstItem.addLf(new Lf(keyName, nextValue(jReader)));
             } else if (keyName.equals("lf112")) {
-                lstItem.addLf(new Lf(keyName, jReader.nextString()));
+                lstItem.addLf(new Lf(keyName, nextValue(jReader)));
             } else if (keyName.equals("cont111")) {
                 Cont cont = new Cont(keyName);
                 cont = jsonReadCont111(jReader, cont);
@@ -146,7 +190,7 @@ public class YangAndXmlToJsonBasicYangTypesTest {
         if (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf1121")) {
-                lstItem.addLf(new Lf(keyName, jReader.nextString()));
+                lstItem.addLf(new Lf(keyName, nextValue(jReader)));
             }
         }
         jReader.endObject();
@@ -170,11 +214,20 @@ public class YangAndXmlToJsonBasicYangTypesTest {
         if (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf1111")) {
-                lstItem.addLf(new Lf(keyName, jReader.nextString()));
+                lstItem.addLf(new Lf(keyName, nextValue(jReader)));
             }
         }
         jReader.endObject();
         return lstItem;
+    }
+
+    private String nextValue(JsonReader jReader) throws IOException {
+        if (jReader.peek().equals(JsonToken.NULL)) {
+            jReader.nextNull();
+            return null;
+        } else {
+            return jReader.nextString();
+        }
     }
 
     private Cont jsonReadCont111(JsonReader jReader, Cont cont) throws IOException {
@@ -188,7 +241,7 @@ public class YangAndXmlToJsonBasicYangTypesTest {
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf1111")) {
-                cont.addLf(new Lf(keyName, jReader.nextString()));
+                cont.addLf(new Lf(keyName, nextValue(jReader)));
             } else if (keyName.equals("lflst1111")) {
                 LfLst lfLst = new LfLst(keyName);
                 lfLst = jsonReadLflstValues(jReader, lfLst);
@@ -221,7 +274,7 @@ public class YangAndXmlToJsonBasicYangTypesTest {
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf1111A") || keyName.equals("lf1111B")) {
-                lstItem.addLf(new Lf(keyName, jReader.nextString()));
+                lstItem.addLf(new Lf(keyName, nextValue(jReader)));
             }
         }
         jReader.endObject();
@@ -231,10 +284,97 @@ public class YangAndXmlToJsonBasicYangTypesTest {
     private LfLst jsonReadLflstValues(JsonReader jReader, LfLst lfLst) throws IOException {
         jReader.beginArray();
         while (jReader.hasNext()) {
-            lfLst.addLf(new Lf(jReader.nextString()));
+            lfLst.addLf(new Lf(nextValue(jReader)));
         }
         jReader.endArray();
         return lfLst;
+    }
+
+    private void checkDataFromJsonEmpty(Cont dataFromJson) {
+        assertTrue(dataFromJson.getLfs().isEmpty());
+        assertTrue(dataFromJson.getLfLsts().isEmpty());
+        assertTrue(dataFromJson.getConts().isEmpty());
+
+        Map<String, Lst> lsts = dataFromJson.getLsts();
+        assertEquals(1, lsts.size());
+        Lst lst11 = lsts.get("lst11");
+        assertNotNull(lst11);
+        Set<LstItem> lstItems = lst11.getLstItems();
+        assertNotNull(lstItems);
+
+        LstItem lst11_1 = null;
+        LstItem lst11_2 = null;
+        LstItem lst11_3 = null;
+        for (LstItem lstItem : lstItems) {
+            if (lstItem.getLfs().get("lf111").getValue().equals("1")) {
+                lst11_1 = lstItem;
+            } else if (lstItem.getLfs().get("lf111").getValue().equals("2")) {
+                lst11_2 = lstItem;
+            } else if (lstItem.getLfs().get("lf111").getValue().equals("3")) {
+                lst11_3 = lstItem;
+            }
+        }
+
+        assertNotNull(lst11_1);
+        assertNotNull(lst11_2);
+        assertNotNull(lst11_3);
+
+        // lst11_1
+        assertTrue(lst11_1.getLfLsts().isEmpty());
+        assertEquals(1, lst11_1.getLfs().size());
+        assertEquals(1, lst11_1.getConts().size());
+        assertEquals(1, lst11_1.getLsts().size());
+        assertEquals(lst11_1.getLsts().get("lst111"), new Lst("lst111").addLstItem(new LstItem().addLf("lf1111", "35"))
+                .addLstItem(new LstItem().addLf("lf1111", null)).addLstItem(new LstItem()).addLstItem(new LstItem()));
+        assertEquals(lst11_1.getConts().get("cont111"), new Cont("cont111"));
+        // : lst11_1
+
+        // lst11_2
+        assertTrue(lst11_2.getLfLsts().isEmpty());
+        assertEquals(1, lst11_2.getLfs().size());
+        assertEquals(1, lst11_2.getConts().size());
+        assertEquals(1, lst11_2.getLsts().size());
+
+        Cont lst11_2_cont111 = lst11_2.getConts().get("cont111");
+
+        // -cont111
+        assertNotNull(lst11_2_cont111);
+        assertEquals(1, lst11_2_cont111.getLfs().size());
+        assertEquals(1, lst11_2_cont111.getLfLsts().size());
+        assertEquals(1, lst11_2_cont111.getLsts().size());
+        assertTrue(lst11_2_cont111.getConts().isEmpty());
+
+        assertEquals(new Lf("lf1111", null), lst11_2_cont111.getLfs().get("lf1111"));
+        assertEquals(new LfLst("lflst1111").addLf(new Lf(null)).addLf("1024").addLf("4096"), lst11_2_cont111
+                .getLfLsts().get("lflst1111"));
+        assertEquals(
+                new Lst("lst1111").addLstItem(new LstItem().addLf("lf1111B", "4")).addLstItem(
+                        new LstItem().addLf("lf1111A", "lf1111A str12")), lst11_2_cont111.getLsts().get("lst1111"));
+        // :-cont111
+        assertEquals(lst11_2.getLsts().get("lst112"), new Lst("lst112").addLstItem(new LstItem()));
+        // : lst11_2
+
+        // lst11_3
+        assertEquals(1, lst11_3.getLfs().size());
+        assertTrue(lst11_3.getLfLsts().isEmpty());
+        assertTrue(lst11_3.getLsts().isEmpty());
+        assertTrue(lst11_3.getLsts().isEmpty());
+
+        // -cont111
+        Cont lst11_3_cont111 = lst11_3.getConts().get("cont111");
+        assertEquals(1, lst11_3_cont111.getLfs().size());
+        assertEquals(1, lst11_3_cont111.getLfLsts().size());
+        assertEquals(1, lst11_3_cont111.getLsts().size());
+        assertTrue(lst11_3_cont111.getConts().isEmpty());
+
+        assertEquals(new Lf("lf1111", null), lst11_3_cont111.getLfs().get("lf1111"));
+        assertEquals(new LfLst("lflst1111").addLf(new Lf(null)).addLf(new Lf(null)),
+                lst11_3_cont111.getLfLsts().get("lflst1111"));
+        assertEquals(new Lst("lst1111").addLstItem(new LstItem()).addLstItem(new LstItem()), lst11_3_cont111.getLsts()
+                .get("lst1111"));
+        // :-cont111
+        // : lst11_3
+
     }
 
     private void checkDataFromJson(Cont dataFromJson) {

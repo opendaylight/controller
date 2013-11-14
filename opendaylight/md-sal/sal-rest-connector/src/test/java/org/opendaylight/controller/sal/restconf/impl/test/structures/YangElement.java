@@ -6,7 +6,7 @@ public class YangElement {
     protected YangElement(String name) {
         this.name = name;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -20,7 +20,11 @@ public class YangElement {
             return false;
         }
         YangElement yangElement = (YangElement) obj;
-        if (!this.name.equals(yangElement.name)) {
+        if (this.name == null) {
+            if (yangElement.name != null) {
+                return false;
+            }
+        } else if (!this.name.equals(yangElement.name)) {
             return false;
         }
         return true;
