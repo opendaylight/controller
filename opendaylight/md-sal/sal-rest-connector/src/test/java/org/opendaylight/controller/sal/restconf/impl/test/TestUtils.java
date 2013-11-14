@@ -4,6 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.*;
+import java.net.*;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -19,10 +21,9 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.opendaylight.controller.sal.rest.impl.*;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
-import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.impl.*;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -115,24 +116,17 @@ final class TestUtils {
 
     }
 
-    static String convertXmlDataAndYangToJson(String xmlDataPath, String yangPath, String outputPath) {
+    static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath, String outputPath) {
         String jsonResult = null;
         Set<Module> modules = null;
 
         try {
-            modules = TestUtils.loadModules(YangAndXmlToJsonBasicDataTypesTest.class.getResource(yangPath).getPath());
+            modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangPath).getPath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         assertNotNull("modules can't be null.", modules);
 
-        InputStream xmlStream = YangAndXmlToJsonBasicDataTypesTest.class.getResourceAsStream(xmlDataPath);
-        CompositeNode compositeNode = null;
-        try {
-            compositeNode = TestUtils.loadCompositeNode(xmlStream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
         assertNotNull("Composite node can't be null", compositeNode);
 
         StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
@@ -160,10 +154,21 @@ final class TestUtils {
         return jsonResult;
     }
 
+    static CompositeNode loadCompositeNode(String xmlDataPath) {
+        InputStream xmlStream = ToJsonBasicDataTypesTest.class.getResourceAsStream(xmlDataPath);
+        CompositeNode compositeNode = null;
+        try {
+            compositeNode = TestUtils.loadCompositeNode(xmlStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return compositeNode;
+    }
+
     static void outputToFile(ByteArrayOutputStream outputStream, String outputDir) throws IOException {
         FileOutputStream fileOS = null;
         try {
-            String path = YangAndXmlToJsonBasicDataTypesTest.class.getResource(outputDir).getPath();
+            String path = ToJsonBasicDataTypesTest.class.getResource(outputDir).getPath();
             File outFile = new File(path + "/data.json");
             fileOS = new FileOutputStream(outFile);
             try {
@@ -212,7 +217,7 @@ final class TestUtils {
     }
 
     private static FileReader getFileReader(String path) {
-        String fullPath = YangAndXmlToJsonBasicDataTypesTest.class.getResource(path).getPath();
+        String fullPath = ToJsonBasicDataTypesTest.class.getResource(path).getPath();
         assertNotNull("Path to file can't be null.", fullPath);
         File file = new File(fullPath);
         assertNotNull("File can't be null", file);
@@ -244,4 +249,20 @@ final class TestUtils {
         return strBuilder.toString();
     }
 
+    static QName buildQName(String name, String uri, String date) {
+        try {
+            URI u = new URI(uri);
+            Date dt = null;
+            if (date != null) {
+                dt = Date.valueOf(date);
+            }
+            return new QName(u, dt, name);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    static QName buildQName(String name) {
+        return buildQName(name, "", null);
+    }
 }
