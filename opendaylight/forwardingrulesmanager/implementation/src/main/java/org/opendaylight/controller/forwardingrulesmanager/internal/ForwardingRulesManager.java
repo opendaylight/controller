@@ -2608,6 +2608,12 @@ public class ForwardingRulesManager implements
         // Start event handler thread
         frmEventHandler.start();
 
+        // replay the installedSwView data structure to populate
+        // node flows and group flows
+        for (FlowEntryInstall fei : installedSwView.keySet()) {
+            pendingEvents.offer(new UpdateIndexDBs(fei, true));
+        }
+
         /*
          * Read startup and build database if we have not already gotten the
          * configurations synced from another node
