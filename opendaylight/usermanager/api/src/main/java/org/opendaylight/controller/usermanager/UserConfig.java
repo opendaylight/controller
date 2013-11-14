@@ -112,6 +112,9 @@ public class UserConfig implements Serializable {
     }
 
     public List<String> getRoles() {
+        if(roles == null) {
+            return new ArrayList<String>();
+        }
         return new ArrayList<String>(roles);
     }
 
