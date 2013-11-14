@@ -8,10 +8,12 @@
 package org.opendaylight.controller.usermanager.northbound;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -32,10 +34,13 @@ import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.UserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
 
 /**
  * This class provides REST APIs to manage users.
@@ -83,7 +88,11 @@ public class UserManagerNorthbound {
     }
 
     /**
-     * Add a user
+     * Add a user<br><br>
+     *
+     * Provide Below values for the corresponding roles<br>
+     * Network-Admin - Network Administrator<br>
+     * Network-Operator - Network Operator<br>
      *
      * @param userConfigData
      *            the {@link UserConfig} user config structure in request body
@@ -130,6 +139,16 @@ public class UserManagerNorthbound {
             throw new UnauthorizedException("User is not authorized to perform user management operations ");
         }
 
+        if(userConfigData.getRoles() == null || userConfigData.getRoles().isEmpty()){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one role for the user")
+                        .build();
+        }
+
+        if(userConfigData.getRoles().contains("")){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid role provided. Please check configuration again")
+                    .build();
+        }
+
         // Reconstructing the object so password can be hashed in userConfig
         UserConfig userCfgObject = new UserConfig(userConfigData.getUser(),userConfigData.getPassword(),
                  userConfigData.getRoles());
@@ -144,6 +163,109 @@ public class UserManagerNorthbound {
             NorthboundUtils.auditlog("User", username, "added", userCfgObject.getUser());
             URI uri = uriInfo.getAbsolutePathBuilder().path("/"+userCfgObject.getUser()).build();
             return Response.created(uri).build();
+        }
+        return NorthboundUtils.getResponse(status);
+    }
+
+    /**
+     * Modify a user.<br><br>
+     *
+     * Provide Below values for the corresponding roles<br>
+     * Network-Admin - Network Administrator<br>
+     * Network-Operator - Network Operator<br>
+     *
+     * @param userConfigData
+     *            the {@link UserConfig} user config structure in request body.
+     * No value required for password in UserConfig. Only username and valid User roles.<br>
+     *
+     * @return Response as dictated by the HTTP Response Status code
+     *
+     *         <pre>
+     * Example:
+     *
+     * Request URL:
+     * https://localhost/controller/nb/v2/usermanager/users
+     *
+     * Request body in XML:
+     *  &lt;userConfig&gt;
+     *      &lt;user&gt;testuser&lt;/user&gt;
+     *      &lt;roles&gt;Network-Admin&lt;/roles&gt;
+     *  &lt;/userConfig&gt;
+     *
+     * Request body in JSON:
+     * {
+     *  "user":"testuser",
+     *  "roles":[
+     *       "Network-Admin"
+     *       ]
+     * }
+     * </pre>
+     */
+
+    @Path("/users/{username}/roles")
+    @PUT
+    @StatusCodes({ @ResponseCode(code = 200, condition = "User modified successfully"),
+        @ResponseCode(code = 400, condition = "Invalid data passed"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 409, condition = "User name in url conflicts with name in request body"),
+        @ResponseCode(code = 404, condition = "User config is null"),
+        @ResponseCode(code = 500, condition = "Internal Server Error: Addition of user failed"),
+        @ResponseCode(code = 503, condition = "Service unavailable") })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response modifyLocalUser(@PathParam("username") String userName, @TypeHint(UserConfig.class) UserConfig userConfigData) {
+
+        if (!isAdminUser()) {
+            throw new UnauthorizedException("User is not authorized to perform user management operations ");
+        }
+
+        if(userConfigData.getPassword() != null && !userConfigData.getPassword().equals("")){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Configuration. " +
+                    "Password should not be provided to modify the roles of a user")
+                        .build();
+        }
+
+        if(userConfigData.getRoles() == null || userConfigData.getRoles().isEmpty()){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one role for the user")
+                        .build();
+        }
+
+        if(userConfigData.getRoles().contains("")){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid role provided. Please check configuration again")
+                    .build();
+        }
+
+        handleNameMismatch(userConfigData.getUser(), userName);
+
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
+        if (userManager == null) {
+            throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Gson gson = new Gson();
+        String json = gson.toJson(userConfigData);
+        List<UserConfig> currentUserConfig = userManager.getLocalUserList();
+        String password = null;
+        String user = userConfigData.getUser();
+        for (UserConfig userConfig : currentUserConfig) {
+            if(userConfig.getUser().equals(user)){
+                password = userConfig.getPassword();
+                break;
+            }
+        }
+
+        if (password == null) {
+            String msg = String.format("User %s not found in configuration database", user);
+            return NorthboundUtils.getResponse(new Status(StatusCode.NOTFOUND, msg));
+        }
+        //While modifying a user's roles, the front end passes only the username and the new roles
+        //The password is stored in the UserConfig Object and the password is stored in a hashed format.
+        //a new UserConfig object is created below with the username, new roles and hashed password
+        json = json.replace("\"roles\"", "\"password\":\""+ password + "\",\"roles\"");
+        UserConfig newConfig = gson.fromJson(json, UserConfig.class);
+
+        Status status = userManager.modifyLocalUser(newConfig);
+        if (status.isSuccess()) {
+            NorthboundUtils.auditlog("User", username, "modified", userName);
         }
         return NorthboundUtils.getResponse(status);
     }
