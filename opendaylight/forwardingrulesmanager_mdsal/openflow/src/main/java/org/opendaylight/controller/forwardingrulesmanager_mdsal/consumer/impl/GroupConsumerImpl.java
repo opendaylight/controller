@@ -62,16 +62,14 @@ public class GroupConsumerImpl {
     private ConcurrentMap<Node, List<Group>> nodeGroups;
     private ConcurrentMap<GroupKey, Group> inactiveGroups;
     
-    private IClusterContainerServices clusterGroupContainerService = null;
-    private ISwitchManager switchGroupManager;
+    private IClusterContainerServices clusterGroupContainerService = null;   
     private IContainer container;
     
     public GroupConsumerImpl() {
-	    InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Groups.class).toInstance();
+	    InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Groups.class).node(Group.class).toInstance();
         groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);
         
-        clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();
-        switchGroupManager = FRMConsumerImpl.getSwitchManager();
+        clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();        
         container = FRMConsumerImpl.getContainer();
         
         if (!(cacheStartup())) {
@@ -279,7 +277,7 @@ public class GroupConsumerImpl {
      * @param dataObject
      */
     private Status updateGroup(InstanceIdentifier<?> path, Group groupUpdateDataObject) {
-        GroupKey groupKey = groupUpdateDataObject.getKey();
+        GroupKey groupKey = groupUpdateDataObject.getKey();        
         Status groupOperationStatus = validateGroup(groupUpdateDataObject, FRMUtil.operation.UPDATE);
         
         if (!groupOperationStatus.isSuccess()) {
@@ -319,7 +317,7 @@ public class GroupConsumerImpl {
             logger.error("Group data object validation failed %s" + groupAddDataObject.getGroupName());
             return groupOperationStatus;
         }
-        validateGroup(groupAddDataObject, FRMUtil.operation.ADD);
+        
         originalSwGroupView.put(groupKey, groupAddDataObject);
         
         if (groupAddDataObject.isInstall()) {
@@ -363,7 +361,7 @@ public class GroupConsumerImpl {
         @Override
          public DataCommitTransaction requestCommit(DataModification<InstanceIdentifier<?>, DataObject> modification) {
              // We should verify transaction
-             System.out.println("Coming in FlowDatacommitHandler");
+             System.out.println("Coming in GroupDatacommitHandler");
              internalTransaction transaction = new internalTransaction(modification);
              transaction.prepareUpdate();
              return transaction;
