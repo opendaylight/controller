@@ -19,6 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Flow
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
@@ -196,6 +197,12 @@ public class NoficationTest extends AbstractTest {
         @Override
         public void onFlowUpdated(FlowUpdated notification) {
             updatedFlows.add(notification);
+        }
+
+        @Override
+        public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
+            // TODO Auto-generated method stub
+            
         }
 
     }

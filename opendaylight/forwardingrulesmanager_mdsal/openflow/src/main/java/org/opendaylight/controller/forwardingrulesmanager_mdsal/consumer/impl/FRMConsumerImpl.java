@@ -19,7 +19,6 @@ import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
 	private static DataProviderService dataProviderService;  
 
 	private static IClusterContainerServices clusterContainerService = null;
-	private static ISwitchManager switchManager;
 	private static IContainer container;
 	
 	@Override
@@ -97,14 +95,6 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
         FRMConsumerImpl.clusterContainerService = clusterContainerService;
     }
 
-    public static ISwitchManager getSwitchManager() {
-        return switchManager;
-    }
-
-    public static void setSwitchManager(ISwitchManager switchManager) {
-        FRMConsumerImpl.switchManager = switchManager;
-    }
-
     public static IContainer getContainer() {
         return container;
     }
@@ -141,15 +131,7 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
         }
 	    } while (container == null);
 	    
-	    do {
-	        switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, container.getName(), this);
-	        try {
-	            Thread.sleep(5);
-	        } catch (InterruptedException e) {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();
-	        }
-	    } while(null == switchManager);
+	   
         return true;
 	}
 
