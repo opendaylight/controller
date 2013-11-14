@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc.api;
 
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-
 import java.util.EventListener;
 
-public interface RouteChangeListener extends EventListener {
+public interface RouteChangeListener<I,R> extends EventListener {
 
-  public void onRouteChanged(RouteChange<RpcRouter.RouteIdentifier<QName, QName, InstanceIdentifier>, String>  change);
+
+   void onRouteUpdated(I key, R new_value);
+
+   void onRouteDeleted(I key);
 }
