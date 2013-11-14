@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.util.jolokia;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -144,7 +145,13 @@ abstract class ListableJolokiaClient {
         J4pResponse<J4pListRequest> response = execute(req);
         JSONObject listJSONResponse = response.getValue();
         JSONObject attributes = (JSONObject) listJSONResponse.get("attr");
-        Map<String, JSONObject> listMap = new HashMap<String, JSONObject>();
+
+        // Empty attributes list
+        if(attributes == null)
+            return Collections.emptyMap();
+
+        Map<String, JSONObject> listMap = new HashMap<>();
+
         for (Object entryObject : attributes.entrySet()) {
             Entry<String, Object> entry = (Entry<String, Object>) entryObject;
             JSONObject entryVal = (JSONObject) entry.getValue();
