@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b02f19f6",
+        "filename": "opendaylight/md-sal/clustered-data-store/implementation/src/main/java/org/opendaylight/controller/datastore/internal/ClusteredDataStoreImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2013-11-14T02:09:40Z",
+      "side": 1,
+      "message": "If check seems redundant. Preconditions.checkNotNull does that.",
+      "revId": "3587d59f2443d6dd5c09bae2e8f80c0f7206bf77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_90365551",
+        "filename": "opendaylight/md-sal/clustered-data-store/implementation/src/main/java/org/opendaylight/controller/datastore/internal/ClusteredDataStoreImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2013-11-14T02:09:40Z",
+      "side": 1,
+      "message": "If check seems redundant. Preconditions.checkNotNull does that.",
+      "revId": "3587d59f2443d6dd5c09bae2e8f80c0f7206bf77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5040dda4",
+        "filename": "opendaylight/md-sal/clustered-data-store/implementation/src/main/java/org/opendaylight/controller/datastore/internal/ClusteredDataStoreManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2013-11-14T02:09:40Z",
+      "side": 1,
+      "message": "If cache exists, couldnt you just get the cache and use it instead of throwing?",
+      "revId": "3587d59f2443d6dd5c09bae2e8f80c0f7206bf77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
