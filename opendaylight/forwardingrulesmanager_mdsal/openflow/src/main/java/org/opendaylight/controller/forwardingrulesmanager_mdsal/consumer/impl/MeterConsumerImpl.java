@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.Met
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.UpdatedMeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.BandType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.Drop;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.DscpRemark;
@@ -63,9 +64,8 @@ public class MeterConsumerImpl {
     private IContainer container;
 
     public MeterConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class)
-                .node(Meter.class).toInstance();
-        meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class).node(Meter.class).toInstance();
+        meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);        
         clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
 
         container = FRMConsumerImpl.getContainer();
@@ -218,9 +218,10 @@ public class MeterConsumerImpl {
                 originalSwMeterView.put(meterKey, meterAddDataObject);
                 meterService.addMeter(meterBuilder.build());
             }
-
-            originalSwMeterView.put(meterKey, meterAddDataObject);
-        } else {
+            
+            originalSwMeterView.put(meterKey, meterAddDataObject);            
+        }
+        else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
 
@@ -234,19 +235,35 @@ public class MeterConsumerImpl {
      *
      * @param dataObject
      */
-    private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
+    private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
         MeterKey meterKey = meterUpdateDataObject.getKey();
-
-        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
-            if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();
-
+        UpdatedMeterBuilder updateMeterBuilder = null;
+        
+        
+        if (null != meterKey && 
+                validateMeter(meterUpdateDataObject, FRMUtil.operation.UPDATE).isSuccess()) {
+            
+            if (originalSwMeterView.containsKey(meterKey)) {
+                originalSwMeterView.remove(meterKey);
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
-                meterService.updateMeter(updateMeterBuilder.build());
             }
-
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);
-        } else {
+            
+            if (meterUpdateDataObject.isInstall()) {
+                UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder(); 
+                updateMeterBuilder = new UpdatedMeterBuilder();
+                updateMeterBuilder.fieldsFrom(meterUpdateDataObject);
+                updateMeterInputBuilder.setUpdatedMeter(updateMeterBuilder.build());
+                
+                if (installedSwMeterView.containsKey(meterKey)) {
+                    installedSwMeterView.remove(meterKey);
+                    installedSwMeterView.put(meterKey, meterUpdateDataObject);
+                }
+                
+                meterService.updateMeter(updateMeterInputBuilder.build());
+            }
+                        
+        }
+        else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
 
@@ -260,19 +277,21 @@ public class MeterConsumerImpl {
      *
      * @param dataObject
      */
-    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
+    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
         MeterKey meterKey = meterUpdateDataObject.getKey();
-
-        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
+        
+        if (null != meterKey && 
+                validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
             if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();
-
-                originalSwMeterView.put(meterKey, meterUpdateDataObject);
+                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();                
+                
+                installedSwMeterView.put(meterKey, meterUpdateDataObject);
                 meterService.updateMeter(updateMeterBuilder.build());
             }
-
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);
-        } else {
+            
+            originalSwMeterView.put(meterKey, meterUpdateDataObject);            
+        }
+        else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
 
