@@ -25,7 +25,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.Groups;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.groups.GroupKey;
@@ -36,9 +35,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.Gro
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.UpdatedGroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes.GroupType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.Buckets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.Bucket;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.UpdatedMeterBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -242,7 +243,7 @@ public class GroupConsumerImpl {
                 bucketIterator = groupBuckets.getBucket().iterator();
                 
                 while (bucketIterator.hasNext()) {
-                    if(!(FRMUtil.areActionsValid(bucketIterator.next().getActions()))) {
+                    if(!(FRMUtil.validateActions(bucketIterator.next().getAction()))) {
                         logger.error("Error in action bucket");
                         return new Status(StatusCode.BADREQUEST, "Invalid Group bucket contents");
                     }                                
@@ -278,25 +279,32 @@ public class GroupConsumerImpl {
      */
     private Status updateGroup(InstanceIdentifier<?> path, Group groupUpdateDataObject) {
         GroupKey groupKey = groupUpdateDataObject.getKey();        
+        UpdatedGroupBuilder updateGroupBuilder = null;
+        
         Status groupOperationStatus = validateGroup(groupUpdateDataObject, FRMUtil.operation.UPDATE);
         
         if (!groupOperationStatus.isSuccess()) {
             logger.error("Group data object validation failed %s" + groupUpdateDataObject.getGroupName());
             return groupOperationStatus;
         }
-            
-        originalSwGroupView.remove(groupKey);
-        originalSwGroupView.put(groupKey, groupUpdateDataObject);
+         
+        if (originalSwGroupView.containsKey(groupKey)) {
+            originalSwGroupView.remove(groupKey);
+            originalSwGroupView.put(groupKey, groupUpdateDataObject);
+        }
         
         if (groupUpdateDataObject.isInstall()) {
             UpdateGroupInputBuilder groupData = new UpdateGroupInputBuilder();
+            updateGroupBuilder = new UpdatedGroupBuilder();
+            updateGroupBuilder.fieldsFrom(groupUpdateDataObject);
+            groupData.setUpdatedGroup(updateGroupBuilder.build());
             //TODO how to get original group and modified group. 
             
             if (installedSwGroupView.containsKey(groupKey)) {
                 installedSwGroupView.remove(groupKey);
+                installedSwGroupView.put(groupKey, groupUpdateDataObject);
             }
             
-            installedSwGroupView.put(groupKey, groupUpdateDataObject);
             groupService.updateGroup(groupData.build());
         }
         
@@ -338,12 +346,15 @@ public class GroupConsumerImpl {
         for(Entry<InstanceIdentifier<?>, Group> entry :transaction.additions.entrySet()) {
             
             if (!addGroup(entry.getKey(),entry.getValue()).isSuccess()) {
+                transaction.additions.remove(entry.getKey());
                 return Rpcs.getRpcResult(false, null, null);
             }
         }
-        for(@SuppressWarnings("unused") Entry<InstanceIdentifier<?>, Group> entry :transaction.additions.entrySet()) {
+        
+        for(Entry<InstanceIdentifier<?>, Group> entry :transaction.updates.entrySet()) {
            
             if (!updateGroup(entry.getKey(),entry.getValue()).isSuccess()) {
+                transaction.updates.remove(entry.getKey());
                 return Rpcs.getRpcResult(false, null, null);
             }
         }

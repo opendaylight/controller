@@ -69,15 +69,7 @@ module opendaylight-flow-types {
         }
     }
     
-    grouping flow {
-        container match {
-            uses match:match;
-        }
-        
-        container instructions {
-            uses instruction-list;
-        }
-                
+    grouping generic_flow_attributes {
         leaf priority {
             type uint16;
         }
@@ -94,16 +86,28 @@ module opendaylight-flow-types {
             type uint64;
         }
         
+        leaf table_id {
+            type uint8;
+        }
+    }
+    
+    grouping flow {
+        container match {
+            uses match:match;
+        }
+        
+        container instructions {
+            uses instruction-list;
+        }          
+         
+        uses generic_flow_attributes;
+        
         leaf container-name {
             type string; 
         }
         
         leaf cookie_mask {
-            type uint8;
-        }
-        
-        leaf table_id {
-            type uint8;
+            type uint64;
         }
         
         leaf buffer_id {
@@ -118,11 +122,11 @@ module opendaylight-flow-types {
             type uint32;
         }
         
-        leaf flags{
+        leaf flags {
             type flow-mod-flags;
         }
         
-        leaf flow-name{
+        leaf flow-name {
             type string;
         }
         
@@ -171,6 +175,37 @@ module opendaylight-flow-types {
 
         leaf matched {
             type yang:counter64;   
+        }
+    }
+    
+    grouping flow-mod-removed {
+        uses generic_flow_attributes;
+        
+        leaf duration_nsec {
+            type uint32;
+        }
+        
+        leaf duration_sec {
+            type uint32;
+        }
+        
+        leaf idle_timeout {
+            type uint16;
+        }
+        
+        leaf hard_timeout {
+            type uint16;
+        }
+        
+        leaf packet_count {
+            type uint64;
+        }
+        
+        leaf byte_count {
+            type uint64;
+        }
+        container match {
+            uses match:match;
         }
     }
 }
