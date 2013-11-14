@@ -16,6 +16,17 @@ module sal-flow {
         type instance-identifier;
     }
     
+    grouping node-flow-removed {
+        leaf node {
+            ext:context-reference "inv:node-context";
+            type inv:node-ref;
+        }
+        leaf flow-table {
+            type flow-table-ref;
+        }
+        uses types:flow-mod-removed;
+    }
+    
     grouping node-flow {
         uses "inv:node-context-ref";
 
@@ -77,5 +88,9 @@ module sal-flow {
 
     notification flow-removed {
         uses node-flow;
+    }
+    
+    notification switch-flow-removed {
+        uses node-flow-removed;
     }
 }

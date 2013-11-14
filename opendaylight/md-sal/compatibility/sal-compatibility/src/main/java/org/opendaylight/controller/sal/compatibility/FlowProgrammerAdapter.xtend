@@ -9,6 +9,7 @@ import org.opendaylight.controller.sal.utils.Status
 import org.opendaylight.controller.sal.utils.StatusCode
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
@@ -129,6 +130,10 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     }
     
     override onFlowUpdated(FlowUpdated notification) {
+        // NOOP : Not supported by AD SAL
+    }
+    
+    override onSwitchFlowRemoved(SwitchFlowRemoved notification) {
         // NOOP : Not supported by AD SAL
     }
     
