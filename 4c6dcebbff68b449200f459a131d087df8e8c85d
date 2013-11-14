@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_1059455a",
+        "filename": "opendaylight/northbound/usermanager/src/main/java/org/opendaylight/controller/usermanager/northbound/UserManagerNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-11-14T06:09:58Z",
+      "side": 1,
+      "message": "Change the url to match the @Path below.",
+      "revId": "4c6dcebbff68b449200f459a131d087df8e8c85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f0535137",
+        "filename": "opendaylight/northbound/usermanager/src/main/java/org/opendaylight/controller/usermanager/northbound/UserManagerNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-11-14T06:09:58Z",
+      "side": 1,
+      "message": "For adding a new role, use POST. You cannot POST userConfig object. Rather you\u0027d have to post the \u0027roles\u0027 to be added. This means you\u0027d have to define a new object to represent the roles to be POSTed.\n\nNewer APIs use POST to collection semantics. See openstack APIs for examples.",
+      "revId": "4c6dcebbff68b449200f459a131d087df8e8c85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_903c15e4",
+        "filename": "opendaylight/northbound/usermanager/src/main/java/org/opendaylight/controller/usermanager/northbound/UserManagerNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-11-14T06:09:58Z",
+      "side": 1,
+      "message": "YOu are only adding a role here. Consider renaming the method to addRole()",
+      "revId": "4c6dcebbff68b449200f459a131d087df8e8c85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b035d9f8",
+        "filename": "opendaylight/northbound/usermanager/src/main/java/org/opendaylight/controller/usermanager/northbound/UserManagerNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-11-14T06:09:58Z",
+      "side": 1,
+      "message": "The gson usage appears to be a hack. Its unclear the purpose of converting UserConfig to JSON and then back to UserConfig.\n\nNote that we support both XML and JSON.\n\nThe use of UserConfig is incorrect in this method. See above comment.",
+      "revId": "4c6dcebbff68b449200f459a131d087df8e8c85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_505fbd41",
+        "filename": "opendaylight/usermanager/api/src/main/java/org/opendaylight/controller/usermanager/UserConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-11-14T06:09:58Z",
+      "side": 1,
+      "message": "Return Collections.emptyList() instead. The consumer doesn\u0027t have to do a null check.",
+      "revId": "4c6dcebbff68b449200f459a131d087df8e8c85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
