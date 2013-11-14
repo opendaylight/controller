@@ -51,8 +51,11 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
         CompositeNode data = t.getData();
-        Document domTree = NodeUtils.buildShadowDomTree(data);
+        if (data == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+        }
         
+        Document domTree = NodeUtils.buildShadowDomTree(data);
         try {
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
@@ -64,7 +67,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             transformer.transform(new DOMSource(domTree), new StreamResult(entityStream));
         } catch (TransformerException e) {
             logger.error("Error during translation of Document to OutputStream", e);
-            new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
     }
 

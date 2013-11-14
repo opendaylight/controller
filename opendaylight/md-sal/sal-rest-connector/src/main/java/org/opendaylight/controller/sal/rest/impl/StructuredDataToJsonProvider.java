@@ -12,11 +12,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 
 import com.google.gson.stream.JsonWriter;
@@ -40,11 +42,16 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
     public void writeTo(StructuredData t, Class<?> type, Type genericType, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
+        CompositeNode data = t.getData();
+        if (data == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+        }
+
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, "UTF-8"));
         writer.setIndent("    ");
         JsonMapper jsonMapper = new JsonMapper();
-        jsonMapper.write(writer, t.getData(), (DataNodeContainer) t.getSchema());
+        jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema());
         writer.flush();
     }
-    
+
 }
