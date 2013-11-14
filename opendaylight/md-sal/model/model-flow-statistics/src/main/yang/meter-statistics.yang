@@ -19,10 +19,9 @@ module opendaylight-meter-statistics {
     grouping meter-stats-response {
         uses "inv:node-context-ref";
 
-        leaf meter-stats-id {
-            type meter-stats-ref;
+        list meter-statistics {
+	        uses meter-types:meter-statistics;
         }
-        uses meter-types:meter-statistics;
     }
 
     typedef meter-config-ref {
@@ -32,10 +31,9 @@ module opendaylight-meter-statistics {
     grouping meter-config-response {
         uses "inv:node-context-ref";
 
-        leaf meter-config-id {
-            type meter-config-ref;
+        list meter-config-stats {
+        	uses meter-types:meter-config-stats;
         }
-        uses meter-types:meter-config-stats;
     }
 
     typedef meter-features-ref {
@@ -45,28 +43,35 @@ module opendaylight-meter-statistics {
     grouping meter-features-response {
         uses "inv:node-context-ref";
 
-        leaf meter-features-id {
-            type meter-features-ref;
-        }
         uses meter-types:meter-features;
     }
 
+	container meter-all-stats {
+		container meter-stats {
+			uses meter-stats-response;
+		}
+		
+		container meter-config {
+			uses meter-config-response;
+		}
+		
+		container meter-features {
+			uses meter-features-response;
+		}
+	}
 	// RPC calls
 	rpc get-all-meter-statistics {
 		input {
             uses inv:node-context-ref;
         }
         output {
-            list meter-statistics {
-                uses meter-stats-response;
-                uses tr:transaction-aware;
-            }
+			uses meter-stats-response;
+			uses tr:transaction-aware;
         }
 	
 	}
 	
 	rpc get-meter-statistics {
-		description "RPC Method to send meter statistics request to the give switch for specific meter"; 
 		input {
             uses inv:node-context-ref;
             leaf meter-id{
@@ -80,12 +85,9 @@ module opendaylight-meter-statistics {
 	
 	}
 	
-	rpc get-meter-config-statistics {
+	rpc get-all-meter-config-statistics {
 		input {
             uses inv:node-context-ref;
-            leaf meter-id{
-            	type meter-types:meter-id;
-            }
         }
         output {
         	uses meter-config-response;
@@ -96,9 +98,6 @@ module opendaylight-meter-statistics {
 	rpc get-meter-features {
 		input {
             uses inv:node-context-ref;
-            leaf meter-id{
-            	type meter-types:meter-id;
-	        }
         }
         output {
         	uses meter-features-response;
@@ -110,16 +109,27 @@ module opendaylight-meter-statistics {
 	//Notification calls
 	
 	notification meter-statistics-updated {
-		uses meter-stats-response;
+	    leaf meter-stats-id {
+            type meter-stats-ref;
+        }
+    	uses meter-stats-response;
         uses tr:transaction-aware;
 	}
 	
 	notification meter-config-stats-updated {
+		leaf meter-config-id {
+            type meter-config-ref;
+        }
+	
 		uses meter-config-response;
         uses tr:transaction-aware;
 	}
 
 	notification meter-features-updated {
+	    leaf meter-features-id {
+            type meter-features-ref;
+        }
+	
 		uses meter-features-response;
         uses tr:transaction-aware;
 	}

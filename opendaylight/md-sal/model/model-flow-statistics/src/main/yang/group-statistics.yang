@@ -18,10 +18,9 @@ module opendaylight-group-statistics {
     grouping group-stats-response {
         uses "inv:node-context-ref";
 
-        leaf group-stats-id {
-            type group-stats-ref;
+        list group-statistics{
+        	uses group-types:group-statistics;
         }
-        uses group-types:group-statistics;
     }
 
     typedef group-features-ref {
@@ -31,9 +30,6 @@ module opendaylight-group-statistics {
     grouping group-features-response {
         uses "inv:node-context-ref";
 
-        leaf group-features-id {
-            type group-features-ref;
-        }
         uses group-types:group-features;
     }
 
@@ -44,10 +40,23 @@ module opendaylight-group-statistics {
     grouping group-desc-response {
         uses "inv:node-context-ref";
 
-        leaf group-desc-id {
-            type group-desc-ref;
+        list group-desc-stats {
+        	uses group-types:group-desc-stats;
         }
-        uses group-types:group-desc-stats;
+    }
+    
+    container group-all-statistics {
+    	container group-stats {
+    		uses group-stats-response;
+    	}
+    	
+    	container group-features {
+   			uses group-features-response;
+   		}
+   		
+   		container group-desc {
+   			uses group-desc-response;
+   		}
     }
 
 	// RPC calls
@@ -56,9 +65,7 @@ module opendaylight-group-statistics {
             uses inv:node-context-ref;
         }
         output {
-            list group-statistics {
-                uses group-stats-response;
-            }
+        	uses group-stats-response;
             uses tr:transaction-aware;
         }
 	
@@ -81,9 +88,6 @@ module opendaylight-group-statistics {
 	rpc get-group-description {
 		input {
             uses inv:node-context-ref;
-            leaf group-id{
-            	type group-types:group-id;
-            }
         }
         output {
             uses group-desc-response;
@@ -94,9 +98,6 @@ module opendaylight-group-statistics {
 	rpc get-group-features {
 		input {
             uses inv:node-context-ref;
-            leaf group-id{
-            	type group-types:group-id;
-            }
         }
         output {
             uses group-features-response;
@@ -108,16 +109,28 @@ module opendaylight-group-statistics {
 	//Notification calls
 	
 	notification group-statistics-updated {
+	    leaf group-stats-id {
+            type group-stats-ref;
+        }
+		
 		uses group-stats-response;
         uses tr:transaction-aware;
 	}
 	
 	notification group-desc-stats-updated {
+		leaf group-desc-id {
+            type group-desc-ref;
+        }
+	
 		uses group-desc-response;
         uses tr:transaction-aware;
 	}
 
 	notification group-features-updated {
+		leaf group-features-id {
+            type group-features-ref;
+        }
+	
 		uses group-features-response;
         uses tr:transaction-aware;
 	}
