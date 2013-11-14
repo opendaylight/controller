@@ -1,7 +1,10 @@
 package org.opendaylight.controller.sal.restconf.impl
 
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import java.util.List
 import org.opendaylight.controller.sal.rest.api.RestconfService
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
 
 class RestconfImpl implements RestconfService {
     
@@ -44,17 +47,20 @@ class RestconfImpl implements RestconfService {
 
     override createConfigurationData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
-        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
+        val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
+        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
-        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
+        val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
+        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
         val rpc = identifier.toQName;
-        val rpcResult = broker.invokeRpc(rpc, payload);
+        val value = resolveNodeNamespaceBySchema(payload, controllerContext.getRpcInputSchema(rpc))
+        val rpcResult = broker.invokeRpc(rpc, value);
         val schema = controllerContext.getRpcOutputSchema(rpc);
         return new StructuredData(rpcResult.result, schema);
     }
@@ -81,12 +87,35 @@ class RestconfImpl implements RestconfService {
     
     override createOperationalData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
-        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
+        val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
+        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
     }
     
     override updateOperationalData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
-        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,payload).get();
+        val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
+        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+    }
+    
+    private def CompositeNode resolveNodeNamespaceBySchema(CompositeNode node, DataSchemaNode schema) {
+        if (node instanceof CompositeNodeWrapper) {
+            addNamespaceToNodeFromSchemaRecursively(node as CompositeNodeWrapper, schema)
+            return (node as CompositeNodeWrapper).unwrap(null)
+        }
+        return node
+    }
+
+    private def void addNamespaceToNodeFromSchemaRecursively(NodeWrapper<?> nodeBuilder, DataSchemaNode schema) {
+        if (nodeBuilder.namespace == null) {
+            nodeBuilder.namespace = schema.QName.namespace
+        }
+        if (nodeBuilder instanceof CompositeNodeWrapper) {
+            val List<NodeWrapper<?>> children = (nodeBuilder as CompositeNodeWrapper).getValues
+            for (child : children) {
+                addNamespaceToNodeFromSchemaRecursively(child,
+                    (schema as DataNodeContainer).childNodes.findFirst[n|n.QName.localName === child.localName])
+            }
+        }
     }
 
 }

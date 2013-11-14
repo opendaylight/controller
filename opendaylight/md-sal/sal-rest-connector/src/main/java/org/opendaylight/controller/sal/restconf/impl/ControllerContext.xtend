@@ -294,5 +294,9 @@ class ControllerContext implements SchemaServiceListener {
     def ContainerSchemaNode getRpcOutputSchema(QName name) {
         qnameToRpc.get(name)?.output;
     }
+    
+    def ContainerSchemaNode getRpcInputSchema(QName name) {
+        qnameToRpc.get(name)?.input;
+    }
 
 }
