@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.MappingServiceImpl;
+import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodesBuilder;
@@ -48,10 +49,9 @@ public class MappingServiceTest {
     @Test
     public void baDataToBiData() throws Exception {
 
-        String[] yangFiles = new String[] { "yang-ext.yang", "ietf-inet-types.yang", "ietf-yang-types.yang",
-                "node-inventory.yang" };
+        String[] yangFiles = AbstractDataServiceTest.getModelFilenamesImpl();
 
-        SchemaContext ctx = getContext(yangFiles);
+        SchemaContext ctx = AbstractDataServiceTest.getContext(yangFiles);
 
         impl.onGlobalContextUpdated(ctx);
 
@@ -73,9 +73,8 @@ public class MappingServiceTest {
     @Test
     public void instanceIdentifierTest() throws Exception {
 
-        String[] yangFiles = new String[] { "yang-ext.yang", "ietf-inet-types.yang", "ietf-yang-types.yang",
-                "node-inventory.yang" };
-        SchemaContext ctx = getContext(yangFiles);
+        String[] yangFiles = AbstractDataServiceTest.getModelFilenamesImpl();
+        SchemaContext ctx = AbstractDataServiceTest.getContext(yangFiles);
         impl.onGlobalContextUpdated(ctx);
 
         NodeKey nodeKey = new NodeKey(new NodeId("foo"));
@@ -83,22 +82,6 @@ public class MappingServiceTest {
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier result = service.toDataDom(path);
         assertNotNull(result);
         assertEquals(2, result.getPath().size());
-    }
-
-    public static SchemaContext getContext(String[] yangFiles) {
-
-        ClassLoader loader = MappingServiceTest.class.getClassLoader();
-
-        List<InputStream> streams = new ArrayList<>();
-        for (String string : yangFiles) {
-            InputStream stream = loader.getResourceAsStream("META-INF/yang/" + string);
-            streams.add(stream);
-
-        }
-        YangParserImpl parser = new YangParserImpl();
-
-        Set<Module> modules = parser.parseYangModelsFromStreams(streams);
-        return parser.resolveSchemaContext(modules);
     }
 
     private Node createChildNode(String id) {

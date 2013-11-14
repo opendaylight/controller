@@ -55,8 +55,6 @@ import org.opendaylight.yangtools.sal.binding.model.api.MethodSignature
 
 class BindingMapping {
 
-
-
     @Property
     val Map<Type, GeneratedTypeBuilder> typeToDefinition = new HashMap();
     

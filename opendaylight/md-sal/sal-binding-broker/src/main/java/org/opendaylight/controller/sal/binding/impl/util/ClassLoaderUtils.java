@@ -34,6 +34,10 @@ public class ClassLoaderUtils {
     
     
     public static Class<?> loadClassWithTCCL(String name) throws ClassNotFoundException {
+        if("byte[]".equals(name)) {
+            return byte[].class;
+        }
+        
         return Thread.currentThread().getContextClassLoader().loadClass(name);
     }
 }
