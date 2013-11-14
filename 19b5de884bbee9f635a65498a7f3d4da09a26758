@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_8ece32b3",
+        "filename": "opendaylight/usermanager/api/src/main/java/org/opendaylight/controller/usermanager/UserConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-14T19:45:55Z",
+      "side": 1,
+      "message": "Like Prasanth has already suggested, please return a singleton empty list:\n\nreturn Collections.emptyList();",
+      "revId": "19b5de884bbee9f635a65498a7f3d4da09a26758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
