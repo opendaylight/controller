@@ -48,7 +48,7 @@
         <module>statistics-manager</module>
         <!-- Compability Packages -->
         <module>compatibility</module>
-
+        <module>sal-infinispan-routingtable/implementation</module>
         <module>sal-zeromq-connector</module>
     </modules>
 
