@@ -8,6 +8,7 @@ public class LstItem {
     Map<String, LfLst> lfLsts;
     Map<String, Lst> lsts;
     Map<String, Cont> conts;
+    private int numOfEqualItems = 0;
 
     public LstItem() {
         lfs = new HashMap<>();
@@ -41,6 +42,11 @@ public class LstItem {
         return this;
     }
 
+    public LstItem addLf(String name, String value) {
+        lfs.put(name, new Lf(name, value));
+        return this;
+    }
+
     public void addLfLst(LfLst lfLst) {
         lfLsts.put(lfLst.getName(), lfLst);
     }
@@ -53,6 +59,10 @@ public class LstItem {
         conts.put(cont.getName(), cont);
     }
 
+    public void incNumOfEqualItems() {
+        this.numOfEqualItems++;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -62,16 +72,35 @@ public class LstItem {
             return false;
         }
         LstItem lstItem = (LstItem) obj;
-        if (!this.conts.equals(lstItem.conts)) {
+        if (this.conts == null) {
+            if (lstItem.conts != null) {
+                return false;
+            }
+        } else if (!this.conts.equals(lstItem.conts)) {
             return false;
         }
-        if (!this.lfs.equals(lstItem.lfs)) {
+        if (this.lfs == null) {
+            if (lstItem.lfs != null) {
+                return false;
+            }
+        } else if (!this.lfs.equals(lstItem.lfs)) {
             return false;
         }
-        if (!this.lfLsts.equals(lstItem.lfLsts)) {
+        if (this.lfLsts == null) {
+            if (lstItem.lfLsts != null) {
+                return false;
+            }
+        } else if (!this.lfLsts.equals(lstItem.lfLsts)) {
             return false;
         }
-        if (!this.lsts.equals(lstItem.lsts)) {
+        if (this.lsts == null) {
+            if (lstItem.lsts != null) {
+                return false;
+            }
+        } else if (!this.lsts.equals(lstItem.lsts)) {
+            return false;
+        }
+        if (this.numOfEqualItems != lstItem.numOfEqualItems) {
             return false;
         }
         return true;
@@ -85,6 +114,7 @@ public class LstItem {
         result = prime * result + ((lfLsts == null) ? 0 : lfLsts.hashCode());
         result = prime * result + ((lsts == null) ? 0 : lsts.hashCode());
         result = prime * result + ((conts == null) ? 0 : conts.hashCode());
+        result = prime * result + numOfEqualItems;
         return result;
     }
 

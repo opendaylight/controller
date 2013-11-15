@@ -10,8 +10,16 @@ public class LfLst extends YangElement {
         lfs = new HashSet<>();
     }
 
+    public LfLst addLf(String value) {
+        return addLf(new Lf(value));
+    }
+
+    
     public LfLst addLf(Lf lf) {
-        lfs.add(lf);
+        while (this.lfs.contains(lf)) {
+            lf.incNumOfEqualItems();
+        }
+        this.lfs.add(lf);
         return this;
     }
 
@@ -31,7 +39,11 @@ public class LfLst extends YangElement {
             return false;
         }
         LfLst lfLst = (LfLst) obj;
-        if (!this.lfs.equals(lfLst.lfs)) {
+        if (this.lfs == null) {
+            if (lfLst.lfs != null) {
+                return false;
+            }
+        } else if (!this.lfs.equals(lfLst.lfs)) {
             return false;
         }
         return true;

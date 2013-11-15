@@ -10,9 +10,10 @@ import java.io.*;
 import java.util.*;
 
 import org.junit.Test;
+
 import com.google.gson.stream.*;
 
-public class YangAndXmlToJsonBasicDataTypesTest {
+public class ToJsonBasicDataTypesTest {
 
     @Test
     public void simpleYangDataTest() {
@@ -21,7 +22,8 @@ public class YangAndXmlToJsonBasicDataTypesTest {
         // TestUtils.readJsonFromFile("/yang-to-json-conversion/simple-yang-types/xml/awaited_output.json",
         // false);
 
-        jsonOutput = TestUtils.convertXmlDataAndYangToJson("/yang-to-json-conversion/simple-data-types/xml/data.xml",
+        jsonOutput = TestUtils.convertCompositeNodeDataAndYangToJson(
+                TestUtils.loadCompositeNode("/yang-to-json-conversion/simple-data-types/xml/data.xml"),
                 "/yang-to-json-conversion/simple-data-types", "/yang-to-json-conversion/simple-data-types/xml");
         verifyJsonOutput(jsonOutput);
     }
