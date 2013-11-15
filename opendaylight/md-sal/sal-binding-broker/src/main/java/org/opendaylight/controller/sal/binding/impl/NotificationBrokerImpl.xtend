@@ -179,7 +179,7 @@ class NotifyTask implements Callable<Object> {
         try {
             listener.onNotification(notification);
         } catch (Exception e) {
-            log.error("Unhandled exception {} thrown by listener: {} Notification: {}", e, listener, notification);
+            log.error("Unhandled exception thrown by listener: {}", listener, e);
         }
         return null;
     }
