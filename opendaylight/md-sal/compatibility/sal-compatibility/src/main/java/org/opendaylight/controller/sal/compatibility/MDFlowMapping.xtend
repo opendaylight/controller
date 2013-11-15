@@ -331,7 +331,7 @@ public class MDFlowMapping {
         return it.build()
     }
 
-    public static def List<Uri> toUriList(NodeConnector connector) {
+    public static def Uri toUriList(NodeConnector connector) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 

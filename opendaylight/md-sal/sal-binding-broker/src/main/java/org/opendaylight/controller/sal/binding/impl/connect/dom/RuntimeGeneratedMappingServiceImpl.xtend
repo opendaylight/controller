@@ -38,6 +38,10 @@ import org.opendaylight.yangtools.concepts.Delegator
 import java.util.concurrent.ConcurrentMap
 import org.opendaylight.yangtools.sal.binding.model.api.GeneratedType
 import org.opendaylight.yangtools.yang.binding.BindingCodec
+import com.google.common.collect.HashMultimap
+import com.google.common.util.concurrent.SettableFuture
+import java.util.concurrent.Future
+import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl
 
 class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener {
 
@@ -55,6 +59,10 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
 
     @Property
     val ConcurrentMap<Type, SchemaNode> typeToSchemaNode = new ConcurrentHashMap();
+    
+    val promisedTypeDefinitions = HashMultimap.<Type, SettableFuture<GeneratedTypeBuilder>>create;
+    
+    val promisedSchemas = HashMultimap.<Type, SettableFuture<SchemaNode>>create;
 
     override onGlobalContextUpdated(SchemaContext arg0) {
         recreateBindingContext(arg0);
@@ -135,11 +143,14 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         return ret;
     }
 
-    def void updateBindingFor(Map<SchemaPath, GeneratedTypeBuilder> map, SchemaContext module) {
+    private def void updateBindingFor(Map<SchemaPath, GeneratedTypeBuilder> map, SchemaContext module) {
         for (entry : map.entrySet) {
             val schemaNode = SchemaContextUtil.findDataSchemaNode(module, entry.key);
-            typeToDefinition.put(entry.value, entry.value);
-            typeToSchemaNode.put(entry.value, schemaNode)
+            if(schemaNode != null) {
+                typeToSchemaNode.put(entry.value, schemaNode)
+                typeToDefinition.put(entry.value,entry.value);
+                updatePromisedSchemas(entry.value,schemaNode);
+            }
         }
     }
 
@@ -147,7 +158,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         Class<? extends DataObject> parent) {
         val Class<?> rawType = argument.type;
         val ref = Types.typeForClass(rawType);
-        val schemaType = typeToSchemaNode.get(ref);
+        val schemaType = ref.schemaWithRetry;
         val qname = schemaType.QName
 
         val Object key = argument.key;
@@ -169,7 +180,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
 
     private def dispatch PathArgument toDataDomPathArgument(Item<?> argument, Class<? extends DataObject> parent) {
         val ref = Types.typeForClass(argument.type);
-        val qname = typeToSchemaNode.get(ref).QName
+        val qname = ref.schemaWithRetry.QName
         return new NodeIdentifier(qname);
     }
 
@@ -181,6 +192,58 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         binding.typeToSchemaNode = typeToSchemaNode
         binding.typeDefinitions = typeDefinitions
 
+    }
+    
+    private def getTypeDefinition(Type type) {
+        val typeDef = typeToDefinition.get(type);
+        if (typeDef !== null) {
+            return typeDef;
+        }
+        return type.getTypeDefInFuture.get();
+    }
+
+    private def Future<GeneratedTypeBuilder> getTypeDefInFuture(Type type) {
+        val future = SettableFuture.<GeneratedTypeBuilder>create()
+        promisedTypeDefinitions.put(type, future);
+        return future;
+    }
+    
+    private def updatePromisedTypeDefinitions(GeneratedTypeBuilder builder) {
+        val futures = promisedTypeDefinitions.get(builder);
+        if (futures === null || futures.empty) {
+            return;
+        }
+        for (future : futures) {
+            future.set(builder);
+        }
+        promisedTypeDefinitions.removeAll(builder);
+    }
+
+
+    private def getSchemaWithRetry(Type type) {
+        val typeDef = typeToSchemaNode.get(type);
+        if (typeDef !== null) {
+            return typeDef;
+        }
+        return type.getSchemaInFuture.get();
+    }
+
+    private def Future<SchemaNode> getSchemaInFuture(Type type) {
+        val future = SettableFuture.<SchemaNode>create()
+        promisedSchemas.put(type, future);
+        return future;
+    }
+    
+    private def void updatePromisedSchemas(Type builder,SchemaNode schema) {
+        val ref = new ReferencedTypeImpl(builder.packageName,builder.name);
+        val futures = promisedSchemas.get(ref);
+        if (futures === null || futures.empty) {
+            return;
+        }
+        for (future : futures) {
+            future.set(schema);
+        }
+        promisedSchemas.removeAll(builder);
     }
 }
 

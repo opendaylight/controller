@@ -10,10 +10,15 @@ import javassist.Modifier
 import javassist.NotFoundException
 import javassist.LoaderClassPath
 import javassist.ClassClassPath
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 class JavassistUtils {
 
     ClassPool classPool
+    
+    @Property
+    val Lock lock = new ReentrantLock();
 
     new(ClassPool pool) {
         classPool = pool;
@@ -49,12 +54,14 @@ class JavassistUtils {
     }
 
     def CtClass createClass(String fqn, ClassGenerator cls) {
+        
         val target = classPool.makeClass(fqn);
         cls.process(target);
         return target;
     }
 
     def CtClass createClass(String fqn, CtClass superInterface, ClassGenerator cls) {
+        
         val target = classPool.makeClass(fqn);
         target.implementsType(superInterface);
         cls.process(target);
