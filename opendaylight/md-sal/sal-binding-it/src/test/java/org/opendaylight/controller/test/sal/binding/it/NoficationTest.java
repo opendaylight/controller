@@ -200,6 +200,11 @@ public class NoficationTest extends AbstractTest {
         public void onFlowUpdated(FlowUpdated notification) {
             updatedFlows.add(notification);
         }
+        
+        public void onSwitchFlowRemoved(SwitchFlowRemoved arg0) {
+            // TODO Auto-generated method stub
+            
+        }
 
         @Override
         public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
