@@ -5,6 +5,7 @@ module opendaylight-action-types {
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-l2-types {prefix l2t; revision-date "2013-08-27";}
+    import opendaylight-match-types {prefix match; revision-date 2013-10-26";}
     
     revision "2013-11-12" {
         description "Initial revision of action service";
@@ -42,7 +43,7 @@ module opendaylight-action-types {
     grouping action {
         choice action {
             case output-action {
-                leaf-list output-node-connector {
+                leaf output-node-connector {
                     type inet:uri;
                 }
                 
@@ -60,10 +61,20 @@ module opendaylight-action-types {
                     }
                 }
             }
-
+            
+            case set-field {
+                container match {
+                    uses match:match;
+                }
+            }
+            
             case set-queue-action {
                 leaf queue {
                     type string; 
+                }
+                
+                leaf queue-id {
+                    type uint32; 
                 }
             }
 
@@ -167,6 +178,10 @@ module opendaylight-action-types {
             case group-action {
                 leaf group {
                     type string;
+                }
+                
+                leaf group-id {
+                    type uint32;
                 }
             }
             

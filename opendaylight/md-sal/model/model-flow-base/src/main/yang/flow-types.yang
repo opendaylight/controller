@@ -55,6 +55,10 @@ module opendaylight-flow-types {
                 leaf meter {
                     type string;
                 }
+                
+                leaf meter-id {
+                    type uint32;
+                }
             }   
         }
     }

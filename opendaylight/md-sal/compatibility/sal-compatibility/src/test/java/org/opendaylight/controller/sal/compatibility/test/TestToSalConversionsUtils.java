@@ -175,7 +175,7 @@ public class TestToSalConversionsUtils {
         checkSalAction(actions, FloodAll.class, 1);
         checkSalAction(actions, HwPath.class, 1);
         checkSalAction(actions, Loopback.class, 1);
-        checkSalAction(actions, Output.class, 2, true);
+        checkSalAction(actions, Output.class, 1, true);
         checkSalAction(actions, PopVlan.class, 1);
         checkSalAction(actions, PushVlan.class, 1, true);
         checkSalAction(actions, SetDlDst.class, 1, true);
@@ -451,11 +451,8 @@ public class TestToSalConversionsUtils {
         pushVlanActionBuilder.setTag(0x8100); // 12 bit
     }
 
-    private void prepareActionOutput(OutputActionBuilder outputActionBuilder) {
-        List<Uri> uris = new ArrayList<>();
-        uris.add(new Uri("uri1"));
-        uris.add(new Uri("uri2"));
-        outputActionBuilder.setOutputNodeConnector(uris);
+    private void prepareActionOutput(OutputActionBuilder outputActionBuilder) {       
+        outputActionBuilder.setOutputNodeConnector(new Uri("uri1"));
     }
 
     private Match prepOdMatch(MtchType mt) {
