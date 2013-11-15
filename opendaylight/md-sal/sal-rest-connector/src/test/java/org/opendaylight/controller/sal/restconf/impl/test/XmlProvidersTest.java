@@ -24,6 +24,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
@@ -150,6 +151,21 @@ public class XmlProvidersTest extends JerseyTest {
         response = target(uri.toASCIIString()).request(MediaTypes.API + RestconfService.XML).post(
                 Entity.entity("<SimpleNode>", new MediaType("application", "vnd.yang.api+xml")));
         assertEquals(400, response.getStatus());
+    }
+    
+    @Test
+    public void testXmlToCompositeNode404NotFound() {
+        URI uri = null;
+        try {
+            uri = new URI("/datastore/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
+        } catch (UnsupportedEncodingException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        
+        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
+        
+        Response response = target(uri.toASCIIString()).request(MediaTypes.API+RestconfService.XML).get();
+        assertEquals(404, response.getStatus());
     }
 
     @Override

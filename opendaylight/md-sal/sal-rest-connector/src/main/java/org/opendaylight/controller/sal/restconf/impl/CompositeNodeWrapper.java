@@ -29,6 +29,11 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     public CompositeNodeWrapper(String localName) {
         this.localName = Preconditions.checkNotNull(localName);
     }
+    
+    public CompositeNodeWrapper(URI namespace, String localName) {
+        this(localName);
+        this.namespace = namespace;
+    }
 
     @Override
     public String getLocalName() {

@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -48,7 +49,8 @@ class JsonReader {
     }
     
     private CompositeNodeWrapper createStructureWithRoot(String rootObjectName, JsonObject rootObject) {
-        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(rootObjectName);
+        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFrom(rootObjectName),
+                getLocalNameFrom(rootObjectName));
         for (Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
             addChildToParent(childOfFirstNode.getKey(), childOfFirstNode.getValue(), firstNode);
         }
@@ -57,7 +59,8 @@ class JsonReader {
     
     private void addChildToParent(String childName, JsonElement childType, CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(childName);
+            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFrom(childName),
+                    getLocalNameFrom(childName));
             parent.addValue(child);
             for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
@@ -71,11 +74,28 @@ class JsonReader {
             String value = childPrimitive.getAsString();
             SimpleNodeWrapper child = null;
             if (value.equals("[null]")) {
-                child = new SimpleNodeWrapper(childName, null);
+                child = new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), null);
             } else {
-                child = new SimpleNodeWrapper(childName, value);
+                child = new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), value);
             }
             parent.addValue(child);
         }
     }
+
+    private URI getNamespaceFrom(String jsonElementName) {
+        int indexOfDelimeter = jsonElementName.lastIndexOf(':');
+        if (indexOfDelimeter == -1) {
+            return null;
+        }
+        return URI.create(jsonElementName.substring(0, indexOfDelimeter));
+    }
+
+    private String getLocalNameFrom(String jsonElementName) {
+        int indexOfDelimeter = jsonElementName.lastIndexOf(':');
+        if (indexOfDelimeter == -1) {
+            return jsonElementName;
+        }
+        return jsonElementName.substring(indexOfDelimeter + 1, jsonElementName.length());
+    }
+
 }
