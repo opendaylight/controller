@@ -37,7 +37,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
         return null;
     }
 
-    private void blankTransaction() {
+    private synchronized void blankTransaction() {
         // create transaction
         ObjectName tx = configRegistry.beginConfig();
         CommitStatus commitStatus = configRegistry.commitConfig(tx);
