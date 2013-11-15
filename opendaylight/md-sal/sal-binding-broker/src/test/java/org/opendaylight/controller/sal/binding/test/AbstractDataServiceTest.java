@@ -11,7 +11,7 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.binding.test.connect.dom.MappingServiceTest;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
@@ -69,15 +69,17 @@ public  abstract class AbstractDataServiceTest {
         connectorServiceImpl.start();
         
         String[] yangFiles= getModelFilenames();
-        mappingServiceImpl.onGlobalContextUpdated(getContext(yangFiles));
+        if(yangFiles != null && yangFiles.length > 0) {
+            mappingServiceImpl.onGlobalContextUpdated(getContext(yangFiles));
+        }
     }
 
 
     protected  String[] getModelFilenames() {
-        return getModelFilenamesImpl();
+        return getAllModelFilenames();
     }
     
-    public static String[] getModelFilenamesImpl() {
+    public static String[] getAllModelFilenames() {
         Predicate<String> predicate = new Predicate<String>() {
             @Override
             public boolean apply(String input) {
