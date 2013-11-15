@@ -166,11 +166,11 @@ public class ToSalConversionsUtils {
                 targetAction.add(new Controller());
             } else if (sourceAction instanceof OutputAction) {
 
-                List<Uri> nodeConnectors = ((OutputAction) sourceAction).getOutputNodeConnector();
-                if (nodeConnectors != null) {
-                    for (Uri uri : nodeConnectors) {
-                        targetAction.add(new Output(fromNodeConnectorRef(uri)));
-                    }
+                Uri nodeConnector = ((OutputAction) sourceAction).getOutputNodeConnector();
+                if (nodeConnector != null) {
+                    //for (Uri uri : nodeConnectors) {
+                        targetAction.add(new Output(fromNodeConnectorRef(nodeConnector)));
+                    //}
                 }
             } else if (sourceAction instanceof PopMplsAction) {
                 // TODO: define maping

@@ -190,7 +190,7 @@ public class MDFlowMapping {
     public static dispatch def toAction(Output sourceAction) {
         val actionBuilder = new ActionBuilder();
         val it = new OutputActionBuilder();
-        outputNodeConnector = sourceAction.port.toUriList;
+        outputNodeConnector = sourceAction.port.toUri;
         actionBuilder.action = it.build();
         return actionBuilder.build();
 
@@ -331,7 +331,7 @@ public class MDFlowMapping {
         return it.build()
     }
 
-    public static def List<Uri> toUriList(NodeConnector connector) {
+    public static def Uri toUri(NodeConnector connector) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 

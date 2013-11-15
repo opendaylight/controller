@@ -127,7 +127,7 @@ public class FRMUtil {
                 }
             } else if (action instanceof OutputAction) {
                 Integer length = ((OutputAction) action).getMaxLength();
-                List<Uri> outputnodeconnector = ((OutputAction) action).getOutputNodeConnector();
+                Uri outputnodeconnector = ((OutputAction) action).getOutputNodeConnector();
                 if (length < 0 || length > 65294) {
                     logger.error("OutputAction: MaxLength is not valid");
                     return false;

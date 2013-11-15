@@ -451,11 +451,8 @@ public class TestToSalConversionsUtils {
         pushVlanActionBuilder.setTag(0x8100); // 12 bit
     }
 
-    private void prepareActionOutput(OutputActionBuilder outputActionBuilder) {
-        List<Uri> uris = new ArrayList<>();
-        uris.add(new Uri("uri1"));
-        uris.add(new Uri("uri2"));
-        outputActionBuilder.setOutputNodeConnector(uris);
+    private void prepareActionOutput(OutputActionBuilder outputActionBuilder) {       
+        outputActionBuilder.setOutputNodeConnector(new Uri("uri1"));
     }
 
     private Match prepOdMatch(MtchType mt) {
