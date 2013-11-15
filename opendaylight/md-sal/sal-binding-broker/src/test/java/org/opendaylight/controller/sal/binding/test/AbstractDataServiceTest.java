@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javassist.ClassPool;
+
 import org.junit.Before;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.RuntimeGeneratedMappingServiceImpl;
-import org.opendaylight.controller.sal.binding.test.connect.dom.MappingServiceTest;
+import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -28,6 +29,12 @@ import com.google.common.util.concurrent.MoreExecutors;
 public  abstract class AbstractDataServiceTest {
     protected DataBrokerService biDataService;
     protected DataProviderService baDataService;
+    
+    /**
+     * Workaround for JUNIT sharing classloaders
+     * 
+     */
+    protected static final ClassPool POOL = new ClassPool();
     
     protected RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
     protected BindingIndependentMappingService mappingService;
@@ -56,6 +63,7 @@ public  abstract class AbstractDataServiceTest {
         biDataImpl.registerCommitHandler(treeRoot, dataStore);
         
         mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl();
+        mappingServiceImpl.setPool(POOL);
         mappingService = mappingServiceImpl;
         File pathname = new File("target/gen-classes-debug");
         //System.out.println("Generated classes are captured in " + pathname.getAbsolutePath());
@@ -69,15 +77,17 @@ public  abstract class AbstractDataServiceTest {
         connectorServiceImpl.start();
         
         String[] yangFiles= getModelFilenames();
-        mappingServiceImpl.onGlobalContextUpdated(getContext(yangFiles));
+        if(yangFiles != null && yangFiles.length > 0) {
+            mappingServiceImpl.onGlobalContextUpdated(getContext(yangFiles));
+        }
     }
 
 
     protected  String[] getModelFilenames() {
-        return getModelFilenamesImpl();
+        return getAllModelFilenames();
     }
     
-    public static String[] getModelFilenamesImpl() {
+    public static String[] getAllModelFilenames() {
         Predicate<String> predicate = new Predicate<String>() {
             @Override
             public boolean apply(String input) {
