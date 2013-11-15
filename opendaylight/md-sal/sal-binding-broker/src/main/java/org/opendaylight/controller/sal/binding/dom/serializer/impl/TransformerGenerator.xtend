@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.binding.codegen.CodeGenerationException
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import java.security.ProtectionDomain
 import java.io.File
+import org.opendaylight.yangtools.yang.binding.Identifier
 
 class TransformerGenerator {
 
@@ -60,7 +61,6 @@ class TransformerGenerator {
     @Property
     var File classFileCapturePath;
 
-
     @Property
     var Map<Type, Type> typeDefinitions;
 
@@ -69,8 +69,6 @@ class TransformerGenerator {
 
     @Property
     var Map<Type, SchemaNode> typeToSchemaNode
-
-    val Map<Class<?>, Class<?>> generatedClasses = new WeakHashMap();
 
     public new(ClassPool pool) {
         classPool = pool;
@@ -81,8 +79,8 @@ class TransformerGenerator {
     }
 
     def Class<? extends BindingCodec<Map<QName, Object>, Object>> transformerFor(Class<?> inputType) {
-        return withClassLoader(inputType.classLoader) [ |
-            val ret = generatedClasses.get(inputType);
+        return withClassLoaderAndLock(inputType.classLoader, lock) [ |
+            val ret = getGeneratedClass(inputType)
             if (ret !== null) {
                 return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
             }
@@ -90,25 +88,62 @@ class TransformerGenerator {
             val node = typeToSchemaNode.get(ref)
             val typeSpecBuilder = typeToDefinition.get(ref)
             val typeSpec = typeSpecBuilder.toInstance();
-            val newret = generateTransformerFor(inputType, typeSpec, node)
-            generatedClasses.put(inputType, newret);
+            val newret = generateTransformerFor(inputType, typeSpec, node);
+            return newret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+        ]
+    }
+
+    def Class<? extends BindingCodec<Map<QName, Object>, Object>> keyTransformerForIdentifiable(Class<?> inputType) {
+        return withClassLoaderAndLock(inputType.classLoader, lock) [ |
+            val ret = getGeneratedClass(inputType)
+            if (ret !== null) {
+                return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+            }
+            val ref = Types.typeForClass(inputType)
+            val node = typeToSchemaNode.get(ref)
+            val typeSpecBuilder = typeToDefinition.get(ref)
+            val typeSpec = typeSpecBuilder.toInstance();
+            val newret = generateTransformerFor(inputType, typeSpec, node);
+            return newret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+        ]
+    }
+
+    def Class<? extends BindingCodec<Map<QName, Object>, Object>> keyTransformerForIdentifier(Class<?> inputType) {
+        return withClassLoaderAndLock(inputType.classLoader, lock) [ |
+            val ret = getGeneratedClass(inputType)
+            if (ret !== null) {
+                return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+            }
+            val ref = Types.typeForClass(inputType)
+            val node = typeToSchemaNode.get(ref)
+            val typeSpecBuilder = typeToDefinition.get(ref)
+            val typeSpec = typeSpecBuilder.toInstance();
+            val newret = generateTransformerFor(inputType, typeSpec, node);
             return newret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         ]
     }
 
     private def Class<?> keyTransformerFor(Class<?> inputType, GeneratedType type, ListSchemaNode schema) {
-        return withClassLoader(inputType.classLoader) [ |
-            val transformer = generatedClasses.get(inputType);
+        return withClassLoaderAndLock(inputType.classLoader, lock) [ |
+            val transformer = getGeneratedClass(inputType)
             if (transformer != null) {
                 return transformer;
             }
             val newret = generateKeyTransformerFor(inputType, type, schema);
-            generatedClasses.put(inputType, newret);
             return newret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         ]
     }
 
-    def Class<?> keyTransformer(GeneratedType type, ListSchemaNode node) {
+    private def Class getGeneratedClass(Class<? extends Object> cls) {
+
+        try {
+            return loadClassWithTCCL(cls.codecClassName)
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    private def Class<?> keyTransformer(GeneratedType type, ListSchemaNode node) {
         val cls = loadClassWithTCCL(type.resolvedName + "Key");
         keyTransformerFor(cls, type, node);
     }
@@ -121,20 +156,19 @@ class TransformerGenerator {
 
     private def Class<?> getValueSerializer(GeneratedTransferObject type) {
         val cls = loadClassWithTCCL(type.resolvedName);
-        val transformer = generatedClasses.get(cls);
+        val transformer = cls.generatedClass;
         if (transformer !== null) {
             return transformer;
         }
         val valueTransformer = generateValueTransformer(cls, type);
-        generatedClasses.put(cls, valueTransformer);
         return valueTransformer;
     }
 
     private def generateKeyTransformerFor(Class<? extends Object> inputType, GeneratedType typeSpec, ListSchemaNode node) {
         try {
-            log.info("Generating DOM Codec for {} with {}",inputType,inputType.classLoader)
+            log.info("Generating DOM Codec for {} with {}", inputType, inputType.classLoader)
             val properties = typeSpec.allProperties;
-            val ctCls = createClass(inputType.transformatorFqn) [
+            val ctCls = createClass(inputType.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 staticQNameField(node.QName);
                 implementsType(ctTransformator)
@@ -179,19 +213,19 @@ class TransformerGenerator {
                 ]
             ]
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-            log.info("DOM Codec for {} was generated {}",inputType,ret)
+            log.info("DOM Codec for {} was generated {}", inputType, ret)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, ?>>;
         } catch (Exception e) {
-            processException(inputType,e);
+            processException(inputType, e);
             return null;
         }
     }
 
-    private def dispatch  Class<? extends BindingCodec<Map<QName, Object>, Object>> generateTransformerFor(Class inputType,
-        GeneratedType typeSpec, SchemaNode node) {
+    private def dispatch  Class<? extends BindingCodec<Map<QName, Object>, Object>> generateTransformerFor(
+        Class inputType, GeneratedType typeSpec, SchemaNode node) {
         try {
-            log.info("Generating DOM Codec for {} with {}",inputType,inputType.classLoader)
-            val ctCls = createClass(typeSpec.transformatorFqn) [
+            log.info("Generating DOM Codec for {} with {}", inputType, inputType.classLoader)
+            val ctCls = createClass(typeSpec.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 staticQNameField(inputType);
                 implementsType(ctTransformator)
@@ -218,17 +252,16 @@ class TransformerGenerator {
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         } catch (Exception e) {
-            processException(inputType,e);
+            processException(inputType, e);
             return null;
         }
     }
-    
-    
-    private def dispatch  Class<? extends BindingCodec<Map<QName, Object>, Object>> generateTransformerFor(Class inputType,
-        GeneratedType typeSpec, ChoiceNode node) {
+
+    private def dispatch  Class<? extends BindingCodec<Map<QName, Object>, Object>> generateTransformerFor(
+        Class inputType, GeneratedType typeSpec, ChoiceNode node) {
         try {
-            log.info("Generating DOM Codec for {} with {}",inputType,inputType.classLoader)
-            val ctCls = createClass(typeSpec.transformatorFqn) [
+            log.info("Generating DOM Codec for {} with {}", inputType, inputType.classLoader)
+            val ctCls = createClass(typeSpec.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 //staticQNameField(inputType);
                 implementsType(ctTransformator)
@@ -259,11 +292,10 @@ class TransformerGenerator {
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         } catch (Exception e) {
-            processException(inputType,e);
+            processException(inputType, e);
             return null;
         }
     }
-    
 
     private def keyConstructorList(List<QName> qnames) {
         val names = new TreeSet<String>()
@@ -445,7 +477,7 @@ class TransformerGenerator {
                 val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
                 return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
             }
-            val ctCls = createClass(typeSpec.transformatorFqn) [
+            val ctCls = createClass(typeSpec.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 implementsType(ctTransformator)
                 implementsType(BindingDeserializer.asCtClass)
@@ -497,10 +529,10 @@ class TransformerGenerator {
             ]
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-            log.info("DOM Codec for {} was generated {}",inputType,ret)
+            log.info("DOM Codec for {} was generated {}", inputType, ret)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         } catch (Exception e) {
-            log.error("Cannot compile DOM Codec for {}",inputType,e);
+            log.error("Cannot compile DOM Codec for {}", inputType, e);
             val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType);
             exception.addSuppressed(e);
             throw exception;
@@ -509,8 +541,8 @@ class TransformerGenerator {
     }
 
     private def createDummyImplementation(Class<?> object, GeneratedTransferObject typeSpec) {
-        log.info("Generating Dummy DOM Codec for {} with {}",object,object.classLoader)
-        return createClass(typeSpec.transformatorFqn) [
+        log.info("Generating Dummy DOM Codec for {} with {}", object, object.classLoader)
+        return createClass(typeSpec.codecClassName) [
             //staticField(Map,"AUGMENTATION_SERIALIZERS");
             implementsType(ctTransformator)
             implementsType(BindingDeserializer.asCtClass)
@@ -553,8 +585,8 @@ class TransformerGenerator {
     private def dispatch Class<? extends BindingCodec<Map<QName, Object>, Object>> generateValueTransformer(
         Class<?> inputType, Enumeration typeSpec) {
         try {
-            log.info("Generating DOM Codec for {} with {}",inputType,inputType.classLoader)
-            val ctCls = createClass(typeSpec.transformatorFqn) [
+            log.info("Generating DOM Codec for {} with {}", inputType, inputType.classLoader)
+            val ctCls = createClass(typeSpec.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 implementsType(ctTransformator)
                 method(Object, "toDomValue", Object) [
@@ -591,34 +623,33 @@ class TransformerGenerator {
             ]
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-            log.info("DOM Codec for {} was generated {}",inputType,ret)
+            log.info("DOM Codec for {} was generated {}", inputType, ret)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         } catch (CodeGenerationException e) {
-            throw new CodeGenerationException("Cannot compile Transformator for " + inputType,e);
+            throw new CodeGenerationException("Cannot compile Transformator for " + inputType, e);
         } catch (Exception e) {
-            log.error("Cannot compile DOM Codec for {}",inputType,e);
+            log.error("Cannot compile DOM Codec for {}", inputType, e);
             val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType);
             exception.addSuppressed(e);
             throw exception;
         }
 
     }
-    
+
     def Class<?> toClassImpl(CtClass newClass, ClassLoader loader, ProtectionDomain domain) {
-        val cls = newClass.toClass(loader,domain);
-        if(classFileCapturePath !== null) {
+        val cls = newClass.toClass(loader, domain);
+        if (classFileCapturePath !== null) {
             newClass.writeFile(classFileCapturePath.absolutePath);
         }
         return cls;
     }
-    
+
     def debugWriteClass(CtClass class1) {
-        val path = class1.name.replace(".","/")+".class"
-        
-        val captureFile = new File(classFileCapturePath,path);
+        val path = class1.name.replace(".", "/") + ".class"
+
+        val captureFile = new File(classFileCapturePath, path);
         captureFile.createNewFile
-        
-        
+
     }
 
     private def dispatch String deserializeValue(Type type, String domParameter) '''(«type.resolvedName») «domParameter»'''
@@ -662,11 +693,12 @@ class TransformerGenerator {
         field.modifiers = PUBLIC + FINAL + STATIC;
         addField(field, '''«node.name».QNAME''')
     }
-    
+
     private def staticQNameField(CtClass it, QName node) {
         val field = new CtField(ctQName, "QNAME", it);
         field.modifiers = PUBLIC + FINAL + STATIC;
-        addField(field, '''«QName.asCtClass.name».create("«node.namespace»","«node.formattedRevision»","«node.localName»")''')
+        addField(field,
+            '''«QName.asCtClass.name».create("«node.namespace»","«node.formattedRevision»","«node.localName»")''')
     }
 
     private def dispatch String serializeBody(GeneratedType type, ListSchemaNode node) '''
@@ -708,7 +740,6 @@ class TransformerGenerator {
         }
     '''
 
-
     private def transformDataContainerBody(Map<String, MethodSignature> properties, DataNodeContainer node) {
         val ret = '''
             «FOR child : node.childNodes.filter[!augmenting]»
@@ -718,10 +749,10 @@ class TransformerGenerator {
         '''
         return ret;
     }
-    
-    def MethodSignature getFor(Map<String,MethodSignature> map, DataSchemaNode node) {
+
+    def MethodSignature getFor(Map<String, MethodSignature> map, DataSchemaNode node) {
         val sig = map.get(node.getterName);
-        if(sig == null) {
+        if (sig == null) {
             return map.get(node.booleanGetterName);
         }
         return sig;
@@ -813,13 +844,11 @@ class TransformerGenerator {
         }
     '''
 
-
-
-    private def transformatorFqn(GeneratedType typeSpec) {
+    private def codecClassName(GeneratedType typeSpec) {
         return '''«typeSpec.resolvedName»$Broker$Codec$DOM'''
     }
 
-    private def transformatorFqn(Class typeSpec) {
+    private def codecClassName(Class typeSpec) {
         return '''«typeSpec.name»$Broker$Codec$DOM'''
     }
 
@@ -852,17 +881,15 @@ class TransformerGenerator {
         val cls = loadClassWithTCCL(type.fullyQualifiedName)
         return cls.asCtClass;
     }
-    
-    
-    
-    private def dispatch processException(Class<?> inputType,CodeGenerationException e){
-        log.error("Cannot compile DOM Codec for {}. One of it's prerequisites was not generated.",inputType);
+
+    private def dispatch processException(Class<?> inputType, CodeGenerationException e) {
+        log.error("Cannot compile DOM Codec for {}. One of it's prerequisites was not generated.", inputType);
         throw e;
     }
-    
-    private def dispatch processException(Class<?> inputType,Exception e){
-        log.error("Cannot compile DOM Codec for {}",inputType,e);
-        val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType,e);
+
+    private def dispatch processException(Class<?> inputType, Exception e) {
+        log.error("Cannot compile DOM Codec for {}", inputType, e);
+        val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType, e);
         throw exception;
     }
 

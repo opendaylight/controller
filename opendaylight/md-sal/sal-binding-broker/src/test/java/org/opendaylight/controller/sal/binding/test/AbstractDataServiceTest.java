@@ -69,15 +69,17 @@ public  abstract class AbstractDataServiceTest {
         connectorServiceImpl.start();
         
         String[] yangFiles= getModelFilenames();
-        mappingServiceImpl.onGlobalContextUpdated(getContext(yangFiles));
+        if(yangFiles != null && yangFiles.length > 0) {
+            mappingServiceImpl.onGlobalContextUpdated(getContext(yangFiles));
+        }
     }
 
 
     protected  String[] getModelFilenames() {
-        return getModelFilenamesImpl();
+        return getAllModelFilenames();
     }
     
-    public static String[] getModelFilenamesImpl() {
+    public static String[] getAllModelFilenames() {
         Predicate<String> predicate = new Predicate<String>() {
             @Override
             public boolean apply(String input) {
