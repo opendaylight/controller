@@ -40,9 +40,9 @@
         <version>1.5</version>
         <executions>
           <execution>
-            <phase>install</phase>
+            <phase>package</phase>
             <goals>
-                <goal>run</goal>
+              <goal>run</goal>
             </goals>
           </execution>
         </executions>
@@ -72,16 +72,16 @@
             <!-- generate index.html -->
             <!-- append header -->
             <echo file="${docs.output.dir}/index.html" append="true">
-&lt;![CDATA[
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt; OpenDaylight REST API Documentation &lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-  &lt;h2&gt;OpenDaylight REST API Documentation&lt;/h2&gt;
-  &lt;p&gt; OpenDaylight supports the following &lt;a href="http://en.wikipedia.org/wiki/Representational_State_Transfer"&gt;Representational State Transfer (REST)&lt;/a&gt; APIs: &lt;/p&gt;
-  &lt;h4&gt;
-]]&gt;
+              &lt;![CDATA[
+              &lt;html&gt;
+              &lt;head&gt;
+              &lt;title&gt; OpenDaylight REST API Documentation &lt;/title&gt;
+              &lt;/head&gt;
+              &lt;body&gt;
+              &lt;h2&gt;OpenDaylight REST API Documentation&lt;/h2&gt;
+              &lt;p&gt; OpenDaylight supports the following &lt;a href="http://en.wikipedia.org/wiki/Representational_State_Transfer"&gt;Representational State Transfer (REST)&lt;/a&gt; APIs: &lt;/p&gt;
+              &lt;h4&gt;
+              ]]&gt;
             </echo>
             <dirset id="nbset" dir="${docs.output.dir}">
               <include name="*"/>
@@ -99,12 +99,12 @@
 
             <!-- append footer -->
             <echo file="${docs.output.dir}/index.html" append="true">
-&lt;![CDATA[
-  &lt;/h4&gt;
-  &lt;i&gt;---&lt;/i&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-]]&gt;
+              &lt;![CDATA[
+              &lt;/h4&gt;
+              &lt;i&gt;---&lt;/i&gt;
+              &lt;/body&gt;
+              &lt;/html&gt;
+              ]]&gt;
             </echo>
             <!-- archive all the docs excluding whatever is not needed -->
             <echo message="======== Archiving enunciate docs ========"/>
@@ -126,107 +126,43 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <packaging>jar</packaging>
-          <groupId>${project.groupId}</groupId>
-          <version>${project.version}</version>
-        </configuration>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.8</version>
         <executions>
           <execution>
-            <!-- skip default install -->
-            <id>default-install</id>
-            <phase>install</phase>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
             <goals>
-              <goal>install</goal>
+              <goal>attach-artifact</goal>
             </goals>
             <configuration>
-              <skip>true</skip>
-            </configuration>
-          </execution>
-          <execution>
-            <!-- install full java client -->
-            <id>install-full-client</id>
-            <phase>install</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <artifactId>${project.artifactId}.full-client</artifactId>
-              <file>${java-client}</file>
-              <sources>${java-client-sources}</sources>
-            </configuration>
-          </execution>
-          <execution>
-            <!-- install full java json client -->
-            <id>install-full-json-client</id>
-            <phase>install</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <artifactId>${project.artifactId}.full-json-client</artifactId>
-              <file>${json-client}</file>
-              <sources>${json-client-sources}</sources>
+              <artifacts>
+                <artifact>
+                  <file>${java-client}</file>
+                  <type>jar</type>
+                  <classifier>full-java-client</classifier>
+                </artifact>
+                <artifact>
+                  <file>${java-client-sources}</file>
+                  <type>jar</type>
+                  <classifier>full-java-client-sources</classifier>
+                </artifact>
+                <artifact>
+                  <file>${json-client}</file>
+                  <type>jar</type>
+                  <classifier>full-json-client</classifier>
+                </artifact>
+                <artifact>
+                  <file>${json-client-sources}</file>
+                  <type>jar</type>
+                  <classifier>full-json-client-sources</classifier>
+                </artifact>
+              </artifacts>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <packaging>jar</packaging>
-          <generatePom>true</generatePom>
-          <groupId>${project.groupId}</groupId>
-          <version>${project.version}</version>
-          <url>${project.distributionManagement.repository.url}</url>
-        </configuration>
-        <executions>
-          <execution>
-            <!-- skip default deploy -->
-            <id>default-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy</goal>
-            </goals>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-          </execution>
-          <execution>
-            <!-- deploy full java client -->
-            <id>deploy-full-client</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <artifactId>${project.artifactId}.full-client</artifactId>
-              <file>${java-client}</file>
-              <sources>${java-client-sources}</sources>
-            </configuration>
-          </execution>
-          <execution>
-            <!-- deploy full java json client -->
-            <id>deploy-full-json-client</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <artifactId>${project.artifactId}.full-json-client</artifactId>
-              <file>${json-client}</file>
-              <sources>${json-client-sources}</sources>
-            </configuration>
-          </execution>
-       </executions>
-    </plugin>
-
     </plugins>
   </build>
   <dependencies>
