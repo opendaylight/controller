@@ -9,8 +9,4 @@ public class XtendHelper {
             Class<C> cls) {
         return new RpcRoutingTableImpl<>(cls);
     }
-    
-    public static String foo() {
-        return "Foo";
-    }
 }

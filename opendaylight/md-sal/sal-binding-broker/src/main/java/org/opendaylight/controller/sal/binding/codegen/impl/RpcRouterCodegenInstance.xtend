@@ -8,7 +8,6 @@ import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeC
 import java.util.Set
 import java.util.HashMap
 import org.opendaylight.controller.sal.binding.spi.RpcRoutingTable
-import static org.opendaylight.controller.sal.binding.codegen.impl.XtendHelper.*
 import org.opendaylight.yangtools.yang.binding.DataContainer
 import org.opendaylight.yangtools.yang.binding.RpcImplementation
 
