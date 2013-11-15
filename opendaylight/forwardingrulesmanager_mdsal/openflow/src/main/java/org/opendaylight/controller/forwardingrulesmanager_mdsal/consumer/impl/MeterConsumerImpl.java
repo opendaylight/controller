@@ -1,13 +1,15 @@
 package org.opendaylight.controller.forwardingrulesmanager_mdsal.consumer.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,8 +18,8 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
-import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.Node;
@@ -25,6 +27,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.Meters;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.MeterKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.MeterAdded;
@@ -38,7 +41,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.Drop;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.DscpRemark;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.Experimenter;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.Meter;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -47,9 +49,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MeterConsumerImpl {
+public class MeterConsumerImpl implements IForwardingRulesManager {
     protected static final Logger logger = LoggerFactory.getLogger(MeterConsumerImpl.class);
-    private MeterEventListener meterEventListener = new MeterEventListener();
+    private final MeterEventListener meterEventListener = new MeterEventListener();
     private Registration<NotificationListener> meterListener;
     private SalMeterService meterService;
     private MeterDataCommitHandler commitHandler;
@@ -64,8 +66,9 @@ public class MeterConsumerImpl {
     private IContainer container;
 
     public MeterConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class).node(Meter.class).toInstance();
-        meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);        
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class)
+                .node(Meter.class).toInstance();
+        meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);
         clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
 
         container = FRMConsumerImpl.getContainer();
@@ -218,10 +221,9 @@ public class MeterConsumerImpl {
                 originalSwMeterView.put(meterKey, meterAddDataObject);
                 meterService.addMeter(meterBuilder.build());
             }
-            
-            originalSwMeterView.put(meterKey, meterAddDataObject);            
-        }
-        else {
+
+            originalSwMeterView.put(meterKey, meterAddDataObject);
+        } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
 
@@ -235,35 +237,32 @@ public class MeterConsumerImpl {
      *
      * @param dataObject
      */
-    private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
+    private Status updateMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
         MeterKey meterKey = meterUpdateDataObject.getKey();
         UpdatedMeterBuilder updateMeterBuilder = null;
-        
-        
-        if (null != meterKey && 
-                validateMeter(meterUpdateDataObject, FRMUtil.operation.UPDATE).isSuccess()) {
-            
+
+        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.UPDATE).isSuccess()) {
+
             if (originalSwMeterView.containsKey(meterKey)) {
                 originalSwMeterView.remove(meterKey);
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
             }
-            
+
             if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder(); 
+                UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder();
                 updateMeterBuilder = new UpdatedMeterBuilder();
                 updateMeterBuilder.fieldsFrom(meterUpdateDataObject);
                 updateMeterInputBuilder.setUpdatedMeter(updateMeterBuilder.build());
-                
+
                 if (installedSwMeterView.containsKey(meterKey)) {
                     installedSwMeterView.remove(meterKey);
                     installedSwMeterView.put(meterKey, meterUpdateDataObject);
                 }
-                
+
                 meterService.updateMeter(updateMeterInputBuilder.build());
             }
-                        
-        }
-        else {
+
+        } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
 
@@ -277,21 +276,19 @@ public class MeterConsumerImpl {
      *
      * @param dataObject
      */
-    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {        
+    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
         MeterKey meterKey = meterUpdateDataObject.getKey();
-        
-        if (null != meterKey && 
-                validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
+
+        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
             if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();                
-                
+                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();
+
                 installedSwMeterView.put(meterKey, meterUpdateDataObject);
                 meterService.updateMeter(updateMeterBuilder.build());
             }
-            
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);            
-        }
-        else {
+
+            originalSwMeterView.put(meterKey, meterUpdateDataObject);
+        } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
 
@@ -524,5 +521,31 @@ public class MeterConsumerImpl {
             // TODO Auto-generated method stub
 
         }
+    }
+
+    @Override
+    public List<DataObject> get() {
+
+        List<DataObject> orderedList = new ArrayList<DataObject>();
+        Collection<Meter> meterList = originalSwMeterView.values();
+        for (Iterator<Meter> iterator = meterList.iterator(); iterator.hasNext();) {
+            orderedList.add(iterator.next());
+        }
+        return orderedList;
+    }
+
+    @Override
+    public DataObject getWithName(String name, Node n) {
+        if (this instanceof MeterConsumerImpl) {
+            Collection<Meter> meterList = originalSwMeterView.values();
+            for (Iterator<Meter> iterator = meterList.iterator(); iterator.hasNext();) {
+                Meter meter = iterator.next();
+                if (meter.getNode().equals(n) && meter.getMeterName().equals(name)) {
+
+                    return meter;
+                }
+            }
+        }
+        return null;
     }
 }

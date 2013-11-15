@@ -40,6 +40,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Remo
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -54,9 +56,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlowConsumerImpl {
+public class FlowConsumerImpl implements IForwardingRulesManager {
     protected static final Logger logger = LoggerFactory.getLogger(FlowConsumerImpl.class);
-    private FlowEventListener flowEventListener = new FlowEventListener();
+    private final FlowEventListener flowEventListener = new FlowEventListener();
     private Registration<NotificationListener> listener1Reg;
     private SalFlowService flowService;
     // private FlowDataListener listener;
@@ -201,7 +203,7 @@ public class FlowConsumerImpl {
         // updating the staticflow cache
         Integer ordinal = staticFlowsOrdinal.get(0);
         staticFlowsOrdinal.put(0, ++ordinal);
-        staticFlows.put(ordinal, (Flow) dataObject);
+        staticFlows.put(ordinal, dataObject);
 
         // We send flow to the sounthbound plugin
         flowService.addFlow(input.build());
@@ -241,6 +243,29 @@ public class FlowConsumerImpl {
         updateLocalDatabase((NodeFlow) dataObject, false);
     }
 
+    /**
+     * Update flow to the southbound plugin and our internal database
+     *
+     * @param path
+     * @param dataObject
+     */
+    private void updateFlow(InstanceIdentifier<?> path, Flow dataObject) {
+
+        UpdateFlowInputBuilder input = new UpdateFlowInputBuilder();
+        UpdatedFlowBuilder updatedflowbuilder = new UpdatedFlowBuilder();
+        updatedflowbuilder.fieldsFrom(dataObject);
+        input.setUpdatedFlow(updatedflowbuilder.build());
+
+        // updating the staticflow cache
+        Integer ordinal = staticFlowsOrdinal.get(0);
+        staticFlowsOrdinal.put(0, ++ordinal);
+        staticFlows.put(ordinal, dataObject);
+
+        // We send flow to the sounthbound plugin
+        flowService.updateFlow(input.build());
+        updateLocalDatabase((NodeFlow) dataObject, true);
+    }
+
     @SuppressWarnings("unchecked")
     private void commitToPlugin(internalTransaction transaction) {
         for (Entry<InstanceIdentifier<?>, Flow> entry : transaction.additions.entrySet()) {
@@ -250,7 +275,7 @@ public class FlowConsumerImpl {
         for (@SuppressWarnings("unused")
         Entry<InstanceIdentifier<?>, Flow> entry : transaction.updates.entrySet()) {
             System.out.println("Coming update cc in FlowDatacommitHandler");
-            // updateFlow(entry.getKey(),entry.getValue());
+            updateFlow(entry.getKey(), entry.getValue());
         }
 
         for (Entry<InstanceIdentifier<?>, Flow> entry : transaction.removals.entrySet()) {
@@ -316,7 +341,7 @@ public class FlowConsumerImpl {
                     logger.error(error);
                     return;
                 }
-                if (originalSwView.containsKey((FlowKey) entry)) {
+                if (originalSwView.containsKey(entry)) {
                     logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
                     logger.trace("Aborting to install {}", entry);
                     continue;
@@ -463,10 +488,10 @@ public class FlowConsumerImpl {
         public void onFlowUpdated(FlowUpdated notification) {
             updatedFlows.add(notification);
         }
-        
+
         @Override
         public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
-            //TODO
+            // TODO
         };
 
     }
@@ -526,10 +551,39 @@ public class FlowConsumerImpl {
             FlowConsumerImpl.originalSwView.put((FlowKey) entry, (Flow) entry);
             installedSwView.put((FlowKey) entry, (Flow) entry);
         } else {
-            originalSwView.remove((Flow) entry);
-            installedSwView.remove((FlowKey) entry);
+            originalSwView.remove(entry);
+            installedSwView.remove(entry);
 
         }
+    }
+
+    @Override
+    public List<DataObject> get() {
+
+        List<DataObject> orderedList = new ArrayList<DataObject>();
+        ConcurrentMap<Integer, Flow> flowMap = staticFlows;
+        int maxKey = staticFlowsOrdinal.get(0).intValue();
+        for (int i = 0; i <= maxKey; i++) {
+            Flow entry = flowMap.get(i);
+            if (entry != null) {
+                orderedList.add(entry);
+            }
+        }
+        return orderedList;
+    }
+
+    @Override
+    public DataObject getWithName(String name, org.opendaylight.controller.sal.core.Node n) {
+        if (this instanceof FlowConsumerImpl) {
+            for (ConcurrentMap.Entry<Integer, Flow> flowEntry : staticFlows.entrySet()) {
+                Flow flow = flowEntry.getValue();
+                if (flow.getNode().equals(n) && flow.getFlowName().equals(name)) {
+
+                    return flowEntry.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     /*
@@ -550,7 +604,7 @@ public class FlowConsumerImpl {
         if (add) {
             nodeIndeces.add((Flow) entry);
         } else {
-            nodeIndeces.remove((Flow) entry);
+            nodeIndeces.remove(entry);
         }
 
         // Update cache across cluster
