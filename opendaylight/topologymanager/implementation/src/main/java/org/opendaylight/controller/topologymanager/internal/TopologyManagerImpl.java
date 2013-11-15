@@ -49,6 +49,7 @@ import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
@@ -368,6 +369,12 @@ public class TopologyManagerImpl implements
      * @return true if it is an ISL link
      */
     public boolean isISLink(Edge e) {
+        /*
+         * Prior to checking for production link,cross check if the
+         * nodes of nodeConnector are known to SwitchManager. If so,
+         * then it is not really a production link.
+         */
+        crossCheckNodeConnectors(e);
         return (!isProductionLink(e));
     }
 
@@ -381,6 +388,56 @@ public class TopologyManagerImpl implements
     public boolean isProductionLink(Edge e) {
         return (e.getHeadNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)
                 || e.getTailNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION));
+    }
+
+    /**
+     * This method cross checks the determination of nodeConnector type by Discovery Service
+     * against the information in SwitchManager and updates it accordingly.
+     * @param e
+     *          The edge
+     */
+    private void crossCheckNodeConnectors(Edge e) {
+        NodeConnector nc;
+        if (e.getHeadNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
+            nc = prNodeExistsInSwitchManager(e.getHeadNodeConnector());
+            if (nc != null) {
+                e.setHeadNodeConnector(nc);
+            }
+        }
+        if (e.getTailNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
+            nc = prNodeExistsInSwitchManager(e.getTailNodeConnector());
+            if (nc != null) {
+                e.setTailNodeConnector(nc);
+            }
+        }
+    }
+
+    /**
+     * A NodeConnector may have been categorized as of type Production by Discovery Service.
+     * But at the time when this determination was made, only OF nodes were known to Discovery
+     * Service. This method checks if the node of nodeConnector is known to SwitchManager. If
+     * so, then it returns a new NodeConnector with correct type.
+     *
+     * @param nc
+     *       NodeConnector as passed on in the edge
+     * @return
+     *       If Node of the NodeConnector is in SwitchManager, then return a new NodeConnector
+     *       with correct type, null otherwise
+     */
+
+    private NodeConnector prNodeExistsInSwitchManager(NodeConnector nc) {
+
+        for (Node node : switchManager.getNodes()) {
+            String nodeName = node.getNodeIDString();
+            log.trace("Switch Manager Node Name: {}, NodeConnector Node Name: {}", nodeName,
+                    nc.getNode().getNodeIDString());
+            if (nodeName.equals(nc.getNode().getNodeIDString())) {
+                NodeConnector nodeConnector = NodeConnectorCreator
+                        .createNodeConnector(node.getType(), nc.getID(), node);
+                return nodeConnector;
+            }
+        }
+        return null;
     }
 
     /**
@@ -565,9 +622,6 @@ public class TopologyManagerImpl implements
                 props.add(t);
             }
 
-            // Now add this in the database eventually overriding
-            // something that may have been already existing
-            this.edgesDB.put(e, props);
 
             // Now populate the DB of NodeConnectors
             // NOTE WELL: properties are empty sets, not really needed
@@ -577,6 +631,10 @@ public class TopologyManagerImpl implements
                 this.nodeConnectorsDB.put(e.getHeadNodeConnector(), new HashSet<Property>(1));
                 this.nodeConnectorsDB.put(e.getTailNodeConnector(), new HashSet<Property>(1));
             }
+
+            // Now add this in the database eventually overriding
+            // something that may have been already existing
+            this.edgesDB.put(e, props);
             log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         case REMOVED:
