@@ -49,7 +49,7 @@ public class MappingServiceTest {
     @Test
     public void baDataToBiData() throws Exception {
 
-        String[] yangFiles = AbstractDataServiceTest.getModelFilenamesImpl();
+        String[] yangFiles = AbstractDataServiceTest.getAllModelFilenames();
 
         SchemaContext ctx = AbstractDataServiceTest.getContext(yangFiles);
 
@@ -73,7 +73,7 @@ public class MappingServiceTest {
     @Test
     public void instanceIdentifierTest() throws Exception {
 
-        String[] yangFiles = AbstractDataServiceTest.getModelFilenamesImpl();
+        String[] yangFiles = AbstractDataServiceTest.getAllModelFilenames();
         SchemaContext ctx = AbstractDataServiceTest.getContext(yangFiles);
         impl.onGlobalContextUpdated(ctx);
 
