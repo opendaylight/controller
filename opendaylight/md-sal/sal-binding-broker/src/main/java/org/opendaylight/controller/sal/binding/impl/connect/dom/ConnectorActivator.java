@@ -6,6 +6,7 @@ import java.util.Collections;
 import javassist.ClassPool;
 
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.binding.dom.serializer.impl.TransformerGenerator;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
