@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_694098a5",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/DlDst.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-15T17:02:31Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. Let me see if I can get the chang right.",
+      "parentUuid": "da6255ed_69d2d801",
+      "revId": "aa69ca6d69be688d83eb9a10f3ec9f3241175191",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_e905a87a",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/Match2.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-15T15:33:59Z",
       "side": 1,
       "message": "Instead to add this methods in here, i think would be better to have an helper class that calculate this conditions over and input Match2. Just so we keep clean the match field to just represent the Match. Yes i know that in OOP you wan to confine the methods where the data are, but valuating all the possible conditions would simply lead to an explosion of methods. And this isIpv6 and isIPv4 are just convenience ones hence i believe a convenience class is appropriate.",
+      "revId": "aa69ca6d69be688d83eb9a10f3ec9f3241175191",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_493b9438",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/Match2.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-15T17:02:31Z",
+      "side": 1,
+      "message": "I understand your concern: This function is not flexible in case new MatchField types are added to the image. An alternative would be to have the MatchField class expose a property, forcing the extenders to specify if they fit that IPv6 property or not.\nIf I see it cannot be done in a clean way, I will go with your suggestion adding the isIPv6Match(Match m) to NetUtils",
+      "parentUuid": "da6255ed_e905a87a",
       "revId": "aa69ca6d69be688d83eb9a10f3ec9f3241175191",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
