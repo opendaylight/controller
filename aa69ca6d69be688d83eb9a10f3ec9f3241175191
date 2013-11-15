@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_69d2d801",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/DlDst.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-15T15:33:59Z",
+      "side": 1,
+      "message": "What about making MatchField2 to use generics so we can return proper type for getValue and getMask rather than Object? Just an idea.",
+      "revId": "aa69ca6d69be688d83eb9a10f3ec9f3241175191",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e905a87a",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/Match2.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-15T15:33:59Z",
+      "side": 1,
+      "message": "Instead to add this methods in here, i think would be better to have an helper class that calculate this conditions over and input Match2. Just so we keep clean the match field to just represent the Match. Yes i know that in OOP you wan to confine the methods where the data are, but valuating all the possible conditions would simply lead to an explosion of methods. And this isIpv6 and isIPv4 are just convenience ones hence i believe a convenience class is appropriate.",
+      "revId": "aa69ca6d69be688d83eb9a10f3ec9f3241175191",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
