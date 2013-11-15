@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c964244b",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/Match2.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-15T20:07:24Z",
+      "side": 1,
+      "message": "This method is very handy and seem appropriate that is implemented by the class Match. Please let me know if this new implementation (having the MatchField extender class report if it is v6 congruent) makes it more extensible. I am fine to drop it, I am just trying to see if we can avoid an external class to check a property that belongs to this one.",
+      "revId": "10bc94678512523f86fa6c43e995c1be965894d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
