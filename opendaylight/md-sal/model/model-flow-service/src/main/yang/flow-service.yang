@@ -7,6 +7,7 @@ module sal-flow {
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import opendaylight-flow-types {prefix types;revision-date "2013-10-26";}
     import flow-capable-transaction {prefix tr;}
+    import flow-errors {prefix error;}
 
     revision "2013-08-19" {
         description "Initial revision of flow service";
@@ -92,5 +93,13 @@ module sal-flow {
     
     notification switch-flow-removed {
         uses node-flow-removed;
+    }
+    
+    notification node-error-notification {
+        uses error:error-message;
+    }
+    
+    notification node-experimenter-error-notification {
+        uses error:experimenter-error-message;
     }
 }

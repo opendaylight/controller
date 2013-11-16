@@ -13,6 +13,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Swit
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeErrorNotification
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeExperimenterErrorNotification
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.slf4j.LoggerFactory
 
@@ -137,4 +139,12 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
         // NOOP : Not supported by AD SAL
     }
     
+     override onNodeErrorNotification(NodeErrorNotification notification) {
+        // NOOP : Not supported by AD SAL
+    }
+    
+     override onNodeExperimenterErrorNotification(
+                NodeExperimenterErrorNotification notification) {
+        // NOOP : Not supported by AD SAL
+    }
 }
