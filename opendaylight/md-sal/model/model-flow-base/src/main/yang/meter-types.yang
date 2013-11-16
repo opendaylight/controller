@@ -119,16 +119,6 @@ module opendaylight-meter-types {
         }
     }
     
-    grouping meter-stats-config-request {
-        list meter-stats {
-            key "meter-id";         
-            
-            leaf meter-id {
-                type int32;
-            }           
-        }
-    }
-    
     grouping meter-statistics {
             
         leaf meter-id {
@@ -174,6 +164,39 @@ module opendaylight-meter-types {
         }
     }
 
+    grouping meter-features {
+		            
+        leaf max_meter {
+            type yang:counter32;
+        }
+           
+        leaf band_types {
+            type yang:counter32;
+        }
+        
+        leaf capabilities {
+            type yang:counter32;
+        }
+        
+        leaf max_bands {
+            type uint8;
+        }
+        
+        leaf max_color {
+            type uint8;
+        }
+    }
+
+    grouping meter-stats-config-request {
+        list meter-stats {
+            key "meter-id";         
+            
+            leaf meter-id {
+                type int32;
+            }           
+        }
+    }
+    
     grouping meter-statistics-reply {
         list meter-stats {
             key "meter-stats-order";
@@ -184,10 +207,9 @@ module opendaylight-meter-types {
         }
     }
     
-    grouping meter-config-stats {
+    grouping meter-config-stats-reply {
         list meter-config-stats {
             key "meter-config-order";
-            
             leaf meter-config-order {
                 type int32;
             }
@@ -196,33 +218,8 @@ module opendaylight-meter-types {
         } 
     }
     
-    grouping meter-features {
-        list meter-features {
-            key "meter-feature-order";
-            
-            leaf meter-feature-order {
-                type yang:counter32;
-            }          
-            
-            leaf max_meter {
-                type yang:counter32;
-            }
-            
-            leaf band_types {
-                type yang:counter32;
-            }
-            
-            leaf capabilities {
-                type yang:counter32;
-            }
-            
-            leaf max_bands {
-                type uint8;
-            }
-            
-            leaf max_color {
-                type uint8;
-            }
-        }
-    }    
+    grouping meter-features-reply {
+    	uses meter-features;
+    }
+    
 }

@@ -1,28 +1,37 @@
+/*
+ * Copyright IBM Corporation, 2013.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.List;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.desc.response.GroupDescStats;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.stats.response.GroupStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupFeatures;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.desc.stats.reply.GroupDescStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.statistics.reply.GroupStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.meter.config.response.MeterConfigStats;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.meter.stats.response.MeterStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeatures;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
 
 public class NodeStatistics {
 
     private NodeRef targetNode;
     
-    private List<GroupStatistics> groupStatistics;
+    private List<GroupStats> groupStatistics;
     
-    private List<MeterStatistics> meterStatistics;
+    private List<MeterStats> meterStatistics;
     
     private List<GroupDescStats> groupDescStats;
     
     private List<MeterConfigStats> meterConfigStats;
     
-    private List<org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.features.GroupFeatures> groupFeatures;
+    private GroupFeatures groupFeatures;
     
-    private List<org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.features.MeterFeatures> meterFeatures;
+    private MeterFeatures meterFeatures;
     
     public NodeStatistics(){
         
@@ -36,19 +45,19 @@ public class NodeStatistics {
         this.targetNode = targetNode;
     }
 
-    public List<GroupStatistics> getGroupStatistics() {
+    public List<GroupStats> getGroupStatistics() {
         return groupStatistics;
     }
 
-    public void setGroupStatistics(List<GroupStatistics> groupStatistics) {
+    public void setGroupStatistics(List<GroupStats> groupStatistics) {
         this.groupStatistics = groupStatistics;
     }
 
-    public List<MeterStatistics> getMeterStatistics() {
+    public List<MeterStats> getMeterStatistics() {
         return meterStatistics;
     }
 
-    public void setMeterStatistics(List<MeterStatistics> meterStatistics) {
+    public void setMeterStatistics(List<MeterStats> meterStatistics) {
         this.meterStatistics = meterStatistics;
     }
 
@@ -68,21 +77,19 @@ public class NodeStatistics {
         this.meterConfigStats = meterConfigStats;
     }
 
-    public List<org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.features.GroupFeatures> getGroupFeatures() {
+    public GroupFeatures getGroupFeatures() {
         return groupFeatures;
     }
 
-    public void setGroupFeatures(
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.features.GroupFeatures> groupFeatures) {
+    public void setGroupFeatures(GroupFeatures groupFeatures) {
         this.groupFeatures = groupFeatures;
     }
 
-    public List<org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.features.MeterFeatures> getMeterFeatures() {
+    public MeterFeatures getMeterFeatures() {
         return meterFeatures;
     }
 
-    public void setMeterFeatures(
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.features.MeterFeatures> meterFeatures) {
+    public void setMeterFeatures(MeterFeatures meterFeatures) {
         this.meterFeatures = meterFeatures;
     }
     

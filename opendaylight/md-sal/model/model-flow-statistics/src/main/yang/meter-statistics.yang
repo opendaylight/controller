@@ -7,65 +7,45 @@ module opendaylight-meter-statistics {
     import opendaylight-meter-types {prefix meter-types;revision-date "2013-09-18";}
     import flow-capable-transaction {prefix tr;}
     
+    contact
+    	"Anilkumar Vishnoi
+    	Email: avishnoi@in.ibm.com";
 
     revision "2013-11-11" {
         description "Initial revision of meter statistics service";
     }
 
-    typedef meter-stats-ref {
-        type instance-identifier;
-    }
-    
-    grouping meter-stats-response {
-        uses "inv:node-context-ref";
-
-        list meter-statistics {
-	        uses meter-types:meter-statistics;
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-meter-statistics";
+        container meter-statistics {
+        	config "false";
+        	uses meter-types:meter-statistics-reply;
         }
     }
 
-    typedef meter-config-ref {
-        type instance-identifier;
+	augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-meter-config-stats";
+        container meter-config-stats {
+        	config "false";
+        	uses meter-types:meter-config-stats-reply;
+        }
     }
-    
-    grouping meter-config-response {
-        uses "inv:node-context-ref";
-
-        list meter-config-stats {
-        	uses meter-types:meter-config-stats;
+	
+	augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-meter-features";
+        container meter-features {
+        	config "false";
+        	uses meter-types:meter-features-reply;
         }
     }
 
-    typedef meter-features-ref {
-        type instance-identifier;
-    }
-    
-    grouping meter-features-response {
-        uses "inv:node-context-ref";
-
-        uses meter-types:meter-features;
-    }
-
-	container meter-all-stats {
-		container meter-stats {
-			uses meter-stats-response;
-		}
-		
-		container meter-config {
-			uses meter-config-response;
-		}
-		
-		container meter-features {
-			uses meter-features-response;
-		}
-	}
 	// RPC calls
 	rpc get-all-meter-statistics {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
         }
         output {
-			uses meter-stats-response;
+			uses meter-types:meter-statistics-reply;
 			uses tr:transaction-aware;
         }
 	
@@ -73,13 +53,13 @@ module opendaylight-meter-statistics {
 	
 	rpc get-meter-statistics {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
             leaf meter-id{
             	type meter-types:meter-id;
             }
         }
         output {
-            uses meter-stats-response;
+            uses meter-types:meter-statistics-reply;
             uses tr:transaction-aware;
         }
 	
@@ -87,20 +67,20 @@ module opendaylight-meter-statistics {
 	
 	rpc get-all-meter-config-statistics {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
         }
         output {
-        	uses meter-config-response;
+   	    	uses meter-types:meter-config-stats-reply;
             uses tr:transaction-aware;
         }
 	}
 	
 	rpc get-meter-features {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
         }
         output {
-        	uses meter-features-response;
+	        uses meter-types:meter-features-reply;
             uses tr:transaction-aware;
         }
 	}
@@ -109,28 +89,32 @@ module opendaylight-meter-statistics {
 	//Notification calls
 	
 	notification meter-statistics-updated {
-	    leaf meter-stats-id {
-            type meter-stats-ref;
-        }
-    	uses meter-stats-response;
+		leaf moreReplies {
+			type boolean;
+		}
+		
+		uses inv:node;
+        uses meter-types:meter-statistics-reply;
         uses tr:transaction-aware;
 	}
 	
 	notification meter-config-stats-updated {
-		leaf meter-config-id {
-            type meter-config-ref;
-        }
-	
-		uses meter-config-response;
-        uses tr:transaction-aware;
+		leaf moreReplies {
+			type boolean;
+		}
+	    
+        uses inv:node;
+	    uses meter-types:meter-config-stats-reply;
+    	uses tr:transaction-aware;
 	}
 
 	notification meter-features-updated {
-	    leaf meter-features-id {
-            type meter-features-ref;
-        }
-	
-		uses meter-features-response;
+		leaf moreReplies {
+			type boolean;
+		}
+		
+		uses inv:node;
+        uses meter-types:meter-features-reply;
         uses tr:transaction-aware;
 	}
 }

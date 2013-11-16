@@ -73,16 +73,6 @@ module opendaylight-group-types {
         }
     }
     
-    grouping group-statistics-request {
-        list group-stats {
-            key "group-id";         
-            
-            leaf group-id {
-                type int32;
-            }           
-        }
-    }
-    
     grouping group-statistics {
             
         leaf group-id {
@@ -128,7 +118,44 @@ module opendaylight-group-types {
         }       
     }
 
+    grouping group-features {
+        uses group-types;
+            
+        leaf capabilities { 
+        	type enumeration {
+                enum select-weight;
+                enum select-liveness;
+                enum chaining;
+                enum chaining-checks;
+            }   
+        }
+
+        leaf-list max-groups {
+            type uint32;
+            description "Maximum number of groups for each type";
+            max-elements 4;
+        }
+            
+        leaf-list actions {
+            type uint32;
+            description "Bitmap number OFPAT_* that are supported";
+            max-elements 4;
+        }
+    }
+    
+    grouping group-statistics-request {
+        list group-stats {
+            key "group-id";         
+            
+            leaf group-id {
+                type int32;
+            }           
+        }
+    }
+    
+    
     grouping group-statistics-reply {
+    	
         list group-stats {
             key "group-stats-order";
             leaf group-stats-order {
@@ -139,10 +166,10 @@ module opendaylight-group-types {
         }
     }
     
-    grouping group-desc-stats {
+    grouping group-desc-stats-reply {
+   	
         list group-desc-stats {
             key "order-id";         
-            
             leaf order-id {
                 type int32;
             }
@@ -151,35 +178,8 @@ module opendaylight-group-types {
         }
     }
     
-    grouping group-features {
-        list group-features {
-            key "order";
-            leaf order {
-                type int32;
-            }
-            
-            uses group-types;
-            
-            leaf capabilities { 
-                type enumeration {
-                    enum select-weight;
-                    enum select-liveness;
-                    enum chaining;
-                    enum chaining-checks;
-                }   
-            }
-
-            leaf-list max-groups {
-                type uint32;
-                description "Maximum number of groups for each type";
-                max-elements 4;
-            }
-            
-            leaf-list actions {
-                type uint32;
-                description "Bitmap number OFPAT_* that are supported";
-                max-elements 4;
-            }
-        }
-    }    
+    grouping group-features-reply {
+    	uses group-features;
+    }
+    
 }

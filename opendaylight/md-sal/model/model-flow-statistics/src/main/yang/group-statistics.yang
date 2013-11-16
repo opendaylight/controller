@@ -7,65 +7,45 @@ module opendaylight-group-statistics {
     import opendaylight-group-types {prefix group-types;revision-date "2013-10-18";}
     import flow-capable-transaction {prefix tr;}
     
+    contact
+    	"Anilkumar Vishnoi
+    	Email: avishnoi@in.ibm.com";
+    		
     revision "2013-11-11" {
         description "Initial revision of group statistics service";
     }
     
-    typedef group-stats-ref {
-        type instance-identifier;
-    }
-    
-    grouping group-stats-response {
-        uses "inv:node-context-ref";
-
-        list group-statistics{
-        	uses group-types:group-statistics;
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-group-statistics";
+        container group-statistics {
+        	config "false";
+        	uses group-types:group-statistics-reply;
         }
     }
 
-    typedef group-features-ref {
-        type instance-identifier;
-    }
-    
-    grouping group-features-response {
-        uses "inv:node-context-ref";
-
-        uses group-types:group-features;
-    }
-
-    typedef group-desc-ref {
-        type instance-identifier;
-    }
-    
-    grouping group-desc-response {
-        uses "inv:node-context-ref";
-
-        list group-desc-stats {
-        	uses group-types:group-desc-stats;
+	augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-group-desc-stats";
+        container group-desc {
+        	config "false";
+        	uses group-types:group-desc-stats-reply;
         }
     }
-    
-    container group-all-statistics {
-    	container group-stats {
-    		uses group-stats-response;
-    	}
-    	
-    	container group-features {
-   			uses group-features-response;
-   		}
-   		
-   		container group-desc {
-   			uses group-desc-response;
-   		}
+	
+	augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-group-features";
+        container group-features {
+        	config "false";
+        	uses group-types:group-features-reply;
+        }
     }
 
 	// RPC calls
 	rpc get-all-group-statistics {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
         }
         output {
-        	uses group-stats-response;
+        	uses group-types:group-statistics-reply;
             uses tr:transaction-aware;
         }
 	
@@ -73,13 +53,10 @@ module opendaylight-group-statistics {
 	
 	rpc get-group-statistics {
 		input {
-            uses inv:node-context-ref;
-            leaf group-id{
-            	type group-types:group-id;
-            }
+            uses inv:node;
         }
         output {
-            uses group-stats-response;
+            uses group-types:group-statistics-reply;
             uses tr:transaction-aware;
         }
 	
@@ -87,20 +64,20 @@ module opendaylight-group-statistics {
 	
 	rpc get-group-description {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
         }
         output {
-            uses group-desc-response;
+            uses group-types:group-desc-stats-reply;
             uses tr:transaction-aware;
         }
 	}
 	
 	rpc get-group-features {
 		input {
-            uses inv:node-context-ref;
+            uses inv:node;
         }
         output {
-            uses group-features-response;
+            uses group-types:group-features-reply;
             uses tr:transaction-aware;
         }
 	}
@@ -109,29 +86,29 @@ module opendaylight-group-statistics {
 	//Notification calls
 	
 	notification group-statistics-updated {
-	    leaf group-stats-id {
-            type group-stats-ref;
-        }
-		
-		uses group-stats-response;
+		leaf moreReplies {
+			type boolean;
+		}
+		uses inv:node;
+		uses group-types:group-statistics-reply;
         uses tr:transaction-aware;
 	}
 	
 	notification group-desc-stats-updated {
-		leaf group-desc-id {
-            type group-desc-ref;
-        }
-	
-		uses group-desc-response;
+		leaf moreReplies {
+			type boolean;
+		}
+		uses inv:node;
+		uses group-types:group-desc-stats-reply;
         uses tr:transaction-aware;
 	}
 
 	notification group-features-updated {
-		leaf group-features-id {
-            type group-features-ref;
-        }
-	
-		uses group-features-response;
+		leaf moreReplies {
+			type boolean;
+		}
+		uses inv:node;
+		uses group-types:group-features-reply;
         uses tr:transaction-aware;
 	}
 }
