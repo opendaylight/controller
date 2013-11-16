@@ -24,6 +24,11 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
         this.value = value;
     }
     
+    public SimpleNodeWrapper(URI namespace, String localName, String value) {
+        this(localName, value);
+        this.namespace = namespace;
+    }
+    
     @Override
     public String getLocalName() {
         if (simpleNode != null) {
