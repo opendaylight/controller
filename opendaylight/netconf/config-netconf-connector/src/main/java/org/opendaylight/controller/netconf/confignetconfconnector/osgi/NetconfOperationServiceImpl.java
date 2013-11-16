@@ -72,13 +72,12 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
     private static Set<Capability> setupCapabilities(YangStoreSnapshot yangStoreSnapshot) {
         Set<Capability> capabilities = Sets.newHashSet();
 
+        // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
+        // [RFC6241] 8.5.  Rollback-on-Error Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
-        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:operations:1.0"));
-        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:operations:1.1"));
-        capabilities
-                .add(new BasicCapability(
-                        "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04"));
+        // [RFC6022] get-schema RPC. TODO: implement rest of the RFC
+        capabilities.add(new BasicCapability("urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&revision=2010-10-04"));
 
         final Collection<Map.Entry<Module, String>> modulesAndContents = yangStoreSnapshot.getModuleMap().values();
         for (Map.Entry<Module, String> moduleAndContent : modulesAndContents) {
