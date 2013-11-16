@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_098fdccd",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-11-16T04:25:13Z",
+      "side": 1,
+      "message": "Can we do cross check just once when edge update is received? O/w it\u0027ll be called every time isISLink() is called.",
+      "revId": "33dce931f18ea78db95147083f909bcdc4d362b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e9bda869",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-11-16T04:25:13Z",
+      "side": 1,
+      "message": "Could we rename this API to make it clear what it\u0027s doing? It does more just checking if the node exists. It also fixed the nodeconnector type.",
+      "revId": "33dce931f18ea78db95147083f909bcdc4d362b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
