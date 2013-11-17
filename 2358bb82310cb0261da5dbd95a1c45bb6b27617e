@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_e4d14f58",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/StatisticsManagerActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-11-17T15:46:04Z",
+      "side": 1,
+      "message": "I would think that the more flag should be handled in the openflowplugin...",
+      "revId": "2358bb82310cb0261da5dbd95a1c45bb6b27617e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
