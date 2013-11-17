@@ -49,6 +49,7 @@ import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
@@ -384,6 +385,56 @@ public class TopologyManagerImpl implements
     }
 
     /**
+     * This method cross checks the determination of nodeConnector type by Discovery Service
+     * against the information in SwitchManager and updates it accordingly.
+     * @param e
+     *          The edge
+     */
+    private void crossCheckNodeConnectors(Edge e) {
+        NodeConnector nc;
+        if (e.getHeadNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
+            nc = updateNCTypeFromSwitchMgr(e.getHeadNodeConnector());
+            if (nc != null) {
+                e.setHeadNodeConnector(nc);
+            }
+        }
+        if (e.getTailNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
+            nc = updateNCTypeFromSwitchMgr(e.getTailNodeConnector());
+            if (nc != null) {
+                e.setTailNodeConnector(nc);
+            }
+        }
+    }
+
+    /**
+     * A NodeConnector may have been categorized as of type Production by Discovery Service.
+     * But at the time when this determination was made, only OF nodes were known to Discovery
+     * Service. This method checks if the node of nodeConnector is known to SwitchManager. If
+     * so, then it returns a new NodeConnector with correct type.
+     *
+     * @param nc
+     *       NodeConnector as passed on in the edge
+     * @return
+     *       If Node of the NodeConnector is in SwitchManager, then return a new NodeConnector
+     *       with correct type, null otherwise
+     */
+
+    private NodeConnector updateNCTypeFromSwitchMgr(NodeConnector nc) {
+
+        for (Node node : switchManager.getNodes()) {
+            String nodeName = node.getNodeIDString();
+            log.trace("Switch Manager Node Name: {}, NodeConnector Node Name: {}", nodeName,
+                    nc.getNode().getNodeIDString());
+            if (nodeName.equals(nc.getNode().getNodeIDString())) {
+                NodeConnector nodeConnector = NodeConnectorCreator
+                        .createNodeConnector(node.getType(), nc.getID(), node);
+                return nodeConnector;
+            }
+        }
+        return null;
+    }
+
+    /**
      * The Map returned is a copy of the current topology hence if the topology
      * changes the copy doesn't
      *
@@ -532,6 +583,10 @@ public class TopologyManagerImpl implements
                 log.warn("Ignore edge that contains invalid node connector: {}", e);
                 return null;
             }
+
+            // Check if nodeConnectors of the edge were correctly categorized
+            // by OF plugin
+            crossCheckNodeConnectors(e);
 
             // Make sure the props are non-null
             if (props == null) {
