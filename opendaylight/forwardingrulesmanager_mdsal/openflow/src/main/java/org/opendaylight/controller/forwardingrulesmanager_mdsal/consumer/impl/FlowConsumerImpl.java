@@ -35,6 +35,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddF
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeErrorNotification;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeExperimenterErrorNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
@@ -492,6 +494,19 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         @Override
         public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
             // TODO
+        }
+
+        @Override
+        public void onNodeErrorNotification(NodeErrorNotification notification) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void onNodeExperimenterErrorNotification(
+                NodeExperimenterErrorNotification notification) {
+            // TODO Auto-generated method stub
+            
         };
 
     }
