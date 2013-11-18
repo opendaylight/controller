@@ -14,7 +14,7 @@
     <tag>HEAD</tag>
   </scm>
   <artifactId>arphandler</artifactId>
-  <version>0.4.1-SNAPSHOT</version>
+  <version>0.5.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <build>
@@ -27,6 +27,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.opendaylight.controller.sal.packet.address,
               org.opendaylight.controller.connectionmanager,
               org.opendaylight.controller.sal.connection,
               org.opendaylight.controller.sal.core,
@@ -72,7 +73,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

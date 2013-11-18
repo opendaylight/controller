@@ -27,6 +27,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.hosttracker.IHostId;
+import org.opendaylight.controller.hosttracker.IPHostId;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.Node;
@@ -45,6 +47,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 //import org.opendaylight.controller.hosttracker.*;
 
 @RunWith(PaxExam.class)
@@ -56,6 +59,7 @@ public class HostTrackerIT {
 
     private IfIptoHost hosttracker = null;
     private IInventoryListener invtoryListener = null;
+
     // Configure the OSGi container
     @Configuration
     public Option[] config() {
@@ -218,7 +222,6 @@ public class HostTrackerIT {
         st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "0");
         Assert.assertFalse(st.isSuccess());
 
-
         this.invtoryListener.notifyNodeConnector(nc1_1, UpdateType.ADDED, null);
 
         // check all host list
@@ -257,12 +260,15 @@ public class HostTrackerIT {
         Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, null);
         st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "");
 
-        HostNodeConnector hnc_1 = this.hosttracker.hostFind(InetAddress.getByName("192.168.0.8"));
+        IHostId id1 = IPHostId.fromIP(InetAddress.getByName("192.168.0.8"));
+        HostNodeConnector hnc_1 = this.hosttracker.hostFind(id1);
         assertNull(hnc_1);
 
         this.invtoryListener.notifyNodeConnector(nc1_1, UpdateType.ADDED, null);
 
-        hnc_1 = this.hosttracker.hostFind(InetAddress.getByName("192.168.0.8"));
+        IHostId id2 = IPHostId.fromIP(InetAddress.getByName("192.168.0.8"));
+        hnc_1 = this.hosttracker.hostFind(id2);
+
         assertNotNull(hnc_1);
 
     }
