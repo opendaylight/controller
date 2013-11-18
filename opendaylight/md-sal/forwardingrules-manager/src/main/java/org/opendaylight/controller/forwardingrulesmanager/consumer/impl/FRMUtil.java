@@ -1,4 +1,4 @@
-package org.opendaylight.controller.forwardingrulesmanager_mdsal.consumer.impl;
+package org.opendaylight.controller.forwardingrulesmanager.consumer.impl;
 
 import java.util.ArrayList;
 import java.util.List;
