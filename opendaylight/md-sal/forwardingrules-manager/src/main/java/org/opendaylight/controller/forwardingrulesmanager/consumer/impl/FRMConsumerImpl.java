@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.forwardingrulesmanager_mdsal.consumer.impl;
+package org.opendaylight.controller.forwardingrulesmanager.consumer.impl;
 
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
