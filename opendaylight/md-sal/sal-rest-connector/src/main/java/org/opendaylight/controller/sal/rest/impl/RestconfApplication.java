@@ -24,6 +24,8 @@ public class RestconfApplication extends Application {
         singletons.add(restconfImpl);
         singletons.add(XmlToCompositeNodeProvider.INSTANCE);
         singletons.add(StructuredDataToXmlProvider.INSTANCE);
+        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
+        singletons.add(StructuredDataToJsonProvider.INSTANCE);
         return singletons;
     }
 
