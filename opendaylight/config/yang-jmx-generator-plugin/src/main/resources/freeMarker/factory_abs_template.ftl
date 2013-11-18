@@ -17,7 +17,12 @@ package ${packageName};
 
     @Override
     public final boolean isModuleImplementingServiceInterface(Class<? extends ${abstractServiceInterfaceType}> serviceInterface) {
-        return serviceIfcs.contains(serviceInterface);
+        for (Class<?> ifc: serviceIfcs) {
+            if (serviceInterface.isAssignableFrom(ifc)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

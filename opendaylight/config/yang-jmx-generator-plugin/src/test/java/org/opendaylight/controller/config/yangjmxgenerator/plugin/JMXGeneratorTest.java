@@ -748,8 +748,10 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 // available if source level is 5.0
                 if (c.getID() == 1610613329)
                     continue;
+                if (c.getID() == 1610613328) // 'for each' statements are only available if source level is 5.0
+                    continue;
                 fail("Error in generated source code " + file + ":"
-                        + c.getSourceLineNumber() + " " + c.toString());
+                        + c.getSourceLineNumber() + " id: " + c.getID() + " message:"  + c.toString());
             }
 
             ASTVisitor visitor = verifiers.get(file.getName());
