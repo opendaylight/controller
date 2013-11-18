@@ -72,7 +72,8 @@ public class ToJsonBasicDataTypesTest {
         boolean lfbinaryChecked = false;
         // boolean lfref1Checked = false;
         boolean lfemptyChecked = false;
-
+        boolean lfstr1Checked = false;
+        
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             JsonToken peek = null;
@@ -98,6 +99,10 @@ public class ToJsonBasicDataTypesTest {
                 assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
                 assertEquals("lfstr", jReader.nextString());
                 lfstrChecked = true;
+            } else if (keyName.equals("lfstr1")) {
+                assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+                assertEquals("", jReader.nextString());
+                lfstr1Checked = true;
             } else if (keyName.equals("lfbool1")) {
                 assertEquals("Key " + keyName + " has incorrect type", JsonToken.BOOLEAN, peek);
                 assertEquals(true, jReader.nextBoolean());
@@ -167,6 +172,7 @@ public class ToJsonBasicDataTypesTest {
         assertTrue("lfbool1 wasn't checked", lfbool1Checked);
         assertTrue("lfbool2 wasn't checked", lfbool2Checked);
         assertTrue("lfstr wasn't checked", lfstrChecked);
+        assertTrue("lfstr1 wasn't checked", lfstr1Checked);
         assertTrue("lfbinary wasn't checked", lfbinaryChecked);
         assertTrue("lfempty wasn't checked", lfemptyChecked);
         // assertTrue("lfref1 wasn't checked", lfref1Checked);
