@@ -13,6 +13,10 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -31,6 +35,7 @@ import org.glassfish.jersey.test.TestProperties;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -73,7 +78,7 @@ public class XmlProvidersTest extends JerseyTest {
         restconfImpl.setControllerContext(controllerContext);
     }
 
-//    @Before
+    @Before
     public void logs() {
         List<LogRecord> loggedRecords = getLoggedRecords();
         for (LogRecord l : loggedRecords) {
@@ -102,26 +107,32 @@ public class XmlProvidersTest extends JerseyTest {
     public void testXmlToCompositeNodeProvider() throws ParserConfigurationException, SAXException, IOException {
         URI uri = null;
         try {
-            uri = new URI("/operations/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
+            uri = new URI("/config/" + URLEncoder.encode("ietf-interfaces:interfaces/interface/eth0", Charsets.US_ASCII.name()).toString());
         } catch (UnsupportedEncodingException | URISyntaxException e) {
             e.printStackTrace();
         }
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
         final CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode(xmlStream);
-        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(new RpcResult<CompositeNode>() {
-            
+        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(new Future<RpcResult<TransactionStatus>>() {
             @Override
-            public boolean isSuccessful() {
-                return true;
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
             }
-            
             @Override
-            public CompositeNode getResult() {
-                return loadedCompositeNode;
+            public boolean isCancelled() {
+                return false;
             }
-            
             @Override
-            public Collection<RpcError> getErrors() {
+            public boolean isDone() {
+                return false;
+            }
+            @Override
+            public RpcResult<TransactionStatus> get() throws InterruptedException, ExecutionException {
+                return null;
+            }
+            @Override
+            public RpcResult<TransactionStatus> get(long timeout, TimeUnit unit) throws InterruptedException,
+                    ExecutionException, TimeoutException {
                 return null;
             }
         });
@@ -132,7 +143,7 @@ public class XmlProvidersTest extends JerseyTest {
         Document doc = docBuilder.parse(xmlStream);
         
         Response response = target(uri.toASCIIString()).request(MediaTypes.API+RestconfService.XML).post(Entity.entity(TestUtils.getDocumentInPrintableForm(doc), new MediaType("application","vnd.yang.api+xml")));
-        assertEquals(200, response.getStatus());
+        assertEquals(204, response.getStatus());
     }
     
     @Test

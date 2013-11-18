@@ -35,7 +35,7 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
         JsonReader jsonReader = new JsonReader();
         try {
             return jsonReader.read(entityStream);
-        } catch (UnsupportedJsonFormatException e) {
+        } catch (UnsupportedFormatException e) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity(e.getMessage()).build());
         }
