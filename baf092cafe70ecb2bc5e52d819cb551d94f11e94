@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_9f0ade1f",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/config.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-18T14:48:36Z",
+      "side": 1,
+      "message": "Rather than using a number which convey little information, can we use a name? Will be more descriptive",
+      "revId": "baf092cafe70ecb2bc5e52d819cb551d94f11e94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7f0dea36",
+        "filename": "opendaylight/forwarding/staticrouting/src/main/java/org/opendaylight/controller/forwarding/staticrouting/internal/StaticRoutingImplementation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-18T14:48:36Z",
+      "side": 1,
+      "message": "The fact that the HostID scheme need to known in different places is not scalable. I would really concentrate in one place if need to be present else it\u0027s really opening up for very error prone behaviors.",
+      "revId": "baf092cafe70ecb2bc5e52d819cb551d94f11e94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
