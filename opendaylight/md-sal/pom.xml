@@ -48,7 +48,7 @@
         <module>statistics-manager</module>
         <!-- Compability Packages -->
         <module>compatibility</module>
-
+        <module>zeromq-routingtable/implementation</module>
         <module>sal-zeromq-connector</module>
     </modules>
 
@@ -61,6 +61,7 @@
            </activation>
             <modules>
                 <module>sal-binding-it</module>
+                <module>zeromq-routingtable/integrationtest</module>
                 <module>clustered-data-store/integrationtest</module>
                 <module>test</module>
             </modules>
