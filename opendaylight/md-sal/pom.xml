@@ -46,6 +46,8 @@
 
         <module>inventory-manager</module>
         <module>statistics-manager</module>
+        <module>forwardingrules-manager</module>
+        
         <!-- Compability Packages -->
         <module>compatibility</module>
 
