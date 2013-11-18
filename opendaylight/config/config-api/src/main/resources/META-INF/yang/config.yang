@@ -121,14 +121,12 @@ module config {
                  should refine this leaf with required-identity pointing to
                  the actual service-type which is actually required.";
 
-            mandatory true;
             type leafref {
                 path "/config:services/config:service/config:type";
             }
         }
 
         leaf name {
-            mandatory true;
             type leafref {
                 path "/config:services/config:service[config:type=current()/../type]/config:instance/config:name";
             }
@@ -144,18 +142,15 @@ module config {
             leaf name {
                 description "Unique module instance name";
                 type string;
-                mandatory true;
             }
 
             leaf type {
                 type identityref {
                     base module-type;
                 }
-                mandatory true;
             }
 
             choice configuration {
-                mandatory true;
                 config true;
             }
 
@@ -179,7 +174,6 @@ module config {
                 }
 
                 leaf provider {
-                    mandatory true;
                     type leafref {
                         path "/modules/module/name";
                     }
