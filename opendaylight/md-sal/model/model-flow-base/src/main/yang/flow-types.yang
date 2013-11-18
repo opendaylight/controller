@@ -72,6 +72,15 @@ module opendaylight-flow-types {
             bit SEND_FLOW_REM;
         }
     }
+
+    typedef removed_reason_flags {
+        type bits {
+            bit IDLE_TIMEOUT;
+            bit HARD_TIMEOUT;
+            bit DELETE;
+            bit GROUP_DELETE;
+        }
+    }
     
     grouping generic_flow_attributes {
         leaf priority {
@@ -185,6 +194,10 @@ module opendaylight-flow-types {
     grouping flow-mod-removed {
         uses generic_flow_attributes;
         
+        leaf removed_reason {
+            type removed_reason_flags;
+        }
+
         leaf duration_nsec {
             type uint32;
         }
@@ -192,22 +205,15 @@ module opendaylight-flow-types {
         leaf duration_sec {
             type uint32;
         }
-        
-        leaf idle_timeout {
-            type uint16;
-        }
-        
-        leaf hard_timeout {
-            type uint16;
-        }
-        
+
         leaf packet_count {
             type uint64;
         }
-        
+
         leaf byte_count {
             type uint64;
         }
+		
         container match {
             uses match:match;
         }
