@@ -418,7 +418,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwarding.staticrouting</artifactId>
-      <version>${controller.version}</version>
+      <version>${forwarding.staticrouting}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -448,17 +448,17 @@
       <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>arphandler</artifactId>
-      <version>${controller.version}</version>
+      <version>${arphandler.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker</artifactId>
-      <version>${controller.version}</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker.implementation</artifactId>
-      <version>${controller.version}</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -734,7 +734,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>samples.loadbalancer</artifactId>
-      <version>${controller.version}</version>
+      <version>${samples.loadbalancer}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

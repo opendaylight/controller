@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -42,6 +41,8 @@ import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRou
 import org.opendaylight.controller.forwarding.staticrouting.IStaticRoutingAware;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRoute;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
+import org.opendaylight.controller.hosttracker.HostIdFactory;
+import org.opendaylight.controller.hosttracker.IHostId;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
@@ -57,10 +58,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Static Routing feature provides the bridge between SDN and Non-SDN networks.
  */
-public class StaticRoutingImplementation implements IfNewHostNotify,
-        IForwardingStaticRouting, IObjectReader, IConfigurationContainerAware {
-    private static Logger log = LoggerFactory
-            .getLogger(StaticRoutingImplementation.class);
+public class StaticRoutingImplementation implements IfNewHostNotify, IForwardingStaticRouting, IObjectReader,
+        IConfigurationContainerAware {
+    private static Logger log = LoggerFactory.getLogger(StaticRoutingImplementation.class);
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
     ConcurrentMap<String, StaticRoute> staticRoutes;
     ConcurrentMap<String, StaticRouteConfig> staticRouteConfigs;
@@ -71,6 +71,10 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     private Set<IStaticRoutingAware> staticRoutingAware = Collections
             .synchronizedSet(new HashSet<IStaticRoutingAware>());
     private ExecutorService executor;
+
+    //HostTracker db key scheme implementation. By default IP only key scheme is mentioned in the config.ini
+    private static int DEFAULT_IP_KEY_SCHEME = 0;
+    private int keyScheme = DEFAULT_IP_KEY_SCHEME;
 
     void setStaticRoutingAware(IStaticRoutingAware s) {
         if (this.staticRoutingAware != null) {
@@ -101,8 +105,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     @Override
-    public Object readObject(ObjectInputStream ois)
-            throws FileNotFoundException, IOException, ClassNotFoundException {
+    public Object readObject(ObjectInputStream ois) throws FileNotFoundException, IOException, ClassNotFoundException {
         // Perform the class deserialization locally, from inside the package
         // where the class is defined
         return ois.readObject();
@@ -111,8 +114,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     @SuppressWarnings("unchecked")
     private void loadConfiguration() {
         ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, StaticRouteConfig> confList = (ConcurrentMap<String, StaticRouteConfig>) objReader
-                .read(this, staticRoutesFileName);
+        ConcurrentMap<String, StaticRouteConfig> confList = (ConcurrentMap<String, StaticRouteConfig>) objReader.read(
+                this, staticRoutesFileName);
 
         if (confList == null) {
             return;
@@ -123,7 +126,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
     }
 
-
     private Status saveConfig() {
         return saveConfigInternal();
     }
@@ -132,9 +134,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         Status status;
         ObjectWriter objWriter = new ObjectWriter();
 
-        status = objWriter.write(
-                new ConcurrentHashMap<String, StaticRouteConfig>(
-                        staticRouteConfigs), staticRoutesFileName);
+        status = objWriter.write(new ConcurrentHashMap<String, StaticRouteConfig>(staticRouteConfigs),
+                staticRoutesFileName);
 
         if (status.isSuccess()) {
             return status;
@@ -144,23 +145,19 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     @SuppressWarnings("deprecation")
-        private void allocateCaches() {
+    private void allocateCaches() {
         if (this.clusterContainerService == null) {
-            log
-                    .info("un-initialized clusterContainerService, can't create cache");
+            log.info("un-initialized clusterContainerService, can't create cache");
             return;
         }
 
         try {
-            clusterContainerService.createCache(
-                    "forwarding.staticrouting.routes", EnumSet
-                            .of(IClusterServices.cacheMode.TRANSACTIONAL));
-            clusterContainerService.createCache(
-                    "forwarding.staticrouting.configs", EnumSet
-                            .of(IClusterServices.cacheMode.TRANSACTIONAL));
+            clusterContainerService.createCache("forwarding.staticrouting.routes",
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+            clusterContainerService.createCache("forwarding.staticrouting.configs",
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
-            log
-                    .error("\nCache already exists - destroy and recreate if needed");
+            log.error("\nCache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
             log.error("\nCache configuration invalid - check cache mode");
         }
@@ -169,8 +166,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     @SuppressWarnings({ "unchecked", "deprecation" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
-            log
-                    .info("un-initialized clusterContainerService, can't retrieve cache");
+            log.info("un-initialized clusterContainerService, can't retrieve cache");
             return;
         }
 
@@ -195,7 +191,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
                     try {
                         ra.staticRouteUpdate(s, update);
                     } catch (Exception e) {
-                        log.error("",e);
+                        log.error("", e);
                     }
                 }
             }
@@ -216,15 +212,16 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
 
         @Override
         public Object call() throws Exception {
-            if (!added
-                    || (staticRoute.getType() == StaticRoute.NextHopType.SWITCHPORT)) {
+            if (!added || (staticRoute.getType() == StaticRoute.NextHopType.SWITCHPORT)) {
                 notifyStaticRouteUpdate(staticRoute, added);
             } else {
                 InetAddress nh = staticRoute.getNextHopAddress();
-                HostNodeConnector host = hostTracker.hostQuery(nh);
+                //HostTracker hosts db key scheme implementation
+                IHostId id = HostIdFactory.create(keyScheme, nh, null);
+                HostNodeConnector host = hostTracker.hostQuery(id);
                 if (host == null) {
                     log.debug("Next hop {}  is not present, try to discover it", nh.getHostAddress());
-                    Future<HostNodeConnector> future = hostTracker.discoverHost(nh);
+                    Future<HostNodeConnector> future = hostTracker.discoverHost(id);
                     if (future != null) {
                         try {
                             host = future.get();
@@ -337,8 +334,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     public StaticRoute getBestMatchStaticRoute(InetAddress ipAddress) {
         ByteBuffer bblongestPrefix = null;
         try {
-            bblongestPrefix = ByteBuffer.wrap(InetAddress.getByName("0.0.0.0")
-                    .getAddress());
+            bblongestPrefix = ByteBuffer.wrap(InetAddress.getByName("0.0.0.0").getAddress());
         } catch (Exception e) {
             return null;
         }
@@ -368,9 +364,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
             return status;
         }
         if (staticRouteConfigs.get(config.getName()) != null) {
-                return new Status(StatusCode.CONFLICT,
-                                "A valid Static Route configuration with this name " +
-                                                "already exists. Please use a different name");
+            return new Status(StatusCode.CONFLICT, "A valid Static Route configuration with this name "
+                    + "already exists. Please use a different name");
         }
 
         // Update database
@@ -378,10 +373,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
 
         for (Map.Entry<String, StaticRoute> entry : staticRoutes.entrySet()) {
             if (entry.getValue().compareTo(sRoute) == 0) {
-                return new Status(StatusCode.CONFLICT,
-                        "This conflicts with an existing Static Route " +
-                                "Configuration. Please check the configuration " +
-                                        "and try again");
+                return new Status(StatusCode.CONFLICT, "This conflicts with an existing Static Route "
+                        + "Configuration. Please check the configuration " + "and try again");
             }
         }
         staticRoutes.put(config.getName(), sRoute);
@@ -402,8 +395,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
             checkAndUpdateListeners(name, sRoute, false);
             return new Status(StatusCode.SUCCESS, null);
         }
-        return new Status(StatusCode.NOTFOUND,
-                        "Static Route with name " + name + " is not found");
+        return new Status(StatusCode.NOTFOUND, "Static Route with name " + name + " is not found");
     }
 
     void setClusterContainerService(IClusterContainerServices s) {
@@ -433,11 +425,9 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
             containerName = "";
         }
 
-        staticRoutesFileName = ROOT + "staticRouting_" + containerName
-                + ".conf";
+        staticRoutesFileName = ROOT + "staticRouting_" + containerName + ".conf";
 
-        log.debug("forwarding.staticrouting starting on container {}",
-                  containerName);
+        log.debug("forwarding.staticrouting starting on container {}", containerName);
         allocateCaches();
         retrieveCaches();
         this.executor = Executors.newFixedThreadPool(1);
@@ -446,8 +436,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
 
         /*
-         *  Slow probe to identify any gateway that might have silently appeared
-         *  after the Static Routing Configuration.
+         * Slow probe to identify any gateway that might have silently appeared
+         * after the Static Routing Configuration.
          */
         gatewayProbeTimer = new Timer();
         gatewayProbeTimer.schedule(new TimerTask() {
@@ -455,24 +445,32 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
             public void run() {
                 for (Map.Entry<String, StaticRoute> s : staticRoutes.entrySet()) {
                     StaticRoute route = s.getValue();
-                    if ((route.getType() == StaticRoute.NextHopType.IPADDRESS)
-                            && route.getHost() == null) {
+                    if ((route.getType() == StaticRoute.NextHopType.IPADDRESS) && route.getHost() == null) {
                         checkAndUpdateListeners(s.getKey(), route, true);
                     }
                 }
             }
         }, 60 * 1000, 60 * 1000);
+
+        // hosttracker.keyscheme config.ini setting retrieval
+        String ks = System.getProperty("hosttracker.keyscheme");
+        keyScheme = DEFAULT_IP_KEY_SCHEME;
+        try {
+            if (ks != null)
+                keyScheme = Integer.decode(ks);
+        } catch (NumberFormatException ne) {
+            keyScheme = DEFAULT_IP_KEY_SCHEME;
+        }
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
      *
      */
     void destroy() {
-        log.debug("Destroy all the Static Routing Rules given we are "
-                + "shutting down");
+        log.debug("Destroy all the Static Routing Rules given we are " + "shutting down");
 
         gatewayProbeTimer.cancel();
 
@@ -481,18 +479,17 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
      *
      */
     void start() {
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
      *
      */
     void stop() {
