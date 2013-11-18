@@ -76,6 +76,10 @@
     <yangtools.binding.version>0.6.0-SNAPSHOT</yangtools.binding.version>
     <!--versions for bits of the controller -->
     <controller.version>0.4.1-SNAPSHOT</controller.version>
+    <hosttracker.version>0.5.1-SNAPSHOT</hosttracker.version>
+    <arphandler.version>0.5.1-SNAPSHOT</arphandler.version>
+    <forwarding.staticrouting>0.5.1-SNAPSHOT</forwarding.staticrouting>
+    <samples.loadbalancer>0.5.1-SNAPSHOT</samples.loadbalancer>
     <config.version>0.2.3-SNAPSHOT</config.version>
     <netconf.version>0.2.3-SNAPSHOT</netconf.version>
     <mdsal.version>1.0-SNAPSHOT</mdsal.version>
