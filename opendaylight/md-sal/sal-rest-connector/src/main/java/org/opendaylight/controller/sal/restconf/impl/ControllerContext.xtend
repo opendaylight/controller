@@ -8,6 +8,11 @@ import java.net.URLEncoder
 import java.util.HashMap
 import java.util.List
 import java.util.Map
+import java.util.concurrent.ConcurrentHashMap
+import javax.ws.rs.WebApplicationException
+import javax.ws.rs.core.Response
+import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.controller.sal.rest.impl.RestconfProvider
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder
@@ -21,12 +26,10 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 import static com.google.common.base.Preconditions.*
-import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
-import org.opendaylight.yangtools.yang.model.api.RpcDefinition
-import java.util.concurrent.ConcurrentHashMap
 
 class ControllerContext implements SchemaServiceListener {
 
@@ -51,6 +54,13 @@ class ControllerContext implements SchemaServiceListener {
     static def getInstance() {
         return INSTANCE
     }
+    
+    private def void checkPreconditions() {
+        if (schemas == null) {
+            throw new WebApplicationException(Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                    .entity(RestconfProvider::NOT_INITALIZED_MSG).build())
+        }
+    }
 
     public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
         val ret = InstanceIdentifier.builder();
@@ -69,6 +79,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     private def findModule(String restconfInstance) {
+        checkPreconditions
         checkNotNull(restconfInstance);
         val pathArgs = restconfInstance.split("/");
         if (pathArgs.empty) {
@@ -93,6 +104,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     def String toFullRestconfIdentifier(InstanceIdentifier path) {
+        checkPreconditions
         val elements = path.path;
         val ret = new StringBuilder();
         val startQName = elements.get(0).nodeType;
@@ -120,6 +132,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     def CharSequence toRestconfIdentifier(QName qname) {
+        checkPreconditions
         var module = uriToModuleName.get(qname.namespace)
         if (module == null) {
             val moduleSchema = schemas.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
