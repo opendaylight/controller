@@ -46,6 +46,9 @@ module simple-data-types {
 	  leaf lfstr {
 	  	type string;
 	  }	  
+	  leaf lfstr1 {
+	  	type string;
+	  }	  
 	  leaf lfbool1 {
 	  	type boolean;
 	  }	  

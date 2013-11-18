@@ -1,0 +1,20 @@
+module simple-data-types {
+  namespace "simple:data:types";  
+
+  prefix "smpdtp";
+  revision 2013-11-12 {    
+  }
+  
+  list lst {
+  	container cont1 {
+  	}
+  	list lst1 {
+  	}
+  	leaf-list lflst1 {
+  		type string;
+  	}
+  	leaf lf1 {
+  		type string;
+  	}
+  }
+}

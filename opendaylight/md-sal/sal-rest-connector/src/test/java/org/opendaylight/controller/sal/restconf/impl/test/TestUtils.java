@@ -2,33 +2,30 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.*;
 import java.net.*;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.opendaylight.controller.sal.rest.impl.*;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.data.impl.*;
+import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 import org.w3c.dom.Document;
 
 final class TestUtils {
@@ -265,4 +262,80 @@ final class TestUtils {
     static QName buildQName(String name) {
         return buildQName(name, "", null);
     }
+
+    static void supplementNamespace(DataSchemaNode dataSchemaNode, CompositeNode compositeNode) {
+        RestconfImpl restconf = RestconfImpl.getInstance();
+
+        InstanceIdWithSchemaNode instIdAndSchema = new InstanceIdWithSchemaNode(mock(InstanceIdentifier.class),
+                dataSchemaNode);
+
+        ControllerContext controllerContext = mock(ControllerContext.class);
+        BrokerFacade broker = mock(BrokerFacade.class);
+
+        when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
+        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(
+                new DummyFuture());
+
+        restconf.setControllerContext(controllerContext);
+        restconf.setBroker(broker);
+
+        // method is called only because it contains call of method which
+        // supplement namespaces to compositeNode
+        restconf.createConfigurationData("something", compositeNode);
+    }
+
+    static DataSchemaNode obtainSchemaFromYang(String yangFolder) throws FileNotFoundException {
+        return obtainSchemaFromYang(yangFolder, null);
+    }
+
+    static DataSchemaNode obtainSchemaFromYang(String yangFolder, String moduleName) throws FileNotFoundException {
+        Set<Module> modules = null;
+        modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangFolder).getPath());
+
+        if (modules == null) {
+            return null;
+        }
+        if (modules.size() < 1) {
+            return null;
+        }
+        
+        Module moduleRes = null;        
+        if (modules.size() > 1) {
+            if (moduleName == null) {
+                return null;
+            } else {
+                for (Module module: modules) {
+                    if (module.getName().equals(moduleName)) {
+                        moduleRes = module; 
+                    }
+                }
+                if (moduleRes == null) {
+                    return null;
+                }
+            }
+        } else {
+            moduleRes = modules.iterator().next();
+        }
+        
+        if (moduleRes.getChildNodes() == null) {
+            return null;
+        }
+
+        if (moduleRes.getChildNodes().size() != 1) {
+            return null;
+        }
+        DataSchemaNode dataSchemaNode = moduleRes.getChildNodes().iterator().next();
+        return dataSchemaNode;
+
+    }
+
+    static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
+        wrappedNode.setNamespace(new URI(""));
+        if (wrappedNode instanceof CompositeNodeWrapper) {
+            for (NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
+                addDummyNamespaceToAllNodes(childNodeWrapper);
+            }
+        }
+    }
+
 }
