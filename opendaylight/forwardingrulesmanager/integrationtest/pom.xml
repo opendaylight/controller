@@ -21,12 +21,12 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker.implementation</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
