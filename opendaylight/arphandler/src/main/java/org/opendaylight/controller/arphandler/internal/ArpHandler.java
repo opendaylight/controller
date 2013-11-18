@@ -37,6 +37,8 @@ import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
+import org.opendaylight.controller.hosttracker.HostIdFactory;
+import org.opendaylight.controller.hosttracker.IHostId;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
@@ -80,6 +82,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     private BlockingQueue<ARPCacheEvent> ARPCacheEvents = new LinkedBlockingQueue<ARPCacheEvent>();
     private Thread cacheEventHandler;
     private boolean stopping = false;
+
+    // HostTracker db key scheme implementation. By default IP only key scheme is mentioned in the config.ini
+    private static int DEFAULT_IP_KEY_SCHEME = 0;
+    private int keyScheme = DEFAULT_IP_KEY_SCHEME;
+
     /*
      * A cluster allocated cache. Used for synchronizing ARP request/reply
      * events across all cluster controllers. To raise an event, we put() a specific
@@ -280,8 +287,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             return;
         }
 
-
-        HostNodeConnector host = hostTracker.hostQuery(targetIP);
+        //Hosttracker hosts db key implementation
+        IHostId id = HostIdFactory.create(keyScheme,targetIP, null);
+        HostNodeConnector host = hostTracker.hostQuery(id);
         // unknown host, initiate ARP request
         if (host == null) {
             // add the requestor to the list so that we can replay the reply
@@ -468,7 +476,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
 
         // see if we know about the host
-        HostNodeConnector host = hostTracker.hostFind(dIP);
+      //Hosttracker hosts db key implementation
+        IHostId id = HostIdFactory.create(keyScheme,dIP, null);
+        HostNodeConnector host = hostTracker.hostFind(id);
 
         if (host == null) {
             // if we don't, know about the host, try to find it
@@ -524,6 +534,16 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
 
         allocateCaches();
         retrieveCaches();
+        // Hosttracker hosts db setting retrieval code from config.ini
+        String ks = System.getProperty("hosttracker.keyscheme");
+        keyScheme = DEFAULT_IP_KEY_SCHEME;
+        try {
+            if (ks != null)
+                keyScheme = Integer.decode(ks);
+        } catch (NumberFormatException ne) {
+            keyScheme = DEFAULT_IP_KEY_SCHEME;
+        }
+        log.debug("key scheme used in arphandler is {}",keyScheme);
     }
 
     @SuppressWarnings({ "unchecked" })
