@@ -124,6 +124,11 @@
           <artifactId>inventory-manager</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>forwardingrules-manager</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
