@@ -18,7 +18,7 @@ module opendaylight-meter-statistics {
     augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-meter-statistics";
         container meter-statistics {
-        	config "false";
+        	//config "false";
         	uses meter-types:meter-statistics-reply;
         }
     }
@@ -26,7 +26,7 @@ module opendaylight-meter-statistics {
 	augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-meter-config-stats";
         container meter-config-stats {
-        	config "false";
+        	//config "false";
         	uses meter-types:meter-config-stats-reply;
         }
     }
@@ -34,7 +34,7 @@ module opendaylight-meter-statistics {
 	augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-meter-features";
         container meter-features {
-        	config "false";
+        	//config "false";
         	uses meter-types:meter-features-reply;
         }
     }

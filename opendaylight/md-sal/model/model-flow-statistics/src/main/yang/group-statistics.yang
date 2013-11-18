@@ -18,7 +18,7 @@ module opendaylight-group-statistics {
     augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-statistics";
         container group-statistics {
-        	config "false";
+        	//config "false";
         	uses group-types:group-statistics-reply;
         }
     }
@@ -26,7 +26,7 @@ module opendaylight-group-statistics {
 	augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-desc-stats";
         container group-desc {
-        	config "false";
+        	//config "false";
         	uses group-types:group-desc-stats-reply;
         }
     }
@@ -34,7 +34,7 @@ module opendaylight-group-statistics {
 	augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-features";
         container group-features {
-        	config "false";
+        	//config "false";
         	uses group-types:group-features-reply;
         }
     }
