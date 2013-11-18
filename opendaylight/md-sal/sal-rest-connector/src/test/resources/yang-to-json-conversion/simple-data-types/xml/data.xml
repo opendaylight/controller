@@ -11,6 +11,7 @@
 	<lfnuint16Max>65535</lfnuint16Max>
 	<lfnuint32Max>4294967295</lfnuint32Max>
 	<lfstr>lfstr</lfstr>
+	<lfstr1></lfstr1>
 	<lfbool1>true</lfbool1>
 	<lfbool2>false</lfbool2>
 	<lfbool3>bla</lfbool3>
