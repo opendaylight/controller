@@ -15,18 +15,18 @@
   </scm>
 
   <artifactId>hosttracker.integrationtest</artifactId>
-  <version>0.4.1-SNAPSHOT</version>
+  <version>0.5.1-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker.implementation</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>arphandler</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${arphandler.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

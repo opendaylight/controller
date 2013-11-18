@@ -18,19 +18,24 @@ package org.opendaylight.controller.hosttracker.internal;
  * find a host in HostTracker's database and want to discover the host
  * in the same thread without being called by a callback function.
  */
-import java.net.InetAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
+import org.opendaylight.controller.hosttracker.IHostId;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 
+/**
+ *
+ *
+ */
 public class HostTrackerCallable implements Callable<HostNodeConnector> {
 
-    InetAddress trackedHost;
+    //host id which could be ip or a combination of ip + mac based on the scheme chosen.
+    IHostId trackedHost;
     HostTracker hostTracker;
     protected CountDownLatch latch;
 
-    public HostTrackerCallable(HostTracker tracker, InetAddress inet) {
+    public HostTrackerCallable(HostTracker tracker, IHostId inet) {
         trackedHost = inet;
         hostTracker = tracker;
         latch = new CountDownLatch(1);
