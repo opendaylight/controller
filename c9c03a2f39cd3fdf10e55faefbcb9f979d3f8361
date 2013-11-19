@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_5f2fc5f6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-19T16:30:54Z",
+      "side": 1,
+      "message": "Please change to a more informative commit message  -what was cleaned and why. thank you",
+      "revId": "c9c03a2f39cd3fdf10e55faefbcb9f979d3f8361",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
