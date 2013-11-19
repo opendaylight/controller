@@ -28,7 +28,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-
+                        <Export-Package>
+                          org.opendaylight.controller.sal.connector.remoterpc.api,
+                          org.opendaylight.controller.sal.connector.remoterpc.impl
+                        </Export-Package>
                         <Import-Package>
                             javax.xml.bind.annotation,
                             org.opendaylight.controller.sal.core,
