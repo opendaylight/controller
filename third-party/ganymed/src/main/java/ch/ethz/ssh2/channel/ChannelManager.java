@@ -1418,6 +1418,38 @@ public class ChannelManager implements MessageHandler
 			
 			return;
 		}
+		
+		if ((server_session != null) && (type.equals("subsystem")))
+		{
+			String command = tr.readString();
+			if (tr.remain() != 0)
+				throw new IOException("Badly formatted SSH_MSG_CHANNEL_REQUEST message");
+			
+			Runnable run_after_sending_success = null;
+			ServerSessionCallback sscb = server_session.getServerSessionCallback();
+
+			if (sscb != null)
+				run_after_sending_success = sscb.requestSubsystem(server_session, command);
+
+			if (wantReply)
+			{
+				if (run_after_sending_success != null)
+				{
+					tm.sendAsynchronousMessage(new PacketChannelSuccess(c.remoteID).getPayload());
+				}
+				else
+				{
+					tm.sendAsynchronousMessage(new PacketChannelFailure(c.remoteID).getPayload());
+				}
+			}
+			
+			if (run_after_sending_success != null)
+			{
+				runAsync(run_after_sending_success);
+			}
+			
+			return;
+		}
 
 		if ((server_session != null) && (type.equals("shell")))
 		{
