@@ -25,19 +25,12 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>threadpool-config-api</artifactId>
+            <artifactId>netty-config-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
 
         <!--test dependencies -->
@@ -82,7 +75,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.7</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -92,7 +84,7 @@
                         <Import-Package>
                             com.google.common.base,
                             io.netty.channel.nio,
-                            org.opendaylight.controller.config.yang.threadpool,
+                            org.opendaylight.controller.config.yang.netty,
                             io.netty.util.concurrent,
                             org.opendaylight.controller.config.api,
                             org.opendaylight.controller.config.api.annotations,

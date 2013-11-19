@@ -37,7 +37,6 @@ public final class GlobalEventExecutorModule extends
     @Override
     public void validate() {
         super.validate();
-        // Add custom validation for module attributes here.
     }
 
     @Override

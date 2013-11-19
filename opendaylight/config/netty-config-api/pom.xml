@@ -1,13 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <parent>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-subsystem</artifactId>
-      <version>0.2.3-SNAPSHOT</version>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>threadpool-config-api</artifactId>
-   <name>${project.artifactId}</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-subsystem</artifactId>
+    <version>0.2.3-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>netty-config-api</artifactId>
+     <name>${project.artifactId}</name>
    <packaging>bundle</packaging>
    <prerequisites>
       <maven>3.0.4</maven>
@@ -22,8 +21,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+        </dependency>
     </dependencies>
-
    <build>
       <plugins>
          <plugin>
@@ -33,11 +35,12 @@
                <instructions>
                   <Import-Package>
                      org.opendaylight.controller.config.api.*,
-                     com.google.common.eventbus,
+                     io.netty.channel,
+                     io.netty.util,
+                     io.netty.util.concurrent
                   </Import-Package>
                   <Export-Package>
-                     org.opendaylight.controller.config.threadpool,
-                     org.opendaylight.controller.config.yang.threadpool
+                     org.opendaylight.controller.config.yang.netty
                   </Export-Package>
                </instructions>
             </configuration>
