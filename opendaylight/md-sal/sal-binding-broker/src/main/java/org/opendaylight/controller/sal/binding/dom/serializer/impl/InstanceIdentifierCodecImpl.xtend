@@ -119,5 +119,6 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
         val qnameField = class1.getField("QNAME");
         val qnameValue = qnameField.get(null) as QName;
         classToQName.put(class1,qnameValue);
+        return qnameValue;
     }
 }

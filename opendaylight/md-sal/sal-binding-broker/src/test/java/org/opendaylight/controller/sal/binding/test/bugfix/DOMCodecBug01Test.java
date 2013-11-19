@@ -15,6 +15,8 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionBuilder;
@@ -39,6 +41,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodesBu
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -68,8 +72,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
     private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
             NODE_ID);
 
-    private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder() //
-            .node(Nodes.class) //
+    private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) // //
             .toInstance();
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODES_INSTANCE_ID_BI = //
@@ -99,9 +102,8 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
             .nodeWithKey(Flow.QNAME, FLOW_KEY_BI) //
             .toInstance();
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
-    InstanceIdentifier.builder() //
-            .node(Flows.class) //
-            .node(Flow.class, FLOW_KEY) //
+    InstanceIdentifier.builder(Flows.class) //
+            .child(Flow.class, FLOW_KEY) //
             .toInstance();
 
 
@@ -180,8 +182,6 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         flow.setKey(FLOW_KEY);
         flow.setMatch(match.build());
         flow.setNode(NODE_REF);
-
-
         InstructionsBuilder instructions = new InstructionsBuilder();
         InstructionBuilder instruction = new InstructionBuilder();
         ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
@@ -191,6 +191,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         actionList.add(new ActionBuilder().setAction(popMplsAction.build()).build());
 
         applyActions.setAction(actionList );
+        
 
 
         instruction.setInstruction(applyActions.build());
@@ -204,6 +205,33 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         RpcResult<TransactionStatus> ret = modification.commit().get();
         assertNotNull(ret);
         assertEquals(TransactionStatus.COMMITED, ret.getResult());
+    }
+    
+    private void createFlow2() throws Exception {
+        DataModificationTransaction modification = baDataService.beginTransaction();
+        long id = 123;
+        FlowKey key = new FlowKey(id, new NodeRef(NODE_INSTANCE_ID_BA));
+        InstanceIdentifier<?> path1;
+        FlowBuilder flow = new FlowBuilder();
+        flow.setKey(key);
+        MatchBuilder match = new MatchBuilder();
+        Ipv4MatchBuilder ipv4Match = new Ipv4MatchBuilder();
+        // ipv4Match.setIpv4Destination(new Ipv4Prefix(cliInput.get(4)));
+        match.setLayer4Match(new TcpMatchBuilder().build());
+        flow.setMatch(match.build());
+        DropAction dropAction = new DropActionBuilder().build();
+        //   ActionBuilder action = new ActionBuilder();
+
+        //  List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action> actions = Collections
+             //   .singletonList(action.build());
+        //   flow.setAction(actions);
+        flow.setPriority(2);
+        System.out.println("Putting the configuration Data................");
+        path1 = InstanceIdentifier.builder(Flows.class).child(Flow.class, key).toInstance();
+       // DataObject cls = (DataObject) modification.readConfigurationData(path1);
+        modification.putConfigurationData(path1, flow.build());
+        modification.commit();
+
     }
 
     private class CreateFlowTask implements Callable<Void> {
@@ -220,6 +248,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
                 //startSyncObject.wait();
                 //Thread.sleep(500);
                 createFlow();
+                createFlow2();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -228,10 +257,10 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
     }
 
     private void verifyDataAreStoredProperly() {
-        CompositeNode biFlow = biDataService.readConfigurationData(FLOW_INSTANCE_ID_BI);
+        CompositeNode biFlows = biDataService.readConfigurationData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.of(Flows.QNAME));
+        assertNotNull(biFlows);
+        CompositeNode biFlow = biFlows.getFirstCompositeByName(Flow.QNAME);
         assertNotNull(biFlow);
-        CompositeNode biMatch = biFlow.getFirstCompositeByName(QName.create(Flow.QNAME, Match.QNAME.getLocalName()));
-        assertNotNull(biMatch);
     }
 
 

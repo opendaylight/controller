@@ -1,5 +1,6 @@
 package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
@@ -14,6 +15,8 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.Data
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.core.api.Provider;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -26,7 +29,7 @@ import com.google.common.base.Preconditions;
 
 public class BindingIndependentDataServiceConnector implements //
         RuntimeDataProvider, //
-        DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> {
+        DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>, Provider {
 
     private static final InstanceIdentifier<? extends DataObject> ROOT = InstanceIdentifier.builder().toInstance();
 
@@ -38,7 +41,6 @@ public class BindingIndependentDataServiceConnector implements //
 
     @Override
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
-        // TODO Auto-generated method stub
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
         CompositeNode result = biDataService.readOperationalData(biPath);
         return mappingService.dataObjectFromDataDom(path, result);
@@ -146,6 +148,17 @@ public class BindingIndependentDataServiceConnector implements //
 
     public void setMappingService(BindingIndependentMappingService mappingService) {
         this.mappingService = mappingService;
+    }
+    
+    @Override
+    public Collection<ProviderFunctionality> getProviderFunctionality() {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public void onSessionInitiated(ProviderSession session) {
+        setBiDataService(session.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
+        start();
     }
 
 }
