@@ -40,6 +40,8 @@
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
+        <module>zeromq-routingtable/implementation</module>
+        <module>sal-remoterpc-connector/implementation</module>
 
         <!-- Clustered Data Store -->
         <module>clustered-data-store/implementation</module>
@@ -50,8 +52,6 @@
         
         <!-- Compability Packages -->
         <module>compatibility</module>
-        <module>zeromq-routingtable/implementation</module>
-        <module>sal-zeromq-connector</module>
     </modules>
 
 
@@ -64,8 +64,9 @@
             <modules>
                 <module>sal-binding-it</module>
                 <module>zeromq-routingtable/integrationtest</module>
+                <module>sal-remoterpc-connector/integrationtest</module>
                 <module>clustered-data-store/integrationtest</module>
-                <module>test</module>
+                <!--module>test/sal-rest-connector-it</modulei-->
             </modules>
         </profile>
         <profile>
@@ -168,6 +169,20 @@
           <releases>
               <enabled>false</enabled>
           </releases>
+        </repository>
+        <repository>
+          <id>sonatype-nexus-snapshots</id>
+          <url>http://oss.sonatype.org/content/repositories/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>maven central</id>
+          <url>http://repo1.maven.org/maven2</url>
         </repository>
     </repositories>
 
