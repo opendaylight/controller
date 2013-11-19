@@ -1,0 +1,21 @@
+<cont>
+	<lst1>
+		<lf11>str0</lf11>
+		<lflst11>121</lflst11>
+		<lflst11>131</lflst11>
+		<lflst11>str1</lflst11>
+		<lst11>
+			<lf111>str2</lf111>
+		</lst11>			
+		<cont11>
+			<lf111>100</lf111>
+		</cont11>
+	</lst1>
+	<lst1>
+		<lflst11>221</lflst11>
+		<cont11>
+			<lf111>100</lf111>
+		</cont11>
+	</lst1>	
+	<lf1>lf1</lf1>
+</cont>

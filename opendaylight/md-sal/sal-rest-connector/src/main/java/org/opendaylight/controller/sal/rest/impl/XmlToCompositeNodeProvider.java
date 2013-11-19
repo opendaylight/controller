@@ -20,10 +20,10 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 @Provider
-@Consumes({API+RestconfService.XML})
+@Consumes({ API + RestconfService.XML })
 public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
-    
+
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return true;
@@ -37,8 +37,8 @@ public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNod
         try {
             return xmlReader.read(entityStream);
         } catch (XMLStreamException | UnsupportedFormatException e) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage()).build());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage())
+                    .build());
         }
     }
 
