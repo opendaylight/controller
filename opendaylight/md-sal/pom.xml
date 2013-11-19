@@ -4,7 +4,29 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit4</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>5.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeromq</groupId>
+      <artifactId>jeromq</artifactId>
+      <version>0.3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <packaging>pom</packaging>
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
@@ -66,6 +88,7 @@
                 <module>zeromq-routingtable/integrationtest</module>
                 <module>clustered-data-store/integrationtest</module>
                 <module>test</module>
+                <module>test/sal-rest-connector-it</module>
             </modules>
         </profile>
         <profile>
