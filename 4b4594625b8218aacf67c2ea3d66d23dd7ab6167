@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_9f465d4e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-19T12:28:09Z",
+      "side": 1,
+      "message": "Can you be more specific - id of which entity was changed? And where it was discussed?",
+      "revId": "4b4594625b8218aacf67c2ea3d66d23dd7ab6167",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
