@@ -24,18 +24,12 @@ import java.util.Collections
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 
-class NotificationBrokerImpl implements NotificationProviderService {
+class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
 
     val Multimap<Class<? extends Notification>, NotificationListener<?>> listeners;
 
     @Property
     var ExecutorService executor;
-
-    @Property
-    var RuntimeCodeGenerator generator;
-
-    @Property
-    var NotificationInvokerFactory invokerFactory;
 
     new(ExecutorService executor) {
         listeners = HashMultimap.create()
@@ -108,7 +102,7 @@ class NotificationBrokerImpl implements NotificationProviderService {
 
     override registerNotificationListener(
         org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        val invoker = invokerFactory.invokerFor(listener);
+        val invoker = BindingAwareBrokerImpl.generator.invokerFactory.invokerFor(listener);
         for (notifyType : invoker.supportedNotifications) {
             listeners.put(notifyType, invoker.invocationProxy)
         }
@@ -125,6 +119,11 @@ class NotificationBrokerImpl implements NotificationProviderService {
             listeners.remove(notifyType, reg.invoker.invocationProxy)
         }
     }
+    
+    override close()  {
+        //FIXME: implement properly.
+    }
+    
 }
 
 class GenericNotificationRegistration<T extends Notification> extends AbstractObjectRegistration<NotificationListener<T>> implements ListenerRegistration<NotificationListener<T>> {
@@ -177,7 +176,9 @@ class NotifyTask implements Callable<Object> {
 
     override call() {
         try {
+            log.info("Delivering notification {} to {}",notification,listener);
             listener.onNotification(notification);
+            log.info("Notification delivered {} to {}",notification,listener);
         } catch (Exception e) {
             log.error("Unhandled exception thrown by listener: {}", listener, e);
         }

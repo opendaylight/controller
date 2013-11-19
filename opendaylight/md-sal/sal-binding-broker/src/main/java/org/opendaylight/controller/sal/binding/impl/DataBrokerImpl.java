@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 
 public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> implements
-        DataProviderService {
+        DataProviderService, AutoCloseable {
 
     public DataBrokerImpl() {
         setDataReadRouter(new BindingAwareDataReaderRouter());
@@ -29,65 +29,68 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     }
 
     @Override
+    @Deprecated
     public <T extends DataRoot> T getData(DataStoreIdentifier store, Class<T> rootType) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public <T extends DataRoot> T getData(DataStoreIdentifier store, T filter) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, Class<T> rootType) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, T filter) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public RpcResult<DataRoot> editCandidateData(DataStoreIdentifier store, DataRoot changeSet) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public Future<RpcResult<Void>> commit(DataStoreIdentifier store) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public DataObject getData(InstanceIdentifier<? extends DataObject> data) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public DataObject getConfigurationData(InstanceIdentifier<?> data) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public void registerChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener) {
-        // TODO Auto-generated method stub
-        
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
+    @Deprecated
     public void unregisterChangeListener(InstanceIdentifier<? extends DataObject> path,
             DataChangeListener changeListener) {
-        // TODO Auto-generated method stub
-        
+        throw new UnsupportedOperationException("Deprecated");
     }
     
-    
+    @Override
+    public void close() throws Exception {
+        
+    }
 }

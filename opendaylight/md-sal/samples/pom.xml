@@ -27,7 +27,7 @@
           <activeByDefault>false</activeByDefault>
         </activation>
         <modules>
-          <module>toaster-it</module>
+          <!--module>toaster-it</module -->
         </modules>
       </profile>
     </profiles>

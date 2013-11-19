@@ -16,7 +16,6 @@
 
     <build>
         <plugins>
-        
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>

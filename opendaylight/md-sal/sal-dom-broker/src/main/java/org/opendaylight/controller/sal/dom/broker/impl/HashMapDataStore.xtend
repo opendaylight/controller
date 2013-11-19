@@ -1,7 +1,5 @@
 package org.opendaylight.controller.sal.dom.broker.impl
 
-import org.opendaylight.controller.md.sal.common.api.data.DataReader
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
 import org.opendaylight.controller.md.sal.common.api.data.DataModification
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
 import org.opendaylight.yangtools.yang.common.RpcResult
@@ -12,10 +10,10 @@ import java.util.Collections
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import static extension org.opendaylight.controller.sal.dom.broker.impl.DataUtils.*;
+import org.opendaylight.controller.sal.core.api.data.DataStore
+import java.util.HashSet
 
-class HashMapDataStore //
-implements //
-DataReader<InstanceIdentifier, CompositeNode>, DataCommitHandler<InstanceIdentifier, CompositeNode> {
+class HashMapDataStore implements DataStore, AutoCloseable {
 
     val Map<InstanceIdentifier, CompositeNode> configuration = new ConcurrentHashMap();
     val Map<InstanceIdentifier, CompositeNode> operational = new ConcurrentHashMap();
@@ -45,14 +43,32 @@ DataReader<InstanceIdentifier, CompositeNode>, DataCommitHandler<InstanceIdentif
         operational.putAll(modification.updatedOperationalData);
 
         for (removal : modification.removedConfigurationData) {
-            configuration.remove(removal);
+            remove(configuration,removal);
         }
         for (removal : modification.removedOperationalData) {
-            operational.remove(removal);
+            remove(operational,removal);
         }
         return Rpcs.getRpcResult(true, null, Collections.emptySet);
     }
+    
+    def remove(Map<InstanceIdentifier, CompositeNode> map, InstanceIdentifier identifier) {
+        val affected = new HashSet<InstanceIdentifier>();
+        for(path : map.keySet) {
+            if(identifier.contains(path)) {
+                affected.add(path);
+            }
+        }
+        for(pathToRemove : affected) {
+            map.remove(pathToRemove);
+        }
+        
+    }
 
+
+    override close()  {
+        // NOOP
+    }
+    
 }
 
 class HashMapDataStoreTransaction implements // 

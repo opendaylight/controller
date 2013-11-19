@@ -67,7 +67,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     override <T extends RpcService> getRouterFor(Class<T> iface) {
         val contexts = new HashSet<Class<? extends BaseIdentity>>
 
-        val instance = <RpcRouterCodegenInstance<T>>withClassLoader(iface.classLoader) [ |
+        val instance = <RpcRouterCodegenInstance<T>>withClassLoaderAndLock(iface.classLoader,lock) [ |
             val supertype = iface.asCtClass
             val metadata = supertype.rpcMetadata;
             val targetCls = createClass(iface.routerName, supertype) [
@@ -218,13 +218,16 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
 
 
     protected def resolveInvokerClass(Class<? extends NotificationListener> class1) {
-        val invoker = invokerClasses.get(class1);
-        if (invoker !== null) {
-            return invoker;
-        }
-        val newInvoker = generateListenerInvoker(class1);
-        invokerClasses.put(class1, newInvoker);
-        return newInvoker
+        return <RuntimeGeneratedInvokerPrototype>withClassLoaderAndLock(class1.classLoader,lock) [|
+            val invoker = invokerClasses.get(class1);
+            if (invoker !== null) {
+                return invoker;
+            }
+            val newInvoker = generateListenerInvoker(class1);
+            invokerClasses.put(class1, newInvoker);
+            return newInvoker
+            
+        ]
     }
 }
 
