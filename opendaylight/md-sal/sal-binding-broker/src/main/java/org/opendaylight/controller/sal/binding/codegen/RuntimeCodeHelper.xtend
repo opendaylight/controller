@@ -39,7 +39,7 @@ class RuntimeCodeHelper {
     public static def void setDelegate(RpcService proxy, RpcService delegate) {
         val field = proxy.class.getField(DELEGATE_FIELD)
         if (field == null) throw new UnsupportedOperationException("Unable to set delegate to proxy");
-        if (field.type.isAssignableFrom(delegate.class)) {
+        if (delegate == null || field.type.isAssignableFrom(delegate.class)) {
             field.set(proxy, delegate)
         } else
             throw new IllegalArgumentException("delegate class is not assignable to proxy");
@@ -55,7 +55,7 @@ class RuntimeCodeHelper {
     public static def void setDelegate(Object proxy, Object delegate) {
         val field = proxy.class.getField(DELEGATE_FIELD)
         if (field == null) throw new UnsupportedOperationException("Unable to set delegate to proxy");
-        if (field.type.isAssignableFrom(delegate.class)) {
+        if (delegate == null || field.type.isAssignableFrom(delegate.class)) {
             field.set(proxy, delegate)
         } else
             throw new IllegalArgumentException("delegate class is not assignable to proxy");
