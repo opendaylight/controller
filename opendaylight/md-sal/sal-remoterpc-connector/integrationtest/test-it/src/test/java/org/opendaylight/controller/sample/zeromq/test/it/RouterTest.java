@@ -212,9 +212,9 @@ public class RouterTest {
         mavenBundle(ODL, "sal-broker-impl").versionAsInProject(), //
         mavenBundle(ODL, "sal-core-spi").versionAsInProject().update(), //
         mavenBundle(ODL, "sal-connector-api").versionAsInProject(), //
-        mavenBundle(SAMPLE, "zeromq-test-provider").versionAsInProject(), //
-        mavenBundle(ODL, "sal-zeromq-connector").versionAsInProject(), //
-        mavenBundle(ODL, "sal-infinispan-routingtable").versionAsInProject(),
+        mavenBundle(SAMPLE, "sal-remoterpc-connector-test-provider").versionAsInProject(), //
+        mavenBundle(ODL, "sal-remoterpc-connector").versionAsInProject(), //
+        mavenBundle(ODL, "zeromq-routingtable.implementation").versionAsInProject(),
         mavenBundle(YANG, "concepts").versionAsInProject(),
         mavenBundle(YANG, "yang-binding").versionAsInProject(), //
         mavenBundle(YANG, "yang-common").versionAsInProject(), //
