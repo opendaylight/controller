@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.netconf.InventoryUtils;
-import org.opendaylight.controller.sal.connect.netconf.NetconfDeviceManager;
 import org.opendaylight.controller.sal.connect.netconf.NetconfInventoryUtils;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
@@ -61,9 +60,6 @@ public class ServiceProviderController {
     @Inject
     DataBrokerService dataBroker;
 
-    @Inject
-    NetconfDeviceManager netconfManager;
-
     @Test
     public void properInitialized() throws Exception {
 
@@ -71,8 +67,6 @@ public class ServiceProviderController {
 
         InstanceIdentifier path = InstanceIdentifier.builder(InventoryUtils.INVENTORY_PATH)
                 .nodeWithKey(InventoryUtils.INVENTORY_NODE, InventoryUtils.INVENTORY_ID, "foo").toInstance();
-
-        netconfManager.netconfNodeAdded(path, new InetSocketAddress("127.0.0.1", 8383));
 
         
         InstanceIdentifier mountPointPath = path;
