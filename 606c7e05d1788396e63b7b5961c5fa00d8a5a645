@@ -16,6 +16,24 @@
       "revId": "606c7e05d1788396e63b7b5961c5fa00d8a5a645",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ff3f9923",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2013-11-19T16:33:14Z",
+      "side": 1,
+      "message": "Hi - My build has been failing on jenkins but works locally. I am trying to make changes in pom file to see if works. Please refer to this main commit I did (https://git.opendaylight.org/gerrit/#/c/2871/). \nI will try to add more details.\n\nThanks",
+      "parentUuid": "da6255ed_9fed3dba",
+      "revId": "606c7e05d1788396e63b7b5961c5fa00d8a5a645",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
