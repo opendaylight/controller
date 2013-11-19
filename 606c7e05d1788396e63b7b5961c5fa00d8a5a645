@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_9fed3dba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-19T16:26:50Z",
+      "side": 1,
+      "message": "Hi, the commit message is very short and not informative. What is the reason for fixing poms/what is changed there? Also, the patch contains not just poms, so it should be mentioned in commit message as well, otherwise it\u0027s confusing.\nPlease make the message more informative and clear. thank you",
+      "revId": "606c7e05d1788396e63b7b5961c5fa00d8a5a645",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
