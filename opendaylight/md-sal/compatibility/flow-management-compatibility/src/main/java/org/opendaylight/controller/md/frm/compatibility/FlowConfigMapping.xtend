@@ -24,14 +24,14 @@ class FlowConfigMapping {
         idleTimeout = source.idleTimeout
         match = source.match
         node = source.node
-        key = new FlowKey(sourceCfg.name,node);
+        key = new FlowKey(Long.parseLong(sourceCfg.name),node);
         return it.build();
     }
 
     static def toFlowConfig(Flow sourceCfg) {
         val flow = toFlow(sourceCfg);
         val it = new FlowConfig;
-        name = sourceCfg.key.id
+        name = String.valueOf(sourceCfg.id);
         node = sourceCfg.node.toADNode();
 
         return it
@@ -40,7 +40,7 @@ class FlowConfigMapping {
     static def toFlowConfig(InstanceIdentifier<?> identifier) {
         val it = new FlowConfig()
         val FlowKey key = ((identifier.path.get(2) as IdentifiableItem<Flow,FlowKey>).key)
-        name = key.id;
+        name = String.valueOf(key.id);
         node = key.node.toADNode();
 
         return it;

@@ -108,7 +108,7 @@ class ConfigurationReader implements FlowManagementReader {
     }
 
     override readFlow(FlowKey key) {
-        val flowCfg = manager.getStaticFlow(key.id,key.node.toADNode());
+        val flowCfg = manager.getStaticFlow(String.valueOf(key.id), key.node.toADNode());
         return flowCfg.toConfigurationFlow;
     }
 }

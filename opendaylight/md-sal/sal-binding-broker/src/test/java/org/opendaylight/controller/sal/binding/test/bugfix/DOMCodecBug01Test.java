@@ -46,7 +46,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
     private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
     private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
     
-    private static final String FLOW_ID = "foo";
+    private static final long FLOW_ID = 1234;
     private static final String NODE_ID = "node:1";
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));

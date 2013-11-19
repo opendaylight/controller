@@ -22,7 +22,7 @@ module meter-management {
             key "id node"; 
                         
             leaf id {
-                type string;
+                type uint32;
             }                    
             
             uses meter-entry;

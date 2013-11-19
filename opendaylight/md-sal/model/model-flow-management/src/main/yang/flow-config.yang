@@ -23,7 +23,7 @@ module flow-management {
             key "node id"; 
 
             leaf id {
-                type string;
+                type uint32;
             }
             uses flow:flow-entry;
         }

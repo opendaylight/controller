@@ -23,7 +23,7 @@ module table-management {
             key "id node"; 
                         
             leaf id {
-                type string;
+                type uint32;
             }                    
             
             uses table-entry;
