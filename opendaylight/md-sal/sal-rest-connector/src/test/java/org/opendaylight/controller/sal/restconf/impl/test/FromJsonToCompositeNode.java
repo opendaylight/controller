@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.junit.Test;
+import org.junit.*;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.yangtools.yang.data.api.*;
@@ -27,41 +27,7 @@ import com.google.gson.JsonSyntaxException;
 
 public class FromJsonToCompositeNode {
 
-    /**
-     * 
-     * It is just dummy class which is used in mock method to specify return
-     * type
-     */
-    private class DummyFuture implements Future<RpcResult<TransactionStatus>> {
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean isDone() {
-            return false;
-        }
-
-        @Override
-        public RpcResult<TransactionStatus> get() throws InterruptedException, ExecutionException {
-            return null;
-        }
-
-        @Override
-        public RpcResult<TransactionStatus> get(long timeout, TimeUnit unit) throws InterruptedException,
-                ExecutionException, TimeoutException {
-            return null;
-        }
-    };
-
-    Logger LOG = LoggerFactory.getLogger(FromJsonToCompositeNode.class);
+    private static Logger LOG = LoggerFactory.getLogger(FromJsonToCompositeNode.class);
 
     @Test
     public void simpleListTest() {
@@ -71,8 +37,8 @@ public class FromJsonToCompositeNode {
 
     @Test
     public void simpleContainerTest() {
-        simpleTest("/json-to-composite-node/simple-container.json", "/json-to-composite-node/simple-list-yang", "cont",
-                "simple:data:types");
+        simpleTest("/json-to-composite-node/simple-container.json", "/json-to-composite-node/simple-container-yang",
+                "cont", "simple:data:types");
     }
 
     /**
@@ -162,55 +128,22 @@ public class FromJsonToCompositeNode {
         CompositeNode compositeNode = compositeContainerFromJson(jsonPath);
         assertNotNull(compositeNode);
 
-        DataSchemaNode dataSchemaNode = obtainSchemaFromYang(yangPath);
+        DataSchemaNode dataSchemaNode = null;
+        try {
+            dataSchemaNode = TestUtils.obtainSchemaFromYang(yangPath);
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+            assertTrue(false);
+        }
         assertNotNull(dataSchemaNode);
 
-        supplementNamespace(dataSchemaNode, compositeNode);
+        TestUtils.supplementNamespace(dataSchemaNode, compositeNode);
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap(null);
 
         assertEquals(topLevelElementName, compNode.getNodeType().getLocalName());
         verifyCompositeNode(compNode, namespace);
-    }
-
-    private DataSchemaNode obtainSchemaFromYang(String yangFolder) {
-        Set<Module> modules = null;
-        try {
-            modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangFolder).getPath());
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage());
-            assertTrue(false);
-        }
-
-        assertNotNull(modules);
-        assertEquals(1, modules.size());
-        Module module = modules.iterator().next();
-        assertNotNull(module.getChildNodes());
-        assertEquals(1, module.getChildNodes().size());
-        DataSchemaNode dataSchemaNode = module.getChildNodes().iterator().next();
-        return dataSchemaNode;
-    }
-
-    private void supplementNamespace(DataSchemaNode dataSchemaNode, CompositeNode compositeNode) {
-        RestconfImpl restconf = RestconfImpl.getInstance();
-
-        InstanceIdWithSchemaNode instIdAndSchema = new InstanceIdWithSchemaNode(mock(InstanceIdentifier.class),
-                dataSchemaNode);
-
-        ControllerContext controllerContext = mock(ControllerContext.class);
-        BrokerFacade broker = mock(BrokerFacade.class);
-
-        when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
-        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(
-                new DummyFuture());
-
-        restconf.setControllerContext(controllerContext);
-        restconf.setBroker(broker);
-
-        // method is called only because it contains call of method which
-        // supplement namespaces to compositeNode
-        restconf.createConfigurationData("something", compositeNode);
     }
 
     private void verityMultipleItemsInList(CompositeNode compositeNode) {
@@ -308,7 +241,7 @@ public class FromJsonToCompositeNode {
             assertTrue(compositeNode instanceof CompositeNodeWrapper);
             if (dummyNamespaces) {
                 try {
-                    addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
+                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
                     return ((CompositeNodeWrapper) compositeNode).unwrap(null);
                 } catch (URISyntaxException e) {
                     LOG.error(e.getMessage());
@@ -323,12 +256,4 @@ public class FromJsonToCompositeNode {
         return null;
     }
 
-    private void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
-        wrappedNode.setNamespace(new URI(""));
-        if (wrappedNode instanceof CompositeNodeWrapper) {
-            for (NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
-                addDummyNamespaceToAllNodes(childNodeWrapper);
-            }
-        }
-    }
 }

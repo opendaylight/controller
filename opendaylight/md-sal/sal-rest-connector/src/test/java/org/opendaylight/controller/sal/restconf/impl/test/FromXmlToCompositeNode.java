@@ -5,16 +5,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.*;
+import java.net.URISyntaxException;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.junit.Test;
+import org.junit.*;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
+import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.slf4j.*;
 
 public class FromXmlToCompositeNode {
-    Logger LOG = LoggerFactory.getLogger(FromXmlToCompositeNode.class);
+    private static Logger LOG = LoggerFactory.getLogger(FromXmlToCompositeNode.class);
 
     /**
      * top level element represents container. second level element is list with
@@ -22,33 +25,68 @@ public class FromXmlToCompositeNode {
      */
     @Test
     public void testXmlDataContainer() {
-        CompositeNode compNode = compositeContainerFromXml("/xml-to-composite-node/data-container.xml");
-        verifyCommonPartAOfXml(compNode, "");
+        CompositeNode compNode = compositeContainerFromXml("/xml-to-composite-node/data-container.xml", false);
+        assertNotNull(compNode);
+        DataSchemaNode dataSchemaNode = null;
+        try {
+            dataSchemaNode = TestUtils.obtainSchemaFromYang("/xml-to-composite-node/data-container-yang");
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+            assertTrue(false);
+        }
+
+        assertNotNull(dataSchemaNode);
+        TestUtils.supplementNamespace(dataSchemaNode, compNode);
+
+        String nameSpace = "data:container:yang";
+        assertEquals(nameSpace, compNode.getNodeType().getNamespace().toString());
+
+        verifyCommonPartAOfXml(compNode, "", nameSpace);
     }
 
     @Test
     public void testXmlDataList() {
-        CompositeNode compNode = compositeContainerFromXml("/xml-to-composite-node/data-list.xml");
+        CompositeNode compNode = compositeContainerFromXml("/xml-to-composite-node/data-list.xml", false);
         assertNotNull(compNode);
+
+        DataSchemaNode dataSchemaNode = null;
+        try {
+            dataSchemaNode = TestUtils.obtainSchemaFromYang("/xml-to-composite-node/data-list-yang",
+                    "data-container-yang");
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+        }
+        assertNotNull(dataSchemaNode);
+        TestUtils.supplementNamespace(dataSchemaNode, compNode);
+
+        String nameSpaceList = "data:list:yang";
+        String nameSpaceCont = "data:container:yang";
+        assertEquals(nameSpaceCont, compNode.getNodeType().getNamespace().toString());
         assertEquals("cont", compNode.getNodeType().getLocalName());
-        assertEquals(2, compNode.getChildren().size());
+        assertEquals(3, compNode.getChildren().size());
         CompositeNode lst1_1 = null;
         CompositeNode lst1_2 = null;
         int loopCount = 0;
         for (Node<?> node : compNode.getChildren()) {
-            assertTrue(node instanceof CompositeNode);
-            switch (loopCount++) {
-            case 0:
-                lst1_1 = (CompositeNode) node;
-                break;
-            case 1:
-                lst1_2 = (CompositeNode) node;
-                break;
+            if (node.getNodeType().getLocalName().equals("lf1")) {
+                assertEquals(nameSpaceList, node.getNodeType().getNamespace().toString());
+                assertTrue(node instanceof SimpleNode<?>);
+                assertEquals("lf1", node.getValue());
+            } else {
+                assertTrue(node instanceof CompositeNode);
+                switch (loopCount++) {
+                case 0:
+                    lst1_1 = (CompositeNode) node;
+                    break;
+                case 1:
+                    lst1_2 = (CompositeNode) node;
+                    break;
+                }
+                assertEquals(nameSpaceCont, node.getNodeType().getNamespace().toString());
             }
-
         }
         // lst1_1
-        verifyCommonPartAOfXml(lst1_1, "1");
+        verifyCommonPartAOfXml(lst1_1, "1", nameSpaceCont);
         // :lst1_1
 
         // lst1_2
@@ -64,12 +102,14 @@ public class FromXmlToCompositeNode {
                 assertTrue(node instanceof CompositeNode);
                 cont11 = (CompositeNode) node;
             }
+            assertEquals(nameSpaceCont, compNode.getNodeType().getNamespace().toString());
         }
         assertEquals("221", lflst11.getValue());
 
         assertEquals(1, cont11.getChildren().size());
         assertTrue(cont11.getChildren().get(0) instanceof SimpleNode<?>);
         SimpleNode<?> cont11_lf111 = (SimpleNode<?>) cont11.getChildren().get(0);
+        assertEquals(nameSpaceCont, cont11_lf111.getNodeType().getNamespace().toString());
         assertEquals("lf111", cont11_lf111.getNodeType().getLocalName());
         assertEquals("100", cont11_lf111.getValue());
         // :lst1_2
@@ -78,7 +118,7 @@ public class FromXmlToCompositeNode {
 
     @Test
     public void testXmlEmptyData() {
-        CompositeNode compNode = compositeContainerFromXml("/xml-to-composite-node/empty-data.xml");
+        CompositeNode compNode = compositeContainerFromXml("/xml-to-composite-node/empty-data.xml", true);
         assertEquals("cont", compNode.getNodeType().getLocalName());
         SimpleNode<?> lf1 = null;
         SimpleNode<?> lflst1_1 = null;
@@ -122,7 +162,7 @@ public class FromXmlToCompositeNode {
 
     }
 
-    private void verifyCommonPartAOfXml(CompositeNode compNode, String suf) {
+    private void verifyCommonPartAOfXml(CompositeNode compNode, String suf, String nameSpace) {
         SimpleNode<?> lf1suf = null;
         SimpleNode<?> lflst1suf_1 = null;
         SimpleNode<?> lflst1suf_2 = null;
@@ -157,7 +197,9 @@ public class FromXmlToCompositeNode {
                 assertTrue(node instanceof CompositeNode);
                 cont1suf = (CompositeNode) node;
             }
+            assertEquals(nameSpace, node.getNodeType().getNamespace().toString());
         }
+
         assertNotNull(lf1suf);
         assertNotNull(lflst1suf_1);
         assertNotNull(lflst1suf_2);
@@ -174,20 +216,33 @@ public class FromXmlToCompositeNode {
 
         assertTrue(lst1suf.getChildren().get(0) instanceof SimpleNode<?>);
         SimpleNode<?> lst11_lf11 = (SimpleNode<?>) lst1suf.getChildren().get(0);
+        assertEquals(nameSpace, lst11_lf11.getNodeType().getNamespace().toString());
         assertEquals("lf11" + suf, lst11_lf11.getNodeType().getLocalName());
         assertEquals("str2", lst11_lf11.getValue());
 
         assertTrue(cont1suf.getChildren().get(0) instanceof SimpleNode<?>);
         SimpleNode<?> cont1_lf11 = (SimpleNode<?>) cont1suf.getChildren().get(0);
+        assertEquals(nameSpace, cont1_lf11.getNodeType().getNamespace().toString());
         assertEquals("lf11" + suf, cont1_lf11.getNodeType().getLocalName());
         assertEquals("100", cont1_lf11.getValue());
     }
 
-    private CompositeNode compositeContainerFromXml(String xmlPath) {
+    private CompositeNode compositeContainerFromXml(String xmlPath, boolean dummyNamespaces) {
         XmlToCompositeNodeProvider xmlToCompositeNodeProvider = XmlToCompositeNodeProvider.INSTANCE;
         try {
             InputStream xmlStream = FromXmlToCompositeNode.class.getResourceAsStream(xmlPath);
-            return xmlToCompositeNodeProvider.readFrom(null, null, null, null, null, xmlStream);
+            CompositeNode compositeNode = xmlToCompositeNodeProvider.readFrom(null, null, null, null, null, xmlStream);
+            if (dummyNamespaces) {
+                try {
+                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
+                    return ((CompositeNodeWrapper) compositeNode).unwrap(null);
+                } catch (URISyntaxException e) {
+                    LOG.error(e.getMessage());
+                    assertTrue(e.getMessage(), false);
+                }
+            }
+            return compositeNode;
+
         } catch (WebApplicationException | IOException e) {
             LOG.error(e.getMessage());
             assertTrue(false);
