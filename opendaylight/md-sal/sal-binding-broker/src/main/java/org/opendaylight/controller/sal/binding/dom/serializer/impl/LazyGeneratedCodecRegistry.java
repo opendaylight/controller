@@ -280,6 +280,11 @@ public class LazyGeneratedCodecRegistry implements //
             ReferencedTypeImpl typeref = new ReferencedTypeImpl(caseNode.getValue().getPackageName(), caseNode
                     .getValue().getName());
             ChoiceCaseNode node = (ChoiceCaseNode) SchemaContextUtil.findDataSchemaNode(module, caseNode.getKey());
+            if(node == null) {
+                LOG.error("YANGTools Bug: SchemaNode for {}, with path {} was not found in context.",typeref.getFullyQualifiedName(), caseNode.getKey());
+                continue;
+            }
+            
             @SuppressWarnings("rawtypes")
             ChoiceCaseCodecImpl value = new ChoiceCaseCodecImpl(node);
             typeToCaseNodes.putIfAbsent(typeref, value);
