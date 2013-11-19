@@ -8,11 +8,73 @@
     </parent>
     <artifactId>sal-core-api</artifactId>
     <scm>
-      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-      <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+        <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+        <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-maven-plugin</artifactId>
+                <version>0.5.9-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
+                                    <additionalConfiguration>
+                                        <namespaceToPackage1>
+                                            urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
+                                        </namespaceToPackage1>
+                                    </additionalConfiguration>
+                                </generator>
+                            </codeGenerators>
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-jmx-generator-plugin</artifactId>
+                        <version>0.2.3-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/config</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -21,9 +83,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+            <version>0.2.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-api</artifactId>
-            <version>0.5.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

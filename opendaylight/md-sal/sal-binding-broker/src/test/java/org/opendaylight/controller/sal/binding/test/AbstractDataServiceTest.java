@@ -67,7 +67,7 @@ public  abstract class AbstractDataServiceTest {
         mappingService = mappingServiceImpl;
         File pathname = new File("target/gen-classes-debug");
         //System.out.println("Generated classes are captured in " + pathname.getAbsolutePath());
-        mappingServiceImpl.start();
+        mappingServiceImpl.start(null);
         //mappingServiceImpl.getBinding().setClassFileCapturePath(pathname);
         
         connectorServiceImpl = new BindingIndependentDataServiceConnector();
