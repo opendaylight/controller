@@ -39,8 +39,11 @@ import org.slf4j.LoggerFactory
 import org.opendaylight.controller.sal.binding.dom.serializer.api.ValueWithQName
 import org.opendaylight.controller.sal.binding.dom.serializer.api.DataContainerCodec
 import org.opendaylight.yangtools.binding.generator.util.Types
+import org.osgi.framework.BundleContext
+import java.util.Hashtable
+import org.osgi.framework.ServiceRegistration
 
-class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener {
+class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener, AutoCloseable {
 
     @Property
     ClassPool pool;
@@ -65,6 +68,8 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
     val promisedTypeDefinitions = HashMultimap.<Type, SettableFuture<GeneratedTypeBuilder>>create;
 
     val promisedSchemas = HashMultimap.<Type, SettableFuture<SchemaNode>>create;
+    
+    ServiceRegistration<SchemaServiceListener> listenerRegistration
 
     override onGlobalContextUpdated(SchemaContext arg0) {
         recreateBindingContext(arg0);
@@ -152,7 +157,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         }
     }
 
-    public def void start() {
+    public def void start(BundleContext ctx) {
         binding = new TransformerGenerator(pool);
         registry = new LazyGeneratedCodecRegistry()
         registry.generator = binding
@@ -162,7 +167,9 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         binding.typeToDefinition = typeToDefinition
         binding.typeToSchemaNode = typeToSchemaNode
         binding.typeDefinitions = typeDefinitions
-
+        if(ctx !== null) {
+            listenerRegistration = ctx.registerService(SchemaServiceListener,this,new Hashtable<String,String>());
+        }
     }
 
     private def getTypeDefinition(Type type) {
@@ -215,4 +222,9 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         }
         promisedSchemas.removeAll(builder);
     }
+    
+    override close() throws Exception {
+        listenerRegistration?.unregister();
+    }
+    
 }

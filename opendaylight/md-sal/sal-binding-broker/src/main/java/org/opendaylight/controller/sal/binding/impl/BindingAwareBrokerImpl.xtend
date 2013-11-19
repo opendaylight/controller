@@ -44,7 +44,6 @@ import static org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils
 import java.util.concurrent.Executors
 import java.util.Collections
 import org.opendaylight.yangtools.yang.binding.DataObject
-import org.opendaylight.controller.sal.binding.impl.connect.dom.ConnectorActivator
 
 class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
@@ -52,8 +51,8 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
 
     private InstanceIdentifier<? extends DataObject> root = InstanceIdentifier.builder().toInstance();
 
-    private val clsPool = ClassPool.getDefault()
-    private var RuntimeCodeGenerator generator;
+    private  static val clsPool = ClassPool.getDefault()
+    public static var RuntimeCodeGenerator generator;
     
 
     /**
@@ -71,10 +70,10 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     private val Map<Class<? extends RpcService>, RpcRouter<? extends RpcService>> rpcRouters = new ConcurrentHashMap();
 
     @Property
-    private var NotificationBrokerImpl notifyBroker
+    private var NotificationProviderService notifyBroker
     
     @Property
-    private var DataBrokerImpl dataBroker
+    private var DataProviderService dataBroker
     
     @Property
     var BundleContext brokerBundleContext
@@ -87,7 +86,6 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     
     ServiceRegistration<DataBrokerService> dataConsumerRegistration
     
-    ConnectorActivator connectorActivator
    
     
     public new(BundleContext bundleContext) {
@@ -101,30 +99,14 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
         val executor = Executors.newCachedThreadPool;
         // Initialization of notificationBroker
         log.info("Starting MD-SAL: Binding Aware Notification Broker");
-        notifyBroker = new NotificationBrokerImpl(executor);
-        notifyBroker.invokerFactory = generator.invokerFactory;
-
-        log.info("Starting MD-SAL: Binding Aware Data Broker");
-        dataBroker = new DataBrokerImpl();
-        dataBroker.executor = executor;
-
-        val brokerProperties = newProperties();
-        
         
         log.info("Starting MD-SAL: Binding Aware Data Broker");
-        notifyProviderRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
-            brokerProperties)
-        notifyConsumerRegistration = brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
-        dataProviderRegistration = brokerBundleContext.registerService(DataProviderService, dataBroker, brokerProperties)
-        dataConsumerRegistration = brokerBundleContext.registerService(DataBrokerService, dataBroker, brokerProperties)
-
-        connectorActivator = new ConnectorActivator(dataBroker,brokerBundleContext);
-        connectorActivator.start();
+        
+        log.info("Starting MD-SAL: Binding Aware Data Broker");
         log.info("MD-SAL: Binding Aware Broker Started");
     }
 
     def initGenerator() {
-
         // YANG Binding Class Loader
         clsPool.appendClassPath(new LoaderClassPath(RpcService.classLoader));
         generator = new RuntimeCodeGenerator(clsPool);
