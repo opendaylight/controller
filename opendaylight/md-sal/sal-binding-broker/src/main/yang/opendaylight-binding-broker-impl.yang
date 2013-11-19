@@ -3,8 +3,9 @@ module opendaylight-sal-binding-broker-impl {
     namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl";
     prefix "binding-impl";
 
-	import config { prefix config; revision-date 2013-04-05; }
- 	import opendaylight-md-sal-binding {prefix sal;}
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding {prefix sal;}
+    import opendaylight-md-sal-common {prefix common;}
 
     description
         "Service definition for Binding Aware MD-SAL.";
@@ -19,34 +20,41 @@ module opendaylight-sal-binding-broker-impl {
         config:provided-service sal:binding-broker-osgi-registry;
         config:java-name-prefix BindingBrokerImplSingleton;
     }
-
-    grouping rpc-routing-table {
-        
     
+    identity binding-data-broker-singleton {
+        base config:module-type;
+        config:provided-service sal:binding-data-broker;
+        config:java-name-prefix DataBrokerImplSingleton;
     }
-
-
-    grouping rpc-router {
-        leaf module {
-            type string;
-        }
-        container routing-tables {
-            list routing-table {
-                uses rpc-routing-table;
-            }
-        }
+    
+    identity binding-rpc-broker-singleton {
+        base config:module-type;
+        config:provided-service sal:binding-rpc-registry;
+        config:java-name-prefix RpcBrokerImplSingleton;
+    }
+    
+    identity binding-notification-broker-singleton {
+        base config:module-type;
+        config:provided-service sal:binding-notification-service;
+        config:java-name-prefix NotificationBrokerImplSingleton;
     }
 
 
     augment "/config:modules/config:module/config:state" {
         case binding-broker-impl-singleton {
             when "/config:modules/config:module/config:type = 'binding-broker-impl-singleton'";
-            
-            container rpc-routers {
-                list rpc-router {
-                    uses rpc-router;
-                }
-            }
+        }
+        case binding-data-broker-singleton {
+            when "/config:modules/config:module/config:type = 'binding-data-broker-singleton'";
+            uses common:data-state;
+        }
+        case binding-rpc-broker-singleton {
+            when "/config:modules/config:module/config:type = 'binding-rpc-broker-singleton'";
+            uses common:rpc-state;
+        }
+        case binding-notification-broker-singleton {
+            when "/config:modules/config:module/config:type = 'binding-notification-broker-singleton'";
+            uses common:notification-state;
         }
     }
 }

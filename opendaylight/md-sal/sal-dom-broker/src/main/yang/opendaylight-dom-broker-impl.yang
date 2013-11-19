@@ -1,0 +1,52 @@
+module opendaylight-sal-dom-broker-impl {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl";
+    prefix "binding-impl";
+
+	import config { prefix config; revision-date 2013-04-05; }
+ 	import opendaylight-md-sal-dom {prefix sal;}
+
+    description
+        "Service definition for Binding Aware MD-SAL.";
+ 
+    revision "2013-10-28" {
+        description
+            "Initial revision";
+    }
+
+    identity dom-broker-impl-singleton {
+        base config:module-type;
+        config:provided-service sal:dom-broker-osgi-registry;
+        config:java-name-prefix DomBrokerImplSingleton;
+    }
+
+    grouping rpc-routing-table {
+        
+    
+    }
+
+
+    grouping rpc-router {
+        leaf module {
+            type string;
+        }
+        container routing-tables {
+            list routing-table {
+                uses rpc-routing-table;
+            }
+        }
+    }
+
+
+    augment "/config:modules/config:module/config:state" {
+        case dom-broker-impl-singleton {
+            when "/config:modules/config:module/config:type = 'dom-broker-impl-singleton'";
+            
+            container rpc-routers {
+                list rpc-router {
+                    uses rpc-router;
+                }
+            }
+        }
+    }
+}

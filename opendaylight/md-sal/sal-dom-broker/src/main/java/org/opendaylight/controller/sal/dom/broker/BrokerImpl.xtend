@@ -30,7 +30,7 @@ import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter
 import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 
-public class BrokerImpl implements Broker {
+public class BrokerImpl implements Broker, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BrokerImpl);
 
     // Broker Generic Context
@@ -43,6 +43,9 @@ public class BrokerImpl implements Broker {
     private var ExecutorService executor = Executors.newFixedThreadPool(5);
     @Property
     private var BundleContext bundleContext;
+    
+    @Property
+    private var AutoCloseable deactivator;
 
     @Property
     private var RpcRouter router;
@@ -107,4 +110,9 @@ public class BrokerImpl implements Broker {
         sessions.remove(consumerContextImpl);
         providerSessions.remove(consumerContextImpl);
     }
+    
+    override close() throws Exception {
+        deactivator?.close();
+    }
+    
 }
