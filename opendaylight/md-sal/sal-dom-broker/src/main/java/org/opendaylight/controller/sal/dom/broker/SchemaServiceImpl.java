@@ -220,6 +220,7 @@ public class SchemaServiceImpl implements SchemaService, AutoCloseable {
                     proposedNewState.putAll(inconsistentBundlesToYangURLs);
                     proposedNewState.putAll(bundle, addedURLs);
                     boolean adding = true;
+                    
                     if (tryToUpdateState(addedURLs, proposedNewState, adding) == false) {
                         inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
                     }
