@@ -41,6 +41,11 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-netconf-connector</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-core-api</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
@@ -155,6 +160,31 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-jmx-generator</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netty-event-executor-config</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netty-threadgroup-config</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>threadpool-config-api</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>threadpool-config-impl</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>yang-store-api</artifactId>
           <version>${config.version}</version>
         </dependency>
         <dependency>
