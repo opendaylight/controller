@@ -2,6 +2,7 @@ package org.opendaylight.controller.tests.zmqrouter.rest;
 
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.impl.RoutingTableImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
 import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
@@ -47,13 +48,13 @@ public class Router {
     _logger.info("Announce request received");
 
     BundleContext ctx = getBundleContext();
-    ServiceReference<ExampleProvider> providerRef = ctx.getServiceReference(ExampleProvider.class);
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
     if (providerRef == null) {
       _logger.debug("Could not get provider reference");
       return "Could not get provider reference";
     }
 
-    ExampleProvider provider = ctx.getService(providerRef);
+    ExampleProvider provider = (ExampleProvider) ctx.getService(providerRef);
     if (provider == null) {
       _logger.info("Could not get provider service");
       return "Could not get provider service";
@@ -71,12 +72,12 @@ public class Router {
     _logger.info("Invoking RPC");
 
     BundleContext ctx = getBundleContext();
-    ServiceReference<ExampleConsumer> consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
     if (consumerRef == null) {
       _logger.debug("Could not get consumer reference");
       return "Could not get consumer reference";
     }
-    ExampleConsumer consumer = ctx.getService(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer) ctx.getService(consumerRef);
     if (consumer == null) {
       _logger.info("Could not get consumer service");
       return "Could not get consumer service";
@@ -95,12 +96,12 @@ public class Router {
         _logger.info("Invoking adding an entry in routing table");
 
         BundleContext ctx = getBundleContext();
-        ServiceReference<RoutingTable> routingTableServiceReference = ctx.getServiceReference(RoutingTable.class);
+        ServiceReference routingTableServiceReference = ctx.getServiceReference(RoutingTable.class);
         if (routingTableServiceReference == null) {
             _logger.debug("Could not get routing table impl reference");
             return "Could not get routingtable referen ";
         }
-        RoutingTable routingTable = ctx.getService(routingTableServiceReference);
+        RoutingTable routingTable = (RoutingTableImpl) ctx.getService(routingTableServiceReference);
         if (routingTable == null) {
             _logger.info("Could not get routing table service");
             return "Could not get routing table service";
