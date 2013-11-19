@@ -129,6 +129,11 @@
           <artifactId>forwardingrules-manager</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>md_frm_test</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
