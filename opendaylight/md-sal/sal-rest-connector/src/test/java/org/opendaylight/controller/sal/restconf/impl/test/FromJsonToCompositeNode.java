@@ -3,10 +3,14 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.*;
 import java.net.*;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.*;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -15,29 +19,60 @@ import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.slf4j.*;
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.model.api.*;
 
 import com.google.gson.JsonSyntaxException;
 
 public class FromJsonToCompositeNode {
+
+    /**
+     * 
+     * It is just dummy class which is used in mock method to specify return
+     * type
+     */
+    private class DummyFuture implements Future<RpcResult<TransactionStatus>> {
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public RpcResult<TransactionStatus> get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+
+        @Override
+        public RpcResult<TransactionStatus> get(long timeout, TimeUnit unit) throws InterruptedException,
+                ExecutionException, TimeoutException {
+            return null;
+        }
+    };
+
     Logger LOG = LoggerFactory.getLogger(FromJsonToCompositeNode.class);
 
     @Test
     public void simpleListTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/simple-list.json");
-        assertNotNull(compositeNode);
-
-        assertEquals("lst", compositeNode.getNodeType().getLocalName());
-        verifyCompositeNode(compositeNode);
+        simpleTest("/json-to-composite-node/simple-list.json", "/json-to-composite-node/simple-list-yang", "lst",
+                "simple:data:types");
     }
 
     @Test
     public void simpleContainerTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/simple-container.json");
-        assertNotNull(compositeNode);
-
-        assertEquals("cont", compositeNode.getNodeType().getLocalName());
-
-        verifyCompositeNode(compositeNode);
+        simpleTest("/json-to-composite-node/simple-container.json", "/json-to-composite-node/simple-list-yang", "cont",
+                "simple:data:types");
     }
 
     /**
@@ -46,7 +81,8 @@ public class FromJsonToCompositeNode {
      */
     @Test
     public void multipleItemsInListTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/multiple-items-in-list.json");
+        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/multiple-items-in-list.json",
+                true);
         assertNotNull(compositeNode);
 
         assertEquals("lst", compositeNode.getNodeType().getLocalName());
@@ -58,7 +94,7 @@ public class FromJsonToCompositeNode {
     public void incorrectTopLevelElementsTest() {
         Throwable cause1 = null;
         try {
-            compositeContainerFromJson("/json-to-composite-node/wrong-top-level1.json");
+            compositeContainerFromJson("/json-to-composite-node/wrong-top-level1.json", true);
         } catch (WebApplicationException e) {
             cause1 = e;
         }
@@ -72,7 +108,7 @@ public class FromJsonToCompositeNode {
 
         Throwable cause2 = null;
         try {
-            compositeContainerFromJson("/json-to-composite-node/wrong-top-level2.json");
+            compositeContainerFromJson("/json-to-composite-node/wrong-top-level2.json", true);
         } catch (WebApplicationException e) {
             cause2 = e;
         }
@@ -81,7 +117,7 @@ public class FromJsonToCompositeNode {
 
         Throwable cause3 = null;
         try {
-            compositeContainerFromJson("/json-to-composite-node/wrong-top-level3.json");
+            compositeContainerFromJson("/json-to-composite-node/wrong-top-level3.json", true);
         } catch (WebApplicationException e) {
             cause3 = e;
         }
@@ -100,7 +136,7 @@ public class FromJsonToCompositeNode {
      */
     @Test
     public void emptyDataReadTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/empty-data.json");
+        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/empty-data.json", true);
 
         assertNotNull(compositeNode);
 
@@ -113,13 +149,68 @@ public class FromJsonToCompositeNode {
 
         String reason = null;
         try {
-            compositeContainerFromJson("/json-to-composite-node/empty-data1.json");
+            compositeContainerFromJson("/json-to-composite-node/empty-data1.json", true);
         } catch (JsonSyntaxException e) {
             reason = e.getMessage();
         }
 
         assertTrue(reason.contains("Expected value at line"));
 
+    }
+
+    private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace) {
+        CompositeNode compositeNode = compositeContainerFromJson(jsonPath);
+        assertNotNull(compositeNode);
+
+        DataSchemaNode dataSchemaNode = obtainSchemaFromYang(yangPath);
+        assertNotNull(dataSchemaNode);
+
+        supplementNamespace(dataSchemaNode, compositeNode);
+
+        assertTrue(compositeNode instanceof CompositeNodeWrapper);
+        CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap(null);
+
+        assertEquals(topLevelElementName, compNode.getNodeType().getLocalName());
+        verifyCompositeNode(compNode, namespace);
+    }
+
+    private DataSchemaNode obtainSchemaFromYang(String yangFolder) {
+        Set<Module> modules = null;
+        try {
+            modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangFolder).getPath());
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+            assertTrue(false);
+        }
+
+        assertNotNull(modules);
+        assertEquals(1, modules.size());
+        Module module = modules.iterator().next();
+        assertNotNull(module.getChildNodes());
+        assertEquals(1, module.getChildNodes().size());
+        DataSchemaNode dataSchemaNode = module.getChildNodes().iterator().next();
+        return dataSchemaNode;
+    }
+
+    private void supplementNamespace(DataSchemaNode dataSchemaNode, CompositeNode compositeNode) {
+        RestconfImpl restconf = RestconfImpl.getInstance();
+
+        InstanceIdWithSchemaNode instIdAndSchema = new InstanceIdWithSchemaNode(mock(InstanceIdentifier.class),
+                dataSchemaNode);
+
+        ControllerContext controllerContext = mock(ControllerContext.class);
+        BrokerFacade broker = mock(BrokerFacade.class);
+
+        when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
+        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(
+                new DummyFuture());
+
+        restconf.setControllerContext(controllerContext);
+        restconf.setBroker(broker);
+
+        // method is called only because it contains call of method which
+        // supplement namespaces to compositeNode
+        restconf.createConfigurationData("something", compositeNode);
     }
 
     private void verityMultipleItemsInList(CompositeNode compositeNode) {
@@ -152,19 +243,19 @@ public class FromJsonToCompositeNode {
             }
 
         }
-
         assertTrue(lf11Found);
         assertTrue(cont11Found);
         assertTrue(lst11Found);
-
     }
 
-    private void verifyCompositeNode(CompositeNode compositeNode) {
+    private void verifyCompositeNode(CompositeNode compositeNode, String namespace) {
         boolean cont1Found = false;
         boolean lst1Found = false;
         boolean lflst1_1Found = false;
         boolean lflst1_2Found = false;
         boolean lf1Found = false;
+
+        assertEquals(namespace, compositeNode.getNodeType().getNamespace().toString());
 
         for (Node<?> node : compositeNode.getChildren()) {
             if (node.getNodeType().getLocalName().equals("cont1")) {
@@ -193,6 +284,7 @@ public class FromJsonToCompositeNode {
                     }
                 }
             }
+            assertEquals(namespace, node.getNodeType().getNamespace().toString());
         }
         assertTrue(cont1Found);
         assertTrue(lst1Found);
@@ -201,7 +293,12 @@ public class FromJsonToCompositeNode {
         assertTrue(lf1Found);
     }
 
-    private CompositeNode compositeContainerFromJson(String jsonPath) throws WebApplicationException {
+    private CompositeNode compositeContainerFromJson(String jsonPath) {
+        return compositeContainerFromJson(jsonPath, false);
+    }
+
+    private CompositeNode compositeContainerFromJson(String jsonPath, boolean dummyNamespaces)
+            throws WebApplicationException {
 
         JsonToCompositeNodeProvider jsonToCompositeNodeProvider = JsonToCompositeNodeProvider.INSTANCE;
         InputStream jsonStream = FromJsonToCompositeNode.class.getResourceAsStream(jsonPath);
@@ -209,13 +306,16 @@ public class FromJsonToCompositeNode {
             CompositeNode compositeNode = jsonToCompositeNodeProvider
                     .readFrom(null, null, null, null, null, jsonStream);
             assertTrue(compositeNode instanceof CompositeNodeWrapper);
-            try {
-                addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-                return ((CompositeNodeWrapper) compositeNode).unwrap(null);
-            } catch (URISyntaxException e) {
-                LOG.error(e.getMessage());
-                assertTrue(e.getMessage(), false);
+            if (dummyNamespaces) {
+                try {
+                    addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
+                    return ((CompositeNodeWrapper) compositeNode).unwrap(null);
+                } catch (URISyntaxException e) {
+                    LOG.error(e.getMessage());
+                    assertTrue(e.getMessage(), false);
+                }
             }
+            return compositeNode;
         } catch (IOException e) {
             LOG.error(e.getMessage());
             assertTrue(e.getMessage(), false);

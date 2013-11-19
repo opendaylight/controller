@@ -113,7 +113,7 @@ class RestconfImpl implements RestconfService {
             val List<NodeWrapper<?>> children = (nodeBuilder as CompositeNodeWrapper).getValues
             for (child : children) {
                 addNamespaceToNodeFromSchemaRecursively(child,
-                    (schema as DataNodeContainer).childNodes.findFirst[n|n.QName.localName === child.localName])
+                    (schema as DataNodeContainer).childNodes.findFirst[n|n.QName.localName.equals(child.localName)])
             }
         }
     }
