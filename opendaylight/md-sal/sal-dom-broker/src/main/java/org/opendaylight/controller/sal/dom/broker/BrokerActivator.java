@@ -9,6 +9,8 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
+import org.opendaylight.controller.sal.dom.broker.impl.RpcRouterImpl;
+import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.osgi.framework.BundleActivator;
@@ -28,6 +30,7 @@ public class BrokerActivator implements BundleActivator {
     private MountPointManagerImpl mountService;
     private ServiceRegistration<MountService> mountReg;
     private ServiceRegistration<MountProvisionService> mountProviderReg;
+
     private HashMapDataStore hashMapStore;
 
     @Override
@@ -60,6 +63,9 @@ public class BrokerActivator implements BundleActivator {
         
         mountReg = context.registerService(MountService.class, mountService, emptyProperties);
         mountProviderReg =  context.registerService(MountProvisionService.class, mountService, emptyProperties);
+
+        RpcRouter rpcRouterService = new RpcRouterImpl("SAL RPC Router");
+        broker.setRouter(rpcRouterService);
         
         brokerReg = context.registerService(Broker.class, broker, emptyProperties);
     }
