@@ -23,8 +23,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -35,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -58,8 +63,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
     private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
             NODE_ID);
 
-    private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder() //
-            .node(Nodes.class) //
+    private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .toInstance();
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODES_INSTANCE_ID_BI = //
@@ -67,8 +71,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .node(Nodes.QNAME) //
             .toInstance();
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder() //
-            .node(Nodes.class) //
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY).toInstance();
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
@@ -120,6 +123,49 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         verifyNodes(nodes,original);
         
         
+        
+        testAddingNodeConnector();
+        
+        
+        
+        testNodeRemove();
+        
+        
+    }
+
+    private void testAddingNodeConnector() throws Exception {
+        
+        NodeConnectorId ncId = new NodeConnectorId("openflow:1:bar");
+        NodeConnectorKey nodeKey = new NodeConnectorKey(ncId );
+        InstanceIdentifier<NodeConnector> ncInstanceId = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA).child(NodeConnector.class, nodeKey).toInstance();
+        NodeConnectorBuilder ncBuilder = new NodeConnectorBuilder();
+        ncBuilder.setId(ncId);
+        ncBuilder.setKey(nodeKey);
+        NodeConnector connector = ncBuilder.build();
+        DataModificationTransaction transaction = baDataService.beginTransaction();
+        transaction.putOperationalData(ncInstanceId, connector);
+        RpcResult<TransactionStatus> result = transaction.commit().get();
+        
+        Node node = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
+        assertNotNull(node);
+        assertNotNull(node.getNodeConnector());
+        assertFalse(node.getNodeConnector().isEmpty());
+        NodeConnector readedNc = node.getNodeConnector().get(0);
+        assertNotNull(readedNc);
+        
+        
+        
+        
+    }
+
+    private void testNodeRemove() throws Exception {
+        DataModificationTransaction transaction = baDataService.beginTransaction();
+        transaction.removeOperationalData(NODE_INSTANCE_ID_BA);
+        RpcResult<TransactionStatus> result = transaction.commit().get();
+        assertEquals(TransactionStatus.COMMITED, result.getResult());
+        
+        Node node = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
+        assertNull(node);
     }
 
     private void verifyNodes(Nodes nodes,Node original) {

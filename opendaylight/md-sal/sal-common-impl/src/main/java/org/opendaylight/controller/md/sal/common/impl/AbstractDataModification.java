@@ -179,7 +179,7 @@ public abstract class AbstractDataModification<P /* extends Path<P> */, D> imple
         if (operationalOriginal.containsKey(path)) {
             return true;
         }
-        D data = reader.readConfigurationData(path);
+        D data = reader.readOperationalData(path);
         if (data != null) {
             operationalOriginal.putIfAbsent(path, data);
             return true;

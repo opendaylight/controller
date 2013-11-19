@@ -17,6 +17,5 @@ public interface BindingIndependentMappingService {
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier toDataDom(InstanceIdentifier<? extends DataObject> path);
 
     DataObject dataObjectFromDataDom(InstanceIdentifier<? extends DataObject> path, CompositeNode result);
-    
-    
+
 }
