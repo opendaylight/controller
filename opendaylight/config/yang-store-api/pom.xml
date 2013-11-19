@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>yang-jmx-generator</artifactId>
         </dependency>
     </dependencies>
@@ -31,7 +31,6 @@
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.store.api,
-                            org.opendaylight.controller.config.yang.store.spi
                         </Export-Package>
                     </instructions>
                 </configuration>
