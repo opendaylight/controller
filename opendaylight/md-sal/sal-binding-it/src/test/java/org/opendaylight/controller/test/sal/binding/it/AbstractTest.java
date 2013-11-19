@@ -11,6 +11,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
+import org.ops4j.pax.exam.util.Filter;
 import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.BundleContext;
 
@@ -24,8 +25,9 @@ public abstract class AbstractTest {
     public static final String YANGTOOLS_MODELS = "org.opendaylight.yangtools.model";
 
     @Inject
+    @Filter(timeout=60*1000)
     BindingAwareBroker broker;
-
+    
     @Inject
     BundleContext bundleContext;
 
@@ -55,13 +57,14 @@ public abstract class AbstractTest {
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
+                systemProperty("osgi.bundles.defaultStartLevel").value("4"),
 
-                configMinumumBundles(),
+                
                 
                 mdSalCoreBundles(),
 
                 bindingAwareSalBundles(),
-
+                configMinumumBundles(),
                 // BASE Models
                 baseModelBundles(), flowCapableModelBundles(), junitAndMockitoBundles());
     }

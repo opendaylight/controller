@@ -13,6 +13,8 @@ import java.util.zip.Checksum;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -20,6 +22,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.ServiceReference;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -34,9 +37,13 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
 import static com.google.common.base.Preconditions.*;
 
-public class SchemaServiceImpl implements SchemaService, AutoCloseable {
+public class SchemaServiceImpl implements //
+SchemaService, //
+ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
+AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(SchemaServiceImpl.class);
 
     private ListenerRegistry<SchemaServiceListener> listeners;
@@ -53,6 +60,8 @@ public class SchemaServiceImpl implements SchemaService, AutoCloseable {
     private final Multimap<Bundle, URL> consistentBundlesToYangURLs = HashMultimap.create();
     private BundleTracker<Object> bundleTracker;
     private final YangStoreCache cache = new YangStoreCache();
+
+    private ServiceTracker<SchemaServiceListener,SchemaServiceListener> listenerTracker;
 
     public ListenerRegistry<SchemaServiceListener> getListeners() {
         return listeners;
@@ -84,9 +93,11 @@ public class SchemaServiceImpl implements SchemaService, AutoCloseable {
         if (listeners == null) {
             listeners = new ListenerRegistry<>();
         }
-
+        
+        listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, this);
         bundleTracker = new BundleTracker<Object>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
         bundleTracker.open();
+        listenerTracker.open();
     }
 
     public SchemaContext getGlobalContext() {
@@ -185,6 +196,18 @@ public class SchemaServiceImpl implements SchemaService, AutoCloseable {
 
     private void updateCache(SchemaContext snapshot) {
         cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
+        
+        Object[] services = listenerTracker.getServices();
+        if(services != null) {
+            for(Object rawListener : services) {
+                SchemaServiceListener listener = (SchemaServiceListener) rawListener;
+                try {
+                    listener.onGlobalContextUpdated(snapshot);
+                } catch (Exception e) {
+                    logger.error("Exception occured during invoking listener",e);
+                }
+            }
+        }
         for (ListenerRegistration<SchemaServiceListener> listener : listeners) {
             try {
                 listener.getInstance().onGlobalContextUpdated(snapshot);
@@ -220,6 +243,7 @@ public class SchemaServiceImpl implements SchemaService, AutoCloseable {
                     proposedNewState.putAll(inconsistentBundlesToYangURLs);
                     proposedNewState.putAll(bundle, addedURLs);
                     boolean adding = true;
+                    
                     if (tryToUpdateState(addedURLs, proposedNewState, adding) == false) {
                         inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
                     }
@@ -276,6 +300,26 @@ public class SchemaServiceImpl implements SchemaService, AutoCloseable {
             this.cachedUrls = setFromMultimapValues(urls);
             this.cachedContextSnapshot = ctx;
         }
-
+    }
+    
+    @Override
+    public SchemaServiceListener addingService(ServiceReference<SchemaServiceListener> reference) {
+        
+        SchemaServiceListener listener = context.getService(reference);
+        SchemaContext _ctxContext = getGlobalContext();
+        if(getContext() != null) {
+            listener.onGlobalContextUpdated(_ctxContext);
+        }
+        return listener;
+    }
+    
+    @Override
+    public void modifiedService(ServiceReference<SchemaServiceListener> reference, SchemaServiceListener service) {
+        // NOOP
+    }
+    
+    @Override
+    public void removedService(ServiceReference<SchemaServiceListener> reference, SchemaServiceListener service) {
+        context.ungetService(reference);
     }
 }
