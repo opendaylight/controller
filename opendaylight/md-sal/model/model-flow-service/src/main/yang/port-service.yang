@@ -13,7 +13,7 @@ module sal-port {
     grouping node-port {
         uses "inv:node-context-ref";
         
-        uses port-type:ofp-port-mod;
+        uses port-type:flow-port-status;
     }
 
     /** Base configuration structure **/
@@ -21,10 +21,10 @@ module sal-port {
         uses "inv:node-context-ref";
 
         container original-port {
-            uses port-type:ofp-port-mod;
+            uses port-type:port-mod;
         }
         container updated-port {
-            uses port-type:ofp-port-mod;
+            uses port-type:port-mod;
         }
     }
 

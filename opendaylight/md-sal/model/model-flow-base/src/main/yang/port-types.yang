@@ -8,7 +8,14 @@ module opendaylight-port-types {
     revision "2013-09-25" {
         description "Initial revision of Port Inventory model";
     }
-
+    
+    typedef port-reason {
+        type enumeration {
+            enum add;
+            enum delete;
+            enum update;
+        }
+    }
     
     typedef port-config {
         type bits {
@@ -26,7 +33,6 @@ module opendaylight-port-types {
             enum live;
         }
     }
-
     
     typedef port-features {
         type bits {
@@ -72,6 +78,14 @@ module opendaylight-port-types {
         }
     }
     
+    grouping flow-port-status {
+        leaf reason {
+            type port-reason;
+        }
+        
+        uses flow-capable-port;
+    }
+    
     grouping flow-capable-port {    
                 
         uses common-port;
@@ -114,7 +128,7 @@ module opendaylight-port-types {
         }
     }    
     
-    grouping ofp-port-mod {
+    grouping port-mod {
         container port {
             list port {
                 key "port-mod-order";
