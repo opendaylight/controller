@@ -51,6 +51,8 @@ public abstract class AbstractConfigTest extends
     protected ConfigRegistryJMXClient configRegistryClient;
     protected BaseJMXRegistrator baseJmxRegistrator;
     protected InternalJMXRegistrator internalJmxRegistrator;
+    protected BundleContext mockedContext;
+    protected ServiceRegistration<?> mockedServiceRegistration;
 
     // this method should be called in @Before
     protected void initConfigTransactionManagerImpl(
@@ -60,16 +62,16 @@ public abstract class AbstractConfigTest extends
 
         configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(
                 platformMBeanServer);
-        BundleContext context = mock(BundleContext.class);
-        ServiceRegistration<?> mockedServiceRegistration = mock(ServiceRegistration.class);
+        this.mockedContext = mock(BundleContext.class);
+        this.mockedServiceRegistration = mock(ServiceRegistration.class);
         doNothing().when(mockedServiceRegistration).unregister();
-        doReturn(mockedServiceRegistration).when(context).registerService(
+        doReturn(mockedServiceRegistration).when(mockedContext).registerService(
                 Matchers.any(String[].class), any(Closeable.class),
                 any(Dictionary.class));
         internalJmxRegistrator = new InternalJMXRegistrator(platformMBeanServer);
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
-        configRegistry = new ConfigRegistryImpl(resolver, context,
+        configRegistry = new ConfigRegistryImpl(resolver, mockedContext,
                 platformMBeanServer, baseJmxRegistrator);
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
