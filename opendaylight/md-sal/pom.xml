@@ -40,6 +40,8 @@
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
+        <module>zeromq-routingtable/implementation</module>
+        <module>sal-remoterpc-connector/implementation</module>
 
         <!-- Clustered Data Store -->
         <module>clustered-data-store/implementation</module>
@@ -50,8 +52,6 @@
         
         <!-- Compability Packages -->
         <module>compatibility</module>
-        <module>zeromq-routingtable/implementation</module>
-        <module>sal-zeromq-connector</module>
     </modules>
 
 
@@ -64,8 +64,9 @@
             <modules>
                 <module>sal-binding-it</module>
                 <module>zeromq-routingtable/integrationtest</module>
+                <module>sal-remoterpc-connector/integrationtest</module>
                 <module>clustered-data-store/integrationtest</module>
-                <module>test</module>
+                <!--module>test/sal-rest-connector-it</modulei-->
             </modules>
         </profile>
         <profile>
