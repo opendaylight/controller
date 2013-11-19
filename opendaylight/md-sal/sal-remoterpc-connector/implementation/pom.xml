@@ -6,6 +6,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
   <artifactId>sal-remoterpc-connector</artifactId>
@@ -280,20 +281,6 @@
     </dependency>
   </dependencies>
   <repositories>
-   <repository>
-      <id>sonatype-nexus-snapshots</id>
-      <url>http://oss.sonatype.org/content/repositories/releases</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>maven central</id>
-      <url>http://repo1.maven.org/maven2</url>
-    </repository>
 
   </repositories>
 

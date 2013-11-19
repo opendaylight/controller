@@ -88,7 +88,7 @@
                 <module>zeromq-routingtable/integrationtest</module>
 								<module>sal-remoterpc-connector/integrationtest</module>
                 <module>clustered-data-store/integrationtest</module>
-                <module>test/sal-rest-connector-it</module>
+                <!--module>test/sal-rest-connector-it</module-->
             </modules>
         </profile>
         <profile>
@@ -192,6 +192,21 @@
               <enabled>false</enabled>
           </releases>
         </repository>
+		   <repository>
+		      <id>sonatype-nexus-snapshots</id>
+		      <url>http://oss.sonatype.org/content/repositories/releases</url>
+		      <releases>
+		        <enabled>true</enabled>
+		      </releases>
+		      <snapshots>
+		        <enabled>false</enabled>
+		      </snapshots>
+		    </repository>
+		    <repository>
+		      <id>maven central</id>
+		      <url>http://repo1.maven.org/maven2</url>
+		    </repository>
+
     </repositories>
 
     <distributionManagement>

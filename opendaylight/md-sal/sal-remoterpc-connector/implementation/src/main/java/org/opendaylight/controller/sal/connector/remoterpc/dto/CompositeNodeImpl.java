@@ -16,137 +16,142 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Skeleton implementation of CompositeNodeImpl.
+ */
 public class CompositeNodeImpl implements CompositeNode, Serializable {
 
   private QName key;
 
+  private List<Node<?>> children;
+
   @Override
   public List<Node<?>> getChildren() {
-    return null;
+    return children;
   }
 
   @Override
   public List<CompositeNode> getCompositesByName(QName children) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<CompositeNode> getCompositesByName(String children) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<SimpleNode<?>> getSimpleNodesByName(QName children) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<SimpleNode<?>> getSimpleNodesByName(String children) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public CompositeNode getFirstCompositeByName(QName container) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public SimpleNode<?> getFirstSimpleByName(QName leaf) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public MutableCompositeNode asMutable() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public QName getKey() {
-    return key;  //To change body of implemented methods use File | Settings | File Templates.
+    return key;
   }
 
   @Override
   public List<Node<?>> setValue(List<Node<?>> value) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public int size() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return 0;
   }
 
   @Override
   public boolean isEmpty() {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false;
   }
 
   @Override
   public boolean containsKey(Object key) {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false;
   }
 
   @Override
   public boolean containsValue(Object value) {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false;
   }
 
   @Override
   public List<Node<?>> get(Object key) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<Node<?>> put(QName key, List<Node<?>> value) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<Node<?>> remove(Object key) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void putAll(Map<? extends QName, ? extends List<Node<?>>> m) {
-    //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void clear() {
-    //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Set<QName> keySet() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Collection<List<Node<?>>> values() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Set<Entry<QName, List<Node<?>>>> entrySet() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public QName getNodeType() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public CompositeNode getParent() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<Node<?>> getValue() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ModifyAction getModificationAction() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 }
