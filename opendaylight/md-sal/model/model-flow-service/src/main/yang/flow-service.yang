@@ -97,9 +97,11 @@ module sal-flow {
     
     notification node-error-notification {
         uses error:error-message;
+        uses tr:transaction-aware;
     }
     
     notification node-experimenter-error-notification {
         uses error:experimenter-error-message;
+        uses tr:transaction-aware;
     }
 }

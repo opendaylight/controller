@@ -14,7 +14,7 @@ module port-management {
         leaf node {
             type inv:node-ref;
         }
-        uses port:ofp-port-mod;
+        uses port:port-mod;
     }   
      
     container ports {
@@ -22,7 +22,7 @@ module port-management {
             key "id node"; 
                         
             leaf id {
-                type string;
+                type uint32;
             }                       
             
             uses port-entry;

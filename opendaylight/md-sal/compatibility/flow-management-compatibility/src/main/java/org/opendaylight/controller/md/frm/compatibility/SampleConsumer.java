@@ -31,7 +31,7 @@ public class SampleConsumer {
 
     Flow createSampleFlow(String name, NodeRef node) {
         FlowBuilder ret = new FlowBuilder();
-        FlowKey key = new FlowKey(name, node);
+        FlowKey key = new FlowKey(Long.parseLong(name), node);
         ret.setKey(key);
         return ret.build();
     }

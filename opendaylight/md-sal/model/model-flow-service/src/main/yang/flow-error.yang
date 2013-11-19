@@ -16,13 +16,15 @@ module flow-errors {
             enum flow-mod-failed;
             enum group-mod-failed;
             enum port-mod-failed;
-            enum table-mod-failed;
-            enum meter-mod-failed;
+            enum table-mod-failed;            
             enum queue-op-failed;
             enum switch-config-failed;
             enum role-request-failed;
+            enum meter-mod-failed;
             enum table-features-failed;
-            enum experimenter;
+            enum experimenter {
+                value "65535";
+            }
         }
     }
     

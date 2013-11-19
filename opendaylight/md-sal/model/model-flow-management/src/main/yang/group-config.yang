@@ -22,7 +22,7 @@ module group-management {
             key "id node"; 
                         
             leaf id {
-                type string;
+                type uint32;
             }                       
             
             uses group-entry;
