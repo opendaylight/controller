@@ -7,50 +7,40 @@
  */
 package org.opendaylight.controller.config.yang.store.impl;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class YangStoreActivator implements BundleActivator {
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.regex.Pattern;
 
-    private BundleTracker bundleTracker;
-    private ServiceRegistration<YangStoreService> registration;
-    private static final Logger logger = LoggerFactory
-            .getLogger(YangStoreActivator.class);
+public class YangStoreActivator implements BundleActivator {
+    private static final Logger logger = LoggerFactory.getLogger(YangStoreActivator.class);
 
     @Override
     public void start(BundleContext context) throws Exception {
-        ExtenderYangTrackerCustomizer customizerAndService = new ExtenderYangTrackerCustomizer();
-        bundleTracker = new BundleTracker(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, customizerAndService);
-        bundleTracker.open();
-
+        // get blacklist
+        Optional<Pattern> maybeBlacklistPattern = Optional.absent();
+        String blacklist = context.getProperty("yangstore.blacklist");
+        if (blacklist != null) {
+            try {
+                maybeBlacklistPattern = Optional.of(Pattern.compile(blacklist));
+            } catch (RuntimeException e) {
+                logger.error("Cannot parse blacklist regex " + blacklist, e);
+                throw e;
+            }
+        }
+        ExtenderYangTracker extenderYangTracker = new ExtenderYangTracker(maybeBlacklistPattern, context);
         Dictionary<String, ?> properties = new Hashtable<>();
-        registration = context.registerService(YangStoreService.class,
-                customizerAndService, properties);
+        context.registerService(YangStoreService.class, extenderYangTracker, properties);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        try {
-            bundleTracker.close();
-        } catch (Exception e) {
-            logger.warn("Exception while closing bundleTracker", e);
-        }
-        if (registration != null) {
-            try {
-                registration.unregister();
-            } catch (Exception e) {
-                logger.warn("Exception while unregistring yang store service",
-                        e);
-            }
-        }
+
     }
 }

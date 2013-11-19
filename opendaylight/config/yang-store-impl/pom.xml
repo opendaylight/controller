@@ -45,6 +45,10 @@
             <artifactId>mockito-configuration</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -54,15 +58,9 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.opendaylight.controller.config.yang.store.impl.YangStoreActivator
-                        </Bundle-Activator>
-                        <Private-Package>
-                            org.opendaylight.controller.config.yang.store.impl,
-                        </Private-Package>
-
+                        <Bundle-Activator>org.opendaylight.controller.config.yang.store.impl.YangStoreActivator</Bundle-Activator>
                         <Import-Package>
                             org.opendaylight.controller.config.yang.store.api,
-                            org.opendaylight.controller.config.yang.store.spi,
                             org.opendaylight.controller.config.yangjmxgenerator,
                             com.google.common.base,
                             com.google.common.collect,
@@ -76,7 +74,7 @@
                             org.opendaylight.yangtools.yang.common,
                             org.opendaylight.yangtools.yang.model.api,
                             org.opendaylight.yangtools.sal.binding.generator.spi,
-                            org.opendaylight.yangtools.yang.parser.impl
+                            org.opendaylight.yangtools.yang.parser.impl,
                         </Import-Package>
                         <Export-Package>
                         </Export-Package>

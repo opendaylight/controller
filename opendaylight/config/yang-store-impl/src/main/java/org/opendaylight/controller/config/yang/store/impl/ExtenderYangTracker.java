@@ -16,24 +16,27 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.api.YangStoreListenerRegistration;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.opendaylight.controller.config.yang.store.spi.YangStoreListener;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.util.tracker.BundleTrackerCustomizer;
+import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Note on consistency:
@@ -41,10 +44,9 @@ import java.util.Set;
  * is not preserved. We thus maintain two maps, one containing consistent snapshot, other inconsistent. The
  * container should eventually send all events and thus making the inconsistent map redundant.
  */
-public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Object>, YangStoreService {
+public class ExtenderYangTracker extends BundleTracker<Object> implements YangStoreService, AutoCloseable {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ExtenderYangTrackerCustomizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExtenderYangTracker.class);
 
     private final Multimap<Bundle, URL> consistentBundlesToYangURLs = HashMultimap.create();
 
@@ -55,20 +57,25 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
 
     private final YangStoreCache cache = new YangStoreCache();
     private final MbeParser mbeParser;
-    private final List<YangStoreListener> listeners = new ArrayList<>();
 
-    public ExtenderYangTrackerCustomizer() {
-        this(new MbeParser());
 
+    public ExtenderYangTracker(Optional<Pattern> maybeBlacklist, BundleContext bundleContext) {
+        this(new MbeParser(), maybeBlacklist, bundleContext);
     }
 
+    @GuardedBy("this")
+    private Optional<Pattern> maybeBlacklist;
+
     @VisibleForTesting
-    ExtenderYangTrackerCustomizer(MbeParser mbeParser) {
+    ExtenderYangTracker(MbeParser mbeParser, Optional<Pattern> maybeBlacklist, BundleContext bundleContext) {
+        super(bundleContext, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, null);
         this.mbeParser = mbeParser;
+        this.maybeBlacklist = maybeBlacklist;
+        open();
     }
 
     @Override
-    public Object addingBundle(Bundle bundle, BundleEvent event) {
+    public synchronized Object addingBundle(Bundle bundle, BundleEvent event) {
 
         // Ignore system bundle:
         // system bundle might have config-api on classpath &&
@@ -76,6 +83,14 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
         // system bundle might contain yang files from that bundle
         if (bundle.getBundleId() == 0)
             return bundle;
+
+        if (maybeBlacklist.isPresent()) {
+            Matcher m = maybeBlacklist.get().matcher(bundle.getSymbolicName());
+            if (m.matches()) {
+                logger.debug("Ignoring {} because it is in blacklist {}", bundle, maybeBlacklist);
+                return bundle;
+            }
+        }
 
         Enumeration<URL> enumeration = bundle.findEntries("META-INF/yang", "*.yang", false);
         if (enumeration != null && enumeration.hasMoreElements()) {
@@ -90,8 +105,32 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
                 Multimap<Bundle, URL> proposedNewState = HashMultimap.create(consistentBundlesToYangURLs);
                 proposedNewState.putAll(inconsistentBundlesToYangURLs);
                 proposedNewState.putAll(bundle, addedURLs);
-                boolean adding = true;
-                if (tryToUpdateState(addedURLs, proposedNewState, adding) == false) {
+
+                Preconditions.checkArgument(addedURLs.size() > 0, "No change can occur when no URLs are changed");
+                boolean success;
+                String failureReason = null;
+                try(YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, proposedNewState)) {
+                    updateCache(snapshot);
+                    success = true;
+                } catch(YangStoreException e) {
+                    failureReason = e.toString();
+                    success = false;
+                }
+                if (success){
+                    // consistent state
+                    // merge into
+                    consistentBundlesToYangURLs.clear();
+                    consistentBundlesToYangURLs.putAll(proposedNewState);
+                    inconsistentBundlesToYangURLs.clear();
+
+                    logger.info("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
+                    logger.trace("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
+                } else {
+                    // inconsistent state
+                    logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}, reason {}",
+                            consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, failureReason);
+                    logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
+                            consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason);
                     inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
                 }
             }
@@ -99,30 +138,7 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
         return bundle;
     }
 
-    private synchronized boolean tryToUpdateState(Collection<URL> changedURLs, Multimap<Bundle, URL> proposedNewState, boolean adding) {
-        Preconditions.checkArgument(changedURLs.size() > 0, "No change can occur when no URLs are changed");
-        try(YangStoreSnapshot snapshot = createSnapshot(mbeParser, proposedNewState)) {
-            // consistent state
-            // merge into
-            consistentBundlesToYangURLs.clear();
-            consistentBundlesToYangURLs.putAll(proposedNewState);
-            inconsistentBundlesToYangURLs.clear();
-            // update cache
-            updateCache(snapshot);
-            logger.info("Yang store updated to new consistent state");
-            logger.trace("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
-
-            notifyListeners(changedURLs, adding);
-            return true;
-        } catch(YangStoreException e) {
-            // inconsistent state
-            logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}, reason {}",
-                    consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, e.toString());
-            return false;
-        }
-    }
-
-    private void updateCache(YangStoreSnapshot snapshot) {
+    private void updateCache(YangStoreSnapshotImpl snapshot) {
         cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
     }
 
@@ -132,62 +148,31 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
     }
 
     /**
-     * Notifiers get only notified when consistent snapshot has changed.
-     */
-    private void notifyListeners(Collection<URL> changedURLs, boolean adding) {
-        Preconditions.checkArgument(changedURLs.size() > 0, "Cannot notify when no URLs changed");
-        if (changedURLs.size() > 0) {
-            RuntimeException potential = new RuntimeException("Error while notifying listeners");
-            for (YangStoreListener listener : listeners) {
-                try {
-                    if (adding) {
-                        listener.onAddedYangURL(changedURLs);
-                    } else {
-                        listener.onRemovedYangURL(changedURLs);
-                    }
-                } catch(RuntimeException e) {
-                    potential.addSuppressed(e);
-                }
-            }
-            if (potential.getSuppressed().length > 0) {
-                throw potential;
-            }
-        }
-    }
-
-
-    /**
      * If removing YANG files makes yang store inconsistent, method {@link #getYangStoreSnapshot()}
      * will throw exception. There is no rollback.
      */
     @Override
     public synchronized void removedBundle(Bundle bundle, BundleEvent event, Object object) {
         inconsistentBundlesToYangURLs.removeAll(bundle);
-        Collection<URL> consistentURLsToBeRemoved = consistentBundlesToYangURLs.removeAll(bundle);
-
-        if (consistentURLsToBeRemoved.isEmpty()){
-            return; // no change
-        }
-        boolean adding = false;
-        notifyListeners(consistentURLsToBeRemoved, adding);
+        consistentBundlesToYangURLs.removeAll(bundle);
     }
 
     @Override
     public synchronized YangStoreSnapshot getYangStoreSnapshot()
             throws YangStoreException {
-        Optional<YangStoreSnapshot> yangStoreOpt = cache.getCachedYangStore(consistentBundlesToYangURLs);
+        Optional<YangStoreSnapshot> yangStoreOpt = cache.getSnapshotIfPossible(consistentBundlesToYangURLs);
         if (yangStoreOpt.isPresent()) {
             logger.trace("Returning cached yang store {}", yangStoreOpt.get());
             return yangStoreOpt.get();
         }
-        YangStoreSnapshot snapshot = createSnapshot(mbeParser, consistentBundlesToYangURLs);
+        YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, consistentBundlesToYangURLs);
         updateCache(snapshot);
         return snapshot;
     }
 
-    private static YangStoreSnapshot createSnapshot(MbeParser mbeParser, Multimap<Bundle, URL> multimap) throws YangStoreException {
+    private static YangStoreSnapshotImpl createSnapshot(MbeParser mbeParser, Multimap<Bundle, URL> multimap) throws YangStoreException {
         try {
-            YangStoreSnapshot yangStoreSnapshot = mbeParser.parseYangFiles(fromUrlsToInputStreams(multimap));
+            YangStoreSnapshotImpl yangStoreSnapshot = mbeParser.parseYangFiles(fromUrlsToInputStreams(multimap));
             logger.trace("{} module entries parsed successfully from {} yang files",
                     yangStoreSnapshot.countModuleMXBeanEntries(), multimap.values().size());
             return yangStoreSnapshot;
@@ -213,44 +198,46 @@ public class ExtenderYangTrackerCustomizer implements BundleTrackerCustomizer<Ob
                 });
     }
 
-    @Override
-    public synchronized YangStoreListenerRegistration registerListener(final YangStoreListener listener) {
-        listeners.add(listener);
-        return new YangStoreListenerRegistration() {
-            @Override
-            public void close() {
-                listeners.remove(listener);
-            }
-        };
+    public synchronized void setMaybeBlacklist(Optional<Pattern> maybeBlacklistPattern) {
+        maybeBlacklist = maybeBlacklistPattern;
+        cache.invalidate();
+    }
+}
+
+class YangStoreCache {
+    @GuardedBy("this")
+    private Set<URL> cachedUrls = Collections.emptySet();
+    @GuardedBy("this")
+    private Optional<YangStoreSnapshotImpl> cachedYangStoreSnapshot = Optional.absent();
+
+    synchronized Optional<YangStoreSnapshot> getSnapshotIfPossible(Multimap<Bundle, URL> bundlesToYangURLs) {
+        Set<URL> urls = setFromMultimapValues(bundlesToYangURLs);
+        if (cachedUrls != null && cachedUrls.equals(urls)) {
+            Preconditions.checkState(cachedYangStoreSnapshot.isPresent());
+            YangStoreSnapshot freshSnapshot = new YangStoreSnapshotImpl(cachedYangStoreSnapshot.get());
+            return Optional.of(freshSnapshot);
+        }
+        return Optional.absent();
     }
 
-    private static final class YangStoreCache {
+    private static Set<URL> setFromMultimapValues(
+            Multimap<Bundle, URL> bundlesToYangURLs) {
+        Set<URL> urls = Sets.newHashSet(bundlesToYangURLs.values());
+        Preconditions.checkState(bundlesToYangURLs.size() == urls.size());
+        return urls;
+    }
 
-        Set<URL> cachedUrls;
-        YangStoreSnapshot cachedYangStoreSnapshot;
+    synchronized void cacheYangStore(Multimap<Bundle, URL> urls,
+                        YangStoreSnapshotImpl yangStoreSnapshot) {
+        this.cachedUrls = setFromMultimapValues(urls);
+        this.cachedYangStoreSnapshot = Optional.of(yangStoreSnapshot);
+    }
 
-        Optional<YangStoreSnapshot> getCachedYangStore(
-                Multimap<Bundle, URL> bundlesToYangURLs) {
-            Set<URL> urls = setFromMultimapValues(bundlesToYangURLs);
-            if (cachedUrls != null && cachedUrls.equals(urls)) {
-                Preconditions.checkState(cachedYangStoreSnapshot != null);
-                return Optional.of(cachedYangStoreSnapshot);
-            }
-            return Optional.absent();
+    synchronized void invalidate() {
+        cachedUrls.clear();
+        if (cachedYangStoreSnapshot.isPresent()){
+            cachedYangStoreSnapshot.get().close();
+            cachedYangStoreSnapshot = Optional.absent();
         }
-
-        private static Set<URL> setFromMultimapValues(
-                Multimap<Bundle, URL> bundlesToYangURLs) {
-            Set<URL> urls = Sets.newHashSet(bundlesToYangURLs.values());
-            Preconditions.checkState(bundlesToYangURLs.size() == urls.size());
-            return urls;
-        }
-
-        void cacheYangStore(Multimap<Bundle, URL> urls,
-                YangStoreSnapshot yangStoreSnapshot) {
-            this.cachedUrls = setFromMultimapValues(urls);
-            this.cachedYangStoreSnapshot = yangStoreSnapshot;
-        }
-
     }
 }

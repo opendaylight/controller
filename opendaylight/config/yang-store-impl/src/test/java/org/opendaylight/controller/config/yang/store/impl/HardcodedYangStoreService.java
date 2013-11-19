@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.config.yang.store.impl;
 
-import static org.junit.Assert.assertNotNull;
+import org.apache.commons.io.IOUtils;
+import org.opendaylight.controller.config.yang.store.api.YangStoreException;
+import org.opendaylight.controller.config.yang.store.api.YangStoreService;
+import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,12 +18,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.io.IOUtils;
-import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.api.YangStoreListenerRegistration;
-import org.opendaylight.controller.config.yang.store.api.YangStoreService;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.opendaylight.controller.config.yang.store.spi.YangStoreListener;
+import static org.junit.Assert.assertNotNull;
 
 public class HardcodedYangStoreService implements YangStoreService {
 
@@ -49,10 +47,5 @@ public class HardcodedYangStoreService implements YangStoreService {
             }
         }
         return new MbeParser().parseYangFiles(byteArrayInputStreams);
-    }
-
-    @Override
-    public YangStoreListenerRegistration registerListener(YangStoreListener listener){
-        throw new UnsupportedOperationException("Cannot register for changes on this service");
     }
 }

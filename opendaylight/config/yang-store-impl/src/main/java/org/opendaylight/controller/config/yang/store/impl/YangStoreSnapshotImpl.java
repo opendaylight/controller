@@ -7,32 +7,31 @@
  */
 package org.opendaylight.controller.config.yang.store.impl;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+
 public class YangStoreSnapshotImpl implements YangStoreSnapshot {
 
-    private final Map<String /* Namespace from yang file */, Map<String /*
-                                                                         * Name
-                                                                         * of
-                                                                         * module
-                                                                         * entry
-                                                                         * from
-                                                                         * yang
-                                                                         * file
-                                                                         */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
+    private final Map<String /* Namespace from yang file */,
+            Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
 
     private final Map<String, Entry<Module, String>> moduleMap;
 
     public YangStoreSnapshotImpl(
             Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap,
             Map<String, Entry<Module, String>> moduleMap) {
-        this.moduleMXBeanEntryMap = moduleMXBeanEntryMap;
-        this.moduleMap = moduleMap;
+        this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntryMap);
+        this.moduleMap = Collections.unmodifiableMap(moduleMap);
+    }
+
+    public YangStoreSnapshotImpl(YangStoreSnapshotImpl yangStoreSnapshot) {
+        this.moduleMXBeanEntryMap = yangStoreSnapshot.moduleMXBeanEntryMap;
+        this.moduleMap = yangStoreSnapshot.moduleMap;
     }
 
     @Override
