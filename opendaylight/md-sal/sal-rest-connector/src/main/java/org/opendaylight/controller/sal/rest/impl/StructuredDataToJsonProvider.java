@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import com.google.gson.stream.JsonWriter;
 
 @Provider
-@Produces({ API + RestconfService.JSON })
+@Produces({API+RestconfService.JSON})
 public enum StructuredDataToJsonProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
     

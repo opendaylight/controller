@@ -17,17 +17,17 @@ import com.google.gson.JsonPrimitive;
 
 class JsonReader {
 
-    public CompositeNodeWrapper read(InputStream entityStream) throws UnsupportedJsonFormatException {
+    public CompositeNodeWrapper read(InputStream entityStream) throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
         
         JsonElement rootElement = parser.parse(new InputStreamReader(entityStream));
         if (!rootElement.isJsonObject()) {
-            throw new UnsupportedJsonFormatException("Root element of Json has to be Object");
+            throw new UnsupportedFormatException("Root element of Json has to be Object");
         }
         
         Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject = rootElement.getAsJsonObject().entrySet();
         if (entrySetsOfRootJsonObject.size() != 1) {
-            throw new UnsupportedJsonFormatException("Json Object should contain one element");
+            throw new UnsupportedFormatException("Json Object should contain one element");
         } else {
             Entry<String, JsonElement> childEntry = Lists.newArrayList(entrySetsOfRootJsonObject).get(0);
             String firstElementName = childEntry.getKey();
@@ -41,10 +41,10 @@ class JsonReader {
                     if (firstElementInArray.isJsonObject()) {
                         return createStructureWithRoot(firstElementName, firstElementInArray.getAsJsonObject());
                     }
-                    throw new UnsupportedJsonFormatException("Array as the first element in Json Object can have only Object element");
+                    throw new UnsupportedFormatException("Array as the first element in Json Object can have only Object element");
                 }
             }
-            throw new UnsupportedJsonFormatException("First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet.");
+            throw new UnsupportedFormatException("First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet.");
         }
     }
     
