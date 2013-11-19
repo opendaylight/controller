@@ -14,8 +14,12 @@ import org.opendaylight.yangtools.yang.common.QName
 import java.util.Collections
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher
 import org.opendaylight.yangtools.concepts.Registration
+import org.opendaylight.controller.sal.core.api.Provider
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
+import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*;
 
-class NetconfDevice implements DataReader<InstanceIdentifier, CompositeNode>, RpcImplementation {
+class NetconfDevice implements Provider, DataReader<InstanceIdentifier, CompositeNode>, RpcImplementation, AutoCloseable {
 
     var NetconfClient client;
 
@@ -23,25 +27,29 @@ class NetconfDevice implements DataReader<InstanceIdentifier, CompositeNode>, Rp
     var InetSocketAddress socketAddress;
 
     @Property
-    val MountProvisionInstance mountInstance;
+    var MountProvisionInstance mountInstance;
 
     @Property
-    val InstanceIdentifier path;
-    
-    Registration<DataReader<InstanceIdentifier,CompositeNode>> operReaderReg
-    
-    Registration<DataReader<InstanceIdentifier,CompositeNode>> confReaderReg
-    
-    public new(MountProvisionInstance mount,InstanceIdentifier path) {
-        _mountInstance = mount;
-        _path = path;
+    var InstanceIdentifier path;
+
+    Registration<DataReader<InstanceIdentifier, CompositeNode>> operReaderReg
+
+    Registration<DataReader<InstanceIdentifier, CompositeNode>> confReaderReg
+
+    String name
+
+    MountProvisionService mountService
+
+    public new(String name) {
+        this.name = name;
+        this.path = InstanceIdentifier.builder(INVENTORY_PATH).nodeWithKey(INVENTORY_NODE,
+            Collections.singletonMap(INVENTORY_ID, name)).toInstance;
     }
 
     def start(NetconfClientDispatcher dispatcher) {
-        client = new NetconfClient("sal-netconf-connector", socketAddress, dispatcher);
-        
-        confReaderReg = mountInstance.registerConfigurationReader(path,this);
-        operReaderReg = mountInstance.registerOperationalReader(path,this);
+        client = new NetconfClient(name, socketAddress, dispatcher);
+        confReaderReg = mountInstance.registerConfigurationReader(path, this);
+        operReaderReg = mountInstance.registerOperationalReader(path, this);
     }
 
     override readConfigurationData(InstanceIdentifier path) {
@@ -66,6 +74,15 @@ class NetconfDevice implements DataReader<InstanceIdentifier, CompositeNode>, Rp
         return result.toRpcResult();
     }
 
+    override getProviderFunctionality() {
+        Collections.emptySet
+    }
+
+    override onSessionInitiated(ProviderSession session) {
+        mountService = session.getService(MountProvisionService);
+        mountInstance = mountService.createOrGetMountPoint(path);
+    }
+
     def Node<?> findNode(CompositeNode node, InstanceIdentifier identifier) {
 
         var Node<?> current = node;
@@ -86,10 +103,11 @@ class NetconfDevice implements DataReader<InstanceIdentifier, CompositeNode>, Rp
         }
         return current;
     }
-    
-    public def stop() {
+
+    override close() {
         confReaderReg?.close()
         operReaderReg?.close()
+        client?.close()
     }
 
 }

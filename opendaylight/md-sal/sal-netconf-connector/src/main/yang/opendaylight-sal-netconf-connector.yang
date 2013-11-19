@@ -1,0 +1,76 @@
+module opendaylight-sal-netconf-connector {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf";
+    prefix "sal-netconf";
+
+	import config { prefix config; revision-date 2013-04-05; }
+	import threadpool {prefix th;}
+ 	import ietf-inet-types {prefix inet;}
+ 	import opendaylight-md-sal-dom {prefix dom;}
+
+    description
+        "Service definition for Binding Aware MD-SAL.";
+ 
+    revision "2013-10-28" {
+        description
+            "Initial revision";
+    }
+
+    identity sal-netconf-connector {
+        base config:module-type;
+        config:java-name-prefix NetconfConnector;
+    }
+
+
+    grouping server {
+        leaf address {
+            type inet:ip-address;
+        }
+    
+        leaf port {
+            type inet:port-number;
+        }
+    }
+
+
+    augment "/config:modules/config:module/config:configuration" {
+        case sal-netconf-connector {
+            when "/config:modules/config:module/config:type = 'sal-netconf-connector'";
+            
+            leaf address {
+                type inet:ip-address;
+            }
+        
+            leaf port {
+                type inet:port-number;
+            }
+            
+            container dom-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+            
+            container boss-thread-group {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity th:netty-threadgroup;
+                    }
+                }
+            }
+            
+            container worker-thread-group {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity th:netty-threadgroup;
+                    }
+                }
+            }
+        }
+    }
+}
