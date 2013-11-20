@@ -9,13 +9,12 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
-
-import java.util.Collection;
-
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 public class NetconfClientSession extends NetconfSession {
 
@@ -31,6 +30,10 @@ public class NetconfClientSession extends NetconfSession {
 
     public Collection<String> getServerCapabilities() {
         return capabilities;
+    }
+
+    public Channel getChannel(){
+        return channel;
     }
 
 }

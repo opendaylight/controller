@@ -86,6 +86,7 @@ public class NetconfITTest extends AbstractConfigTest {
     //
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
+    private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 830);
 
     private NetconfMessage getConfig, getConfigCandidate, editConfig,
             closeSession, startExi, stopExi;
@@ -443,5 +444,31 @@ public class NetconfITTest extends AbstractConfigTest {
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
         return netconfClient;
     }
+
+    private class TestSSHServer implements Runnable {
+        public void run()  {
+            try {
+                NetconfSSHServer.start();
+            } catch (Exception e) {
+                logger.info(e.getMessage());
+            }
+        }
+    }
+    private void startSSHServer() throws Exception{
+        logger.info("Creating SSH server");
+        Thread sshServerThread = new Thread(new TestSSHServer());
+        sshServerThread.setDaemon(true);
+        sshServerThread.start();
+        logger.info("SSH server on");
+    }
+
+    public void testSSH2Netconf(){
+        startSSHServer();
+        try (NetconfClient netconfClient = createSession(sshAddress, "1")) {
+            logger.info("client connected to SSH");
+            //
+        }
+    }
+
 
 }

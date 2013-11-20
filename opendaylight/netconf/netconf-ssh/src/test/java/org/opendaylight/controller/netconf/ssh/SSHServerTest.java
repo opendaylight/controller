@@ -25,8 +25,6 @@ public class SSHServerTest {
 
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 830;
-
-    Thread sshServerThread;
     private static final Logger logger =  LoggerFactory.getLogger(SSHServerTest.class);
 
     private class TestSSHServer implements Runnable {
@@ -41,7 +39,7 @@ public class SSHServerTest {
     @Before
     public void startSSHServer() throws Exception{
             logger.info("Creating SSH server");
-            sshServerThread = new Thread(new TestSSHServer());
+            Thread sshServerThread = new Thread(new TestSSHServer());
             sshServerThread.setDaemon(true);
             sshServerThread.start();
             logger.info("SSH server on");
