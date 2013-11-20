@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_e277fe39",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-11-20T03:55:01Z",
+      "side": 1,
+      "message": "Please either use the existing ODL mirrors: https://nexus.opendaylight.org/index.html or if there is an additional one needed request it.",
+      "revId": "292b13cf0b6b4f7b79ed4c51eec2102d0d3c97d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
