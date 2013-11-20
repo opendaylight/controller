@@ -19,6 +19,10 @@ import java.io.IOException;
 
 public class SSHServerTest {
 
+    private static final String USER = "netconf";
+    private static final String PASSWORD  = "netconf";
+
+
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 830;
 
@@ -51,7 +55,7 @@ public class SSHServerTest {
             logger.info("connecting to SSH server");
             conn.connect();
             logger.info("authenticating ...");
-            boolean isAuthenticated = conn.authenticateWithPassword(AuthProvider.getUser(), AuthProvider.getPassword());
+            boolean isAuthenticated = conn.authenticateWithPassword(USER,PASSWORD);
             Assert.assertTrue(isAuthenticated);
 /*
             logger.info("opening session");

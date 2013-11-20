@@ -1,22 +1,26 @@
 package org.opendaylight.controller.netconf.ssh;
 
-import java.io.IOException;
-import java.net.Socket;
-
-import ch.ethz.ssh2.AuthenticationResult;
-import ch.ethz.ssh2.PtySettings;
-import ch.ethz.ssh2.ServerAuthenticationCallback;
 import ch.ethz.ssh2.ServerConnection;
+import ch.ethz.ssh2.ServerAuthenticationCallback;
 import ch.ethz.ssh2.ServerConnectionCallback;
 import ch.ethz.ssh2.ServerSession;
 import ch.ethz.ssh2.ServerSessionCallback;
 import ch.ethz.ssh2.SimpleServerSessionCallback;
+import ch.ethz.ssh2.PtySettings;
+import ch.ethz.ssh2.AuthenticationResult;
+import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
+
+import java.io.IOException;
+import java.net.Socket;
 
 
 public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback
 {
 
     private Socket socket;
+    private static final String USER = "netconf";
+    private static final String PASSWORD = "netconf";
+
     private static ServerConnection conn = null;
 
     public static void start(Socket socket) throws IOException{
@@ -27,7 +31,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         this.socket = socket;
 
         conn = new ServerConnection(socket);
-        conn.setRsaHostKey(AuthProvider.getHostkey());
+        RSAKey keyStore = new RSAKey();
+        conn.setRsaHostKey(keyStore.getPrivateKey());
         conn.setAuthenticationCallback(this);
         conn.setServerConnectionCallback(this);
         conn.connect();
@@ -117,7 +122,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public AuthenticationResult authenticateWithPassword(ServerConnection sc, String username, String password)
     {
-        if (AuthProvider.getUser().equals(username) && AuthProvider.getPassword().equals(password))
+        if (USER.equals(username) && PASSWORD.equals(password))
             return AuthenticationResult.SUCCESS;
 
         return AuthenticationResult.FAILURE;
