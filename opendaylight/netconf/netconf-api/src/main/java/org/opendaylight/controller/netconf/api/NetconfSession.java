@@ -9,10 +9,6 @@ package org.opendaylight.controller.netconf.api;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-
-import java.io.IOException;
-import java.util.Map;
-
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
 import org.opendaylight.protocol.framework.ProtocolMessageDecoder;
 import org.opendaylight.protocol.framework.ProtocolMessageEncoder;
@@ -20,13 +16,16 @@ import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Map;
+
 public abstract class NetconfSession extends AbstractProtocolSession<NetconfMessage> {
 
     private ChannelHandler exiEncoder;
     private String exiEncoderName;
     private String removeAfterMessageSentname;
     private String pmeName,pmdName;
-    private final  Channel channel;
+    protected final  Channel channel;
     private final  SessionListener sessionListener;
     private final long sessionId;
     private boolean up = false;

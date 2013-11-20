@@ -1,17 +1,18 @@
 package org.opendaylight.controller.netconf.ssh;
 
-import ch.ethz.ssh2.ServerConnection;
-import ch.ethz.ssh2.ServerAuthenticationCallback;
-import ch.ethz.ssh2.ServerConnectionCallback;
-import ch.ethz.ssh2.ServerSession;
-import ch.ethz.ssh2.ServerSessionCallback;
-import ch.ethz.ssh2.SimpleServerSessionCallback;
-import ch.ethz.ssh2.PtySettings;
-import ch.ethz.ssh2.AuthenticationResult;
+import ch.ethz.ssh2.*;
+import com.google.common.base.Optional;
+import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 
 public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback
@@ -20,6 +21,9 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private Socket socket;
     private static final String USER = "netconf";
     private static final String PASSWORD = "netconf";
+    private NetconfClient netconfClient;
+    private static final InetSocketAddress clientAddress = new InetSocketAddress("127.0.0.1", 12023);
+
 
     private static ServerConnection conn = null;
 
@@ -40,7 +44,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     @Override
     public void run() {
-        // do sth with socket
+        //noop
     }
     public ServerSessionCallback acceptSession(final ServerSession session)
     {
@@ -53,7 +57,11 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                     public void run()
                     {
                         if (subsystem.equals("netconf")){
-                            //TODO open connection to netconf server
+                            NetconfClientDispatcher clientDispatcher= clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), new NioEventLoopGroup(), new NioEventLoopGroup());
+                            try {
+                                netconfClient = new NetconfClient("ssh_" + clientAddress.toString(), clientAddress, 5000, clientDispatcher);
+                            } catch (InterruptedException e) {
+                            }
                         }
                     }
                 };
@@ -79,15 +87,19 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                     {
                         try
                         {
-                            while (true)
+                            try (NetconfClientSession session = netconfClient.getClientSession())
                             {
-                                int c = ss.getStdout().read();
-                                if (c < 0)
+                                byte[] bytes = new byte[1024];
+                                while (true)
                                 {
-                                    System.err.println("SESSION EOF");
-                                    return;
+                                    int size = ss.getStdout().read(bytes);
+                                    if (size < 0)
+                                    {
+                                        System.err.println("SESSION EOF");
+                                        return;
+                                    }
+                                    session.getChannel().write(ByteBuffer.wrap(bytes,0,size));
                                 }
-                                //TODO forward data to netconf server
                             }
 
                         }
