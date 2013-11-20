@@ -275,6 +275,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             ModuleJMXRegistrator newModuleJMXRegistrator = baseJMXRegistrator
                     .createModuleJMXRegistrator();
 
+            OsgiRegistration osgiRegistration = null;
             if (entry.hasOldModule()) {
                 ModuleInternalInfo oldInternalInfo = entry.getOldInternalInfo();
                 DynamicReadableWrapper oldReadableConfigBean = oldInternalInfo
@@ -282,19 +283,21 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 currentConfig.remove(entry.getName());
 
                 // test if old instance == new instance
-                if (oldReadableConfigBean.getInstance().equals(
-                        module.getInstance())) {
+                if (oldReadableConfigBean.getInstance().equals(module.getInstance())) {
                     // reused old instance:
                     // wrap in readable dynamic mbean
                     reusedInstances.add(primaryReadOnlyON);
+                    osgiRegistration = oldInternalInfo.getOsgiRegistration();
                 } else {
                     // recreated instance:
                     // it is responsibility of module to call the old instance -
                     // we just need to unregister configbean
                     recreatedInstances.add(primaryReadOnlyON);
+
+                    // close old osgi registration
+                    oldInternalInfo.getOsgiRegistration().close();
                 }
-                // close old osgi registration in any case
-                oldInternalInfo.getOsgiRegistration().close();
+
                 // close old module jmx registrator
                 oldInternalInfo.getModuleJMXRegistrator().close();
             } else {
@@ -316,10 +319,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
 
             // register to OSGi
-            OsgiRegistration osgiRegistration = beanToOsgiServiceManager
-                    .registerToOsgi(module.getClass(),
-                            newReadableConfigBean.getInstance(),
-                            entry.getName());
+            if (osgiRegistration == null) {
+                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
+                        newReadableConfigBean.getInstance(), entry.getName());
+            }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators
                     .get(entry.getName());

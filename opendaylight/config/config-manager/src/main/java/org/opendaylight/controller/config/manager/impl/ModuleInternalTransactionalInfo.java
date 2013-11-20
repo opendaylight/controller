@@ -36,6 +36,11 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
         this.transactionModuleJMXRegistration = transactionModuleJMXRegistration;
     }
 
+
+    /**
+     * Use {@link #getIdentifier()} instead.
+     */
+    @Deprecated
     public ModuleIdentifier getName() {
         return name;
     }
@@ -56,7 +61,7 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
                 maybeOldInternalInfo.getOrderingIdx());
     }
 
-    @Deprecated
+
     public Module getModule() {
         return module;
     }
