@@ -9,8 +9,9 @@
 */
 package org.opendaylight.controller.config.yang.netty.threadgroup;
 
-import com.google.common.base.Preconditions;
 import io.netty.channel.nio.NioEventLoopGroup;
+
+import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 
 /**
 *
@@ -28,7 +29,8 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
     @Override
     public void validate(){
         if(getThreadCount()!=null) {
-            Preconditions.checkArgument(getThreadCount() > 0, "Thread count cannot be < 0");
+            JmxAttributeValidationException.checkCondition(getThreadCount() > 0, "value must be greater than 0",
+                    threadCountJmxAttribute);
         }
     }
 

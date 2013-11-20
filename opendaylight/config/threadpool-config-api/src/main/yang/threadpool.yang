@@ -73,23 +73,4 @@ module threadpool {
 		base "threadpool";
         config:java-class "org.opendaylight.controller.config.threadpool.ScheduledThreadPool";
 	}
-
-
-    identity netty-threadgroup {
-        description
-            "Configuration wrapper around netty's threadgroup";
-
-        base "config:service-type";
-        config:java-class "io.netty.channel.EventLoopGroup";
-    }
-    
-    identity netty-event-executor {
-        description
-            "Configuration wrapper around netty's event executor";
-
-        base "config:service-type";
-        config:java-class "io.netty.util.concurrent.EventExecutor";
-    }
-
-
 }
