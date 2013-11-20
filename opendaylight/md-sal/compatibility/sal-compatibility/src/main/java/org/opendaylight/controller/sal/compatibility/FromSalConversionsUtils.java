@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpVersion;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -197,7 +198,7 @@ public class FromSalConversionsUtils {
         MatchField vlan = sourceMatch.getField(MatchType.DL_VLAN);
         if (vlan != null && vlan.getValue() != null) {
             VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
-            vlanIDBuilder.setVlanId(new VlanId((int) (NetUtils
+            vlanIDBuilder.setVlanId(new VlanId((NetUtils
                     .getUnsignedShort((short) vlan.getValue()))));
             vlanMatchBuild.setVlanId(vlanIDBuilder.build());
         }
@@ -223,8 +224,7 @@ public class FromSalConversionsUtils {
 
         MatchField protocol = sourceMatch.getField(MatchType.NW_PROTO);
         if (protocol != null && protocol.getValue() != null) {
-            targetIpMatchBuild.setIpProtocol((short) ((byte) protocol
-                    .getValue()));
+            targetIpMatchBuild.setIpProto(IpVersion.forValue(((byte) protocol.getValue())));
         }
 
         return targetIpMatchBuild.build();

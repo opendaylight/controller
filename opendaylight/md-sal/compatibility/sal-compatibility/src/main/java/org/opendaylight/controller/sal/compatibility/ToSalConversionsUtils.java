@@ -380,7 +380,7 @@ public class ToSalConversionsUtils {
 
     private static void fillFrom(Match target, IpMatch ipMatch) {
         if (ipMatch != null) {
-            Short ipProtocol = ipMatch.getIpProtocol();
+            Short ipProtocol = (short) ipMatch.getIpProto().getIntValue();
 
             if (ipProtocol != null && target.getField(NW_PROTO) == null) {
                 target.setField(NW_PROTO, ipProtocol.byteValue());
@@ -483,11 +483,11 @@ public class ToSalConversionsUtils {
     private static void fillFromArp(Match target, ArpMatch source) {
         Ipv4Prefix sourceAddress = source.getArpSourceTransportAddress();
         if (sourceAddress != null) {
-            target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
+            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
         Ipv4Prefix destAddress = source.getArpTargetTransportAddress();
         if (destAddress != null) {
-            target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
+            target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
         ArpSourceHardwareAddress sourceHwAddress = source.getArpSourceHardwareAddress();
         if (sourceHwAddress != null) {
@@ -505,22 +505,22 @@ public class ToSalConversionsUtils {
     private static void fillFromIpv6(Match target, Ipv6Match source) {
         Ipv6Prefix sourceAddress = source.getIpv6Source();
         if (sourceAddress != null) {
-            target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
+            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
         Ipv6Prefix destAddress = source.getIpv6Destination();
         if (destAddress != null) {
-            target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
+            target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
     }
 
     private static void fillFromIpv4(Match target, Ipv4Match source) {
         Ipv4Prefix sourceAddress = source.getIpv4Source();
         if (sourceAddress != null) {
-            target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
+            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
         Ipv4Prefix destAddress = source.getIpv4Destination();
         if (destAddress != null) {
-            target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
+            target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
     }
 

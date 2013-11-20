@@ -77,10 +77,6 @@ module opendaylight-match-types {
     }
 
     grouping "ip-match-fields" {
-        leaf ip-protocol {
-                description "IP protocol.";
-                type uint8; 
-        }
 
         leaf ip-dscp {
             description "IP DSCP (6 bits in ToS field).";
