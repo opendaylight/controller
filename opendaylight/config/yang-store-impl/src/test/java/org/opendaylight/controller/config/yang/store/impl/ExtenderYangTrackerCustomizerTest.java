@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.yang.store.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,14 +16,19 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleListener;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -34,22 +40,26 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class ExtenderYangTrackerCustomizerTest {
 
 
-    private ExtenderYangTrackerCustomizer tested;
+    private ExtenderYangTracker tested;
     @Mock
     private MbeParser parser;
     @Mock
-    private YangStoreSnapshot yangStoreSnapshot;
+    private YangStoreSnapshotImpl yangStoreSnapshot;
+    @Mock
+    private BundleContext bundleContext;
 
     @Before
     public void setUp() throws YangStoreException {
         MockitoAnnotations.initMocks(this);
-
-        tested = new ExtenderYangTrackerCustomizer(parser);
+        doNothing().when(bundleContext).addBundleListener(any(BundleListener.class));
+        doReturn(new Bundle[0]).when(bundleContext).getBundles();
+        tested = new ExtenderYangTracker(parser, Optional.<Pattern>absent(), bundleContext);
         doReturn(yangStoreSnapshot).when(parser).parseYangFiles(
                 anyCollectionOf(InputStream.class));
         doReturn(22).when(yangStoreSnapshot).countModuleMXBeanEntries();
         doReturn("mock yang store").when(yangStoreSnapshot).toString();
         doNothing().when(yangStoreSnapshot).close();
+        doReturn(Collections.emptyMap()).when(yangStoreSnapshot).getModuleMap();
     }
 
     @Test
@@ -73,17 +83,15 @@ public class ExtenderYangTrackerCustomizerTest {
         bundle = getMockedBundle(10, false);
         tested.addingBundle(bundle, null);
 
-        for(int i = 0; i< 10; i++){
+        for(int i = 0; i< 20; i++){
             tested.getYangStoreSnapshot();
         }
 
-        verify(parser, times(5)).parseYangFiles(
-                anyCollectionOf(InputStream.class));
+        verify(parser, times(7)).parseYangFiles(anyCollectionOf(InputStream.class));
 
         returnedStore = tested.getYangStoreSnapshot();
 
         verifyNoMoreInteractions(parser);
-        assertEquals(yangStoreSnapshot, returnedStore);
     }
 
     int bundleCounter = 1;
@@ -106,6 +114,7 @@ public class ExtenderYangTrackerCustomizerTest {
             doReturn(1L).when(mock).getBundleId();
 
         doReturn("mockedBundle").when(mock).toString();
+        doReturn("mockedBundle").when(mock).getSymbolicName();
 
         return mock;
     }
