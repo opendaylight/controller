@@ -415,7 +415,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
              */
             if (inPort == null
                     || container.equals(GlobalConstants.DEFAULT.toString())
-                    || this.containerToNc.get(container).contains(inPort)) {
+                    || (containerToNc.containsKey(container) && containerToNc.get(container).contains(inPort))) {
                 notifier.flowRemoved(node, flow);
             }
         }
