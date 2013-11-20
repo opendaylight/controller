@@ -134,6 +134,7 @@ public class NetconfITTest extends AbstractConfigTest {
     public void tearDown() throws Exception {
         commitNot.close();
         nettyThreadgroup.shutdownGracefully();
+        clientDispatcher.close();
     }
 
     private void loadMessages() throws IOException, SAXException, ParserConfigurationException {

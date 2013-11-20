@@ -54,9 +54,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
 
     private final InetSocketAddress address;
-    private final NetconfClientDispatcher dispatcher;
     private final EventLoopGroup nettyThreadgroup;
 
+    private NetconfClientDispatcher netconfClientDispatcher;
     private NetconfClient netconfClient;
 
     private final Persister persister;
@@ -81,7 +81,6 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         this.timeout = timeout;
 
         this.nettyThreadgroup = new NioEventLoopGroup();
-        this.dispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
     }
 
     public void init() throws InterruptedException {
@@ -125,11 +124,12 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         while (true) {
             attempt++;
 
+            netconfClientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
             try {
-                netconfClient = new NetconfClient(this.toString(), address, delay, dispatcher);
-                // TODO is this correct ex to catch ?
+                netconfClient = new NetconfClient(this.toString(), address, delay, netconfClientDispatcher);
             } catch (IllegalStateException e) {
                 logger.debug("Netconf {} was not initialized or is not stable, attempt {}", address, attempt, e);
+                netconfClientDispatcher.close();
                 Thread.sleep(delay);
                 continue;
             }
@@ -148,11 +148,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
             logger.debug("Polling hello from netconf, attempt {}, capabilities {}", attempt, currentCapabilities);
 
-            try {
-                netconfClient.close();
-            } catch (IOException e) {
-                throw new RuntimeException("Error closing temporary client " + netconfClient);
-            }
+            closeClientAndDispatcher(netconfClient, netconfClientDispatcher);
 
             Thread.sleep(delay);
         }
@@ -160,6 +156,25 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         throw new RuntimeException("Netconf server did not provide required capabilities " + expectedCaps
                 + " in time, provided capabilities " + currentCapabilities);
 
+    }
+
+    private static void closeClientAndDispatcher(Closeable client, Closeable dispatcher) {
+        Exception fromClient = null;
+        try {
+            client.close();
+        } catch (Exception e) {
+            fromClient = e;
+        } finally {
+            try {
+                dispatcher.close();
+            } catch (Exception e) {
+                if (fromClient != null) {
+                    e.addSuppressed(fromClient);
+                }
+
+                throw new RuntimeException("Error closing temporary client ", e);
+            }
+        }
     }
 
     private boolean isSubset(Set<String> currentCapabilities, Set<String> expectedCaps) {
@@ -318,10 +333,18 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
             }
         }
 
+        if (netconfClientDispatcher != null) {
+            try {
+                netconfClientDispatcher.close();
+            } catch (Exception e) {
+                logger.warn("Unable to close connection to netconf {}", netconfClientDispatcher, e);
+            }
+        }
+
         try {
             nettyThreadgroup.shutdownGracefully();
         } catch (Exception e) {
-            logger.warn("Unable to close netconf client thread group {}", dispatcher, e);
+            logger.warn("Unable to close netconf client thread group {}", netconfClientDispatcher, e);
         }
 
         // unregister from JMX
