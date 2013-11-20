@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.netconf.ssh;
-
-import java.math.BigInteger;
+package org.opendaylight.controller.netconf.ssh.authentication;
 
 import ch.ethz.ssh2.signature.RSAPrivateKey;
 
-public class AuthProvider {
+import java.math.BigInteger;
+
+public class RSAKey implements KeyStoreHandler {
 
     private static RSAPrivateKey hostkey = null;
     private static String user = "netconf";
@@ -28,14 +28,9 @@ public class AuthProvider {
 
         hostkey = new RSAPrivateKey(d, e, n);
     }
-    public static RSAPrivateKey getHostkey() {
+
+    @Override
+    public RSAPrivateKey getPrivateKey() {
         return hostkey;
     }
-    public static String getUser() {
-        return user;
-    }
-    public static String getPassword() {
-        return password;
-    }
-
 }
