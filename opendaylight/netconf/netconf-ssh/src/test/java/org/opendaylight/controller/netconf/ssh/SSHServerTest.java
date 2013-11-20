@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.netconf.ssh;
+
+import ch.ethz.ssh2.Connection;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
+
+public class SSHServerTest {
+
+    private static final String HOST = "127.0.0.1";
+    private static final int PORT = 830;
+
+    Thread sshServerThread;
+    private static final Logger logger =  LoggerFactory.getLogger(SSHServerTest.class);
+
+    private class TestSSHServer implements Runnable {
+        public void run() {
+            try {
+                NetconfSSHServer.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+     }
+    @Before
+    public void startSSHServer(){
+        try {
+            logger.info("Creating SSH server");
+            sshServerThread = new Thread(new TestSSHServer());
+            sshServerThread.setDaemon(true);
+            sshServerThread.start();
+            logger.info("SSH server on");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void connect(){
+        Connection conn = new Connection(HOST,PORT);
+        Assert.assertNotNull(conn);
+        try {
+            logger.info("connecting to SSH server");
+            conn.connect();
+            logger.info("authenticating ...");
+            boolean isAuthenticated = conn.authenticateWithPassword(AuthProvider.getUser(), AuthProvider.getPassword());
+            Assert.assertTrue(isAuthenticated);
+/*
+            logger.info("opening session");
+            Session sess = conn.openSession();
+            sess.startSubSystem("netconf");
+*/
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
