@@ -1,10 +1,12 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import java.util.List
+import javax.ws.rs.core.Response
 import org.opendaylight.controller.sal.rest.api.RestconfService
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 
 class RestconfImpl implements RestconfService {
     
@@ -48,13 +50,21 @@ class RestconfImpl implements RestconfService {
     override createConfigurationData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
-        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(Response.Status.OK).build
+            default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
+        }
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
-        return broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(Response.Status.NO_CONTENT).build
+            default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
+        }
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
@@ -88,13 +98,21 @@ class RestconfImpl implements RestconfService {
     override createOperationalData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
-        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        val status = broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(Response.Status.OK).build
+            default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
+        }
     }
     
     override updateOperationalData(String identifier, CompositeNode payload) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
-        return broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        val status = broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(Response.Status.NO_CONTENT).build
+            default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
+        }
     }
     
     private def CompositeNode resolveNodeNamespaceBySchema(CompositeNode node, DataSchemaNode schema) {

@@ -15,10 +15,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
@@ -57,7 +56,6 @@ public interface RestconfService extends RestconfServiceLegacy {
     @GET
     public Object getRoot();
 
-
     @GET
     @Path("/modules")
     @Produces({API+JSON,API+XML})
@@ -68,23 +66,20 @@ public interface RestconfService extends RestconfServiceLegacy {
     @Produces({Draft02.MediaTypes.API+JSON,Draft02.MediaTypes.API+XML,API+JSON,API+XML})
     public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
     
-    
     @GET
     @Path("/config/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML})
     public StructuredData readConfigurationData(@PathParam("identifier") String identifier);
-
-    
     
     @PUT
     @Path("/config/{identifier:.+}")
     @Produces({API+JSON,API+XML})
-    public RpcResult<TransactionStatus> createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Response createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Produces({API+JSON,API+XML})
-    public RpcResult<TransactionStatus> updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Response updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @GET
     @Path("/operational/{identifier:.+}")
@@ -94,12 +89,11 @@ public interface RestconfService extends RestconfServiceLegacy {
     @PUT
     @Path("/operational/{identifier:.+}")
     @Produces({API+JSON,API+XML})
-    public RpcResult<TransactionStatus> createOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Response createOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @POST
     @Path("/operational/{identifier:.+}")
     @Produces({API+JSON,API+XML})
-    public RpcResult<TransactionStatus> updateOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Response updateOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
 
-    
 }

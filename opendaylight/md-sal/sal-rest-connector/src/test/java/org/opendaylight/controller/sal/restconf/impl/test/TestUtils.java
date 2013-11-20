@@ -10,16 +10,22 @@ import java.io.*;
 import java.net.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.concurrent.Future;
 
 import javax.ws.rs.WebApplicationException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
 import org.opendaylight.yangtools.yang.model.api.*;
@@ -27,6 +33,9 @@ import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.*;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import com.google.common.base.Preconditions;
 
 final class TestUtils {
 
@@ -90,8 +99,20 @@ final class TestUtils {
         }
         return (CompositeNode) dataTree;
     }
+    
+    public static Document loadDocumentFrom(InputStream inputStream) {
+        try {
+            DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+            return docBuilder.parse(inputStream);
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            logger.error("Error during loading Document from XML", e);
+            return null;
+        }
+    }
 
     public static String getDocumentInPrintableForm(Document doc) {
+        Preconditions.checkNotNull(doc);
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             TransformerFactory tf = TransformerFactory.newInstance();
@@ -272,9 +293,10 @@ final class TestUtils {
         ControllerContext controllerContext = mock(ControllerContext.class);
         BrokerFacade broker = mock(BrokerFacade.class);
 
+        RpcResult<TransactionStatus> rpcResult = DummyRpcResult.builder().result(TransactionStatus.COMMITED).build();
+        Future<RpcResult<TransactionStatus>> future = DummyFuture.builder().rpcResult(rpcResult).build();
         when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
-        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(
-                new DummyFuture());
+        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(future);
 
         restconf.setControllerContext(controllerContext);
         restconf.setBroker(broker);

@@ -8,10 +8,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 public interface RestconfServiceLegacy {
@@ -35,12 +34,12 @@ public interface RestconfServiceLegacy {
     @PUT
     @Path("/datastore/{identifier:.+}")
     @Produces({API+JSON,API+XML})
-    public RpcResult<TransactionStatus> createConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Response createConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @Deprecated
     @POST
     @Path("/datastore/{identifier:.+}")
     @Produces({API+JSON,API+XML})
-    public RpcResult<TransactionStatus> updateConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Response updateConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
 
 }
