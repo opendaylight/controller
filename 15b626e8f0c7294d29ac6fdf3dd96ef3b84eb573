@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_65931850",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/AuthProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-20T14:57:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da6255ed_6530b89e",
+      "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_a5feb0ac",
         "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_057d7c1c",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-20T14:57:40Z",
+      "side": 1,
+      "message": "It wouldn\u0027t be as straightforward solution as this one is. I suggest  we\u0027ll  devise something in the future.",
+      "parentUuid": "da6255ed_a5feb0ac",
+      "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_85d4cc20",
         "filename": "opendaylight/netconf/netconf-ssh/src/test/java/org/opendaylight/controller/netconf/ssh/SSHServerTest.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2013-11-20T13:16:54Z",
       "side": 1,
       "message": "use logger",
+      "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_25b880e4",
+        "filename": "opendaylight/netconf/netconf-ssh/src/test/java/org/opendaylight/controller/netconf/ssh/SSHServerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-11-20T14:57:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da6255ed_85d4cc20",
       "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
