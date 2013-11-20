@@ -37,6 +37,7 @@ public class NetconfImplActivator implements BundleActivator {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
     private NioEventLoopGroup eventLoopGroup;
+    private HashedWheelTimer timer;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -50,8 +51,9 @@ public class NetconfImplActivator implements BundleActivator {
         factoriesTracker.open();
 
         SessionIdProvider idProvider = new SessionIdProvider();
+        timer = new HashedWheelTimer();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                new HashedWheelTimer(), factoriesListener, idProvider);
+                timer, factoriesListener, idProvider);
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
@@ -88,5 +90,6 @@ public class NetconfImplActivator implements BundleActivator {
 
         commitNot.close();
         eventLoopGroup.shutdownGracefully();
+        timer.stop();
     }
 }

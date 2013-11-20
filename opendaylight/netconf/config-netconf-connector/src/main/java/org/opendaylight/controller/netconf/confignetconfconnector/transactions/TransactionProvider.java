@@ -41,12 +41,12 @@ public class TransactionProvider implements AutoCloseable {
     @Override
     public synchronized void close() {
         for (ObjectName tx : allOpenedTransactions) {
-            if (isStillOpenTransaction(tx)) {
-                try {
+            try {
+                if (isStillOpenTransaction(tx)) {
                     configRegistryClient.getConfigTransactionClient(tx).abortConfig();
-                } catch (Exception e) {
-                    logger.debug("Ignoring {} while closing transaction {}", e.toString(), tx, e);
                 }
+            } catch (Exception e) {
+                logger.debug("Ignoring exception while closing transaction {}", tx, e);
             }
         }
         allOpenedTransactions.clear();

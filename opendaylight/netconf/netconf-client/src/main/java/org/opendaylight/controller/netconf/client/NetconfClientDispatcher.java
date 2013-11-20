@@ -23,20 +23,27 @@ import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import java.io.Closeable;
 import java.net.InetSocketAddress;
 
-public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener> {
+public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener> implements Closeable {
+
+    private static final Logger logger = LoggerFactory.getLogger(NetconfClient.class);
 
     private final Optional<SSLContext> maybeContext;
     private final NetconfClientSessionNegotiatorFactory negotatorFactory;
+    private final HashedWheelTimer timer;
 
     public NetconfClientDispatcher(final Optional<SSLContext> maybeContext, EventLoopGroup bossGroup, EventLoopGroup workerGroup) {
         super(bossGroup, workerGroup);
         this.maybeContext = Preconditions.checkNotNull(maybeContext);
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(new HashedWheelTimer());
+        timer = new HashedWheelTimer();
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer);
     }
 
     public Future<NetconfClientSession> createClient(InetSocketAddress address,
@@ -83,4 +90,12 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
         }
     }
 
+    @Override
+    public void close() {
+        try {
+            timer.stop();
+        } catch (Exception e) {
+            logger.debug("Ignoring exception while closing {}", timer, e);
+        }
+    }
 }
