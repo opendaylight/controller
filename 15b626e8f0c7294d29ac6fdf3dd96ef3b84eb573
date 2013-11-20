@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_6530b89e",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/AuthProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-20T13:16:54Z",
+      "side": 1,
+      "message": "This file is for testing purposes I believe, if so, please move to src/test",
+      "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a5feb0ac",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-20T13:16:54Z",
+      "side": 1,
+      "message": "Can we use netty here?",
+      "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_85d4cc20",
+        "filename": "opendaylight/netconf/netconf-ssh/src/test/java/org/opendaylight/controller/netconf/ssh/SSHServerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-20T13:16:54Z",
+      "side": 1,
+      "message": "use logger",
+      "revId": "15b626e8f0c7294d29ac6fdf3dd96ef3b84eb573",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
