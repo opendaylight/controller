@@ -19,12 +19,12 @@ class JsonReader {
 
     public CompositeNodeWrapper read(InputStream entityStream) throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
-        
+
         JsonElement rootElement = parser.parse(new InputStreamReader(entityStream));
         if (!rootElement.isJsonObject()) {
             throw new UnsupportedFormatException("Root element of Json has to be Object");
         }
-        
+
         Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject = rootElement.getAsJsonObject().entrySet();
         if (entrySetsOfRootJsonObject.size() != 1) {
             throw new UnsupportedFormatException("Json Object should contain one element");
@@ -41,13 +41,15 @@ class JsonReader {
                     if (firstElementInArray.isJsonObject()) {
                         return createStructureWithRoot(firstElementName, firstElementInArray.getAsJsonObject());
                     }
-                    throw new UnsupportedFormatException("Array as the first element in Json Object can have only Object element");
+                    throw new UnsupportedFormatException(
+                            "Array as the first element in Json Object can have only Object element");
                 }
             }
-            throw new UnsupportedFormatException("First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet.");
+            throw new UnsupportedFormatException(
+                    "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet.");
         }
     }
-    
+
     private CompositeNodeWrapper createStructureWithRoot(String rootObjectName, JsonObject rootObject) {
         CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFrom(rootObjectName),
                 getLocalNameFrom(rootObjectName));
@@ -56,7 +58,7 @@ class JsonReader {
         }
         return firstNode;
     }
-    
+
     private void addChildToParent(String childName, JsonElement childType, CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
             CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFrom(childName),
@@ -66,19 +68,18 @@ class JsonReader {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
             }
         } else if (childType.isJsonArray()) {
-            for (JsonElement childOfChildType : childType.getAsJsonArray()) {
-                addChildToParent(childName, childOfChildType, parent);
+            if (childType.getAsJsonArray().size() == 1 && childType.getAsJsonArray().get(0).isJsonNull()) {
+                parent.addValue(new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), null));
+
+            } else {
+                for (JsonElement childOfChildType : childType.getAsJsonArray()) {
+                    addChildToParent(childName, childOfChildType, parent);
+                }
             }
         } else if (childType.isJsonPrimitive()) {
             JsonPrimitive childPrimitive = childType.getAsJsonPrimitive();
             String value = childPrimitive.getAsString();
-            SimpleNodeWrapper child = null;
-            if (value.equals("[null]")) {
-                child = new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), null);
-            } else {
-                child = new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), value);
-            }
-            parent.addValue(child);
+            parent.addValue(new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), value));
         }
     }
 

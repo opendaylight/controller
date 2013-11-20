@@ -16,8 +16,8 @@ import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.slf4j.*;
 
-public class FromXmlToCompositeNode {
-    private static Logger LOG = LoggerFactory.getLogger(FromXmlToCompositeNode.class);
+public class FromXmlToCompositeNodeTest {
+    private static final Logger LOG = LoggerFactory.getLogger(FromXmlToCompositeNodeTest.class);
 
     /**
      * top level element represents container. second level element is list with
@@ -230,7 +230,7 @@ public class FromXmlToCompositeNode {
     private CompositeNode compositeContainerFromXml(String xmlPath, boolean dummyNamespaces) {
         XmlToCompositeNodeProvider xmlToCompositeNodeProvider = XmlToCompositeNodeProvider.INSTANCE;
         try {
-            InputStream xmlStream = FromXmlToCompositeNode.class.getResourceAsStream(xmlPath);
+            InputStream xmlStream = FromXmlToCompositeNodeTest.class.getResourceAsStream(xmlPath);
             CompositeNode compositeNode = xmlToCompositeNodeProvider.readFrom(null, null, null, null, null, xmlStream);
             if (dummyNamespaces) {
                 try {

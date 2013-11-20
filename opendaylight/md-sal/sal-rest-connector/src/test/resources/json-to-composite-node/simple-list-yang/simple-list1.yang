@@ -1,11 +1,11 @@
-module simple-container-yang {
-  namespace "simple:container:yang";  
+module simple-list-yang1 {
+  namespace "simple:list:yang1";  
 
-  prefix "smpdtp";
+  prefix "smplstyg";
   revision 2013-11-12 {    
   }
   
-  container cont {
+  list lst {
   	container cont1 {
   	}
   	list lst1 {
