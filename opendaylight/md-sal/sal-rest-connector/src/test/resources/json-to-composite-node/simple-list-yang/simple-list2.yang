@@ -1,7 +1,7 @@
-module simple-data-types {
-  namespace "simple:data:types";  
+module simple-list-yang2 {
+  namespace "simple:list:yang2";  
 
-  prefix "smpdtp";
+  prefix "smplstyg";
   revision 2013-11-12 {    
   }
   

@@ -25,20 +25,53 @@ import org.opendaylight.yangtools.yang.model.api.*;
 
 import com.google.gson.JsonSyntaxException;
 
-public class FromJsonToCompositeNode {
+public class FromJsonToCompositeNodeTest {
 
-    private static Logger LOG = LoggerFactory.getLogger(FromJsonToCompositeNode.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FromJsonToCompositeNodeTest.class);
 
     @Test
     public void simpleListTest() {
         simpleTest("/json-to-composite-node/simple-list.json", "/json-to-composite-node/simple-list-yang", "lst",
-                "simple:data:types");
+                "simple:list:yang1", "simple-list-yang1");
     }
 
     @Test
     public void simpleContainerTest() {
         simpleTest("/json-to-composite-node/simple-container.json", "/json-to-composite-node/simple-container-yang",
-                "cont", "simple:data:types");
+                "cont", "simple:container:yang", "simple-container-yang");
+    }
+
+    /**
+     * test if for every leaf list item is simple node instance created
+     */
+    @Test
+    public void multipleItemsInLeafList() {
+        CompositeNode compositeNode = compositeContainerFromJson(
+                "/json-to-composite-node/multiple-leaflist-items.json", true);
+        assertNotNull(compositeNode);
+        assertEquals(3, compositeNode.getChildren().size());
+
+        boolean lflst1_1 = false;
+        boolean lflst1_2 = false;
+        boolean lflst1_3 = false;
+
+        for (Node<?> node : compositeNode.getChildren()) {
+            assertEquals("lflst1", node.getNodeType().getLocalName());
+            assertTrue(node instanceof SimpleNode<?>);
+            SimpleNode<?> simpleNode = (SimpleNode<?>) node;
+            if (simpleNode.getValue().equals("45")) {
+                lflst1_1 = true;
+            } else if (simpleNode.getValue().equals("55")) {
+                lflst1_2 = true;
+            } else if (simpleNode.getValue().equals("66")) {
+                lflst1_3 = true;
+            }
+        }
+
+        assertTrue(lflst1_1);
+        assertTrue(lflst1_2);
+        assertTrue(lflst1_3);
+
     }
 
     /**
@@ -54,6 +87,21 @@ public class FromJsonToCompositeNode {
         assertEquals("lst", compositeNode.getNodeType().getLocalName());
 
         verityMultipleItemsInList(compositeNode);
+    }
+
+    @Test
+    public void nullArrayToCompositeNodeWithNullValueTest() {
+        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/array-with-null.json", true);
+        assertNotNull(compositeNode);
+        assertEquals("cont", compositeNode.getNodeType().getLocalName());
+
+        assertNotNull(compositeNode.getChildren());
+        assertEquals(1, compositeNode.getChildren().size());
+        Node<?> lfNode = compositeNode.getChildren().iterator().next();
+
+        assertTrue(lfNode instanceof SimpleNode<?>);
+        assertEquals(null, ((SimpleNode<?>) lfNode).getValue());
+
     }
 
     @Test
@@ -124,13 +172,57 @@ public class FromJsonToCompositeNode {
 
     }
 
-    private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace) {
+    /**
+     * Tests whether namespace <b>stay unchanged</b> if concrete values are
+     * present in composite or simple node and if the method for update is
+     * called.
+     * 
+     */
+    @Test
+    public void notSupplyNamespaceIfAlreadySupplied() {
+
+        CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/simple-list.json");
+        assertNotNull(compositeNode);
+
+        DataSchemaNode dataSchemaNode1 = null;
+        DataSchemaNode dataSchemaNode2 = null;
+        try {
+            dataSchemaNode1 = TestUtils.obtainSchemaFromYang("/json-to-composite-node/simple-list-yang",
+                    "simple-list-yang1");
+            dataSchemaNode2 = TestUtils.obtainSchemaFromYang("/json-to-composite-node/simple-list-yang",
+                    "simple-list-yang2");
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+            assertTrue(false);
+        }
+        assertNotNull(dataSchemaNode1);
+        assertNotNull(dataSchemaNode2);
+
+        // supplement namespaces according to first data schema -
+        // "simple:data:types1"
+        TestUtils.supplementNamespace(dataSchemaNode1, compositeNode);
+
+        assertTrue(compositeNode instanceof CompositeNodeWrapper);
+        CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap(null);
+
+        assertEquals("lst", compNode.getNodeType().getLocalName());
+        verifyCompositeNode(compNode, "simple:list:yang1");
+
+        // dataSchemaNode2 should't be taken into account, because compNode
+        // isn't CompositeNodeWrapper
+        TestUtils.supplementNamespace(dataSchemaNode2, compNode);
+        verifyCompositeNode(compNode, "simple:list:yang1");
+
+    }
+
+    private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace,
+            String moduleName) {
         CompositeNode compositeNode = compositeContainerFromJson(jsonPath);
         assertNotNull(compositeNode);
 
         DataSchemaNode dataSchemaNode = null;
         try {
-            dataSchemaNode = TestUtils.obtainSchemaFromYang(yangPath);
+            dataSchemaNode = TestUtils.obtainSchemaFromYang(yangPath, moduleName);
         } catch (FileNotFoundException e) {
             LOG.error(e.getMessage());
             assertTrue(false);
@@ -234,7 +326,7 @@ public class FromJsonToCompositeNode {
             throws WebApplicationException {
 
         JsonToCompositeNodeProvider jsonToCompositeNodeProvider = JsonToCompositeNodeProvider.INSTANCE;
-        InputStream jsonStream = FromJsonToCompositeNode.class.getResourceAsStream(jsonPath);
+        InputStream jsonStream = FromJsonToCompositeNodeTest.class.getResourceAsStream(jsonPath);
         try {
             CompositeNode compositeNode = jsonToCompositeNodeProvider
                     .readFrom(null, null, null, null, null, jsonStream);
