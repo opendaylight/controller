@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_85d16c59",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPersisterNotificationHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-20T12:23:05Z",
+      "side": 1,
+      "message": "if netconfClient.close fails we still should issue netconfClientDispatcher.close. Exceptions can then be stacked using addSuppressed",
+      "revId": "0883add69afd0b8f7dfd8891b1f4adf4714bb3f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
