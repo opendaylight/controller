@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.it;
 
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -15,6 +17,20 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import javax.management.ObjectName;
+import javax.net.ssl.SSLContext;
+import javax.xml.parsers.ParserConfigurationException;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -49,43 +65,34 @@ import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
 import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
+import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-
-import javax.management.ObjectName;
-import javax.net.ssl.SSLContext;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.internal.util.Checks.checkNotNull;
 
 public class NetconfITTest extends AbstractConfigTest {
 
-    // private static final Logger logger =
-    // LoggerFactory.getLogger(NetconfITTest.class);
+     private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
     //
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
+    private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 830);
+    private static final String USERNAME = "netconf";
+    private static final String PASSWORD = "netconf";
 
     private NetconfMessage getConfig, getConfigCandidate, editConfig,
             closeSession, startExi, stopExi;
@@ -94,6 +101,7 @@ public class NetconfITTest extends AbstractConfigTest {
     private EventLoopGroup nettyThreadgroup;
 
     private NetconfClientDispatcher clientDispatcher;
+
 
     @Before
     public void setUp() throws Exception {
@@ -444,5 +452,40 @@ public class NetconfITTest extends AbstractConfigTest {
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
         return netconfClient;
     }
+
+    private class TestSSHServer implements Runnable {
+        public void run()  {
+            try {
+                NetconfSSHServer.start();
+            } catch (Exception e) {
+                logger.info(e.getMessage());
+            }
+        }
+    }
+    private void startSSHServer() throws Exception{
+        logger.info("Creating SSH server");
+        Thread sshServerThread = new Thread(new TestSSHServer());
+        sshServerThread.setDaemon(true);
+        sshServerThread.start();
+        logger.info("SSH server on");
+    }
+
+    @Test
+    public void sshTest() throws Exception {
+        startSSHServer();
+        Connection conn = new Connection(sshAddress.getHostName(),sshAddress.getPort());
+        Assert.assertNotNull(conn);
+        try {
+            conn.connect();
+            boolean isAuthenticated = conn.authenticateWithPassword(USERNAME,PASSWORD);
+            assertTrue(isAuthenticated);
+            Session sess = conn.openSession();
+            sess.startSubSystem("netconf");
+//            sess.requestPTY("");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
