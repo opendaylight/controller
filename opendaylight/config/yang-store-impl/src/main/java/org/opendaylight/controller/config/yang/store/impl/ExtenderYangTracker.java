@@ -18,6 +18,8 @@ import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
+import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -34,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,7 +78,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
     }
 
     @Override
-    public synchronized Object addingBundle(Bundle bundle, BundleEvent event) {
+    public Object addingBundle(Bundle bundle, BundleEvent event) {
 
         // Ignore system bundle:
         // system bundle might have config-api on classpath &&
@@ -107,35 +110,38 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
                 proposedNewState.putAll(bundle, addedURLs);
 
                 Preconditions.checkArgument(addedURLs.size() > 0, "No change can occur when no URLs are changed");
-                boolean success;
-                String failureReason = null;
-                try(YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, proposedNewState)) {
-                    updateCache(snapshot);
-                    success = true;
-                } catch(YangStoreException e) {
-                    failureReason = e.toString();
-                    success = false;
-                }
-                if (success){
-                    // consistent state
-                    // merge into
-                    consistentBundlesToYangURLs.clear();
-                    consistentBundlesToYangURLs.putAll(proposedNewState);
-                    inconsistentBundlesToYangURLs.clear();
 
-                    logger.info("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
-                    logger.trace("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
-                } else {
-                    // inconsistent state
-                    logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}, reason {}",
-                            consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, failureReason);
-                    logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
-                            consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason);
-                    inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
+                try(YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, proposedNewState)) {
+                    onSnapshotSuccess(proposedNewState, snapshot);
+                } catch(YangStoreException e) {
+                    onSnapshotFailure(bundle, addedURLs, e);
                 }
             }
         }
         return bundle;
+    }
+
+    private void onSnapshotFailure(Bundle bundle, List<URL> addedURLs, Exception failureReason) {
+        // inconsistent state
+        inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
+
+        logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}, reason {}",
+                consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, failureReason);
+        logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
+                consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason.toString());
+    }
+
+    private void onSnapshotSuccess(Multimap<Bundle, URL> proposedNewState, YangStoreSnapshotImpl snapshot) {
+        // consistent state
+        // merge into
+        consistentBundlesToYangURLs.clear();
+        consistentBundlesToYangURLs.putAll(proposedNewState);
+        inconsistentBundlesToYangURLs.clear();
+
+        updateCache(snapshot);
+
+        logger.info("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
+        logger.debug("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
     }
 
     private void updateCache(YangStoreSnapshotImpl snapshot) {
@@ -153,6 +159,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
      */
     @Override
     public synchronized void removedBundle(Bundle bundle, BundleEvent event, Object object) {
+        logger.debug("Removed bundle {} {} {}", bundle, event, object);
         inconsistentBundlesToYangURLs.removeAll(bundle);
         consistentBundlesToYangURLs.removeAll(bundle);
     }
@@ -162,9 +169,10 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
             throws YangStoreException {
         Optional<YangStoreSnapshot> yangStoreOpt = cache.getSnapshotIfPossible(consistentBundlesToYangURLs);
         if (yangStoreOpt.isPresent()) {
-            logger.trace("Returning cached yang store {}", yangStoreOpt.get());
+            logger.debug("Returning cached yang store {}", yangStoreOpt.get());
             return yangStoreOpt.get();
         }
+
         YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, consistentBundlesToYangURLs);
         updateCache(snapshot);
         return snapshot;
@@ -205,18 +213,21 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
 }
 
 class YangStoreCache {
+
     @GuardedBy("this")
-    private Set<URL> cachedUrls = Collections.emptySet();
+    private Set<URL> cachedUrls = null;
     @GuardedBy("this")
-    private Optional<YangStoreSnapshotImpl> cachedYangStoreSnapshot = Optional.absent();
+    private Optional<YangStoreSnapshot> cachedYangStoreSnapshot = getInitialSnapshot();
 
     synchronized Optional<YangStoreSnapshot> getSnapshotIfPossible(Multimap<Bundle, URL> bundlesToYangURLs) {
         Set<URL> urls = setFromMultimapValues(bundlesToYangURLs);
-        if (cachedUrls != null && cachedUrls.equals(urls)) {
+
+        if (cachedUrls==null || cachedUrls.equals(urls)) {
             Preconditions.checkState(cachedYangStoreSnapshot.isPresent());
             YangStoreSnapshot freshSnapshot = new YangStoreSnapshotImpl(cachedYangStoreSnapshot.get());
             return Optional.of(freshSnapshot);
         }
+
         return Optional.absent();
     }
 
@@ -228,7 +239,7 @@ class YangStoreCache {
     }
 
     synchronized void cacheYangStore(Multimap<Bundle, URL> urls,
-                        YangStoreSnapshotImpl yangStoreSnapshot) {
+                        YangStoreSnapshot yangStoreSnapshot) {
         this.cachedUrls = setFromMultimapValues(urls);
         this.cachedYangStoreSnapshot = Optional.of(yangStoreSnapshot);
     }
@@ -239,5 +250,29 @@ class YangStoreCache {
             cachedYangStoreSnapshot.get().close();
             cachedYangStoreSnapshot = Optional.absent();
         }
+    }
+
+    private Optional<YangStoreSnapshot> getInitialSnapshot() {
+        YangStoreSnapshot initialSnapshot = new YangStoreSnapshot() {
+            @Override
+            public Map<String, Map<String, ModuleMXBeanEntry>> getModuleMXBeanEntryMap() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public Map<String, Map.Entry<Module, String>> getModuleMap() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public int countModuleMXBeanEntries() {
+                return 0;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        return Optional.of(initialSnapshot);
     }
 }
