@@ -143,6 +143,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/editConfig.xml");
         checkBinaryLeafEdited(getConfigCandidate());
 
+
         // default-operation:none, should not affect binary leaf
         edit("netconfMessages/editConfig_none.xml");
         checkBinaryLeafEdited(getConfigCandidate());
@@ -150,7 +151,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // check after edit
         commit();
         Element response = getConfigRunning();
-        // System.out.println(Xml.toString(response));
 
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);

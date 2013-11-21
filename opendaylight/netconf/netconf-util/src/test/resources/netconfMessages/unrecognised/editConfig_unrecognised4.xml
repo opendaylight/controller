@@ -24,7 +24,7 @@
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 l
                 <service>
-                    <type>testing</type>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                     <unknownAttribute>error</unknownAttribute>
 
                     <instance>

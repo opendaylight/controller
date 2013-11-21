@@ -15,8 +15,11 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 
 import java.util.List;
+import java.util.Map;
 
 public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReadingStrategy<AttributeIfc> {
+
+    private static final Object PREFIX_SEPARATOR = ":";
 
     public ObjectNameAttributeReadingStrategy(DependencyAttribute attributeIfc) {
         super(attributeIfc);
@@ -35,11 +38,28 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
 
     private ObjectNameAttributeMappingStrategy.MappedDependency resolve(XmlElement firstChild) {
         XmlElement typeElement = firstChild.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
-        String serviceName = typeElement.getTextContent();
+        Map.Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
+
+        String serviceName = checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
+
         XmlElement nameElement = firstChild.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
         String dependencyName = nameElement.getTextContent();
 
-        return new ObjectNameAttributeMappingStrategy.MappedDependency(serviceName, dependencyName);
+        return new ObjectNameAttributeMappingStrategy.MappedDependency(prefixNamespace.getValue(), serviceName,
+                dependencyName);
+    }
+
+    public static String checkPrefixAndExtractServiceName(XmlElement typeElement, Map.Entry<String, String> prefixNamespace) {
+        String serviceName = typeElement.getTextContent();
+
+        Preconditions.checkState(prefixNamespace.equals("") == false, "Service %s value not prefixed with namespace",
+                XmlNetconfConstants.TYPE_KEY);
+        String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;
+        Preconditions.checkState(serviceName.startsWith(prefix),
+                "Service %s not correctly prefixed, expected %s, but was %s", XmlNetconfConstants.TYPE_KEY, prefix,
+                serviceName);
+        serviceName = serviceName.substring(prefix.length());
+        return serviceName;
     }
 
 }

@@ -7,21 +7,8 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
-import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
@@ -50,8 +37,20 @@ import org.opendaylight.yangtools.yang.model.api.UsesNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
 
 /**
  * Represents part of yang model that describes a module.
@@ -129,13 +128,13 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private final String nullableDescription, packageName, javaNamePrefix,
             namespace;
 
-    private final Map<String /* java fully qualified name */, String/* identity local name */> providedServices;
+    private final Map<String, QName> providedServices;
 
     private Collection<RuntimeBeanEntry> runtimeBeans;
 
     public ModuleMXBeanEntry(IdentitySchemaNode id,
             Map<String, AttributeIfc> yangToAttributes, String packageName,
-            Map<String, String> providedServices2, String javaNamePrefix,
+            Map<String, QName> providedServices2, String javaNamePrefix,
             String namespace, Collection<RuntimeBeanEntry> runtimeBeans) {
         this.globallyUniqueName = id.getQName().getLocalName();
         this.yangToAttributes = yangToAttributes;
@@ -184,7 +183,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
      * @return services implemented by this module. Keys are fully qualified java names of generated
      * ServiceInterface classes, values are identity local names.
      */
-    public Map<String, String> getProvidedServices() {
+    public Map<String, QName> getProvidedServices() {
         return providedServices;
     }
 
@@ -317,7 +316,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                     checkState(moduleIdentity != null, "Cannot find identity "
                             + moduleLocalNameFromXPath
                             + " matching augmentation " + augmentation);
-                    Map<String, String> providedServices = findProvidedServices(
+                    Map<String, QName> providedServices = findProvidedServices(
                             moduleIdentity, currentModule, qNamesToSIEs,
                             schemaContext);
 
@@ -497,11 +496,11 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         return yangToAttributes;
     }
 
-    private static Map<String, String> findProvidedServices(
+    private static Map<String, QName> findProvidedServices(
             IdentitySchemaNode moduleIdentity, Module currentModule,
             Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
             SchemaContext schemaContext) {
-        Map<String, String> result = new HashMap<>();
+        Map<String, QName> result = new HashMap<>();
         for (UnknownSchemaNode unknownNode : moduleIdentity
                 .getUnknownSchemaNodes()) {
             if (ConfigConstants.PROVIDED_SERVICE_EXTENSION_QNAME
@@ -510,8 +509,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                         .getNodeParameter();
                 ServiceInterfaceEntry sie = findSIE(prefixAndIdentityLocalName,
                         currentModule, qNamesToSIEs, schemaContext);
-                result.put(sie.getFullyQualifiedName(), sie.getQName()
-                        .getLocalName());
+                result.put(sie.getFullyQualifiedName(), sie.getQName());
             }
         }
         return result;

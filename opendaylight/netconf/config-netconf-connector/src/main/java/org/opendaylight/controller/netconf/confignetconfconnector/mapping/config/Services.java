@@ -13,6 +13,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -42,26 +43,32 @@ public final class Services {
     private long suffix = 1;
 
     private final Map<ServiceInstance, String> instanceToRef = Maps.newHashMap();
-    private final Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>> serviceNameToRefNameToInstance = Maps
+    private final Map<String /*Namespace*/, Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = Maps
             .newHashMap();
 
-    public String addServiceEntry(String serviceName, ObjectName on) {
+    public String addServiceEntry(String namespace, String serviceName, ObjectName on) {
 
         String moduleName = on.getKeyProperty("moduleFactoryName");
         String instanceName = on.getKeyProperty("instanceName");
 
-        String refName = addServiceEntry(serviceName, moduleName, instanceName);
+        String refName = addServiceEntry(namespace, serviceName, moduleName, instanceName);
         logger.trace("Added service entry to tracker. Service name {}, ref name {}, module name {}, instance name {}",
                 serviceName, refName, moduleName, instanceName);
         return refName;
     }
 
     @VisibleForTesting
-    public String addServiceEntry(String serviceName, String moduleName, String instanceName) {
+    public String addServiceEntry(String namespace, String serviceName, String moduleName, String instanceName) {
         ServiceInstance serviceInstance = new ServiceInstance(moduleName, instanceName);
         serviceInstance.setServiceName(serviceName);
 
         String refName = instanceToRef.get(serviceInstance);
+
+        Map<String, Map<String, ServiceInstance>> serviceNameToRefNameToInstance = namespaceToServiceNameToRefNameToInstance.get(namespace);
+        if (serviceNameToRefNameToInstance == null) {
+            serviceNameToRefNameToInstance = Maps.newHashMap();
+            namespaceToServiceNameToRefNameToInstance.put(namespace, serviceNameToRefNameToInstance);
+        }
 
         Map<String, ServiceInstance> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
         if (refNameToInstance == null) {
@@ -101,7 +108,11 @@ public final class Services {
         return refNamesAsSet;
     }
 
-    public ServiceInstance getByServiceAndRefName(String serviceName, String refName) {
+    public ServiceInstance getByServiceAndRefName(String namespace, String serviceName, String refName) {
+        Map<String, Map<String, ServiceInstance>> serviceNameToRefNameToInstance = namespaceToServiceNameToRefNameToInstance.get(namespace);
+        Preconditions.checkArgument(serviceNameToRefNameToInstance != null, "No serviceInstances mapped to " + namespace + " , "
+                + serviceNameToRefNameToInstance.keySet());
+
         Map<String, ServiceInstance> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
         Preconditions.checkArgument(refNameToInstance != null, "No serviceInstances mapped to " + serviceName + " , "
                 + serviceNameToRefNameToInstance.keySet());
@@ -114,20 +125,28 @@ public final class Services {
 
     // TODO hide getMappedServices, call it explicitly in toXml
 
-    public Map<String, Map<String, String>> getMappedServices() {
-        Map<String, Map<String, String>> retVal = Maps.newHashMap();
+    public Map<String, Map<String, Map<String, String>>> getMappedServices() {
+        Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
 
-        for (String serviceName : serviceNameToRefNameToInstance.keySet()) {
+        for (String namespace : namespaceToServiceNameToRefNameToInstance.keySet()) {
 
-            Map<String, String> innerRetVal = Maps.transformValues(serviceNameToRefNameToInstance.get(serviceName),
-                    new Function<ServiceInstance, String>() {
-                        @Nullable
-                        @Override
-                        public String apply(@Nullable ServiceInstance serviceInstance) {
-                            return serviceInstance.toString();
-                        }
-                    });
-            retVal.put(serviceName, innerRetVal);
+            Map<String, Map<String, ServiceInstance>> serviceNameToRefNameToInstance = namespaceToServiceNameToRefNameToInstance
+                    .get(namespace);
+            Map<String, Map<String, String>> innerRetVal = Maps.newHashMap();
+
+            for (String serviceName : serviceNameToRefNameToInstance.keySet()) {
+
+                Map<String, String> innerInnerRetVal = Maps.transformValues(
+                        serviceNameToRefNameToInstance.get(serviceName), new Function<ServiceInstance, String>() {
+                            @Nullable
+                            @Override
+                            public String apply(@Nullable ServiceInstance serviceInstance) {
+                                return serviceInstance.toString();
+                            }
+                        });
+                innerRetVal.put(serviceName, innerInnerRetVal);
+            }
+            retVal.put(namespace, innerRetVal);
         }
 
         return retVal;
@@ -135,35 +154,45 @@ public final class Services {
 
     // TODO hide resolveServices, call it explicitly in fromXml
 
-    public static Services resolveServices(Map<String, Map<String, String>> mappedServices) {
+    public static Services resolveServices(Map<String, Map<String, Map<String, String>>> mappedServices) {
         Services tracker = new Services();
 
-        for (Entry<String, Map<String, String>> serviceEntry : mappedServices.entrySet()) {
+        for (Entry<String, Map<String, Map<String, String>>> namespaceEntry : mappedServices.entrySet()) {
+            String namespace = namespaceEntry.getKey();
 
-            String serviceName = serviceEntry.getKey();
-            for (Entry<String, String> refEntry : serviceEntry.getValue().entrySet()) {
+            for (Entry<String, Map<String, String>> serviceEntry : namespaceEntry.getValue().entrySet()) {
 
-                Map<String, ServiceInstance> refNameToInstance = tracker.serviceNameToRefNameToInstance
-                        .get(serviceName);
-                if (refNameToInstance == null) {
-                    refNameToInstance = Maps.newHashMap();
-                    tracker.serviceNameToRefNameToInstance.put(serviceName, refNameToInstance);
+                String serviceName = serviceEntry.getKey();
+                for (Entry<String, String> refEntry : serviceEntry.getValue().entrySet()) {
+
+                    Map<String, Map<String, ServiceInstance>> namespaceToServices = tracker.namespaceToServiceNameToRefNameToInstance.get(namespace);
+                    if (namespaceToServices == null) {
+                        namespaceToServices = Maps.newHashMap();
+                        tracker.namespaceToServiceNameToRefNameToInstance.put(namespace, namespaceToServices);
+                    }
+
+                    Map<String, ServiceInstance> refNameToInstance = namespaceToServices
+                            .get(serviceName);
+                    if (refNameToInstance == null) {
+                        refNameToInstance = Maps.newHashMap();
+                        namespaceToServices.put(serviceName, refNameToInstance);
+                    }
+
+                    String refName = refEntry.getKey();
+                    Preconditions.checkState(false == refNameToInstance.containsKey(refName),
+                            "Duplicate reference name to service " + refName + " under service " + serviceName);
+                    ServiceInstance serviceInstance = ServiceInstance.fromString(refEntry.getValue());
+                    refNameToInstance.put(refName, serviceInstance);
+
+                    tracker.instanceToRef.put(serviceInstance, refEntry.getKey());
                 }
-
-                String refName = refEntry.getKey();
-                Preconditions.checkState(false == refNameToInstance.containsKey(refName),
-                        "Duplicate reference name to service " + refName + " under service " + serviceName);
-                ServiceInstance serviceInstance = ServiceInstance.fromString(refEntry.getValue());
-                refNameToInstance.put(refName, serviceInstance);
-
-                tracker.instanceToRef.put(serviceInstance, refEntry.getKey());
             }
         }
         return tracker;
     }
 
-    public static Map<String, Map<String, String>> fromXml(XmlElement xml) {
-        Map<String, Map<String, String>> retVal = Maps.newHashMap();
+    public static Map<String, Map<String, Map<String, String>>> fromXml(XmlElement xml) {
+        Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
 
         List<XmlElement> services = xml.getChildElements(SERVICE_KEY);
         xml.checkUnrecognisedElements(services);
@@ -171,10 +200,20 @@ public final class Services {
         for (XmlElement service : services) {
 
             XmlElement typeElement = service.getOnlyChildElement(TYPE_KEY);
-            String serviceName = typeElement.getTextContent();
+            Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
+
+            Preconditions.checkState(prefixNamespace.getKey()!=null && prefixNamespace.getKey().equals("") == false, "Type attribute was not prefixed");
+
+            Map<String, Map<String, String>> namespaceToServices = retVal.get(prefixNamespace.getValue());
+            if(namespaceToServices == null) {
+                namespaceToServices = Maps.newHashMap();
+                retVal.put(prefixNamespace.getValue(), namespaceToServices);
+            }
+
+            String serviceName =  ObjectNameAttributeReadingStrategy.checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
 
             Map<String, String> innerMap = Maps.newHashMap();
-            retVal.put(serviceName, innerMap);
+            namespaceToServices.put(serviceName, innerMap);
 
             List<XmlElement> instances = service.getChildElements(XmlNetconfConstants.INSTANCE_KEY);
             service.checkUnrecognisedElements(instances, typeElement);
@@ -205,29 +244,34 @@ public final class Services {
         }
     }
 
-    public Element toXml(Map<String, Map<String, String>> mappedServices, Document document) {
+    public Element toXml(Map<String, Map<String, Map<String, String>>> mappedServices, Document document) {
         Element root = document.createElement(XmlNetconfConstants.SERVICES_KEY);
         XmlUtil.addNamespaceAttr(root, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
 
-        for (Entry<String, Map<String, String>> serviceEntry : mappedServices.entrySet()) {
-            Element serviceElement = document.createElement(SERVICE_KEY);
-            root.appendChild(serviceElement);
+        for (String namespace : mappedServices.keySet()) {
 
-            Element typeElement = XmlUtil.createTextElement(document, TYPE_KEY, serviceEntry.getKey());
-            serviceElement.appendChild(typeElement);
+            for (Entry<String, Map<String, String>> serviceEntry : mappedServices.get(namespace).entrySet()) {
+                Element serviceElement = document.createElement(SERVICE_KEY);
+                root.appendChild(serviceElement);
 
-            for (Entry<String, String> instanceEntry : serviceEntry.getValue().entrySet()) {
-                Element instanceElement = document.createElement(XmlNetconfConstants.INSTANCE_KEY);
-                serviceElement.appendChild(instanceElement);
+                Element typeElement = XmlUtil.createPrefixedTextElement(document, TYPE_KEY, XmlNetconfConstants.PREFIX,
+                        serviceEntry.getKey());
+                XmlUtil.addPrefixedNamespaceAttr(typeElement, XmlNetconfConstants.PREFIX, namespace);
+                serviceElement.appendChild(typeElement);
 
-                Element nameElement = XmlUtil.createTextElement(document, NAME_KEY, instanceEntry.getKey());
-                instanceElement.appendChild(nameElement);
+                for (Entry<String, String> instanceEntry : serviceEntry.getValue().entrySet()) {
+                    Element instanceElement = document.createElement(XmlNetconfConstants.INSTANCE_KEY);
+                    serviceElement.appendChild(instanceElement);
 
-                Element providerElement = XmlUtil.createTextElement(document, PROVIDER_KEY, instanceEntry.getValue());
-                instanceElement.appendChild(providerElement);
+                    Element nameElement = XmlUtil.createTextElement(document, NAME_KEY, instanceEntry.getKey());
+                    instanceElement.appendChild(nameElement);
+
+                    Element providerElement = XmlUtil.createTextElement(document, PROVIDER_KEY, instanceEntry.getValue());
+                    instanceElement.appendChild(providerElement);
+                }
             }
-        }
 
+        }
         return root;
     }
 

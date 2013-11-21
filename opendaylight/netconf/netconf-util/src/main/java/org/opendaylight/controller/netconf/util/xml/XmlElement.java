@@ -326,7 +326,7 @@ public class XmlElement {
             prefix = "";
         }
         if (namespaces.containsKey(prefix) == false) {
-            throw new IllegalArgumentException("Cannot find namespace for " + element + ". Prefix from content is "
+            throw new IllegalArgumentException("Cannot find namespace for " + XmlUtil.toString(element) + ". Prefix from content is "
                     + prefix + ". Found namespaces " + namespaces);
         }
         return Maps.immutableEntry(prefix, namespaces.get(prefix));
