@@ -80,6 +80,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         Element dataElement = document.createElement(XmlNetconfConstants.DATA_KEY);
         final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
                 .queryInstances(configRegistryClient);
+
         final Config configMapping = new Config(transform(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap()));
         dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement);

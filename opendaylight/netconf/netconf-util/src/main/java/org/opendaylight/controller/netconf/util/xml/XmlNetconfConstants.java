@@ -33,6 +33,8 @@ public class XmlNetconfConstants {
     public static final String NAME_KEY = "name";
     public static final String NOTIFICATION_ELEMENT_NAME = "notification";
 
+    public static final String PREFIX = "prefix";
+
     //
     //
     public static final String RFC4741_TARGET_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";
