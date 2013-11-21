@@ -110,7 +110,8 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
                 boolean success;
                 String failureReason = null;
                 try(YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, proposedNewState)) {
-                    updateCache(snapshot);
+                    cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
+                    cache.setInconsistentURLsForReporting(Collections.<URL> emptySet());
                     success = true;
                 } catch(YangStoreException e) {
                     failureReason = e.toString();
@@ -132,14 +133,11 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
                     logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
                             consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason);
                     inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
+                    cache.setInconsistentURLsForReporting(inconsistentBundlesToYangURLs.values());
                 }
             }
         }
         return bundle;
-    }
-
-    private void updateCache(YangStoreSnapshotImpl snapshot) {
-        cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
     }
 
     @Override
@@ -166,7 +164,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
             return yangStoreOpt.get();
         }
         YangStoreSnapshotImpl snapshot = createSnapshot(mbeParser, consistentBundlesToYangURLs);
-        updateCache(snapshot);
+        cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
         return snapshot;
     }
 
@@ -205,20 +203,32 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
 }
 
 class YangStoreCache {
+    private static final Logger logger = LoggerFactory.getLogger(YangStoreCache.class);
+
     @GuardedBy("this")
     private Set<URL> cachedUrls = Collections.emptySet();
     @GuardedBy("this")
     private Optional<YangStoreSnapshotImpl> cachedYangStoreSnapshot = Optional.absent();
+    @GuardedBy("this")
+    private Collection<URL> inconsistentURLsForReporting = Collections.emptySet();
 
     synchronized Optional<YangStoreSnapshot> getSnapshotIfPossible(Multimap<Bundle, URL> bundlesToYangURLs) {
         Set<URL> urls = setFromMultimapValues(bundlesToYangURLs);
-        if (cachedUrls != null && cachedUrls.equals(urls)) {
+        if (cachedUrls.equals(urls)) {
             Preconditions.checkState(cachedYangStoreSnapshot.isPresent());
             YangStoreSnapshot freshSnapshot = new YangStoreSnapshotImpl(cachedYangStoreSnapshot.get());
+            if (inconsistentURLsForReporting.size() > 0){
+                logger.warn("Some yang URLs are ignored: {}", inconsistentURLsForReporting);
+            }
             return Optional.of(freshSnapshot);
         }
         return Optional.absent();
     }
+
+    public synchronized void setInconsistentURLsForReporting(Collection<URL> urls){
+        inconsistentURLsForReporting = urls;
+    }
+
 
     private static Set<URL> setFromMultimapValues(
             Multimap<Bundle, URL> bundlesToYangURLs) {

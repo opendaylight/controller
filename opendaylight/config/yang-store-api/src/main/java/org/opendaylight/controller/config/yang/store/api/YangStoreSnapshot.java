@@ -15,7 +15,8 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 
 public interface YangStoreSnapshot extends AutoCloseable {
 
-    Map<String, Map<String, ModuleMXBeanEntry>> getModuleMXBeanEntryMap();
+    Map<String/* Namespace from yang file */,
+            Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> getModuleMXBeanEntryMap();
 
     Map<String, Entry<Module, String>> getModuleMap();
 

@@ -129,7 +129,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private final String nullableDescription, packageName, javaNamePrefix,
             namespace;
 
-    private final Map<String, String> providedServices;
+    private final Map<String /* java fully qualified name */, String/* identity local name */> providedServices;
 
     private Collection<RuntimeBeanEntry> runtimeBeans;
 
@@ -180,6 +180,10 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         return packageName;
     }
 
+    /**
+     * @return services implemented by this module. Keys are fully qualified java names of generated
+     * ServiceInterface classes, values are identity local names.
+     */
     public Map<String, String> getProvidedServices() {
         return providedServices;
     }
