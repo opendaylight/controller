@@ -8,21 +8,19 @@
 package org.opendaylight.controller.netconf.ssh;
 
 import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+import java.io.IOException;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 
 public class SSHServerTest {
 
     private static final String USER = "netconf";
     private static final String PASSWORD  = "netconf";
-
-
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 830;
     private static final Logger logger =  LoggerFactory.getLogger(SSHServerTest.class);
@@ -55,11 +53,11 @@ public class SSHServerTest {
             logger.info("authenticating ...");
             boolean isAuthenticated = conn.authenticateWithPassword(USER,PASSWORD);
             Assert.assertTrue(isAuthenticated);
-/*
             logger.info("opening session");
             Session sess = conn.openSession();
+            logger.info("subsystem netconf");
             sess.startSubSystem("netconf");
-*/
+//            sess.requestPTY("");
         } catch (IOException e) {
             e.printStackTrace();
         }

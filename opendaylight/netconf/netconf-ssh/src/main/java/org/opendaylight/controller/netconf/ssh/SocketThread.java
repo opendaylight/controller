@@ -21,6 +21,8 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
 import org.opendaylight.controller.netconf.ssh.handler.SSHChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback
@@ -31,6 +33,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private static final String PASSWORD = "netconf";
     private NetconfClient netconfClient;
     private static final InetSocketAddress clientAddress = new InetSocketAddress("127.0.0.1", 12023);
+    private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
 
 
     private static ServerConnection conn = null;
@@ -65,10 +68,18 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                     public void run()
                     {
                         if (subsystem.equals("netconf")){
-                            NetconfClientDispatcher clientDispatcher= clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), new NioEventLoopGroup(), new NioEventLoopGroup());
                             try {
-                                netconfClient = new NetconfClient("ssh_" + clientAddress.toString(), clientAddress, 5000, clientDispatcher);
+                                logger.debug("received netconf subsystem");
+                                NetconfClientDispatcher clientDispatcher = null;
+                                logger.debug("client dispatcher declared and defined as null");
+                                NioEventLoopGroup nioGrup = new NioEventLoopGroup(1);
+                                clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nioGrup, nioGrup);
+                                logger.debug("client dispatcher created");
+                                logger.debug("creating netconf client");
+                                netconfClient = new NetconfClient("ssh_" + clientAddress.toString(),clientAddress,5000,clientDispatcher);
+                                logger.debug("netconf client created");
                             } catch (InterruptedException e) {
+                                logger.debug("fubar {}"+e.getMessage());
                             }
                         }
                     }

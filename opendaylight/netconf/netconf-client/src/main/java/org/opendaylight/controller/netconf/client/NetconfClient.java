@@ -36,7 +36,7 @@ public class NetconfClient implements Closeable {
     private final NetconfClientDispatcher dispatch;
     private final String label;
     private final NetconfClientSession clientSession;
-    private final NetconfClientSessionListener sessionListener;
+    private NetconfClientSessionListener sessionListener;
     private final long sessionId;
     private final InetSocketAddress address;
 

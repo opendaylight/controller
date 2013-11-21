@@ -19,6 +19,7 @@
 
 
     <modules>
+        <module>netconf-it</module>
         <module>netconf-api</module>
         <module>netconf-impl</module>
         <module>config-netconf-connector</module>
@@ -144,7 +145,6 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>netconf-ssh</artifactId>
                 <version>${netconf.version}</version>
-                <type>test-jar</type>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>

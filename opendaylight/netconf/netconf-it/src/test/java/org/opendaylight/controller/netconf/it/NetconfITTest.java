@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.it;
 
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -28,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
 import javax.net.ssl.SSLContext;
 import javax.xml.parsers.ParserConfigurationException;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -63,9 +66,6 @@ import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
-import org.opendaylight.controller.netconf.util.handler.ssh.SshHandler;
-import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
-import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -79,6 +79,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.internal.util.Checks.checkNotNull;
@@ -100,6 +101,7 @@ public class NetconfITTest extends AbstractConfigTest {
     private EventLoopGroup nettyThreadgroup;
 
     private NetconfClientDispatcher clientDispatcher;
+
 
     @Before
     public void setUp() throws Exception {
@@ -469,16 +471,23 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     @Test
-    public void testSSH2Netconf() throws Exception {
+    public void sshTest() throws Exception {
         startSSHServer();
-        try (NetconfClient netconfClient = createSession(sshAddress, "1")) {
-            logger.info("client connected to SSH");
-            netconfClient.getClientSession().getChannel().pipeline().addFirst(
-                        new SshHandler(
-                                   new LoginPassword(USERNAME,PASSWORD)
-                                   ,Invoker.subsystem("netconf")
-                        )
-            );
+        Connection conn = new Connection(sshAddress.getHostName(),sshAddress.getPort());
+        Assert.assertNotNull(conn);
+        try {
+            logger.info("connecting to SSH server");
+            conn.connect();
+            logger.info("authenticating ...");
+            boolean isAuthenticated = conn.authenticateWithPassword(USERNAME,PASSWORD);
+            assertTrue(isAuthenticated);
+            logger.info("opening session");
+            Session sess = conn.openSession();
+            logger.info("sending subsystem netconf");
+            sess.startSubSystem("netconf");
+//            sess.requestPTY("");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
