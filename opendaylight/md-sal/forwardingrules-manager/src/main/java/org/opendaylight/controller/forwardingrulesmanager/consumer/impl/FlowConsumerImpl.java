@@ -71,7 +71,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private IContainer container;
     private static final String NAMEREGEX = "^[a-zA-Z0-9]+$";
     private static ConcurrentMap<Integer, Flow> staticFlows;
-    private static ConcurrentMap<Integer, Integer> staticFlowsOrdinal;
+    private static ConcurrentMap<Integer, Integer> staticFlowsOrdinal = new ConcurrentHashMap<Integer, Integer>();
     /*
      * Inactive flow list. This is for the global instance of FRM It will
      * contain all the flow entries which were installed on the global container
@@ -499,14 +499,14 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         @Override
         public void onNodeErrorNotification(NodeErrorNotification notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void onNodeExperimenterErrorNotification(
                 NodeExperimenterErrorNotification notification) {
             // TODO Auto-generated method stub
-            
+
         };
 
     }
