@@ -34,6 +34,10 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
         this.moduleMap = yangStoreSnapshot.getModuleMap();
     }
 
+    /**
+     * @return all loaded config modules. Key of outer map is namespace of yang file.
+     * Key of inner map is name of module entry. Value is module entry.
+     */
     @Override
     public Map<String, Map<String, ModuleMXBeanEntry>> getModuleMXBeanEntryMap() {
         return moduleMXBeanEntryMap;

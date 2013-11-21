@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
+//FIXME: make thread safe
 public enum EditStrategyType {
     // can be default
     merge, replace, none,

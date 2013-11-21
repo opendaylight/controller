@@ -78,7 +78,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
     }
 
     @Override
-    public Object addingBundle(Bundle bundle, BundleEvent event) {
+    public synchronized Object addingBundle(Bundle bundle, BundleEvent event) {
 
         // Ignore system bundle:
         // system bundle might have config-api on classpath &&
@@ -121,7 +121,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
         return bundle;
     }
 
-    private void onSnapshotFailure(Bundle bundle, List<URL> addedURLs, Exception failureReason) {
+    private synchronized void onSnapshotFailure(Bundle bundle, List<URL> addedURLs, Exception failureReason) {
         // inconsistent state
         inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
 
@@ -129,9 +129,10 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
                 consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, failureReason);
         logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
                 consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason.toString());
+        cache.setInconsistentURLsForReporting(inconsistentBundlesToYangURLs.values());
     }
 
-    private void onSnapshotSuccess(Multimap<Bundle, URL> proposedNewState, YangStoreSnapshotImpl snapshot) {
+    private synchronized void onSnapshotSuccess(Multimap<Bundle, URL> proposedNewState, YangStoreSnapshotImpl snapshot) {
         // consistent state
         // merge into
         consistentBundlesToYangURLs.clear();
@@ -139,12 +140,12 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
         inconsistentBundlesToYangURLs.clear();
 
         updateCache(snapshot);
-
+        cache.setInconsistentURLsForReporting(Collections.<URL> emptySet());
         logger.info("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
         logger.debug("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
     }
 
-    private void updateCache(YangStoreSnapshotImpl snapshot) {
+    private synchronized void updateCache(YangStoreSnapshotImpl snapshot) {
         cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
     }
 
@@ -213,11 +214,14 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
 }
 
 class YangStoreCache {
+    private static final Logger logger = LoggerFactory.getLogger(YangStoreCache.class);
 
     @GuardedBy("this")
     private Set<URL> cachedUrls = null;
     @GuardedBy("this")
     private Optional<YangStoreSnapshot> cachedYangStoreSnapshot = getInitialSnapshot();
+    @GuardedBy("this")
+    private Collection<URL> inconsistentURLsForReporting = Collections.emptySet();
 
     synchronized Optional<YangStoreSnapshot> getSnapshotIfPossible(Multimap<Bundle, URL> bundlesToYangURLs) {
         Set<URL> urls = setFromMultimapValues(bundlesToYangURLs);
@@ -225,6 +229,9 @@ class YangStoreCache {
         if (cachedUrls==null || cachedUrls.equals(urls)) {
             Preconditions.checkState(cachedYangStoreSnapshot.isPresent());
             YangStoreSnapshot freshSnapshot = new YangStoreSnapshotImpl(cachedYangStoreSnapshot.get());
+            if (inconsistentURLsForReporting.size() > 0){
+                logger.warn("Some yang URLs are ignored: {}", inconsistentURLsForReporting);
+            }
             return Optional.of(freshSnapshot);
         }
 
@@ -239,7 +246,7 @@ class YangStoreCache {
     }
 
     synchronized void cacheYangStore(Multimap<Bundle, URL> urls,
-                        YangStoreSnapshot yangStoreSnapshot) {
+                                     YangStoreSnapshot yangStoreSnapshot) {
         this.cachedUrls = setFromMultimapValues(urls);
         this.cachedYangStoreSnapshot = Optional.of(yangStoreSnapshot);
     }
@@ -250,6 +257,10 @@ class YangStoreCache {
             cachedYangStoreSnapshot.get().close();
             cachedYangStoreSnapshot = Optional.absent();
         }
+    }
+
+    public synchronized void setInconsistentURLsForReporting(Collection<URL> urls){
+        inconsistentURLsForReporting = urls;
     }
 
     private Optional<YangStoreSnapshot> getInitialSnapshot() {

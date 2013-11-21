@@ -12,17 +12,22 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
+import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.ObjectName;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 public class EditConfigXmlParser {
 
@@ -38,7 +43,8 @@ public class EditConfigXmlParser {
     public EditConfigXmlParser() {
     }
 
-    EditConfigXmlParser.EditConfigExecution fromXml(final XmlElement xml, final Config cfgMapping)
+    EditConfigXmlParser.EditConfigExecution fromXml(final XmlElement xml, final Config cfgMapping,
+                                                    TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient)
             throws NetconfDocumentedException {
 
         EditStrategyType.resetDefaultStrategy();
@@ -81,12 +87,24 @@ public class EditConfigXmlParser {
         // Default op
         Optional<XmlElement> defaultContent = xml
                 .getOnlyChildElementWithSameNamespaceOptionally(EditConfigXmlParser.DEFAULT_OPERATION_KEY);
-        if (defaultContent.isPresent())
-            EditStrategyType.setDefaultStrategy(EditStrategyType.valueOf(defaultContent.get().getTextContent()));
+        if (defaultContent.isPresent()) {
+            String mergeStrategyString = defaultContent.get().getTextContent();
+            logger.trace("Setting merge strategy to {}", mergeStrategyString);
+            EditStrategyType editStrategyType = EditStrategyType.valueOf(mergeStrategyString);
+            // FIXME: thread safety, remove global state
+            EditStrategyType.setDefaultStrategy(editStrategyType);
+        }
+        // FIXME: thread safety, remove global state
+        Set<ObjectName> instancesForFillingServiceRefMapping = Collections.emptySet();
+        if (EditStrategyType.defaultStrategy() == EditStrategyType.merge) {
+            instancesForFillingServiceRefMapping = Datastore.getInstanceQueryStrategy(targetDatastore, transactionProvider)
+                    .queryInstances(configRegistryClient);
+            logger.trace("Pre-filling services from following instances: {}", instancesForFillingServiceRefMapping);
+        }
 
         XmlElement configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
 
-        return new EditConfigXmlParser.EditConfigExecution(xml, cfgMapping, configElement, testOption);
+        return new EditConfigXmlParser.EditConfigExecution(xml, cfgMapping, configElement, testOption, instancesForFillingServiceRefMapping);
     }
 
     private void removeMountpointsFromConfig(XmlElement configElement, XmlElement mountpointsElement) {
@@ -123,9 +141,9 @@ public class EditConfigXmlParser {
         Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements;
         TestOption testOption;
 
-        EditConfigExecution(XmlElement xml, Config configResolver, XmlElement configElement, TestOption testOption) {
+        EditConfigExecution(XmlElement xml, Config configResolver, XmlElement configElement, TestOption testOption, Set<ObjectName> instancesForFillingServiceRefMapping) {
             this.editConfigXml = xml;
-            this.resolvedXmlElements = configResolver.fromXml(configElement);
+            this.resolvedXmlElements = configResolver.fromXml(configElement, instancesForFillingServiceRefMapping);
             this.testOption = testOption;
         }
 

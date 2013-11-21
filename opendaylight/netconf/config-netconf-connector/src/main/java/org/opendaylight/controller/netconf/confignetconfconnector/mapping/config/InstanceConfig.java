@@ -109,17 +109,19 @@ public final class InstanceConfig {
                 depTracker).prepareResolving(yangToAttrConfig);
 
         for (Entry<String, AttributeConfigElement> configDefEntry : mappedConfig.getConfiguration().entrySet()) {
+            AttributeConfigElement value = configDefEntry.getValue();
+            String attributeName = configDefEntry.getKey();
             try {
-
                 AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy = resolvingStrategies
-                        .get(configDefEntry.getKey());
+                        .get(attributeName);
+                logger.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
 
-                configDefEntry.getValue().resolveValue(attributeResolvingStrategy, configDefEntry.getKey());
-                configDefEntry.getValue().setJmxName(
-                        yangToAttrConfig.get(configDefEntry.getKey()).getUpperCaseCammelCase());
+                value.resolveValue(attributeResolvingStrategy, attributeName);
+                value.setJmxName(
+                        yangToAttrConfig.get(attributeName).getUpperCaseCammelCase());
             } catch (Exception e) {
-                throw new IllegalStateException("Unable to resolve value " + configDefEntry.getValue()
-                        + " to attribute " + configDefEntry.getKey(), e);
+                throw new IllegalStateException("Unable to resolve value " + value
+                        + " to attribute " + attributeName, e);
             }
         }
     }

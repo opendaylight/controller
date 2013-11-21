@@ -17,7 +17,6 @@ import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
 import java.util.Collection;
-import java.util.Collections;
 
 public class ModuleConfig {
 
@@ -29,10 +28,6 @@ public class ModuleConfig {
         this.moduleName = moduleName;
         this.instanceConfig = mbeanMapping;
         this.providedServices = providedServices;
-    }
-
-    public ModuleConfig(String key, InstanceConfig instanceConfig) {
-        this(key, instanceConfig, Collections.<String> emptyList());
     }
 
     public InstanceConfig getMbeanMapping() {

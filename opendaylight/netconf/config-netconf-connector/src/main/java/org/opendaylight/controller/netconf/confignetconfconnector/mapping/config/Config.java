@@ -8,13 +8,6 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -25,20 +18,37 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 public class Config {
+    private final Logger logger = LoggerFactory.getLogger(Config.class);
 
-    private final Map<String, Map<String, ModuleConfig>> moduleConfigs;
+    private final Map<String/* Namespace from yang file */,
+            Map<String /* Name of module entry from yang file */, ModuleConfig>> moduleConfigs;
+    private final Map<String, ModuleConfig> moduleNamesToConfigs;
 
     public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs) {
         this.moduleConfigs = moduleConfigs;
+        Map<String, ModuleConfig> moduleNamesToConfigs = new HashMap<>();
+        for (Entry<String, Map<String, ModuleConfig>> entry : moduleConfigs.entrySet()) {
+            moduleNamesToConfigs.putAll(entry.getValue());
+        }
+        this.moduleNamesToConfigs = Collections.unmodifiableMap(moduleNamesToConfigs);
     }
 
     private Map<String, Map<String, Collection<ObjectName>>> getMappedInstances(Set<ObjectName> instancesToMap,
@@ -64,7 +74,7 @@ public class Config {
                 // All found instances add to service tracker in advance
                 // This way all instances will be serialized as all available
                 // services when get-config is triggered
-                // (even if they are not used as services by other onstances)
+                // (even if they are not used as services by other instances)
                 // = more user friendly
                 addServices(serviceTracker, instances, mbeEntry.getValue().getProvidedServices());
 
@@ -152,12 +162,12 @@ public class Config {
     // TODO refactor, replace string representing namespace with namespace class
     // TODO refactor, replace Map->Multimap with e.g. ConfigElementResolved
     // class
-    public Map<String, Multimap<String, ModuleElementResolved>> fromXml(XmlElement xml) {
+    public Map<String, Multimap<String, ModuleElementResolved>> fromXml(XmlElement xml, Set<ObjectName> instancesForFillingServiceRefMapping) {
         Map<String, Multimap<String, ModuleElementResolved>> retVal = Maps.newHashMap();
 
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        Services serviceTracker = fromXmlServices(xml, recognisedChildren);
+        Services serviceTracker = fromXmlServices(xml, recognisedChildren, instancesForFillingServiceRefMapping);
         List<XmlElement> moduleElements = fromXmlModules(xml, recognisedChildren);
 
         xml.checkUnrecognisedElements(recognisedChildren);
@@ -208,7 +218,7 @@ public class Config {
         innerMap.put(factoryName, moduleElementResolved);
     }
 
-    private Services fromXmlServices(XmlElement xml, List<XmlElement> recognisedChildren) {
+    private Services fromXmlServices(XmlElement xml, List<XmlElement> recognisedChildren, Set<ObjectName> instancesForFillingServiceRefMapping) {
         Optional<XmlElement> servicesElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.SERVICES_KEY,
                 XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
 
@@ -219,8 +229,23 @@ public class Config {
         } else {
             mappedServices = new HashMap<>();
         }
+        Services services = Services.resolveServices(mappedServices);
+        // merge with what candidate db contains by default - ref_
 
-        return Services.resolveServices(mappedServices);
+        for(ObjectName existingON: instancesForFillingServiceRefMapping) {
+            logger.trace("Filling services from {}", existingON);
+            // get all its services
+            String factoryName = ObjectNameUtil.getFactoryName(existingON);
+            ModuleConfig moduleConfig = moduleNamesToConfigs.get(factoryName);
+
+            checkState(moduleConfig != null, "Cannot find ModuleConfig with name " + factoryName + " in " + moduleNamesToConfigs);
+            // Set<String> services = ;
+            for (String serviceName : moduleConfig.getProvidedServices()) {
+                services.addServiceEntry(serviceName, existingON);
+            }
+        }
+
+        return services;
     }
 
     private String getFactoryName(String factoryNameWithPrefix, String prefixOrEmptyString) {

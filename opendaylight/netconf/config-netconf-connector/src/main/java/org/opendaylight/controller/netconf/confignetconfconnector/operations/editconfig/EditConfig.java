@@ -147,14 +147,17 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     public static Config getConfigMapping(ConfigRegistryClient configRegistryClient,
-            Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
+            Map<String/* Namespace from yang file */,
+                    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
         Map<String, Map<String, ModuleConfig>> factories = transform(configRegistryClient, mBeanEntries);
         return new Config(factories);
     }
 
     // TODO refactor
-    private static Map<String, Map<String, ModuleConfig>> transform(final ConfigRegistryClient configRegistryClient,
-            Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
+    private static Map<String/* Namespace from yang file */,
+            Map<String /* Name of module entry from yang file */, ModuleConfig>> transform
+    (final ConfigRegistryClient configRegistryClient, Map<String/* Namespace from yang file */,
+                    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
         return Maps.transformEntries(mBeanEntries,
                 new Maps.EntryTransformer<String, Map<String, ModuleMXBeanEntry>, Map<String, ModuleConfig>>() {
 
@@ -164,9 +167,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                                 new Maps.EntryTransformer<String, ModuleMXBeanEntry, ModuleConfig>() {
 
                                     @Override
-                                    public ModuleConfig transformEntry(String key, ModuleMXBeanEntry value) {
-                                        return new ModuleConfig(key, new InstanceConfig(configRegistryClient, value
-                                                .getAttributes()));
+                                    public ModuleConfig transformEntry(String key, ModuleMXBeanEntry moduleMXBeanEntry) {
+                                        return new ModuleConfig(key, new InstanceConfig(configRegistryClient, moduleMXBeanEntry
+                                                .getAttributes()), moduleMXBeanEntry.getProvidedServices().values());
                                     }
                                 });
                     }
@@ -184,7 +187,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
         Config cfg = getConfigMapping(configRegistryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
         try {
-            editConfigExecution = editConfigXmlParser.fromXml(xml, cfg);
+            editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, configRegistryClient);
         } catch (IllegalStateException e) {
             logger.warn("Error parsing xml", e);
             final Map<String, String> errorInfo = new HashMap<>();
