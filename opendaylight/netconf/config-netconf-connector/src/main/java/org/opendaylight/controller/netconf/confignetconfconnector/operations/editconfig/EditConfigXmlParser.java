@@ -47,7 +47,7 @@ public class EditConfigXmlParser {
                                                     TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient)
             throws NetconfDocumentedException {
 
-        EditStrategyType.resetDefaultStrategy();
+        EditStrategyType editStrategyType = EditStrategyType.getDefaultStrategy();
 
         xml.checkName(EditConfigXmlParser.EDIT_CONFIG);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
@@ -90,13 +90,10 @@ public class EditConfigXmlParser {
         if (defaultContent.isPresent()) {
             String mergeStrategyString = defaultContent.get().getTextContent();
             logger.trace("Setting merge strategy to {}", mergeStrategyString);
-            EditStrategyType editStrategyType = EditStrategyType.valueOf(mergeStrategyString);
-            // FIXME: thread safety, remove global state
-            EditStrategyType.setDefaultStrategy(editStrategyType);
+            editStrategyType = EditStrategyType.valueOf(mergeStrategyString);
         }
-        // FIXME: thread safety, remove global state
         Set<ObjectName> instancesForFillingServiceRefMapping = Collections.emptySet();
-        if (EditStrategyType.defaultStrategy() == EditStrategyType.merge) {
+        if (editStrategyType == EditStrategyType.merge) {
             instancesForFillingServiceRefMapping = Datastore.getInstanceQueryStrategy(targetDatastore, transactionProvider)
                     .queryInstances(configRegistryClient);
             logger.trace("Pre-filling services from following instances: {}", instancesForFillingServiceRefMapping);
@@ -104,7 +101,8 @@ public class EditConfigXmlParser {
 
         XmlElement configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
 
-        return new EditConfigXmlParser.EditConfigExecution(xml, cfgMapping, configElement, testOption, instancesForFillingServiceRefMapping);
+        return new EditConfigXmlParser.EditConfigExecution(xml, cfgMapping, configElement, testOption,
+                instancesForFillingServiceRefMapping, editStrategyType);
     }
 
     private void removeMountpointsFromConfig(XmlElement configElement, XmlElement mountpointsElement) {
@@ -137,14 +135,17 @@ public class EditConfigXmlParser {
 
     @VisibleForTesting
     static class EditConfigExecution {
-        XmlElement editConfigXml;
-        Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements;
-        TestOption testOption;
+        private final XmlElement editConfigXml;
+        private final Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements;
+        private final TestOption testOption;
+        private final EditStrategyType defaultEditStrategyType;
 
-        EditConfigExecution(XmlElement xml, Config configResolver, XmlElement configElement, TestOption testOption, Set<ObjectName> instancesForFillingServiceRefMapping) {
+        EditConfigExecution(XmlElement xml, Config configResolver, XmlElement configElement, TestOption testOption, Set<ObjectName> instancesForFillingServiceRefMapping,
+                            EditStrategyType defaultStrategy) {
             this.editConfigXml = xml;
-            this.resolvedXmlElements = configResolver.fromXml(configElement, instancesForFillingServiceRefMapping);
+            this.resolvedXmlElements = configResolver.fromXml(configElement, instancesForFillingServiceRefMapping, defaultStrategy);
             this.testOption = testOption;
+            this.defaultEditStrategyType = defaultStrategy;
         }
 
         boolean shouldTest() {
@@ -153,6 +154,14 @@ public class EditConfigXmlParser {
 
         boolean shouldSet() {
             return testOption == TestOption.set || testOption == TestOption.testThenSet;
+        }
+
+        Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements() {
+            return resolvedXmlElements;
+        }
+
+        EditStrategyType getDefaultStrategy() {
+            return defaultEditStrategyType;
         }
     }
 }

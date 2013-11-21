@@ -25,20 +25,26 @@ public class InstanceConfigElementResolved {
     private final EditStrategyType editStrategy;
     private final Map<String, AttributeConfigElement> configuration;
 
-    public InstanceConfigElementResolved(String strat, Map<String, AttributeConfigElement> configuration) {
-        EditStrategyType valueOf = checkStrategy(strat);
+    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy) {
+        EditStrategyType valueOf = checkStrategy(currentStrategy, defaultStrategy);
         this.editStrategy = valueOf;
         this.configuration = configuration;
     }
 
-    EditStrategyType checkStrategy(String strat) {
-        EditStrategyType valueOf = EditStrategyType.valueOf(strat);
-        if (EditStrategyType.defaultStrategy().isEnforcing()) {
+    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy) {
+        editStrategy = defaultStrategy;
+        this.configuration = configuration;
+    }
+
+
+    EditStrategyType checkStrategy(String currentStrategy, EditStrategyType defaultStrategy) {
+        EditStrategyType valueOf = EditStrategyType.valueOf(currentStrategy);
+        if (defaultStrategy.isEnforcing()) {
             Preconditions
                     .checkArgument(
-                            valueOf == EditStrategyType.defaultStrategy(),
+                            valueOf == defaultStrategy,
                             "With "
-                                    + EditStrategyType.defaultStrategy()
+                                    + defaultStrategy
                                     + " as "
                                     + EditConfigXmlParser.DEFAULT_OPERATION_KEY
                                     + " operations on module elements are not permitted since the default option is restrictive");
@@ -46,10 +52,6 @@ public class InstanceConfigElementResolved {
         return valueOf;
     }
 
-    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration) {
-        editStrategy = EditStrategyType.defaultStrategy();
-        this.configuration = configuration;
-    }
 
     public EditConfigStrategy getEditStrategy() {
         return editStrategy.getFittingStrategy();

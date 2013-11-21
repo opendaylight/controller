@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -162,7 +163,8 @@ public class Config {
     // TODO refactor, replace string representing namespace with namespace class
     // TODO refactor, replace Map->Multimap with e.g. ConfigElementResolved
     // class
-    public Map<String, Multimap<String, ModuleElementResolved>> fromXml(XmlElement xml, Set<ObjectName> instancesForFillingServiceRefMapping) {
+    public Map<String, Multimap<String, ModuleElementResolved>> fromXml(XmlElement xml, Set<ObjectName> instancesForFillingServiceRefMapping,
+                                                                        EditStrategyType defaultEditStrategyType) {
         Map<String, Multimap<String, ModuleElementResolved>> retVal = Maps.newHashMap();
 
         List<XmlElement> recognisedChildren = Lists.newArrayList();
@@ -173,7 +175,7 @@ public class Config {
         xml.checkUnrecognisedElements(recognisedChildren);
 
         for (XmlElement moduleElement : moduleElements) {
-            resolveModule(retVal, serviceTracker, moduleElement);
+            resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType);
         }
 
         return retVal;
@@ -194,7 +196,7 @@ public class Config {
     }
 
     private void resolveModule(Map<String, Multimap<String, ModuleElementResolved>> retVal, Services serviceTracker,
-            XmlElement moduleElement) {
+            XmlElement moduleElement, EditStrategyType defaultStrategy) {
         XmlElement typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
         Entry<String, String> prefixToNamespace = typeElement.findNamespaceOfTextContent();
         String moduleNamespace = prefixToNamespace.getValue();
@@ -213,7 +215,7 @@ public class Config {
         }
 
         ModuleElementResolved moduleElementResolved = moduleMapping.fromXml(moduleElement, serviceTracker,
-                instanceName, moduleNamespace);
+                instanceName, moduleNamespace, defaultStrategy);
 
         innerMap.put(factoryName, moduleElementResolved);
     }
