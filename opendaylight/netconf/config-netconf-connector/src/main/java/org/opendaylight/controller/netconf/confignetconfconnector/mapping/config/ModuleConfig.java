@@ -8,34 +8,52 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ModuleConfig {
 
     private final String moduleName;
     private final InstanceConfig instanceConfig;
-    private final Collection<String> providedServices;
+    // TODO 2 services from same namespace ?
+    private final Map<String, String> providedServices;
 
-    public ModuleConfig(String moduleName, InstanceConfig mbeanMapping, Collection<String> providedServices) {
+    public ModuleConfig(String moduleName, InstanceConfig mbeanMapping, Collection<QName> providedServices) {
         this.moduleName = moduleName;
         this.instanceConfig = mbeanMapping;
-        this.providedServices = providedServices;
+        this.providedServices = mapServices(providedServices);
+    }
+
+    private Map<String, String> mapServices(Collection<QName> providedServices) {
+        HashMap<String, String> mapped = Maps.newHashMap();
+
+        for (QName providedService : providedServices) {
+            String key = providedService.getNamespace().toString();
+            Preconditions.checkState(mapped.containsKey(key) == false);
+            mapped.put(key, providedService.getLocalName());
+        }
+
+        return  mapped;
     }
 
     public InstanceConfig getMbeanMapping() {
         return instanceConfig;
     }
 
-    public Collection<String> getProvidedServices() {
+    public Map<String, String> getProvidedServices() {
         return providedServices;
     }
 
@@ -64,7 +82,7 @@ public class ModuleConfig {
 
     private String getPrefix(String namespace) {
         // if(namespace.contains(":")==false)
-        return "prefix";
+        return XmlNetconfConstants.PREFIX;
         // return namespace.substring(namespace.lastIndexOf(':') + 1,
         // namespace.length());
 

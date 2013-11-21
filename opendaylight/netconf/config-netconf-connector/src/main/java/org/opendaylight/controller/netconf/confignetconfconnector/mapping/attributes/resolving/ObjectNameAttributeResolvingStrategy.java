@@ -40,13 +40,11 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
 
         ObjectNameAttributeMappingStrategy.MappedDependency mappedDep = (ObjectNameAttributeMappingStrategy.MappedDependency) value;
         String serviceName = mappedDep.getServiceName();
-        if (serviceName.contains(":")) {
-            // hack for yuma
-            serviceName = serviceName.substring(serviceName.indexOf(":") + 1);
-        }
         String refName = mappedDep.getRefName();
-        logger.trace("Getting service instance by service name {} and ref name {}", serviceName, refName);
-        ServiceInstance byRefName = serviceTracker.getByServiceAndRefName(serviceName, refName);
+        String namespace = mappedDep.getNamespace();
+        logger.trace("Getting service instance by service name {} : {} and ref name {}", namespace, serviceName, refName);
+
+        ServiceInstance byRefName = serviceTracker.getByServiceAndRefName(namespace, serviceName, refName);
         ObjectName on = ObjectNameUtil.createReadOnlyModuleON(byRefName.getModuleName(), byRefName.getInstanceName());
         logger.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
         return Optional.of(on);

@@ -74,8 +74,9 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
             DependencyAttribute attributeIfc) {
         String serviceName = attributeIfc.getDependency().getSie().getQName().getLocalName();
+        String namespace = attributeIfc.getDependency().getSie().getQName().getNamespace().toString();
         return new ObjectNameAttributeMappingStrategy((SimpleType<?>) attributeIfc.getOpenType(), dependencyTracker,
-                serviceName);
+                serviceName, namespace);
     }
 
     @Override
