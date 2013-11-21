@@ -24,6 +24,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.ObjectResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.AttributeWritingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -126,7 +127,8 @@ public final class InstanceConfig {
         }
     }
 
-    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, Services services, String moduleNamespace) {
+    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, Services services, String moduleNamespace,
+                                                 EditStrategyType defaultStrategy) {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig);
@@ -151,7 +153,7 @@ public final class InstanceConfig {
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
-                retVal) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal);
+                retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
 
         resolveConfiguration(instanceConfigElementResolved, services);
         return instanceConfigElementResolved;

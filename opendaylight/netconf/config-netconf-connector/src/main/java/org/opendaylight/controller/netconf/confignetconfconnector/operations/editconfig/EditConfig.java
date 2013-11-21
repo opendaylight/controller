@@ -27,6 +27,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -88,9 +89,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void executeTests(ConfigRegistryClient configRegistryClient,
-            EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
+            EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         try {
-            test(configRegistryClient, editConfigExecution.resolvedXmlElements);
+            test(configRegistryClient, editConfigExecution.getResolvedXmlElements(), editConfigExecution.getDefaultStrategy());
         } catch (IllegalStateException | JmxAttributeValidationException | ValidationException e) {
             logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
@@ -102,12 +103,12 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void test(ConfigRegistryClient configRegistryClient,
-            Map<String, Multimap<String, ModuleElementResolved>> resolvedModules) {
+                      Map<String, Multimap<String, ModuleElementResolved>> resolvedModules, EditStrategyType editStrategyType) {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
 
             // default strategy = replace wipes config
-            if (EditStrategyType.defaultStrategy() == EditStrategyType.replace) {
+            if (editStrategyType == EditStrategyType.replace) {
                 transactionProvider.wipeTestTransaction(taON);
             }
             setOnTransaction(configRegistryClient, resolvedModules, taON);
@@ -122,10 +123,10 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         ObjectName taON = transactionProvider.getOrCreateTransaction();
 
         // default strategy = replace wipes config
-        if (EditStrategyType.defaultStrategy() == EditStrategyType.replace) {
+        if (editConfigExecution.getDefaultStrategy() == EditStrategyType.replace) {
             transactionProvider.wipeTransaction();
         }
-        setOnTransaction(configRegistryClient, editConfigExecution.resolvedXmlElements, taON);
+        setOnTransaction(configRegistryClient, editConfigExecution.getResolvedXmlElements(), taON);
     }
 
     private void setOnTransaction(ConfigRegistryClient configRegistryClient,

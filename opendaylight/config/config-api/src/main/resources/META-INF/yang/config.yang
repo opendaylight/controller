@@ -122,9 +122,7 @@ module config {
                  the actual service-type which is actually required.";
 
             mandatory true;
-            type leafref {
-                path "/config:services/config:service/config:type";
-            }
+            type service-type-ref;
         }
 
         leaf name {

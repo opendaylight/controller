@@ -89,10 +89,11 @@ public class EditConfigTest {
         Config cfg = mock(Config.class);
         XmlElement xmlElement = mock(XmlElement.class);
         Set<ObjectName> instancesForFillingServiceRefMapping = Collections.emptySet();
-        doReturn(resolvedXmlElements).when(cfg).fromXml(xmlElement, instancesForFillingServiceRefMapping);
+        EditStrategyType defaultStrategy = EditStrategyType.getDefaultStrategy();
+        doReturn(resolvedXmlElements).when(cfg).fromXml(xmlElement, instancesForFillingServiceRefMapping, defaultStrategy);
 
         EditConfigExecution editConfigExecution = new EditConfigExecution(null, cfg, xmlElement,
-                EditConfigXmlParser.TestOption.testThenSet, instancesForFillingServiceRefMapping);
+                EditConfigXmlParser.TestOption.testThenSet, instancesForFillingServiceRefMapping, defaultStrategy);
 
         edit.getResponseInternal(XmlUtil.newDocument(), editConfigExecution);
 

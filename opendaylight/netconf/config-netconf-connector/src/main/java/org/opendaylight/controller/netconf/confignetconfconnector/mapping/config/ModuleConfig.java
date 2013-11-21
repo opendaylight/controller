@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -70,9 +71,9 @@ public class ModuleConfig {
     }
 
     public ModuleElementResolved fromXml(XmlElement moduleElement, Services depTracker, String instanceName,
-            String moduleNamespace) {
+            String moduleNamespace, EditStrategyType defaultStrategy) {
 
-        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace);
+        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy);
         return new ModuleElementResolved(instanceName, ice);
     }
 
