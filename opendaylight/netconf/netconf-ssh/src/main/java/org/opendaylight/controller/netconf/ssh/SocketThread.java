@@ -108,7 +108,6 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                         return;
                                     }
                                     session.getChannel().write(ByteBuffer.wrap(bytes,0,size));
-//                                    session.getChannel().re
                                 }
                             }
 
