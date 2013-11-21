@@ -41,7 +41,7 @@ public class Activator extends AbstractProvider {
     _logger.debug("Stopping...");
     if (registration != null) registration.unregister();
 
-    Client.getInstance().stop();
+    //Alex:Client.getInstance().stop();
     Server.getInstance().stop();
 
   }
@@ -56,7 +56,7 @@ public class Activator extends AbstractProvider {
     _logger.debug("Registering [{}]", registration);
 
     ServiceRegistration routerReg =
-    context.registerService((Class<Client$>) Client.getInstance().getClass(), Client.getInstance(), emptyProperties);
+    context.registerService((Class<Client>) Client.getInstance().getClass(), Client.getInstance(), emptyProperties);
 
     Client.getInstance().start();
     _logger.debug("Registering [{}]", routerReg);
