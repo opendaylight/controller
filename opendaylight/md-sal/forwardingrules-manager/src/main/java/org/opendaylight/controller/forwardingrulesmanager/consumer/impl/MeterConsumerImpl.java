@@ -66,8 +66,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
     private IContainer container;
 
     public MeterConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Meters.class)
-                .node(Meter.class).toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Meters.class).child(Meter.class).toInstance();
         meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);
         clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
 

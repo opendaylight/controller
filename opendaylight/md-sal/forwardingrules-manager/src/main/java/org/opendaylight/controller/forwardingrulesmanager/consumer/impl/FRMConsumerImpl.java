@@ -38,23 +38,24 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
     public void onSessionInitiated(ProviderContext session) {
 
         FRMConsumerImpl.p_session = session;
-
+        System.out.println("1");
         if (!getDependentModule()) {
             logger.error("Unable to fetch handlers for dependent modules");
             System.out.println("Unable to fetch handlers for dependent modules");
             return;
         }
-
+        System.out.println("2");
         if (null != session) {
             notificationService = session.getSALService(NotificationService.class);
-
+            System.out.println("3");
             if (null != notificationService) {
                 dataBrokerService = session.getSALService(DataBrokerService.class);
-
+                System.out.println("4");
                 if (null != dataBrokerService) {
                     dataProviderService = session.getSALService(DataProviderService.class);
-
+                    System.out.println("5");
                     if (null != dataProviderService) {
+                        System.out.println("6");
                         flowImplRef = new FlowConsumerImpl();
                         // groupImplRef = new GroupConsumerImpl();
                         registerWithOSGIConsole();

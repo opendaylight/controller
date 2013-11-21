@@ -47,7 +47,7 @@
         <module>inventory-manager</module>
         <module>statistics-manager</module>
         <module>forwardingrules-manager</module>
-        
+        <module>md_frm_test</module>
         <!-- Compability Packages -->
         <module>compatibility</module>
         <module>zeromq-routingtable/implementation</module>

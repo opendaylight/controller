@@ -129,6 +129,11 @@
           <artifactId>forwardingrules-manager</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
+        <dependency>	
+          <groupId>org.opendaylight.controller.md</groupId>	
+          <artifactId>md_frm_test</artifactId>	
+          <version>${mdsal.version}</version>	
+        </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
@@ -235,29 +240,6 @@
             <artifactId>org.apache.xml.resolver</artifactId>
             <version>1.2.0</version>
         </dependency>
-
-         <!-- threadpool -->
-          <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>threadpool-config-api</artifactId>
-              <version>${config.version}</version>
-          </dependency>
-          <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>threadpool-config-impl</artifactId>
-              <version>${config.version}</version>
-          </dependency>
-          <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>netty-event-executor-config</artifactId>
-              <version>${config.version}</version>
-          </dependency>
-          <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>netty-event-executor-config</artifactId>
-              <version>${config.version}</version>
-          </dependency>
-
 
           <!-- toaster example I'm pretty sure we should trim -->
          <dependency>

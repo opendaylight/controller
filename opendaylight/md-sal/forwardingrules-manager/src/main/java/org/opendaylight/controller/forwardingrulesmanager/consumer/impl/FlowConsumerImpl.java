@@ -86,9 +86,9 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private boolean inContainerMode; // being used by global instance only
 
     public FlowConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Flows.class).toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).child(Flow.class).toInstance();
         flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
-
+        System.out.println("7");
         if (null == flowService) {
             logger.error("Consumer SAL Service is down or NULL. FRM may not function as intended");
             System.out.println("Consumer SAL Service is down or NULL.");
@@ -107,7 +107,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
         // For switch events
         listener1Reg = FRMConsumerImpl.getNotificationService().registerNotificationListener(flowEventListener);
-
+        System.out.println("8");
         if (null == listener1Reg) {
             logger.error("Listener to listen on flow data modifcation events");
             System.out.println("Consumer SAL Service is down or NULL.");
@@ -115,21 +115,22 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         }
         // addFlowTest();
         System.out.println("-------------------------------------------------------------------");
-        allocateCaches();
+    //    allocateCaches();
         commitHandler = new FlowDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
-        clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
+      /* clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
                 IClusterContainerServices.class, this);
-        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);*/
         /*
          * If we are not the first cluster node to come up, do not initialize
          * the static flow entries ordinal
          */
-        if (staticFlowsOrdinal.size() == 0) {
+    /*    if (staticFlowsOrdinal.size() == 0) {
             staticFlowsOrdinal.put(0, Integer.valueOf(0));
-        }
+        }*/
     }
 
+    @SuppressWarnings("unused")
     private void allocateCaches() {
 
         if (this.clusterContainerService == null) {
@@ -189,12 +190,13 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
         AddFlowInputBuilder input = new AddFlowInputBuilder();
         List<Instruction> inst = (dataObject).getInstructions().getInstruction();
+        System.out.println("add Flow-------------------------------------------------------------------");
         input.setNode((dataObject).getNode());
         input.setPriority((dataObject).getPriority());
         input.setMatch((dataObject).getMatch());
         input.setCookie((dataObject).getCookie());
         input.setInstructions((dataObject).getInstructions());
-        dataObject.getMatch().getLayer3Match();
+        
         for (int i = 0; i < inst.size(); i++) {
             System.out.println("i = " + i + inst.get(i).getInstruction().toString());
             System.out.println("i = " + i + inst.get(i).toString());
@@ -203,9 +205,9 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         System.out.println("Instruction list" + (dataObject).getInstructions().getInstruction().toString());
 
         // updating the staticflow cache
-        Integer ordinal = staticFlowsOrdinal.get(0);
-        staticFlowsOrdinal.put(0, ++ordinal);
-        staticFlows.put(ordinal, dataObject);
+      //  Integer ordinal = staticFlowsOrdinal.get(0);
+       // staticFlowsOrdinal.put(0, ++ordinal);
+       // staticFlows.put(ordinal, dataObject);
 
         // We send flow to the sounthbound plugin
         flowService.addFlow(input.build());
@@ -323,13 +325,14 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
          *
          */
         void prepareUpdate() {
-
+            System.out.println("Entering prepare update  in FlowDatacommitHandler");
             Set<Entry<InstanceIdentifier<?>, DataObject>> puts = modification.getUpdatedConfigurationData().entrySet();
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
 
                 // validating the DataObject
 
                 Status status = validate(container, (NodeFlow) entry);
+                System.out.println("Entering prepare update  in FlowDatacommitHandler"+status.isSuccess());
                 if (!status.isSuccess()) {
                     logger.warn("Invalid Configuration for flow {}. The failure is {}", entry, status.getDescription());
                     String error = "Invalid Configuration (" + status.getDescription() + ")";
@@ -339,7 +342,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
                 // Presence check
                 if (flowEntryExists((NodeFlow) entry)) {
                     String error = "Entry with this name on specified table already exists";
-                    logger.warn("Entry with this name on specified table already exists: {}", entry);
+                    logger.error("Entry with this name on specified table already exists: {}", entry);
                     logger.error(error);
                     return;
                 }
@@ -357,6 +360,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
                     return;
                 }
                 if (entry.getValue() instanceof Flow) {
+                    System.out.println("Entering prepare update  in "+status.isSuccess());
                     Flow flow = (Flow) entry.getValue();
                     preparePutEntry(entry.getKey(), flow);
                 }
@@ -395,6 +399,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         public RpcResult<Void> finish() throws IllegalStateException {
 
             commitToPlugin(this);
+            System.out.println("commit to plugin-------------------------------------------------------------------");
             // We return true if internal transaction is successful.
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
             return Rpcs.getRpcResult(true, null, null);
