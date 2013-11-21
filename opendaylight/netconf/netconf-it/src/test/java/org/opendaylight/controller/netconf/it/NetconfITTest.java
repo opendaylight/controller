@@ -468,6 +468,7 @@ public class NetconfITTest extends AbstractConfigTest {
         logger.info("SSH server on");
     }
 
+    @Test
     public void testSSH2Netconf() throws Exception {
         startSSHServer();
         try (NetconfClient netconfClient = createSession(sshAddress, "1")) {

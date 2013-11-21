@@ -19,6 +19,10 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-api</artifactId>
         </dependency>
         <dependency>
@@ -48,6 +52,7 @@
                             ch.ethz.ssh2,
                             ch.ethz.ssh2.signature,
                             io.netty.channel,
+                            io.netty.channel.nio,
                             io.netty.channel.socket,
                             io.netty.util,
                             io.netty.util.concurrent,
@@ -57,6 +62,7 @@
                             javax.xml.parsers,
                             javax.xml.xpath,
                             org.opendaylight.controller.netconf.api,
+                            org.opendaylight.controller.netconf.client,
                             org.opendaylight.controller.netconf.util,
                             org.opendaylight.controller.netconf.util.xml,
                             org.opendaylight.protocol.framework,

@@ -20,6 +20,7 @@ import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
+import org.opendaylight.controller.netconf.ssh.handler.SSHChannelInboundHandler;
 
 
 public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback
@@ -96,6 +97,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                         {
                             try (NetconfClientSession session = netconfClient.getClientSession())
                             {
+                                session.getChannel().pipeline().addLast(new SSHChannelInboundHandler(ss));
                                 byte[] bytes = new byte[1024];
                                 while (true)
                                 {
@@ -106,7 +108,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                         return;
                                     }
                                     session.getChannel().write(ByteBuffer.wrap(bytes,0,size));
-                                    session.getChannel().pipeline().
+//                                    session.getChannel().re
                                 }
                             }
 
