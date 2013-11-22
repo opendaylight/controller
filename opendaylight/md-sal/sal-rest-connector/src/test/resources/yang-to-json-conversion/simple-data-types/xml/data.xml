@@ -24,8 +24,16 @@
 	<lfbits>bit3</lfbits>	
 	<lfbinary>AAaacdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ%%-#^</lfbinary>
 	<lfempty></lfempty>
-	<lflstunion>324</lflstunion>
-	<lflstunion>33.3</lflstunion>
-	<lflstunion>lfunion</lflstunion>
-	<lflstunion>true</lflstunion>
+	<lfunion1>324</lfunion1>
+	<lfunion2>33.3</lfunion2>
+	<lfunion3>55</lfunion3>
+	<lfunion4>true</lfunion4>
+	<lfunion5>true</lfunion5>
+	<lfunion6>false</lfunion6>
+	<lfunion7></lfunion7>
+	<lfunion8></lfunion8>
+	<lfunion9></lfunion9>
+	<lfunion10>bt1</lfunion10>
+	<lfunion11>33</lfunion11>
+	<lfunion12>false</lfunion12>
 </cont>

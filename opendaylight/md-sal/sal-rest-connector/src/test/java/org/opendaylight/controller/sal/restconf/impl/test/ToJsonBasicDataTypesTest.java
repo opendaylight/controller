@@ -18,10 +18,6 @@ public class ToJsonBasicDataTypesTest {
     @Test
     public void simpleYangDataTest() {
         String jsonOutput;
-        // jsonOutput =
-        // TestUtils.readJsonFromFile("/yang-to-json-conversion/simple-yang-types/xml/awaited_output.json",
-        // false);
-
         jsonOutput = TestUtils.convertCompositeNodeDataAndYangToJson(
                 TestUtils.loadCompositeNode("/yang-to-json-conversion/simple-data-types/xml/data.xml"),
                 "/yang-to-json-conversion/simple-data-types", "/yang-to-json-conversion/simple-data-types/xml");
@@ -73,7 +69,7 @@ public class ToJsonBasicDataTypesTest {
         // boolean lfref1Checked = false;
         boolean lfemptyChecked = false;
         boolean lfstr1Checked = false;
-        
+
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             JsonToken peek = null;
@@ -148,10 +144,8 @@ public class ToJsonBasicDataTypesTest {
                 jReader.nextNull();
                 jReader.endArray();
                 lfemptyChecked = true;
-                // TODO: test will be implemented when functionality will be
-                // implemented
-            } else if (keyName.equals("lflstunion")) {
-                jReader.skipValue();
+            } else if (keyName.startsWith("lfunion")) {
+                checkLfUnion(jReader, keyName, peek);
             } else {
                 assertTrue("Key " + keyName + " doesn't exists in yang file.", false);
             }
@@ -179,5 +173,45 @@ public class ToJsonBasicDataTypesTest {
 
         jReader.endObject();
 
+    }
+
+    private void checkLfUnion(JsonReader jReader, String keyName, JsonToken peek) throws IOException {
+        if (keyName.equals("lfunion1")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion2")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion3")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextInt();
+        } else if (keyName.equals("lfunion4")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.BOOLEAN, peek);
+            jReader.nextBoolean();
+        } else if (keyName.equals("lfunion5")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion6")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion7")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion8")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion9")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion10")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion11")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
+            jReader.nextString();
+        } else if (keyName.equals("lfunion12")) {
+            assertEquals("Key " + keyName + " has incorrect type", JsonToken.BOOLEAN, peek);
+            jReader.nextBoolean();
+        }
     }
 }

@@ -5,6 +5,45 @@ module simple-data-types {
   revision 2013-11-12 {    
   }
   
+  typedef tpdfempty {
+  	type empty;
+  }
+  
+  typedef tpdfbit {
+  	type bits {
+  		bit b1;
+  		bit b2;
+  		bit b3;
+  	}
+  }
+  
+  typedef tpdfun4 {
+  	type boolean;
+  }
+  
+  typedef tpdfun3 {
+  	type union {
+  		type tpdfbit;
+  		type tpdfempty;
+  	}
+  }  
+  
+  typedef tpdfun2 {
+  	type union {
+  		type tpdfun3;
+  		type tpdfun4;
+  	}
+  }
+  
+  typedef tpdfun1 {
+  	type union {
+  		type uint8;
+  		type decimal64 {
+  			fraction-digits 2;
+  		}
+  	}
+  }
+  
   container cont {
 	  leaf lfnint8Min {
 	  	type int8; 
@@ -125,11 +164,86 @@ module simple-data-types {
     	type empty;
     }
     
-    leaf-list lflstunion {
+    leaf lfunion1 {
     	type union {
     		type uint16;
     		type string;
     	}
+    }
+    leaf lfunion2 {
+    	type union {
+    		type decimal64 {
+	  			fraction-digits 2;    		
+    		}
+    		type string;
+    	}
+    }
+    
+    leaf lfunion3 {
+    	type union {
+    		type empty;
+    		type string;
+    	}
+    }
+    
+    leaf lfunion4 {
+    	type union {
+    		type boolean;
+    		type string;
+    	}
+    }
+    
+    leaf lfunion5 {
+    	type union {
+    		type uint16;
+    		type string;
+    	}
+    }
+    
+    leaf lfunion6 {
+    	type union {
+    		type uint16;
+    		type empty;
+    	}
+    }
+    
+    leaf lfunion7 {
+		type tpdfun3;
+    }
+    
+    leaf lfunion8 {
+    	type union {
+    		type uint16;
+    		type string;
+    	}
+    }
+    
+    leaf lfunion9 {
+    	type union {
+    		type uint16;
+    		type boolean;    		
+    	}
+    }
+    
+    leaf lfunion10 {
+    	type union {
+    		type bits {
+    			bit bt1;
+    			bit bt2;
+    		}
+    		type boolean;    		
+    	}
+    }
+    
+    leaf lfunion11 {
+		type union {
+			type tpdfun1;
+			type tpdfun2;
+		}
+    }
+    
+    leaf lfunion12 {
+		type tpdfun2;
     }
 	  
 	  
