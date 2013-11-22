@@ -114,6 +114,17 @@ public class ContainerFlowConfig implements Serializable {
         //this.unidirectional = false;
     }
 
+    public ContainerFlowConfig(String name, String dlVlan, String srcIP, String dstIP, String proto, String srcPort,
+            String dstPort) {
+        this.name = name;
+        this.dlVlan = dlVlan;
+        this.nwSrc = srcIP;
+        this.nwDst = dstIP;
+        this.protocol = proto;
+        this.tpSrc = srcPort;
+        this.tpDst = dstPort;
+    }
+
 
     public ContainerFlowConfig(ContainerFlowConfig containerFlowConfig) {
         this.name = containerFlowConfig.name;
