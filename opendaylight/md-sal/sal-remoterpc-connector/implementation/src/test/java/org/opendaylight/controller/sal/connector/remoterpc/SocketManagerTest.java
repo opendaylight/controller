@@ -7,6 +7,7 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import com.google.common.base.Optional;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -55,7 +56,7 @@ public class SocketManagerTest {
   public void getManagedSocket_WhenPassedAValidAddress_ShouldReturnARpcSocket() throws Exception {
     String testAddress = "tcp://localhost:5554";
     RpcSocket rpcSocket = manager.getManagedSocket(testAddress);
-    Assert.assertEquals(testAddress, rpcSocket.address());
+    Assert.assertEquals(testAddress, rpcSocket.getAddress());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -75,11 +76,11 @@ public class SocketManagerTest {
     //Prepare data
     String firstAddress = "tcp://localhost:5554";
     RpcSocket firstRpcSocket = manager.getManagedSocket(firstAddress);
-    ZMQ.Socket firstZmqSocket = firstRpcSocket.socket();
+    ZMQ.Socket firstZmqSocket = firstRpcSocket.getSocket();
 
     String secondAddress = "tcp://localhost:5555";
     RpcSocket secondRpcSocket = manager.getManagedSocket(secondAddress);
-    ZMQ.Socket secondZmqSocket = secondRpcSocket.socket();
+    ZMQ.Socket secondZmqSocket = secondRpcSocket.getSocket();
 
     Assert.assertEquals(firstRpcSocket, manager.getManagedSocketFor(firstZmqSocket).get());
     Assert.assertEquals(secondRpcSocket, manager.getManagedSocketFor(secondZmqSocket).get());
@@ -87,16 +88,16 @@ public class SocketManagerTest {
 
   @Test
   public void getManagedSocket_WhenPassedNonManagedZmqSocket_ShouldReturnNone() throws Exception {
-    ZMQ.Socket nonManagedSocket = Context.zmqContext().socket(ZMQ.REQ);
+    ZMQ.Socket nonManagedSocket = Context.zmqContext.socket(ZMQ.REQ);
     nonManagedSocket.connect("tcp://localhost:5000");
 
     //Prepare data
     String firstAddress = "tcp://localhost:5554";
     RpcSocket firstRpcSocket = manager.getManagedSocket(firstAddress);
-    ZMQ.Socket firstZmqSocket = firstRpcSocket.socket();
+    ZMQ.Socket firstZmqSocket = firstRpcSocket.getSocket();
 
-    Assert.assertSame(scala.None$.MODULE$, manager.getManagedSocketFor(nonManagedSocket) );
-    Assert.assertSame(scala.None$.MODULE$, manager.getManagedSocketFor(null) );
+    Assert.assertSame(Optional.<RpcSocket>absent(), manager.getManagedSocketFor(nonManagedSocket) );
+    Assert.assertSame(Optional.<RpcSocket>absent(), manager.getManagedSocketFor(null) );
   }
 
   @Test
@@ -111,7 +112,7 @@ public class SocketManagerTest {
 
   @Test
   public void poller_WhenCalled_ShouldReturnAnInstanceOfPoller() throws Exception {
-    Assert.assertTrue (manager.poller() instanceof ZMQ.Poller);
+    Assert.assertTrue (manager.getPoller() instanceof ZMQ.Poller);
   }
 
 }
