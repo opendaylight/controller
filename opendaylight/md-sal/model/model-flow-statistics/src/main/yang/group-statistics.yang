@@ -54,6 +54,10 @@ module opendaylight-group-statistics {
 	rpc get-group-statistics {
 		input {
             uses inv:node;
+            leaf group-id{
+            	type group-types:group-id;
+            }
+           
         }
         output {
             uses group-types:group-statistics-reply;
