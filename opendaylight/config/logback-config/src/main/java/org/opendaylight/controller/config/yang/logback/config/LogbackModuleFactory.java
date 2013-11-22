@@ -8,6 +8,22 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.osgi.framework.BundleContext;
+import org.slf4j.LoggerFactory;
+
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -17,21 +33,10 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.osgi.framework.BundleContext;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.Sets;
 
 /**
 *
@@ -39,15 +44,15 @@ import java.util.Map.Entry;
 public class LogbackModuleFactory extends
         org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModuleFactory {
 
-    private static final String INSTANCE_NAME = "singleton";
+    public static final String INSTANCE_NAME = "singleton";
     private Map<String, LoggerTO> loggersDTOs;
     private Map<String, RollingFileAppenderTO> rollingDTOs;
     private Map<String, ConsoleAppenderTO> consoleDTOs;
     private Map<String, FileAppenderTO> fileDTOs;
 
     @Override
-    public LogbackModule instantiateModule(String instanceName,
-            DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
@@ -61,9 +66,8 @@ public class LogbackModuleFactory extends
     }
 
     @Override
-    public LogbackModule instantiateModule(String instanceName,
-            DependencyResolver dependencyResolver, LogbackModule oldModule,
-            AutoCloseable oldInstance, BundleContext bundleContext) {
+    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            LogbackModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
@@ -218,6 +222,16 @@ public class LogbackModuleFactory extends
             }
         }
         return Lists.newArrayList(loggersToReturn.values());
+    }
+
+    @Override
+    public Set<LogbackModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
+            BundleContext bundleContext) {
+        DependencyResolver resolver = dependencyResolverFactory.createDependencyResolver(new ModuleIdentifier(
+                getImplementationName(), INSTANCE_NAME));
+        LogbackModule defaultLogback = instantiateModule(INSTANCE_NAME, resolver, bundleContext);
+        Set<LogbackModule> defaultModules = Sets.newHashSet(defaultLogback);
+        return defaultModules;
     }
 
 }
