@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.connector.remoterpc.Client;
-import org.opendaylight.controller.sal.connector.remoterpc.Client$;
 import org.opendaylight.controller.sal.connector.remoterpc.Server;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
@@ -70,8 +69,8 @@ public class RouterTest {
 
     _logger.debug("Provider sends announcement [{}]", "heartbeat");
     provider.announce(QNAME);
-    ServiceReference routerRef = ctx.getServiceReference(Client$.class);
-    Client$ router = (Client$) ctx.getService(routerRef);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
+    Client router = (Client) ctx.getService(routerRef);
     _logger.debug("Found router[{}]", router);
     _logger.debug("Invoking RPC [{}]", QNAME);
     for (int i = 0; i < 3; i++) {
@@ -152,10 +151,10 @@ public class RouterTest {
     Server service = (Server) ctx.getService(ref);
     Assert.assertNotNull(service);
 
-    ServiceReference routerRef = ctx.getServiceReference(Client$.class);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
     if (routerRef == null) {
       ServiceRegistration routerReg =
-          ctx.registerService(Client$.class, Client.getInstance(), new Hashtable<String,String>()) ;
+          ctx.registerService(Client.class, Client.getInstance(), new Hashtable<String,String>()) ;
     }
 
 
