@@ -7,14 +7,9 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -36,9 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
@@ -116,9 +116,33 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     @Override
     public synchronized Document onNetconfMessage(Document message,
             NetconfSession session) throws NetconfDocumentedException {
-        NetconfOperationExecution netconfOperationExecution = getNetconfOperationWithHighestPriority(
-                message, session);
-        logger.debug("Forwarding netconf message {} to {}", XmlUtil.toString(message),
+        NetconfOperationExecution netconfOperationExecution = null;
+
+        String messageAsString = XmlUtil.toString(message);
+
+        try {
+            netconfOperationExecution = getNetconfOperationWithHighestPriority(
+                    message, session);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            logger.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
+
+            String errorMessage = String.format("Unable to handle rpc %s on session %s", messageAsString, session);
+            Map<String, String> errorInfo = Maps.newHashMap();
+
+            NetconfDocumentedException.ErrorTag tag = null;
+            if (e instanceof IllegalArgumentException) {
+                errorInfo.put(NetconfDocumentedException.ErrorTag.operation_not_supported.toString(), e.getMessage());
+                tag = NetconfDocumentedException.ErrorTag.operation_not_supported;
+            } else if (e instanceof IllegalStateException) {
+                errorInfo.put(NetconfDocumentedException.ErrorTag.operation_failed.toString(), e.getMessage());
+                tag = NetconfDocumentedException.ErrorTag.operation_failed;
+            }
+
+            throw new NetconfDocumentedException(errorMessage, e, NetconfDocumentedException.ErrorType.application,
+                    tag, NetconfDocumentedException.ErrorSeverity.error, errorInfo);
+        }
+
+        logger.debug("Forwarding netconf message {} to {}", messageAsString,
                 netconfOperationExecution.operationWithHighestPriority);
 
         final LinkedList<NetconfOperationFilterChain> chain = new LinkedList<>();
@@ -147,7 +171,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         TreeMap<HandlingPriority, Set<NetconfOperation>> sortedPriority = getSortedNetconfOperationsWithCanHandle(
                 message, session);
 
-        Preconditions.checkState(sortedPriority.isEmpty() == false, "No %s available to handle message %s",
+        Preconditions.checkArgument(sortedPriority.isEmpty() == false, "No %s available to handle message %s",
                 NetconfOperation.class.getName(), XmlUtil.toString(message));
 
         HandlingPriority highestFoundPriority = sortedPriority.lastKey();
