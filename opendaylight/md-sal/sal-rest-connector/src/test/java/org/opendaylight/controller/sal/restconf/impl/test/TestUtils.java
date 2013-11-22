@@ -320,15 +320,15 @@ final class TestUtils {
         if (modules.size() < 1) {
             return null;
         }
-        
-        Module moduleRes = null;        
+
+        Module moduleRes = null;
         if (modules.size() > 1) {
             if (moduleName == null) {
                 return null;
             } else {
-                for (Module module: modules) {
+                for (Module module : modules) {
                     if (module.getName().equals(moduleName)) {
-                        moduleRes = module; 
+                        moduleRes = module;
                     }
                 }
                 if (moduleRes == null) {
@@ -338,7 +338,7 @@ final class TestUtils {
         } else {
             moduleRes = modules.iterator().next();
         }
-        
+
         if (moduleRes.getChildNodes() == null) {
             return null;
         }
