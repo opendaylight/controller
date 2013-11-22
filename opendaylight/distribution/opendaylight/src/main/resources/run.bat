@@ -140,7 +140,7 @@ SET RUN_CMD="%JAVA_HOME%\bin\java.exe" -Dopendaylight.controller %extraJVMOpts% 
 ECHO %RUN_CMD%
 
 if "%startEnabled%" NEQ "" (
-    START /B cmd /C CALL %RUN_CMD% > %basedir%\logs\controller.out 2>&1
+    START /B cmd /C CALL %RUN_CMD%
     ECHO Running controller in the background.
 ) else (
     %RUN_CMD%
