@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.impl.RoutingTableImpl;
 import org.opendaylight.controller.sal.core.api.AbstractProvider;
@@ -51,18 +52,21 @@ public class Activator extends AbstractProvider {
     Dictionary<String, ?> emptyProperties = new Hashtable<String, String>();
 
     registration = context.registerService
-        (Server.class, Server.getInstance(), emptyProperties);
+        (new String[]{Server.class.getName(), RouteChangeListener.class.getName()},
+            Server.getInstance(), emptyProperties);
 
-    _logger.debug("Registering [{}]", registration);
+    _logger.debug("Registering server [{}]", registration);
 
-    ServiceRegistration routerReg =
-    context.registerService((Class<Client$>) Client.getInstance().getClass(), Client.getInstance(), emptyProperties);
+    ServiceRegistration routerReg = context.registerService
+        ((Class<Client$>) Client.getInstance().getClass(), Client.getInstance(), emptyProperties);
+
+    _logger.debug("Registering client [{}]", routerReg);
 
     Client.getInstance().start();
-    _logger.debug("Registering [{}]", routerReg);
+
   }
 
-  private void injectRoutingTable(){
+  private void injectRoutingTable() {
 
     ServiceReference ref = context.getServiceReference(RoutingTable.class.getName());
     RoutingTable table = (RoutingTableImpl) context.getService(ref);
