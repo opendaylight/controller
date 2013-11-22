@@ -19,10 +19,12 @@ public interface RoutingTable<I,R> {
    *
    * @param routeId route identifier
    * @param route network address
+   * @throws RoutingTableException for any logical exception
+   * @throws SystemException
    */
-  public void addRoute(I routeId, R route) throws SystemException,  RoutingTableException;
+  public void addRoute(I routeId, R route) throws  RoutingTableException,SystemException;
 
-  /**
+    /**
    * Adds a network address for the route. If the route already exists,
    * it throws <code>DuplicateRouteException</code>.
    * This method would be used when registering a global service.
@@ -31,6 +33,7 @@ public interface RoutingTable<I,R> {
    * @param routeId route identifier
    * @param route network address
    * @throws DuplicateRouteException
+   * @throws RoutingTableException
    */
   public void addGlobalRoute(I routeId, R route) throws  RoutingTableException, SystemException;
 
@@ -50,8 +53,10 @@ public interface RoutingTable<I,R> {
      * Remove the route.
      * This method would be used when registering a global service.
      * @param routeId
+     * @throws RoutingTableException
+     * @throws SystemException
      */
-    public void removeGlobalRoute(I routeId);
+    public void removeGlobalRoute(I routeId) throws RoutingTableException, SystemException;
 
   /**
    * Returns a set of network addresses associated with this route
@@ -68,6 +73,13 @@ public interface RoutingTable<I,R> {
    * @return
    */
   public R getARoute(I routeId);
+
+    /**
+     *
+     * This will be removed after listeners
+     * have made change on their end to use whiteboard pattern
+     * @deprecated
+     */
 
   public void registerRouteChangeListener(RouteChangeListener listener);
 

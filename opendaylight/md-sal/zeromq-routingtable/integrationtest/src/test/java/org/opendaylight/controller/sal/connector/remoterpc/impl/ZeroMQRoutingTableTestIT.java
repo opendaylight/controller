@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Set;
 
-
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -41,6 +40,7 @@ public class
     public static final String YANG = "org.opendaylight.yangtools";
     public static final String CONTROLLER = "org.opendaylight.controller";
     public static final String YANGTOOLS = "org.opendaylight.yangtools";
+    RoutingIdentifierImpl rii  = new RoutingIdentifierImpl();
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
@@ -171,9 +171,6 @@ public class
 
                 mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
 
-                mavenBundle(YANG, "concepts").versionAsInProject(),
-                mavenBundle(YANG, "yang-binding").versionAsInProject(), //
-                mavenBundle(YANG, "yang-common").versionAsInProject(), //
                 mavenBundle(YANG+".thirdparty", "xtend-lib-osgi").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //
                 mavenBundle("org.javassist", "javassist").versionAsInProject(),
@@ -248,7 +245,7 @@ public class
 
     @Test
   public  void testAddGlobalRoute () throws Exception{
-       RoutingIdentifierImpl rii  = new RoutingIdentifierImpl();
+
        routingTable.addGlobalRoute(rii,"172.27.12.1:5000");
 
        Set<String> routes = routingTable.getRoutes(rii);
@@ -259,6 +256,20 @@ public class
 
 
     }
+
+
+    @Test
+    public  void testDeleteGlobalRoute () throws Exception{
+
+        routingTable.removeGlobalRoute(rii);
+
+        Set<String> routes = routingTable.getRoutes(rii);
+
+        Assert.assertNull(routes);
+
+
+    }
+
 
 
    class RoutingIdentifierImpl implements RpcRouter.RouteIdentifier,Serializable {
@@ -280,6 +291,28 @@ public class
        @Override
        public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier getRoute() {
            return InstanceIdentifier.of(instance);
+       }
+
+       @Override
+       public boolean equals(Object o) {
+           if (this == o) return true;
+           if (o == null || getClass() != o.getClass()) return false;
+
+           RoutingIdentifierImpl that = (RoutingIdentifierImpl) o;
+
+           if (QNAME != null ? !QNAME.equals(that.QNAME) : that.QNAME != null) return false;
+           if (instance != null ? !instance.equals(that.instance) : that.instance != null) return false;
+           if (namespace != null ? !namespace.equals(that.namespace) : that.namespace != null) return false;
+
+           return true;
+       }
+
+       @Override
+       public int hashCode() {
+           int result = namespace != null ? namespace.hashCode() : 0;
+           result = 31 * result + (QNAME != null ? QNAME.hashCode() : 0);
+           result = 31 * result + (instance != null ? instance.hashCode() : 0);
+           return result;
        }
    }
 
