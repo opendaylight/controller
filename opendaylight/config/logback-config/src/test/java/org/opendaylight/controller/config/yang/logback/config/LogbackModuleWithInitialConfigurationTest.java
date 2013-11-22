@@ -17,7 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.apache.commons.io.FileUtils;
@@ -142,7 +144,8 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
 
     }
 
-    public ObjectName createBeans() throws JoranException, InstanceAlreadyExistsException, IOException {
+    public ObjectName createBeans() throws JoranException, InstanceAlreadyExistsException, IOException,
+            MalformedObjectNameException, InstanceNotFoundException {
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -200,8 +203,8 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
         loggersDTOs.add(log);
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
-        ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), "singleton");
-        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated, LogbackModuleMXBean.class);
+        ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), LogbackModuleFactory.INSTANCE_NAME);
+        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameRetrieved, LogbackModuleMXBean.class);
 
         bean.setLoggerTO(loggersDTOs);
         bean.setRollingFileAppenderTO(rollingAppenders);
@@ -210,6 +213,6 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
 
         transaction.commit();
 
-        return nameCreated;
+        return nameRetrieved;
     }
 }
