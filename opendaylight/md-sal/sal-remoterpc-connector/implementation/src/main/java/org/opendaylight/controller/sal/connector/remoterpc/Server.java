@@ -42,7 +42,7 @@ import java.util.concurrent.Future;
  * 1. Make rpc request handling async and non-blocking. Note zmq socket is not thread safe
  * 2. Read properties from config file using existing(?) ODL properties framework
  */
-public class Server {
+public class Server  implements RouteChangeListener<String, Set>{
 
   private Logger _logger = LoggerFactory.getLogger(Server.class);
 
@@ -56,7 +56,6 @@ public class Server {
 
   private static Server _instance = new Server();
   private final RpcListener listener = new RpcListener();
-  private final RemoteRouteChangeListener routeChangeListener = new RemoteRouteChangeListener();
 
   private final String localIp = getLocalIpAddress();
 
@@ -93,7 +92,7 @@ public class Server {
 
     _logger.debug("Start listening for RPC registrations");
     brokerSession.addRpcRegistrationListener(listener);
-    routingTable.registerRouteChangeListener(routeChangeListener);
+    //routingTable.registerRouteChangeListener(routeChangeListener);
 
     Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
     for (QName rpc : currentlySupported) {
@@ -230,6 +229,25 @@ public class Server {
     return msg;
   }
 
+  @Override
+  public void onRouteUpdated(String key, Set values) {
+    RouteIdentifierImpl rId = new RouteIdentifierImpl();
+    try{
+      _logger.debug("Updating key/value {}-{}", key, values);
+      brokerSession.addRpcImplementation(
+          (QName) rId.fromString(key).getType(), Client.getInstance());
+
+    }catch(Exception e){
+      _logger.info("Route update failed {}", e);
+    }
+  }
+
+  @Override
+  public void onRouteDeleted(String key) {
+    //TODO: Broker session needs to be updated to support this
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * Listener for rpc registrations
    */
@@ -275,25 +293,4 @@ public class Server {
     }
   }
 
-  private class RemoteRouteChangeListener implements RouteChangeListener<String, Set> {
-
-    @Override
-    public void onRouteUpdated(String key, Set values) {
-      RouteIdentifierImpl rId = new RouteIdentifierImpl();
-      try{
-        _logger.debug("Updating key/value {}-{}", key, values);
-        brokerSession.addRpcImplementation(
-            (QName) rId.fromString(key).getType(), Client.getInstance());
-
-      }catch(Exception e){
-        _logger.info("Route update failed {}", e);
-      }
-    }
-
-    @Override
-    public void onRouteDeleted(String key) {
-      //TODO: Broker session needs to be updated to support this
-      throw new UnsupportedOperationException();
-    }
-  }
 }

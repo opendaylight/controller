@@ -40,6 +40,7 @@
               org.opendaylight.yangtools.yang.common,
               org.opendaylight.controller.sal.connector.api,
               org.opendaylight.controller.sal.connector.remoterpc.api;version="[0.4,1)",
+              org.opendaylight.controller.sal.connector.remoterpc.impl;version="[0.4,1)",
               org.osgi.framework,
               com.google.common.base,
                 org.opendaylight.yangtools.yang.data.api,
