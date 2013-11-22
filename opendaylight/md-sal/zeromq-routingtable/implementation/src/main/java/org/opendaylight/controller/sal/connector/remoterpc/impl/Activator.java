@@ -11,7 +11,9 @@ package org.opendaylight.controller.sal.connector.remoterpc.impl;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
+import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.impl.internal.RoutingTableImpl;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,15 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(new String[] { RoutingTable.class.getName(),ICacheUpdateAware.class.getName()  }, props);
             logger.debug("configureGlobalInstance adding dependency:", IClusterGlobalServices.class);
 
+
+            // RouteChangeListener services will be none or many so the
+            // dependency is optional
+            c.add(createServiceDependency()
+                    .setService(RouteChangeListener.class)
+                    .setCallbacks("setRouteChangeListener", "unsetRouteChangeListener")
+                    .setRequired(false));
+
+            //dependency is required as it provides us the caching support
             c.add(createServiceDependency().setService(
                     IClusterGlobalServices.class).setCallbacks(
                     "setClusterGlobalServices",
