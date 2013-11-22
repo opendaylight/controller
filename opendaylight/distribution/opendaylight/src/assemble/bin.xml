@@ -27,7 +27,6 @@
         <exclude>com.sun.jersey:jersey-json</exclude>
         <exclude>com.sun.jersey:jersey-server</exclude>
         <exclude>org.opendaylight.controller:logging.bridge</exclude>
-        <exclude>org.opendaylight.controller:sanitytest</exclude>
       </excludes>
       <outputFileNameMapping>
         ${artifact.groupId}.${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
