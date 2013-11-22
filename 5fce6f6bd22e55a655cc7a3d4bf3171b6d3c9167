@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0eeb59b1",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/IfIptoHost.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-22T13:14:46Z",
+      "side": 1,
+      "message": "Deepak, given we are saying that the API would be backward compatible unless there is a bump in the major version it is necessary to keep to the old version of hostFind with InetAddress along with the new version of hostFind with the IHostId. Can you please take care of it?",
+      "revId": "5fce6f6bd22e55a655cc7a3d4bf3171b6d3c9167",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
