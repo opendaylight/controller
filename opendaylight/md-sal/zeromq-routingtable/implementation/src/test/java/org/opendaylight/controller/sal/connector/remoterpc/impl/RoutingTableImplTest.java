@@ -103,7 +103,12 @@ public class RoutingTableImplTest {
         Assert.assertEquals(rti.getRegisteredRouteChangeListeners().size(),0);
         rti.registerRouteChangeListener(new RouteChangeListenerImpl());
 
-        Assert.assertEquals(rti.getRegisteredRouteChangeListeners().size(),1);
+        Assert.assertEquals(rti.getRegisteredRouteChangeListeners().size(),0); //old should not work
+        //what about the new approach - using whiteboard pattern
+        rti.setRouteChangeListener(new RouteChangeListenerImpl());
+
+        Assert.assertEquals(rti.getRegisteredRouteChangeListeners().size(),1); //should not work
+
 
     }
     @Test
