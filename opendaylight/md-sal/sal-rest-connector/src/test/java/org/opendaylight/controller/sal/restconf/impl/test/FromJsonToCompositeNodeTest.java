@@ -90,7 +90,7 @@ public class FromJsonToCompositeNodeTest {
     }
 
     @Test
-    public void nullArrayToCompositeNodeWithNullValueTest() {
+    public void nullArrayToSimpleNodeWithNullValueTest() {
         CompositeNode compositeNode = compositeContainerFromJson("/json-to-composite-node/array-with-null.json", true);
         assertNotNull(compositeNode);
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
