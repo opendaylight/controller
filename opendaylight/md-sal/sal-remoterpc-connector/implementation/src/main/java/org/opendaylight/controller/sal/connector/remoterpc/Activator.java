@@ -56,7 +56,7 @@ public class Activator extends AbstractProvider {
     _logger.debug("Registering [{}]", registration);
 
     ServiceRegistration routerReg =
-    context.registerService((Class<Client$>) Client.getInstance().getClass(), Client.getInstance(), emptyProperties);
+    context.registerService((Class<Client>) Client.getInstance().getClass(), Client.getInstance(), emptyProperties);
 
     Client.getInstance().start();
     _logger.debug("Registering [{}]", routerReg);
