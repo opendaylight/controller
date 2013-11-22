@@ -86,7 +86,8 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private boolean inContainerMode; // being used by global instance only
 
     public FlowConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Flows.class).toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).child(Flow.class)
+                .toInstance();
         flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
 
         if (null == flowService) {
@@ -503,8 +504,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         }
 
         @Override
-        public void onNodeExperimenterErrorNotification(
-                NodeExperimenterErrorNotification notification) {
+        public void onNodeExperimenterErrorNotification(NodeExperimenterErrorNotification notification) {
             // TODO Auto-generated method stub
 
         };

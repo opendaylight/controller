@@ -68,8 +68,8 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
     public GroupConsumerImpl() {
 
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Groups.class)
-                .node(Group.class).toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Groups.class).child(Group.class)
+                .toInstance();
         groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);
 
         clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();
