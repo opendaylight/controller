@@ -130,6 +130,51 @@ public class Router {
         return stringBuilder.toString();
     }
 
+  @GET
+  @Path("/routingtabledelete")
+  @Produces(MediaType.TEXT_PLAIN)
+  public String invokeDeleteRoutingTable(){
+    _logger.info("Invoking adding an entry in routing table");
+
+    BundleContext ctx = getBundleContext();
+    ServiceReference routingTableServiceReference = ctx.getServiceReference(RoutingTable.class);
+    if (routingTableServiceReference == null) {
+      _logger.debug("Could not get routing table impl reference");
+      return "Could not get routingtable referen ";
+    }
+    RoutingTable routingTable = (RoutingTableImpl) ctx.getService(routingTableServiceReference);
+    if (routingTable == null) {
+      _logger.info("Could not get routing table service");
+      return "Could not get routing table service";
+    }
+
+
+    RoutingIdentifierImpl rii  = new RoutingIdentifierImpl();
+    try {
+      routingTable.removeGlobalRoute(rii.toString());
+    } catch (RoutingTableException e) {
+      _logger.error("error in adding routing identifier"+ e.getMessage());
+
+    } catch (SystemException e) {
+      _logger.error("error in adding routing identifier" + e.getMessage());
+    }
+
+    Set<String> routes = routingTable.getRoutes(rii.toString());
+
+    StringBuilder stringBuilder = new StringBuilder();
+    if(routes != null){
+      for(String route:routes){
+        stringBuilder.append(route);
+      }
+    }else{
+      stringBuilder.append(" successfully");
+    }
+
+    _logger.info("Result [{}] routes removed for route" + rii+  stringBuilder.toString());
+
+    return stringBuilder.toString();
+  }
+
   private String stringify(RpcResult<CompositeNode> result) {
     CompositeNode node = result.getResult();
     StringBuilder builder = new StringBuilder("result:").append(node).append("\n")
