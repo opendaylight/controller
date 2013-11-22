@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -21,15 +21,12 @@ import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ModuleConfig {
 
     private final String moduleName;
     private final InstanceConfig instanceConfig;
-    // TODO 2 services from same namespace ?
-    private final Map<String, String> providedServices;
+    private final Multimap<String, String> providedServices;
 
     public ModuleConfig(String moduleName, InstanceConfig mbeanMapping, Collection<QName> providedServices) {
         this.moduleName = moduleName;
@@ -37,12 +34,11 @@ public class ModuleConfig {
         this.providedServices = mapServices(providedServices);
     }
 
-    private Map<String, String> mapServices(Collection<QName> providedServices) {
-        HashMap<String, String> mapped = Maps.newHashMap();
+    private Multimap<String, String> mapServices(Collection<QName> providedServices) {
+        Multimap<String, String> mapped = HashMultimap.create();
 
         for (QName providedService : providedServices) {
             String key = providedService.getNamespace().toString();
-            Preconditions.checkState(mapped.containsKey(key) == false);
             mapped.put(key, providedService.getLocalName());
         }
 
@@ -53,7 +49,7 @@ public class ModuleConfig {
         return instanceConfig;
     }
 
-    public Map<String, String> getProvidedServices() {
+    public Multimap<String, String> getProvidedServices() {
         return providedServices;
     }
 
