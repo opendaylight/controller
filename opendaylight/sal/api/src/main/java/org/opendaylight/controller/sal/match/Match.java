@@ -483,6 +483,13 @@ public class Match implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return "Match[" + fields.values() + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("Match [fields=");
+        builder.append(fields);
+        builder.append(", matches=");
+        builder.append(matches);
+        builder.append("]");
+        return builder.toString();
     }
+
 }
