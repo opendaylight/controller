@@ -232,7 +232,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         GroupFeaturesBuilder groupFeatures = new GroupFeaturesBuilder();
         groupFeatures.setActions(notification.getActions());
         groupFeatures.setCapabilities(notification.getCapabilities());
-        groupFeatures.setGroupType(notification.getGroupType());
+        groupFeatures.setTypes(notification.getTypes());
         groupFeatures.setMaxGroups(notification.getMaxGroups());
         cache.get(notification.getId()).setGroupFeatures(groupFeatures.build());
         

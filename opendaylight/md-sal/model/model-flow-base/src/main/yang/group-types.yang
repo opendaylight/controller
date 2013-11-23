@@ -18,12 +18,22 @@ module opendaylight-group-types {
         leaf group-type {
             type enumeration {
                 enum group-all;
-                enum group_select;
-                enum group_indirect;
-                enum group_ff;
+                enum group-select;
+                enum group-indirect;
+                enum group-ff;
             }
         }
     }
+    
+    typedef group-capabilities { 
+        	type enumeration {
+                enum select-weight;
+                enum select-liveness;
+                enum chaining;
+                enum chaining-checks;
+            }   
+        }
+    
     
     grouping group {
         
@@ -119,14 +129,21 @@ module opendaylight-group-types {
     }
 
     grouping group-features {
-        uses group-types;
+        leaf types {
+            type bits {
+            	bit group-all;
+            	bit group-select;
+            	bit group-indirect;
+            	bit group-ff;
+            }
+        }
             
         leaf capabilities { 
-        	type enumeration {
-                enum select-weight;
-                enum select-liveness;
-                enum chaining;
-                enum chaining-checks;
+        	type bits {
+                bit select-weight;
+                bit select-liveness;
+                bit chaining;
+                bit chaining-checks;
             }   
         }
 
