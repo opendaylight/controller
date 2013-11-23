@@ -12,12 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.connector.remoterpc.Client;
-import org.opendaylight.controller.sal.connector.remoterpc.Client$;
 import org.opendaylight.controller.sal.connector.remoterpc.Server;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sample.zeromq.provider.ExampleProvider;
+import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -70,12 +70,42 @@ public class RouterTest {
 
     _logger.debug("Provider sends announcement [{}]", "heartbeat");
     provider.announce(QNAME);
-    ServiceReference routerRef = ctx.getServiceReference(Client$.class);
-    Client$ router = (Client$) ctx.getService(routerRef);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
+    Client router = (Client) ctx.getService(routerRef);
     _logger.debug("Found router[{}]", router);
     _logger.debug("Invoking RPC [{}]", QNAME);
     for (int i = 0; i < 3; i++) {
       RpcResult<CompositeNode> result = router.getInstance().invokeRpc(QNAME, new CompositeNodeImpl());
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertNotNull(result);
+    }
+  }
+
+  //@Test
+  // This method is UNTESTED -- need to get around the bundling issues before I know if this even work
+  public void testInvokeRpcWithValidCompositeNode() throws Exception{
+    Thread.sleep(10000);
+    //Send announcement
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    _logger.debug("Provider sends announcement [{}]", "heartbeat");
+    provider.announce(QNAME);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
+    Client router = (Client) ctx.getService(routerRef);
+    _logger.debug("Found router[{}]", router);
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = router.getInstance().invokeRpc(QNAME, consumer.getValidCompositeNodeWithOneSimpleChild());
       _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
       Assert.assertNotNull(result);
     }
@@ -152,10 +182,10 @@ public class RouterTest {
     Server service = (Server) ctx.getService(ref);
     Assert.assertNotNull(service);
 
-    ServiceReference routerRef = ctx.getServiceReference(Client$.class);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
     if (routerRef == null) {
       ServiceRegistration routerReg =
-          ctx.registerService(Client$.class, Client.getInstance(), new Hashtable<String,String>()) ;
+          ctx.registerService(Client.class, Client.getInstance(), new Hashtable<String,String>()) ;
     }
 
 
@@ -212,8 +242,14 @@ public class RouterTest {
         mavenBundle(ODL, "sal-broker-impl").versionAsInProject(), //
         mavenBundle(ODL, "sal-core-spi").versionAsInProject().update(), //
         mavenBundle(ODL, "sal-connector-api").versionAsInProject(), //
+
+      //Added the consumer
+        mavenBundle(SAMPLE, "sal-remoterpc-connector-test-consumer").versionAsInProject(), //
+      //**** These two bundles below are NOT successfully resolved -- some of their dependencies must be missing
+      //**** This causes the "Message" error to occur, the class cannot be found
         mavenBundle(SAMPLE, "sal-remoterpc-connector-test-provider").versionAsInProject(), //
         mavenBundle(ODL, "sal-remoterpc-connector").versionAsInProject(), //
+
         mavenBundle(ODL, "zeromq-routingtable.implementation").versionAsInProject(),
         mavenBundle(YANG, "concepts").versionAsInProject(),
         mavenBundle(YANG, "yang-binding").versionAsInProject(), //
