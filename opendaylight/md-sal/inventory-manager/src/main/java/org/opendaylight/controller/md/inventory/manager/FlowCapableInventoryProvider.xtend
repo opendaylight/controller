@@ -63,7 +63,7 @@ class FlowCapableInventoryProvider implements AutoCloseable {
 }
 
 class NodeChangeCommiter implements OpendaylightInventoryListener {
-
+    static val LOG = LoggerFactory.getLogger(NodeChangeCommiter);
     @Property
     val FlowCapableInventoryProvider manager;
 
@@ -73,16 +73,18 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
     override onNodeConnectorRemoved(NodeConnectorRemoved connector) {
         val ref = connector.nodeConnectorRef;
+        LOG.error("onNodeConnectorRemoved - removing: " + ref.value);
 
         // Check path
         val it = manager.startChange()
         removeRuntimeData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
+        LOG.error("onNodeConnectorRemoved - removed: " + ref.value);
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated connector) {
         val ref = connector.nodeConnectorRef;
-
+        LOG.error("onNodeConnectorUpdated - updating: " + ref.value + " " + connector);
         val flowConnector = connector.getAugmentation(FlowCapableNodeConnectorUpdated);
 
         val it = manager.startChange()
@@ -95,18 +97,22 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         putRuntimeData(ref.value as InstanceIdentifier<NodeConnector>, data.build());
         commit()
+        LOG.error("onNodeConnectorUpdated - updated: " + ref.value + " " + connector);
     }
 
     override onNodeRemoved(NodeRemoved node) {
         val ref = node.nodeRef;
+        LOG.error("onNodeRemoved - removing: " + ref.value);
         val it = manager.startChange()
 
         removeRuntimeData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
+        LOG.error("onNodeRemoved - removed: " + ref.value);
     }
 
     override onNodeUpdated(NodeUpdated node) {
         val ref = node.nodeRef;
+        LOG.error("onNodeUpdated - updating: " + ref.value + " " + node);
         val flowNode = node.getAugmentation(FlowCapableNodeUpdated);
 
         val it = manager.startChange()
@@ -119,5 +125,6 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         putRuntimeData(ref.value as InstanceIdentifier<Node>, data.build())
         commit()
+        LOG.error("onNodeUpdated - updated: " + ref.value + " " + node);
     }
 }

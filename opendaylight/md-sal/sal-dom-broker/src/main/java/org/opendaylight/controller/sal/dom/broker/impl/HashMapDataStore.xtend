@@ -1,20 +1,22 @@
 package org.opendaylight.controller.sal.dom.broker.impl
 
-import org.opendaylight.controller.md.sal.common.api.data.DataModification
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
-import org.opendaylight.yangtools.yang.common.RpcResult
+import java.util.Collections
+import java.util.HashSet
 import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
+import org.opendaylight.controller.md.sal.common.api.data.DataModification
 import org.opendaylight.controller.sal.common.util.Rpcs
-import java.util.Collections
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import static extension org.opendaylight.controller.sal.dom.broker.impl.DataUtils.*;
 import org.opendaylight.controller.sal.core.api.data.DataStore
-import java.util.HashSet
+import org.opendaylight.yangtools.yang.common.RpcResult
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.slf4j.LoggerFactory
+
+import static extension org.opendaylight.controller.sal.dom.broker.impl.DataUtils.*
 
 class HashMapDataStore implements DataStore, AutoCloseable {
-
+    static val LOG = LoggerFactory.getLogger(HashMapDataStore);   
     val Map<InstanceIdentifier, CompositeNode> configuration = new ConcurrentHashMap();
     val Map<InstanceIdentifier, CompositeNode> operational = new ConcurrentHashMap();
 
@@ -48,6 +50,7 @@ class HashMapDataStore implements DataStore, AutoCloseable {
         for (removal : modification.removedOperationalData) {
             remove(operational,removal);
         }
+        LOG.info("New Operational Data: " + operational);
         return Rpcs.getRpcResult(true, null, Collections.emptySet);
     }
     

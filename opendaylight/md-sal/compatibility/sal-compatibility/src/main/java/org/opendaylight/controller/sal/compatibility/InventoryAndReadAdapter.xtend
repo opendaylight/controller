@@ -161,13 +161,14 @@ class InventoryAndReadAdapter implements IPluginInTopologyService, IPluginInRead
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated update) {
-        val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        inventoryPublisher.updateNodeConnector(update.nodeConnectorRef.toADNodeConnector, UpdateType.CHANGED, properties);
+        // val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
+        // inventoryPublisher.updateNodeConnector(update.nodeConnectorRef.toADNodeConnector, UpdateType.CHANGED, properties);
     }
 
     override onNodeUpdated(NodeUpdated notification) {
-        val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        inventoryPublisher.updateNode(notification.nodeRef.toADNode, UpdateType.CHANGED, properties);
+        return
+        //val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
+        //inventoryPublisher.updateNode(notification.nodeRef.toADNode, UpdateType.CHANGED, properties);
     }
 
     override getNodeProps() {
