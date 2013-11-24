@@ -7,6 +7,7 @@ module flow-node-inventory {
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-port-types {prefix port;revision-date "2013-09-25";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import sal-flow {prefix sal-flow;}
     
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
@@ -34,11 +35,98 @@ module flow-node-inventory {
         }
     }
 
-    grouping table {
-
-
+    typedef table-id {
+        type uint8;
     }
 
+
+    
+    identity table-context {
+        description "Identity used to mark node context";
+    }
+    
+    /* 
+    grouping table-features {
+        container meta-data-match {
+        
+        }
+        
+        container meta-data-write {
+        
+        }
+        container config {
+            
+        }
+        
+        leaf max-entries {
+            type unint32;
+        }
+        list supported-instructions {
+            uses flow:instruction;
+        }
+        container next-tables {
+            uses table-list;
+        }
+        
+        container next-tables-miss {
+            uses table-list;
+        }
+        list write-actions {
+            uses action:action-list;
+        }
+        
+        list write-actions-miss {
+            uses action:action-list;
+        }
+        
+        list apply-actions {
+            uses action:action-list;
+        }
+        
+        list apply-actions-miss {
+            uses action:action-list;
+        }
+        
+        list match {
+        
+        }
+        
+        list wildcards {
+        
+        }
+        
+        list write-set-field {
+        }
+        list write-set-field-miss {
+        }
+        list apply-set-field {
+        }
+        list apply-set-field-miss {
+        }
+    }
+    */
+    grouping table {
+        leaf id {
+            type table-id;
+        }
+        /*
+        ext:context-instance "table-context";
+        container features {
+            uses table-features;
+        }
+        container flows {
+            list flow {
+                key "node id"; 
+
+                leaf id {
+                    type uint32;
+                }
+                uses flow:flow-entry;
+            }
+        }
+        */
+    }
+    
     grouping flow-node {
 
         leaf manufacturer {
@@ -57,11 +145,9 @@ module flow-node-inventory {
             type string;
         }
 
-        container tables {
-            uses feature;
-            list table {
-                uses table;
-            }
+        list table {
+            key "id";
+            uses table;
         }
         
         container group-tables {
@@ -127,5 +213,19 @@ module flow-node-inventory {
     augment "/inv:node-connector-updated" {
         ext:augment-identifier "flow-capable-node-connector-updated";
         uses flow-node-connector;
+    }
+    
+    notification table-updated {
+        leaf table-ref {
+            ext:context-reference "table-context";
+            type sal-flow:flow-table-ref;
+        }
+        uses table;
+    }
+    notification table-removed {
+        leaf table-ref {
+            ext:context-reference "table-context";
+            type sal-flow:flow-table-ref;
+        }
     }
 }
