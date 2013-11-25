@@ -33,14 +33,15 @@ public class ConfigRegistryImplTest extends
     @Test
     public void testFailOnTwoFactoriesExportingSameImpl() {
         ModuleFactory factory = new TestingFixedThreadPoolModuleFactory();
-        ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(
-                factory, factory);
-
         BundleContext context = mock(BundleContext.class);
-
-        ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(resolver,
-                context, ManagementFactory.getPlatformMBeanServer());
+        ConfigRegistryImpl configRegistry = null;
         try {
+            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(
+                    factory, factory);
+
+            configRegistry = new ConfigRegistryImpl(resolver,
+                    context, ManagementFactory.getPlatformMBeanServer());
+
             configRegistry.beginConfig();
             fail();
         } catch (IllegalArgumentException e) {

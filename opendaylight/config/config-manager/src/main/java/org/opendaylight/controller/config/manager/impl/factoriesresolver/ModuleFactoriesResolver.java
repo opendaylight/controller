@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
-import java.util.List;
-
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
+
+import java.util.Map;
 
 /**
  * {@link org.opendaylight.controller.config.manager.impl.ConfigTransactionControllerImpl}
@@ -20,6 +21,6 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
  */
 public interface ModuleFactoriesResolver {
 
-    List<ModuleFactory> getAllFactories();
+    Map<String, Map.Entry<ModuleFactory, BundleContext>> getAllFactories();
 
 }
