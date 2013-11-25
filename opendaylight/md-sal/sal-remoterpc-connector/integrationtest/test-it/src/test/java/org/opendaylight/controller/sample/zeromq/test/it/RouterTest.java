@@ -12,13 +12,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.connector.remoterpc.Client;
-import org.opendaylight.controller.sal.connector.remoterpc.Client$;
 import org.opendaylight.controller.sal.connector.remoterpc.Server;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sample.zeromq.provider.ExampleProvider;
+import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.ops4j.pax.exam.Configuration;
@@ -70,14 +71,185 @@ public class RouterTest {
 
     _logger.debug("Provider sends announcement [{}]", "heartbeat");
     provider.announce(QNAME);
-    ServiceReference routerRef = ctx.getServiceReference(Client$.class);
-    Client$ router = (Client$) ctx.getService(routerRef);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
+    Client router = (Client) ctx.getService(routerRef);
     _logger.debug("Found router[{}]", router);
     _logger.debug("Invoking RPC [{}]", QNAME);
     for (int i = 0; i < 3; i++) {
       RpcResult<CompositeNode> result = router.getInstance().invokeRpc(QNAME, new CompositeNodeImpl());
       _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
       Assert.assertNotNull(result);
+    }
+  }
+
+  @Test
+  public void testInvokeRpcWithValidSimpleNode() throws Exception{
+    Thread.sleep(2000);
+
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    // Provider sends announcement
+    _logger.debug("Provider sends announcement [{}]", "heartbeat");
+    provider.announce(QNAME);
+    // Consumer invokes RPC
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getValidCompositeNodeWithOneSimpleChild());
+      Assert.assertNotNull(result);
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertTrue(result.isSuccessful());
+      Assert.assertNotNull(result.getResult());
+      Assert.assertEquals(0, result.getErrors().size());
+    }
+  }
+
+  @Test
+  public void testInvokeRpcWithValidSimpleNodes() throws Exception{
+    Thread.sleep(2000);
+
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    // Provider sends announcement
+    _logger.debug("Provider sends announcement [{}]", "heartbeat");
+    provider.announce(QNAME);
+    // Consumer invokes RPC
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getValidCompositeNodeWithFourSimpleChildren());
+      Assert.assertNotNull(result);
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertTrue(result.isSuccessful());
+      Assert.assertNotNull(result.getResult());
+      Assert.assertEquals(0, result.getErrors().size());
+    }
+  }
+
+  @Test
+  public void testInvokeRpcWithValidCompositeNode() throws Exception{
+    Thread.sleep(2000);
+
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    // Provider sends announcement
+    _logger.debug("Provider sends announcement [{}]", "heartbeat");
+    provider.announce(QNAME);
+    // Consumer invokes RPC
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getValidCompositeNodeWithTwoCompositeChildren());
+      Assert.assertNotNull(result);
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertTrue(result.isSuccessful());
+      Assert.assertNotNull(result.getResult());
+      Assert.assertEquals(0, result.getErrors().size());
+    }
+  }
+
+  @Test
+  public void testInvokeRpcWithNullInput() throws Exception{
+    Thread.sleep(2000);
+
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    // Provider sends announcement
+    _logger.debug("Provider sends announcement [{}]", QNAME.getLocalName());
+    provider.announce(QNAME);
+    // Consumer invokes RPC
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, null);
+      Assert.assertNotNull(result);
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertFalse(result.isSuccessful());
+      Assert.assertNull(result.getResult());
+      Assert.assertEquals(1, result.getErrors().size());
+      Assert.assertEquals(RpcError.ErrorSeverity.WARNING, ((RpcError)result.getErrors().toArray()[0]).getSeverity());
+    }
+  }
+
+  @Test
+  public void testInvokeRpcWithInvalidSimpleNode() throws Exception{
+    Thread.sleep(2000);
+
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    // Provider sends announcement
+    _logger.debug("Provider sends announcement [{}]", QNAME.getLocalName());
+    provider.announce(QNAME);
+    // Consumer invokes RPC
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getInvalidCompositeNodeSimpleChild());
+      Assert.assertNotNull(result);
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertFalse(result.isSuccessful());
+      Assert.assertNull(result.getResult());
+      Assert.assertEquals(1, result.getErrors().size());
+      Assert.assertEquals(RpcError.ErrorSeverity.ERROR, ((RpcError)result.getErrors().toArray()[0]).getSeverity());
+    }
+  }
+
+  @Test
+  public void testInvokeRpcWithInvalidCompositeNode() throws Exception{
+    Thread.sleep(2000);
+
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    Assert.assertNotNull(providerRef);
+    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+    Assert.assertNotNull(provider);
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
+    // Provider sends announcement
+    _logger.debug("Provider sends announcement [{}]", QNAME.getLocalName());
+    provider.announce(QNAME);
+    // Consumer invokes RPC
+    _logger.debug("Invoking RPC [{}]", QNAME);
+    for (int i = 0; i < 3; i++) {
+      RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getInvalidCompositeNodeCompositeChild());
+      Assert.assertNotNull(result);
+      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+      Assert.assertFalse(result.isSuccessful());
+      Assert.assertNull(result.getResult());
+      Assert.assertEquals(1, result.getErrors().size());
+      Assert.assertEquals(RpcError.ErrorSeverity.ERROR, ((RpcError)result.getErrors().toArray()[0]).getSeverity());
     }
   }
 
@@ -152,10 +324,10 @@ public class RouterTest {
     Server service = (Server) ctx.getService(ref);
     Assert.assertNotNull(service);
 
-    ServiceReference routerRef = ctx.getServiceReference(Client$.class);
+    ServiceReference routerRef = ctx.getServiceReference(Client.class);
     if (routerRef == null) {
       ServiceRegistration routerReg =
-          ctx.registerService(Client$.class, Client.getInstance(), new Hashtable<String,String>()) ;
+          ctx.registerService(Client.class, Client.getInstance(), new Hashtable<String,String>()) ;
     }
 
 
@@ -212,8 +384,14 @@ public class RouterTest {
         mavenBundle(ODL, "sal-broker-impl").versionAsInProject(), //
         mavenBundle(ODL, "sal-core-spi").versionAsInProject().update(), //
         mavenBundle(ODL, "sal-connector-api").versionAsInProject(), //
+
+      //Added the consumer
+        mavenBundle(SAMPLE, "sal-remoterpc-connector-test-consumer").versionAsInProject(), //
+      //**** These two bundles below are NOT successfully resolved -- some of their dependencies must be missing
+      //**** This causes the "Message" error to occur, the class cannot be found
         mavenBundle(SAMPLE, "sal-remoterpc-connector-test-provider").versionAsInProject(), //
         mavenBundle(ODL, "sal-remoterpc-connector").versionAsInProject(), //
+
         mavenBundle(ODL, "zeromq-routingtable.implementation").versionAsInProject(),
         mavenBundle(YANG, "concepts").versionAsInProject(),
         mavenBundle(YANG, "yang-binding").versionAsInProject(), //

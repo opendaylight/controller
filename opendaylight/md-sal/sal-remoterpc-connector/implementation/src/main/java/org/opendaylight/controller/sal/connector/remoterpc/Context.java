@@ -5,13 +5,13 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.sal.connector.remoterpc
+package org.opendaylight.controller.sal.connector.remoterpc;
 
-import org.zeromq.ZMQ
+import org.zeromq.ZMQ;
 
-
-object Context {
-
-  val zmqContext = ZMQ.context(1)
-
+/**
+ * Provides a ZeroMQ Context object
+ */
+public class Context {
+  public static ZMQ.Context zmqContext = ZMQ.context(1);
 }
