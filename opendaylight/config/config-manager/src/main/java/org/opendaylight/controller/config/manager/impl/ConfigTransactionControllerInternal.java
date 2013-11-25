@@ -15,6 +15,7 @@ import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 
 /**
  * Defines contract between {@link ConfigTransactionControllerImpl} (producer)
@@ -68,4 +69,6 @@ interface ConfigTransactionControllerInternal extends
     boolean isClosed();
 
     List<ModuleFactory> getCurrentlyRegisteredFactories();
+
+    BundleContext getModuleFactoryBundleContext(String factoryName);
 }

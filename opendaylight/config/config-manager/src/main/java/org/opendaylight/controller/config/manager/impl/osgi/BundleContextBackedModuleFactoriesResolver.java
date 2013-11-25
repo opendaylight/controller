@@ -7,21 +7,26 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Retrieves list of currently registered Module Factories using bundlecontext.
  */
 public class BundleContextBackedModuleFactoriesResolver implements
         ModuleFactoriesResolver {
+    private static final Logger logger = LoggerFactory
+            .getLogger(BundleContextBackedModuleFactoriesResolver.class);
     private final BundleContext bundleContext;
 
     public BundleContextBackedModuleFactoriesResolver(
@@ -30,7 +35,7 @@ public class BundleContextBackedModuleFactoriesResolver implements
     }
 
     @Override
-    public List<ModuleFactory> getAllFactories() {
+    public Map<String, Map.Entry<ModuleFactory, BundleContext>> getAllFactories() {
         Collection<ServiceReference<ModuleFactory>> serviceReferences;
         try {
             serviceReferences = bundleContext.getServiceReferences(
@@ -38,15 +43,43 @@ public class BundleContextBackedModuleFactoriesResolver implements
         } catch (InvalidSyntaxException e) {
             throw new IllegalStateException(e);
         }
-        List<ModuleFactory> result = new ArrayList<>(serviceReferences.size());
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> result = new HashMap<>(serviceReferences.size());
         for (ServiceReference<ModuleFactory> serviceReference : serviceReferences) {
-            ModuleFactory service = bundleContext.getService(serviceReference);
+            ModuleFactory factory = bundleContext.getService(serviceReference);
             // null if the service is not registered, the service object
             // returned by a ServiceFactory does not
             // implement the classes under which it was registered or the
             // ServiceFactory threw an exception.
-            if (service != null) {
-                result.add(service);
+            if(factory == null) {
+                throw new NullPointerException("ServiceReference of class" + serviceReference.getClass() + "not found.");
+            }
+            StringBuffer errors = new StringBuffer();
+            String moduleName = factory.getImplementationName();
+            if (moduleName == null || moduleName.isEmpty()) {
+                throw new IllegalStateException(
+                        "Invalid implementation name for " + factory);
+            }
+            if (serviceReference.getBundle() == null || serviceReference.getBundle().getBundleContext() == null) {
+                throw new NullPointerException("Bundle context of " + factory + " ModuleFactory not found.");
+            }
+            logger.debug("Reading factory {} {}", moduleName, factory);
+            String error = null;
+            Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
+            if (conflicting != null) {
+                error = String
+                        .format("Module name is not unique. Found two conflicting factories with same name '%s': " +
+                                "\n\t%s\n\t%s\n", moduleName, conflicting.getKey(), factory);
+
+            }
+
+            if (error == null) {
+                result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,
+                        serviceReference.getBundle().getBundleContext()));
+            } else {
+                errors.append(error);
+            }
+            if (errors.length() > 0) {
+                throw new IllegalArgumentException(errors.toString());
             }
         }
         return result;
