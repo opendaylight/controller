@@ -26,6 +26,7 @@ import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,8 +115,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             BundleContext bundleContext, MBeanServer configMBeanServer,
             BaseJMXRegistrator baseJMXRegistrator) {
         this.resolver = resolver;
-        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager(
-                bundleContext);
+        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.bundleContext = bundleContext;
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
@@ -320,8 +320,18 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
             // register to OSGi
             if (osgiRegistration == null) {
+                ModuleFactory moduleFactory = entry.getModuleFactory();
+                BundleContext bc = this.bundleContext;
+                if(moduleFactory != null) {
+                    ServiceReference serviceReference = this.bundleContext.getServiceReference(moduleFactory.getClass());
+                    if (serviceReference != null && serviceReference.getBundle() != null &&
+                            serviceReference.getBundle().getBundleContext() != null) {
+                        bc = serviceReference.getBundle().getBundleContext();
+                    }
+                }
                 osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
-                        newReadableConfigBean.getInstance(), entry.getName());
+                        newReadableConfigBean.getInstance(), entry.getName(), bc);
+
             }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators

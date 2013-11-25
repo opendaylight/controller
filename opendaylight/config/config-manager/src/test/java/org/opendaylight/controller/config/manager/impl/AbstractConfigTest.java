@@ -32,7 +32,9 @@ import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrato
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -68,6 +70,11 @@ public abstract class AbstractConfigTest extends
         doReturn(mockedServiceRegistration).when(mockedContext).registerService(
                 Matchers.any(String[].class), any(Closeable.class),
                 any(Dictionary.class));
+        ServiceReference<?> serviceReference = mock(ServiceReference.class);
+        Bundle bundle = mock(Bundle.class);
+        doReturn(mockedContext).when(bundle).getBundleContext();
+        doReturn(bundle).when(serviceReference).getBundle();
+        doReturn(serviceReference).when(mockedContext).getServiceReference(Matchers.any(Class.class));
         internalJmxRegistrator = new InternalJMXRegistrator(platformMBeanServer);
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
