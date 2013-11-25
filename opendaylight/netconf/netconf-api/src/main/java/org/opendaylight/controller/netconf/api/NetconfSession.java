@@ -30,7 +30,6 @@ public abstract class NetconfSession extends AbstractProtocolSession<NetconfMess
     private final long sessionId;
     private boolean up = false;
     private static final Logger logger = LoggerFactory.getLogger(NetconfSession.class);
-    private static final int T = 0;
 
     protected NetconfSession(SessionListener sessionListener, Channel channel, long sessionId) {
         this.sessionListener = sessionListener;
