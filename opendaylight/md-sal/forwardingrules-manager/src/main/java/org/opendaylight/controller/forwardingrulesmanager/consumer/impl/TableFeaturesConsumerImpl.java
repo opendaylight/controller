@@ -51,6 +51,10 @@ public class TableFeaturesConsumerImpl {
         commitHandler = new TableDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
         container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+        if (container == null) {
+            logger.error("IContainer Service is down or null");
+            return;
+        }
     }
 
     /**

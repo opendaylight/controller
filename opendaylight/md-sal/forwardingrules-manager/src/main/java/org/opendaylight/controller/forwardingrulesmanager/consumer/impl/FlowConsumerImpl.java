@@ -107,7 +107,12 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         // }
 
         // For switch events
-        listener1Reg = FRMConsumerImpl.getNotificationService().registerNotificationListener(flowEventListener);
+        try {
+            listener1Reg = FRMConsumerImpl.getNotificationService().registerNotificationListener(flowEventListener);
+        } catch (Exception e) {
+            System.out.println("Notification Service Exception");
+            e.printStackTrace();
+        }
 
         if (null == listener1Reg) {
             logger.error("Listener to listen on flow data modifcation events");
@@ -116,12 +121,21 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         }
         // addFlowTest();
         System.out.println("-------------------------------------------------------------------");
-        allocateCaches();
+
         commitHandler = new FlowDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
         clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
                 IClusterContainerServices.class, this);
+        if (clusterContainerService == null) {
+            logger.error("Cluster Container Service is down or null");
+            return;
+        }
         container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+        if (container == null) {
+            logger.error("IContainer Service is down or null");
+            return;
+        }
+        allocateCaches();
         /*
          * If we are not the first cluster node to come up, do not initialize
          * the static flow entries ordinal

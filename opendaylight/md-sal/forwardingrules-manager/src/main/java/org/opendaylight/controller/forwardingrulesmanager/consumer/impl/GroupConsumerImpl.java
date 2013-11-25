@@ -73,7 +73,14 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);
 
         clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();
+        if (clusterGroupContainerService == null) {
+            logger.error("Cluster Container Service is down or null");
+            return;
+        }
         container = FRMConsumerImpl.getContainer();
+        if (container == null) {
+            logger.error("IContainer Service is down or null");
+        }
 
         if (!(cacheStartup())) {
             logger.error("Unanle to allocate/retrieve group cache");
@@ -87,7 +94,12 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         }
 
         // For switch events
-        groupListener = FRMConsumerImpl.getNotificationService().registerNotificationListener(groupEventListener);
+        try {
+            groupListener = FRMConsumerImpl.getNotificationService().registerNotificationListener(groupEventListener);
+        } catch (Exception e) {
+            System.out.println("Notification Service Exception");
+            e.printStackTrace();
+        }
 
         if (null == groupListener) {
             logger.error("Listener to listen on group data modifcation events");

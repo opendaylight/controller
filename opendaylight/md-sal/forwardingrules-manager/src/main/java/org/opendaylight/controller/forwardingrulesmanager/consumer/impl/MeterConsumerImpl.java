@@ -70,9 +70,15 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 .toInstance();
         meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);
         clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
-
+        if (clusterMeterContainerService == null) {
+            logger.error("Cluster Service is down or null");
+            return;
+        }
         container = FRMConsumerImpl.getContainer();
-
+        if (container == null) {
+            logger.error("IContainer Service is down or null");
+            return;
+        }
         if (!(cacheStartup())) {
             logger.error("Unable to allocate/retrieve meter cache");
             System.out.println("Unable to allocate/retrieve meter cache");
@@ -85,7 +91,12 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
         }
 
         // For switch/plugin events
-        meterListener = FRMConsumerImpl.getNotificationService().registerNotificationListener(meterEventListener);
+        try {
+            meterListener = FRMConsumerImpl.getNotificationService().registerNotificationListener(meterEventListener);
+        } catch (Exception e) {
+            System.out.println("Notification Service Exception");
+            e.printStackTrace();
+        }
 
         if (null == meterListener) {
             logger.error("Listener to listen on meter data modifcation events");
