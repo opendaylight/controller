@@ -31,9 +31,4 @@ public class NetconfClientSession extends NetconfSession {
     public Collection<String> getServerCapabilities() {
         return capabilities;
     }
-
-    public Channel getChannel(){
-        return channel;
-    }
-
 }

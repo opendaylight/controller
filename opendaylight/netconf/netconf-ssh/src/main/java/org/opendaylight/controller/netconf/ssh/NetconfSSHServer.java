@@ -7,25 +7,36 @@
  */
 package org.opendaylight.controller.netconf.ssh;
 
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.controller.netconf.ssh.threads.SocketThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetconfSSHServer  {
 
     private static boolean acceptMore = true;
-    private static final int SERVER_PORT = 830;
     private ServerSocket ss = null;
+    private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHServer.class);
+    private static final AtomicLong sesssionId = new AtomicLong();
 
-    private NetconfSSHServer() throws Exception{
-        this.ss = new ServerSocket(SERVER_PORT);
+    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress) throws Exception{
+
+        this.ss = new ServerSocket(serverPort);
         while (acceptMore) {
-            SocketThread.start(ss.accept());
+            logger.trace("starting new socket thread");
+            SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet());
         }
     }
-    public static NetconfSSHServer start() throws Exception {
-        return new NetconfSSHServer();
+
+
+    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress) throws Exception {
+        return new NetconfSSHServer(serverPort, clientAddress);
     }
 
     public void stop() throws Exception {
+           acceptMore = false;
            ss.close();
     }
 

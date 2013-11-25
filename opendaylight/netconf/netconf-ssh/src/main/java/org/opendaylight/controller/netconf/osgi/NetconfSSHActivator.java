@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.netconf.osgi;
 
+import com.google.common.base.Optional;
+import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
+import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -15,7 +18,12 @@ public class NetconfSSHActivator implements BundleActivator{
 
     @Override
     public void start(BundleContext context) throws Exception {
-        NetconfSSHServer.start();
+        Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context);
+        Optional<InetSocketAddress> tcpSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context);
+
+        if (sshSocketAddressOptional.isPresent() && tcpSocketAddressOptional.isPresent()){
+            NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddressOptional.get());
+        }
     }
 
     @Override

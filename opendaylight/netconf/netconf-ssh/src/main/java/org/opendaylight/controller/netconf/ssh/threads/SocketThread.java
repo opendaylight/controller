@@ -1,4 +1,4 @@
-package org.opendaylight.controller.netconf.ssh;
+package org.opendaylight.controller.netconf.ssh.threads;
 
 
 import ch.ethz.ssh2.AuthenticationResult;
@@ -9,18 +9,10 @@ import ch.ethz.ssh2.ServerConnectionCallback;
 import ch.ethz.ssh2.ServerSession;
 import ch.ethz.ssh2.ServerSessionCallback;
 import ch.ethz.ssh2.SimpleServerSessionCallback;
-import com.google.common.base.Optional;
-import io.netty.channel.nio.NioEventLoopGroup;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import javax.net.ssl.SSLContext;
-import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
-import org.opendaylight.controller.netconf.ssh.handler.SSHChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,19 +23,21 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private Socket socket;
     private static final String USER = "netconf";
     private static final String PASSWORD = "netconf";
-    private NetconfClient netconfClient;
-    private static final InetSocketAddress clientAddress = new InetSocketAddress("127.0.0.1", 12023);
+    private InetSocketAddress clientAddress;
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
+    private ServerConnection conn = null;
+    private long sessionId;
 
 
-    private static ServerConnection conn = null;
-
-    public static void start(Socket socket) throws IOException{
-        new Thread(new SocketThread(socket)).start();
+    public static void start(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException{
+        Thread netconf_ssh_socket_thread = new Thread(new SocketThread(socket,clientAddress,sessionId));
+        netconf_ssh_socket_thread.start();
     }
-    private SocketThread(Socket socket) throws IOException {
+    private SocketThread(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException {
 
-        this.socket = socket;
+        socket = socket;
+        clientAddress = clientAddress;
+        sessionId = sessionId;
 
         conn = new ServerConnection(socket);
         RSAKey keyStore = new RSAKey();
@@ -62,22 +56,53 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         SimpleServerSessionCallback cb = new SimpleServerSessionCallback()
         {
             @Override
-            public Runnable requestSubsystem(ServerSession ss, final String subsystem) throws IOException
+            public Runnable requestSubsystem(final ServerSession ss, final String subsystem) throws IOException
             {
                 return new Runnable(){
                     public void run()
                     {
                         if (subsystem.equals("netconf")){
-                            logger.info("netconf subsystem received");
+                            IOThread netconf_ssh_input = null;
+                            IOThread  netconf_ssh_output = null;
                             try {
-                                NetconfClientDispatcher clientDispatcher = null;
-                                NioEventLoopGroup nioGrup = new NioEventLoopGroup(1);
-                                clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nioGrup, nioGrup);
-                                logger.info("dispatcher created");
-                                netconfClient = new NetconfClient("ssh_" + clientAddress.toString(),clientAddress,5000,clientDispatcher);
-                                logger.info("netconf client created");
+                                String hostName = clientAddress.getHostName();
+                                int portNumber = clientAddress.getPort();
+                                final Socket echoSocket = new Socket(hostName, portNumber);
+                                logger.trace("echo socket created");
+
+                                logger.trace("starting netconf_ssh_input thread");
+                                netconf_ssh_input =  new IOThread(echoSocket.getInputStream(),ss.getStdin(),"input_thread_"+sessionId);
+                                netconf_ssh_input.start();
+
+                                netconf_ssh_output = new IOThread(ss.getStdout(),echoSocket.getOutputStream(),"output_thread_"+sessionId);
+                                netconf_ssh_output.start();
+
                             } catch (Throwable t){
                                 logger.error(t.getMessage(),t);
+
+                                try {
+                                    if (netconf_ssh_input!=null){
+                                        netconf_ssh_input.join();
+                                    }
+                                } catch (InterruptedException e) {
+                                   logger.error("netconf_ssh_input join error ",e);
+                                }
+
+                                try {
+                                    if (netconf_ssh_output!=null){
+                                        netconf_ssh_output.join();
+                                    }
+                                } catch (InterruptedException e) {
+                                    logger.error("netconf_ssh_output join error ",e);
+                                }
+
+                            }
+                        } else {
+                            try {
+                                ss.getStdin().write("wrong subsystem requested - closing connection".getBytes());
+                                ss.close();
+                            } catch (IOException e) {
+                                logger.debug("excpetion while sending bad subsystem response",e);
                             }
                         }
                     }
@@ -90,7 +115,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                 {
                     public void run()
                     {
-                        System.out.println("Client requested " + pty.term + " pty");
+                        //noop
                     }
                 };
             }
@@ -102,30 +127,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                 {
                     public void run()
                     {
-                        try
-                        {
-                            try (NetconfClientSession session = netconfClient.getClientSession())
-                            {
-                                session.getChannel().pipeline().addLast(new SSHChannelInboundHandler(ss));
-                                byte[] bytes = new byte[1024];
-                                while (true)
-                                {
-                                    int size = ss.getStdout().read(bytes);
-                                    if (size < 0)
-                                    {
-                                        System.err.println("SESSION EOF");
-                                        return;
-                                    }
-                                    session.getChannel().write(ByteBuffer.wrap(bytes,0,size));
-                                }
-                            }
-
-                        }
-                        catch (IOException e)
-                        {
-                            System.err.println("SESSION DOWN");
-                            e.printStackTrace();
-                        }
+                        //noop
                     }
                 };
             }
@@ -141,8 +143,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public String[] getRemainingAuthMethods(ServerConnection sc)
     {
-        return new String[] { ServerAuthenticationCallback.METHOD_PASSWORD,
-                ServerAuthenticationCallback.METHOD_PUBLICKEY };
+        return new String[] { ServerAuthenticationCallback.METHOD_PASSWORD };
     }
 
     public AuthenticationResult authenticateWithNone(ServerConnection sc, String username)
