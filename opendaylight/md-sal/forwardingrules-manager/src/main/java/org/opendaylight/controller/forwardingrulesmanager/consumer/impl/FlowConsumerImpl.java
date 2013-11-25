@@ -86,7 +86,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private boolean inContainerMode; // being used by global instance only
 
     public FlowConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder().node(Flows.class).toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).child(Flow.class).toInstance();
         flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
 
         if (null == flowService) {
@@ -118,14 +118,14 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         allocateCaches();
         commitHandler = new FlowDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
-        clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
-                IClusterContainerServices.class, this);
-        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+        //clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
+            //    IClusterContainerServices.class, this);
+      //  container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
         /*
          * If we are not the first cluster node to come up, do not initialize
          * the static flow entries ordinal
          */
-        if (staticFlowsOrdinal.size() == 0) {
+        if (null != staticFlowsOrdinal && staticFlowsOrdinal.size() == 0) {
             staticFlowsOrdinal.put(0, Integer.valueOf(0));
         }
     }
@@ -188,28 +188,32 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private void addFlow(InstanceIdentifier<?> path, Flow dataObject) {
 
         AddFlowInputBuilder input = new AddFlowInputBuilder();
-        List<Instruction> inst = (dataObject).getInstructions().getInstruction();
+       
+        List<Instruction> inst;
+        //(dataObject).getInstructions().getInstruction();
         input.setNode((dataObject).getNode());
         input.setPriority((dataObject).getPriority());
         input.setMatch((dataObject).getMatch());
-        input.setCookie((dataObject).getCookie());
-        input.setInstructions((dataObject).getInstructions());
-        dataObject.getMatch().getLayer3Match();
-        for (int i = 0; i < inst.size(); i++) {
+      //  input.setAction((dataObject).)
+      //  input.setCookie((dataObject).getCookie());
+     //   input.setInstructions((dataObject).getInstructions());
+       // dataObject.getMatch().getLayer3Match();
+     /*   for (int i = 0; i < inst.size(); i++) {
             System.out.println("i = " + i + inst.get(i).getInstruction().toString());
             System.out.println("i = " + i + inst.get(i).toString());
         }
 
-        System.out.println("Instruction list" + (dataObject).getInstructions().getInstruction().toString());
+        System.out.println("Instruction list" + (dataObject).getInstructions().getInstruction().toString());*/
 
         // updating the staticflow cache
-        Integer ordinal = staticFlowsOrdinal.get(0);
-        staticFlowsOrdinal.put(0, ++ordinal);
-        staticFlows.put(ordinal, dataObject);
+      //  Integer ordinal = staticFlowsOrdinal.get(0);
+   //     staticFlowsOrdinal.put(0, ++ordinal);
+     //   staticFlows.put(ordinal, dataObject);
 
         // We send flow to the sounthbound plugin
+        System.out.println("ading into flow " + input.getPriority().intValue());
         flowService.addFlow(input.build());
-        updateLocalDatabase((NodeFlow) dataObject, true);
+     //   updateLocalDatabase((NodeFlow) dataObject, true);
     }
 
     /**
@@ -329,15 +333,15 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
                 // validating the DataObject
 
-                Status status = validate(container, (NodeFlow) entry);
-                if (!status.isSuccess()) {
+              //  Status status = validate(container, (NodeFlow) entry);
+               /* if (!status.isSuccess()) {
                     logger.warn("Invalid Configuration for flow {}. The failure is {}", entry, status.getDescription());
                     String error = "Invalid Configuration (" + status.getDescription() + ")";
                     logger.error(error);
                     return;
-                }
+                }*/
                 // Presence check
-                if (flowEntryExists((NodeFlow) entry)) {
+              /*  if (flowEntryExists((Flow) entry)) {
                     String error = "Entry with this name on specified table already exists";
                     logger.warn("Entry with this name on specified table already exists: {}", entry);
                     logger.error(error);
@@ -355,7 +359,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
                 if (!FRMUtil.validateInstructions((NodeFlow) entry)) {
                     logger.error("Not a valid Instruction");
                     return;
-                }
+                }*/
                 if (entry.getValue() instanceof Flow) {
                     Flow flow = (Flow) entry.getValue();
                     preparePutEntry(entry.getKey(), flow);
@@ -375,8 +379,9 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         }
 
         private void preparePutEntry(InstanceIdentifier<?> key, Flow flow) {
-            Flow original = originalSwView.get(key);
-            if (original != null) {
+        //    Flow original = originalSwView.get(key);
+        	 additions.put(key, flow);
+           /* if (original != null) {
                 // It is update for us
                 System.out.println("Coming update  in FlowDatacommitHandler");
                 updates.put(key, flow);
@@ -384,7 +389,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
                 // It is addition for us
                 System.out.println("Coming add in FlowDatacommitHandler");
                 additions.put(key, flow);
-            }
+            }*/
         }
 
         /**
