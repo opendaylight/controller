@@ -7,26 +7,44 @@
  */
 package org.opendaylight.controller.netconf.ssh;
 
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.controller.netconf.ssh.threads.SocketThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetconfSSHServer  {
 
     private static boolean acceptMore = true;
-    private static final int SERVER_PORT = 830;
     private ServerSocket ss = null;
+    private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHServer.class);
+    private static final AtomicLong sesssionId = new AtomicLong();
 
-    private NetconfSSHServer() throws Exception{
-        this.ss = new ServerSocket(SERVER_PORT);
+    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress) throws Exception{
+
+        logger.trace("Creating server socket.");
+        this.ss = new ServerSocket(serverPort);
+        if (!ss.isBound()){
+            throw new Exception("Socket can't be bound to requested port :"+serverPort);
+        }
+        logger.trace("Server socket created.");
         while (acceptMore) {
-            SocketThread.start(ss.accept());
+            logger.trace("Starting new socket thread.");
+            SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet());
         }
     }
-    public static NetconfSSHServer start() throws Exception {
-        return new NetconfSSHServer();
+
+
+    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress) throws Exception {
+        return new NetconfSSHServer(serverPort, clientAddress);
     }
 
     public void stop() throws Exception {
-           ss.close();
+        acceptMore = false;
+        logger.trace("Closing SSH server socket.");
+        ss.close();
+        logger.trace("SSH server socket closed.");
     }
 
 }

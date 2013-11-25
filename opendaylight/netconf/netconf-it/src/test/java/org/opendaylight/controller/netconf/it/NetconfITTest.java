@@ -77,12 +77,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+import static java.util.Collections.emptyList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.internal.util.Checks.checkNotNull;
 
 public class NetconfITTest extends AbstractConfigTest {
 
@@ -90,7 +90,7 @@ public class NetconfITTest extends AbstractConfigTest {
     //
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
-    private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 830);
+    private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 10830);
     private static final String USERNAME = "netconf";
     private static final String PASSWORD = "netconf";
 
@@ -166,10 +166,16 @@ public class NetconfITTest extends AbstractConfigTest {
                 "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
+        List<String> failedToFind = new ArrayList<>();
         for (String path : paths) {
-            final InputStream is = checkNotNull(NetconfITTest.class.getResourceAsStream(path), path + " not found");
-            yangDependencies.add(is);
+            InputStream resourceAsStream = NetconfITTest.class.getResourceAsStream(path);
+            if (resourceAsStream == null) {
+                failedToFind.add(path);
+            } else {
+                yangDependencies.add(resourceAsStream);
+            }
         }
+        assertEquals("Some yang files were not found",emptyList(), failedToFind);
         return yangDependencies;
     }
 
@@ -456,7 +462,7 @@ public class NetconfITTest extends AbstractConfigTest {
     private class TestSSHServer implements Runnable {
         public void run()  {
             try {
-                NetconfSSHServer.start();
+                NetconfSSHServer.start(10830);
             } catch (Exception e) {
                 logger.info(e.getMessage());
             }
@@ -475,16 +481,28 @@ public class NetconfITTest extends AbstractConfigTest {
         startSSHServer();
         Connection conn = new Connection(sshAddress.getHostName(),sshAddress.getPort());
         Assert.assertNotNull(conn);
-        try {
-            conn.connect();
-            boolean isAuthenticated = conn.authenticateWithPassword(USERNAME,PASSWORD);
-            assertTrue(isAuthenticated);
-            Session sess = conn.openSession();
-            sess.startSubSystem("netconf");
-//            sess.requestPTY("");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        conn.connect();
+        boolean isAuthenticated = conn.authenticateWithPassword(USERNAME,PASSWORD);
+        assertTrue(isAuthenticated);
+        final Session sess = conn.openSession();
+        sess.startSubSystem("netconf");
+        sess.getStdin().write(XmlUtil.toString(this.getConfig.getDocument()).getBytes());
+
+        new Thread(){
+           public void run(){
+               while (true){
+                 byte[] bytes = new byte[1024];
+                   int c = 0;
+                   try {
+                       c = sess.getStdout().read(bytes);
+                   } catch (IOException e) {
+                       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                   }
+                   logger.info("got data:"+bytes);
+                 if (c == 0) break;
+               }
+           }
+        }.join();
     }
 
 
