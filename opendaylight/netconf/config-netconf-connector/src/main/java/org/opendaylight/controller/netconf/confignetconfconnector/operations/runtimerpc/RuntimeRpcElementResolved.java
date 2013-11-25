@@ -33,11 +33,11 @@ public final class RuntimeRpcElementResolved {
 
     private RuntimeRpcElementResolved(String namespace, String moduleName, String instanceName, String runtimeBeanName,
             Map<String, String> additionalAttributes) {
-        this.moduleName = moduleName;
-        this.instanceName = instanceName;
+        this.moduleName = Preconditions.checkNotNull(moduleName, "Module name");
+        this.instanceName =  Preconditions.checkNotNull(instanceName, "Instance name");
         this.additionalAttributes = additionalAttributes;
-        this.namespace = namespace;
-        this.runtimeBeanName = runtimeBeanName;
+        this.namespace = Preconditions.checkNotNull(namespace, "Namespace");;
+        this.runtimeBeanName = Preconditions.checkNotNull(runtimeBeanName, "Runtime bean name");
     }
 
     public String getModuleName() {
@@ -68,10 +68,10 @@ public final class RuntimeRpcElementResolved {
         return ObjectNameUtil.createRuntimeBeanName(moduleName, instanceName, additionalAttributesJavaNames);
     }
 
-    private static final String xpathPatternBlueprint = "/" + XmlNetconfConstants.DATA_KEY + "/"
-            + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "\\["
-            + XmlNetconfConstants.NAME_KEY + "='(.+)'\\]/" + XmlNetconfConstants.INSTANCE_KEY + "\\["
+    private static final String xpathPatternBlueprint = "/" + XmlNetconfConstants.MODULES_KEY + "/"
+            + XmlNetconfConstants.MODULE_KEY + "\\[" + XmlNetconfConstants.TYPE_KEY + "='(.+)'" + "( and |\\]\\[)"
             + XmlNetconfConstants.NAME_KEY + "='([^']+)'\\](.*)";
+
     private static final Pattern xpathPattern = Pattern.compile(xpathPatternBlueprint);
     private static final String additionalPatternBlueprint = "(.+)\\[(.+)='(.+)'\\]";
     private static final Pattern additionalPattern = Pattern.compile(additionalPatternBlueprint);
@@ -83,8 +83,8 @@ public final class RuntimeRpcElementResolved {
                 RuntimeRpc.CONTEXT_INSTANCE, xpath, elementName, xpathPatternBlueprint);
 
         String moduleName = matcher.group(1);
-        String instanceName = matcher.group(2);
-        String additionalString = matcher.group(3);
+        String instanceName = matcher.group(3);
+        String additionalString = matcher.group(4);
         HashMap<String, String> additionalAttributes = Maps.<String, String> newHashMap();
         String runtimeBeanYangName = moduleName;
         for (String additionalKeyValue : additionalString.split("/")) {
