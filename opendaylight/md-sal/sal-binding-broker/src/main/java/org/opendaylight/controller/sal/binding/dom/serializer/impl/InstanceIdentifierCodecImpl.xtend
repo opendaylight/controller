@@ -95,6 +95,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
         return new NodeIdentifier(QName.create(previousQname,qname.localName));
     }
     
+    @SuppressWarnings("rawtypes")
     private def dispatch PathArgument serializePathArgument(IdentifiableItem argument, QName previousQname) {
         val Map<QName,Object> predicates = new HashMap();
         val type = argument.type;
@@ -111,7 +112,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
         return new NodeIdentifierWithPredicates(QName.create(previousQname,qname.localName),predicates);
     }
     
-    def resolveQname(Class class1) {
+    def resolveQname(Class<?> class1) {
         val qname = classToQName.get(class1);
         if(qname !== null) {
             return qname;

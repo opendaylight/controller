@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
@@ -190,5 +192,12 @@ public class MountPointImpl implements MountProvisionInstance {
             }
             return MountPointImpl.this.readOperationalData(newPath);
         }
+    }
+
+    @Override
+    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
+            RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

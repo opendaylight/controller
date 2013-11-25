@@ -30,7 +30,7 @@ class RpcRoutingTableImpl<C extends BaseIdentity,S extends RpcService> implement
     }
     
     
-    override getRoute(InstanceIdentifier nodeInstance) {
+    override getRoute(InstanceIdentifier<? extends Object> nodeInstance) {
         val ret = routes.get(nodeInstance);
         if(ret !== null) {
             return ret;
@@ -44,6 +44,6 @@ class RpcRoutingTableImpl<C extends BaseIdentity,S extends RpcService> implement
     
     @SuppressWarnings("rawtypes")
     override updateRoute(InstanceIdentifier<? extends Object> path, S service) {
-        routes.put(path as InstanceIdentifier,service);
+        routes.put(path as InstanceIdentifier<? extends DataObject>,service);
     }
 }

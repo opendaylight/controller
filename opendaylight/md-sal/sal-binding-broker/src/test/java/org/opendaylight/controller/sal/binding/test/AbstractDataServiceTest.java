@@ -27,7 +27,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 public  abstract class AbstractDataServiceTest {
-    protected DataBrokerService biDataService;
+    protected org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;
     protected DataProviderService baDataService;
     
     /**

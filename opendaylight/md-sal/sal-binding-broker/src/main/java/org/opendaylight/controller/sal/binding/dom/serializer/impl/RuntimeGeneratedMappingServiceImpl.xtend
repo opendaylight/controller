@@ -17,18 +17,9 @@ import java.util.Map.Entry
 import java.util.AbstractMap.SimpleEntry
 import org.opendaylight.yangtools.yang.model.api.SchemaPath
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
-import java.util.ArrayList
-import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.binding.DataContainer
-import static com.google.common.base.Preconditions.*;
-import java.util.List
-import org.opendaylight.yangtools.yang.data.api.Node
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
-import org.opendaylight.yangtools.concepts.Delegator
 import java.util.concurrent.ConcurrentMap
 import org.opendaylight.yangtools.sal.binding.model.api.GeneratedType
-import org.opendaylight.yangtools.yang.binding.BindingCodec
 import com.google.common.collect.HashMultimap
 import com.google.common.util.concurrent.SettableFuture
 import java.util.concurrent.Future
@@ -143,6 +134,10 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         val transformer = registry.getCodecForDataObject(targetType);
         val ret = transformer.deserialize(node)?.value as DataObject;
         return ret;
+    }
+    
+    override fromDataDom(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry) {
+        return registry.instanceIdentifierCodec.deserialize(entry);
     }
 
     private def void updateBindingFor(Map<SchemaPath, GeneratedTypeBuilder> map, SchemaContext module) {

@@ -15,8 +15,8 @@ public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentif
     
     
     
-    public DataTransactionImpl(DataBrokerImpl dataBroker) {
-        super(dataBroker);
+    public DataTransactionImpl(Object identifier,DataBrokerImpl dataBroker) {
+        super(identifier,dataBroker);
     }
 
     @Override
