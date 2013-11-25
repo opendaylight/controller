@@ -7,21 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.io.Closeable;
-import java.lang.management.ManagementFactory;
-import java.util.Dictionary;
-import java.util.Set;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.junit.After;
 import org.mockito.Matchers;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -34,6 +19,20 @@ import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.io.Closeable;
+import java.lang.management.ManagementFactory;
+import java.util.Dictionary;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Each test that relies on
@@ -51,7 +50,7 @@ public abstract class AbstractConfigTest extends
     protected ConfigRegistryJMXClient configRegistryClient;
     protected BaseJMXRegistrator baseJmxRegistrator;
     protected InternalJMXRegistrator internalJmxRegistrator;
-    protected BundleContext mockedContext;
+    protected BundleContext mockedContext = mock(BundleContext.class);
     protected ServiceRegistration<?> mockedServiceRegistration;
 
     // this method should be called in @Before
@@ -62,12 +61,12 @@ public abstract class AbstractConfigTest extends
 
         configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(
                 platformMBeanServer);
-        this.mockedContext = mock(BundleContext.class);
         this.mockedServiceRegistration = mock(ServiceRegistration.class);
         doNothing().when(mockedServiceRegistration).unregister();
         doReturn(mockedServiceRegistration).when(mockedContext).registerService(
                 Matchers.any(String[].class), any(Closeable.class),
                 any(Dictionary.class));
+
         internalJmxRegistrator = new InternalJMXRegistrator(platformMBeanServer);
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 

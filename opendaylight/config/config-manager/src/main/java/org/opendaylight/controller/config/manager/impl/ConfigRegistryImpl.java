@@ -114,8 +114,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             BundleContext bundleContext, MBeanServer configMBeanServer,
             BaseJMXRegistrator baseJMXRegistrator) {
         this.resolver = resolver;
-        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager(
-                bundleContext);
+        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.bundleContext = bundleContext;
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
@@ -138,7 +137,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
         TransactionJMXRegistrator transactionRegistrator = baseJMXRegistrator
                 .createTransactionJMXRegistrator(transactionName);
-        List<ModuleFactory> allCurrentFactories = Collections.unmodifiableList(resolver.getAllFactories());
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(resolver.getAllFactories());
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
                 transactionName, transactionRegistrator, version,
                 versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer, bundleContext);
@@ -320,8 +319,16 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
             // register to OSGi
             if (osgiRegistration == null) {
-                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
-                        newReadableConfigBean.getInstance(), entry.getName());
+                ModuleFactory moduleFactory = entry.getModuleFactory();
+                if(moduleFactory != null) {
+                    BundleContext bc = configTransactionController.
+                            getModuleFactoryBundleContext(moduleFactory.getImplementationName());
+                    osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
+                            newReadableConfigBean.getInstance(), entry.getName(), bc);
+                } else {
+                    throw new NullPointerException(entry.getIdentifier().getFactoryName() + " ModuleFactory not found.");
+                }
+
             }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators
