@@ -4,4 +4,5 @@ public interface BindingClassListener {
 
     void onBindingClassCaptured(Class<?> cls);
     
+    void onBindingClassProcessed(Class<?> cls);
 }

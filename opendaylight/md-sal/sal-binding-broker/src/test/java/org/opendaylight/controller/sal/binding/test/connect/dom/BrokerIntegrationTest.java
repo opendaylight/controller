@@ -63,7 +63,7 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         assertNotNull(result2.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        Nodes allNodes = (Nodes) baDataService.readConfigurationData(InstanceIdentifier.builder().node(Nodes.class)
+        Nodes allNodes = (Nodes) baDataService.readConfigurationData(InstanceIdentifier.builder(Nodes.class)
                 .toInstance());
         assertNotNull(allNodes);
         assertNotNull(allNodes.getNode());
@@ -100,7 +100,7 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
 
     private static NodeRef createNodeRef(String string) {
         NodeKey key = new NodeKey(new NodeId(string));
-        InstanceIdentifier<Node> path = InstanceIdentifier.builder().node(Nodes.class).node(Node.class, key)
+        InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                 .toInstance();
         return new NodeRef(path);
     }

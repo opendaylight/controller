@@ -1,6 +1,8 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
+import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
@@ -73,5 +75,11 @@ public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataPro
     @Override
     public void removeValidator(DataStoreIdentifier store, DataValidator validator) {
         getDelegate().removeValidator(store, validator);
+    }
+    
+    @Override
+    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
+            RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+        return addRegistration(getDelegate().registerCommitHandlerListener(commitHandlerListener));
     }
 }

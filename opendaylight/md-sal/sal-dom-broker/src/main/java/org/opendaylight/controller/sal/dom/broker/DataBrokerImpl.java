@@ -1,5 +1,7 @@
 package org.opendaylight.controller.sal.dom.broker;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataBroker;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
@@ -18,9 +20,12 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
         setDataReadRouter(new DataReaderRouter());
     }
 
+    private AtomicLong nextTransaction = new AtomicLong();
+    
     @Override
     public DataTransactionImpl beginTransaction() {
-        return new DataTransactionImpl(this);
+        String transactionId = "DOM-" + nextTransaction.getAndIncrement();
+        return new DataTransactionImpl(transactionId,this);
     }
 
     @Override
@@ -38,29 +43,26 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
     @Deprecated
     @Override
     public void addValidator(DataStoreIdentifier store, DataValidator validator) {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Deprecated");
 
     }
 
     @Deprecated
     @Override
     public void removeValidator(DataStoreIdentifier store, DataValidator validator) {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Deprecated
     @Override
     public void addRefresher(DataStoreIdentifier store, DataRefresher refresher) {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Deprecated
     @Override
     public void removeRefresher(DataStoreIdentifier store, DataRefresher refresher) {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("Deprecated");
     }
 
 }

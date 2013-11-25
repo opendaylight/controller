@@ -11,7 +11,6 @@ import javassist.ClassPool
 import org.opendaylight.yangtools.yang.binding.RpcService
 
 import javassist.CtClass
-import static com.google.common.base.Preconditions.*
 import javassist.CtMethod
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext
@@ -65,8 +64,6 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     }
 
     override <T extends RpcService> getRouterFor(Class<T> iface) {
-        val contexts = new HashSet<Class<? extends BaseIdentity>>
-
         val instance = <RpcRouterCodegenInstance<T>>withClassLoaderAndLock(iface.classLoader,lock) [ |
             val supertype = iface.asCtClass
             val metadata = supertype.rpcMetadata;
@@ -210,7 +207,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         ]
         val finalClass = targetCls.toClass(iface.classLoader, iface.protectionDomain)
         return new RuntimeGeneratedInvokerPrototype(supportedNotification,
-            finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener>);
+            finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener<?>>);
     }
 
     
@@ -238,7 +235,7 @@ package class RuntimeGeneratedInvoker implements NotificationInvoker {
     val NotificationListener delegate;
 
     @Property
-    var org.opendaylight.controller.sal.binding.api.NotificationListener invocationProxy;
+    var org.opendaylight.controller.sal.binding.api.NotificationListener<Notification> invocationProxy;
 
     @Property
     var RuntimeGeneratedInvokerPrototype prototype;
@@ -246,7 +243,7 @@ package class RuntimeGeneratedInvoker implements NotificationInvoker {
     new(NotificationListener delegate, RuntimeGeneratedInvokerPrototype prototype) {
         _delegate = delegate;
         _prototype = prototype;
-        _invocationProxy = prototype.protoClass.newInstance;
+        _invocationProxy = prototype.protoClass.newInstance as org.opendaylight.controller.sal.binding.api.NotificationListener<Notification>;
         RuntimeCodeHelper.setDelegate(_invocationProxy, delegate);
     }
 
@@ -265,7 +262,7 @@ package class RuntimeGeneratedInvokerPrototype {
     val Set<Class<? extends Notification>> supportedNotifications;
 
     @Property
-    val Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener> protoClass;
+    val Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener<?>> protoClass;
 }
 
 package class RpcServiceMetadata {

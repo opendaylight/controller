@@ -30,8 +30,8 @@ public class CodecMapping {
         }
     }
 
-    public static void setClassToCaseMap(Class<? extends BindingCodec> codec,
-            Map<Class,BindingCodec> classToCaseRawCodec) {
+    public static void setClassToCaseMap(Class<? extends BindingCodec<?,?>> codec,
+            Map<Class<?>,BindingCodec<?,?>> classToCaseRawCodec) {
         Field instanceIdField;
         try {
             instanceIdField = codec.getField(CLASS_TO_CASE_MAP);
@@ -47,8 +47,8 @@ public class CodecMapping {
         
     }
 
-    public static void setCompositeNodeToCaseMap(Class<? extends BindingCodec> codec,
-            Map<CompositeNode,BindingCodec> compositeToCase) {
+    public static void setCompositeNodeToCaseMap(Class<? extends BindingCodec<?,?>> codec,
+            Map<CompositeNode,BindingCodec<?,?>> compositeToCase) {
         Field instanceIdField;
         try {
             instanceIdField = codec.getField(COMPOSITE_TO_CASE);
@@ -63,7 +63,7 @@ public class CodecMapping {
     }
 
     public static void setAugmentationCodec(Class<? extends BindingCodec<Map<QName, Object>, Object>> dataCodec,
-            BindingCodec augmentableCodec) {
+            BindingCodec<?,?> augmentableCodec) {
             Field instanceIdField;
             try {
                 instanceIdField = dataCodec.getField(AUGMENTATION_CODEC);

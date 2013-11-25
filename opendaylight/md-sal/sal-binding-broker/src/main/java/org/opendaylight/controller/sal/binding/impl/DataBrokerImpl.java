@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.binding.impl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataBroker;
@@ -19,13 +20,18 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> implements
         DataProviderService, AutoCloseable {
 
+    
+    
+    private final AtomicLong nextTransaction = new AtomicLong();
+    
     public DataBrokerImpl() {
         setDataReadRouter(new BindingAwareDataReaderRouter());
     }
 
     @Override
     public DataTransactionImpl beginTransaction() {
-        return new DataTransactionImpl(this);
+        String transactionId = "BA-" + nextTransaction.getAndIncrement();
+        return new DataTransactionImpl(transactionId,this);
     }
 
     @Override

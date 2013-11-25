@@ -36,6 +36,7 @@ import org.opendaylight.yangtools.yang.binding.Augmentable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.BindingCodec;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -120,6 +121,9 @@ public class LazyGeneratedCodecRegistry implements //
         ReferencedTypeImpl typeref = new ReferencedTypeImpl(type.getPackageName(), type.getName());
         @SuppressWarnings("rawtypes")
         WeakReference<Class> weakRef = typeToClass.get(typeref);
+        if(weakRef == null) {
+            LOG.error("Could not find loaded class for path: {} and type: {}",path,typeref.getFullyQualifiedName());
+        }
         return weakRef.get();
     }
 
@@ -147,8 +151,28 @@ public class LazyGeneratedCodecRegistry implements //
     @Override
     @SuppressWarnings("rawtypes")
     public void bindingClassEncountered(Class cls) {
+        
         ConcreteType typeRef = Types.typeForClass(cls);
+        if(typeToClass.containsKey(typeRef)) {
+            return;
+        }
+        LOG.info("Binding Class {} encountered.",cls);
         WeakReference<Class> weakRef = new WeakReference<>(cls);
+        typeToClass.put(typeRef, weakRef);
+        if(DataObject.class.isAssignableFrom(cls)) {
+            @SuppressWarnings({"unchecked","unused"})
+            Object cdc = getCodecForDataObject((Class<? extends DataObject>) cls);
+        }
+    }
+    
+    @Override
+    public void onClassProcessed(Class<?> cls) {
+        ConcreteType typeRef = Types.typeForClass(cls);
+        if(typeToClass.containsKey(typeRef)) {
+            return;
+        }
+        LOG.info("Binding Class {} encountered.",cls);
+        WeakReference<Class> weakRef = new WeakReference<>((Class) cls);
         typeToClass.put(typeRef, weakRef);
     }
 
@@ -280,11 +304,12 @@ public class LazyGeneratedCodecRegistry implements //
             ReferencedTypeImpl typeref = new ReferencedTypeImpl(caseNode.getValue().getPackageName(), caseNode
                     .getValue().getName());
             ChoiceCaseNode node = (ChoiceCaseNode) SchemaContextUtil.findDataSchemaNode(module, caseNode.getKey());
-            if(node == null) {
-                LOG.error("YANGTools Bug: SchemaNode for {}, with path {} was not found in context.",typeref.getFullyQualifiedName(), caseNode.getKey());
+            if (node == null) {
+                LOG.error("YANGTools Bug: SchemaNode for {}, with path {} was not found in context.",
+                        typeref.getFullyQualifiedName(), caseNode.getKey());
                 continue;
             }
-            
+
             @SuppressWarnings("rawtypes")
             ChoiceCaseCodecImpl value = new ChoiceCaseCodecImpl(node);
             typeToCaseNodes.putIfAbsent(typeref, value);
@@ -305,7 +330,7 @@ public class LazyGeneratedCodecRegistry implements //
         BindingCodec<Map<QName, Object>, Object> delegate = newInstanceOf(choiceCodec);
         ChoiceCodecImpl<?> newCodec = new ChoiceCodecImpl(delegate);
         choiceCodecs.put(choiceClass, newCodec);
-        CodecMapping.setClassToCaseMap(choiceCodec, (Map<Class, BindingCodec>) classToCaseRawCodec);
+        CodecMapping.setClassToCaseMap(choiceCodec, (Map<Class<?>, BindingCodec<?, ?>>) classToCaseRawCodec);
         CodecMapping.setCompositeNodeToCaseMap(choiceCodec, newCodec.getCompositeToCase());
 
     }
@@ -545,7 +570,7 @@ public class LazyGeneratedCodecRegistry implements //
         public BindingCodec get(Object key) {
             if (key instanceof Class) {
                 Class cls = (Class) key;
-                bindingClassEncountered(cls);
+                //bindingClassEncountered(cls);
                 ChoiceCaseCodecImpl caseCodec = getCaseCodecFor(cls);
                 return caseCodec.getDelegate();
             }
@@ -563,11 +588,6 @@ public class LazyGeneratedCodecRegistry implements //
         }
 
         @Override
-        public Set<java.util.Map.Entry<CompositeNode, BindingCodec>> entrySet() {
-            return null;
-        }
-
-        @Override
         public BindingCodec get(Object key) {
             if (false == (key instanceof CompositeNode)) {
                 return null;
@@ -580,6 +600,8 @@ public class LazyGeneratedCodecRegistry implements //
             }
             return null;
         }
+        
+        
     }
 
     /**
@@ -590,7 +612,7 @@ public class LazyGeneratedCodecRegistry implements //
      *            Key type
      */
     @SuppressWarnings("rawtypes")
-    private static abstract class MapFacadeBase<T> implements Map<T, BindingCodec> {
+    private static abstract class MapFacadeBase<T> implements Map<T, BindingCodec<?, ?>> {
 
         @Override
         public boolean containsKey(Object key) {
@@ -618,7 +640,7 @@ public class LazyGeneratedCodecRegistry implements //
         }
 
         @Override
-        public Collection<BindingCodec> values() {
+        public Collection<BindingCodec<?, ?>> values() {
             return null;
         }
 
@@ -627,12 +649,12 @@ public class LazyGeneratedCodecRegistry implements //
         }
 
         @Override
-        public BindingCodec<Map<QName, Object>, Object> put(T key, BindingCodec value) {
+        public BindingCodec<Map<QName, Object>, Object> put(T key, BindingCodec<?,?> value) {
             throw notModifiable();
         }
 
         @Override
-        public void putAll(Map<? extends T, ? extends BindingCodec> m) {
+        public void putAll(Map<? extends T, ? extends BindingCodec<?, ?>> m) {
             throw notModifiable();
         }
 
@@ -652,7 +674,8 @@ public class LazyGeneratedCodecRegistry implements //
         }
 
         @Override
-        public Set<java.util.Map.Entry<T, BindingCodec>> entrySet() {
+        public Set<java.util.Map.Entry<T, BindingCodec<?, ?>>> entrySet() {
+            // TODO Auto-generated method stub
             return null;
         }
 
