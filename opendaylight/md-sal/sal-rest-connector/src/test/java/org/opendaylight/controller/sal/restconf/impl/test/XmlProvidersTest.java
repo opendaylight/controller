@@ -107,6 +107,16 @@ public class XmlProvidersTest extends JerseyTest {
     }
     
     @Test
+    public void testXmlToCompositeNode400() throws UnsupportedEncodingException, URISyntaxException {
+        String uri = createUri("/datastore/", "simple-nodes:user/name");
+        
+        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
+        
+        Response response = target(uri).request(MediaTypes.API+RestconfService.XML).get();
+        assertEquals(400, response.getStatus());
+    }
+    
+    @Test
     public void testRpcResultCommitedToStatusCodes() throws UnsupportedEncodingException {
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
         String xml = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));

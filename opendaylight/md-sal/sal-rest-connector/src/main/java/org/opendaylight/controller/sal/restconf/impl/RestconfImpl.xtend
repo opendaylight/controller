@@ -7,6 +7,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
+import javax.ws.rs.WebApplicationException
 
 class RestconfImpl implements RestconfService {
     
@@ -19,7 +20,7 @@ class RestconfImpl implements RestconfService {
     extension ControllerContext controllerContext
     
     private new() {
-        if (INSTANCE != null) {
+        if (INSTANCE !== null) {
             throw new IllegalStateException("Already instantiated");
         }
     }
@@ -42,13 +43,13 @@ class RestconfImpl implements RestconfService {
     }
 
     override readData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
         val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
         switch status.result {
@@ -58,7 +59,7 @@ class RestconfImpl implements RestconfService {
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
         val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
         switch status.result {
@@ -76,13 +77,13 @@ class RestconfImpl implements RestconfService {
     }
     
     override readConfigurationData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
     
     override readOperationalData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
@@ -96,7 +97,7 @@ class RestconfImpl implements RestconfService {
     }
     
     override createOperationalData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
         val status = broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
         switch status.result {
@@ -106,13 +107,22 @@ class RestconfImpl implements RestconfService {
     }
     
     override updateOperationalData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
         val status = broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
         switch status.result {
             case TransactionStatus.COMMITED: Response.status(Response.Status.NO_CONTENT).build
             default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
         }
+    }
+    
+    private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
+        if (identifierWithSchemaNode === null) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("URI has bad format")
+                    .build());
+        }
+        return identifierWithSchemaNode
     }
     
     private def CompositeNode resolveNodeNamespaceBySchema(CompositeNode node, DataSchemaNode schema) {
@@ -124,7 +134,7 @@ class RestconfImpl implements RestconfService {
     }
 
     private def void addNamespaceToNodeFromSchemaRecursively(NodeWrapper<?> nodeBuilder, DataSchemaNode schema) {
-        if (nodeBuilder.namespace == null) {
+        if (nodeBuilder.namespace === null) {
             nodeBuilder.namespace = schema.QName.namespace
         }
         if (nodeBuilder instanceof CompositeNodeWrapper) {

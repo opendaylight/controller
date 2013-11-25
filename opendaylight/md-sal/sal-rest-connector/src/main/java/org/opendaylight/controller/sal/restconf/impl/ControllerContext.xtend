@@ -46,7 +46,7 @@ class ControllerContext implements SchemaServiceListener {
     
 
     private new() {
-        if (INSTANCE != null) {
+        if (INSTANCE !== null) {
             throw new IllegalStateException("Already instantiated");
         }
     }
@@ -56,7 +56,7 @@ class ControllerContext implements SchemaServiceListener {
     }
     
     private def void checkPreconditions() {
-        if (schemas == null) {
+        if (schemas === null) {
             throw new WebApplicationException(Response.status(Response.Status.SERVICE_UNAVAILABLE)
                     .entity(RestconfProvider::NOT_INITALIZED_MSG).build())
         }
@@ -72,7 +72,7 @@ class ControllerContext implements SchemaServiceListener {
             pathArgs.remove(0)
         }
         val schemaNode = ret.collectPathArguments(pathArgs, restconfInstance.findModule);
-        if (schemaNode == null) {
+        if (schemaNode === null) {
             return null
         }
         new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
@@ -92,7 +92,7 @@ class ControllerContext implements SchemaServiceListener {
 
     private def getLatestModule(SchemaContext schema, String moduleName) {
         checkNotNull(schema)
-        checkArgument(moduleName != null && !moduleName.empty)
+        checkArgument(moduleName !== null && !moduleName.empty)
         val modules = schema.modules.filter[m|m.name == moduleName]
         var latestModule = modules.head
         for (module : modules) {
@@ -134,9 +134,9 @@ class ControllerContext implements SchemaServiceListener {
     def CharSequence toRestconfIdentifier(QName qname) {
         checkPreconditions
         var module = uriToModuleName.get(qname.namespace)
-        if (module == null) {
+        if (module === null) {
             val moduleSchema = schemas.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
-            if(moduleSchema == null) throw new IllegalArgumentException()
+            if(moduleSchema === null) throw new IllegalArgumentException()
             uriToModuleName.put(qname.namespace, moduleSchema.name)
             module = moduleSchema.name;
         }
@@ -189,7 +189,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     private def toUriString(Object object) {
-        if(object == null) return "";
+        if(object === null) return "";
         return URLEncoder.encode(object.toString)
     }
 
@@ -203,14 +203,14 @@ class ControllerContext implements SchemaServiceListener {
 
         val nodeName = nodeRef.toNodeName();
         val targetNode = parentNode.getDataChildByName(nodeName);
-        if (targetNode == null) {
+        if (targetNode === null) {
             val children = parentNode.childNodes
             for (child : children) {
                 if (child instanceof ChoiceNode) {
                     val choice = child as ChoiceNode
                     for (caze : choice.cases) {
                         val result = builder.collectPathArguments(strings, caze as DataNodeContainer);
-                        if (result != null)
+                        if (result !== null)
                             return result
                     }
                 }
