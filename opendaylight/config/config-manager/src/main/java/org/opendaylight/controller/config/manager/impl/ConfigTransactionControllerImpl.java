@@ -20,6 +20,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistr
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
+import org.opendaylight.controller.config.manager.impl.util.ModuleFactoryBundleContextHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -136,7 +137,8 @@ class ConfigTransactionControllerImpl implements
         }
         // add default modules
         for (ModuleFactory moduleFactory : toBeAdded) {
-            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager, bundleContext);
+            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager, ModuleFactoryBundleContextHelper.
+                    getModuleFactoryBundleContext(this.bundleContext, moduleFactory.getImplementationName()));
             for (Module module : defaultModules) {
                 // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
                 DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
@@ -173,9 +175,11 @@ class ConfigTransactionControllerImpl implements
         DependencyResolver dependencyResolver = dependencyResolverManager
                 .getOrCreate(moduleIdentifier);
         try {
+            BundleContext bc = ModuleFactoryBundleContextHelper.
+                    getModuleFactoryBundleContext(this.bundleContext, moduleFactory.getImplementationName());
             module = moduleFactory.createModule(
                     moduleIdentifier.getInstanceName(), dependencyResolver,
-                    oldConfigBeanInfo.getReadableModule(), bundleContext);
+                    oldConfigBeanInfo.getReadableModule(), bc);
         } catch (Exception e) {
             throw new IllegalStateException(format(
                     "Error while copying old configuration from %s to %s",
@@ -196,7 +200,8 @@ class ConfigTransactionControllerImpl implements
         // find factory
         ModuleFactory moduleFactory = factoriesHolder.findByModuleName(factoryName);
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
-        Module module = moduleFactory.createModule(instanceName, dependencyResolver, bundleContext);
+        Module module = moduleFactory.createModule(instanceName, dependencyResolver, ModuleFactoryBundleContextHelper.
+                getModuleFactoryBundleContext(this.bundleContext, moduleFactory.getImplementationName()));
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
                 moduleFactory, null, dependencyResolver);
     }

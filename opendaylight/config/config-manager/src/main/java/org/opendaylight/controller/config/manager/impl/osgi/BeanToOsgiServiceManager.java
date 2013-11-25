@@ -28,12 +28,6 @@ public class BeanToOsgiServiceManager {
     static final String INSTANCE_NAME_OSGI_PROP = "instanceName";
     static final String IMPLEMENTATION_NAME_OSGI_PROP = "implementationName";
 
-    private final BundleContext bundleContext;
-
-    public BeanToOsgiServiceManager(BundleContext context) {
-        this.bundleContext = context;
-    }
-
     /**
      * To be called for every created, reconfigured and recreated config bean.
      * It is expected that before using this method OSGi service registry will
@@ -41,7 +35,7 @@ public class BeanToOsgiServiceManager {
      */
     public OsgiRegistration registerToOsgi(
             Class<? extends Module> configBeanClass, AutoCloseable instance,
-            ModuleIdentifier moduleIdentifier) {
+            ModuleIdentifier moduleIdentifier, BundleContext bundleContext) {
         try {
             final Set<Class<?>> configuresInterfaces = InterfacesHelper
                     .getOsgiRegistrationTypes(configBeanClass);

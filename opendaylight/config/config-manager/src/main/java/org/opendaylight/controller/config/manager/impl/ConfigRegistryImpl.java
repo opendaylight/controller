@@ -23,6 +23,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistr
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
+import org.opendaylight.controller.config.manager.impl.util.ModuleFactoryBundleContextHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
@@ -114,8 +115,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             BundleContext bundleContext, MBeanServer configMBeanServer,
             BaseJMXRegistrator baseJMXRegistrator) {
         this.resolver = resolver;
-        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager(
-                bundleContext);
+        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.bundleContext = bundleContext;
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
@@ -320,8 +320,16 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
             // register to OSGi
             if (osgiRegistration == null) {
-                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
-                        newReadableConfigBean.getInstance(), entry.getName());
+                ModuleFactory moduleFactory = entry.getModuleFactory();
+                if(moduleFactory != null) {
+                    BundleContext bc = ModuleFactoryBundleContextHelper.
+                            getModuleFactoryBundleContext(this.bundleContext, moduleFactory.getImplementationName());
+                    osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
+                            newReadableConfigBean.getInstance(), entry.getName(), bc);
+                } else {
+                    throw new NullPointerException(entry.getIdentifier().getFactoryName() + " ModuleFactory not found.");
+                }
+
             }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators
