@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.ssh;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,13 +23,14 @@ public class SSHServerTest {
     private static final String USER = "netconf";
     private static final String PASSWORD  = "netconf";
     private static final String HOST = "127.0.0.1";
-    private static final int PORT = 830;
+    private static final int PORT = 10830;
+    private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
     private static final Logger logger =  LoggerFactory.getLogger(SSHServerTest.class);
 
     private class TestSSHServer implements Runnable {
         public void run()  {
             try {
-                NetconfSSHServer.start();
+                NetconfSSHServer.start(PORT,tcpAddress);
             } catch (Exception e) {
                 logger.info(e.getMessage());
             }
