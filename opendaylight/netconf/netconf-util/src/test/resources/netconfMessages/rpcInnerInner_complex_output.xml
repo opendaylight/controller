@@ -2,7 +2,7 @@
     <leaf-list-output
             xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
         <context-instance>
-            /data/modules/module[name='impl-netconf']/instance[name='instance2']/inner-running-data[key='1015']/inner-inner-running-data[key='1017']
+            /modules/module[type='impl-netconf'][name='instance2']/inner-running-data[key='1015']/inner-inner-running-data[key='1017']
         </context-instance>
     </leaf-list-output>
 </rpc>
