@@ -29,9 +29,9 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
         this.moduleMap = Collections.unmodifiableMap(moduleMap);
     }
 
-    public YangStoreSnapshotImpl(YangStoreSnapshotImpl yangStoreSnapshot) {
-        this.moduleMXBeanEntryMap = yangStoreSnapshot.moduleMXBeanEntryMap;
-        this.moduleMap = yangStoreSnapshot.moduleMap;
+    public YangStoreSnapshotImpl(YangStoreSnapshot yangStoreSnapshot) {
+        this.moduleMXBeanEntryMap = yangStoreSnapshot.getModuleMXBeanEntryMap();
+        this.moduleMap = yangStoreSnapshot.getModuleMap();
     }
 
     @Override
