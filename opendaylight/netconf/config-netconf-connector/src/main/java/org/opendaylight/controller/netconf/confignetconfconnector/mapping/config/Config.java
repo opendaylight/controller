@@ -87,9 +87,9 @@ public class Config {
     }
 
     private void addServices(Services serviceTracker, Collection<ObjectName> instances,
-            Map<String, String> providedServices) {
+            Multimap<String, String> providedServices) {
         for (ObjectName instanceOn : instances) {
-            for (Entry<String, String> serviceName : providedServices.entrySet()) {
+            for (Entry<String, String> serviceName : providedServices.entries()) {
                 serviceTracker.addServiceEntry(serviceName.getKey(), serviceName.getValue(), instanceOn);
             }
         }
@@ -243,7 +243,7 @@ public class Config {
 
             checkState(moduleConfig != null, "Cannot find ModuleConfig with name " + factoryName + " in " + moduleNamesToConfigs);
             // Set<String> services = ;
-            for (Entry<String, String> serviceName : moduleConfig.getProvidedServices().entrySet()) {
+            for (Entry<String, String> serviceName : moduleConfig.getProvidedServices().entries()) {
 
                 services.addServiceEntry(serviceName.getKey(), serviceName.getValue(), existingON);
             }

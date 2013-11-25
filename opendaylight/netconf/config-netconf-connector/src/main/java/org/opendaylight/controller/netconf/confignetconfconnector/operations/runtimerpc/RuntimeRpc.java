@@ -127,6 +127,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         if (contextInstanceElement.isPresent() == false)
             return HandlingPriority.CANNOT_HANDLE;
 
+        // FIXME update xpath to instance to conform to config-api yang
         final RuntimeRpcElementResolved id = RuntimeRpcElementResolved.fromXpath(contextInstanceElement.get()
                 .getTextContent(), netconfOperationName, netconfOperationNamespace);
 
