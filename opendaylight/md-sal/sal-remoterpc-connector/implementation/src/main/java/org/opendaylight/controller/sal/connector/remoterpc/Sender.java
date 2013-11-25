@@ -5,18 +5,34 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
+package org.opendaylight.controller.sal.connector.remoterpc;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: alefan
+ * Date: 11/21/13
+ * Time: 12:41 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class Sender {
+}
+
+
+/*
+SCALA
+
 package org.opendaylight.controller.sal.connector.remoterpc
 
-import org.slf4j.{LoggerFactory, Logger}
-import scala.collection.JavaConverters._
-import scala.Some
-import org.opendaylight.controller.sal.connector.remoterpc.dto.{MessageWrapper, Message}
-
+  import org.slf4j.{LoggerFactory, Logger}
+  import scala.collection.JavaConverters._
+  import scala.Some
+  import org.opendaylight.controller.sal.connector.remoterpc.dto.{MessageWrapper, Message}
+*/
 /**
  * Main server thread for sending requests. This does not maintain any state. If the
  * thread dies, it will be restarted
  */
-class Sender extends Runnable {
+/*class Sender extends Runnable {
   private val _logger: Logger = LoggerFactory.getLogger(Sender.this.getClass())
 
   override def run = {
@@ -54,7 +70,7 @@ class Sender extends Runnable {
               case None => //{
                 _logger.error("Could not find a managed socket for zmq socket")
                 throw new IllegalStateException("Could not find a managed socket for zmq socket")
-              //}
+                //}
               case Some(s) => {
                 val response = s.receive()
                 _logger.debug("Received rpc response [{}]", response.message)
@@ -102,4 +118,3 @@ class Sender extends Runnable {
 //    _logger.info("Restarting request processor server...")
 //    RequestProcessor.start()
 //  }
-

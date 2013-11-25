@@ -1,5 +1,6 @@
 package org.opendaylight.controller.sample.zeromq.provider;
 
+import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.core.api.AbstractProvider;
@@ -10,6 +11,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -22,7 +24,6 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
 
   private final URI namespace = URI.create("http://cisco.com/example");
   private final QName QNAME = new QName(namespace, "heartbeat");
-  private final QName QNAME_TWO = new QName(namespace, "heartbeat2");
   private RpcRegistration reg;
 
   private ServiceRegistration thisReg;
@@ -39,40 +40,48 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
   public Set<QName> getSupportedRpcs() {
     Set<QName> supportedRpcs = new HashSet<QName>();
     supportedRpcs.add(QNAME);
-    supportedRpcs.add(QNAME_TWO);
     return supportedRpcs;
   }
 
   @Override
   public RpcResult<CompositeNode> invokeRpc(final QName rpc, CompositeNode input) {
-
-    CompositeNode successCompositeNode = new CompositeNodeImpl();
-
-
     boolean success = false;
     CompositeNode output = null;
     Collection<RpcError> errors = new ArrayList<>();
 
     // Only handle supported RPC calls
-//    if (getSupportedRpcs().contains(rpc))  {
-//      if (input == null) {
-//        errors.add(RpcErrors.getRpcError("app", "tag", "info", RpcError.ErrorSeverity.ERROR, "message:null input", RpcError.ErrorType.RPC, null));
-//      }
-//      else if (!rpc.equals(input.getKey())) {
-//        errors.add(RpcErrors.getRpcError("app", "tag", "info", RpcError.ErrorSeverity.WARNING, "message:key mismatch", RpcError.ErrorType.RPC, null));
-//      }
-//      else {
-//        success = true;
-//        output = successCompositeNode;
-//      }
-//    }
-//    else {
-//      // Invalid Service
-//      // I don't think this code can ever get executed in the integration test, no way for the request to get here b/c no announce for invalid service
-//      errors.add(RpcErrors.getRpcError("app", "tag", "info", RpcError.ErrorSeverity.ERROR, "message:unsupported RPC", RpcError.ErrorType.RPC, null));
-//    }
-    output = successCompositeNode;
+    if (getSupportedRpcs().contains(rpc))  {
+      if (input == null) {
+        errors.add(RpcErrors.getRpcError("app", "tag", "info", RpcError.ErrorSeverity.WARNING, "message:null input", RpcError.ErrorType.RPC, null));
+      }
+      else {
+        if (isErroneousInput(input)) {
+          errors.add(RpcErrors.getRpcError("app", "tag", "info", RpcError.ErrorSeverity.ERROR, "message:error", RpcError.ErrorType.RPC, null));
+        }
+        else {
+          success = true;
+          output = new CompositeNodeImpl();
+        }
+      }
+    }
     return Rpcs.getRpcResult(success, output, errors);
+  }
+
+  // Examines input -- dives into CompositeNodes and finds any value equal to "error"
+  private boolean isErroneousInput(CompositeNode input) {
+    for (Node<?> n : input.getChildren()) {
+      if (n instanceof CompositeNode) {
+        if (isErroneousInput((CompositeNode)n)) {
+          return true;
+        }
+      }
+      else {  //SimpleNode
+        if ((input.getChildren().get(0).getValue()).equals("error")) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Override

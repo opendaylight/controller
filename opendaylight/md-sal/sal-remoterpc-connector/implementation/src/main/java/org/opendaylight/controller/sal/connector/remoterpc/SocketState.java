@@ -5,8 +5,14 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.sal.connector.remoterpc.dto
+package org.opendaylight.controller.sal.connector.remoterpc;
 
-import org.zeromq.ZMQ
+/**
+ * Represents the state of a {@link RpcSocket}
+ */
+public interface SocketState {
 
-case class MessageWrapper(val message:Message, val receiveSocket:ZMQ.Socket)
+  /* The processing actions to be performed in this state
+   */
+  public void process(RpcSocket socket);
+}
