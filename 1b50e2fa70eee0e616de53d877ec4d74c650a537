@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b4f140cf",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-25T16:51:45Z",
+      "side": 1,
+      "message": "This is hard to explain. Once your change for inserting/removing the value of the sw views map entries is in, we should not need this anymore.",
+      "revId": "1b50e2fa70eee0e616de53d877ec4d74c650a537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_74bbc8e5",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-25T16:51:45Z",
+      "side": 1,
+      "message": "Same here. With your following diffs, this code should no longer be needed.\n\nAlso, if remove is able to match, then the add will correctly overwrite the existing entry in the array.",
+      "revId": "1b50e2fa70eee0e616de53d877ec4d74c650a537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d4e27400",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/Match.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-25T16:51:45Z",
+      "side": 1,
+      "message": "If you found useful printing the matches field for debugging I am fine with this change. Otherwise I would prefer to keep the Match toString minimal, as matches is not really used much and I am removing it in next Match version.",
+      "revId": "1b50e2fa70eee0e616de53d877ec4d74c650a537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
