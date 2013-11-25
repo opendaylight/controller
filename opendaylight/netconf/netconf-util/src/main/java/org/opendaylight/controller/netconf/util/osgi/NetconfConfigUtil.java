@@ -26,7 +26,7 @@ public class NetconfConfigUtil {
     private static final String PREFIX_PROP = "netconf.";
 
     private enum InfixProp {
-        tcp, tls
+        tcp, tls, ssh
     }
 
     private static final String PORT_SUFFIX_PROP = ".port";
@@ -38,6 +38,11 @@ public class NetconfConfigUtil {
     public static Optional<InetSocketAddress> extractTCPNetconfAddress(BundleContext context) {
         return extractSomeNetconfAddress(context, InfixProp.tcp);
     }
+
+    public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context) {
+        return extractSomeNetconfAddress(context, InfixProp.ssh);
+    }
+
 
     public static Optional<TLSConfiguration> extractTLSConfiguration(BundleContext context) {
         Optional<InetSocketAddress> address = extractSomeNetconfAddress(context, InfixProp.tls);
