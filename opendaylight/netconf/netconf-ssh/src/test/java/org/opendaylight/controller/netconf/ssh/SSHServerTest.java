@@ -10,8 +10,9 @@ package org.opendaylight.controller.netconf.ssh;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import junit.framework.Assert;
-import org.junit.Before;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,22 +23,15 @@ public class SSHServerTest {
     private static final String USER = "netconf";
     private static final String PASSWORD  = "netconf";
     private static final String HOST = "127.0.0.1";
-    private static final int PORT = 830;
+    private static final int PORT = 1830;
+    private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 8383);
     private static final Logger logger =  LoggerFactory.getLogger(SSHServerTest.class);
 
-    private class TestSSHServer implements Runnable {
-        public void run()  {
-            try {
-                NetconfSSHServer.start();
-            } catch (Exception e) {
-                logger.info(e.getMessage());
-            }
-        }
-     }
-    @Before
+//    @Before
     public void startSSHServer() throws Exception{
             logger.info("Creating SSH server");
-            Thread sshServerThread = new Thread(new TestSSHServer());
+            NetconfSSHServer server = NetconfSSHServer.start(PORT,tcpAddress);
+            Thread sshServerThread = new Thread(server);
             sshServerThread.setDaemon(true);
             sshServerThread.start();
             logger.info("SSH server on");
@@ -57,7 +51,8 @@ public class SSHServerTest {
             Session sess = conn.openSession();
             logger.info("subsystem netconf");
             sess.startSubSystem("netconf");
-//            sess.requestPTY("");
+            sess.getStdin().write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities></hello>]]>]]>".getBytes());
+            IOUtils.copy(sess.getStdout(), System.out);
         } catch (IOException e) {
             e.printStackTrace();
         }
