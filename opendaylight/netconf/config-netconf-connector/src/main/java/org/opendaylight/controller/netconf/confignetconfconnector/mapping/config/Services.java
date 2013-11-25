@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -15,6 +16,8 @@ import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -29,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Services {
+    private static final Logger logger = LoggerFactory.getLogger(Services.class);
 
     private static final String PROVIDER_KEY = "provider";
     private static final String NAME_KEY = "name";
@@ -46,9 +50,13 @@ public final class Services {
         String moduleName = on.getKeyProperty("moduleFactoryName");
         String instanceName = on.getKeyProperty("instanceName");
 
-        return addServiceEntry(serviceName, moduleName, instanceName);
+        String refName = addServiceEntry(serviceName, moduleName, instanceName);
+        logger.trace("Added service entry to tracker. Service name {}, ref name {}, module name {}, instance name {}",
+                serviceName, refName, moduleName, instanceName);
+        return refName;
     }
 
+    @VisibleForTesting
     public String addServiceEntry(String serviceName, String moduleName, String instanceName) {
         ServiceInstance serviceInstance = new ServiceInstance(moduleName, instanceName);
         serviceInstance.setServiceName(serviceName);

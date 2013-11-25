@@ -24,6 +24,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.ObjectResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.AttributeWritingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -109,22 +110,25 @@ public final class InstanceConfig {
                 depTracker).prepareResolving(yangToAttrConfig);
 
         for (Entry<String, AttributeConfigElement> configDefEntry : mappedConfig.getConfiguration().entrySet()) {
+            AttributeConfigElement value = configDefEntry.getValue();
+            String attributeName = configDefEntry.getKey();
             try {
-
                 AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy = resolvingStrategies
-                        .get(configDefEntry.getKey());
+                        .get(attributeName);
+                logger.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
 
-                configDefEntry.getValue().resolveValue(attributeResolvingStrategy, configDefEntry.getKey());
-                configDefEntry.getValue().setJmxName(
-                        yangToAttrConfig.get(configDefEntry.getKey()).getUpperCaseCammelCase());
+                value.resolveValue(attributeResolvingStrategy, attributeName);
+                value.setJmxName(
+                        yangToAttrConfig.get(attributeName).getUpperCaseCammelCase());
             } catch (Exception e) {
-                throw new IllegalStateException("Unable to resolve value " + configDefEntry.getValue()
-                        + " to attribute " + configDefEntry.getKey(), e);
+                throw new IllegalStateException("Unable to resolve value " + value
+                        + " to attribute " + attributeName, e);
             }
         }
     }
 
-    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, Services services, String moduleNamespace) {
+    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, Services services, String moduleNamespace,
+                                                 EditStrategyType defaultStrategy) {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig);
@@ -149,7 +153,7 @@ public final class InstanceConfig {
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
-                retVal) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal);
+                retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
 
         resolveConfiguration(instanceConfigElementResolved, services);
         return instanceConfigElementResolved;

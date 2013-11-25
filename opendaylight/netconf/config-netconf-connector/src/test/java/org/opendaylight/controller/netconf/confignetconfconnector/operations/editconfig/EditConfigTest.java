@@ -31,7 +31,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 
 import javax.management.ObjectName;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
@@ -86,10 +88,12 @@ public class EditConfigTest {
 
         Config cfg = mock(Config.class);
         XmlElement xmlElement = mock(XmlElement.class);
-        doReturn(resolvedXmlElements).when(cfg).fromXml(xmlElement);
+        Set<ObjectName> instancesForFillingServiceRefMapping = Collections.emptySet();
+        EditStrategyType defaultStrategy = EditStrategyType.getDefaultStrategy();
+        doReturn(resolvedXmlElements).when(cfg).fromXml(xmlElement, instancesForFillingServiceRefMapping, defaultStrategy);
 
         EditConfigExecution editConfigExecution = new EditConfigExecution(null, cfg, xmlElement,
-                EditConfigXmlParser.TestOption.testThenSet);
+                EditConfigXmlParser.TestOption.testThenSet, instancesForFillingServiceRefMapping, defaultStrategy);
 
         edit.getResponseInternal(XmlUtil.newDocument(), editConfigExecution);
 

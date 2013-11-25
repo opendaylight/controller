@@ -11,8 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 import java.util.EnumSet;
 import java.util.Set;
 
-import com.google.common.base.Preconditions;
-
+//FIXME: make thread safe
 public enum EditStrategyType {
     // can be default
     merge, replace, none,
@@ -21,20 +20,8 @@ public enum EditStrategyType {
 
     private static final Set<EditStrategyType> defaultStrats = EnumSet.of(merge, replace, none);
 
-    private static EditStrategyType defaultStrat = merge;
-
-    public static EditStrategyType defaultStrategy() {
-        return defaultStrat;
-    }
-
-    public static void setDefaultStrategy(EditStrategyType strat) {
-        Preconditions.checkArgument(strat.canBeDefault(), "Default edit strategy can be only of value " + defaultStrats
-                + ", but was " + strat);
-        defaultStrat = strat;
-    }
-
-    public static void resetDefaultStrategy() {
-        setDefaultStrategy(EditStrategyType.merge);
+    public static EditStrategyType getDefaultStrategy() {
+        return merge;
     }
 
     public boolean isEnforcing() {
@@ -51,16 +38,6 @@ public enum EditStrategyType {
             throw new IllegalStateException("Default edit strategy can be only of value " + defaultStrats + " but was "
                     + this);
         }
-    }
-
-    private static final EnumSet<EditStrategyType> defaults;
-
-    static {
-        defaults = EnumSet.of(merge, replace, none);
-    }
-
-    private boolean canBeDefault() {
-        return defaults.contains(this);
     }
 
     public EditConfigStrategy getFittingStrategy() {
