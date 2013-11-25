@@ -9,18 +9,11 @@ import ch.ethz.ssh2.ServerConnectionCallback;
 import ch.ethz.ssh2.ServerSession;
 import ch.ethz.ssh2.ServerSessionCallback;
 import ch.ethz.ssh2.SimpleServerSessionCallback;
-import com.google.common.base.Optional;
-import io.netty.channel.nio.NioEventLoopGroup;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import javax.net.ssl.SSLContext;
-import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.client.NetconfClientSession;
+import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
-import org.opendaylight.controller.netconf.ssh.handler.SSHChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +24,6 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private Socket socket;
     private static final String USER = "netconf";
     private static final String PASSWORD = "netconf";
-    private NetconfClient netconfClient;
     private static final InetSocketAddress clientAddress = new InetSocketAddress("127.0.0.1", 12023);
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
 
@@ -62,7 +54,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         SimpleServerSessionCallback cb = new SimpleServerSessionCallback()
         {
             @Override
-            public Runnable requestSubsystem(ServerSession ss, final String subsystem) throws IOException
+            public Runnable requestSubsystem(final ServerSession ss, final String subsystem) throws IOException
             {
                 return new Runnable(){
                     public void run()
@@ -70,16 +62,35 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                         if (subsystem.equals("netconf")){
                             logger.info("netconf subsystem received");
                             try {
-                                NetconfClientDispatcher clientDispatcher = null;
-                                NioEventLoopGroup nioGrup = new NioEventLoopGroup(1);
-                                clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nioGrup, nioGrup);
-                                logger.info("dispatcher created");
-                                netconfClient = new NetconfClient("ssh_" + clientAddress.toString(),clientAddress,5000,clientDispatcher);
-                                logger.info("netconf client created");
+                                String hostName = clientAddress.getHostName();
+                                int portNumber = clientAddress.getPort();
+                                final Socket echoSocket = new Socket(hostName, portNumber);
+                                logger.info("echo socket created");
+                                new Thread(){
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            IOUtils.copy(echoSocket.getInputStream(), ss.getStdin());
+                                        } catch (IOException e) {
+                                            logger.error("client -> server stream copy error ",e);
+                                        }
+                                    }
+                                }.start();
+
+                                new Thread(){
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            IOUtils.copy(ss.getStdout(), echoSocket.getOutputStream());
+                                        } catch (IOException e) {
+                                            logger.error("server -> client stream copy error ",e);
+                                        }
+                                    }
+                                }.start();
                             } catch (Throwable t){
                                 logger.error(t.getMessage(),t);
                             }
-                        }
+                        }// else? what if not subsystem is sent?
                     }
                 };
             }
@@ -90,7 +101,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                 {
                     public void run()
                     {
-                        System.out.println("Client requested " + pty.term + " pty");
+                        //noop
                     }
                 };
             }
@@ -102,30 +113,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                 {
                     public void run()
                     {
-                        try
-                        {
-                            try (NetconfClientSession session = netconfClient.getClientSession())
-                            {
-                                session.getChannel().pipeline().addLast(new SSHChannelInboundHandler(ss));
-                                byte[] bytes = new byte[1024];
-                                while (true)
-                                {
-                                    int size = ss.getStdout().read(bytes);
-                                    if (size < 0)
-                                    {
-                                        System.err.println("SESSION EOF");
-                                        return;
-                                    }
-                                    session.getChannel().write(ByteBuffer.wrap(bytes,0,size));
-                                }
-                            }
-
-                        }
-                        catch (IOException e)
-                        {
-                            System.err.println("SESSION DOWN");
-                            e.printStackTrace();
-                        }
+                        //noop
                     }
                 };
             }
@@ -142,7 +130,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     public String[] getRemainingAuthMethods(ServerConnection sc)
     {
         return new String[] { ServerAuthenticationCallback.METHOD_PASSWORD,
-                ServerAuthenticationCallback.METHOD_PUBLICKEY };
+                ServerAuthenticationCallback.METHOD_PUBLICKEY };// why announing publickey?
     }
 
     public AuthenticationResult authenticateWithNone(ServerConnection sc, String username)

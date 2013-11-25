@@ -22,13 +22,13 @@ public class SSHServerTest {
     private static final String USER = "netconf";
     private static final String PASSWORD  = "netconf";
     private static final String HOST = "127.0.0.1";
-    private static final int PORT = 830;
+    private static final int PORT = 10830;
     private static final Logger logger =  LoggerFactory.getLogger(SSHServerTest.class);
 
     private class TestSSHServer implements Runnable {
         public void run()  {
             try {
-                NetconfSSHServer.start();
+                NetconfSSHServer.start(PORT);
             } catch (Exception e) {
                 logger.info(e.getMessage());
             }

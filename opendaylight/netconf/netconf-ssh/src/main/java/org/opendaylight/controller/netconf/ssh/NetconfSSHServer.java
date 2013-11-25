@@ -12,17 +12,19 @@ import java.net.ServerSocket;
 public class NetconfSSHServer  {
 
     private static boolean acceptMore = true;
-    private static final int SERVER_PORT = 830;
     private ServerSocket ss = null;
 
-    private NetconfSSHServer() throws Exception{
-        this.ss = new ServerSocket(SERVER_PORT);
+
+    private NetconfSSHServer(int serverPort) throws Exception{
+        this.ss = new ServerSocket(serverPort);
         while (acceptMore) {
             SocketThread.start(ss.accept());
         }
     }
-    public static NetconfSSHServer start() throws Exception {
-        return new NetconfSSHServer();
+
+
+    public static NetconfSSHServer start(int serverPort) throws Exception {
+        return new NetconfSSHServer(serverPort);
     }
 
     public void stop() throws Exception {
