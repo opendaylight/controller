@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_740628d0",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-25T13:16:18Z",
+      "side": 1,
+      "message": "This might fail silently. If bundlecontext is not found, throw an exception.",
+      "revId": "8807d4e722fbae310e4e5e7df3b2494eb0d6a473",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5409e4db",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigTransactionControllerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-25T13:16:18Z",
+      "side": 1,
+      "message": "(code repetition):This might fail silently. If bundlecontext is not found, throw an exception.",
+      "revId": "8807d4e722fbae310e4e5e7df3b2494eb0d6a473",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
