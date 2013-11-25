@@ -21,11 +21,13 @@ public class ObjectNameAttributeMappingStrategy extends
 
     private final Services tracker;
     private final String serviceName;
+    private final String namespace;
 
-    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, Services dependencyTracker, String serviceName) {
+    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, Services dependencyTracker, String serviceName, String namespace) {
         super(openType);
         this.tracker = dependencyTracker;
         this.serviceName = serviceName;
+        this.namespace = namespace;
     }
 
     @Override
@@ -40,17 +42,18 @@ public class ObjectNameAttributeMappingStrategy extends
         Util.checkType(value, ObjectName.class);
 
         ObjectName on = (ObjectName) value;
-        String refName = tracker.addServiceEntry(serviceName, on);
+        String refName = tracker.addServiceEntry(namespace, serviceName, on);
 
-        return Optional.of(new MappedDependency(serviceName, refName));
+        return Optional.of(new MappedDependency(namespace, serviceName, refName));
     }
 
     public static class MappedDependency {
-        private final String serviceName, refName;
+        private final String namespace, serviceName, refName;
 
-        public MappedDependency(String serviceName, String refName) {
+        public MappedDependency(String namespace, String serviceName, String refName) {
             this.serviceName = serviceName;
             this.refName = refName;
+            this.namespace = namespace;
         }
 
         public String getServiceName() {
@@ -61,10 +64,15 @@ public class ObjectNameAttributeMappingStrategy extends
             return refName;
         }
 
+        public String getNamespace() {
+            return namespace;
+        }
+
         @Override
         public String toString() {
             final StringBuffer sb = new StringBuffer("MappedDependency{");
-            sb.append("serviceName='").append(serviceName).append('\'');
+            sb.append("namespace='").append(namespace).append('\'');
+            sb.append(", serviceName='").append(serviceName).append('\'');
             sb.append(", refName='").append(refName).append('\'');
             sb.append('}');
             return sb.toString();

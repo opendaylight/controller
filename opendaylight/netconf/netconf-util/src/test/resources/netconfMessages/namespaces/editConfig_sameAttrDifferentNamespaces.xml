@@ -76,7 +76,7 @@
                         <core-size>44</core-size>
                     </peers>
                     <testing-dep>
-                        <type>testing</type>
+                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                         <name>ref_dep</name>
                     </testing-dep>
                 </module>
@@ -87,7 +87,7 @@
                     </type>
                     <name>test2</name>
                     <testing-dep>
-                        <type>testing</type>
+                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                         <name>ref_dep</name>
                     </testing-dep>
                 </module>
@@ -95,7 +95,7 @@
 
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 <service>
-                    <type>testing</type>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                     <instance>
                         <name>ref_dep</name>
                         <provider>/config/modules/module[name='impl-dep']/instance[name='dep']

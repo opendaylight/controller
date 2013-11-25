@@ -151,6 +151,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             Map<String/* Namespace from yang file */,
                     Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
         Map<String, Map<String, ModuleConfig>> factories = transform(configRegistryClient, mBeanEntries);
+
         return new Config(factories);
     }
 

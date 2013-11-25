@@ -87,10 +87,10 @@ public class Config {
     }
 
     private void addServices(Services serviceTracker, Collection<ObjectName> instances,
-            Collection<String> providedServices) {
+            Map<String, String> providedServices) {
         for (ObjectName instanceOn : instances) {
-            for (String serviceName : providedServices) {
-                serviceTracker.addServiceEntry(serviceName, instanceOn);
+            for (Entry<String, String> serviceName : providedServices.entrySet()) {
+                serviceTracker.addServiceEntry(serviceName.getKey(), serviceName.getValue(), instanceOn);
             }
         }
     }
@@ -149,6 +149,7 @@ public class Config {
         return root;
     }
 
+    // TODO remove commented modules from output
     private void addEmptyModulesCommented(Document document, Element root, String moduleNamespace,
             Entry<String, Collection<ObjectName>> moduleMappingEntry) {
         Element emptyModule = document.createElement(XmlNetconfConstants.MODULE_KEY);
@@ -224,7 +225,7 @@ public class Config {
         Optional<XmlElement> servicesElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.SERVICES_KEY,
                 XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
 
-        Map<String, Map<String, String>> mappedServices;
+        Map<String, Map<String, Map<String, String>>> mappedServices;
         if (servicesElement.isPresent()) {
             mappedServices = Services.fromXml(servicesElement.get());
             recognisedChildren.add(servicesElement.get());
@@ -242,8 +243,9 @@ public class Config {
 
             checkState(moduleConfig != null, "Cannot find ModuleConfig with name " + factoryName + " in " + moduleNamesToConfigs);
             // Set<String> services = ;
-            for (String serviceName : moduleConfig.getProvidedServices()) {
-                services.addServiceEntry(serviceName, existingON);
+            for (Entry<String, String> serviceName : moduleConfig.getProvidedServices().entrySet()) {
+
+                services.addServiceEntry(serviceName.getKey(), serviceName.getValue(), existingON);
             }
         }
 
