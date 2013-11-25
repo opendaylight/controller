@@ -275,7 +275,7 @@ public class NetconfITTest extends AbstractConfigTest {
                     + "<no-arg xmlns=\""
                     + expectedNamespace
                     + "\">    "
-                    + "<context-instance>/data/modules/module[name='impl-netconf']/instance[name='instance']</context-instance>"
+                    + "<context-instance>/modules/module[type='impl-netconf'][name='instance']</context-instance>"
                     + "<arg1>argument1</arg1>" + "</no-arg>" + "</rpc>";
             final Document doc = XmlUtil.readXmlToDocument(rpc);
             final NetconfMessage message = netconfClient.sendMessage(new NetconfMessage(doc));
