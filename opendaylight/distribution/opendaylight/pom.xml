@@ -129,7 +129,11 @@
           <artifactId>forwardingrules-manager</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
-
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>statistics-manager</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>concepts</artifactId>
