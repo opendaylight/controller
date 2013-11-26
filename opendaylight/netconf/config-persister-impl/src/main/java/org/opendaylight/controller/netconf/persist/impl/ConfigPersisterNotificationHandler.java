@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -152,9 +153,11 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
             Thread.sleep(delay);
         }
-
-        throw new RuntimeException("Netconf server did not provide required capabilities " + expectedCaps
-                + " in time, provided capabilities " + currentCapabilities);
+        Set<String> allNotFound = new HashSet<>(expectedCaps);
+        allNotFound.removeAll(currentCapabilities);
+        logger.error("Netconf server did not provide required capabilities. Expected but not found: {}, all expected {}, current {}",
+                allNotFound, expectedCaps ,currentCapabilities);
+        throw new RuntimeException("Netconf server did not provide required capabilities. Expected but not found:" + allNotFound);
 
     }
 
