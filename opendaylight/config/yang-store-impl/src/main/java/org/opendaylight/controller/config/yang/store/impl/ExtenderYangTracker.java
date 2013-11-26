@@ -125,7 +125,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
         // inconsistent state
         inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
 
-        logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}, reason {}",
+        logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}",
                 consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, failureReason);
         logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
                 consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason.toString());

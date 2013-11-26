@@ -17,6 +17,7 @@ import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.apache.commons.io.FileUtils;
@@ -27,11 +28,11 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
+
+import com.google.common.collect.Lists;
 
 public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
 
@@ -56,14 +57,16 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
 
     /**
      * Tests configuration of Logger factory.
+     *
+     * @throws MalformedObjectNameException
      */
     @Test
-    public void test() throws InstanceAlreadyExistsException, InstanceNotFoundException {
+    public void test() throws InstanceAlreadyExistsException, InstanceNotFoundException, MalformedObjectNameException {
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
-        ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), "singleton");
+        ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), LogbackModuleFactory.INSTANCE_NAME);
 
-        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated, LogbackModuleMXBean.class);
+        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameRetrieved, LogbackModuleMXBean.class);
 
         assertEquals(1, bean.getConsoleAppenderTO().size());
 
@@ -73,9 +76,9 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
 
         transaction = configRegistryClient.createTransaction();
 
-        nameCreated = transaction.lookupConfigBean(factory.getImplementationName(), "singleton");
+        nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), "singleton");
 
-        bean = JMX.newMXBeanProxy(platformMBeanServer, nameCreated, LogbackModuleMXBean.class);
+        bean = JMX.newMXBeanProxy(platformMBeanServer, nameRetrieved, LogbackModuleMXBean.class);
 
         assertEquals(1, bean.getConsoleAppenderTO().size());
         assertEquals(1, bean.getRollingFileAppenderTO().size());
@@ -89,11 +92,6 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
     @Test
     public void testAllLoggers() throws InstanceAlreadyExistsException, InstanceNotFoundException {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
-        transaction.createModule(factory.getImplementationName(), "singleton");
-
-        transaction.commit();
-
-        transaction = configRegistryClient.createTransaction();
 
         LogbackModuleMXBean bean = JMX.newMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
                 transaction.lookupConfigBean("logback", "singleton"), LogbackModuleMXBean.class);
@@ -103,13 +101,16 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
 
     /**
      * Add new logger using FileAppender
+     *
+     * @throws MalformedObjectNameException
      */
     @Test
-    public void testAddNewLogger() throws InstanceAlreadyExistsException, InstanceNotFoundException {
+    public void testAddNewLogger() throws InstanceAlreadyExistsException, InstanceNotFoundException,
+            MalformedObjectNameException {
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
-        ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), "singleton");
-        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated, LogbackModuleMXBean.class);
+        ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), LogbackModuleFactory.INSTANCE_NAME);
+        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameRetrieved, LogbackModuleMXBean.class);
 
         assertEquals(5, bean.getLoggerTO().size());
 
@@ -124,8 +125,8 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
         transaction.commit();
 
         transaction = configRegistryClient.createTransaction();
-        nameCreated = transaction.lookupConfigBean(factory.getImplementationName(), "singleton");
-        bean = JMX.newMXBeanProxy(platformMBeanServer, nameCreated, LogbackModuleMXBean.class);
+        nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), "singleton");
+        bean = JMX.newMXBeanProxy(platformMBeanServer, nameRetrieved, LogbackModuleMXBean.class);
 
         assertEquals(6, bean.getLoggerTO().size());
     }
