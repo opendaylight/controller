@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_287850c3",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-26T14:32:47Z",
+      "side": 1,
+      "message": "Can you please avoid to use the System.out.println and use the logger facility?",
+      "revId": "bf789c3e47a2fda69fc5f29801f702c108148401",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a84b2086",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-26T14:32:47Z",
+      "side": 1,
+      "message": "On printStackTrace replace it with logger.debug(\"\", e); this way we can also get the stacktrace in the logger",
+      "revId": "bf789c3e47a2fda69fc5f29801f702c108148401",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_884e1c95",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-26T14:32:47Z",
+      "side": 1,
+      "message": "Please use logger",
+      "revId": "bf789c3e47a2fda69fc5f29801f702c108148401",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_285f3043",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-26T14:32:47Z",
+      "side": 1,
+      "message": "Please remove printStackTrace and use logger.error(\"\", e);",
+      "revId": "bf789c3e47a2fda69fc5f29801f702c108148401",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_48482487",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-26T14:32:47Z",
+      "side": 1,
+      "message": "Please use logger only without System.out.println",
+      "revId": "bf789c3e47a2fda69fc5f29801f702c108148401",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_085a2c50",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/MeterConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-26T14:32:47Z",
+      "side": 1,
+      "message": "Same comment as in the other files",
+      "revId": "bf789c3e47a2fda69fc5f29801f702c108148401",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
