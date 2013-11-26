@@ -33,6 +33,8 @@ import org.opendaylight.yangtools.binding.generator.util.Types
 import org.osgi.framework.BundleContext
 import java.util.Hashtable
 import org.osgi.framework.ServiceRegistration
+import org.opendaylight.controller.sal.binding.impl.connect.dom.DeserializationException
+import java.util.concurrent.Callable
 
 class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener, AutoCloseable {
 
@@ -59,7 +61,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
     val promisedTypeDefinitions = HashMultimap.<Type, SettableFuture<GeneratedTypeBuilder>>create;
 
     val promisedSchemas = HashMultimap.<Type, SettableFuture<SchemaNode>>create;
-    
+
     ServiceRegistration<SchemaServiceListener> listenerRegistration
 
     override onGlobalContextUpdated(SchemaContext arg0) {
@@ -79,7 +81,6 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
             val context = entry.value;
             updateBindingFor(context.childNodes, schemaContext);
             updateBindingFor(context.cases, schemaContext);
-            
 
             val typedefs = context.typedefs;
             for (typedef : typedefs.values) {
@@ -89,7 +90,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
             for (augmentation : augmentations) {
                 binding.typeToDefinition.put(augmentation, augmentation);
             }
-            
+
             binding.typeToAugmentation.putAll(context.typeToAugmentation);
         }
     }
@@ -127,22 +128,36 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
     }
 
     override dataObjectFromDataDom(InstanceIdentifier<? extends DataObject> path, CompositeNode node) {
-        if (node == null) {
-            return null;
-        }
-        val targetType = path.targetType
-        val transformer = registry.getCodecForDataObject(targetType);
-        val ret = transformer.deserialize(node)?.value as DataObject;
-        return ret;
+        return tryDeserialization[ |
+            if (node == null) {
+                return null;
+            }
+            val targetType = path.targetType
+            val transformer = registry.getCodecForDataObject(targetType);
+            val ret = transformer.deserialize(node)?.value as DataObject;
+            return ret;
+        ]
     }
-    
+
     override fromDataDom(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry) {
-        return registry.instanceIdentifierCodec.deserialize(entry);
+        return tryDeserialization[ |
+            registry.instanceIdentifierCodec.deserialize(entry);
+        ]
+    }
+
+    private static def <T> T tryDeserialization(Callable<T> deserializationBlock) throws DeserializationException {
+        try {
+            deserializationBlock.call()
+        } catch (Exception e) {
+            // FIXME: Make this block providing more information.
+            throw new DeserializationException(e);
+        }
     }
 
     private def void updateBindingFor(Map<SchemaPath, GeneratedTypeBuilder> map, SchemaContext module) {
         for (entry : map.entrySet) {
             val schemaNode = SchemaContextUtil.findDataSchemaNode(module, entry.key);
+
             //LOG.info("{} : {}",entry.key,entry.value.fullyQualifiedName)
             if (schemaNode != null) {
                 typeToSchemaNode.put(entry.value, schemaNode);
@@ -162,8 +177,8 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         binding.typeToDefinition = typeToDefinition
         binding.typeToSchemaNode = typeToSchemaNode
         binding.typeDefinitions = typeDefinitions
-        if(ctx !== null) {
-            listenerRegistration = ctx.registerService(SchemaServiceListener,this,new Hashtable<String,String>());
+        if (ctx !== null) {
+            listenerRegistration = ctx.registerService(SchemaServiceListener, this, new Hashtable<String, String>());
         }
     }
 
@@ -217,9 +232,9 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         }
         promisedSchemas.removeAll(builder);
     }
-    
+
     override close() throws Exception {
         listenerRegistration?.unregister();
     }
-    
+
 }

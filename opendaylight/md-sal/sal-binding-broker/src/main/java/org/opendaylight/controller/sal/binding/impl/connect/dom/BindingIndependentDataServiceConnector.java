@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class BindingIndependentDataServiceConnector implements //
         RuntimeDataProvider, //
-        Provider {
+        Provider, AutoCloseable {
 
     private final Logger LOG = LoggerFactory.getLogger(BindingIndependentDataServiceConnector.class);
 
@@ -59,16 +59,24 @@ public class BindingIndependentDataServiceConnector implements //
 
     @Override
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
-        CompositeNode result = biDataService.readOperationalData(biPath);
-        return mappingService.dataObjectFromDataDom(path, result);
+        try {
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
+            CompositeNode result = biDataService.readOperationalData(biPath);
+            return mappingService.dataObjectFromDataDom(path, result);
+        } catch (DeserializationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
     public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path) {
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
-        CompositeNode result = biDataService.readConfigurationData(biPath);
-        return mappingService.dataObjectFromDataDom(path, result);
+        try {
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
+            CompositeNode result = biDataService.readConfigurationData(biPath);
+            return mappingService.dataObjectFromDataDom(path, result);
+        } catch (DeserializationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private DataModificationTransaction createBindingToDomTransaction(
@@ -103,23 +111,42 @@ public class BindingIndependentDataServiceConnector implements //
                 .beginTransaction();
         for (Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
                 .getUpdatedConfigurationData().entrySet()) {
-            InstanceIdentifier<?> baKey = mappingService.fromDataDom(entry.getKey());
-            DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
-            target.putConfigurationData(baKey, baData);
+            try {
+                InstanceIdentifier<?> baKey = mappingService.fromDataDom(entry.getKey());
+                DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
+                target.putConfigurationData(baKey, baData);
+            } catch (DeserializationException e) {
+                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry.getKey(), e);
+            }
         }
         for (Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
                 .getUpdatedOperationalData().entrySet()) {
-            InstanceIdentifier<?> baKey = mappingService.fromDataDom(entry.getKey());
-            DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
-            target.putOperationalData(baKey, baData);
+            try {
+
+                InstanceIdentifier<?> baKey = mappingService.fromDataDom(entry.getKey());
+                DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
+                target.putOperationalData(baKey, baData);
+            } catch (DeserializationException e) {
+                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry.getKey(), e);
+            }
         }
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
-            InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
-            target.removeConfigurationData(baEntry);
+            try {
+
+                InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
+                target.removeConfigurationData(baEntry);
+            } catch (DeserializationException e) {
+                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry, e);
+            }
         }
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedOperationalData()) {
-            InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
-            target.removeOperationalData(baEntry);
+            try {
+
+                InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
+                target.removeOperationalData(baEntry);
+            } catch (DeserializationException e) {
+                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry, e);
+            }
         }
         return target;
     }
@@ -160,6 +187,18 @@ public class BindingIndependentDataServiceConnector implements //
     public void onSessionInitiated(ProviderSession session) {
         setBiDataService(session.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
         start();
+    }
+
+    @Override
+    public void close() throws Exception {
+
+        if (baCommitHandlerRegistration != null) {
+            baCommitHandlerRegistration.close();
+        }
+        if (biCommitHandlerRegistration != null) {
+            biCommitHandlerRegistration.close();
+        }
+
     }
 
     private class DomToBindingTransaction implements
@@ -271,10 +310,11 @@ public class BindingIndependentDataServiceConnector implements //
 
         @Override
         public void onRegister(DataCommitHandlerRegistration<InstanceIdentifier<?>, DataObject> registration) {
-            
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = mappingService.toDataDom(registration.getPath());
+
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = mappingService.toDataDom(registration
+                    .getPath());
             // FIXME: do registration based on only active commit handlers.
-            
+
         }
 
         @Override
