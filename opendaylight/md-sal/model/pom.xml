@@ -63,6 +63,10 @@
                                         target/generated-sources/sal
                                     </outputBaseDir>
                                 </generator>
+                                <generator>
+                                    <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
+                                    <outputBaseDir>target/site</outputBaseDir>
+                                </generator>
                             </codeGenerators>
                             <inspectDependencies>true</inspectDependencies>
                         </configuration>
