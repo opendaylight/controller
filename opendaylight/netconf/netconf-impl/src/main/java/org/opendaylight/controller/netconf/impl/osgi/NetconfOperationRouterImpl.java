@@ -121,8 +121,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         String messageAsString = XmlUtil.toString(message);
 
         try {
-            netconfOperationExecution = getNetconfOperationWithHighestPriority(
-                    message, session);
+            netconfOperationExecution = getNetconfOperationWithHighestPriority(message, session);
         } catch (IllegalArgumentException | IllegalStateException e) {
             logger.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
 
@@ -140,8 +139,29 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
             throw new NetconfDocumentedException(errorMessage, e, NetconfDocumentedException.ErrorType.application,
                     tag, NetconfDocumentedException.ErrorSeverity.error, errorInfo);
+        } catch (RuntimeException e) {
+            throw handleUnexpectedEx("Unexpected exception during netconf operation sort", e);
         }
 
+        try {
+            return executeOperationWithHighestPriority(message, netconfOperationExecution, messageAsString);
+        } catch (RuntimeException e) {
+            throw handleUnexpectedEx("Unexpected exception during netconf operation execution", e);
+        }
+    }
+
+    private NetconfDocumentedException handleUnexpectedEx(String s, Exception e) throws NetconfDocumentedException {
+        logger.error(s, e);
+
+        Map<String, String> info = Maps.newHashMap();
+        info.put(NetconfDocumentedException.ErrorSeverity.error.toString(), e.toString());
+        return new NetconfDocumentedException("Unexpected error",
+                NetconfDocumentedException.ErrorType.application,
+                NetconfDocumentedException.ErrorTag.operation_failed,
+                NetconfDocumentedException.ErrorSeverity.error, info);
+    }
+
+    private Document executeOperationWithHighestPriority(Document message, NetconfOperationExecution netconfOperationExecution, String messageAsString) throws NetconfDocumentedException {
         logger.debug("Forwarding netconf message {} to {}", messageAsString,
                 netconfOperationExecution.operationWithHighestPriority);
 

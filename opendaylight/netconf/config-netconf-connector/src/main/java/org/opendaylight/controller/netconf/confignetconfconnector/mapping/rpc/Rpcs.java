@@ -24,8 +24,9 @@ public class Rpcs {
     public ModuleRpcs getRpcMapping(RuntimeRpcElementResolved id) {
         Map<String, ModuleRpcs> modules = mappedRpcs.get(id.getNamespace());
         Preconditions.checkState(modules != null, "No modules found for namespace %s", id.getNamespace());
-        ModuleRpcs rpcMapping = modules.get(id.getModuleName());
-        Preconditions.checkState(modules != null, "No module %s found for namespace %s", id.getModuleName(),
+        String moduleName = id.getModuleName();
+        ModuleRpcs rpcMapping = modules.get(moduleName);
+        Preconditions.checkState(rpcMapping != null, "No module %s found for namespace %s", moduleName,
                 id.getNamespace());
 
         return rpcMapping;
