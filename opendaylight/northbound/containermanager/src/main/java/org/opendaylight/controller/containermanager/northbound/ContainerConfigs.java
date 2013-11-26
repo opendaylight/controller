@@ -20,10 +20,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.opendaylight.controller.containermanager.ContainerConfig;
 
 
-@XmlRootElement(name = "container-config-list")
+@XmlRootElement(name = "containerConfig-list")
 @XmlAccessorType(XmlAccessType.NONE)
 public class ContainerConfigs {
-        @XmlElement(name = "container-config")
+        @XmlElement(name = "containerConfig")
     List<ContainerConfig> containerConfig;
 
     //To satisfy JAXB

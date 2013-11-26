@@ -35,7 +35,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
  * files through java serialization API when saving to/reading from Container
  * Manager startup configuration file.
  */
-@XmlRootElement(name = "container-config")
+@XmlRootElement(name = "containerConfig")
 @XmlAccessorType(XmlAccessType.NONE)
 public class ContainerConfig implements Serializable {
     private static final long serialVersionUID = 2L;

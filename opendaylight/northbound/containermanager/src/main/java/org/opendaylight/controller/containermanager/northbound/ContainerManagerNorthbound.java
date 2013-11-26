@@ -114,8 +114,8 @@ public class ContainerManagerNorthbound {
      * http://localhost:8080/controller/nb/v2/containermanager/containers
      *
      * Response body in XML:
-     * &lt;container-config-list&gt;
-     *    &#x20;&#x20;&#x20;&lt;container-config&gt;
+     * &lt;containerConfig-list&gt;
+     *    &#x20;&#x20;&#x20;&lt;containerConfig&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;container&gt;black&lt;/container&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;staticVlan&gt;10&lt;/staticVlan&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;OF|1@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
@@ -124,8 +124,8 @@ public class ContainerManagerNorthbound {
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;tcp&lt;/name&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;protocol&gt;TCP&lt;/protocol&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/flowSpecs&gt;
-     *    &#x20;&#x20;&#x20;&#x20;&lt;/container-config&gt;
-     *    &#x20;&#x20;&#x20;&#x20;&lt;container-config&gt;
+     *    &#x20;&#x20;&#x20;&#x20;&lt;/containerConfig&gt;
+     *    &#x20;&#x20;&#x20;&#x20;&lt;containerConfig&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;container&gt;red&lt;/container&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;staticVlan&gt;20&lt;/staticVlan&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;OF|1@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
@@ -134,11 +134,11 @@ public class ContainerManagerNorthbound {
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;udp&lt;/name&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;protocol&gt;UDP&lt;/protocol&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/flowSpecs&gt;
-     *  &#x20;&#x20;&#x20;&#x20;&lt;/container-config&gt;
-     * &lt;/container-config-list&gt;
+     *  &#x20;&#x20;&#x20;&#x20;&lt;/containerConfig&gt;
+     * &lt;/containerConfig-list&gt;
      *
      * Response body in JSON:
-     * { "container-config" : [
+     * { "containerConfig" : [
      *     { "container" : "black",
      *       "nodeConnectors" : [
      *          "OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"
@@ -196,16 +196,16 @@ public class ContainerManagerNorthbound {
      * http://localhost:8080/controller/nb/v2/containermanager/container/blue
      *
      * Response body in XML:
-     * &lt;container-config&gt;
+     * &lt;containerConfig&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;container&gt;blue&lt;/container&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;staticVlan&gt;10&lt;/staticVlan&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;OF|1@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;OF|23@OF|00:00:00:00:00:00:20:21&lt;/nodeConnectors&gt;
-     * &lt;/container-config&gt;
+     * &lt;/containerConfig&gt;
      *
      * Response body in JSON:
      * {
-     *    "container-config": [
+     *    "containerConfig": [
      *       {
      *        "container": "yellow",
      *        "staticVlan": "10",
@@ -259,11 +259,11 @@ public class ContainerManagerNorthbound {
      * http://localhost:8080/controller/nb/v2/containermanager/container/yellow
      *
      * Request body in XML:
-     * &lt;container-config&gt;
+     * &lt;containerConfig&gt;
      *   &#x20;&#x20;&#x20;&#x20;&lt;container&gt;yellow&lt;/container&gt;
      *   &#x20;&#x20;&#x20;&#x20;&lt;staticVlan&gt;10&lt;/staticVlan&gt;
      *   &#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;&lt;/nodeConnectors&gt;
-     * &lt;/container-config&gt;
+     * &lt;/containerConfig&gt;
      *
      * Request body in JSON:
      * {
