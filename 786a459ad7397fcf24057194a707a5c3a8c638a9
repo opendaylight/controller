@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a87a00ef",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T13:51:48Z",
+      "side": 1,
+      "message": "perhaps join() was intended?",
+      "revId": "786a459ad7397fcf24057194a707a5c3a8c638a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_688408d4",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T13:51:48Z",
+      "side": 1,
+      "message": "please add logging, e.g. starting netconf ssh bridge on \u003cip\u003e:\u003cport\u003e. Fail (throw an exception in activator) if configuration is not specified or invalid or we cannot bind to that port",
+      "revId": "786a459ad7397fcf24057194a707a5c3a8c638a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_488704d8",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T13:51:48Z",
+      "side": 1,
+      "message": "make sure to clean up all threads, server sockets here. Document in javadoc what resources are opened when (during bundle activation, during ssh connection)",
+      "revId": "786a459ad7397fcf24057194a707a5c3a8c638a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_286e1030",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/threads/IOThread.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T13:51:48Z",
+      "side": 1,
+      "message": "replace id with super.name",
+      "revId": "786a459ad7397fcf24057194a707a5c3a8c638a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
