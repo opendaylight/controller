@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0bc0e67a",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/table-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-11-26T17:57:18Z",
+      "side": 1,
+      "message": "Please look at openflowjava/openflow-protocol-api/src/main/yang/openflow-extensible-match.yang  for an example of how to model this extensibly.  enum type cannot be augmented, an so no one would be able to augment with new types of matches...",
+      "revId": "5d29ee0fffcb827112961ddb0e94676f9b5d6088",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
