@@ -11,7 +11,7 @@ import javax.ws.rs.WebApplicationException;
 
 import org.junit.*;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.slf4j.*;
@@ -41,7 +41,34 @@ public class FromXmlToCompositeNodeTest {
         String nameSpace = "data:container:yang";
         assertEquals(nameSpace, compNode.getNodeType().getNamespace().toString());
 
+        verifyNullAndEmptyStringSingleNode(compNode, nameSpace);
         verifyCommonPartAOfXml(compNode, "", nameSpace);
+    }
+
+    private void verifyNullAndEmptyStringSingleNode(CompositeNode compNode, String nameSpace) {
+        assertEquals("cont", compNode.getNodeType().getLocalName());
+
+        SimpleNode<?> lf2 = null;
+        SimpleNode<?> lf3 = null;
+        int found = 0;
+        for (Node<?> child : compNode.getChildren()) {
+            if (found == 0x3)
+                break;
+            if (child instanceof SimpleNode<?>) {
+                SimpleNode<?> childSimple = (SimpleNode<?>) child;
+                if (childSimple.getNodeType().getLocalName().equals("lf3")) {
+                    lf3 = childSimple;
+                    found = found | (1 << 0);
+                } else if (childSimple.getNodeType().getLocalName().equals("lf2")) {
+                    lf2 = childSimple;
+                    found = found | (1 << 1);
+                }
+            }
+            assertEquals(nameSpace, child.getNodeType().getNamespace().toString());
+        }
+
+        assertEquals("", lf2.getValue());
+        assertEquals(null, lf3.getValue());
     }
 
     @Test

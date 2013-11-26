@@ -18,13 +18,13 @@ import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 
 public class XmlReader {
-    
+
     private final static XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     private XMLEventReader eventReader;
 
     public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException, UnsupportedFormatException {
         eventReader = xmlInputFactory.createXMLEventReader(entityStream);
-        
+
         if (eventReader.hasNext()) {
             XMLEvent element = eventReader.peek();
             if (element.isStartDocument()) {
@@ -35,7 +35,7 @@ public class XmlReader {
         if (eventReader.hasNext() && !isCompositeNodeEvent(eventReader.peek())) {
             throw new UnsupportedFormatException("Root element of XML has to be composite element.");
         }
-        
+
         final Stack<NodeWrapper<?>> processingQueue = new Stack<>();
         CompositeNodeWrapper root = null;
         NodeWrapper<?> element = null;
@@ -73,14 +73,14 @@ public class XmlReader {
                 element = processingQueue.pop();
             }
         }
-        
+
         if (!root.getLocalName().equals(element.getLocalName())) {
             throw new UnsupportedFormatException("XML should contain only one root element");
         }
-        
+
         return root;
     }
-    
+
     private boolean isSimpleNodeEvent(final XMLEvent event) throws XMLStreamException {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
@@ -99,7 +99,7 @@ public class XmlReader {
         }
         return false;
     }
-    
+
     private boolean isCompositeNodeEvent(final XMLEvent event) throws XMLStreamException {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
@@ -120,8 +120,9 @@ public class XmlReader {
         }
         return false;
     }
-    
-    private SimpleNodeWrapper resolveSimpleNodeFromStartElement(final StartElement startElement) throws XMLStreamException {
+
+    private SimpleNodeWrapper resolveSimpleNodeFromStartElement(final StartElement startElement)
+            throws XMLStreamException {
         checkArgument(startElement != null, "Start Element cannot be NULL!");
         String data = null;
 
@@ -133,25 +134,29 @@ public class XmlReader {
                     data = innerEvent.asCharacters().getData();
                 }
             } else if (innerEvent.isEndElement()) {
-                data = "";
+                if (startElement.getLocation().getCharacterOffset() == innerEvent.getLocation().getCharacterOffset()) {
+                    data = null;
+                } else {
+                    data = "";
+                }
             }
         }
-        
+
         return new SimpleNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement), data);
     }
-    
+
     private CompositeNodeWrapper resolveCompositeNodeFromStartElement(final StartElement startElement) {
         checkArgument(startElement != null, "Start Element cannot be NULL!");
         return new CompositeNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement));
     }
-    
+
     private String getLocalNameFrom(StartElement startElement) {
         return startElement.getName().getLocalPart();
     }
-    
+
     private URI getNamespaceFrom(StartElement startElement) {
         String namespaceURI = startElement.getName().getNamespaceURI();
         return namespaceURI.isEmpty() ? null : URI.create(namespaceURI);
     }
-    
+
 }
