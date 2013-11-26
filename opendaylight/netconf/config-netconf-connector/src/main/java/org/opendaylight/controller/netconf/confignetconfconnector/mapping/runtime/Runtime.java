@@ -66,9 +66,12 @@ public class Runtime {
                 if (instanceToRbe == null)
                     continue;
 
-                ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
-                Element innerXml = moduleRuntime.toXml(localNamespace, instanceToRbe, document);
-                modulesElement.appendChild(innerXml);
+                for (String instanceName : instanceToRbe.keySet()) {
+                    ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
+                    Element innerXml = moduleRuntime.toXml(localNamespace, instanceName, instanceToRbe.get(instanceName), document);
+                    modulesElement.appendChild(innerXml);
+                }
+
             }
         }
 
