@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -41,31 +40,30 @@ public class ModuleRuntime {
         throw new IllegalStateException("Root runtime bean not found among " + runtimeBeanOns);
     }
 
-    public Element toXml(String namespace, Multimap<String, ObjectName> instances, Document document) {
-        Element root = document.createElement(XmlNetconfConstants.MODULE_KEY);
-        XmlUtil.addNamespaceAttr(root, namespace);
+    public Element toXml(String namespace, String instanceName, Collection<ObjectName> runtimeBeanOns, Document document) {
+        Element moduleElement = document.createElement(XmlNetconfConstants.MODULE_KEY);
 
-        Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, moduleName);
-        root.appendChild(nameElement);
+        final String prefix = getPrefix(namespace);
+        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlNetconfConstants.TYPE_KEY, prefix,
+                moduleName);
+        XmlUtil.addPrefixedNamespaceAttr(typeElement, prefix, namespace);
+        moduleElement.appendChild(typeElement);
 
-        for (String instanceName : instances.keySet()) {
-            Element instance = document.createElement(XmlNetconfConstants.INSTANCE_KEY);
+        Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, instanceName);
+        moduleElement.appendChild(nameElement);
 
-            Element innerNameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, instanceName);
-            instance.appendChild(innerNameElement);
+        ObjectName rootName = findRoot(runtimeBeanOns);
 
-            Collection<ObjectName> runtimeBeanOns = instances.get(instanceName);
-            ObjectName rootName = findRoot(runtimeBeanOns);
+        Set<ObjectName> childrenRuntimeBeans = Sets.newHashSet(runtimeBeanOns);
+        childrenRuntimeBeans.remove(rootName);
 
-            Set<ObjectName> childrenRuntimeBeans = Sets.newHashSet(runtimeBeanOns);
-            childrenRuntimeBeans.remove(rootName);
+        instanceRuntime.toXml(rootName, childrenRuntimeBeans, document, moduleElement, namespace);
 
-            instance.appendChild(instanceRuntime.toXml(rootName, childrenRuntimeBeans, document));
+        return moduleElement;
+    }
 
-            root.appendChild(instance);
-        }
-
-        return root;
+    private String getPrefix(String namespace) {
+        return XmlNetconfConstants.PREFIX;
     }
 
 }

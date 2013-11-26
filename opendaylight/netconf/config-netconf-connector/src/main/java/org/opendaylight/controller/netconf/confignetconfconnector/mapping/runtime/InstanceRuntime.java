@@ -12,7 +12,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -83,15 +82,14 @@ public class InstanceRuntime {
         }));
     }
 
-    public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document) {
-        return toXml(rootOn, childRbeOns, document, null, null);
+    public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, Element parentElement, String namespace) {
+        return toXml(rootOn, childRbeOns, document, null, parentElement, namespace);
     }
 
     public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, String instanceIndex,
-            String keyName) {
-        Element xml = document.createElement(keyName == null ? XmlNetconfConstants.DATA_KEY : keyName);
+                         Element parentElement, String namespace) {
         // TODO namespace
-        xml = instanceMapping.toXml(rootOn, null, "namespace", document, xml);
+        Element xml = instanceMapping.toXml(rootOn, null, namespace, document, parentElement);
 
         if (instanceIndex != null) {
             xml.setAttribute(KEY_ATTRIBUTE_KEY, instanceIndex);
@@ -106,8 +104,11 @@ public class InstanceRuntime {
                 String runtimeInstanceIndex = objectName.getKeyProperty(childMappingEntry.getKey());
 
                 String elementName = jmxToYangChildRbeMapping.get(childMappingEntry.getKey());
-                xml.appendChild(childMappingEntry.getValue().toXml(objectName, innerChildRbeOns, document,
-                        runtimeInstanceIndex, elementName));
+
+                Element innerXml = document.createElement(elementName);
+                childMappingEntry.getValue().toXml(objectName, innerChildRbeOns, document,
+                        runtimeInstanceIndex, innerXml, namespace);
+                xml.appendChild(innerXml);
             }
         }
 
