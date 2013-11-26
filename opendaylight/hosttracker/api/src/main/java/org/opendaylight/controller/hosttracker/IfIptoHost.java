@@ -32,47 +32,100 @@ public interface IfIptoHost {
      * statically through Northbound APIs. If a binding is unknown, then an ARP
      * request is initiated immediately to discover the host.
      *
-     * @param networkAddress
-     *            IP Address of the Host encapsulated in class InetAddress
+     * @param id
+     *            IP address and Mac Address combination encapsulated in IHostId
+     *            interface
      * @return {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
      *         Class that contains the Host info such as its MAC address, Switch
      *         ID, port, VLAN. If Host is not found, returns NULL
      */
-    public HostNodeConnector hostFind(InetAddress networkAddress);
+    public HostNodeConnector hostFind(IHostId id);
+
+    /**
+     * Applications call this interface methods to determine IP address to MAC
+     * binding and its connectivity to an OpenFlow switch in term of Node, Port,
+     * and VLAN. These bindings are learned dynamically as well as can be added
+     * statically through Northbound APIs. If a binding is unknown, then an ARP
+     * request is initiated immediately to discover the host.
+     *
+     * @param addr
+     *            IP address of the host
+     * @return {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
+     *         Class that contains the Host info such as its MAC address, Switch
+     *         ID, port, VLAN. If Host is not found, returns NULL
+     */
+    public HostNodeConnector hostFind(InetAddress addr);
 
     /**
      * Checks the local Host Database to see if a Host has been learned for a
-     * given IP address.
+     * given IP address and Mac combination using the HostId.
      *
-     * @param networkAddress
-     *            IP Address of the Host encapsulated in class InetAddress
+     * @param id
+     *            IP address and Mac Address combination encapsulated in IHostId
+     *            interface
      * @return {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
      *         Class that contains the Host info such as its MAC address, Switch
      *         ID, port, VLAN. If Host is not found, returns NULL
      *
      */
-    public HostNodeConnector hostQuery(InetAddress networkAddress);
+    public HostNodeConnector hostQuery(IHostId id);
 
     /**
-     * Initiates an immediate discovery of the Host for a given IP address. This
+     * Checks the local Host Database to see if a Host has been learned for a
+     * given IP address and Mac combination using the HostId.
+     *
+     * @param addr
+     *            IP address of the Host
+     * @return {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
+     *         Class that contains the Host info such as its MAC address, Switch
+     *         ID, port, VLAN. If Host is not found, returns NULL
+     *
+     */
+    public HostNodeConnector hostQuery(InetAddress addr);
+
+    /**
+     * Initiates an immediate discovery of the Host for a given Host id. This
      * provides for the calling applications to block on the host discovery.
      *
-     * @param networkAddress
-     *            IP address encapsulated in InetAddress class
+     * @param id
+     *            IP address and Mac Address combination encapsulated in IHostId
+     *            interface
      * @return Future
      *         {@link org.opendaylight.controller.hosttracker.HostTrackerCallable}
      */
-    public Future<HostNodeConnector> discoverHost(InetAddress networkAddress);
+    public Future<HostNodeConnector> discoverHost(IHostId id);
+
+    /**
+     * Initiates an immediate discovery of the Host for a given Host id. This
+     * provides for the calling applications to block on the host discovery.
+     *
+     * @param addr
+     *            IP address of the host
+     * @return Future
+     *         {@link org.opendaylight.controller.hosttracker.HostTrackerCallable}
+     */
+    public Future<HostNodeConnector> discoverHost(InetAddress addr);
 
     /**
      * Returns the Network Hierarchy for a given Host. This API is typically
      * used by applications like Hadoop for Rack Awareness functionality.
      *
-     * @param IP
-     *            address of the Host encapsulated in InetAddress class
+     * @param id
+     *            IP address and Mac Address combination encapsulated in IHostId
+     *            interface
      * @return List of String ArrayList containing the Hierarchies.
      */
-    public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress);
+    public List<List<String>> getHostNetworkHierarchy(IHostId id);
+
+    /**
+     * Returns the Network Hierarchy for a given Host. This API is typically
+     * used by applications like Hadoop for Rack Awareness functionality.
+     *
+     * @param addr
+     *            IP address of the host
+     * @return List of String ArrayList containing the Hierarchies.
+     */
+    public List<List<String>> getHostNetworkHierarchy(InetAddress addr);
 
     /**
      * Returns all the the Hosts either learned dynamically or added statically
@@ -124,8 +177,7 @@ public interface IfIptoHost {
      * @return The status object as described in {@code Status} indicating the
      *         result of this action.
      */
-    public Status addStaticHost(String networkAddress, String dataLayerAddress,
-            NodeConnector nc, String vlan);
+    public Status addStaticHost(String networkAddress, String dataLayerAddress, NodeConnector nc, String vlan);
 
     /**
      * Allows the deletion of statically learned Host
@@ -135,4 +187,14 @@ public interface IfIptoHost {
      *         result of this action.
      */
     public Status removeStaticHost(String networkAddress);
+
+    /**
+     * Allows the deletion of statically learned Host
+     *
+     * @param networkAddress
+     * @param macAddress
+     * @return The status object as described in {@code Status} indicating the
+     *         result of this action.
+     */
+    public Status removeStaticHostUsingIPAndMac(String networkAddress, String macAddress);
 }

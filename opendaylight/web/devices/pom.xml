@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwarding.staticrouting</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${forwarding.staticrouting}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.jackson</groupId>

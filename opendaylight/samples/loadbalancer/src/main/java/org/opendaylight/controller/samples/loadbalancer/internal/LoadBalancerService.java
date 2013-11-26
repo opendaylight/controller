@@ -17,6 +17,8 @@ import java.util.Set;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
+import org.opendaylight.controller.hosttracker.HostIdFactory;
+import org.opendaylight.controller.hosttracker.IHostId;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.action.Action;
@@ -56,35 +58,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is the main class that represents the load balancer service.
- * This is a sample load balancer application that balances traffic to backend servers
- * based on the source address and source port on each incoming packet.  The service
- * reactively installs OpenFlow rules to direct all packets with a specific source address
- * and source port to one of the appropriate backend servers.  The servers may be chosen
- * using a round robin policy or a random policy. This service can be configured via a
- * REST APIs which are similar to the OpenStack Quantum LBaaS (Load-balancer-as-a-Service)
- * v1.0 API proposal (http://wiki.openstack.org/Quantum/LBaaS)
+ * This class is the main class that represents the load balancer service. This
+ * is a sample load balancer application that balances traffic to backend
+ * servers based on the source address and source port on each incoming packet.
+ * The service reactively installs OpenFlow rules to direct all packets with a
+ * specific source address and source port to one of the appropriate backend
+ * servers. The servers may be chosen using a round robin policy or a random
+ * policy. This service can be configured via a REST APIs which are similar to
+ * the OpenStack Quantum LBaaS (Load-balancer-as-a-Service) v1.0 API proposal
+ * (http://wiki.openstack.org/Quantum/LBaaS)
  *
- * To use this service, a virtual IP (or VIP) should be exposed to the clients of this service
- * and used as the destination address. A VIP is a entity that comprises of a virtual IP, port
- * and protocol (TCP or UDP).
- * Assumptions:
- *      1. One or more VIPs may be mapped to the same server pool. All VIPs that share the same
- *      pool must also share the same load balancing policy (random or round robin).
+ * To use this service, a virtual IP (or VIP) should be exposed to the clients
+ * of this service and used as the destination address. A VIP is a entity that
+ * comprises of a virtual IP, port and protocol (TCP or UDP). Assumptions: 1.
+ * One or more VIPs may be mapped to the same server pool. All VIPs that share
+ * the same pool must also share the same load balancing policy (random or round
+ * robin).
  *
- *      2. Only one server pool can be be assigned to a VIP.
+ * 2. Only one server pool can be be assigned to a VIP.
  *
- *      3. All flow rules are installed with an idle timeout of 5 seconds.
+ * 3. All flow rules are installed with an idle timeout of 5 seconds.
  *
- *      4. Packets to a VIP must leave the OpenFlow  cluster from the same switch from where
- *      it entered it.
+ * 4. Packets to a VIP must leave the OpenFlow cluster from the same switch from
+ * where it entered it.
  *
- *      5. When you delete a VIP or a server pool or a server from a pool, the service does not
- *      delete the flow rules it has already installed. The flow rules should automatically
- *      time out after the idle timeout of 5 seconds.
+ * 5. When you delete a VIP or a server pool or a server from a pool, the
+ * service does not delete the flow rules it has already installed. The flow
+ * rules should automatically time out after the idle timeout of 5 seconds.
  *
  */
-public class LoadBalancerService implements IListenDataPacket, IConfigManager{
+public class LoadBalancerService implements IListenDataPacket, IConfigManager {
 
     /*
      * Logger instance
@@ -92,8 +95,8 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
     private static Logger lbsLogger = LoggerFactory.getLogger(LoadBalancerService.class);
 
     /*
-     * Single instance of the configuration manager. Application passes this reference to all
-     * the new policies implemented for load balancing.
+     * Single instance of the configuration manager. Application passes this
+     * reference to all the new policies implemented for load balancing.
      */
     private static ConfigManager configManager = new ConfigManager();
 
@@ -101,12 +104,12 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
      * Round robing policy instance. Need to implement factory patterns to get
      * policy instance.
      */
-    private static RoundRobinLBPolicy rrLBMethod= new RoundRobinLBPolicy(configManager);
+    private static RoundRobinLBPolicy rrLBMethod = new RoundRobinLBPolicy(configManager);
 
     /*
      * Random policy instance.
      */
-    private static RandomLBPolicy ranLBMethod= new RandomLBPolicy(configManager);
+    private static RandomLBPolicy ranLBMethod = new RandomLBPolicy(configManager);
 
     /*
      * Reference to the data packet service
@@ -139,8 +142,8 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
     private String containerName = null;
 
     /*
-     * Set/unset methods for the service instance that load balancer
-     * service requires
+     * Set/unset methods for the service instance that load balancer service
+     * requires
      */
     public String getContainerName() {
         if (containerName == null)
@@ -179,32 +182,30 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
         }
     }
 
-    public void setForwardingRulesManager(
-            IForwardingRulesManager forwardingRulesManager) {
+    public void setForwardingRulesManager(IForwardingRulesManager forwardingRulesManager) {
         lbsLogger.debug("Setting ForwardingRulesManager");
         this.ruleManager = forwardingRulesManager;
     }
 
-    public void unsetForwardingRulesManager(
-            IForwardingRulesManager forwardingRulesManager) {
+    public void unsetForwardingRulesManager(IForwardingRulesManager forwardingRulesManager) {
         if (this.ruleManager == forwardingRulesManager) {
             this.ruleManager = null;
         }
     }
 
     /**
-     * This method receives first packet of flows for which there is no
-     * matching flow rule installed on the switch. IP addresses used for VIPs
-     * are not supposed to be used by any real/virtual host in the network.
-     * Hence, any forwarding/routing service will not install any flows rules matching
-     * these VIPs. This ensures that all the flows destined for VIPs will not find a match
-     * in the switch and will be forwarded to the load balancing service.
-     * Service will decide where to route this traffic based on the load balancing
-     * policy of the VIP's attached pool and will install appropriate flow rules
-     * in a reactive manner.
+     * This method receives first packet of flows for which there is no matching
+     * flow rule installed on the switch. IP addresses used for VIPs are not
+     * supposed to be used by any real/virtual host in the network. Hence, any
+     * forwarding/routing service will not install any flows rules matching
+     * these VIPs. This ensures that all the flows destined for VIPs will not
+     * find a match in the switch and will be forwarded to the load balancing
+     * service. Service will decide where to route this traffic based on the
+     * load balancing policy of the VIP's attached pool and will install
+     * appropriate flow rules in a reactive manner.
      */
     @Override
-    public PacketResult receiveDataPacket(RawPacket inPkt){
+    public PacketResult receiveDataPacket(RawPacket inPkt) {
 
         if (inPkt == null) {
             return PacketResult.IGNORED;
@@ -218,88 +219,89 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
 
             if (ipPkt instanceof IPv4) {
 
-                lbsLogger.debug("Packet recieved from switch : {}",inPkt.getIncomingNodeConnector().getNode().toString());
-                IPv4 ipv4Pkt = (IPv4)ipPkt;
-                if(IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.TCP.toString())
-                        || IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.UDP.toString())){
+                lbsLogger.debug("Packet recieved from switch : {}", inPkt.getIncomingNodeConnector().getNode()
+                        .toString());
+                IPv4 ipv4Pkt = (IPv4) ipPkt;
+                if (IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.TCP.toString())
+                        || IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.UDP.toString())) {
 
-                    lbsLogger.debug("Packet protocol : {}",IPProtocols.getProtocolName(ipv4Pkt.getProtocol()));
+                    lbsLogger.debug("Packet protocol : {}", IPProtocols.getProtocolName(ipv4Pkt.getProtocol()));
                     Client client = new LBUtil().getClientFromPacket(ipv4Pkt);
                     VIP vip = new LBUtil().getVIPFromPacket(ipv4Pkt);
 
-                    if(configManager.vipExists(vip)){
+                    if (configManager.vipExists(vip)) {
                         VIP vipWithPoolName = configManager.getVIPWithPoolName(vip);
                         String poolMemberIp = null;
-                        if(vipWithPoolName.getPoolName() == null){
-                            lbsLogger.error("No pool attached. Please attach pool with the VIP -- {}",vip);
+                        if (vipWithPoolName.getPoolName() == null) {
+                            lbsLogger.error("No pool attached. Please attach pool with the VIP -- {}", vip);
                             return PacketResult.IGNORED;
                         }
-                        if(configManager.getPool(vipWithPoolName.getPoolName()).getLbMethod().equalsIgnoreCase(LBConst.ROUND_ROBIN_LB_METHOD)){
+                        if (configManager.getPool(vipWithPoolName.getPoolName()).getLbMethod()
+                                .equalsIgnoreCase(LBConst.ROUND_ROBIN_LB_METHOD)) {
 
-                            poolMemberIp = rrLBMethod.getPoolMemberForClient(client,vipWithPoolName);
+                            poolMemberIp = rrLBMethod.getPoolMemberForClient(client, vipWithPoolName);
                         }
 
-                        if(configManager.getPool(vipWithPoolName.getPoolName()).getLbMethod().equalsIgnoreCase(LBConst.RANDOM_LB_METHOD)){
-                            poolMemberIp = ranLBMethod.getPoolMemberForClient(client,vipWithPoolName);
+                        if (configManager.getPool(vipWithPoolName.getPoolName()).getLbMethod()
+                                .equalsIgnoreCase(LBConst.RANDOM_LB_METHOD)) {
+                            poolMemberIp = ranLBMethod.getPoolMemberForClient(client, vipWithPoolName);
                         }
 
                         try {
 
                             Node clientNode = inPkt.getIncomingNodeConnector().getNode();
-                            HostNodeConnector hnConnector = this.hostTracker.hostFind(InetAddress.getByName(poolMemberIp));
+                            // HostTracker hosts db key scheme implementation
+                            IHostId id = HostIdFactory.create(InetAddress.getByName(poolMemberIp), null);
+                            HostNodeConnector hnConnector = this.hostTracker.hostFind(id);
 
                             Node destNode = hnConnector.getnodeconnectorNode();
 
-                            lbsLogger.debug("Client is connected to switch : {}",clientNode.toString());
-                            lbsLogger.debug("Destination pool machine is connected to switch : {}",destNode.toString());
+                            lbsLogger.debug("Client is connected to switch : {}", clientNode.toString());
+                            lbsLogger
+                                    .debug("Destination pool machine is connected to switch : {}", destNode.toString());
 
-                            //Get path between both the nodes
+                            // Get path between both the nodes
                             NodeConnector forwardPort = null;
 
-                            if(clientNode.getNodeIDString().equals(destNode.getNodeIDString())){
+                            if (clientNode.getNodeIDString().equals(destNode.getNodeIDString())) {
 
                                 forwardPort = hnConnector.getnodeConnector();
 
-                                lbsLogger.info("Both source (client) and destination pool machine is connected to same switch nodes. Respective ports are - {},{}",forwardPort,inPkt.getIncomingNodeConnector());
+                                lbsLogger
+                                        .info("Both source (client) and destination pool machine is connected to same switch nodes. Respective ports are - {},{}",
+                                                forwardPort, inPkt.getIncomingNodeConnector());
 
-                            }else{
+                            } else {
 
                                 Path route = this.routing.getRoute(clientNode, destNode);
 
-                                lbsLogger.info("Path between source (client) and destination switch nodes : {}",route.toString());
+                                lbsLogger.info("Path between source (client) and destination switch nodes : {}",
+                                        route.toString());
 
                                 forwardPort = route.getEdges().get(0).getTailNodeConnector();
 
                             }
 
-                            if(installLoadBalancerFlow(client,
-                                                            vip,
-                                                            clientNode,
-                                                            poolMemberIp,
-                                                            hnConnector.getDataLayerAddressBytes(),
-                                                            forwardPort,
-                                                            LBConst.FORWARD_DIRECTION_LB_FLOW)){
-                                lbsLogger.info("Traffic from client : {} will be routed " +
-                                                            "to pool machine : {}",client,poolMemberIp);
-                            }else{
-                                lbsLogger.error("Not able to route traffic from client : {}",client );
+                            if (installLoadBalancerFlow(client, vip, clientNode, poolMemberIp,
+                                    hnConnector.getDataLayerAddressBytes(), forwardPort,
+                                    LBConst.FORWARD_DIRECTION_LB_FLOW)) {
+                                lbsLogger.info("Traffic from client : {} will be routed " + "to pool machine : {}",
+                                        client, poolMemberIp);
+                            } else {
+                                lbsLogger.error("Not able to route traffic from client : {}", client);
                             }
 
-                            if(installLoadBalancerFlow(client,
-                                                            vip,
-                                                            clientNode,
-                                                            poolMemberIp,
-                                                            vipMacAddr,
-                                                            inPkt.getIncomingNodeConnector(),
-                                                            LBConst.REVERSE_DIRECTION_LB_FLOW)){
-                                lbsLogger.info("Flow rule installed to change the source ip/mac from " +
-                                                            "pool machine ip {} to VIP {} for traffic coming pool machine",poolMemberIp,vip);
-                            }else{
-                                lbsLogger.error("Not able to route traffic from client : {}",client );
+                            if (installLoadBalancerFlow(client, vip, clientNode, poolMemberIp, vipMacAddr,
+                                    inPkt.getIncomingNodeConnector(), LBConst.REVERSE_DIRECTION_LB_FLOW)) {
+                                lbsLogger.info("Flow rule installed to change the source ip/mac from "
+                                        + "pool machine ip {} to VIP {} for traffic coming pool machine", poolMemberIp,
+                                        vip);
+                            } else {
+                                lbsLogger.error("Not able to route traffic from client : {}", client);
                             }
-                        }catch (UnknownHostException e) {
-                            lbsLogger.error("Pool member not found  in the network : {}",e.getMessage());
-                            lbsLogger.error("",e);
+                        } catch (UnknownHostException e) {
+                            lbsLogger.error("Pool member not found  in the network : {}", e.getMessage());
+                            lbsLogger.error("", e);
                         }
                     }
                 }
@@ -309,30 +311,37 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
     }
 
     /*
-     * This method installs the flow rule for routing the traffic between two hosts.
-     * @param source    Traffic is sent by this source
-     * @param dest      Traffic is destined to this destination (VIP)
-     * @param sourceSwitch      Switch from where controller received the packet
-     * @param destMachineIp     IP address of the pool member where traffic needs to be routed
-     * @param destMachineMac    MAC address of the pool member where traffic needs to be routed
-     * @param outport   Use this port to send out traffic
-     * @param flowDirection     FORWARD_DIRECTION_LB_FLOW or REVERSE_DIRECTION_LB_FLOW
-     * @return  true     If flow installation was successful
-     *          false   else
-     *          @throws UnknownHostException
+     * This method installs the flow rule for routing the traffic between two
+     * hosts.
+     *
+     * @param source Traffic is sent by this source
+     *
+     * @param dest Traffic is destined to this destination (VIP)
+     *
+     * @param sourceSwitch Switch from where controller received the packet
+     *
+     * @param destMachineIp IP address of the pool member where traffic needs to
+     * be routed
+     *
+     * @param destMachineMac MAC address of the pool member where traffic needs
+     * to be routed
+     *
+     * @param outport Use this port to send out traffic
+     *
+     * @param flowDirection FORWARD_DIRECTION_LB_FLOW or
+     * REVERSE_DIRECTION_LB_FLOW
+     *
+     * @return true If flow installation was successful false else
+     *
+     * @throws UnknownHostException
      */
-    private boolean installLoadBalancerFlow(Client source,
-                                            VIP dest,
-                                            Node sourceSwitch,
-                                            String destMachineIp,
-                                            byte[] destMachineMac,
-                                            NodeConnector outport,
-                                            int flowDirection) throws UnknownHostException{
+    private boolean installLoadBalancerFlow(Client source, VIP dest, Node sourceSwitch, String destMachineIp,
+            byte[] destMachineMac, NodeConnector outport, int flowDirection) throws UnknownHostException {
 
         Match match = new Match();
         List<Action> actions = new ArrayList<Action>();
 
-        if(flowDirection == LBConst.FORWARD_DIRECTION_LB_FLOW){
+        if (flowDirection == LBConst.FORWARD_DIRECTION_LB_FLOW) {
             match.setField(MatchType.DL_TYPE, EtherTypes.IPv4.shortValue());
             match.setField(MatchType.NW_SRC, InetAddress.getByName(source.getIp()));
             match.setField(MatchType.NW_DST, InetAddress.getByName(dest.getIp()));
@@ -344,13 +353,13 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
             actions.add(new SetDlDst(destMachineMac));
         }
 
-        if(flowDirection == LBConst.REVERSE_DIRECTION_LB_FLOW){
+        if (flowDirection == LBConst.REVERSE_DIRECTION_LB_FLOW) {
             match.setField(MatchType.DL_TYPE, EtherTypes.IPv4.shortValue());
             match.setField(MatchType.NW_SRC, InetAddress.getByName(destMachineIp));
             match.setField(MatchType.NW_DST, InetAddress.getByName(source.getIp()));
             match.setField(MatchType.NW_PROTO, IPProtocols.getProtocolNumberByte(source.getProtocol()));
             match.setField(MatchType.TP_SRC, dest.getPort());
-            match.setField(MatchType.TP_DST,source.getPort());
+            match.setField(MatchType.TP_DST, source.getPort());
 
             actions.add(new SetNwSrc(InetAddress.getByName(dest.getIp())));
             actions.add(new SetDlSrc(destMachineMac));
@@ -366,30 +375,30 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
         flow.setHardTimeout((short) 0);
         flow.setPriority(LB_IPSWITCH_PRIORITY);
 
-        String policyName = source.getIp()+":"+source.getProtocol()+":"+source.getPort();
-        String flowName =null;
+        String policyName = source.getIp() + ":" + source.getProtocol() + ":" + source.getPort();
+        String flowName = null;
 
-        if(flowDirection == LBConst.FORWARD_DIRECTION_LB_FLOW){
-            flowName = "["+policyName+":"+source.getIp() + ":"+dest.getIp()+"]";
+        if (flowDirection == LBConst.FORWARD_DIRECTION_LB_FLOW) {
+            flowName = "[" + policyName + ":" + source.getIp() + ":" + dest.getIp() + "]";
         }
 
-        if(flowDirection == LBConst.REVERSE_DIRECTION_LB_FLOW){
+        if (flowDirection == LBConst.REVERSE_DIRECTION_LB_FLOW) {
 
-            flowName = "["+policyName+":"+dest.getIp() + ":"+source.getIp()+"]";
+            flowName = "[" + policyName + ":" + dest.getIp() + ":" + source.getIp() + "]";
         }
 
         FlowEntry fEntry = new FlowEntry(policyName, flowName, flow, sourceSwitch);
 
-        lbsLogger.info("Install flow entry {} on node {}",fEntry.toString(),sourceSwitch.toString());
+        lbsLogger.info("Install flow entry {} on node {}", fEntry.toString(), sourceSwitch.toString());
 
-        if(!this.ruleManager.checkFlowEntryConflict(fEntry)){
-            if(this.ruleManager.installFlowEntry(fEntry).isSuccess()){
+        if (!this.ruleManager.checkFlowEntryConflict(fEntry)) {
+            if (this.ruleManager.installFlowEntry(fEntry).isSuccess()) {
                 return true;
-            }else{
-                lbsLogger.error("Error in installing flow entry to node : {}",sourceSwitch);
+            } else {
+                lbsLogger.error("Error in installing flow entry to node : {}", sourceSwitch);
             }
-        }else{
-            lbsLogger.error("Conflicting flow entry exists : {}",fEntry.toString());
+        } else {
+            lbsLogger.error("Conflicting flow entry exists : {}", fEntry.toString());
         }
         return false;
     }
@@ -405,45 +414,45 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
             this.containerName = (String) props.get("containerName");
 
             lbsLogger.info("Running container name:" + this.containerName);
-        }else {
+        } else {
 
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
         lbsLogger.info(configManager.toString());
+
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
      *
      */
     void destroy() {
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
      *
      */
     void start() {
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
      *
      */
     void stop() {
     }
 
     /*
-     * All the methods below are just proxy methods to direct the REST API requests to configuration
-     * manager. We need this redirection as currently, opendaylight supports only one
-     * implementation of the service.
+     * All the methods below are just proxy methods to direct the REST API
+     * requests to configuration manager. We need this redirection as currently,
+     * opendaylight supports only one implementation of the service.
      */
     @Override
     public Set<VIP> getAllVIPs() {
@@ -451,8 +460,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
     }
 
     @Override
-    public boolean vipExists(String name, String ip, String protocol,
-                                short protocolPort, String poolName) {
+    public boolean vipExists(String name, String ip, String protocol, short protocolPort, String poolName) {
         return configManager.vipExists(name, ip, protocol, protocolPort, poolName);
     }
 
@@ -462,8 +470,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
     }
 
     @Override
-    public VIP createVIP(String name, String ip, String protocol,
-                            short protocolPort, String poolName) {
+    public VIP createVIP(String name, String ip, String protocol, short protocolPort, String poolName) {
         return configManager.createVIP(name, ip, protocol, protocolPort, poolName);
     }
 
@@ -489,9 +496,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
     }
 
     @Override
-    public PoolMember addPoolMember(String name,
-                                    String memberIP,
-                                    String poolName) {
+    public PoolMember addPoolMember(String name, String memberIP, String poolName) {
         return configManager.addPoolMember(name, memberIP, poolName);
     }
 
