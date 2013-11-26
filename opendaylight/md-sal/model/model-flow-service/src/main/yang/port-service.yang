@@ -5,6 +5,7 @@ module sal-port {
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-port-types {prefix port-type;revision-date "2013-09-25";}
+    import flow-capable-transaction {prefix tr;}
 
     revision "2013-11-07" {
         description "Initial revision of port service";
@@ -31,6 +32,10 @@ module sal-port {
     rpc update-port {
         input {
             uses port-update;
+            uses tr:transaction-aware;
+        }
+        output {
+            uses tr:transaction-aware;
         }
     }
      
