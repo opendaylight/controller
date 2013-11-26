@@ -31,7 +31,7 @@ class JsonMapper {
         if (schema instanceof ContainerSchemaNode) {
             writeContainer(writer, data, (ContainerSchemaNode) schema);
         } else if (schema instanceof ListSchemaNode) {
-            writeList(writer, data, (ListSchemaNode) schema);
+            writeList(writer, null, data, (ListSchemaNode) schema);
         } else {
             throw new UnsupportedDataTypeException(
                     "Schema can be ContainerSchemaNode or ListSchemaNode. Other types are not supported yet.");
@@ -64,14 +64,14 @@ class JsonMapper {
                     Preconditions.checkState(child instanceof CompositeNode,
                             "Data representation of List should be CompositeNode - " + child.getNodeType());
                     foundLists.add((ListSchemaNode) childSchema);
-                    writeList(writer, (CompositeNode) child, (ListSchemaNode) childSchema);
+                    writeList(writer, parent, (CompositeNode) child, (ListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafListSchemaNode) {
                 if (!foundLeafLists.contains(childSchema)) {
                     Preconditions.checkState(child instanceof SimpleNode<?>,
                             "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
                     foundLeafLists.add((LeafListSchemaNode) childSchema);
-                    writeLeafList(writer, (SimpleNode<?>) child, (LeafListSchemaNode) childSchema);
+                    writeLeafList(writer, parent, (SimpleNode<?>) child, (LeafListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafSchemaNode) {
                 Preconditions.checkState(child instanceof SimpleNode<?>,
@@ -109,13 +109,12 @@ class JsonMapper {
         writer.endObject();
     }
 
-    private void writeList(JsonWriter writer, CompositeNode node, ListSchemaNode schema) throws IOException {
+    private void writeList(JsonWriter writer, CompositeNode nodeParent, CompositeNode node, ListSchemaNode schema) throws IOException {
         writer.name(node.getNodeType().getLocalName());
         writer.beginArray();
 
-        if (node.getParent() != null) {
-            CompositeNode parent = node.getParent();
-            List<CompositeNode> nodeLists = parent.getCompositesByName(node.getNodeType());
+        if (nodeParent != null) {
+            List<CompositeNode> nodeLists = nodeParent.getCompositesByName(node.getNodeType());
             for (CompositeNode nodeList : nodeLists) {
                 writer.beginObject();
                 writeChildrenOfParent(writer, nodeList, schema);
@@ -130,12 +129,11 @@ class JsonMapper {
         writer.endArray();
     }
 
-    private void writeLeafList(JsonWriter writer, SimpleNode<?> node, LeafListSchemaNode schema) throws IOException {
+    private void writeLeafList(JsonWriter writer, CompositeNode nodeParent, SimpleNode<?> node, LeafListSchemaNode schema) throws IOException {
         writer.name(node.getNodeType().getLocalName());
         writer.beginArray();
 
-        CompositeNode parent = node.getParent();
-        List<SimpleNode<?>> nodeLeafLists = parent.getSimpleNodesByName(node.getNodeType());
+        List<SimpleNode<?>> nodeLeafLists = nodeParent.getSimpleNodesByName(node.getNodeType());
         for (SimpleNode<?> nodeLeafList : nodeLeafLists) {
             writeValueOfNodeByType(writer, nodeLeafList, schema.getType());
         }
