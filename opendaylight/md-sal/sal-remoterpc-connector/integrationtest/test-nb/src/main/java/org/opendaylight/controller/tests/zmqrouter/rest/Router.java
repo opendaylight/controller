@@ -2,6 +2,7 @@ package org.opendaylight.controller.tests.zmqrouter.rest;
 
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.impl.RoutingTableImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
@@ -82,7 +83,7 @@ public class Router {
       _logger.info("Could not get consumer service");
       return "Could not get consumer service";
     }
-    RpcResult<CompositeNode> result = consumer.invokeRpc();
+    RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, new CompositeNodeImpl());
     _logger.info("Result [{}]", result.isSuccessful());
 
     return stringify(result);

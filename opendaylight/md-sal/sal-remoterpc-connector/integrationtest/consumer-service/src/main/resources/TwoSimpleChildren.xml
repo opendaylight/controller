@@ -1,0 +1,4 @@
+<rpc>
+    <name>eth0</name>
+    <type>ethernetCsmacd</type>
+</rpc>
