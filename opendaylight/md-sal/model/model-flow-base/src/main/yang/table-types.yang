@@ -19,7 +19,143 @@ module opendaylight-table-types {
         type bits {
             bit DEPRECATED-MASK;
         }
-    }  
+    }
+
+    typedef field {
+        type enumeration {
+            enum in_port {
+                description "Match for Switch input port.";
+            }
+            enum in_phy_port {
+                description "Match for Switch physical input port.";
+            }
+            enum metadata {
+                description "Match for Metadata passed between tables.";
+            }
+            enum eth_dst {
+                description "Match for Ethernet destination address.";
+            }
+            enum eth_src {
+                description "Match for Ethernet source address.";
+            }
+            enum eth_type {
+                description "Match for Ethernet frame type.";
+            }
+            enum vlan_vid {
+                description "Match for VLAN id.";
+            }
+            enum vlan_pcp {
+                description "Match for VLAN priority.";
+            }
+            enum ip_dscp {
+                description "Match for IP DSCP (6 bits in ToS field).";
+            }
+            enum ip_ecn {
+                description "Match for IP ECN (2 bits in ToS field).";
+            }
+            enum ip_proto {
+                description "Match for IP protocol.";
+            }
+            enum ipv4_src {
+                description "Match for IPv4 source address.";
+            }
+            enum ipv4_dst {
+                description "Match for IPv4 destination address.";
+            }
+            enum tcp_src {
+                description "Match for TCP source port.";
+            }
+            enum tcp_dst {
+                description "Match for TCP destination port.";
+            }
+            enum udp_src {
+                description "Match for UDP source port.";
+            }
+            enum udp_dst {
+                description "Match for UDP destination port.";
+            }
+            enum sctp_src {
+                description "Match for SCTP source port.";
+            }
+            enum sctp_dst {
+                description "Match for SCTP destination port.";
+            }
+            enum icmpv4_type {
+                description "Match for ICMP type.";
+            }
+            enum icmpv4_code {
+                description "Match for ICMP code.";
+            }
+            enum arp_op {
+                description "Match for ARP opcode.";
+            }
+            enum arp_spa {
+                description "Match for ARP source IPv4 address.";
+            }
+            enum arp_tpa {
+                description "Match for ARP target IPv4 address.";
+            }
+            enum arp_sha {
+                description "Match for ARP source hardware address.";
+            }
+            enum arp_tha {
+                description "Match for ARP target hardware address.";
+            }
+            enum ipv6_src {
+                description "Match for IPv6 source address.";
+            }
+            enum ipv6_dst {
+                description "Match for IPv6 destination address.";
+            }
+            enum ipv6_flabel {
+                description "Match for IPv6 Flow Label";
+            }
+            enum icmpv6_type {
+                description "Match for ICMPv6 type.";
+            }
+            enum icmpv6_code {
+                description "Match for ICMPv6 code.";
+            }
+            enum ipv6_nd_target {
+                description "Match for Target address for ND.";
+            }
+            enum ipv6_nd_sll {
+                description "Match for Source link-layer for ND.";
+            }
+            enum ipv6_nd_tll {
+                description "Match for Target link-layer for ND.";
+            }
+            enum mpls_label {
+                description "Match for MPLS label.";
+            }
+            enum mpls_tc {
+                description "Match for MPLS TC.";
+            }
+            enum mpls_bos {
+                description "Match for MPLS BoS bit.";
+            }
+            enum pbb_isid {
+                description "Match for PBB I-SID.";
+            }
+            enum tunnel_id {
+                description "Match for Logical Port Metadata";
+            }
+            enum ipv6_exthdr {
+                description "Match for IPv6 Extension Header pseudo-field";
+            }
+        }
+    }
+        
+    grouping set-field-match {
+        list set-field-match {
+            leaf match-type {
+                type field;
+            }
+            leaf has-mask {
+                type boolean;
+            } 
+        }
+    }
       
     grouping table-feature-prop-type {
         choice table-feature-prop-type {
@@ -37,24 +173,16 @@ module opendaylight-table-types {
 
             case next-table {   
                 container tables {
-                    list table-id {
-                        key "table";                        
-                        
-                        leaf table-id {
-                            type table-ref;
-                        } 
+                    leaf-list table-ids {
+                        type uint8;
                     }
                 } 
             }
             
             case next-table-miss {   
                 container tables {
-                    list table-id {
-                        key "table-id";                        
-                        
-                        leaf table-id {
-                            type table-ref;
-                        } 
+                    leaf-list table-ids {
+                        type uint8;
                     }
                 } 
             }
@@ -83,52 +211,28 @@ module opendaylight-table-types {
                 } 
             }
             
-            case match {   
-                container matches {
-                    leaf-list match {                                              
-                        type uint32;
-                    }
-                } 
+            case match {
+                uses set-field-match; 
             }
             
             case wildcards {   
-                container wildcards {
-                    leaf-list wildcard {                                              
-                        type uint32;
-                    }
-                } 
+                uses set-field-match;
             }
             
             case write-setfield {   
-                container write-setfield {
-                    leaf-list setfield {                                              
-                        type uint32;
-                    }
-                } 
+                uses set-field-match;
             }
             
             case write-setfield-miss {   
-                container write-setfield-miss {
-                    leaf-list setfield {                                              
-                        type uint32;
-                    }
-                } 
+                uses set-field-match;
             }
             
             case apply-setfield {   
-                container apply-setfield {
-                    leaf-list setfield {                                              
-                        type uint32;
-                    }
-                } 
+                uses set-field-match; 
             }
             
             case apply-setfield-miss {   
-                container apply-setfield-miss {
-                    leaf-list setfield {                                              
-                        type uint32;
-                    }
-                } 
+                uses set-field-match; 
             }
         }
     } 
@@ -138,7 +242,7 @@ module opendaylight-table-types {
             key "table-id";
             
             leaf table-id {
-                type table-ref;
+                type uint8;
             }      
             
             leaf name {
@@ -167,15 +271,15 @@ module opendaylight-table-types {
             }
             
             container table-properties {
-                list instruction-id {
-                    key "order";
-                    leaf order {
-                        type int32;
-                    }
-                    
-                    uses table-feature-prop-type;
+                list table-feature-properties {
+                     key "order";
+                     leaf order {
+                         type int32;
+                     }
+                     uses table-feature-prop-type;
                 }
             }
+
         }
     }    
 }
