@@ -28,6 +28,7 @@ public class StatisticsManagerActivator extends AbstractBindingAwareProvider {
     @Override
     public void onSessionInitiated(ProviderContext session) {
         
+        pSession = session;
         DataProviderService dps = session.<DataProviderService>getSALService(DataProviderService.class);
         StatisticsManagerActivator.statsProvider.setDataService(dps);
         NotificationProviderService nps = session.<NotificationProviderService>getSALService(NotificationProviderService.class);
