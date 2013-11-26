@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a82d6048",
+        "filename": "opendaylight/config/yang-test/src/main/resources/META-INF/yang/config-test-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "sorry I didn\u0027t want to include these 2 in the patch, please delete",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_68276865",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/config.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "830 is privileged port on linux, increase \u003e\u003d1024, e.g.1830",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_482a642d",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "Please add logging here",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_08e34c06",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "This must be taken from config.ini in activator - address and port of netconf server. If netconf is not configured properly, fail to start.",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_88be1cd3",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "Why is this static? do we support more than one client?",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_48b824e5",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "unnamed thread. No lifecycle management: when does the thread finish? Please document all threads created in activator and per connection.",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_68b528ed",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "\u0027this\u0027 escapes constructor",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e81a3816",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "change to trace.",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a8d44020",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "Those threads should be named (prefix + counter). Code for handling error state is not there - threads should be evicted if any of the parties closes connection. Add logging.",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c81534e6",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "else? we should drop the connection if no subsystem or wrong subsystem is selected.",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_081c6c12",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/SocketThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-26T10:06:00Z",
+      "side": 1,
+      "message": "why?",
+      "revId": "da6bc486dbe9b84348f1055fc5a274f92c3ec0d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
