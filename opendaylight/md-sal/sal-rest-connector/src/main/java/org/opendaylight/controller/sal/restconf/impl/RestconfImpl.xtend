@@ -45,7 +45,7 @@ class RestconfImpl implements RestconfService {
     override readData(String identifier) {
         val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
-        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode,controllerContext.schemas)
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
@@ -73,19 +73,19 @@ class RestconfImpl implements RestconfService {
         val value = resolveNodeNamespaceBySchema(payload, controllerContext.getRpcInputSchema(rpc))
         val rpcResult = broker.invokeRpc(rpc, value);
         val schema = controllerContext.getRpcOutputSchema(rpc);
-        return new StructuredData(rpcResult.result, schema);
+        return new StructuredData(rpcResult.result, schema,controllerContext.schemas);
     }
     
     override readConfigurationData(String identifier) {
         val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
-        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode,controllerContext.schemas)
     }
     
     override readOperationalData(String identifier) {
         val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
-        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode,controllerContext.schemas)
     }
     
     override updateConfigurationDataLegacy(String identifier, CompositeNode payload) {
