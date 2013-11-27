@@ -43,6 +43,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Responsible for listening for notifications from netconf containing latest
@@ -53,6 +54,8 @@ import java.util.Set;
 public class ConfigPersisterNotificationHandler implements NotificationListener, Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
+    private static final int NETCONF_SEND_ATTEMPT_MS_DELAY = 1000;
+    private static final int NETCONF_SEND_ATTEMPTS = 20;
 
     private final InetSocketAddress address;
     private final EventLoopGroup nettyThreadgroup;
@@ -66,22 +69,25 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
     private final ObjectName on = DefaultCommitOperationMXBean.objectName;
 
-    public static final long DEFAULT_TIMEOUT = 40000L;
+    public static final long DEFAULT_TIMEOUT = 120000L;// 120 seconds until netconf must be stable
     private final long timeout;
+    private final Pattern ignoredMissingCapabilityRegex;
 
     public ConfigPersisterNotificationHandler(Persister persister, InetSocketAddress address,
-            MBeanServerConnection mbeanServer) {
-        this(persister, address, mbeanServer, DEFAULT_TIMEOUT);
+            MBeanServerConnection mbeanServer, Pattern ignoredMissingCapabilityRegex) {
+        this(persister, address, mbeanServer, DEFAULT_TIMEOUT, ignoredMissingCapabilityRegex);
+
     }
 
     public ConfigPersisterNotificationHandler(Persister persister, InetSocketAddress address,
-            MBeanServerConnection mbeanServer, long timeout) {
+            MBeanServerConnection mbeanServer, long timeout, Pattern ignoredMissingCapabilityRegex) {
         this.persister = persister;
         this.address = address;
         this.mbeanServer = mbeanServer;
         this.timeout = timeout;
 
         this.nettyThreadgroup = new NioEventLoopGroup();
+        this.ignoredMissingCapabilityRegex = ignoredMissingCapabilityRegex;
     }
 
     public void init() throws InterruptedException {
@@ -220,18 +226,8 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
     private void handleAfterCommitNotification(final CommitJMXNotification notification) {
         try {
-            final XmlElement configElement = XmlElement.fromDomElement(notification.getConfigSnapshot());
-            persister.persistConfig(new Persister.ConfigSnapshotHolder() {
-                @Override
-                public String getConfigSnapshot() {
-                    return XmlUtil.toString(configElement.getDomElement());
-                }
-
-                @Override
-                public Set<String> getCapabilities() {
-                    return notification.getCapabilities();
-                }
-            });
+            persister.persistConfig(new CapabilityStrippingConfigSnapshotHolder(notification.getConfigSnapshot(),
+                    notification.getCapabilities(), ignoredMissingCapabilityRegex));
             logger.debug("Configuration persisted successfully");
         } catch (IOException e) {
             throw new RuntimeException("Unable to persist configuration snapshot", e);
@@ -256,7 +252,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         NetconfMessage message = createEditConfigMessage(xmlToBePersisted, "/netconfOp/editConfig.xml");
 
         // sending message to netconf
-        NetconfMessage responseMessage = netconfClient.sendMessage(message);
+        NetconfMessage responseMessage = netconfClient.sendMessage(message, NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
 
         XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
@@ -265,7 +261,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         checkIsOk(element, responseMessage);
         response.append(XmlUtil.toString(responseMessage.getDocument()));
         response.append("}");
-        responseMessage = netconfClient.sendMessage(getNetconfMessageFromResource("/netconfOp/commit.xml"));
+        responseMessage = netconfClient.sendMessage(getNetconfMessageFromResource("/netconfOp/commit.xml"), NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
 
         element = XmlElement.fromDomDocument(responseMessage.getDocument());
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
