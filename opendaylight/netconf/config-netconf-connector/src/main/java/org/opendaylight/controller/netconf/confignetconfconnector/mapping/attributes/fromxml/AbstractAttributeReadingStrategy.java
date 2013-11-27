@@ -8,27 +8,26 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
-import java.util.List;
-
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
-public abstract class AbstractAttributeReadingStrategy<A extends AttributeIfc> implements AttributeReadingStrategy {
+import java.util.List;
 
-    private final A attributeIfc;
+public abstract class AbstractAttributeReadingStrategy implements AttributeReadingStrategy {
 
-    public AbstractAttributeReadingStrategy(A attributeIfc) {
-        this.attributeIfc = attributeIfc;
+    private final String nullableDefault;
+
+    public AbstractAttributeReadingStrategy(String nullableDefault) {
+        this.nullableDefault = nullableDefault;
     }
 
-    public A getAttributeIfc() {
-        return attributeIfc;
+    public String getNullableDefault() {
+        return nullableDefault;
     }
 
     @Override
     public AttributeConfigElement readElement(List<XmlElement> configNodes) {
         if (configNodes.size() == 0)
-            return AttributeConfigElement.createNullValue(attributeIfc);
+            return AttributeConfigElement.createNullValue(nullableDefault);
 
         return readElementHook(configNodes);
     }

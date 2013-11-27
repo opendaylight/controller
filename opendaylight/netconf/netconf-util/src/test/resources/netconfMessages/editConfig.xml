@@ -31,6 +31,18 @@
 
                     <name>test1</name>
 
+                    <extended>
+                        <value>
+                            1
+                        </value>
+                    </extended>
+
+                    <extended-twice>
+                        <value>
+                            1
+                        </value>
+                    </extended-twice>
+
                     <simple-long-2>44</simple-long-2>
                     <binaryLeaf>8</binaryLeaf>
                     <binaryLeaf>1</binaryLeaf>

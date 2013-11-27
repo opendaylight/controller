@@ -11,6 +11,8 @@ import org.opendaylight.yangtools.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 public class TypeProviderWrapper {
     private final TypeProvider typeProvider;
@@ -20,10 +22,15 @@ public class TypeProviderWrapper {
     }
 
     public Type getType(LeafSchemaNode leaf) {
+        TypeDefinition<?> type = leaf.getType();
+        return getType(leaf, type);
+    }
+
+    public Type getType(SchemaNode leaf, TypeDefinition<?> type) {
         Type javaType;
         try {
             javaType = typeProvider.javaTypeForSchemaDefinitionType(
-                    leaf.getType(), leaf);
+                    type, leaf);
             if (javaType == null)
                 throw new IllegalArgumentException("Unknown type received for "
                         + leaf.toString());
@@ -50,4 +57,8 @@ public class TypeProviderWrapper {
         return javaType;
     }
 
+    public String getJMXParamForBaseType(Type baseType) {
+        // FIXME get value from type provider
+        return "value";
+    }
 }

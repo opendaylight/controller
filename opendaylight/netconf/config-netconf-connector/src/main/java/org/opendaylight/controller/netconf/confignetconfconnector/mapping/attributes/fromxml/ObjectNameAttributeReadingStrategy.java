@@ -8,8 +8,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -17,12 +15,12 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import java.util.List;
 import java.util.Map;
 
-public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReadingStrategy<AttributeIfc> {
+public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
 
     private static final Object PREFIX_SEPARATOR = ":";
 
-    public ObjectNameAttributeReadingStrategy(DependencyAttribute attributeIfc) {
-        super(attributeIfc);
+    public ObjectNameAttributeReadingStrategy(String nullableDefault) {
+        super(nullableDefault);
     }
 
     @Override
@@ -33,7 +31,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
                 + " but was " + configNodes.size());
 
         Preconditions.checkNotNull(firstChild, "Element %s should be present", firstChild);
-        return AttributeConfigElement.create(getAttributeIfc(), resolve(firstChild));
+        return AttributeConfigElement.create(getNullableDefault(), resolve(firstChild));
     }
 
     private ObjectNameAttributeMappingStrategy.MappedDependency resolve(XmlElement firstChild) {

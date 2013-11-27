@@ -7,15 +7,10 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
@@ -26,10 +21,13 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class TOAttribute extends AbstractAttribute {
 
@@ -59,7 +57,7 @@ public class TOAttribute extends AbstractAttribute {
                         createInnerAttribute(dataSchemaNode,
                                 typeProviderWrapper));
             } catch (IllegalArgumentException e) {
-                throw new IllegalStateException("Unable to create TO");
+                throw new IllegalStateException("Unable to create TO", e);
             }
         }
         return new TOAttribute(containerSchemaNode, map, attributeNameMap,
@@ -200,7 +198,7 @@ public class TOAttribute extends AbstractAttribute {
     }
 
     @Override
-    public OpenType<?> getOpenType() {
+    public CompositeType getOpenType() {
         String description = getNullableDescription() == null ? getAttributeYangName()
                 : getNullableDescription();
         final String[] itemNames = new String[yangNameToAttributeMap.keySet()
