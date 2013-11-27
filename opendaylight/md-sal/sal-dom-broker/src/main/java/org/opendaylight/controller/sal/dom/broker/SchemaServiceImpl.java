@@ -147,7 +147,7 @@ AutoCloseable {
 
     private synchronized boolean tryToUpdateState(Collection<URL> changedURLs, Multimap<Bundle, URL> proposedNewState,
             boolean adding) {
-        Preconditions.checkArgument(changedURLs.size() > 0, "No change can occur when no URLs are changed");
+        Preconditions.checkArgument(!changedURLs.isEmpty(), "No change can occur when no URLs are changed");
 
         try {
             // consistent state
@@ -166,8 +166,8 @@ AutoCloseable {
         } catch (Exception e) {
             // inconsistent state
             logger.debug(
-                    "SchemaService is falling back on last consistent state containing {}, inconsistent yang files {}, reason {}",
-                    consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, e.toString());
+                    "SchemaService is falling back on last consistent state containing {}, inconsistent yang files {}",
+                    consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, e);
             return false;
         }
     }
@@ -225,8 +225,9 @@ AutoCloseable {
             // system bundle might have config-api on classpath &&
             // config-api contains yang files =>
             // system bundle might contain yang files from that bundle
-            if (bundle.getBundleId() == 0)
+            if (bundle.getBundleId() == 0) {
                 return bundle;
+            }
 
             Enumeration<URL> enumeration = bundle.findEntries("META-INF/yang", "*.yang", false);
             if (enumeration != null && enumeration.hasMoreElements()) {
