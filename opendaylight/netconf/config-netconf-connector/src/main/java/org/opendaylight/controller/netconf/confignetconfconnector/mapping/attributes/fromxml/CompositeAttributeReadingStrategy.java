@@ -11,21 +11,19 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingStrategy<TOAttribute> {
+public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
 
     private final Map<String, AttributeReadingStrategy> innerStrategies;
 
-    public CompositeAttributeReadingStrategy(TOAttribute attributeIfc,
+    public CompositeAttributeReadingStrategy(String nullableDefault,
             Map<String, AttributeReadingStrategy> innerStrategies) {
-        super(attributeIfc);
+        super(nullableDefault);
         this.innerStrategies = innerStrategies;
     }
 
@@ -38,21 +36,19 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
 
         Map<String, Object> innerMap = Maps.newHashMap();
 
-        Map<String, AttributeIfc> inner = getAttributeIfc().getYangPropertiesToTypesMap();
-
         List<XmlElement> recognisedChildren = Lists.newArrayList();
-        for (Entry<String, AttributeIfc> innerAttrEntry : inner.entrySet()) {
+        for (Entry<String, AttributeReadingStrategy> innerAttrEntry : innerStrategies.entrySet()) {
             List<XmlElement> childItem = complexElement.getChildElementsWithSameNamespace(innerAttrEntry.getKey());
             recognisedChildren.addAll(childItem);
 
-            AttributeConfigElement resolvedInner = innerStrategies.get(innerAttrEntry.getKey()).readElement(childItem);
+            AttributeConfigElement resolvedInner = innerAttrEntry.getValue().readElement(childItem);
 
             innerMap.put(innerAttrEntry.getKey(), resolvedInner.getValue());
         }
 
         complexElement.checkUnrecognisedElements(recognisedChildren);
 
-        return AttributeConfigElement.create(getAttributeIfc(), innerMap);
+        return AttributeConfigElement.create(getNullableDefault(), innerMap);
     }
 
 }

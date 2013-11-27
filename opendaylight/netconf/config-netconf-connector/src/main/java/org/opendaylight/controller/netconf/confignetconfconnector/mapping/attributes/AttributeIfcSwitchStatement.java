@@ -14,28 +14,70 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+
 public abstract class AttributeIfcSwitchStatement<T> {
+
+    protected AttributeIfc lastAttribute;
 
     public T switchAttribute(AttributeIfc attributeIfc) {
 
+        this.lastAttribute = attributeIfc;
+
         if (attributeIfc instanceof JavaAttribute) {
-            return caseJavaAttribute((JavaAttribute) attributeIfc);
+            try {
+                return caseJavaAttribute(attributeIfc.getOpenType());
+            } catch (UnknownOpenTypeException e) {
+                throw getIllegalArgumentException(attributeIfc);
+            }
+
         } else if (attributeIfc instanceof DependencyAttribute) {
-            return caseDependencyAttribute((DependencyAttribute) attributeIfc);
+            return caseDependencyAttribute(((DependencyAttribute) attributeIfc).getOpenType());
         } else if (attributeIfc instanceof ListAttribute) {
-            return caseListAttribute((ListAttribute) attributeIfc);
+            return caseListAttribute(((ListAttribute) attributeIfc).getOpenType());
         } else if (attributeIfc instanceof TOAttribute) {
-            return caseTOAttribute((TOAttribute) attributeIfc);
+            return caseTOAttribute(((TOAttribute) attributeIfc).getOpenType());
         }
 
-        throw new IllegalArgumentException("Unknown attribute type " + attributeIfc.getClass() + ", " + attributeIfc);
+        throw getIllegalArgumentException(attributeIfc);
     }
 
-    protected abstract T caseJavaAttribute(JavaAttribute attributeIfc);
+    private IllegalArgumentException getIllegalArgumentException(AttributeIfc attributeIfc) {
+        return new IllegalArgumentException("Unknown attribute type " + attributeIfc.getClass() + ", " + attributeIfc
+                + " with open type:" + attributeIfc.getOpenType());
+    }
 
-    protected abstract T caseDependencyAttribute(DependencyAttribute attributeIfc);
+    public final T caseJavaAttribute(OpenType<?> openType) {
+        if (openType instanceof SimpleType<?>) {
+            return caseJavaSimpleAttribute((SimpleType<?>) openType);
+        } else if (openType instanceof ArrayType<?>) {
+            return caseJavaArrayAttribute((ArrayType<?>) openType);
+        } else if (openType instanceof CompositeType) {
+            return caseJavaCompositeAttribute((CompositeType) openType);
+        }
 
-    protected abstract T caseTOAttribute(TOAttribute attributeIfc);
+        throw new UnknownOpenTypeException("Unknown attribute open type " + openType);
+    }
 
-    protected abstract T caseListAttribute(ListAttribute attributeIfc);
+    protected abstract T caseJavaSimpleAttribute(SimpleType<?> openType);
+
+    protected abstract T caseJavaArrayAttribute(ArrayType<?> openType);
+
+    protected abstract T caseJavaCompositeAttribute(CompositeType openType);
+
+    protected abstract T caseDependencyAttribute(SimpleType<?> attributeIfc);
+
+    protected abstract T caseTOAttribute(CompositeType openType);
+
+    protected abstract T caseListAttribute(ArrayType<?> openType);
+
+
+    private static class UnknownOpenTypeException extends RuntimeException {
+        public UnknownOpenTypeException(String message) {
+            super(message);
+        }
+    }
 }

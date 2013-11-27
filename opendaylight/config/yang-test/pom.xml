@@ -32,13 +32,113 @@
         </dependency>
     </dependencies>
 
-
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
+                <version>${opendaylight.yang.version}</version>
+                <executions>
+                    <execution>
+                        <id>config</id>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                    <additionalConfiguration>
+                                        <namespaceToPackage1>
+                                            urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
+                                        </namespaceToPackage1>
+                                    </additionalConfiguration>
+                                </generator>
+                            </codeGenerators>
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>types</id>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <yangFilesRootDir>src/main/yang/types</yangFilesRootDir>
+                            <codeGenerators>
+                              <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        target/generated-sources/sal
+                                    </outputBaseDir>
+                                </generator>
+                            </codeGenerators>
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-jmx-generator-plugin</artifactId>
+                        <version>${config.version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.opendaylight.yangtools</groupId>
+                        <artifactId>maven-sal-api-gen-plugin</artifactId>
+                        <version>${yangtools.binding.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!--Temporary fix for https://bugs.opendaylight.org/show_bug.cgi?id=167 -->
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.2</version>
+                <executions>
+                    <execution>
+                        <id>ex1</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.build.directory}/generated-sources/sal/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/controller/config/test/types/rev131127/ExtendOnce.java</file>
+                            <replacements>
+                                <replacement>
+                                    <token>public ExtendOnce\(Integer</token>
+                                    <value>@java.beans.ConstructorProperties("value") public ExtendOnce(Integer</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>ex2</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.build.directory}/generated-sources/sal/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/controller/config/test/types/rev131127/ExtendTwice.java</file>
+                            <replacements>
+                                <replacement>
+                                    <token>public ExtendTwice\(Integer</token>
+                                    <value>@java.beans.ConstructorProperties("value") public ExtendTwice(Integer</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
