@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.persist.api.storage;
 
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.osgi.framework.BundleContext;
 
 /**
  * Plugins for {@link org.opendaylight.controller.config.persist.api.Persister}
@@ -17,6 +16,20 @@ import org.osgi.framework.BundleContext;
  */
 public interface StorageAdapter extends Persister {
 
-    void setProperties(BundleContext bundleContext);
+    void setProperties(PropertiesProvider propertiesProvider);
+
+
+    public interface PropertiesProvider {
+        /**
+         * Get property value for given key. Implementation of this interface is allowed to prefix
+         * the key with a namespace.
+         */
+        String getProperty(String key);
+
+        /**
+         * @return prefix + key as used in getProperty method.
+         */
+        String getFullKeyForReporting(String key);
+    }
 
 }

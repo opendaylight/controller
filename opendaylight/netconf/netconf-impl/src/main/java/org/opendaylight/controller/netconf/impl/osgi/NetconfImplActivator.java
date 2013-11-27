@@ -16,7 +16,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFact
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
-import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil.TLSConfiguration;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -30,9 +29,6 @@ public class NetconfImplActivator implements BundleActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfImplActivator.class);
 
-    private Optional<InetSocketAddress> maybeTCPAddress;
-    private Optional<TLSConfiguration> maybeTLSConfiguration;
-
     private NetconfOperationServiceFactoryTracker factoriesTracker;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
@@ -41,11 +37,8 @@ public class NetconfImplActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        maybeTCPAddress = NetconfConfigUtil.extractTCPNetconfAddress(context);
-        maybeTLSConfiguration = NetconfConfigUtil.extractTLSConfiguration(context);
-        if (maybeTCPAddress.isPresent() == false && maybeTLSConfiguration.isPresent() == false) {
-            throw new IllegalStateException("TCP nor TLS is configured, netconf not available.");
-        }
+        InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context, "TCP is not configured, netconf not available.");
+
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);
         factoriesTracker.open();
@@ -62,26 +55,13 @@ public class NetconfImplActivator implements BundleActivator {
 
         eventLoopGroup = new NioEventLoopGroup();
 
-        if (maybeTCPAddress.isPresent()) {
-            Optional<SSLContext> maybeSSLContext = Optional.absent();
-            InetSocketAddress address = maybeTCPAddress.get();
-            NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
-                    maybeSSLContext, serverNegotiatorFactory, listenerFactory);
-            dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
+        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
+                Optional.<SSLContext>absent(), serverNegotiatorFactory, listenerFactory);
+        dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
-            logger.info("Starting TCP netconf server at {}", address);
-            dispatch.createServer(address);
-        }
-        if (maybeTLSConfiguration.isPresent()) {
-            Optional<SSLContext> maybeSSLContext = Optional.of(maybeTLSConfiguration.get().getSslContext());
-            InetSocketAddress address = maybeTLSConfiguration.get().getAddress();
-            NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
-                    maybeSSLContext, serverNegotiatorFactory, listenerFactory);
-            dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
+        logger.info("Starting TCP netconf server at {}", address);
+        dispatch.createServer(address);
 
-            logger.info("Starting TLS netconf server at {}", address);
-            dispatch.createServer(address);
-        }
     }
 
     @Override

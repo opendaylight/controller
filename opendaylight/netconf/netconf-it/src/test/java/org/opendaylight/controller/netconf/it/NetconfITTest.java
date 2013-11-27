@@ -204,8 +204,8 @@ public class NetconfITTest extends AbstractConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 4000, clientDispatcher))  {
-            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 4000, clientDispatcher))  {
+        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 10000, clientDispatcher))  {
+            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 10000, clientDispatcher))  {
             }
         }
     }

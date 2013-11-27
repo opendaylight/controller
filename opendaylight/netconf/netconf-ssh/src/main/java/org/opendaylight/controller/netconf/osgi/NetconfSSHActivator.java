@@ -37,10 +37,11 @@ public class NetconfSSHActivator implements BundleActivator{
         logger.trace("Starting netconf SSH  bridge.");
 
         Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context);
-        Optional<InetSocketAddress> tcpSocketAddressOptional = NetconfConfigUtil.extractTCPNetconfAddress(context);
+        InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,
+                "TCP is not configured, netconf ssh bridge is not available.");
 
-        if (sshSocketAddressOptional.isPresent() && tcpSocketAddressOptional.isPresent()){
-            server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddressOptional.get());
+        if (sshSocketAddressOptional.isPresent()){
+            server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress);
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);
             serverThread.start();

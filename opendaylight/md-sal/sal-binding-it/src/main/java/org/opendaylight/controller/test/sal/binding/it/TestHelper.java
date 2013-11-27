@@ -41,7 +41,7 @@ public class TestHelper {
                 mavenBundle("org.opendaylight.bgpcep", "framework").versionAsInProject(), //
                 mavenBundle("org.opendaylight.bgpcep", "util").versionAsInProject(), //
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
-                
+
                 mavenBundle(CONTROLLER, "config-api").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
@@ -54,30 +54,30 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "logback-config").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-persister-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-api").versionAsInProject(), //
-               
+
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
                 mavenBundle(CONTROLLER + ".thirdparty", "ganymed", "1.0-SNAPSHOT"), //
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //
-                
+
                 mavenBundle("io.netty", "netty-handler").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-codec").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-buffer").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-transport").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-common").versionAsInProject(), //
-                
+
                 mavenBundle("org.opendaylight.controller.thirdparty", "exificient", "0.9.2-SNAPSHOT"), //
-                
+
                 mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.xerces", "2.11.0_1"),
                 mavenBundle("org.eclipse.birt.runtime.3_7_1", "org.apache.xml.resolver", "1.2.0"),
-                
+
                 mavenBundle(CONTROLLER, "config-netconf-connector").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-impl").versionAsInProject(), //
-                
+
                 mavenBundle(CONTROLLER, "config-persister-file-adapter").versionAsInProject().noStart());
-            
+
     }
 
     public static Option bindingAwareSalBundles() {
@@ -114,8 +114,8 @@ public class TestHelper {
                 systemProperty("netconf.tcp.port").value("18383"), //
                 systemProperty("netconf.config.persister.storageAdapterClass").value(
                         "org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter"), //
-                systemProperty("fileStorage").value(PathUtils.getBaseDir() + "/src/test/resources/controller.config"), //
-                systemProperty("numberOfBackups").value("1") //
+                systemProperty("netconf.config.persister.fileStorage").value(PathUtils.getBaseDir() + "/src/test/resources/controller.config"), //
+                systemProperty("netconf.config.persister.numberOfBackups").value("1") //
                 //systemProperty("yangstore.blacklist").value(".*controller.model.*") //
 
         );
@@ -170,7 +170,7 @@ public class TestHelper {
                  * org/mockito/cglib/proxy/Factory have different Class objects
                  * for the type org/mockito/cglib/ proxy/Callback used in the
                  * signature
-                 * 
+                 *
                  * So we disable the bootdelegation. this property has no effect
                  * on the other OSGi implementation.
                  */

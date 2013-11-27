@@ -8,12 +8,10 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import com.google.common.base.Optional;
+import org.opendaylight.controller.config.persist.api.storage.StorageAdapter.PropertiesProvider;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
-import org.opendaylight.controller.netconf.persist.impl.NoOpStorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.PersisterImpl;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
-import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil.TLSConfiguration;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -33,32 +31,33 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     private Thread initializationThread;
 
+    private static final String NETCONF_CONFIG_PERSISTER_PREFIX = "netconf.config.persister.";
+    public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX =  "storageAdapterClass";
+
     @Override
-    public void start(BundleContext context) throws Exception {
-        logger.debug("ConfigPersister activator started");
+    public void start(final BundleContext context) throws Exception {
+        logger.debug("ConfigPersister starting");
 
-        Optional<PersisterImpl> maybePersister = PersisterImpl.createFromProperties(context);
-        if (maybePersister.isPresent() == false) {
-            throw new IllegalStateException("No persister is defined in " + PersisterImpl.STORAGE_ADAPTER_CLASS_PROP
-                    + " property. For noop persister use " + NoOpStorageAdapter.class.getCanonicalName()
-                    + " . Persister is not operational");
-        }
+        PropertiesProvider propertiesProvider = new PropertiesProvider() {
+            @Override
+            public String getProperty(String key) {
+                return context.getProperty(getFullKeyForReporting(key));
+            }
 
-        Optional<TLSConfiguration> maybeTLSConfiguration = NetconfConfigUtil.extractTLSConfiguration(context);
-        Optional<InetSocketAddress> maybeTCPAddress = NetconfConfigUtil.extractTCPNetconfAddress(context);
+            @Override
+            public String getFullKeyForReporting(String key) {
+                return NETCONF_CONFIG_PERSISTER_PREFIX + key;
+            }
+        };
 
-        InetSocketAddress address;
-        if (maybeTLSConfiguration.isPresent()) {
-            throw new UnsupportedOperationException("TLS is currently not supported for persister");
-        } else if (maybeTCPAddress.isPresent()) {
-            address = maybeTCPAddress.get();
-        } else {
-            throw new IllegalStateException("Netconf is not configured, persister is not operational");
-        }
+        PersisterImpl persister = PersisterImpl.createFromProperties(propertiesProvider);
 
-        PersisterImpl persister = maybePersister.get();
+        InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
+                "Netconf is not configured, persister is not operational");
         configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(persister, address,
                 platformMBeanServer);
+
+        // offload initialization to another thread in order to stop blocking activator
         Runnable initializationRunnable = new Runnable() {
             @Override
             public void run() {
