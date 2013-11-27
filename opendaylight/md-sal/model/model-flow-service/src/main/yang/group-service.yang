@@ -41,7 +41,7 @@ module sal-group {
 
     rpc remove-group {
         input {
-            uses group-update;
+            uses node-group;
             uses tr:transaction-aware;            
         }
         output {

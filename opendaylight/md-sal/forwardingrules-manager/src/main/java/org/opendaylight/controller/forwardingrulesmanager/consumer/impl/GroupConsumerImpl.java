@@ -2,6 +2,7 @@ package org.opendaylight.controller.forwardingrulesmanager.consumer.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.Add
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.GroupAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.GroupRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.GroupUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.RemoveGroupInputBuilder;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInputBuilder;
@@ -40,10 +43,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.gro
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes.GroupType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.Buckets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.Bucket;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.Meter;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,7 +230,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
                 return new Status(StatusCode.BADREQUEST, "Group Name is invalid");
             }
 
-            returnResult = doesGroupEntryExists(group.getKey(), groupName, containerName);
+           /* returnResult = doesGroupEntryExists(group.getKey(), groupName, containerName);
 
             if (FRMUtil.operation.ADD == operation && returnResult) {
                 logger.error("Record with same Group Name exists");
@@ -233,7 +238,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             } else if (!returnResult) {
                 logger.error("Group record does not exist");
                 return new Status(StatusCode.BADREQUEST, "Group record does not exist");
-            }
+            }*/
 
             if (!(group.getGroupType().getIntValue() >= GroupType.GroupAll.getIntValue() && group.getGroupType()
                     .getIntValue() <= GroupType.GroupFf.getIntValue())) {
@@ -259,7 +264,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
     }
 
-    private boolean doesGroupEntryExists(GroupKey key, String groupName, String containerName) {
+   /* private boolean doesGroupEntryExists(GroupKey key, String groupName, String containerName) {
         if (!originalSwGroupView.containsKey(key)) {
             return false;
         }
@@ -271,8 +276,8 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
                 }
             }
         }
-        return false;
-    }
+        return true;
+    }*/
 
     /**
      * Update Group entries to the southbound plugin/inventory and our internal
@@ -292,11 +297,11 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             return groupOperationStatus;
         }
 
-        if (originalSwGroupView.containsKey(groupKey)) {
+        /*if (originalSwGroupView.containsKey(groupKey)) {
             originalSwGroupView.remove(groupKey);
             originalSwGroupView.put(groupKey, groupUpdateDataObject);
         }
-
+*/
         if (groupUpdateDataObject.isInstall()) {
             UpdateGroupInputBuilder groupData = new UpdateGroupInputBuilder();
             updateGroupBuilder = new UpdatedGroupBuilder();
@@ -304,10 +309,10 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             groupData.setUpdatedGroup(updateGroupBuilder.build());
             // TODO how to get original group and modified group.
 
-            if (installedSwGroupView.containsKey(groupKey)) {
+          /*  if (installedSwGroupView.containsKey(groupKey)) {
                 installedSwGroupView.remove(groupKey);
                 installedSwGroupView.put(groupKey, groupUpdateDataObject);
-            }
+            }*/
 
             groupService.updateGroup(groupData.build());
         }
@@ -330,7 +335,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             return groupOperationStatus;
         }
 
-        originalSwGroupView.put(groupKey, groupAddDataObject);
+        //originalSwGroupView.put(groupKey, groupAddDataObject);
 
         if (groupAddDataObject.isInstall()) {
             AddGroupInputBuilder groupData = new AddGroupInputBuilder();
@@ -339,19 +344,49 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             groupData.setGroupId(groupAddDataObject.getGroupId());
             groupData.setGroupType(groupAddDataObject.getGroupType());
             groupData.setNode(groupAddDataObject.getNode());
-            installedSwGroupView.put(groupKey, groupAddDataObject);
+        //   installedSwGroupView.put(groupKey, groupAddDataObject);
             groupService.addGroup(groupData.build());
         }
 
         return groupOperationStatus;
     }
 
-    private RpcResult<Void> commitToPlugin(internalTransaction transaction) {
+    /**
+     * Remove Group to the southbound plugin and our internal database
+     *
+     * @param path
+     * @param dataObject
+     */
+    private Status removeGroup(InstanceIdentifier<?> path, Group groupRemoveDataObject) {
+        GroupKey groupKey = groupRemoveDataObject.getKey();
+        Status groupOperationStatus = validateGroup(groupRemoveDataObject, FRMUtil.operation.ADD);
+
+        if (!groupOperationStatus.isSuccess()) {
+            logger.error("Group data object validation failed %s" + groupRemoveDataObject.getGroupName());
+            return groupOperationStatus;
+        }
+        //originalSwGroupView.put(groupKey, groupAddDataObject);
+
+        if (groupRemoveDataObject.isInstall()) {
+            RemoveGroupInputBuilder groupData = new RemoveGroupInputBuilder();
+            groupData.setBuckets(groupRemoveDataObject.getBuckets());
+            groupData.setContainerName(groupRemoveDataObject.getContainerName());
+            groupData.setGroupId(groupRemoveDataObject.getGroupId());
+            groupData.setGroupType(groupRemoveDataObject.getGroupType());
+            groupData.setNode(groupRemoveDataObject.getNode());
+        //   installedSwGroupView.put(groupKey, groupAddDataObject);
+            groupService.removeGroup(groupData.build());
+        }
+
+        return groupOperationStatus;
+    }
+    
+    private RpcResult<Void> commitToPlugin(InternalTransaction transaction) {
         for (Entry<InstanceIdentifier<?>, Group> entry : transaction.additions.entrySet()) {
 
             if (!addGroup(entry.getKey(), entry.getValue()).isSuccess()) {
                 transaction.additions.remove(entry.getKey());
-                return Rpcs.getRpcResult(false, null, null);
+                return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
             }
         }
 
@@ -359,12 +394,18 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
             if (!updateGroup(entry.getKey(), entry.getValue()).isSuccess()) {
                 transaction.updates.remove(entry.getKey());
-                return Rpcs.getRpcResult(false, null, null);
+                return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
             }
         }
 
-        for (InstanceIdentifier<?> removal : transaction.removals) {
-            // removeFlow(removal);
+        for (InstanceIdentifier<?> groupId : transaction.removals) {
+       	 	DataObject removeValue = transaction.getModification().getOriginalConfigurationData().get(groupId);	
+       	 
+       	 	if(removeValue instanceof Group) {
+       	 	    if(!removeGroup(groupId, (Group)removeValue).isSuccess()) {
+       	 	        return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet()); 
+       	 	    }             
+       	 	}
         }
 
         return Rpcs.getRpcResult(true, null, null);
@@ -372,19 +413,18 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
     private final class GroupDataCommitHandler implements DataCommitHandler<InstanceIdentifier<?>, DataObject> {
 
-        @SuppressWarnings("unchecked")
         @Override
         public DataCommitTransaction<InstanceIdentifier<?>, DataObject> requestCommit(
                 DataModification<InstanceIdentifier<?>, DataObject> modification) {
             // We should verify transaction
             System.out.println("Coming in GroupDatacommitHandler");
-            internalTransaction transaction = new internalTransaction(modification);
+            InternalTransaction transaction = new InternalTransaction(modification);
             transaction.prepareUpdate();
             return transaction;
         }
     }
 
-    private final class internalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
+    private final class InternalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
 
         private final DataModification<InstanceIdentifier<?>, DataObject> modification;
 
@@ -393,7 +433,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             return modification;
         }
 
-        public internalTransaction(DataModification<InstanceIdentifier<?>, DataObject> modification) {
+        public InternalTransaction(DataModification<InstanceIdentifier<?>, DataObject> modification) {
             this.modification = modification;
         }
 
@@ -407,33 +447,31 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
          *
          */
         void prepareUpdate() {
+        	
+        	 Set<Entry<InstanceIdentifier<?>, DataObject>> groupAdded = modification.getCreatedConfigurationData().entrySet();
+             for (Entry<InstanceIdentifier<?>, DataObject> entry : groupAdded) {
+                 if (entry.getValue() instanceof Group) {
+                     Group group = (Group) entry.getValue();
+                     additions.put(entry.getKey(), group);                     
+                 }
 
-            Set<Entry<InstanceIdentifier<?>, DataObject>> puts = modification.getUpdatedConfigurationData().entrySet();
-            for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
+             }
+
+            Set<Entry<InstanceIdentifier<?>, DataObject>> groupUpdate = modification.getUpdatedConfigurationData().entrySet();
+            for (Entry<InstanceIdentifier<?>, DataObject> entry : groupUpdate) {
                 if (entry.getValue() instanceof Group) {
                     Group group = (Group) entry.getValue();
-                    preparePutEntry(entry.getKey(), group);
+                    ///will be fixed once getUpdatedConfigurationData returns only updated data not created data with it.
+                    if (additions.containsKey(entry.getKey())) {
+                    	updates.put(entry.getKey(), group);
+                    }
                 }
 
             }
 
             removals = modification.getRemovedConfigurationData();
         }
-
-        private void preparePutEntry(InstanceIdentifier<?> key, Group group) {
-
-            Group original = originalSwGroupView.get(key);
-            if (original != null) {
-                // It is update for us
-
-                updates.put(key, group);
-            } else {
-                // It is addition for us
-
-                additions.put(key, group);
-            }
-        }
-
+        
         /**
          * We are OK to go with execution of plan
          *
@@ -457,7 +495,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             // NOOP - we did not modified any internal state during
             // requestCommit phase
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
-            return Rpcs.getRpcResult(true, null, null);
+            return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
 
         }
 
