@@ -77,7 +77,6 @@
                             javax.management,
                             javax.xml.parsers,
                             org.opendaylight.controller.config.persist.api,
-                            org.opendaylight.controller.config.persist.api.storage,
                             org.opendaylight.controller.netconf.api,
                             org.opendaylight.controller.netconf.api.jmx,
                             org.opendaylight.controller.netconf.client,
