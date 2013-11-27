@@ -20,12 +20,14 @@ import org.slf4j.LoggerFactory;
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
+import java.util.regex.Pattern;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterActivator.class);
 
     private final static MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+    private static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
 
     private ConfigPersisterNotificationHandler configPersisterNotificationHandler;
 
@@ -33,6 +35,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     private static final String NETCONF_CONFIG_PERSISTER_PREFIX = "netconf.config.persister.";
     public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX =  "storageAdapterClass";
+    public static final String DEFAULT_IGNORED_REGEX = "^urn:ietf:params:xml:ns:netconf:base:1.0";
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -50,12 +53,20 @@ public class ConfigPersisterActivator implements BundleActivator {
             }
         };
 
+        String regexProperty = propertiesProvider.getProperty(IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX);
+        String regex;
+        if (regexProperty != null) {
+            regex = regexProperty;
+        } else {
+            regex = DEFAULT_IGNORED_REGEX;
+        }
+        Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
         PersisterImpl persister = PersisterImpl.createFromProperties(propertiesProvider);
 
         InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
                 "Netconf is not configured, persister is not operational");
         configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(persister, address,
-                platformMBeanServer);
+                platformMBeanServer, ignoredMissingCapabilityRegex);
 
         // offload initialization to another thread in order to stop blocking activator
         Runnable initializationRunnable = new Runnable() {

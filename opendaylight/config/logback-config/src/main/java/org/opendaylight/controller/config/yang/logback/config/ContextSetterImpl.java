@@ -101,13 +101,15 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
 
     private void addNewAppenders(Map<String, Appender<ILoggingEvent>> appendersMap, LoggerTO logger,
             ch.qos.logback.classic.Logger logbackLogger, Optional<Set<Appender<ILoggingEvent>>> appendersBefore) {
-        for (String appenderName : logger.getAppenders()) {
-            if (appendersMap.containsKey(appenderName)) {
-                logbackLogger.addAppender(appendersMap.get(appenderName));
-                classLogger.trace("Logger {}: Adding new appender: {}", logger.getLoggerName(), appenderName);
-            } else {
-                throw new IllegalStateException("No appender " + appenderName
-                        + " found. This error should have been discovered by validation");
+        if (logger.getAppenders() != null) {
+            for (String appenderName : logger.getAppenders()) {
+                if (appendersMap.containsKey(appenderName)) {
+                    logbackLogger.addAppender(appendersMap.get(appenderName));
+                    classLogger.trace("Logger {}: Adding new appender: {}", logger.getLoggerName(), appenderName);
+                } else {
+                    throw new IllegalStateException("No appender " + appenderName
+                            + " found. This error should have been discovered by validation");
+                }
             }
         }
     }
