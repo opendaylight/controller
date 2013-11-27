@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import org.opendaylight.controller.config.persist.api.storage.StorageAdapter.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
-import org.opendaylight.controller.netconf.persist.impl.PersisterImpl;
+import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -33,7 +33,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     private Thread initializationThread;
 
-    private static final String NETCONF_CONFIG_PERSISTER_PREFIX = "netconf.config.persister.";
+    public static final String NETCONF_CONFIG_PERSISTER = "netconf.config.persister";
     public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX =  "storageAdapterClass";
     public static final String DEFAULT_IGNORED_REGEX = "^urn:ietf:params:xml:ns:netconf:base:1.0";
 
@@ -44,12 +44,14 @@ public class ConfigPersisterActivator implements BundleActivator {
         PropertiesProvider propertiesProvider = new PropertiesProvider() {
             @Override
             public String getProperty(String key) {
+                String fullKey = getFullKeyForReporting(key);
+                logger.trace("Full key for reporting {}", fullKey);
                 return context.getProperty(getFullKeyForReporting(key));
             }
 
             @Override
             public String getFullKeyForReporting(String key) {
-                return NETCONF_CONFIG_PERSISTER_PREFIX + key;
+                return NETCONF_CONFIG_PERSISTER + key;
             }
         };
 
@@ -61,7 +63,7 @@ public class ConfigPersisterActivator implements BundleActivator {
             regex = DEFAULT_IGNORED_REGEX;
         }
         Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
-        PersisterImpl persister = PersisterImpl.createFromProperties(propertiesProvider);
+        PersisterAggregator persister = PersisterAggregator.createFromProperties(propertiesProvider);
 
         InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
                 "Netconf is not configured, persister is not operational");
