@@ -9,12 +9,11 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.List;
 
-public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrategy<AttributeIfc> {
+public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
 
     private final AttributeReadingStrategy innerStrategy;
 
@@ -22,8 +21,8 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
      * @param attributeIfc
      * @param innerStrategy
      */
-    public ArrayAttributeReadingStrategy(AttributeIfc attributeIfc, AttributeReadingStrategy innerStrategy) {
-        super(attributeIfc);
+    public ArrayAttributeReadingStrategy(String nullableDefault, AttributeReadingStrategy innerStrategy) {
+        super(nullableDefault);
         this.innerStrategy = innerStrategy;
     }
 
@@ -33,7 +32,7 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
         for (int i = 0; i < configNodes.size(); i++) {
             innerList.add(innerStrategy.readElement(Lists.newArrayList(configNodes.get(i))).getValue());
         }
-        return AttributeConfigElement.create(getAttributeIfc(), innerList);
+        return AttributeConfigElement.create(getNullableDefault(), innerList);
     }
 
 }

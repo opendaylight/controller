@@ -11,8 +11,10 @@ import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
@@ -21,11 +23,15 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     private final Type type;
     private final String nullableDescription, nullableDefault;
+    private final TypeProviderWrapper typeProviderWrapper;
+    private final TypeDefinition<?> typeDefinition;
 
     public JavaAttribute(LeafSchemaNode leaf,
             TypeProviderWrapper typeProviderWrapper) {
         super(leaf);
         this.type = typeProviderWrapper.getType(leaf);
+        this.typeDefinition = leaf.getType();
+        this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = leaf.getDefault();
         this.nullableDescription = leaf.getDescription();
     }
@@ -34,8 +40,20 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             TypeProviderWrapper typeProviderWrapper) {
         super(leaf);
         this.type = typeProviderWrapper.getType(leaf);
+        this.typeDefinition = leaf.getType();
+        this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = null;
         this.nullableDescription = leaf.getDescription();
+    }
+
+    /**
+     * Returns the most base type
+     */
+    private TypeDefinition<?> getBaseType(TypeProviderWrapper typeProviderWrapper, TypeDefinition<?> baseType) {
+        while(baseType.getBaseType()!=null) {
+            baseType = baseType.getBaseType();
+        }
+        return baseType;
     }
 
     @Override
@@ -98,25 +116,52 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public OpenType<?> getOpenType() {
-        // If is array => arrayType
-        if (isArray(getType())) {
-            String innerTypeFullyQName = getInnerType(getType());
-            SimpleType<?> innerSimpleType = SimpleTypeResolver
-                    .getSimpleType(innerTypeFullyQName);
-            try {
-                ArrayType<Object> arrayType = isPrimitive(innerTypeFullyQName) ? new ArrayType<>(
-                        innerSimpleType, true) : new ArrayType<>(1,
-                        innerSimpleType);
-                return arrayType;
-            } catch (OpenDataException e) {
-                throw new RuntimeException("Unable to create "
-                        + ArrayType.class + " with inner element of type "
-                        + innerSimpleType, e);
-            }
+        TypeDefinition<?> baseTypeDefinition = getBaseType(typeProviderWrapper, typeDefinition);
+        Type baseType = typeProviderWrapper.getType(baseTypeDefinition, baseTypeDefinition);
+
+        if (isArray()) {
+            return getArrayType();
+        } else if (isDerivedType(baseType)) {
+            return getCompositeType(baseType, baseTypeDefinition);
         }
-        // else simple type
+
+        return getSimpleType();
+    }
+
+    private OpenType<?> getSimpleType() {
         SimpleType<?> simpleType = SimpleTypeResolver.getSimpleType(getType());
         return simpleType;
+    }
+
+     private OpenType<?> getCompositeType(Type baseType, TypeDefinition<?> baseTypeDefinition) {
+
+        SimpleType<?> innerItemType = SimpleTypeResolver.getSimpleType(baseType);
+        String innerItemName = typeProviderWrapper.getJMXParamForBaseType(baseTypeDefinition);
+
+        String[] itemNames = new String[]{innerItemName};
+        String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
+
+        OpenType<?>[] itemTypes = new OpenType[]{innerItemType};
+        try {
+            return new CompositeType(getUpperCaseCammelCase(), description, itemNames, itemNames, itemTypes);
+        } catch (OpenDataException e) {
+            throw new RuntimeException("Unable to create " + CompositeType.class + " with inner element of type "
+                    + itemTypes, e);
+        }
+
+    }
+
+    private OpenType<?> getArrayType() {
+        String innerTypeFullyQName = getInnerType(getType());
+        SimpleType<?> innerSimpleType = SimpleTypeResolver.getSimpleType(innerTypeFullyQName);
+        try {
+            ArrayType<Object> arrayType = isPrimitive(innerTypeFullyQName) ? new ArrayType<>(innerSimpleType, true)
+                    : new ArrayType<>(1, innerSimpleType);
+            return arrayType;
+        } catch (OpenDataException e) {
+            throw new RuntimeException("Unable to create " + ArrayType.class + " with inner element of type "
+                    + innerSimpleType, e);
+        }
     }
 
     // TODO verify
@@ -127,13 +172,17 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         return true;
     }
 
+    private boolean isArray() {
+        return type.getName().endsWith("[]");
+    }
+
+    private boolean isDerivedType(Type baseType) {
+        return  baseType.equals(getType()) == false;
+    }
+
     private static String getInnerType(Type type) {
         String fullyQualifiedName = type.getFullyQualifiedName();
         return fullyQualifiedName.substring(0, fullyQualifiedName.length() - 2);
-    }
-
-    private static boolean isArray(Type type) {
-        return type.getName().endsWith("[]");
     }
 
 }
