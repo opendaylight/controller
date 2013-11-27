@@ -21,6 +21,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActions;
@@ -57,7 +58,7 @@ public class FRMUtil {
 
     }
 
-    public static boolean validateMatch(NodeFlow flow) {
+    public static boolean validateMatch(Flow flow) {
         Match match = flow.getMatch();
         if (match != null) {
             EthernetMatch ethernetmatch = match.getEthernetMatch();
@@ -198,7 +199,7 @@ public class FRMUtil {
         return true;
     }
 
-    public static boolean validateInstructions(NodeFlow flow) {
+    public static boolean validateInstructions(Flow flow) {
         List<Instruction> instructionsList = new ArrayList<>();
         Instructions instructions = flow.getInstructions();
         instructionsList = instructions.getInstruction();
