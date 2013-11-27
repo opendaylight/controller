@@ -15,7 +15,7 @@ import com.google.common.collect.Collections2;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -48,7 +48,7 @@ public class FileStorageAdapterTest {
         FileStorageAdapter storage = new FileStorageAdapter();
         storage.setFileStorage(file);
         storage.setNumberOfBackups(Integer.MAX_VALUE);
-        final Persister.ConfigSnapshotHolder holder = new Persister.ConfigSnapshotHolder() {
+        final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
                 return createConfig();
@@ -75,7 +75,7 @@ public class FileStorageAdapterTest {
                 });
         assertEquals(14, readLines.size());
 
-        Optional<Persister.ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
+        Optional<ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
         assertTrue(lastConf.isPresent());
         assertEquals("<config>2</config>",
                 lastConf.get().getConfigSnapshot().replaceAll("\\s", ""));
@@ -96,7 +96,7 @@ public class FileStorageAdapterTest {
         FileStorageAdapter storage = new FileStorageAdapter();
         storage.setFileStorage(file);
         storage.setNumberOfBackups(1);
-        final Persister.ConfigSnapshotHolder holder = new Persister.ConfigSnapshotHolder() {
+        final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
                 return createConfig();
@@ -123,7 +123,7 @@ public class FileStorageAdapterTest {
                 });
         assertEquals(7, readLines.size());
 
-        Optional<Persister.ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
+        Optional<ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
         assertTrue(lastConf.isPresent());
         assertEquals("<config>2</config>",
                 lastConf.get().getConfigSnapshot().replaceAll("\\s", ""));
@@ -134,7 +134,7 @@ public class FileStorageAdapterTest {
         FileStorageAdapter storage = new FileStorageAdapter();
         storage.setFileStorage(file);
         storage.setNumberOfBackups(2);
-        final Persister.ConfigSnapshotHolder holder = new Persister.ConfigSnapshotHolder() {
+        final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
                 return createConfig();
@@ -163,7 +163,7 @@ public class FileStorageAdapterTest {
 
         assertEquals(14, readLines.size());
 
-        Optional<Persister.ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
+        Optional<ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
         assertTrue(lastConf.isPresent());
         assertEquals("<config>3</config>",
                lastConf.get().getConfigSnapshot().replaceAll("\\s", ""));
@@ -178,7 +178,7 @@ public class FileStorageAdapterTest {
         FileStorageAdapter storage = new FileStorageAdapter();
         storage.setFileStorage(file);
 
-        Optional<Persister.ConfigSnapshotHolder> elementOptional = storage.loadLastConfig();
+        Optional<ConfigSnapshotHolder> elementOptional = storage.loadLastConfig();
         assertThat(elementOptional.isPresent(), is(false));
     }
 
@@ -191,7 +191,7 @@ public class FileStorageAdapterTest {
     @Test(expected = NullPointerException.class)
     public void testNoProperties2() throws Exception {
         FileStorageAdapter storage = new FileStorageAdapter();
-        storage.persistConfig(new Persister.ConfigSnapshotHolder() {
+        storage.persistConfig(new ConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
                 return Mockito.mock(String.class);

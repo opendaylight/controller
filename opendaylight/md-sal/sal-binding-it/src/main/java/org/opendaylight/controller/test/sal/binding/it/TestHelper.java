@@ -112,10 +112,12 @@ public class TestHelper {
 
                 systemProperty("netconf.tcp.address").value("0.0.0.0"), //
                 systemProperty("netconf.tcp.port").value("18383"), //
-                systemProperty("netconf.config.persister.storageAdapterClass").value(
+                systemProperty("netconf.config.persister").value("1"), //
+                systemProperty("netconf.config.persister.1.storageAdapterClass").value(
                         "org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter"), //
-                systemProperty("netconf.config.persister.fileStorage").value(PathUtils.getBaseDir() + "/src/test/resources/controller.config"), //
-                systemProperty("netconf.config.persister.numberOfBackups").value("1") //
+                systemProperty("netconf.config.persister.1.properties.fileStorage")
+                        .value(PathUtils.getBaseDir() + "/src/test/resources/controller.config"), //
+                systemProperty("netconf.config.persister.1.properties.numberOfBackups").value("1") //
                 //systemProperty("yangstore.blacklist").value(".*controller.model.*") //
 
         );
