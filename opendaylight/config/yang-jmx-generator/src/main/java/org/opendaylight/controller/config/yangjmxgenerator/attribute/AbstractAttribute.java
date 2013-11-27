@@ -13,7 +13,7 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 public abstract class AbstractAttribute implements AttributeIfc {
     private final String attributeYangName, upperCaseCammelCase,
             lowerCaseCammelCase;
-    private final DataSchemaNode node;
+    protected final DataSchemaNode node;
 
     private static String getLocalName(DataSchemaNode attrNode) {
         return attrNode.getQName().getLocalName();

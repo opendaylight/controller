@@ -7,17 +7,15 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import org.opendaylight.yangtools.sal.binding.model.api.Type;
+
+import javax.management.openmbean.SimpleType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
-
-import javax.management.openmbean.SimpleType;
-
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 public class SimpleTypeResolver {
 
@@ -27,6 +25,10 @@ public class SimpleTypeResolver {
         Preconditions.checkState(expectedSimpleType != null,
                 "Cannot find simple type for " + type.getFullyQualifiedName());
         return expectedSimpleType;
+    }
+
+    public static boolean canResolve(Type type) {
+        return JAVA_TYPE_TO_SIMPLE_TYPE.containsKey(type.getFullyQualifiedName());
     }
 
     public static SimpleType<?> getSimpleType(String fullyQualifiedName) {

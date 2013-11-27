@@ -193,7 +193,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         } catch (IllegalStateException e) {
             logger.warn("Error parsing xml", e);
             final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.missing_attribute.name(), "Missing value for 'target' attribute");
+            errorInfo.put(ErrorTag.missing_attribute.name(), "Error parsing xml: " + e.getMessage());
             throw new NetconfDocumentedException(e.getMessage(), ErrorType.rpc, ErrorTag.missing_attribute,
                     ErrorSeverity.error, errorInfo);
         } catch (final IllegalArgumentException e) {
