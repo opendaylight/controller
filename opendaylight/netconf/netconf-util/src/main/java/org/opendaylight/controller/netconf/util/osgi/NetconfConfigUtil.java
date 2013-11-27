@@ -35,8 +35,13 @@ public class NetconfConfigUtil {
     private static final String NETCONF_TLS_KEYSTORE_PROP = PREFIX_PROP + InfixProp.tls + ".keystore";
     private static final String NETCONF_TLS_KEYSTORE_PASSWORD_PROP = NETCONF_TLS_KEYSTORE_PROP + ".password";
 
-    public static Optional<InetSocketAddress> extractTCPNetconfAddress(BundleContext context) {
-        return extractSomeNetconfAddress(context, InfixProp.tcp);
+    public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound) {
+
+        Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp);
+        if (inetSocketAddressOptional.isPresent() == false) {
+            throw new IllegalStateException("Netconf tcp address not found." + exceptionMessageIfNotFound);
+        }
+        return inetSocketAddressOptional.get();
     }
 
     public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context) {
