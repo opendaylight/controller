@@ -1,13 +1,12 @@
 package org.opendaylight.controller.sal.rest.api;
 
-import static org.opendaylight.controller.sal.restconf.impl.MediaTypes.API;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
@@ -21,25 +20,28 @@ public interface RestconfServiceLegacy {
     @Deprecated
     @GET
     @Path("/datastore")
-    @Produces({API+JSON,API+XML})
+    @Produces({Draft01.MediaTypes.DATASTORE+JSON,Draft01.MediaTypes.DATASTORE+XML})
     public StructuredData readAllData();
 
     @Deprecated
     @GET
     @Path("/datastore/{identifier:.+}")
-    @Produces({API+JSON,API+XML})
+    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData readData(@PathParam("identifier") String identifier);
-
-    @Deprecated
-    @PUT
-    @Path("/datastore/{identifier:.+}")
-    @Produces({API+JSON,API+XML})
-    public Response createConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @Deprecated
     @POST
     @Path("/datastore/{identifier:.+}")
-    @Produces({API+JSON,API+XML})
+    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public Response createConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @Deprecated
+    @PUT
+    @Path("/datastore/{identifier:.+}")
+    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Response updateConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
 
 }

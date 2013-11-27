@@ -149,11 +149,8 @@ class JsonMapper {
 
     private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type)
             throws IOException {
-        if (!(node.getValue() instanceof String)) {
-            throw new IllegalStateException("Value in SimpleNode should be type String");
-        }
 
-        String value = (String) node.getValue();
+        String value = String.valueOf(node.getValue());
         // TODO check Leafref, InstanceIdentifierTypeDefinition,
         // IdentityrefTypeDefinition, UnionTypeDefinition
         TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
@@ -169,7 +166,7 @@ class JsonMapper {
         } else if (baseType instanceof EmptyTypeDefinition) {
             writeEmptyDataTypeToJson(writer);
         } else {
-            writer.value(value != null ? value : "");
+            writer.value(value.equals("null") ? "" : value);
         }
     }
 

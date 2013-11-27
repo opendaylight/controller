@@ -1,7 +1,5 @@
 package org.opendaylight.controller.sal.rest.impl;
 
-import static org.opendaylight.controller.sal.restconf.impl.MediaTypes.API;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -16,6 +14,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
+import org.opendaylight.controller.sal.rest.api.Draft01;
+import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -24,7 +24,8 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import com.google.gson.stream.JsonWriter;
 
 @Provider
-@Produces({ API + RestconfService.JSON })
+@Produces({ Draft01.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
+        MediaType.APPLICATION_JSON })
 public enum StructuredDataToJsonProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
 

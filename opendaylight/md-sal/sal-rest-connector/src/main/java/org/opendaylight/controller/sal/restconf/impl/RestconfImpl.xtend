@@ -119,8 +119,7 @@ class RestconfImpl implements RestconfService {
     private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
         if (identifierWithSchemaNode === null) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("URI has bad format")
-                    .build());
+            throw new ResponseException(Response.Status.BAD_REQUEST, "URI has bad format");
         }
         return identifierWithSchemaNode
     }
