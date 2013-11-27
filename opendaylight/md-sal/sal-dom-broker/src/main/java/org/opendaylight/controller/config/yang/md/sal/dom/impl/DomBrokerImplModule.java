@@ -13,6 +13,7 @@ import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerConfigActivator;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.osgi.framework.BundleContext;
+import static com.google.common.base.Preconditions.*;
 
 /**
 *
@@ -33,8 +34,10 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
     @Override
     public void validate(){
         super.validate();
-        // Add custom validation for module attributes here.
+        checkArgument(getDataStore() != null, "Data Store needs to be provided for DomBroker");
     }
+    
+    
 
     @Override
     public java.lang.AutoCloseable createInstance() {

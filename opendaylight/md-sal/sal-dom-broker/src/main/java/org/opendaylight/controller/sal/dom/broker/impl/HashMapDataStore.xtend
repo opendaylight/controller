@@ -9,23 +9,41 @@ import org.opendaylight.controller.sal.common.util.Rpcs
 import java.util.Collections
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import static extension org.opendaylight.controller.sal.dom.broker.impl.DataUtils.*;
 import org.opendaylight.controller.sal.core.api.data.DataStore
 import java.util.HashSet
 
 class HashMapDataStore implements DataStore, AutoCloseable {
 
+
     val Map<InstanceIdentifier, CompositeNode> configuration = new ConcurrentHashMap();
     val Map<InstanceIdentifier, CompositeNode> operational = new ConcurrentHashMap();
+    
+    
+    
+    override containsConfigurationPath(InstanceIdentifier path) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        
+    }
+    
+    override containsOperationalPath(InstanceIdentifier path) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override getStoredConfigurationPaths() {
+        configuration.keySet
+    }
+    
+    override getStoredOperationalPaths() {
+        operational.keySet
+    }
 
     override readConfigurationData(InstanceIdentifier path) {
-        configuration.read(path);
+        configuration.get(path);
     }
 
     override readOperationalData(InstanceIdentifier path) {
-        operational.read(path);
+        operational.get(path);
     }
-    
 
 
 

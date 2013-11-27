@@ -38,6 +38,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegis
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 import java.util.concurrent.atomic.AtomicLong
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
 
 abstract class AbstractDataBroker<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> implements DataModificationTransactionFactory<P, D>, //
 DataReader<P, D>, //
@@ -91,6 +92,10 @@ DataProvisionService<P, D> {
     override final def registerDataChangeListener(P path, DCL listener) {
         val reg = new DataChangeListenerRegistration(path, listener, this);
         listeners.put(path, reg);
+        val initialConfig = dataReadRouter.readConfigurationData(path);
+        val initialOperational = dataReadRouter.readOperationalData(path);
+        val event = createInitialListenerEvent(path,initialConfig,initialOperational);
+        listener.onDataChanged(event);
         return reg;
     }
 
@@ -108,6 +113,10 @@ DataProvisionService<P, D> {
         return ret;
     }
     
+    protected  def DataChangeEvent<P,D> createInitialListenerEvent(P path,D initialConfig,D initialOperational) {
+        return new InitialDataChangeEventImpl<P, D>(initialConfig,initialOperational);
+        
+    }
 
     protected final def removeListener(DataChangeListenerRegistration<P, D, DCL> registration) {
         listeners.remove(registration.path, registration);
