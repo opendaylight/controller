@@ -16,8 +16,8 @@ public interface BindingIndependentMappingService {
 
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier toDataDom(InstanceIdentifier<? extends DataObject> path);
 
-    DataObject dataObjectFromDataDom(InstanceIdentifier<? extends DataObject> path, CompositeNode result);
+    DataObject dataObjectFromDataDom(InstanceIdentifier<? extends DataObject> path, CompositeNode result) throws DeserializationException;
 
-    InstanceIdentifier<?> fromDataDom(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry);
+    InstanceIdentifier<?> fromDataDom(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry)  throws DeserializationException;
 
 }
