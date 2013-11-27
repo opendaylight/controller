@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_be011a08",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/HostIdFactory.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-11-27T21:25:53Z",
+      "side": 1,
+      "message": "Just in case keyScheme is not set in config.ini, wouldn\u0027t it be better to set it to IP scheme by default here?",
+      "revId": "1b50bf01cd8dab4b32ce696f58d722d6c81db1af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7e1cc277",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-11-27T21:25:53Z",
+      "side": 1,
+      "message": "Just in case keyScheme is not set in config.ini, wouldn\u0027t it be better to set it to IP scheme by default here?",
+      "revId": "1b50bf01cd8dab4b32ce696f58d722d6c81db1af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
