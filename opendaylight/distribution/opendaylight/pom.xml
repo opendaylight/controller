@@ -509,7 +509,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
-      <version>${controller.version}</version>
+      <version>${clustering.services.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
