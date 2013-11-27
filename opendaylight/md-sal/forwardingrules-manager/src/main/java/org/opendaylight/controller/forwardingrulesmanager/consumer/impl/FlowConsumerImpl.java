@@ -86,8 +86,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private boolean inContainerMode; // being used by global instance only
 
     public FlowConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).child(Flow.class)
-                .toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).toInstance();
         flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
 
         if (null == flowService) {
@@ -329,39 +328,40 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
 
                 // validating the DataObject
-
-                Status status = validate(container, (NodeFlow) entry);
-                if (!status.isSuccess()) {
-                    logger.warn("Invalid Configuration for flow {}. The failure is {}", entry, status.getDescription());
-                    String error = "Invalid Configuration (" + status.getDescription() + ")";
-                    logger.error(error);
-                    return;
+                DataObject value = entry.getValue();
+                if(value instanceof Flow ) {
+                    Status status = validate(container, (NodeFlow) entry.getValue());
+                    if (!status.isSuccess()) {
+                        logger.warn("Invalid Configuration for flow {}. The failure is {}", entry, status.getDescription());
+                        String error = "Invalid Configuration (" + status.getDescription() + ")";
+                        logger.error(error);
+                        return;
+                    }
+                    // Presence check
+                    if (flowEntryExists((NodeFlow) entry)) {
+                        String error = "Entry with this name on specified table already exists";
+                        logger.warn("Entry with this name on specified table already exists: {}", entry);
+                        logger.error(error);
+                        return;
+                    }
+                    if (originalSwView.containsKey(entry)) {
+                        logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
+                        logger.trace("Aborting to install {}", entry);
+                        continue;
+                    }
+                    if (!FRMUtil.validateMatch((NodeFlow) entry)) {
+                        logger.error("Not a valid Match");
+                        return;
+                    }
+                    if (!FRMUtil.validateInstructions((NodeFlow) entry)) {
+                        logger.error("Not a valid Instruction");
+                        return;
+                    }
+                    if (entry.getValue() instanceof Flow) {
+                        Flow flow = (Flow) entry.getValue();
+                        preparePutEntry(entry.getKey(), flow);
+                    }
                 }
-                // Presence check
-                if (flowEntryExists((NodeFlow) entry)) {
-                    String error = "Entry with this name on specified table already exists";
-                    logger.warn("Entry with this name on specified table already exists: {}", entry);
-                    logger.error(error);
-                    return;
-                }
-                if (originalSwView.containsKey(entry)) {
-                    logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
-                    logger.trace("Aborting to install {}", entry);
-                    continue;
-                }
-                if (!FRMUtil.validateMatch((NodeFlow) entry)) {
-                    logger.error("Not a valid Match");
-                    return;
-                }
-                if (!FRMUtil.validateInstructions((NodeFlow) entry)) {
-                    logger.error("Not a valid Instruction");
-                    return;
-                }
-                if (entry.getValue() instanceof Flow) {
-                    Flow flow = (Flow) entry.getValue();
-                    preparePutEntry(entry.getKey(), flow);
-                }
-
             }
 
             // removals = modification.getRemovedConfigurationData();
