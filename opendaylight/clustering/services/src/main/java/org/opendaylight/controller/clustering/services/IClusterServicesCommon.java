@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -117,6 +118,16 @@ public interface IClusterServicesCommon {
      *
      */
     void tbegin() throws NotSupportedException, SystemException;
+
+    /**
+     * tbegin with a timeout
+     * @see IClusterServicesCommon#tbegin
+     * @param timeout the transaction timeout
+     * @param unit TimeUnit for the timeout
+     * @throws NotSupportedException
+     * @throws SystemException
+     */
+    void tbegin(long timeout, TimeUnit unit) throws NotSupportedException, SystemException;
 
     /**
      * Commit a transaction covering all the data structures/HW updates.
