@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7ecba21e",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-27T19:22:41Z",
+      "side": 1,
+      "message": "Please replace tabs with spaces and remove leading/trailing spaces",
+      "revId": "94e7e860358b95953f1ad7e92543431b94a5a254",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9ec89623",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-27T19:22:41Z",
+      "side": 1,
+      "message": "Just curious, why do we need to double check the msg\u0027s instance, isn\u0027t the check on its type enough ?",
+      "revId": "94e7e860358b95953f1ad7e92543431b94a5a254",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5ed21ed3",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-11-27T19:22:41Z",
+      "side": 1,
+      "message": "Thanks for taking care of this.",
+      "revId": "94e7e860358b95953f1ad7e92543431b94a5a254",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
