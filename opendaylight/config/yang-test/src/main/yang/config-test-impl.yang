@@ -7,7 +7,7 @@ module config-test-impl {
     import config { prefix config; revision-date 2013-04-05; }
     import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
-
+    import test-types { prefix tt; revision-date 2013-11-27; }
 
     description
         "Testing IMPL";
@@ -107,6 +107,20 @@ module config-test-impl {
                 type string;
             }
 
+            leaf extended {
+                type tt:extend-once;
+            }
+
+            leaf extended-twice {
+                type tt:extend-twice;
+            }
+
+/* TODO Add support for enums
+
+            leaf extended-enum {
+                type tt:extend-enum;
+            }
+*/
            container dto-c {
                 leaf simple-arg {
                     type uint32;

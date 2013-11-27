@@ -29,10 +29,16 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
 
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
+        value = preprocess(value);
         Util.checkType(value, String.class);
         Element innerNode = XmlUtil.createTextElement(document, key, (String) value);
         XmlUtil.addNamespaceAttr(innerNode, namespace);
         parentElement.appendChild(innerNode);
     }
+
+    protected Object preprocess(Object value) {
+        return value;
+    }
+
 
 }

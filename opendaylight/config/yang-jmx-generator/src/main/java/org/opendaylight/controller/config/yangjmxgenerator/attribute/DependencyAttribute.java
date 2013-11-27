@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
 import org.opendaylight.yangtools.binding.generator.util.Types;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+
+import javax.management.ObjectName;
+import javax.management.openmbean.SimpleType;
 
 public class DependencyAttribute extends AbstractAttribute implements
         TypedAttribute {
@@ -95,7 +94,7 @@ public class DependencyAttribute extends AbstractAttribute implements
     }
 
     @Override
-    public OpenType<?> getOpenType() {
+    public SimpleType<?> getOpenType() {
         return SimpleType.OBJECTNAME;
     }
 

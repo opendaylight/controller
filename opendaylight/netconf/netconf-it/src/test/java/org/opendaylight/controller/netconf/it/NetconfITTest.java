@@ -163,7 +163,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
     static Collection<InputStream> getBasicYangs() throws IOException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
-                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang",
+                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         List<String> failedToFind = new ArrayList<>();

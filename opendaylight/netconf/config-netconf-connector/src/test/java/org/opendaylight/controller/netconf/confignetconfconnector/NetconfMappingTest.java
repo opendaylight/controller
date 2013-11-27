@@ -143,7 +143,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/editConfig.xml");
         checkBinaryLeafEdited(getConfigCandidate());
 
-
         // default-operation:none, should not affect binary leaf
         edit("netconfMessages/editConfig_none.xml");
         checkBinaryLeafEdited(getConfigCandidate());
@@ -151,9 +150,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // check after edit
         commit();
         Element response = getConfigRunning();
-
+        System.err.println(XmlUtil.toString(response));
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
+        checkTypedefs(response);
 
         edit("netconfMessages/editConfig_remove.xml");
 
@@ -375,7 +375,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
             buf.append(XmlElement.fromDomElement(e).getTextContent());
         }
         assertEquals("810", buf.toString());
+    }
 
+    private void checkTypedefs(final Element response) {
+        NodeList children = response.getElementsByTagName("extended");
+        assertEquals(1, children.getLength());
+
+        children = response.getElementsByTagName("extended-twice");
+        assertEquals(1, children.getLength());
     }
 
     private void checkTypeConfigAttribute(Element response) {
@@ -643,7 +650,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private List<InputStream> getYangs() throws FileNotFoundException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
-                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang",
+                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         for (String path : paths) {
