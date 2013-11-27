@@ -12,6 +12,7 @@ import java.util.Hashtable
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.controller.sal.core.api.data.DataStore
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter
 
 class BrokerConfigActivator implements AutoCloseable {
     
@@ -27,6 +28,8 @@ class BrokerConfigActivator implements AutoCloseable {
     private var SchemaServiceImpl schemaService;
     private var DataBrokerImpl dataService;
     private var MountPointManagerImpl mountService;
+    
+    SchemaAwareDataStoreAdapter wrappedStore
 
     public def void start(BrokerImpl broker,DataStore store,BundleContext context) {
         val emptyProperties = new Hashtable<String, String>();
@@ -45,9 +48,13 @@ class BrokerConfigActivator implements AutoCloseable {
         dataReg = context.registerService(DataBrokerService, dataService, emptyProperties);
         dataProviderReg = context.registerService(DataProviderService, dataService, emptyProperties);
 
-        dataService.registerConfigurationReader(ROOT, store);
-        dataService.registerCommitHandler(ROOT, store);
-        dataService.registerOperationalReader(ROOT, store);
+        wrappedStore = new SchemaAwareDataStoreAdapter();
+        wrappedStore.changeDelegate(store);
+        wrappedStore.setValidationEnabled(false);
+        
+        dataService.registerConfigurationReader(ROOT, wrappedStore);
+        dataService.registerCommitHandler(ROOT, wrappedStore);
+        dataService.registerOperationalReader(ROOT, wrappedStore);
         
         mountService = new MountPointManagerImpl();
         mountService.setDataBroker(dataService);
