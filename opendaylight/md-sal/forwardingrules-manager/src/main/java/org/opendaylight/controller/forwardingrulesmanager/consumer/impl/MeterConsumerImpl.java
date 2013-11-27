@@ -2,6 +2,7 @@ package org.opendaylight.controller.forwardingrulesmanager.consumer.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.Add
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.MeterAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.MeterRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.MeterUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.RemoveMeterInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInputBuilder;
@@ -45,6 +47,7 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,13 +60,17 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
     private MeterDataCommitHandler commitHandler;
 
     private ConcurrentMap<MeterKey, Meter> originalSwMeterView;
+    @SuppressWarnings("unused")
     private ConcurrentMap<MeterKey, Meter> installedSwMeterView;
-
+    @SuppressWarnings("unused")
     private ConcurrentMap<Node, List<Meter>> nodeMeters;
+    @SuppressWarnings("unused")
     private ConcurrentMap<MeterKey, Meter> inactiveMeters;
+    @SuppressWarnings("unused")
+    private IContainer container;
 
     private IClusterContainerServices clusterMeterContainerService = null;
-    private IContainer container;
+    
 
     public MeterConsumerImpl() {
         InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Meters.class).child(Meter.class)
@@ -218,11 +225,11 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 meterBuilder.setMeterBandHeaders(meterAddDataObject.getMeterBandHeaders());
                 meterBuilder.setMeterId(meterAddDataObject.getMeterId());
                 meterBuilder.setNode(meterAddDataObject.getNode());
-                originalSwMeterView.put(meterKey, meterAddDataObject);
+               // originalSwMeterView.put(meterKey, meterAddDataObject);
                 meterService.addMeter(meterBuilder.build());
             }
 
-            originalSwMeterView.put(meterKey, meterAddDataObject);
+           // originalSwMeterView.put(meterKey, meterAddDataObject);
         } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
@@ -243,10 +250,10 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
 
         if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.UPDATE).isSuccess()) {
 
-            if (originalSwMeterView.containsKey(meterKey)) {
+           /* if (originalSwMeterView.containsKey(meterKey)) {
                 originalSwMeterView.remove(meterKey);
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
-            }
+            }*/
 
             if (meterUpdateDataObject.isInstall()) {
                 UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder();
@@ -254,10 +261,10 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 updateMeterBuilder.fieldsFrom(meterUpdateDataObject);
                 updateMeterInputBuilder.setUpdatedMeter(updateMeterBuilder.build());
 
-                if (installedSwMeterView.containsKey(meterKey)) {
+              /*  if (installedSwMeterView.containsKey(meterKey)) {
                     installedSwMeterView.remove(meterKey);
                     installedSwMeterView.put(meterKey, meterUpdateDataObject);
-                }
+                }*/
 
                 meterService.updateMeter(updateMeterInputBuilder.build());
             }
@@ -276,18 +283,23 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
      *
      * @param dataObject
      */
-    private Status RemoveMeter(InstanceIdentifier<?> path, Meter meterUpdateDataObject) {
-        MeterKey meterKey = meterUpdateDataObject.getKey();
+    private Status removeMeter(InstanceIdentifier<?> path, Meter meterRemoveDataObject) {
+        MeterKey meterKey = meterRemoveDataObject.getKey();
 
-        if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.ADD).isSuccess()) {
-            if (meterUpdateDataObject.isInstall()) {
-                UpdateMeterInputBuilder updateMeterBuilder = new UpdateMeterInputBuilder();
-
-                installedSwMeterView.put(meterKey, meterUpdateDataObject);
-                meterService.updateMeter(updateMeterBuilder.build());
+        if (null != meterKey && validateMeter(meterRemoveDataObject, FRMUtil.operation.DELETE).isSuccess()) {
+            if (meterRemoveDataObject.isInstall()) {
+                RemoveMeterInputBuilder meterBuilder = new RemoveMeterInputBuilder();
+                meterBuilder.setContainerName(meterRemoveDataObject.getContainerName());
+                meterBuilder.setNode(meterRemoveDataObject.getNode());
+                meterBuilder.setFlags(meterRemoveDataObject.getFlags());
+                meterBuilder.setMeterBandHeaders(meterRemoveDataObject.getMeterBandHeaders());
+                meterBuilder.setMeterId(meterRemoveDataObject.getMeterId());
+                meterBuilder.setNode(meterRemoveDataObject.getNode());
+               // originalSwMeterView.put(meterKey, meterAddDataObject);
+                meterService.removeMeter(meterBuilder.build());
             }
 
-            originalSwMeterView.put(meterKey, meterUpdateDataObject);
+           // originalSwMeterView.put(meterKey, meterAddDataObject);
         } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");
         }
@@ -299,7 +311,6 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
         String containerName;
         String meterName;
         Status returnStatus = null;
-        boolean returnResult;
 
         if (null != meter) {
             containerName = meter.getContainerName();
@@ -319,7 +330,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 return returnStatus;
             }
 
-            returnResult = doesMeterEntryExists(meter.getKey(), meterName, containerName);
+         /*   returnResult = doesMeterEntryExists(meter.getKey(), meterName, containerName);
 
             if (FRMUtil.operation.ADD == operation && returnResult) {
                 logger.error("Record with same Meter Name exists");
@@ -329,7 +340,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 logger.error("Group record does not exist");
                 returnStatus = new Status(StatusCode.BADREQUEST, "Meter record does not exist");
                 return returnStatus;
-            }
+            }*/
 
             for (int i = 0; i < meter.getMeterBandHeaders().getMeterBandHeader().size(); i++) {
                 if (!meter.getFlags().isMeterBurst()) {
@@ -367,7 +378,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
         return new Status(StatusCode.SUCCESS);
     }
 
-    private boolean doesMeterEntryExists(MeterKey key, String meterName, String containerName) {
+    /*private boolean doesMeterEntryExists(MeterKey key, String meterName, String containerName) {
         if (!originalSwMeterView.containsKey(key)) {
             return false;
         }
@@ -380,34 +391,9 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
             }
         }
         return false;
-    }
+    }*/
 
-    private RpcResult<Void> commitToPlugin(internalTransaction transaction) {
-        for (Entry<InstanceIdentifier<?>, Meter> entry : transaction.additions.entrySet()) {
-
-            if (!addMeter(entry.getKey(), entry.getValue()).isSuccess()) {
-                return Rpcs.getRpcResult(false, null, null);
-            }
-        }
-        for (@SuppressWarnings("unused")
-        Entry<InstanceIdentifier<?>, Meter> entry : transaction.updates.entrySet()) {
-
-            if (!updateMeter(entry.getKey(), entry.getValue()).isSuccess()) {
-                return Rpcs.getRpcResult(false, null, null);
-            }
-        }
-
-        for (InstanceIdentifier<?> removal : transaction.removals) {
-            /*
-             * if (!removeMeter(entry.getKey(),entry.getValue()).isSuccess()) {
-             * return Rpcs.getRpcResult(false, null, null); }
-             */
-        }
-
-        return Rpcs.getRpcResult(true, null, null);
-    }
-
-    private final class internalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
+    private final class InternalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
 
         private final DataModification<InstanceIdentifier<?>, DataObject> modification;
 
@@ -416,7 +402,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
             return modification;
         }
 
-        public internalTransaction(DataModification<InstanceIdentifier<?>, DataObject> modification) {
+        public InternalTransaction(DataModification<InstanceIdentifier<?>, DataObject> modification) {
             this.modification = modification;
         }
 
@@ -430,31 +416,28 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
          *
          */
         void prepareUpdate() {
-
-            Set<Entry<InstanceIdentifier<?>, DataObject>> puts = modification.getUpdatedConfigurationData().entrySet();
-            for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
+            
+            Set<Entry<InstanceIdentifier<?>, DataObject>> addMeter = modification.getCreatedConfigurationData().entrySet();
+            for (Entry<InstanceIdentifier<?>, DataObject> entry : addMeter) {
                 if (entry.getValue() instanceof Meter) {
-                    Meter Meter = (Meter) entry.getValue();
-                    preparePutEntry(entry.getKey(), Meter);
+                    Meter meter = (Meter) entry.getValue();
+                    additions.put(entry.getKey(), meter);                    
                 }
 
             }
+            
+            Set<Entry<InstanceIdentifier<?>, DataObject>> updateMeter = modification.getUpdatedConfigurationData().entrySet();
+            for (Entry<InstanceIdentifier<?>, DataObject> entry : updateMeter) {
+                if (entry.getValue() instanceof Meter) {
+                    Meter meter = (Meter) entry.getValue();
+                  ///will be fixed once getUpdatedConfigurationData returns only updated data not created data with it.
+                    if (!additions.containsKey(entry.getKey())) {
+                    	updates.put(entry.getKey(), meter);       
+                    }
+                }
+            }
 
             removals = modification.getRemovedConfigurationData();
-        }
-
-        private void preparePutEntry(InstanceIdentifier<?> key, Meter meter) {
-
-            Meter original = originalSwMeterView.get(key);
-            if (original != null) {
-                // It is update for us
-
-                updates.put(key, meter);
-            } else {
-                // It is addition for us
-
-                additions.put(key, meter);
-            }
         }
 
         /**
@@ -480,10 +463,37 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
             // NOOP - we did not modified any internal state during
             // requestCommit phase
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
-            return Rpcs.getRpcResult(true, null, null);
+            return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
 
         }
 
+    }
+    
+    private RpcResult<Void> commitToPlugin(InternalTransaction transaction) {
+        for (Entry<InstanceIdentifier<?>, Meter> entry : transaction.additions.entrySet()) {
+
+            if (!addMeter(entry.getKey(), entry.getValue()).isSuccess()) {
+                return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
+            }
+        }
+        for (Entry<InstanceIdentifier<?>, Meter> entry : transaction.updates.entrySet()) {
+
+            if (!updateMeter(entry.getKey(), entry.getValue()).isSuccess()) {
+                return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
+            }
+        }
+
+        for (InstanceIdentifier<?> meterId : transaction.removals) {
+            DataObject removeValue = transaction.getModification().getOriginalConfigurationData().get(meterId);	
+        	 
+        	 if(removeValue instanceof Meter) {
+        	     if(!removeMeter(meterId, (Meter)removeValue).isSuccess()) {
+        	         return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
+        		 }
+        	 }    
+        }
+
+        return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
     }
 
     private final class MeterDataCommitHandler implements DataCommitHandler<InstanceIdentifier<?>, DataObject> {
@@ -492,7 +502,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 DataModification<InstanceIdentifier<?>, DataObject> modification) {
             // We should verify transaction
             System.out.println("Coming in MeterDataCommitHandler");
-            internalTransaction transaction = new internalTransaction(modification);
+            InternalTransaction transaction = new InternalTransaction(modification);
             transaction.prepareUpdate();
             return transaction;
         }
