@@ -1,6 +1,7 @@
 package org.opendaylight.controller.forwardingrulesmanager.consumer.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -20,12 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.Data
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.IContainer;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.Flows;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.FlowKey;
@@ -54,6 +50,7 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,8 +83,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private boolean inContainerMode; // being used by global instance only
 
     public FlowConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).child(Flow.class)
-                .toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).toInstance();
         flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
 
         if (null == flowService) {
@@ -116,12 +112,11 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         }
         // addFlowTest();
         System.out.println("-------------------------------------------------------------------");
-        allocateCaches();
         commitHandler = new FlowDataCommitHandler();
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
         clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
                 IClusterContainerServices.class, this);
-        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+        allocateCaches();
         /*
          * If we are not the first cluster node to come up, do not initialize
          * the static flow entries ordinal
@@ -204,13 +199,20 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         System.out.println("Instruction list" + (dataObject).getInstructions().getInstruction().toString());
 
         // updating the staticflow cache
+        /*
+         *  Commented out... as in many other places... use of ClusteringServices is breaking things
+         *  insufficient time to debug
         Integer ordinal = staticFlowsOrdinal.get(0);
         staticFlowsOrdinal.put(0, ++ordinal);
         staticFlows.put(ordinal, dataObject);
+        */
 
         // We send flow to the sounthbound plugin
         flowService.addFlow(input.build());
+        /*
+         * Commented out as this will also break due to improper use of ClusteringServices
         updateLocalDatabase((NodeFlow) dataObject, true);
+        */
     }
 
     /**
@@ -237,13 +239,19 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         System.out.println("Instruction list" + (dataObject).getInstructions().getInstruction().toString());
 
         // updating the staticflow cache
+        /*
+         * Commented out due to problems caused by improper use of ClusteringServices
         Integer ordinal = staticFlowsOrdinal.get(0);
         staticFlowsOrdinal.put(0, ++ordinal);
         staticFlows.put(ordinal, dataObject);
+        */
 
         // We send flow to the sounthbound plugin
         flowService.removeFlow(input.build());
+        /*
+         * Commented out due to problems caused by improper use of ClusteringServices
         updateLocalDatabase((NodeFlow) dataObject, false);
+        */
     }
 
     /**
@@ -260,30 +268,44 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         input.setUpdatedFlow(updatedflowbuilder.build());
 
         // updating the staticflow cache
+        /*
+         * Commented out due to problems caused by improper use of ClusteringServices.
         Integer ordinal = staticFlowsOrdinal.get(0);
         staticFlowsOrdinal.put(0, ++ordinal);
         staticFlows.put(ordinal, dataObject);
+        */
 
         // We send flow to the sounthbound plugin
         flowService.updateFlow(input.build());
+        /*
+         * Commented out due to problems caused by improper use of ClusteringServices.
         updateLocalDatabase((NodeFlow) dataObject, true);
+        */
     }
 
     @SuppressWarnings("unchecked")
     private void commitToPlugin(internalTransaction transaction) {
-        for (Entry<InstanceIdentifier<?>, Flow> entry : transaction.additions.entrySet()) {
-            System.out.println("Coming add cc in FlowDatacommitHandler");
-            addFlow(entry.getKey(), entry.getValue());
+
+        for (Entry<InstanceIdentifier<?>, DataObject> entry : transaction.getModification().getCreatedConfigurationData().entrySet()) {
+            if(entry.getValue() instanceof Flow) {
+                System.out.println("Coming add cc in FlowDatacommitHandler");
+                addFlow(entry.getKey(), (Flow) entry.getValue());
+            }
         }
         for (@SuppressWarnings("unused")
-        Entry<InstanceIdentifier<?>, Flow> entry : transaction.updates.entrySet()) {
-            System.out.println("Coming update cc in FlowDatacommitHandler");
-            updateFlow(entry.getKey(), entry.getValue());
+        Entry<InstanceIdentifier<?>, DataObject> entry : transaction.getModification().getUpdatedConfigurationData().entrySet()) {
+            if(entry.getValue() instanceof Flow) {
+                System.out.println("Coming update cc in FlowDatacommitHandler");
+                updateFlow(entry.getKey(), (Flow) entry.getValue());
+            }
         }
 
-        for (Entry<InstanceIdentifier<?>, Flow> entry : transaction.removals.entrySet()) {
-            System.out.println("Coming remove cc in FlowDatacommitHandler");
-            removeFlow(entry.getKey(), entry.getValue());
+        for (Entry<InstanceIdentifier<?>, DataObject> entry : transaction.getModification().getUpdatedConfigurationData().entrySet()) {
+            if(entry.getValue() instanceof Flow) {
+                System.out.println("Coming remove cc in FlowDatacommitHandler");
+                removeFlow(entry.getKey(), (Flow) entry.getValue());
+
+            }
         }
 
     }
@@ -329,39 +351,42 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
 
                 // validating the DataObject
-
-                Status status = validate(container, (NodeFlow) entry);
-                if (!status.isSuccess()) {
-                    logger.warn("Invalid Configuration for flow {}. The failure is {}", entry, status.getDescription());
-                    String error = "Invalid Configuration (" + status.getDescription() + ")";
-                    logger.error(error);
-                    return;
+                DataObject value = entry.getValue();
+                if(value instanceof Flow ) {
+                    Flow flow = (Flow)value;
+                    boolean status = validate(flow);
+                    if (!status) {
+                        return;
+                    }
+                    // Presence check
+                    /*
+                     * This is breaking due to some improper use of caches...
+                     *
+                    if (flowEntryExists(flow)) {
+                        String error = "Entry with this name on specified table already exists";
+                        logger.warn("Entry with this name on specified table already exists: {}", entry);
+                        logger.error(error);
+                        return;
+                    }
+                    if (originalSwView.containsKey(entry)) {
+                        logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
+                        logger.trace("Aborting to install {}", entry);
+                        continue;
+                    }
+                    */
+                    if (!FRMUtil.validateMatch(flow)) {
+                        logger.error("Not a valid Match");
+                        return;
+                    }
+                    if (!FRMUtil.validateInstructions(flow)) {
+                        logger.error("Not a valid Instruction");
+                        return;
+                    }
+                    /*
+                     * Commented out due to Clustering Services issues
+                     * preparePutEntry(entry.getKey(), flow);
+                     */
                 }
-                // Presence check
-                if (flowEntryExists((NodeFlow) entry)) {
-                    String error = "Entry with this name on specified table already exists";
-                    logger.warn("Entry with this name on specified table already exists: {}", entry);
-                    logger.error(error);
-                    return;
-                }
-                if (originalSwView.containsKey(entry)) {
-                    logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
-                    logger.trace("Aborting to install {}", entry);
-                    continue;
-                }
-                if (!FRMUtil.validateMatch((NodeFlow) entry)) {
-                    logger.error("Not a valid Match");
-                    return;
-                }
-                if (!FRMUtil.validateInstructions((NodeFlow) entry)) {
-                    logger.error("Not a valid Instruction");
-                    return;
-                }
-                if (entry.getValue() instanceof Flow) {
-                    Flow flow = (Flow) entry.getValue();
-                    preparePutEntry(entry.getKey(), flow);
-                }
-
             }
 
             // removals = modification.getRemovedConfigurationData();
@@ -398,7 +423,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             commitToPlugin(this);
             // We return true if internal transaction is successful.
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
-            return Rpcs.getRpcResult(true, null, null);
+            return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
         }
 
         /**
@@ -411,58 +436,48 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             // NOOP - we did not modified any internal state during
             // requestCommit phase
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
-            return Rpcs.getRpcResult(true, null, null);
+            return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
 
         }
 
-        public Status validate(IContainer container, NodeFlow dataObject) {
+        public boolean validate(Flow flow) {
 
-            // container validation
-            Switch sw = null;
-            Node node = null;
-            String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container.getName();
-            ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class,
-                    containerName, this);
+            String msg = ""; // Specific part of warn/error log
+
+            boolean result  = true;
             // flow Name validation
-            if (dataObject.getFlowName() == null || dataObject.getFlowName().trim().isEmpty()
-                    || !dataObject.getFlowName().matches(NAMEREGEX)) {
-                return new Status(StatusCode.BADREQUEST, "Invalid Flow name");
+            if (flow.getFlowName() == null || flow.getFlowName().trim().isEmpty()
+                    || !flow.getFlowName().matches(NAMEREGEX)) {
+                msg = "Invalid Flow name";
+                result = false;
             }
             // Node Validation
-            if (dataObject.getNode() == null) {
-                return new Status(StatusCode.BADREQUEST, "Node is null");
+            if (result == true && flow.getNode() == null) {
+                msg = "Node is null";
+                result = false;
             }
 
-            if (switchManager != null) {
-                for (Switch device : switchManager.getNetworkDevices()) {
-                    node = (Node) device.getNode();
-                    if (device.getNode().equals(dataObject.getNode())) {
-                        sw = device;
-                        break;
-                    }
-                }
-                if (sw == null) {
-                    return new Status(StatusCode.BADREQUEST, String.format("Node %s not found", node));
-                }
-            } else {
-                logger.debug("switchmanager is not set yet");
-            }
+            // TODO: Validate we are seeking to program a flow against a valid Node
 
-            if (dataObject.getPriority() != null) {
-                if (dataObject.getPriority() < 0 || dataObject.getPriority() > 65535) {
-                    return new Status(StatusCode.BADREQUEST, String.format("priority %s is not in the range 0 - 65535",
-                            dataObject.getPriority()));
+            if (result == true && flow.getPriority() != null) {
+                if (flow.getPriority() < 0 || flow.getPriority() > 65535) {
+                    msg = String.format("priority %s is not in the range 0 - 65535",
+                            flow.getPriority());
+                    result = false;
                 }
             }
-
-            return new Status(StatusCode.SUCCESS);
+            if (result == false) {
+                logger.warn("Invalid Configuration for flow {}. The failure is {}",flow,msg);
+                logger.error("Invalid Configuration ({})",msg);
+            }
+            return result;
         }
 
-        private boolean flowEntryExists(NodeFlow config) {
+        private boolean flowEntryExists(Flow flow) {
             // Flow name has to be unique on per table id basis
             for (ConcurrentMap.Entry<FlowKey, Flow> entry : originalSwView.entrySet()) {
-                if (entry.getValue().getFlowName().equals(config.getFlowName())
-                        && entry.getValue().getTableId().equals(config.getTableId())) {
+                if (entry.getValue().getFlowName().equals(flow.getFlowName())
+                        && entry.getValue().getTableId().equals(flow.getTableId())) {
                     return true;
                 }
             }
