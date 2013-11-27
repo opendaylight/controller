@@ -19,12 +19,15 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
+
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
@@ -250,6 +253,15 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     public void tbegin() throws NotSupportedException, SystemException {
         if (this.clusterService != null) {
             this.clusterService.tbegin();
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    public void tbegin(long timeout, TimeUnit unit) throws NotSupportedException, SystemException {
+        if (this.clusterService != null) {
+            this.clusterService.tbegin(timeout, unit);
         } else {
             throw new IllegalStateException();
         }

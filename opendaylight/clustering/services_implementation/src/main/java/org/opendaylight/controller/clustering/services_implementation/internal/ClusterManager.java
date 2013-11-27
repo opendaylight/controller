@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -68,6 +69,9 @@ public class ClusterManager implements IClusterServices {
     private ViewChangedListener cacheManagerListener;
 
     private static String loopbackAddress = "127.0.0.1";
+
+    // defaultTransactionTimeout is 60 seconds
+    private static int DEFAULT_TRANSACTION_TIMEOUT = 60;
 
     /**
      * Start a JGroups GossipRouter if we are a supernode. The
@@ -525,6 +529,12 @@ public class ClusterManager implements IClusterServices {
 
     @Override
     public void tbegin() throws NotSupportedException, SystemException {
+        // call tbegin with the default timeout
+        tbegin(DEFAULT_TRANSACTION_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void tbegin(long timeout, TimeUnit unit) throws NotSupportedException, SystemException {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             throw new IllegalStateException();
@@ -533,6 +543,15 @@ public class ClusterManager implements IClusterServices {
                 .getAdvancedCache().getTransactionManager();
         if (tm == null) {
             throw new IllegalStateException();
+        }
+        long timeoutSec = unit.toSeconds(timeout);
+        if((timeoutSec > Integer.MAX_VALUE) || (timeoutSec <= 0)) {
+            // fall back to the default timeout
+            tm.setTransactionTimeout(DEFAULT_TRANSACTION_TIMEOUT);
+        } else {
+            // cast is ok here
+            // as here we are sure that timeoutSec < = Integer.MAX_VALUE.
+            tm.setTransactionTimeout((int) timeoutSec);
         }
         tm.begin();
     }
