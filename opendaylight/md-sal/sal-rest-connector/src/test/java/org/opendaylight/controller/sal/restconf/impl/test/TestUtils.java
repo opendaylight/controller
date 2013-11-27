@@ -13,9 +13,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
@@ -24,8 +22,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.*;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.*;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
 import org.opendaylight.yangtools.yang.model.api.*;
@@ -99,7 +96,7 @@ final class TestUtils {
         }
         return (CompositeNode) dataTree;
     }
-    
+
     public static Document loadDocumentFrom(InputStream inputStream) {
         try {
             DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
@@ -135,6 +132,11 @@ final class TestUtils {
     }
 
     static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath, String outputPath) {
+        return convertCompositeNodeDataAndYangToJson(compositeNode, yangPath, outputPath, null, null);
+    }
+
+    static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath,
+            String outputPath, String searchedModuleName, String searchedDataSchemaName) {
         String jsonResult = null;
         Set<Module> modules = null;
 
@@ -145,30 +147,54 @@ final class TestUtils {
         }
         assertNotNull("modules can't be null.", modules);
 
+        Module module = null;
+        if (searchedModuleName != null) {
+            for (Module m : modules) {
+                if (m.getName().equals(searchedModuleName)) {
+                    module = m;
+                    break;
+                }
+            }
+        } else if (modules.size() == 1) {
+            module = modules.iterator().next();
+        }
+        assertNotNull("Module is missing", module);
+
         assertNotNull("Composite node can't be null", compositeNode);
 
         StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
-        for (Module module : modules) {
-            ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-            for (DataSchemaNode dataSchemaNode : module.getChildNodes()) {
-                StructuredData structuredData = new StructuredData(compositeNode, dataSchemaNode);
-                try {
-                    structuredDataToJsonProvider.writeTo(structuredData, null, null, null, null, null, byteArrayOS);
-                } catch (WebApplicationException | IOException e) {
-                    e.printStackTrace();
+        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+        DataSchemaNode dataSchemaNode = null;
+        if (searchedDataSchemaName != null) {
+            for (DataSchemaNode dsn : module.getChildNodes()) {
+                if (dsn.getQName().getLocalName().equals(searchedDataSchemaName)) {
+                    dataSchemaNode = dsn;
                 }
-                assertFalse(
-                        "Returning JSON string can't be empty for node " + dataSchemaNode.getQName().getLocalName(),
-                        byteArrayOS.toString().isEmpty());
             }
-            jsonResult = byteArrayOS.toString();
-            try {
-                outputToFile(byteArrayOS, outputPath);
-            } catch (IOException e) {
-                System.out.println("Output file wasn't cloased sucessfuly.");
-            }
-
+        } else if (module.getChildNodes().size() == 1) {
+            dataSchemaNode = module.getChildNodes().iterator().next();
         }
+        assertNotNull(dataSchemaNode);
+        // SchemaContextUtil.
+
+        ControllerContext controllerContext = ControllerContext.getInstance();
+        controllerContext.setSchemas(loadSchemaContext(modules));
+        StructuredData structuredData = new StructuredData(compositeNode, dataSchemaNode);
+        try {
+            structuredDataToJsonProvider.writeTo(structuredData, null, null, null, null, null, byteArrayOS);
+        } catch (WebApplicationException | IOException e) {
+            e.printStackTrace();
+        }
+        assertFalse("Returning JSON string can't be empty for node " + dataSchemaNode.getQName().getLocalName(),
+                byteArrayOS.toString().isEmpty());
+
+        jsonResult = byteArrayOS.toString();
+        try {
+            outputToFile(byteArrayOS, outputPath);
+        } catch (IOException e) {
+            System.out.println("Output file wasn't cloased sucessfuly.");
+        }
+
         return jsonResult;
     }
 
@@ -296,7 +322,8 @@ final class TestUtils {
         RpcResult<TransactionStatus> rpcResult = DummyRpcResult.builder().result(TransactionStatus.COMMITED).build();
         Future<RpcResult<TransactionStatus>> future = DummyFuture.builder().rpcResult(rpcResult).build();
         when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
-        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(future);
+        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(
+                future);
 
         restconf.setControllerContext(controllerContext);
         restconf.setBroker(broker);

@@ -33,8 +33,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
     private def void checkPreconditions() {
         if (context === null || dataService === null) {
-            throw new WebApplicationException(Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                    .entity(RestconfProvider::NOT_INITALIZED_MSG).build())
+            throw new ResponseException(Response.Status.SERVICE_UNAVAILABLE, RestconfProvider::NOT_INITALIZED_MSG)
         }
     }
 

@@ -1,7 +1,5 @@
 package org.opendaylight.controller.sal.rest.impl;
 
-import static org.opendaylight.controller.sal.restconf.impl.MediaTypes.API;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -21,7 +19,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.opendaylight.controller.sal.rest.api.Draft01;
+import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeUtils;
@@ -30,10 +31,11 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 @Provider
-@Produces({API+RestconfService.XML})
+@Produces({ Draft01.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
+        MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
-    
+
     private final static Logger logger = LoggerFactory.getLogger(StructuredDataToXmlProvider.class);
 
     @Override
@@ -52,9 +54,9 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             throws IOException, WebApplicationException {
         CompositeNode data = t.getData();
         if (data == null) {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+            throw new ResponseException(Response.Status.NOT_FOUND, "No data exists.");
         }
-        
+
         Document domTree = NodeUtils.buildShadowDomTree(data);
         try {
             TransformerFactory tf = TransformerFactory.newInstance();
@@ -67,7 +69,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             transformer.transform(new DOMSource(domTree), new StreamResult(entityStream));
         } catch (TransformerException e) {
             logger.error("Error during translation of Document to OutputStream", e);
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+            throw new ResponseException(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

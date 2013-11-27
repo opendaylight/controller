@@ -9,7 +9,6 @@ import java.util.HashMap
 import java.util.List
 import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
-import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider
@@ -57,8 +56,7 @@ class ControllerContext implements SchemaServiceListener {
     
     private def void checkPreconditions() {
         if (schemas === null) {
-            throw new WebApplicationException(Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                    .entity(RestconfProvider::NOT_INITALIZED_MSG).build())
+            throw new ResponseException(Response.Status.SERVICE_UNAVAILABLE, RestconfProvider::NOT_INITALIZED_MSG)
         }
     }
 
@@ -196,6 +194,9 @@ class ControllerContext implements SchemaServiceListener {
     private def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
         DataNodeContainer parentNode) {
         checkNotNull(strings)
+        if (parentNode === null) {
+            return null;
+        }
         if (strings.empty) {
             return parentNode as DataSchemaNode;
         }

@@ -7,9 +7,8 @@ import java.util.*;
 
 import javax.activation.UnsupportedDataTypeException;
 
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.api.type.*;
 
@@ -103,14 +102,15 @@ class JsonMapper {
     }
 
     private void writeContainer(JsonWriter writer, CompositeNode node, ContainerSchemaNode schema) throws IOException {
-        writer.name(node.getNodeType().getLocalName());
+        writeName(node, schema, writer);
         writer.beginObject();
         writeChildrenOfParent(writer, node, schema);
         writer.endObject();
     }
 
-    private void writeList(JsonWriter writer, CompositeNode nodeParent, CompositeNode node, ListSchemaNode schema) throws IOException {
-        writer.name(node.getNodeType().getLocalName());
+    private void writeList(JsonWriter writer, CompositeNode nodeParent, CompositeNode node, ListSchemaNode schema)
+            throws IOException {
+        writeName(node, schema, writer);
         writer.beginArray();
 
         if (nodeParent != null) {
@@ -129,8 +129,9 @@ class JsonMapper {
         writer.endArray();
     }
 
-    private void writeLeafList(JsonWriter writer, CompositeNode nodeParent, SimpleNode<?> node, LeafListSchemaNode schema) throws IOException {
-        writer.name(node.getNodeType().getLocalName());
+    private void writeLeafList(JsonWriter writer, CompositeNode nodeParent, SimpleNode<?> node,
+            LeafListSchemaNode schema) throws IOException {
+        writeName(node, schema, writer);
         writer.beginArray();
 
         List<SimpleNode<?>> nodeLeafLists = nodeParent.getSimpleNodesByName(node.getNodeType());
@@ -142,17 +143,14 @@ class JsonMapper {
     }
 
     private void writeLeaf(JsonWriter writer, SimpleNode<?> node, LeafSchemaNode schema) throws IOException {
-        writer.name(node.getNodeType().getLocalName());
+        writeName(node, schema, writer);
         writeValueOfNodeByType(writer, node, schema.getType());
     }
 
     private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type)
             throws IOException {
-        if (!(node.getValue() instanceof String)) {
-            throw new IllegalStateException("Value in SimpleNode should be type String");
-        }
 
-        String value = (String) node.getValue();
+        String value = String.valueOf(node.getValue());
         // TODO check Leafref, InstanceIdentifierTypeDefinition,
         // IdentityrefTypeDefinition, UnionTypeDefinition
         TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
@@ -168,7 +166,7 @@ class JsonMapper {
         } else if (baseType instanceof EmptyTypeDefinition) {
             writeEmptyDataTypeToJson(writer);
         } else {
-            writer.value(value != null ? value : "");
+            writer.value(value.equals("null") ? "" : value);
         }
     }
 
@@ -242,6 +240,19 @@ class JsonMapper {
 
     private TypeDefinition<?> resolveBaseTypeFrom(TypeDefinition<?> type) {
         return type.getBaseType() != null ? resolveBaseTypeFrom(type.getBaseType()) : type;
+    }
+
+    private void writeName(Node<?> node, DataSchemaNode schema, JsonWriter writer) throws IOException {
+        String nameForOutput = node.getNodeType().getLocalName();
+        if (schema.isAugmenting()) {
+            ControllerContext contContext = ControllerContext.getInstance();
+            CharSequence moduleName;
+            moduleName = contContext.toRestconfIdentifier(schema.getQName());
+            if (moduleName != null) {
+                nameForOutput = moduleName.toString();
+            }
+        }
+        writer.name(nameForOutput);
     }
 
     private static final class NumberForJsonWriter extends Number {
