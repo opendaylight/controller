@@ -15,8 +15,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
+import org.opendaylight.controller.config.persist.api.storage.StorageAdapter.PropertiesProvider;
 import org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter;
-import org.osgi.framework.BundleContext;
+import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -34,19 +37,32 @@ import static org.mockito.Mockito.verify;
 
 public class PersisterImplTest {
     @Mock
-    BundleContext mockedContext;
+    TestingPropertiesProvider propertiesProvider;
+
+    class TestingPropertiesProvider implements PropertiesProvider {
+        @Override
+        public String getFullKeyForReporting(String key) {
+            return "prefix" + key;
+        }
+
+        @Override
+        public String getProperty(String key) {
+            throw new UnsupportedOperationException("should be mocked");
+        }
+    }
 
     @Before
     public void setUpMocks() {
         MockitoAnnotations.initMocks(this);
+        doCallRealMethod().when(propertiesProvider).getFullKeyForReporting(anyString());
     }
 
     @Test
     public void testFromProperties() throws Exception {
-        doReturn(MockAdapter.class.getName()).when(mockedContext).getProperty(
-                PersisterImpl.STORAGE_ADAPTER_CLASS_PROP);
+        doReturn(MockAdapter.class.getName()).when(propertiesProvider).getProperty(
+                ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
 
-        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(mockedContext).get();
+        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(propertiesProvider);
         persisterImpl.persistConfig(null);
         persisterImpl.loadLastConfig();
         persisterImpl.persistConfig(null);
@@ -57,31 +73,33 @@ public class PersisterImplTest {
         assertEquals(1, MockAdapter.props);
     }
 
+
     @Test
     public void testFromProperties2() throws Exception {
-        mockedContext = mock(BundleContext.class);
-        doReturn(FileStorageAdapter.class.getName()).when(mockedContext).getProperty(
-                PersisterImpl.STORAGE_ADAPTER_CLASS_PROP);
-        doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
-                mockedContext).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
-        doReturn("mockedContext").when(mockedContext).toString();
-        doReturn(null).when(mockedContext).getProperty("numberOfBackups");
 
-        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(mockedContext).get();
+        doReturn(FileStorageAdapter.class.getName()).when(propertiesProvider).getProperty(
+                ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
+
+        doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
+                propertiesProvider).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
+        doReturn("propertiesProvider").when(propertiesProvider).toString();
+        doReturn(null).when(propertiesProvider).getProperty("numberOfBackups");
+
+        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(propertiesProvider);
         assertTrue(persisterImpl.getStorage() instanceof FileStorageAdapter);
     }
 
     @Test
     public void testFromProperties3() throws Exception {
-        mockedContext = mock(BundleContext.class);
-        doReturn(FileStorageAdapter.class.getName()).when(mockedContext).getProperty(
-                PersisterImpl.STORAGE_ADAPTER_CLASS_PROP);
+
+        doReturn(FileStorageAdapter.class.getName()).when(propertiesProvider).getProperty(
+                ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
         doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
-                mockedContext).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
-        doReturn("mockedContext").when(mockedContext).toString();
-        doReturn("0").when(mockedContext).getProperty("numberOfBackups");
+                propertiesProvider).getProperty(FileStorageAdapter.FILE_STORAGE_PROP);
+        doReturn("propertiesProvider").when(propertiesProvider).toString();
+        doReturn("0").when(propertiesProvider).getProperty("numberOfBackups");
         try {
-            PersisterImpl.createFromProperties(mockedContext).get();
+            PersisterImpl.createFromProperties(propertiesProvider);
             fail();
         } catch (RuntimeException e) {
             assertThat(
@@ -123,7 +141,7 @@ public class PersisterImplTest {
         static int props = 0;
 
         @Override
-        public void setProperties(BundleContext configProvider) {
+        public void setProperties(PropertiesProvider propertiesProvider) {
             props++;
         }
 
