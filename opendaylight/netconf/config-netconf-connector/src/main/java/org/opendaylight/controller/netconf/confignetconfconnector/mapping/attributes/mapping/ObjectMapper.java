@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
@@ -44,6 +44,12 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     public AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
+
+        if(attributeIfc instanceof DependencyAttribute) {
+            serviceNameOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getLocalName();
+            namespaceOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
+        }
+
         return switchAttribute(attributeIfc);
     }
 
@@ -56,45 +62,63 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaAttribute(JavaAttribute attributeIfc) {
-
-        if (attributeIfc.getOpenType() instanceof SimpleType<?>)
-            return new SimpleAttributeMappingStrategy((SimpleType<?>) attributeIfc.getOpenType());
-        else if (attributeIfc.getOpenType() instanceof ArrayType<?>) {
-            ArrayType<?> arrayType = (ArrayType<?>) attributeIfc.getOpenType();
-            AttributeMappingStrategy<?, ? extends OpenType<?>> innerStrategy = new SimpleAttributeMappingStrategy(
-                    (SimpleType<?>) arrayType.getElementOpenType());
-            return new ArrayAttributeMappingStrategy(arrayType, innerStrategy);
-        }
-        throw new IllegalStateException(JavaAttribute.class + " can only provide open type " + SimpleType.class
-                + " or " + ArrayType.class);
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaSimpleAttribute(SimpleType<?> openType) {
+        return new SimpleAttributeMappingStrategy(openType);
     }
+
+    @Override
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaArrayAttribute(ArrayType<?> openType) {
+
+        AttributeMappingStrategy<?, ? extends OpenType<?>> innerStrategy = new SimpleAttributeMappingStrategy(
+                (SimpleType<?>) openType.getElementOpenType());
+        return new ArrayAttributeMappingStrategy(openType, innerStrategy);
+    }
+
+    @Override
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaCompositeAttribute(CompositeType openType) {
+        Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
+
+        Map<String, String> attributeMapping = Maps.newHashMap();
+
+        for (String innerAttributeKey : openType.keySet()) {
+
+            innerStrategies.put(innerAttributeKey, caseJavaAttribute(openType.getType(innerAttributeKey)));
+            attributeMapping.put(innerAttributeKey, innerAttributeKey);
+        }
+
+        return new CompositeAttributeMappingStrategy(openType, innerStrategies, attributeMapping);
+    }
+
+    private String serviceNameOfDepAttr;
+    private String namespaceOfDepAttr;
 
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
-            DependencyAttribute attributeIfc) {
-        String serviceName = attributeIfc.getDependency().getSie().getQName().getLocalName();
-        String namespace = attributeIfc.getDependency().getSie().getQName().getNamespace().toString();
-        return new ObjectNameAttributeMappingStrategy((SimpleType<?>) attributeIfc.getOpenType(), dependencyTracker,
-                serviceName, namespace);
+            SimpleType<?> openType) {
+        return new ObjectNameAttributeMappingStrategy(openType, dependencyTracker,
+                serviceNameOfDepAttr, namespaceOfDepAttr);
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseTOAttribute(TOAttribute attributeIfc) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseTOAttribute(CompositeType openType) {
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
 
-        for (Entry<String, AttributeIfc> innerAttrEntry : attributeIfc.getJmxPropertiesToTypesMap().entrySet()) {
+        Preconditions.checkState(lastAttribute instanceof TOAttribute);
+        TOAttribute lastTO = (TOAttribute) lastAttribute;
+
+        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute)lastAttribute).getJmxPropertiesToTypesMap().entrySet()) {
             innerStrategies.put(innerAttrEntry.getKey(), prepareStrategy(innerAttrEntry.getValue()));
         }
 
-        return new CompositeAttributeMappingStrategy((CompositeType) attributeIfc.getOpenType(), innerStrategies,
-                createJmxToYangMapping(attributeIfc));
+        return new CompositeAttributeMappingStrategy(openType, innerStrategies,
+                createJmxToYangMapping(lastTO));
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListAttribute(ListAttribute attributeIfc) {
-        return new ArrayAttributeMappingStrategy(attributeIfc.getOpenType(),
-                prepareStrategy(attributeIfc.getInnerAttribute()));
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListAttribute(ArrayType<?> openType) {
+        Preconditions.checkState(lastAttribute instanceof ListAttribute);
+        return new ArrayAttributeMappingStrategy(openType,
+                prepareStrategy(((ListAttribute) lastAttribute).getInnerAttribute()));
     }
 
 }
