@@ -12,7 +12,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -21,8 +20,8 @@ import org.opendaylight.controller.config.persist.api.Persister;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -56,7 +55,7 @@ public class FileStorageAdapterTest {
             }
 
             @Override
-            public Set<String> getCapabilities() {
+            public SortedSet<String> getCapabilities() {
                 return createCaps();
             }
         };
@@ -83,8 +82,8 @@ public class FileStorageAdapterTest {
         assertEquals(createCaps(), lastConf.get().getCapabilities());
     }
 
-    private Set<String> createCaps() {
-        Set<String> caps = Sets.newHashSet();
+    private SortedSet<String> createCaps() {
+        SortedSet<String> caps = new TreeSet<>();
 
         caps.add("cap1");
         caps.add("cap2");
@@ -104,7 +103,7 @@ public class FileStorageAdapterTest {
             }
 
             @Override
-            public Set<String> getCapabilities() {
+            public SortedSet<String> getCapabilities() {
                 return createCaps();
             }
         };
@@ -142,7 +141,7 @@ public class FileStorageAdapterTest {
             }
 
             @Override
-            public Set<String> getCapabilities() {
+            public SortedSet<String> getCapabilities() {
                 return createCaps();
             }
         };
@@ -199,8 +198,8 @@ public class FileStorageAdapterTest {
             }
 
             @Override
-            public Set<String> getCapabilities() {
-                return Collections.<String> emptySet();
+            public SortedSet<String> getCapabilities() {
+                return new TreeSet<>();
             }
         } );
     }

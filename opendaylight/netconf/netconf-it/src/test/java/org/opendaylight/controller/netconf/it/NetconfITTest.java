@@ -49,6 +49,7 @@ import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
 import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
+import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -72,6 +73,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -201,7 +203,8 @@ public class NetconfITTest extends AbstractConfigTest {
         Persister persister = mock(Persister.class);
         doReturn("mockPersister").when(persister).toString();
         doReturn(Optional.absent()).when(persister).loadLastConfig();
-        ConfigPersisterNotificationHandler h = new ConfigPersisterNotificationHandler(persister, tcpAddress, ManagementFactory.getPlatformMBeanServer());
+        ConfigPersisterNotificationHandler h = new ConfigPersisterNotificationHandler(persister, tcpAddress,
+                ManagementFactory.getPlatformMBeanServer(), Pattern.compile(ConfigPersisterActivator.DEFAULT_IGNORED_REGEX));
         h.init();
     }
 

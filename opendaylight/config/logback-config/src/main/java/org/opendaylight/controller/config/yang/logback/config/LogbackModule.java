@@ -54,11 +54,12 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
                     "LoggerName needs to be set", loggersJmxAttribute);
             JmxAttributeValidationException.checkCondition(!loggerToValidate.getLevel().isEmpty(),
                     "Level needs to be set", loggersJmxAttribute);
-
-            for (String appenderName : loggerToValidate.getAppenders()) {
-                JmxAttributeValidationException.checkCondition(appenderNames.contains(appenderName), "Appender "
-                        + appenderName + " referenced by logger " + loggerToValidate.getLoggerName()
-                        + " not present in configuration, present appenders: " + appenderNames, loggersJmxAttribute);
+            if (loggerToValidate.getAppenders() != null) {
+                for (String appenderName : loggerToValidate.getAppenders()) {
+                    JmxAttributeValidationException.checkCondition(appenderNames.contains(appenderName), "Appender "
+                            + appenderName + " referenced by logger " + loggerToValidate.getLoggerName()
+                            + " not present in configuration, present appenders: " + appenderNames, loggersJmxAttribute);
+                }
             }
 
         }
