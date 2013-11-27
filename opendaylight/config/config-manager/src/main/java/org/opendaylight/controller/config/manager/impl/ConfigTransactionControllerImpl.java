@@ -34,12 +34,13 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.String.format;
@@ -64,7 +65,7 @@ class ConfigTransactionControllerImpl implements
     private final DependencyResolverManager dependencyResolverManager;
     private final TransactionStatus transactionStatus;
     private final MBeanServer transactionsMBeanServer;
-    private final List<ModuleFactory> currentlyRegisteredFactories;
+    private final Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories;
 
     /**
      * Disables ability of {@link DynamicWritableWrapper} to change attributes
@@ -82,7 +83,7 @@ class ConfigTransactionControllerImpl implements
     public ConfigTransactionControllerImpl(String transactionName,
                                            TransactionJMXRegistrator transactionRegistrator,
                                            long parentVersion, long currentVersion,
-                                           List<ModuleFactory> currentlyRegisteredFactories,
+                                           Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
                                            MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer, BundleContext bundleContext) {
 
         this.transactionIdentifier = new TransactionIdentifier(transactionName);
@@ -120,11 +121,11 @@ class ConfigTransactionControllerImpl implements
         transactionStatus.checkNotAborted();
 
         Set<ModuleFactory> oldSet = new HashSet<>(lastListOfFactories);
-        Set<ModuleFactory> newSet = new HashSet<>(currentlyRegisteredFactories);
+        Set<ModuleFactory> newSet = new HashSet<>(factoriesHolder.getModuleFactories());
 
         List<ModuleFactory> toBeAdded = new ArrayList<>();
         List<ModuleFactory> toBeRemoved = new ArrayList<>();
-        for(ModuleFactory moduleFactory: currentlyRegisteredFactories) {
+        for(ModuleFactory moduleFactory: factoriesHolder.getModuleFactories()) {
             if (oldSet.contains(moduleFactory) == false){
                 toBeAdded.add(moduleFactory);
             }
@@ -136,7 +137,8 @@ class ConfigTransactionControllerImpl implements
         }
         // add default modules
         for (ModuleFactory moduleFactory : toBeAdded) {
-            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager, bundleContext);
+            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager,
+                    getModuleFactoryBundleContext(moduleFactory.getImplementationName()));
             for (Module module : defaultModules) {
                 // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
                 DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
@@ -173,9 +175,10 @@ class ConfigTransactionControllerImpl implements
         DependencyResolver dependencyResolver = dependencyResolverManager
                 .getOrCreate(moduleIdentifier);
         try {
+            BundleContext bc = getModuleFactoryBundleContext(moduleFactory.getImplementationName());
             module = moduleFactory.createModule(
                     moduleIdentifier.getInstanceName(), dependencyResolver,
-                    oldConfigBeanInfo.getReadableModule(), bundleContext);
+                    oldConfigBeanInfo.getReadableModule(), bc);
         } catch (Exception e) {
             throw new IllegalStateException(format(
                     "Error while copying old configuration from %s to %s",
@@ -196,7 +199,8 @@ class ConfigTransactionControllerImpl implements
         // find factory
         ModuleFactory moduleFactory = factoriesHolder.findByModuleName(factoryName);
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
-        Module module = moduleFactory.createModule(instanceName, dependencyResolver, bundleContext);
+        Module module = moduleFactory.createModule(instanceName, dependencyResolver,
+                getModuleFactoryBundleContext(moduleFactory.getImplementationName()));
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
                 moduleFactory, null, dependencyResolver);
     }
@@ -466,11 +470,20 @@ class ConfigTransactionControllerImpl implements
 
     @Override
     public List<ModuleFactory> getCurrentlyRegisteredFactories() {
-        return currentlyRegisteredFactories;
+        return new ArrayList<>(factoriesHolder.getModuleFactories());
     }
 
     @Override
     public TransactionIdentifier getIdentifier() {
         return transactionIdentifier;
+    }
+
+    @Override
+    public BundleContext getModuleFactoryBundleContext(String factoryName) {
+        Map.Entry<ModuleFactory, BundleContext> factoryBundleContextEntry = this.currentlyRegisteredFactories.get(factoryName);
+        if (factoryBundleContextEntry == null || factoryBundleContextEntry.getValue() == null) {
+            throw new NullPointerException("Bundle context of " + factoryName + " ModuleFactory not found.");
+        }
+        return factoryBundleContextEntry.getValue();
     }
 }

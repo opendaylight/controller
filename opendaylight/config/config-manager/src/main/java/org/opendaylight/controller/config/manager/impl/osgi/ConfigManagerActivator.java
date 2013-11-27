@@ -16,6 +16,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegi
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ public class ConfigManagerActivator implements BundleActivator {
     private ExtenderBundleTracker extenderBundleTracker;
     private ConfigRegistryImpl configRegistry;
     private ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
+    private ServiceRegistration configRegistryServiceRegistration;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -36,6 +38,9 @@ public class ConfigManagerActivator implements BundleActivator {
         configRegistry = new ConfigRegistryImpl(
                 bundleContextBackedModuleFactoriesResolver, context,
                 configMBeanServer);
+
+        // register config registry to OSGi
+        configRegistryServiceRegistration = context.registerService(ConfigRegistryImpl.class, configRegistry, null);
 
         // register config registry to jmx
         configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
@@ -68,6 +73,11 @@ public class ConfigManagerActivator implements BundleActivator {
             logger.warn(
                     "Exception while closing config registry jmx registrator",
                     e);
+        }
+        try {
+            configRegistryServiceRegistration.unregister();
+        } catch (Exception e) {
+            logger.warn("Exception while unregistering config registry", e);
         }
     }
 }

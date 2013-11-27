@@ -7,16 +7,19 @@
  */
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.Collections;
+import java.util.TreeSet;
+import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Hold sorted ConfigMBeanFactories by their module names. Check that module
@@ -26,8 +29,9 @@ public class HierarchicalConfigMBeanFactoriesHolder {
     private static final Logger logger = LoggerFactory
             .getLogger(HierarchicalConfigMBeanFactoriesHolder.class);
 
-    private final Map<String, ModuleFactory> moduleNamesToConfigBeanFactories;
+    private final Map<String, Map.Entry<ModuleFactory, BundleContext>> moduleNamesToConfigBeanFactories;
     private final Set<String> moduleNames;
+    private final List<ModuleFactory> moduleFactories;
 
     /**
      * Create instance.
@@ -36,40 +40,17 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      *             if unique constraint on module names is violated
      */
     public HierarchicalConfigMBeanFactoriesHolder(
-            List<? extends ModuleFactory> list) {
-        Map<String, ModuleFactory> moduleNamesToConfigBeanFactories = new HashMap<>();
-        StringBuffer errors = new StringBuffer();
-        for (ModuleFactory factory : list) {
-            String moduleName = factory.getImplementationName();
-            if (moduleName == null || moduleName.isEmpty()) {
-                throw new IllegalStateException(
-                        "Invalid implementation name for " + factory);
-            }
-            logger.debug("Reading factory {} {}", moduleName, factory);
-            String error = null;
-            ModuleFactory conflicting = moduleNamesToConfigBeanFactories
-                    .get(moduleName);
-            if (conflicting != null) {
-                error = String
-                        .format("Module name is not unique. Found two conflicting factories with same name '%s': " +
-                                "\n\t%s\n\t%s\n", moduleName, conflicting, factory);
-
-            }
-
-            if (error == null) {
-                moduleNamesToConfigBeanFactories.put(moduleName, factory);
-            } else {
-                errors.append(error);
-            }
-
-        }
-        if (errors.length() > 0) {
-            throw new IllegalArgumentException(errors.toString());
-        }
+            Map<String, Map.Entry<ModuleFactory, BundleContext>> factoriesMap) {
         this.moduleNamesToConfigBeanFactories = Collections
-                .unmodifiableMap(moduleNamesToConfigBeanFactories);
+                .unmodifiableMap(factoriesMap);
         moduleNames = Collections.unmodifiableSet(new TreeSet<>(
                 moduleNamesToConfigBeanFactories.keySet()));
+        List<ModuleFactory> factories = new ArrayList<>(this.moduleNamesToConfigBeanFactories.size());
+        Collection<Map.Entry<ModuleFactory, BundleContext>> entryCollection = this.moduleNamesToConfigBeanFactories.values();
+        for (Map.Entry<ModuleFactory, BundleContext> entry : entryCollection) {
+            factories.add(entry.getKey());
+        }
+        this.moduleFactories = Collections.unmodifiableList(factories);
     }
 
     /**
@@ -79,16 +60,20 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      *             if factory is not found
      */
     public ModuleFactory findByModuleName(String moduleName) {
-        ModuleFactory result = moduleNamesToConfigBeanFactories.get(moduleName);
+        Map.Entry<ModuleFactory, BundleContext> result = moduleNamesToConfigBeanFactories.get(moduleName);
         if (result == null) {
             throw new IllegalArgumentException(
                     "ModuleFactory not found with module name: " + moduleName);
         }
-        return result;
+        return result.getKey();
     }
 
     public Set<String> getModuleNames() {
         return moduleNames;
+    }
+
+    public List<ModuleFactory> getModuleFactories() {
+        return moduleFactories;
     }
 
 }

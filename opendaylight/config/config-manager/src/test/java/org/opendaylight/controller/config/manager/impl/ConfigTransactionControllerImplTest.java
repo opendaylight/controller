@@ -17,13 +17,14 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistr
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.runtimembean.TestingRuntimeBean;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -59,7 +60,7 @@ public class ConfigTransactionControllerImplTest extends
         baseJMXRegistrator = new BaseJMXRegistrator(
                 ManagementFactory.getPlatformMBeanServer());
         transactionsMBeanServer = MBeanServerFactory.createMBeanServer();
-        List<ModuleFactory> currentlyRegisteredFactories = new ArrayList<>();
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories = new HashMap<>();
         TransactionJMXRegistrator jmxRegistrator123 = baseJMXRegistrator
                 .createTransactionJMXRegistrator(transactionName123);
 
