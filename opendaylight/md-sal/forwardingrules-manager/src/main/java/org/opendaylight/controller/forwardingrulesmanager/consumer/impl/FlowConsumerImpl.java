@@ -86,8 +86,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private boolean inContainerMode; // being used by global instance only
 
     public FlowConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).child(Flow.class)
-                .toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Flows.class).toInstance();
         flowService = FRMConsumerImpl.getProviderSession().getRpcService(SalFlowService.class);
 
         if (null == flowService) {
@@ -330,7 +329,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
                 // validating the DataObject
 
-                Status status = validate(container, (NodeFlow) entry);
+                Status status = validate(container, (NodeFlow) entry.getValue());
                 if (!status.isSuccess()) {
                     logger.warn("Invalid Configuration for flow {}. The failure is {}", entry, status.getDescription());
                     String error = "Invalid Configuration (" + status.getDescription() + ")";
