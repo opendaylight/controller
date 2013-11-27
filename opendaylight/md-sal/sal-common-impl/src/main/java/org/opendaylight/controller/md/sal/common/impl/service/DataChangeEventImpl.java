@@ -11,6 +11,8 @@ public class DataChangeEventImpl<P, D> implements DataChangeEvent<P, D> {
     private final DataChange<P, D> dataChange;
 
     private final D originalConfigurationSubtree;
+
+
     private final D originalOperationalSubtree;
     private final D updatedOperationalSubtree;
     private final D updatedConfigurationSubtree;
@@ -26,6 +28,16 @@ public class DataChangeEventImpl<P, D> implements DataChangeEvent<P, D> {
         this.originalOperationalSubtree = originalOperationalSubtree;
         this.updatedOperationalSubtree = updatedOperationalSubtree;
         this.updatedConfigurationSubtree = updatedConfigurationSubtree;
+    }
+
+    @Override
+    public D getOriginalConfigurationSubtree() {
+        return originalConfigurationSubtree;
+    }
+
+    @Override
+    public D getOriginalOperationalSubtree() {
+        return originalOperationalSubtree;
     }
 
     @Override

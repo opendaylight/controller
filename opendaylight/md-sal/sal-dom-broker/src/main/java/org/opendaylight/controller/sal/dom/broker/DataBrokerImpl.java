@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.dom.broker;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataBroker;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
