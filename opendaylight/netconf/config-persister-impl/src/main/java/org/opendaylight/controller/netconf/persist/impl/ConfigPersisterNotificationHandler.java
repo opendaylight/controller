@@ -93,6 +93,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
             registerToNetconf(maybeConfig.get().getCapabilities());
 
             final String configSnapshot = maybeConfig.get().getConfigSnapshot();
+            logger.trace("Pushing following xml to netconf {}", configSnapshot);
             try {
                 pushLastConfig(XmlUtil.readXmlToElement(configSnapshot));
             } catch (SAXException | IOException e) {
@@ -247,11 +248,14 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         return maybeConfigElement;
     }
 
-    private synchronized void pushLastConfig(Element persistedConfig) {
+    private synchronized void pushLastConfig(Element xmlToBePersisted) {
+        logger.info("Pushing last configuration to netconf");
         StringBuilder response = new StringBuilder("editConfig response = {");
 
-        Element configElement = persistedConfig;
-        NetconfMessage message = createEditConfigMessage(configElement, "/netconfOp/editConfig.xml");
+
+        NetconfMessage message = createEditConfigMessage(xmlToBePersisted, "/netconfOp/editConfig.xml");
+
+        // sending message to netconf
         NetconfMessage responseMessage = netconfClient.sendMessage(message);
 
         XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
@@ -271,7 +275,8 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         response.append("commit response = {");
         response.append(XmlUtil.toString(responseMessage.getDocument()));
         response.append("}");
-        logger.debug("Last configuration loaded successfully");
+        logger.info("Last configuration loaded successfully");
+        logger.trace("Detailed message {}", response);
     }
 
     private void checkIsOk(XmlElement element, NetconfMessage responseMessage) {
@@ -289,8 +294,8 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         }
     }
 
-    private NetconfMessage createEditConfigMessage(Element dataElement, String editConfigResourcename) {
-        try (InputStream stream = getClass().getResourceAsStream(editConfigResourcename)) {
+    private static NetconfMessage createEditConfigMessage(Element dataElement, String editConfigResourcename) {
+        try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcename)) {
             Preconditions.checkNotNull(stream, "Unable to load resource " + editConfigResourcename);
 
             Document doc = XmlUtil.readXmlToDocument(stream);
