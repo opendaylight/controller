@@ -42,7 +42,6 @@ public class PersisterAggregatorTest {
     TestingPropertiesProvider propertiesProvider;
 
     class TestingPropertiesProvider extends PropertiesProviderBaseImpl {
-
         TestingPropertiesProvider() {
             super(null);
         }

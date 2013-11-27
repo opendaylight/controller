@@ -216,7 +216,11 @@
           <artifactId>config-persister-file-adapter</artifactId>
           <version>${config.version}</version>
         </dependency>
-
+          <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>config-persister-directory-adapter</artifactId>
+              <version>${config.version}</version>
+          </dependency>
 
        <!-- Netconf -->
         <dependency>
