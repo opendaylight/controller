@@ -127,6 +127,9 @@ public class StatisticsProvider implements AutoCloseable {
         
         //Need to call API to receive all the nodes connected to controller.
         List<Node> targetNodes = getAllConnectedNodes();
+        
+        if(targetNodes == null)
+            return;
 
         for (Node targetNode : targetNodes){
             spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
@@ -215,6 +218,9 @@ public class StatisticsProvider implements AutoCloseable {
     private List<Node> getAllConnectedNodes(){
         
         Nodes nodes = (Nodes) dps.readOperationalData(nodesIdentifier);
+        if(nodes == null)
+            return null;
+        
         spLogger.info("Number of connected nodes : {}",nodes.getNode().size());
         return nodes.getNode();
     }
