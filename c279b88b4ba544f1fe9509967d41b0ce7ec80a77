@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b7d6ddef",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-28T16:42:31Z",
+      "side": 1,
+      "message": "Does this mean that scala code was removed? I didn\u0027t notice it in this patch, maybe I missed it?",
+      "revId": "c279b88b4ba544f1fe9509967d41b0ce7ec80a77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
