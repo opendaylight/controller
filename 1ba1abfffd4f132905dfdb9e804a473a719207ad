@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_37b42dd0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-28T16:34:31Z",
+      "side": 1,
+      "message": "Subsytem --\u003e subsystem.",
+      "revId": "1ba1abfffd4f132905dfdb9e804a473a719207ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_17cb6954",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-28T16:34:31Z",
+      "side": 1,
+      "message": "separete --\u003e separate",
+      "revId": "1ba1abfffd4f132905dfdb9e804a473a719207ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
