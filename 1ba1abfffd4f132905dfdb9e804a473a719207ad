@@ -33,6 +33,23 @@
       "revId": "1ba1abfffd4f132905dfdb9e804a473a719207ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_57e8c1b3",
+        "filename": "opendaylight/md-sal/clustered-data-store/implementation/src/test/java/org/opendaylight/controller/datastore/internal/ClusteredDataStoreManagerTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-28T16:36:07Z",
+      "side": 1,
+      "message": "it\u0027s not Java standard to have underscores in method names.",
+      "revId": "1ba1abfffd4f132905dfdb9e804a473a719207ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
