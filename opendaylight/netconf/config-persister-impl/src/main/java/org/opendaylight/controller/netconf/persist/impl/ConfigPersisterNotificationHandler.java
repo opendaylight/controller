@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
@@ -91,7 +92,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
     }
 
     public void init() throws InterruptedException {
-        Optional<Persister.ConfigSnapshotHolder> maybeConfig = loadLastConfig();
+        Optional<ConfigSnapshotHolder> maybeConfig = loadLastConfig();
 
         if (maybeConfig.isPresent()) {
             logger.debug("Last config found {}", persister);
@@ -234,8 +235,8 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         }
     }
 
-    private Optional<Persister.ConfigSnapshotHolder> loadLastConfig() {
-        Optional<Persister.ConfigSnapshotHolder> maybeConfigElement;
+    private Optional<ConfigSnapshotHolder> loadLastConfig() {
+        Optional<ConfigSnapshotHolder> maybeConfigElement;
         try {
             maybeConfigElement = persister.loadLastConfig();
         } catch (IOException e) {
