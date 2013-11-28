@@ -1,12 +1,14 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
 <project
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-subsystem</artifactId>
+        <artifactId>config-plugin-parent</artifactId>
         <version>0.2.3-SNAPSHOT</version>
+        <relativePath>../config-plugin-parent</relativePath>
     </parent>
     <artifactId>logback-config</artifactId>
     <name>${project.artifactId}</name>
@@ -79,27 +81,9 @@
                     <instructions>
                         <Private-Package>
                         </Private-Package>
-                        <Import-Package>
-                            ch.qos.logback.classic,
-                            ch.qos.logback.classic.encoder,
-                            ch.qos.logback.classic.filter,
-                            ch.qos.logback.classic.spi,
-                            ch.qos.logback.core,
-                            ch.qos.logback.core.status,
-                            ch.qos.logback.core.encoder,
-                            ch.qos.logback.core.rolling,
-                            org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.config.api.runtime,
-                            org.opendaylight.controller.config.api.annotations,
-                            org.opendaylight.controller.config.spi,
-                            com.google.common.base,
-                            com.google.common.collect,
-                            org.apache.commons.lang3,
-                            org.slf4j,
-                            org.osgi.framework
-                        </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.logback.config,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.logback.config.rev130716.*,
                         </Export-Package>
                     </instructions>
                 </configuration>

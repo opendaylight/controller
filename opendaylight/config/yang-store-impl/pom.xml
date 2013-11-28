@@ -59,23 +59,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.opendaylight.controller.config.yang.store.impl.YangStoreActivator</Bundle-Activator>
-                        <Import-Package>
-                            org.opendaylight.controller.config.yang.store.api,
-                            org.opendaylight.controller.config.yangjmxgenerator,
-                            com.google.common.base,
-                            com.google.common.collect,
-                            com.google.common.primitives,
-                            org.apache.commons.io,
-                            org.osgi.framework,
-                            org.osgi.util.tracker,
-                            org.slf4j,
-                            <!-- YANGTOOLS -->
-                            org.opendaylight.yangtools.sal.binding.yang.types,
-                            org.opendaylight.yangtools.yang.common,
-                            org.opendaylight.yangtools.yang.model.api,
-                            org.opendaylight.yangtools.sal.binding.generator.spi,
-                            org.opendaylight.yangtools.yang.parser.impl,
-                        </Import-Package>
                         <Export-Package>
                         </Export-Package>
                     </instructions>

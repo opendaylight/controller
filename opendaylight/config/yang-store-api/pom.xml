@@ -25,10 +25,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            org.opendaylight.controller.config.yangjmxgenerator,
-                            org.opendaylight.yangtools.yang.model.api
-                        </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.store.api,
                         </Export-Package>
