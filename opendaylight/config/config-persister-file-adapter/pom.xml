@@ -69,21 +69,6 @@
                         </Fragment-Host>
                         <Provide-Capability>org.opendaylight.controller.config.persister.storage.adapter
                         </Provide-Capability>
-                        <Import-Package>
-                            org.osgi.framework,
-                            com.google.common.base,
-                            com.google.common.collect,
-                            com.google.common.io,
-                            javax.xml.parsers,
-                            javax.xml.transform,
-                            javax.xml.transform.dom,
-                            javax.xml.transform.stream,
-                            org.apache.commons.lang3,
-                            org.opendaylight.controller.config.persist.api,
-                            org.slf4j,
-                            org.w3c.dom,
-                            org.xml.sax,
-                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

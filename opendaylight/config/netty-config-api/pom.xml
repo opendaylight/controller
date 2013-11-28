@@ -1,8 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-subsystem</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+        <artifactId>config-plugin-parent</artifactId>
+        <version>0.2.3-SNAPSHOT</version>
+        <relativePath>../config-plugin-parent</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>netty-config-api</artifactId>
@@ -33,14 +36,9 @@
             <artifactId>maven-bundle-plugin</artifactId>
             <configuration>
                <instructions>
-                  <Import-Package>
-                     org.opendaylight.controller.config.api.*,
-                     io.netty.channel,
-                     io.netty.util,
-                     io.netty.util.concurrent
-                  </Import-Package>
                   <Export-Package>
-                     org.opendaylight.controller.config.yang.netty
+                      org.opendaylight.controller.config.yang.netty,
+                      org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.netty.rev131119.*,
                   </Export-Package>
                </instructions>
             </configuration>
