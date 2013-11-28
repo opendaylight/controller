@@ -2,7 +2,7 @@
     <noArgInnerInner
             xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
         <context-instance>
-            /modules/module[type='impl-netconf'][name='instance2']/inner-running-data[key='1015']/inner-inner-running-data[key='1017']
+            /modules/module[type='impl-netconf'][name='test2']/inner-running-data[key='2']/inner-inner-running-data[key='3']
         </context-instance>
 
         <arg1>

@@ -91,7 +91,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
     }
 
     // TODO refactor ... duplicate code
-    private Map<String, Map<String, ModuleConfig>> transform(final ConfigRegistryClient configRegistryClient,
+    public static Map<String, Map<String, ModuleConfig>> transform(final ConfigRegistryClient configRegistryClient,
             Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
         return Maps.transformEntries(mBeanEntries,
                 new Maps.EntryTransformer<String, Map<String, ModuleMXBeanEntry>, Map<String, ModuleConfig>>() {
