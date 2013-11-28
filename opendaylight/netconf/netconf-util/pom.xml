@@ -76,6 +76,7 @@
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.messages,
                             org.opendaylight.controller.netconf.util.handler,
+                            org.opendaylight.controller.netconf.util.handler.*,
                         </Export-Package>
                         <Import-Package>
                             com.google.common.base,

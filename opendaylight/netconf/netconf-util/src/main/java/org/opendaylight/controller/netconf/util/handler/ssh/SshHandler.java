@@ -8,13 +8,16 @@
 
 package org.opendaylight.controller.netconf.util.handler.ssh;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+
 import java.io.IOException;
 import java.net.SocketAddress;
+
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
 import org.opendaylight.controller.netconf.util.handler.ssh.client.SshClient;
@@ -50,7 +53,7 @@ public class SshHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        this.sshClientAdapter.write((String) msg);
+        this.sshClientAdapter.write((ByteBuf) msg);
     }
 
     @Override

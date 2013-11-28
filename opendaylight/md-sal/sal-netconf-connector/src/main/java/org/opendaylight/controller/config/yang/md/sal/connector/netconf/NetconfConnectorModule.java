@@ -17,6 +17,9 @@ import java.net.InetSocketAddress;
 import javax.net.ssl.SSLContext;
 
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfSshClientDispatcher;
+import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
+import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.osgi.framework.BundleContext;
 
@@ -75,8 +78,13 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         EventLoopGroup bossGroup = getBossThreadGroupDependency();
         EventLoopGroup workerGroup = getWorkerThreadGroupDependency();
         Optional<SSLContext> maybeContext = Optional.absent();
-        NetconfClientDispatcher dispatcher = new NetconfClientDispatcher(maybeContext , bossGroup, workerGroup);
-        
+        NetconfClientDispatcher dispatcher = null;
+        if(getTcpOnly()) {
+            dispatcher = new NetconfClientDispatcher(maybeContext , bossGroup, workerGroup);
+        } else {
+            AuthenticationHandler authHandler = new LoginPassword(getUsername(),getPassword());
+            dispatcher = new NetconfSshClientDispatcher(authHandler , bossGroup, workerGroup);
+        }
         getDomRegistryDependency().registerProvider(device, bundleContext);
         
         device.start(dispatcher);
