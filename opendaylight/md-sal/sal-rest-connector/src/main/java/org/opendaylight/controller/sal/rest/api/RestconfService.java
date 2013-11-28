@@ -92,16 +92,4 @@ public interface RestconfService extends RestconfServiceLegacy {
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData readOperationalData(@PathParam("identifier") String identifier);
 
-    @POST
-    @Path("/operational/{identifier:.+}")
-    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
-               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response createOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
-
-    @PUT
-    @Path("/operational/{identifier:.+}")
-    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
-               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response updateOperationalData(@PathParam("identifier") String identifier, CompositeNode payload);
-
 }
