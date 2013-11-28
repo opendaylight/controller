@@ -2,12 +2,11 @@ package org.opendaylight.controller.sal.restconf.impl
 
 import java.util.List
 import javax.ws.rs.core.Response
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.rest.api.RestconfService
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus
-import javax.ws.rs.WebApplicationException
 
 class RestconfImpl implements RestconfService {
     
@@ -94,26 +93,6 @@ class RestconfImpl implements RestconfService {
     
     override createConfigurationDataLegacy(String identifier, CompositeNode payload) {
         createConfigurationData(identifier,payload);
-    }
-    
-    override createOperationalData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
-        val status = broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
-        switch status.result {
-            case TransactionStatus.COMMITED: Response.status(Response.Status.OK).build
-            default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
-        }
-    }
-    
-    override updateOperationalData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val value = resolveNodeNamespaceBySchema(payload, identifierWithSchemaNode.schemaNode)
-        val status = broker.commitOperationalDataPut(identifierWithSchemaNode.instanceIdentifier,value).get();
-        switch status.result {
-            case TransactionStatus.COMMITED: Response.status(Response.Status.NO_CONTENT).build
-            default: Response.status(Response.Status.INTERNAL_SERVER_ERROR).build
-        }
     }
     
     private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
