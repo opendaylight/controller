@@ -52,20 +52,23 @@ public class Config {
         this.moduleNamesToConfigs = Collections.unmodifiableMap(moduleNamesToConfigs);
     }
 
-    private Map<String, Map<String, Collection<ObjectName>>> getMappedInstances(Set<ObjectName> instancesToMap,
-            Services serviceTracker) {
+    public static Map<String, Map<String, Collection<ObjectName>>> getMappedInstances(Set<ObjectName> instancesToMap,
+                                                                                Services serviceTracker, Map<String, Map<String, ModuleConfig>> configs) {
         Multimap<String, ObjectName> moduleToInstances = mapInstancesToModules(instancesToMap);
 
         Map<String, Map<String, Collection<ObjectName>>> retVal = Maps.newLinkedHashMap();
 
-        for (String namespace : moduleConfigs.keySet()) {
+        for (String namespace : configs.keySet()) {
 
             Map<String, Collection<ObjectName>> innerRetVal = Maps.newHashMap();
 
-            for (Entry<String, ModuleConfig> mbeEntry : moduleConfigs.get(namespace).entrySet()) {
+            for (Entry<String, ModuleConfig> mbeEntry : configs.get(namespace).entrySet()) {
 
                 String moduleName = mbeEntry.getKey();
                 Collection<ObjectName> instances = moduleToInstances.get(moduleName);
+
+                // TODO, this code does not support same module names from different namespaces
+                // Namespace should be present in ObjectName
 
                 if (instances == null)
                     continue;
@@ -86,7 +89,7 @@ public class Config {
         return retVal;
     }
 
-    private void addServices(Services serviceTracker, Collection<ObjectName> instances,
+    private static void addServices(Services serviceTracker, Collection<ObjectName> instances,
             Multimap<String, String> providedServices) {
         for (ObjectName instanceOn : instances) {
             for (Entry<String, String> serviceName : providedServices.entries()) {
@@ -115,7 +118,7 @@ public class Config {
         Services serviceTracker = new Services();
 
         Map<String, Map<String, Collection<ObjectName>>> moduleToInstances = getMappedInstances(instancesToMap,
-                serviceTracker);
+                serviceTracker, moduleConfigs);
 
         Element root = dataElement;
         if (maybeNamespace.isPresent()) {
