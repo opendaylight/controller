@@ -35,6 +35,7 @@
         <module>netty-threadgroup-config</module>
         <module>netty-event-executor-config</module>
         <module>netty-timer-config</module>
+        <module>config-persister-directory-adapter</module>
     </modules>
 
     <profiles>

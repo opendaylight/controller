@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.persist.api;
 
 import com.google.common.base.Optional;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
