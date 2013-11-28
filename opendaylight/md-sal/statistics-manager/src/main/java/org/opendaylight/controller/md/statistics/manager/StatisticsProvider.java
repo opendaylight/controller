@@ -24,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupFeaturesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsInputBuilder;
@@ -137,76 +138,86 @@ public class StatisticsProvider implements AutoCloseable {
             //We need to add check, so see if groups/meters are supported
             //by the target node. Below check doesn't look good.
             if(targetNode.getId().getValue().contains("openflow:")){
-                sendAllGroupStatisticsRequest(targetNode);
+                InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
+                NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 
-                sendAllMeterStatisticsRequest(targetNode);
+                sendAllGroupStatisticsRequest(targetNodeRef);
                 
-                sendGroupDescriptionRequest(targetNode);
+                sendAllMeterStatisticsRequest(targetNodeRef);
                 
-                sendGroupFeaturesRequest(targetNode);
+                sendGroupDescriptionRequest(targetNodeRef);
                 
-                sendMeterConfigStatisticsRequest(targetNode);
+                sendGroupFeaturesRequest(targetNodeRef);
                 
-                sendMeterFeaturesRequest(targetNode);
+                sendMeterConfigStatisticsRequest(targetNodeRef);
+                
+                sendMeterFeaturesRequest(targetNodeRef);
             }
         }
     }
     
-    private void sendAllGroupStatisticsRequest(Node targetNode){
+    private void sendAllGroupStatisticsRequest(NodeRef targetNode){
         
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         
-        input.setId(targetNode.getId());
+        input.setNode(targetNode);
+        input.setNode(targetNode);
 
+        @SuppressWarnings("unused")
         Future<RpcResult<GetAllGroupStatisticsOutput>> response = 
                 groupStatsService.getAllGroupStatistics(input.build());
     }
     
-    private void sendGroupDescriptionRequest(Node targetNode){
+    private void sendGroupDescriptionRequest(NodeRef targetNode){
         final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();
         
-        input.setId(targetNode.getId());
-        
+        input.setNode(targetNode);
+
+        @SuppressWarnings("unused")
         Future<RpcResult<GetGroupDescriptionOutput>> response = 
                 groupStatsService.getGroupDescription(input.build());
     }
     
-    private void sendGroupFeaturesRequest(Node targetNode){
+    private void sendGroupFeaturesRequest(NodeRef targetNode){
         
         GetGroupFeaturesInputBuilder input = new GetGroupFeaturesInputBuilder();
         
-        input.setId(targetNode.getId());
-        
+        input.setNode(targetNode);
+
+        @SuppressWarnings("unused")
         Future<RpcResult<GetGroupFeaturesOutput>> response = 
                 groupStatsService.getGroupFeatures(input.build());
     }
     
-    private void sendAllMeterStatisticsRequest(Node targetNode){
+    private void sendAllMeterStatisticsRequest(NodeRef targetNode){
         
         GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
         
-        input.setId(targetNode.getId());
-        
+        input.setNode(targetNode);
+
+        @SuppressWarnings("unused")
         Future<RpcResult<GetAllMeterStatisticsOutput>> response = 
                 meterStatsService.getAllMeterStatistics(input.build());
     }
     
-    private void sendMeterConfigStatisticsRequest(Node targetNode){
+    private void sendMeterConfigStatisticsRequest(NodeRef targetNode){
         
         GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
         
-        input.setId(targetNode.getId());
-        
+        input.setNode(targetNode);
+
+        @SuppressWarnings("unused")
         Future<RpcResult<GetAllMeterConfigStatisticsOutput>> response = 
                 meterStatsService.getAllMeterConfigStatistics(input.build());
         
     }
-    private void sendMeterFeaturesRequest(Node targetNode){
+    private void sendMeterFeaturesRequest(NodeRef targetNode){
      
         GetMeterFeaturesInputBuilder input = new GetMeterFeaturesInputBuilder();
         
-        input.setId(targetNode.getId());
-        
+        input.setNode(targetNode);
+
+        @SuppressWarnings("unused")
         Future<RpcResult<GetMeterFeaturesOutput>> response = 
                 meterStatsService.getMeterFeatures(input.build());
     }
@@ -241,7 +252,6 @@ public class StatisticsProvider implements AutoCloseable {
           } catch (Throwable e) {
             throw Exceptions.sneakyThrow(e);
           }
-
     }
 
 }

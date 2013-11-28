@@ -32,7 +32,7 @@ module sal-group {
     rpc add-group {
         input {
             uses node-group;
-            uses tr:transaction-aware;            
+            uses tr:transaction-aware;
         }
         output {
             uses tr:transaction-aware;
@@ -42,7 +42,7 @@ module sal-group {
     rpc remove-group {
         input {
             uses node-group;
-            uses tr:transaction-aware;            
+            uses tr:transaction-aware;
         }
         output {
             uses tr:transaction-aware;
@@ -52,7 +52,7 @@ module sal-group {
     rpc update-group {
         input {
             uses group-update;
-            uses tr:transaction-aware;            
+            uses tr:transaction-aware;
         }
         output {
             uses tr:transaction-aware;
