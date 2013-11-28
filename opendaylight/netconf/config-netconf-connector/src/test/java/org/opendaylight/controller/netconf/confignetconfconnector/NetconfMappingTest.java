@@ -150,10 +150,11 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // check after edit
         commit();
         Element response = getConfigRunning();
-        System.err.println(XmlUtil.toString(response));
+
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
         checkTypedefs(response);
+        checkEnum(response);
 
         edit("netconfMessages/editConfig_remove.xml");
 
@@ -383,6 +384,26 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         children = response.getElementsByTagName("extended-twice");
         assertEquals(1, children.getLength());
+    }
+
+    private void checkEnum(final Element response) {
+        XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
+                .getOnlyChildElement("modules");
+
+        String enumName = "extended-enum";
+        String enumContent = "TWO";
+
+        for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
+            String name = moduleElement.getOnlyChildElement("name").getTextContent();
+            if(name.equals("test1")) {
+                XmlElement enumAttr = moduleElement.getOnlyChildElement(enumName);
+                assertEquals(enumContent, enumAttr.getTextContent());
+
+                return;
+            }
+        }
+
+        fail("Enum attribute " + enumName + ":" + enumContent + " not present in " + XmlUtil.toString(response));
     }
 
     private void checkTypeConfigAttribute(Element response) {
