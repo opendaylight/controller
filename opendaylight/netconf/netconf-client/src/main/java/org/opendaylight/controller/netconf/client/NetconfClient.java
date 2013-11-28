@@ -50,7 +50,6 @@ public class NetconfClient implements Closeable {
     private NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this.label = clientLabelForLogging;
         dispatch = netconfClientDispatcher;
-
         sessionListener = new NetconfClientSessionListener();
         Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strat);
         this.address = address;
