@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * Wrapper class around GANYMED SSH java library.
  */
@@ -28,16 +27,16 @@ public class SshClient {
     private final AuthenticationHandler authenticationHandler;
     private Connection connection;
 
-    public SshClient(VirtualSocket socket,
-                     AuthenticationHandler authenticationHandler) throws IOException {
+    public SshClient(VirtualSocket socket, AuthenticationHandler authenticationHandler) throws IOException {
         this.socket = socket;
         this.authenticationHandler = authenticationHandler;
     }
 
     public SshSession openSession() throws IOException {
-        if(connection == null) connect();
+        if (connection == null)
+            connect();
 
-        Session session =  connection.openSession();
+        Session session = connection.openSession();
         SshSession sshSession = new SshSession(session);
         openSessions.put(openSessions.size(), sshSession);
 
@@ -46,22 +45,24 @@ public class SshClient {
 
     private void connect() throws IOException {
         connection = new Connection(socket);
+
         connection.connect();
         authenticationHandler.authenticate(connection);
     }
 
     public void closeSession(SshSession session) {
-        if(   session.getState() == Channel.STATE_OPEN
-           || session.getState() == Channel.STATE_OPENING) {
+        if (session.getState() == Channel.STATE_OPEN || session.getState() == Channel.STATE_OPENING) {
             session.session.close();
         }
     }
 
     public void close() {
-        for(SshSession session : openSessions.values()) closeSession(session);
+        for (SshSession session : openSessions.values())
+            closeSession(session);
 
         openSessions.clear();
 
-        if(connection != null) connection.close();
+        if (connection != null)
+            connection.close();
     }
 }

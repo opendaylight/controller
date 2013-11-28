@@ -45,7 +45,18 @@ module odl-sal-netconf-connector-cfg {
             leaf port {
                 type uint32;
             }
+            
+            leaf tcp-only {
+                type boolean;
+            }
 
+            leaf username {
+                type string;
+            }
+            
+            leaf password {
+                type string;
+            }
             container dom-registry {
                 uses config:service-ref {
                     refine type {

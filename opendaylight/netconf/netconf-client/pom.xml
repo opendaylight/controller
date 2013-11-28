@@ -60,11 +60,12 @@
                             javax.xml.xpath,
                             org.opendaylight.controller.netconf.api,
                             org.opendaylight.controller.netconf.util,
-                            org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.*,
                             org.opendaylight.protocol.framework,
                             org.slf4j,
                             org.w3c.dom,
-                            org.xml.sax
+                            org.xml.sax,
+                            io.netty.handler.codec
                         </Import-Package>
                     </instructions>
                 </configuration>
