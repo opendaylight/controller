@@ -43,6 +43,10 @@
                         </value>
                     </extended-twice>
 
+                    <extended-enum>
+                        TWO
+                    </extended-enum>
+
                     <simple-long-2>44</simple-long-2>
                     <binaryLeaf>8</binaryLeaf>
                     <binaryLeaf>1</binaryLeaf>

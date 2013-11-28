@@ -115,12 +115,10 @@ module config-test-impl {
                 type tt:extend-twice;
             }
 
-/* TODO Add support for enums
-
             leaf extended-enum {
                 type tt:extend-enum;
             }
-*/
+
            container dto-c {
                 leaf simple-arg {
                     type uint32;
