@@ -47,7 +47,6 @@ public class TestHelper {
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "config-util").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-jmx-generator").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-store-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-store-impl").versionAsInProject(), //
