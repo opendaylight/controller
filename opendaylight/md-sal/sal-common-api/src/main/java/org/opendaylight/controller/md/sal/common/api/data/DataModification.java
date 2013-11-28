@@ -29,11 +29,12 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
 
     /**
      * 
-     * Use {@link #putOperationalData(Object, Object)} instead.
+     * @deprecated Use {@link #putOperationalData(Object, Object)} instead.
      * 
      * @param path
      * @param data
      */
+    @Deprecated
     void putRuntimeData(P path, D data);
 
     void putOperationalData(P path, D data);
@@ -41,10 +42,11 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
     void putConfigurationData(P path, D data);
 
     /**
-     * Use {@link #removeOperationalData(Object)}
+     * @deprecated Use {@link #removeOperationalData(Object)}
      * 
      * @param path
      */
+    @Deprecated
     void removeRuntimeData(P path);
 
     void removeOperationalData(P path);
