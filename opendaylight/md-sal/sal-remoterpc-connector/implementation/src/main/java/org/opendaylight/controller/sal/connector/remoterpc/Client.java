@@ -7,8 +7,15 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import com.google.common.base.Optional;
+import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
+import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.MessageWrapper;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
+import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -16,13 +23,16 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.zeromq.ZMQ;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+
+import static com.google.common.base.Preconditions.*;
 
 /**
  * An implementation of {@link RpcImplementation} that makes
@@ -30,180 +40,136 @@ import java.util.concurrent.TimeoutException;
  */
 public class Client implements RpcImplementation {
 
-  // I just input the minimal code so ClientTest wouldn't fail
-  private static LinkedBlockingQueue<MessageWrapper> requestQueue = new LinkedBlockingQueue<MessageWrapper>(100);
-  public static LinkedBlockingQueue<MessageWrapper> requestQueue() {
+  private final Logger _logger = LoggerFactory.getLogger(Client.class);
+
+  private final LinkedBlockingQueue<MessageWrapper> requestQueue = new LinkedBlockingQueue<MessageWrapper>(100);
+
+  private static Client _instance = new Client();
+
+  private final ExecutorService pool = Executors.newSingleThreadExecutor();
+  private final long TIMEOUT = 5000; //in ms
+
+  public static Client getInstance(){
+    return _instance;
+  }
+
+  public LinkedBlockingQueue<MessageWrapper> getRequestQueue() {
     return requestQueue;
   }
 
-  public static void process(MessageWrapper msg) throws TimeoutException, InterruptedException {
-    if (requestQueue.size() == 100) throw new TimeoutException();
-    requestQueue.put(msg);
-  }
-
-  public static Client getInstance() {
-    return new Client();
+  @Override
+  public Set<QName> getSupportedRpcs(){
+    //TODO: Find the entries from routing table
+    return Collections.emptySet();
   }
 
   public void start() {
+    pool.execute(new Sender());
 
   }
 
   public void stop() {
 
-  }
+    _logger.debug("Client stopping...");
+    Context.getInstance().getZmqContext().term();
+    _logger.debug("ZMQ context terminated");
 
-  @Override
-  public Set<QName> getSupportedRpcs() {
-    return Collections.emptySet();
+    pool.shutdown(); //intiate shutdown
+    try {
+      if (!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+        pool.shutdownNow();
+        if (!pool.awaitTermination(10, TimeUnit.SECONDS))
+          _logger.error("Client thread pool did not shut down");
+      }
+    } catch(InterruptedException e) {
+      // (Re-)Cancel if current thread also interrupted
+      pool.shutdownNow();
+      // Preserve interrupt status
+      Thread.currentThread().interrupt();
+    }
+    _logger.debug("Client stopped");
   }
 
   @Override
   public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
-    //ToDo: Fill in
-    //Once you fill in, RouterTest's "invokeRpc" (integration test) test method will fail if you didn't do this correctly
-    return Rpcs.getRpcResult(false, null, new ArrayList<RpcError>());
+
+    RouteIdentifierImpl routeId = new RouteIdentifierImpl();
+    routeId.setType(rpc);
+
+    String address = lookupRemoteAddress(routeId);
+
+    Message request = new Message.MessageBuilder()
+        .type(Message.MessageType.REQUEST)
+        .sender(Context.getInstance().getLocalUri())
+        .recipient(address)
+        .route(routeId)
+        .payload(XmlUtils.compositeNodeToXml(input))
+        .build();
+
+    List<RpcError> errors = new ArrayList<RpcError>();
+
+    try( SocketPair pair = new SocketPair() ){
+
+      MessageWrapper messageWrapper = new MessageWrapper(request, pair.getSender());
+      process(messageWrapper);
+      Message response = parseMessage(pair.getReceiver());
+
+      CompositeNode payload = XmlUtils.xmlToCompositeNode((String) response.getPayload());
+
+      return Rpcs.getRpcResult(true, payload, errors);
+
+    } catch (Exception e){
+      collectErrors(e, errors);
+      return Rpcs.getRpcResult(false, null, errors);
+    }
+
+  }
+
+  public void process(MessageWrapper msg) throws TimeoutException, InterruptedException {
+    _logger.debug("Processing message [{}]", msg);
+
+    boolean success = requestQueue.offer(msg, TIMEOUT, TimeUnit.MILLISECONDS);
+    if (!success) throw new TimeoutException("Queue is full");
+  }
+
+  /**
+   * Block on socket for reply
+   * @param receiver
+   * @return
+   */
+  private Message parseMessage(ZMQ.Socket receiver) throws IOException, ClassNotFoundException {
+    return  (Message) Message.deserialize(receiver.recv());
+  }
+
+  /**
+   * Find address for the given route identifier in routing table
+   * @param  routeId route identifier
+   * @return         remote network address
+   */
+  private String lookupRemoteAddress(RpcRouter.RouteIdentifier routeId){
+    checkNotNull(routeId, "route must not be null");
+
+    Optional<RoutingTable<String, String>> routingTable = Server.getInstance().getRoutingTable();
+    checkNotNull(routingTable.isPresent(), "Routing table is null");
+
+    Set<String> addresses = routingTable.get().getRoutes(routeId.toString());
+    checkNotNull(addresses, "Address not found for route [%s]", routeId);
+    checkState(addresses.size() == 1,
+        "Multiple remote addresses found for route [%s], \nonly 1 expected", routeId); //its a global service.
+
+    String address = addresses.iterator().next();
+    checkNotNull(address, "Address not found for route [%s]", routeId);
+
+    return address;
+  }
+
+  private void collectErrors(Exception e, List<RpcError> errors){
+    if (e == null) return;
+    if (errors == null) errors = new ArrayList<RpcError>();
+
+    errors.add(RpcErrors.getRpcError(null, null, null, null, e.getMessage(), null, e.getCause()));
+    for (Throwable t : e.getSuppressed()) {
+      errors.add(RpcErrors.getRpcError(null, null, null, null, t.getMessage(), null, t));
+    }
   }
 }
-
-
-
-/*  SCALA version
-
-package org.opendaylight.controller.sal.connector.remoterpc
-
-  import org.opendaylight.yangtools.yang.data.api.CompositeNode
-  import org.opendaylight.yangtools.yang.common.{RpcError, RpcResult, QName}
-  import org.opendaylight.controller.sal.core.api.RpcImplementation
-  import java.util
-  import java.util.{UUID, Collections}
-  import org.zeromq.ZMQ
-  import org.opendaylight.controller.sal.common.util.{RpcErrors, Rpcs}
-  import org.slf4j.LoggerFactory
-  import org.opendaylight.controller.sal.connector.remoterpc.dto.{MessageWrapper, RouteIdentifierImpl, Message}
-  import Message.MessageType
-  import java.util.concurrent._
-  import java.lang.InterruptedException
-8?
-
-/**
- * An implementation of {@link RpcImplementation} that makes
- * remote RPC calls
-*/
-/*  object Client extends RpcImplementation{
-
-private val _logger = LoggerFactory.getLogger(Client.getClass);
-
-val requestQueue = new LinkedBlockingQueue[MessageWrapper](100)
-  val pool: ExecutorService = Executors.newSingleThreadExecutor()
-private val TIMEOUT = 5000 //in ms
-
-  def getInstance = this
-
-  def getSupportedRpcs: util.Set[QName] = {
-  Collections.emptySet()
-  }
-
-  def invokeRpc(rpc: QName, input: CompositeNode): RpcResult[CompositeNode] = {
-
-  val routeId = new RouteIdentifierImpl()
-  routeId.setType(rpc)
-
-  //lookup address for the rpc request
-  val routingTable = Server.getInstance().getRoutingTable()
-  require( routingTable != null, "Routing table not found. Exiting" )
-
-  val addresses:util.Set[String] = routingTable.getRoutes(routeId.toString)
-  require(addresses != null, "Address not found for rpc " + rpc);
-require(addresses.size() == 1) //its a global service.
-
-  val address = addresses.iterator().next()
-  require(address != null, "Address is null")
-
-  //create in-process "pair" socket and pass it to sender thread
-  //Sender replies on this when result is available
-  val inProcAddress = "inproc://" + UUID.randomUUID()
-  val receiver = Context.zmqContext.socket(ZMQ.PAIR)
-  receiver.bind(inProcAddress);
-
-val sender = Context.zmqContext.socket(ZMQ.PAIR)
-  sender.connect(inProcAddress)
-
-  val requestMessage = new Message.MessageBuilder()
-  .`type`(MessageType.REQUEST)
-  //.sender("tcp://localhost:8081")
-  .recipient(address)
-  .route(routeId)
-  .payload(input)
-  .build()
-
-  _logger.debug("Queuing up request and expecting response on [{}]", inProcAddress)
-
-  val messageWrapper = new MessageWrapper(requestMessage, sender)
-  val errors = new util.ArrayList[RpcError]
-
-  try {
-  process(messageWrapper)
-  val response = parseMessage(receiver)
-
-  return Rpcs.getRpcResult(
-  true, response.getPayload.asInstanceOf[CompositeNode], Collections.emptySet())
-
-  } catch {
-  case e: Exception => {
-  errors.add(RpcErrors.getRpcError(null,null,null,null,e.getMessage,null,e.getCause))
-  return Rpcs.getRpcResult(false, null, errors)
-  }
-  } finally {
-  receiver.close();
-sender.close();
-}
-
-  }
-*/
-/**
- * Block on socket for reply
- * @param receiver
- * @return
- */
-/*private def parseMessage(receiver:ZMQ.Socket): Message = {
-  val bytes = receiver.recv()
-  return  Message.deserialize(bytes).asInstanceOf[Message]
-  }
-
-  def start() = {
-  pool.execute(new Sender)
-  }
-
-  def process(msg: MessageWrapper) = {
-  _logger.debug("Processing message [{}]", msg)
-  val success = requestQueue.offer(msg, TIMEOUT, TimeUnit.MILLISECONDS)
-
-  if (!success) throw new TimeoutException("Queue is full");
-
-}
-
-  def stop() = {
-  pool.shutdown() //intiate shutdown
-  _logger.debug("Client stopping...")
-  //    Context.zmqContext.term();
-  //    _logger.debug("ZMQ context terminated")
-
-  try {
-
-  if (!pool.awaitTermination(10, TimeUnit.SECONDS)) {
-  pool.shutdownNow();
-if (!pool.awaitTermination(10, TimeUnit.SECONDS))
-  _logger.error("Client thread pool did not shut down");
-}
-  } catch {
-  case ie:InterruptedException =>
-  // (Re-)Cancel if current thread also interrupted
-  pool.shutdownNow();
-// Preserve interrupt status
-Thread.currentThread().interrupt();
-}
-  _logger.debug("Client stopped")
-  }
-  }
- */

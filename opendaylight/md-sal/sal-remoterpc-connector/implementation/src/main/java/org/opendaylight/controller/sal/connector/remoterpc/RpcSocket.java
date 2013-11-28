@@ -106,7 +106,7 @@ public class RpcSocket {
   
   public MessageWrapper receive() {
     Message response = parseMessage();
-    MessageWrapper messageWrapper = inQueue.poll();
+    MessageWrapper messageWrapper = inQueue.poll(); //remove the message from queue
     MessageWrapper responseMessageWrapper = new MessageWrapper(response, messageWrapper.getReceiveSocket());
 
     state = new IdleSocketState();
@@ -115,7 +115,8 @@ public class RpcSocket {
   }
   
   public void process() {
-    state.process(this);
+    if (getQueueSize() > 0) //process if there's message in the queue
+      state.process(this);
   }
 
   // Called by IdleSocketState & BusySocketState
@@ -129,6 +130,7 @@ public class RpcSocket {
       }
       catch (IOException e) {
         log.debug("Message send failed [{}]", message);
+        log.debug("Exception [{}]", e);
       }
       sendTime = System.currentTimeMillis();
     }
@@ -141,12 +143,10 @@ public class RpcSocket {
     try {
       parsedMessage = (Message)Message.deserialize(bytes);
     }
-    catch (IOException e) {
+    catch (IOException|ClassNotFoundException e) {
       log.debug("parseMessage : Deserializing received bytes failed", e);
     }
-    catch (ClassNotFoundException e) {
-      log.debug("parseMessage : Deserializing received bytes failed", e);
-    }
+
     return parsedMessage;
   }
 
@@ -160,9 +160,62 @@ public class RpcSocket {
   }
 
   private void createSocket() {
-    socket = Context.zmqContext.socket(ZMQ.REQ);
+    socket = Context.getInstance().getZmqContext().socket(ZMQ.REQ);
     socket.connect(address);
     poller.register(socket, ZMQ.Poller.POLLIN);
     state = new IdleSocketState();
+  }
+
+
+  /**
+   * Represents the state of a {@link org.opendaylight.controller.sal.connector.remoterpc.RpcSocket}
+   */
+  public static interface SocketState {
+
+    /* The processing actions to be performed in this state
+     */
+    public void process(RpcSocket socket);
+  }
+
+  /**
+   * Represents the idle state of a {@link org.opendaylight.controller.sal.connector.remoterpc.RpcSocket}
+   */
+  public static class IdleSocketState implements SocketState {
+
+    @Override
+    public void process(RpcSocket socket) {
+      socket.sendMessage();
+      socket.setState(new BusySocketState());
+      socket.setRetriesLeft(socket.getRetriesLeft()-1);
+    }
+  }
+
+  /**
+   * Represents the busy state of a {@link org.opendaylight.controller.sal.connector.remoterpc.RpcSocket}
+   */
+  public static class BusySocketState implements SocketState {
+
+    private static Logger log = LoggerFactory.getLogger(BusySocketState.class);
+
+    @Override
+    public void process(RpcSocket socket) {
+      if (socket.hasTimedOut()) {
+        if (socket.getRetriesLeft() > 0) {
+          log.debug("process : Request timed out, retrying now...");
+          socket.sendMessage();
+          socket.setRetriesLeft(socket.getRetriesLeft() - 1);
+        }
+        else {
+          // No more retries for current request, so stop processing the current request
+          MessageWrapper message = socket.removeCurrentRequest();
+          if (message != null) {
+            log.error("Unable to process rpc request [{}]", message);
+            socket.setState(new IdleSocketState());
+            socket.setRetriesLeft(NUM_RETRIES);
+          }
+        }
+      }
+      // Else no timeout, so allow processing to continue
+    }
   }
 }

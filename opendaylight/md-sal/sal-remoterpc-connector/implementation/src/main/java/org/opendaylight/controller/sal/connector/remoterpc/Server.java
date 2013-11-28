@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
@@ -14,6 +15,7 @@ import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message.MessageType;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
+import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -24,11 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -57,11 +54,10 @@ public class Server  implements RouteChangeListener<String, Set>{
   private static Server _instance = new Server();
   private final RpcListener listener = new RpcListener();
 
-  private final String localIp = getLocalIpAddress();
+  private final String localUri = Context.getInstance().getLocalUri();
 
   // port on which rpc messages are received
-  private String rpcPort =
-      (System.getProperty("rpc.port") != null) ? System.getProperty("rpc.port") : "5554";
+
 
   //Prevent instantiation
   private Server() {/*NOOPS*/}
@@ -70,8 +66,8 @@ public class Server  implements RouteChangeListener<String, Set>{
     return _instance;
   }
 
-  public RoutingTable<String, String> getRoutingTable(){
-    return this.routingTable;
+  public Optional<RoutingTable<String, String>> getRoutingTable(){
+    return Optional.fromNullable(routingTable);
   }
 
   public void setRoutingTable(RoutingTable<String, String> routingTable) {
@@ -90,7 +86,6 @@ public class Server  implements RouteChangeListener<String, Set>{
     // Start listening rpc requests
     serverPool.execute(receive());
 
-    _logger.debug("Start listening for RPC registrations");
     brokerSession.addRpcRegistrationListener(listener);
     //routingTable.registerRouteChangeListener(routeChangeListener);
 
@@ -98,6 +93,8 @@ public class Server  implements RouteChangeListener<String, Set>{
     for (QName rpc : currentlySupported) {
       listener.onRpcImplementationAdded(rpc);
     }
+
+    _logger.debug("RPC Server started [{}]", localUri);
   }
 
   public void stop() {
@@ -120,7 +117,7 @@ public class Server  implements RouteChangeListener<String, Set>{
 
         // Bind to RPC reply socket
         replySocket = context.socket(ZMQ.REP);
-        replySocket.bind("tcp://*:" + rpcPort);
+        replySocket.bind("tcp://*:" + Context.getInstance().getRpcPort());
 
         // Poller enables listening on multiple sockets using a single thread
         ZMQ.Poller poller = new ZMQ.Poller(1);
@@ -151,66 +148,47 @@ public class Server  implements RouteChangeListener<String, Set>{
    * @throws InterruptedException
    * @throws ExecutionException
    */
-  private void handleRpcCall() throws InterruptedException, ExecutionException {
+  private void handleRpcCall() {
+
+    Message request = parseMessage(replySocket);
+
+    _logger.debug("Received rpc request [{}]", request);
+
+    // Call broker to process the message then reply
+    Future<RpcResult<CompositeNode>> rpc = null;
+    RpcResult<CompositeNode> result = null;
     try {
-      Message request = parseMessage(replySocket);
+      rpc = brokerSession.rpc(
+          (QName) request.getRoute().getType(),
+          XmlUtils.xmlToCompositeNode((String) request.getPayload()));
 
-      _logger.debug("Received rpc request [{}]", request);
+      result = (rpc !=null) ? rpc.get(): null;
 
-      // Call broker to process the message then reply
-      Future<RpcResult<CompositeNode>> rpc = brokerSession.rpc(
-          (QName) request.getRoute().getType(), (CompositeNode) request.getPayload());
+    } catch (Exception e) {
+      _logger.debug("Broker threw  [{}]", e);
+    }
 
-      RpcResult<CompositeNode> result = rpc.get();
 
-      Message response = new Message.MessageBuilder()
-          .type(MessageType.RESPONSE)
-          .sender(localIp + ":" + rpcPort)
-          .route(request.getRoute())
-          .payload(result.getResult())
-          .build();
+    CompositeNode payload = (result != null) ? result.getResult() : null;
 
-      _logger.debug("Sending response [{}]", response);
+    Message response = new Message.MessageBuilder()
+        .type(MessageType.RESPONSE)
+        .sender(localUri)
+        .route(request.getRoute())
+        .payload(XmlUtils.compositeNodeToXml(payload))
+        .build();
+
+    _logger.debug("Sending rpc response [{}]", response);
+
+    try {
       replySocket.send(Message.serialize(response));
-
-      _logger.debug("Sent rpc response [{}]", response);
-
-    } catch (IOException ex) {
-      //TODO: handle exception and send error codes to caller
-      ex.printStackTrace();
+    } catch (Exception e) {
+      _logger.debug("rpc response send failed for message [{}]", response);
+      _logger.debug("{}", e);
     }
+
   }
 
-  /**
-   * Finds IPv4 address of the local VM
-   * TODO: This method is non-deterministic. There may be more than one IPv4 address. Cant say which
-   * address will be returned. Read IP from a property file or enhance the code to make it deterministic.
-   * Should we use IP or hostname?
-   *
-   * @return
-   */
-  private String getLocalIpAddress() {
-    String hostAddress = null;
-    Enumeration e = null;
-    try {
-      e = NetworkInterface.getNetworkInterfaces();
-    } catch (SocketException e1) {
-      e1.printStackTrace();
-    }
-    while (e.hasMoreElements()) {
-
-      NetworkInterface n = (NetworkInterface) e.nextElement();
-
-      Enumeration ee = n.getInetAddresses();
-      while (ee.hasMoreElements()) {
-        InetAddress i = (InetAddress) ee.nextElement();
-        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress()))
-          hostAddress = i.getHostAddress();
-      }
-    }
-    return hostAddress;
-
-  }
 
   /**
    * @param socket
@@ -264,11 +242,10 @@ public class Server  implements RouteChangeListener<String, Set>{
       _logger.debug("Adding registration for [{}]", name);
       RouteIdentifierImpl routeId = new RouteIdentifierImpl();
       routeId.setType(name);
-      String address = "tcp://" + localIp + ":" + rpcPort;
 
       try {
-        routingTable.addGlobalRoute(routeId.toString(), address);
-        _logger.debug("Route added [{}-{}]", name, address);
+        routingTable.addGlobalRoute(routeId.toString(), localUri);
+        _logger.debug("Route added [{}-{}]", name, localUri);
 
       } catch (RoutingTableException | SystemException e) {
         //TODO: This can be thrown when route already exists in the table. Broker

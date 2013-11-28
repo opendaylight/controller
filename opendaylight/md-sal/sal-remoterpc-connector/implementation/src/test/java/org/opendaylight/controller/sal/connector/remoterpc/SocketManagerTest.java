@@ -27,8 +27,8 @@ public class SocketManagerTest {
   }
 
   @After
-  public void tearDown(){
-    manager.stop();
+  public void tearDown() throws Exception {
+    manager.close();
   }
 
   @Test
@@ -88,7 +88,7 @@ public class SocketManagerTest {
 
   @Test
   public void getManagedSocket_WhenPassedNonManagedZmqSocket_ShouldReturnNone() throws Exception {
-    ZMQ.Socket nonManagedSocket = Context.zmqContext.socket(ZMQ.REQ);
+    ZMQ.Socket nonManagedSocket = Context.getInstance().getZmqContext().socket(ZMQ.REQ);
     nonManagedSocket.connect("tcp://localhost:5000");
 
     //Prepare data
@@ -106,7 +106,7 @@ public class SocketManagerTest {
     manager.getManagedSocket("tcp://localhost:5555");
     Assert.assertTrue( 2 == manager.getManagedSockets().size());
 
-    manager.stop();
+    manager.close();
     Assert.assertTrue( 0 == manager.getManagedSockets().size());
   }
 

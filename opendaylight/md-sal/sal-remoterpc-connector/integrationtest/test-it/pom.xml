@@ -185,6 +185,11 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-api</artifactId>
     </dependency>
+    <!--dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-impl</artifactId>
+      <version>0.5.9-SNAPSHOT</version>
+    </dependency-->
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-parser-impl</artifactId>

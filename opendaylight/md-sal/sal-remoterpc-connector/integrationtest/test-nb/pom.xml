@@ -8,9 +8,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-
   <artifactId>sal-remoterpc-connector-test-nb</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <build>
@@ -41,9 +39,11 @@
               org.opendaylight.controller.sal.connector.api,
               org.opendaylight.controller.sal.connector.remoterpc.api;version="[0.4,1)",
               org.opendaylight.controller.sal.connector.remoterpc.impl;version="[0.4,1)",
+              org.opendaylight.controller.sal.connector.remoterpc.dto,
+              org.opendaylight.controller.sal.connector.remoterpc.util,
               org.osgi.framework,
               com.google.common.base,
-                org.opendaylight.yangtools.yang.data.api,
+              org.opendaylight.yangtools.yang.data.api,
               !org.codehaus.enunciate.jaxrs
 
             </Import-Package>
@@ -79,6 +79,11 @@
     <dependency>
       <groupId>org.opendaylight.controller.tests</groupId>
       <artifactId>sal-remoterpc-connector-test-consumer</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-remoterpc-connector</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
