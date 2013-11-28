@@ -13,9 +13,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
-import org.opendaylight.controller.config.persist.api.storage.StorageAdapter.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class PersisterImplTest {
+public class PersisterAggregatorTest {
     @Mock
     TestingPropertiesProvider propertiesProvider;
 
@@ -62,11 +63,11 @@ public class PersisterImplTest {
         doReturn(MockAdapter.class.getName()).when(propertiesProvider).getProperty(
                 ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
 
-        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(propertiesProvider);
-        persisterImpl.persistConfig(null);
-        persisterImpl.loadLastConfig();
-        persisterImpl.persistConfig(null);
-        persisterImpl.loadLastConfig();
+        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
+        persisterAggregator.persistConfig(null);
+        persisterAggregator.loadLastConfig();
+        persisterAggregator.persistConfig(null);
+        persisterAggregator.loadLastConfig();
 
         assertEquals(2, MockAdapter.persist);
         assertEquals(2, MockAdapter.load);
@@ -85,8 +86,8 @@ public class PersisterImplTest {
         doReturn("propertiesProvider").when(propertiesProvider).toString();
         doReturn(null).when(propertiesProvider).getProperty("numberOfBackups");
 
-        PersisterImpl persisterImpl = PersisterImpl.createFromProperties(propertiesProvider);
-        assertTrue(persisterImpl.getStorage() instanceof FileStorageAdapter);
+        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
+        assertTrue(persisterAggregator.getStorage() instanceof FileStorageAdapter);
     }
 
     @Test
@@ -99,7 +100,7 @@ public class PersisterImplTest {
         doReturn("propertiesProvider").when(propertiesProvider).toString();
         doReturn("0").when(propertiesProvider).getProperty("numberOfBackups");
         try {
-            PersisterImpl.createFromProperties(propertiesProvider);
+            PersisterAggregator.createFromProperties(propertiesProvider);
             fail();
         } catch (RuntimeException e) {
             assertThat(
@@ -110,18 +111,18 @@ public class PersisterImplTest {
 
     @Test
     public void test() throws Exception {
-        StorageAdapter storage = mock(StorageAdapter.class);
+        Persister storage = mock(Persister.class);
         doReturn(null).when(storage).loadLastConfig();
-        doNothing().when(storage).persistConfig(any(Persister.ConfigSnapshotHolder.class));
-        PersisterImpl persister = new PersisterImpl(storage);
+        doNothing().when(storage).persistConfig(any(ConfigSnapshotHolder.class));
+        PersisterAggregator persister = new PersisterAggregator(storage);
         persister.loadLastConfig();
         persister.persistConfig(null);
 
         verify(storage).loadLastConfig();
-        verify(storage).persistConfig(any(Persister.ConfigSnapshotHolder.class));
+        verify(storage).persistConfig(any(ConfigSnapshotHolder.class));
     }
 
-    public static class MockAdapter implements StorageAdapter {
+    public static class MockAdapter implements StorageAdapter, Persister {
 
         static int persist = 0;
 
@@ -141,14 +142,13 @@ public class PersisterImplTest {
         static int props = 0;
 
         @Override
-        public void setProperties(PropertiesProvider propertiesProvider) {
+        public Persister instantiate(PropertiesProvider propertiesProvider) {
             props++;
+            return this;
         }
 
         @Override
         public void close() throws IOException {
-            // TODO Auto-generated method stub
-
         }
 
     }

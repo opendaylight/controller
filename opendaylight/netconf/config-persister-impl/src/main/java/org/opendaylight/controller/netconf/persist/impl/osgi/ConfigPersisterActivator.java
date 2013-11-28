@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import org.opendaylight.controller.config.persist.api.storage.StorageAdapter.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
-import org.opendaylight.controller.netconf.persist.impl.PersisterImpl;
+import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -61,7 +61,7 @@ public class ConfigPersisterActivator implements BundleActivator {
             regex = DEFAULT_IGNORED_REGEX;
         }
         Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
-        PersisterImpl persister = PersisterImpl.createFromProperties(propertiesProvider);
+        PersisterAggregator persister = PersisterAggregator.createFromProperties(propertiesProvider);
 
         InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
                 "Netconf is not configured, persister is not operational");

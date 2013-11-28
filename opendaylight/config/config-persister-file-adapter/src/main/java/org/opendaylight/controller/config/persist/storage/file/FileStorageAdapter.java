@@ -14,7 +14,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -30,15 +33,15 @@ import java.util.TreeSet;
 /**
  * StorageAdapter that stores configuration in a plan file.
  */
-public class FileStorageAdapter implements StorageAdapter {
+public class FileStorageAdapter implements StorageAdapter, Persister {
     private static final Logger logger = LoggerFactory.getLogger(FileStorageAdapter.class);
 
-    // TODO prefix properties
 
     private static final Charset ENCODING = Charsets.UTF_8;
 
     public static final String FILE_STORAGE_PROP = "fileStorage";
     public static final String NUMBER_OF_BACKUPS = "numberOfBackups";
+
 
     private static final String SEPARATOR_E_PURE = "//END OF CONFIG";
     private static final String SEPARATOR_E = newLine(SEPARATOR_E_PURE);
@@ -55,7 +58,7 @@ public class FileStorageAdapter implements StorageAdapter {
     private File storage;
 
     @Override
-    public void setProperties(PropertiesProvider propertiesProvider) {
+    public Persister instantiate(PropertiesProvider propertiesProvider) {
         File storage = extractStorageFileFromProperties(propertiesProvider);
         logger.debug("Using file {}", storage.getAbsolutePath());
         // Create file if it does not exist
@@ -79,7 +82,7 @@ public class FileStorageAdapter implements StorageAdapter {
                     + " property should be either set to positive value, or ommited. Can not be set to 0.");
         }
         setFileStorage(storage);
-
+        return this;
     }
 
     @VisibleForTesting
