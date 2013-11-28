@@ -12,28 +12,17 @@ import com.google.common.base.Optional;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.SortedSet;
 
 /**
  * Base interface for persister implementation.
  */
-public interface Persister extends Closeable {
+public interface Persister extends AutoCloseable {
 
     void persistConfig(ConfigSnapshotHolder configSnapshotHolder) throws IOException;
 
     Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException;
 
-    public static interface ConfigSnapshotHolder {
+    @Override
+    void close();
 
-        /**
-         * Get part of get-config document that contains just
-         */
-        String getConfigSnapshot();
-
-
-        /**
-         * Get only required capabilities referenced by the snapshot.
-         */
-        SortedSet<String> getCapabilities();
-    }
 }
