@@ -137,16 +137,22 @@ final class TestUtils {
 
     static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath,
             String outputPath, String searchedModuleName, String searchedDataSchemaName) {
-        String jsonResult = null;
-        Set<Module> modules = null;
+        Set<Module> modules = resolveModules(yangPath);
+        Module module = resolveModule(searchedModuleName, modules);
+        DataSchemaNode dataSchemaNode = resolveDataSchemaNode(module, searchedDataSchemaName);
 
         try {
-            modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangPath).getPath());
-        } catch (FileNotFoundException e) {
+            return writeCompNodeWithSchemaContextToJson(compositeNode, outputPath, modules, dataSchemaNode);
+        } catch (WebApplicationException | IOException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        assertNotNull("modules can't be null.", modules);
+        return null;
 
+    }
+
+    static Module resolveModule(String searchedModuleName, Set<Module> modules) {
+        assertNotNull("modules can't be null.", modules);
         Module module = null;
         if (searchedModuleName != null) {
             for (Module m : modules) {
@@ -158,12 +164,24 @@ final class TestUtils {
         } else if (modules.size() == 1) {
             module = modules.iterator().next();
         }
+        return module;
+    }
+
+    static Set<Module> resolveModules(String yangPath) {
+        Set<Module> modules = null;
+
+        try {
+            modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangPath).getPath());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return modules;
+    }
+
+    static DataSchemaNode resolveDataSchemaNode(Module module, String searchedDataSchemaName) {
         assertNotNull("Module is missing", module);
 
-        assertNotNull("Composite node can't be null", compositeNode);
-
-        StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
         DataSchemaNode dataSchemaNode = null;
         if (searchedDataSchemaName != null) {
             for (DataSchemaNode dsn : module.getChildNodes()) {
@@ -174,19 +192,23 @@ final class TestUtils {
         } else if (module.getChildNodes().size() == 1) {
             dataSchemaNode = module.getChildNodes().iterator().next();
         }
-        assertNotNull(dataSchemaNode);
-        // SchemaContextUtil.
+        return dataSchemaNode;
+    }
 
-        ControllerContext controllerContext = ControllerContext.getInstance();
-        controllerContext.setSchemas(loadSchemaContext(modules));
-        StructuredData structuredData = new StructuredData(compositeNode, dataSchemaNode);
-        try {
-            structuredDataToJsonProvider.writeTo(structuredData, null, null, null, null, null, byteArrayOS);
-        } catch (WebApplicationException | IOException e) {
-            e.printStackTrace();
-        }
-        assertFalse("Returning JSON string can't be empty for node " + dataSchemaNode.getQName().getLocalName(),
-                byteArrayOS.toString().isEmpty());
+    static String writeCompNodeWithSchemaContextToJson(CompositeNode compositeNode, String outputPath,
+            Set<Module> modules, DataSchemaNode dataSchemaNode) throws IOException, WebApplicationException {
+        String jsonResult;
+
+        assertNotNull(dataSchemaNode);
+        assertNotNull("Composite node can't be null", compositeNode);
+        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+
+        ControllerContext contContext = ControllerContext.getInstance();
+        contContext.setSchemas(loadSchemaContext(modules));
+        
+        StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
+        structuredDataToJsonProvider.writeTo(new StructuredData(compositeNode, dataSchemaNode), null, null, null, null,
+                null, byteArrayOS);
 
         jsonResult = byteArrayOS.toString();
         try {
