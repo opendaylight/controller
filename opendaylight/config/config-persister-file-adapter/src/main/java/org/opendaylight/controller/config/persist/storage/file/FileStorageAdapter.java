@@ -16,7 +16,6 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -55,8 +54,8 @@ public class FileStorageAdapter implements StorageAdapter {
     private File storage;
 
     @Override
-    public void setProperties(BundleContext bundleContext) {
-        File storage = extractStorageFileFromProperties(bundleContext);
+    public void setProperties(PropertiesProvider propertiesProvider) {
+        File storage = extractStorageFileFromProperties(propertiesProvider);
         logger.debug("Using file {}", storage.getAbsolutePath());
         // Create file if it does not exist
         File parentFile = storage.getAbsoluteFile().getParentFile();
@@ -92,12 +91,11 @@ public class FileStorageAdapter implements StorageAdapter {
         numberOfStoredBackups = numberOfBackups;
     }
 
-    private static File extractStorageFileFromProperties(BundleContext bundleContext) {
-        String fileStorageProperty = bundleContext.getProperty(FILE_STORAGE_PROP);
-        Preconditions.checkNotNull(fileStorageProperty, "Unable to find " + FILE_STORAGE_PROP
-                + " in received context :" + bundleContext);
+    private static File extractStorageFileFromProperties(PropertiesProvider propertiesProvider) {
+        String fileStorageProperty = propertiesProvider.getProperty(FILE_STORAGE_PROP);
+        Preconditions.checkNotNull(fileStorageProperty, "Unable to find " + propertiesProvider.getFullKeyForReporting(FILE_STORAGE_PROP));
         File result = new File(fileStorageProperty);
-        String numberOfBAckupsAsString = bundleContext.getProperty(NUMBER_OF_BACKUPS);
+        String numberOfBAckupsAsString = propertiesProvider.getProperty(NUMBER_OF_BACKUPS);
         if (numberOfBAckupsAsString != null) {
             numberOfStoredBackups = Integer.valueOf(numberOfBAckupsAsString);
         } else {
