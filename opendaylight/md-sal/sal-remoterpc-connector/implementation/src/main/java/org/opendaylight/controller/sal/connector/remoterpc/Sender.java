@@ -7,14 +7,104 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.MessageWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zeromq.ZMQ;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import static com.google.common.base.Preconditions.*;
+
 /**
- * Created by IntelliJ IDEA.
- * User: alefan
- * Date: 11/21/13
- * Time: 12:41 PM
- * To change this template use File | Settings | File Templates.
+ * Main server thread for sending requests.
  */
-public class Sender {
+public class Sender implements Runnable{
+
+  private Logger _logger = LoggerFactory.getLogger(Sender.class);
+
+
+  @Override
+  public void run() {
+    _logger.info("Starting...");
+
+    try (SocketManager socketManager = new SocketManager()){
+      while (!Thread.currentThread().isInterrupted()) {
+
+        //read incoming messages from blocking queue
+        MessageWrapper request = pollForRequest();
+
+        if (request != null) {
+          processRequest(socketManager, request);
+        }
+
+        flushSockets(socketManager);
+        pollForResponse(socketManager);
+        processResponse(socketManager);
+
+      }
+    } catch(Throwable t){
+      _logger.error("Exception: [{}]", t);
+      _logger.error("Stopping...");
+    }
+  }
+
+  private void processResponse(SocketManager socketManager) {
+    for (int i = 0; i < socketManager.getPoller().getSize(); i++) {
+      // If any sockets get a response, process it
+      if (socketManager.getPoller().pollin(i)) {
+        Optional<RpcSocket> socket = socketManager.getManagedSocketFor(
+            socketManager.getPoller().getItem(i).getSocket());
+
+        checkState(socket.isPresent(), "Managed socket not found");
+
+        MessageWrapper response = socket.get().receive();
+        _logger.debug("Received rpc response [{}]", response.getMessage());
+
+        //TODO: handle exception and introduce timeout on receiver side
+        try {
+          response.getReceiveSocket().send(Message.serialize(response.getMessage()));
+        } catch (IOException e) {
+          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+      }
+    }
+  }
+
+  private void processRequest(SocketManager socketManager, MessageWrapper request) throws TimeoutException {
+
+    if ((request.getMessage() == null) ||
+        (request.getMessage().getRecipient() == null)) {
+      //invalid message. log and drop
+      _logger.error("Invalid request [{}]", request);
+      return;
+    }
+
+    RpcSocket socket =
+        socketManager.getManagedSocket(request.getMessage().getRecipient());
+
+    socket.send(request);
+  }
+
+  private void flushSockets(SocketManager socketManager){
+    for (RpcSocket socket : socketManager.getManagedSockets()){
+      socket.process();
+    }
+  }
+
+  private MessageWrapper pollForRequest(){
+    return Client.getInstance().getRequestQueue().poll();
+  }
+
+  private void pollForResponse(SocketManager socketManager){
+    try{
+      socketManager.getPoller().poll(10); //poll every 10ms
+    }catch (Throwable t) { /*Ignore and continue*/ }
+  }
 }
 
 

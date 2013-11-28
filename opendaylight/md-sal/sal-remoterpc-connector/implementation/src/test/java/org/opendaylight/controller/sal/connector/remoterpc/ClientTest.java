@@ -12,7 +12,7 @@ public class ClientTest {
 
   @Before
   public void setup(){
-    Client.requestQueue().clear();
+    Client.getInstance().getRequestQueue().clear();
   }
 
   @Test
@@ -27,8 +27,8 @@ public class ClientTest {
 
   @Test
   public void process_AddAMessage_ShouldAddToQueue() throws Exception {
-    Client.process(getEmptyMessageWrapper());
-    Assert.assertEquals(1, Client.requestQueue().size());
+    Client.getInstance().process(getEmptyMessageWrapper());
+    Assert.assertEquals(1, Client.getInstance().getRequestQueue().size());
   }
 
   /**
@@ -39,7 +39,7 @@ public class ClientTest {
   @Test(expected = TimeoutException.class)
   public void process_Add101Message_ShouldThrow() throws Exception {
     for (int i=0;i<101;i++){
-      Client.process(getEmptyMessageWrapper());
+      Client.getInstance().process(getEmptyMessageWrapper());
     }
   }
 

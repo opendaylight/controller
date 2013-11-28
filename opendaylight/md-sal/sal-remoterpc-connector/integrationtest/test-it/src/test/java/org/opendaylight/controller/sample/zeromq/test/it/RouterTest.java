@@ -16,6 +16,7 @@ import org.opendaylight.controller.sal.connector.remoterpc.Server;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
+import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sample.zeromq.provider.ExampleProvider;
 import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -61,13 +62,19 @@ public class RouterTest {
 
   @Test
   public void testInvokeRpc() throws Exception{
-    Thread.sleep(10000);
+    Thread.sleep(1000);
     //Send announcement
     ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
     Assert.assertNotNull(providerRef);
 
     ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
     Assert.assertNotNull(provider);
+
+    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+    Assert.assertNotNull(consumerRef);
+    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+    Assert.assertNotNull(consumer);
+
 
     _logger.debug("Provider sends announcement [{}]", "heartbeat");
     provider.announce(QNAME);
@@ -76,7 +83,7 @@ public class RouterTest {
     _logger.debug("Found router[{}]", router);
     _logger.debug("Invoking RPC [{}]", QNAME);
     for (int i = 0; i < 3; i++) {
-      RpcResult<CompositeNode> result = router.getInstance().invokeRpc(QNAME, new CompositeNodeImpl());
+      RpcResult<CompositeNode> result = router.getInstance().invokeRpc(QNAME, consumer.getValidCompositeNodeWithOneSimpleChild());
       _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
       Assert.assertNotNull(result);
     }
@@ -262,6 +269,36 @@ public class RouterTest {
   }
 
   //@Test
+  // This method is UNTESTED -- need to get around the bundling issues before I know if this even work
+//  public void testInvokeRpcWithValidCompositeNode() throws Exception{
+//    Thread.sleep(10000);
+//    //Send announcement
+//    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+//    Assert.assertNotNull(providerRef);
+//
+//    ExampleProvider provider = (ExampleProvider)ctx.getService(providerRef);
+//    Assert.assertNotNull(provider);
+//
+//    ServiceReference consumerRef = ctx.getServiceReference(ExampleConsumer.class);
+//    Assert.assertNotNull(consumerRef);
+//
+//    ExampleConsumer consumer = (ExampleConsumer)ctx.getService(consumerRef);
+//    Assert.assertNotNull(consumer);
+//
+//    _logger.debug("Provider sends announcement [{}]", "heartbeat");
+//    provider.announce(QNAME);
+//    ServiceReference routerRef = ctx.getServiceReference(Client.class);
+//    Client router = (Client) ctx.getService(routerRef);
+//    _logger.debug("Found router[{}]", router);
+//    _logger.debug("Invoking RPC [{}]", QNAME);
+//    for (int i = 0; i < 3; i++) {
+//      RpcResult<CompositeNode> result = router.getInstance().invokeRpc(QNAME, consumer.getValidCompositeNodeWithOneSimpleChild());
+//      _logger.debug("{}-> Result is: Successful:[{}], Payload:[{}], Errors: [{}]", i, result.isSuccessful(), result.getResult(), result.getErrors());
+//      Assert.assertNotNull(result);
+//    }
+//  }
+
+  @Test
   public void testRpc() throws Exception {
 
     RouteIdentifierImpl routeId = new RouteIdentifierImpl();
@@ -275,7 +312,7 @@ public class RouterTest {
         .build();
     _logger.debug("Sending request [{}]", request);
     Message response = send(request);
-    CompositeNode result = (CompositeNode) response.getPayload();
+    CompositeNode result = (CompositeNode) XmlUtils.xmlToCompositeNode((String)response.getPayload());
     _logger.debug("Got response [{}]", response);
 
   }
@@ -374,10 +411,7 @@ public class RouterTest {
   @Configuration
   public Option[] config() {
     return options(systemProperty("osgi.console").value("2401"),
-        systemProperty("pub.port").value("5557"),
-        systemProperty("sub.port").value("5556"),
         systemProperty("rpc.port").value("5555"),
-        systemProperty("pub.ip").value("localhost"),
         mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(), //
         mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
         mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
@@ -414,7 +448,6 @@ public class RouterTest {
         mavenBundle(YANG + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
         mavenBundle("com.google.guava", "guava").versionAsInProject(), //
         mavenBundle("org.zeromq", "jeromq").versionAsInProject(),
-        mavenBundle("org.scala-lang", "scala-library").versionAsInProject(),
         mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
         mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
         //routingtable dependencies

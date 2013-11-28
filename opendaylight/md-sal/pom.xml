@@ -102,9 +102,13 @@
         <guava.version>14.0.1</guava.version>
         <osgi.core.version>5.0.0</osgi.core.version>
         <junit.version>4.8.1</junit.version>
+        <powermock.version>1.5.1</powermock.version>
+        <mockito.version>1.9.5</mockito.version>
         <xtend.version>2.4.3</xtend.version>
         <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
         <jacoco.version>0.5.3.201107060350</jacoco.version>
+        <sal.version>0.5.1-SNAPSHOT</sal.version>  <!-- AD Sal version -->
+
         <!-- Sonar properties using jacoco to retrieve integration test results -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -194,9 +198,6 @@
     <dependencyManagement>
         <dependencies>
 
-
-
-
             <!-- YANG Tools Dependencies -->
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
@@ -215,6 +216,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-data-impl</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-api</artifactId>
                 <version>${yang.version}</version>
             </dependency>
@@ -228,6 +234,11 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sal-connector-api</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>sal</artifactId>
+              <version>${sal.version}</version>
             </dependency>
 
             <!-- Supporting Libraries -->
@@ -246,7 +257,11 @@
                 <artifactId>org.eclipse.xtend.lib</artifactId>
                 <version>${xtend.version}</version>
             </dependency>
-
+          <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${osgi.core.version}</version>
+          </dependency>
             <!-- Testing Dependencies -->
             <dependency>
                 <groupId>junit</groupId>
@@ -257,8 +272,26 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.9.5</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+              <groupId>org.powermock</groupId>
+              <artifactId>powermock-module-junit4</artifactId>
+              <version>${powermock.version}</version>
+              <scope>test</scope>
+            </dependency>
+            <dependency>
+              <groupId>org.powermock</groupId>
+              <artifactId>powermock-api-mockito</artifactId>
+              <version>${powermock.version}</version>
+              <scope>test</scope>
+            </dependency>
+            <dependency>
+              <groupId>org.powermock</groupId>
+              <artifactId>powermock-core</artifactId>
+              <version>${powermock.version}</version>
+              <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

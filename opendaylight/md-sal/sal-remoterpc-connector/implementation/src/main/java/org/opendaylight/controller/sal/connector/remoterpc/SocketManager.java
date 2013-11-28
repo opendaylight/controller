@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Manages creation of {@link RpcSocket} and their registration with {@link ZMQ.Poller}
  */
-public class SocketManager {
+public class SocketManager implements AutoCloseable{
   private static final Logger log = LoggerFactory.getLogger(SocketManager.class);
 
   /*
@@ -83,12 +83,13 @@ public class SocketManager {
    * This should be called when stopping the server to close all the sockets
    * @return
    */
-  public void stop() {    
-    log.debug("{} stopping SocketManager", Thread.currentThread().getName());
+  @Override
+  public void close() throws Exception {
+    log.debug("Stopping...");
     for (RpcSocket socket : managedSockets.values()) {
       socket.close();
     }
     managedSockets.clear();
-    log.debug("SocketManager stopped");
+    log.debug("Stopped");
   }
 }

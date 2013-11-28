@@ -10,9 +10,8 @@ package org.opendaylight.controller.sal.connector.remoterpc;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.MessageWrapper;
-import org.opendaylight.controller.sal.connector.remoterpc.RpcSocket;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.MessageWrapper;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -20,7 +19,6 @@ import org.zeromq.ZMQ;
 
 import java.util.concurrent.TimeoutException;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 
 @RunWith(PowerMockRunner.class)
@@ -86,29 +84,29 @@ public class RpcSocketTest {
   @Test
   public void testProcessStateTransitions() throws Exception {
     PowerMockito.doNothing().when(spy, "sendMessage");
-    Assert.assertTrue(spy.getState() instanceof IdleSocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
     spy.send(getEmptyMessageWrapper());
     Assert.assertEquals(1, spy.getQueueSize());
     Thread.sleep(200);
-    Assert.assertTrue(spy.getState() instanceof BusySocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
     Thread.sleep(1800);
 
     //1st timeout, 2nd try
     spy.process();
     Thread.sleep(200);
-    Assert.assertTrue(spy.getState() instanceof BusySocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
     Thread.sleep(1800);
 
     //2nd timeout, 3rd try
     spy.process();
     Thread.sleep(200);
-    Assert.assertTrue(spy.getState() instanceof BusySocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
     Thread.sleep(1800);
 
     //3rd timeout, no more tries => remove
     spy.process();
     Thread.sleep(200);
-    Assert.assertTrue(spy.getState() instanceof IdleSocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
     Assert.assertEquals(0, spy.getQueueSize());
   }
 
@@ -154,21 +152,45 @@ public class RpcSocketTest {
   @Test
   public void testReceiveStateTransitions() throws Exception {
     PowerMockito.doReturn(null).when(spy, "parseMessage");
-    Assert.assertTrue(spy.getState() instanceof IdleSocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
     spy.send(getEmptyMessageWrapper());
 
     //There should be 1 message waiting in the queue
     Assert.assertEquals(1, spy.getQueueSize());
-    Assert.assertTrue(spy.getState() instanceof BusySocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
 
     spy.receive();
     //This should complete message processing
     //The message should be removed from the queue
     Assert.assertEquals(0, spy.getQueueSize());
-    Assert.assertTrue(spy.getState() instanceof IdleSocketState);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
   }
 
   private MessageWrapper getEmptyMessageWrapper(){
     return new MessageWrapper(new Message(), null);
+  }
+
+  @Test
+  public void testProcessReceiveSequence() throws Exception {
+    PowerMockito.doNothing().when(spy, "sendMessage");
+    PowerMockito.doReturn(null).when(spy, "parseMessage");
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
+    spy.send(getEmptyMessageWrapper());
+    spy.send(getEmptyMessageWrapper());
+    Assert.assertEquals(2, spy.getQueueSize());
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
+
+
+    Thread.sleep(2000);
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
+    spy.receive();
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
+    Assert.assertEquals(1, spy.getQueueSize());
+
+    spy.process();
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.BusySocketState);
+    spy.receive();
+    Assert.assertTrue(spy.getState() instanceof RpcSocket.IdleSocketState);
+    Assert.assertEquals(0, spy.getQueueSize());
   }
 }
