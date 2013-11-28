@@ -121,15 +121,21 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
         if (isArray()) {
             return getArrayType();
+        } else if (isEnum(baseType)) {
+            return getSimpleType(baseType);
         } else if (isDerivedType(baseType)) {
             return getCompositeType(baseType, baseTypeDefinition);
         }
 
-        return getSimpleType();
+        return getSimpleType(getType());
     }
 
-    private OpenType<?> getSimpleType() {
-        SimpleType<?> simpleType = SimpleTypeResolver.getSimpleType(getType());
+    private boolean isEnum(Type baseType) {
+        return baseType.getFullyQualifiedName().equals(Enum.class.getName());
+    }
+
+    private OpenType<?> getSimpleType(Type type) {
+        SimpleType<?> simpleType = SimpleTypeResolver.getSimpleType(type);
         return simpleType;
     }
 
