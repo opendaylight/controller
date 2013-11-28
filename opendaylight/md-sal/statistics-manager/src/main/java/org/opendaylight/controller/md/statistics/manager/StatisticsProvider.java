@@ -113,7 +113,7 @@ public class StatisticsProvider implements AutoCloseable {
         
         spLogger.debug("Statistics requester thread started with timer interval : {}",5000);
         
-        statisticsRequesterThread.start();
+        //statisticsRequesterThread.start();
         
         spLogger.info("Statistics Provider started.");
     }
