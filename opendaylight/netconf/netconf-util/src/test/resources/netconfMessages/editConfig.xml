@@ -93,6 +93,8 @@
                         test-impl:impl-netconf
                     </type>
                     <name>test2</name>
+                    <simple-short>4</simple-short>
+
                     <testing-dep>
                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                         <name>ref_dep</name>

@@ -18,10 +18,13 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorS
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.ModuleRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -129,12 +132,21 @@ public class Get extends AbstractConfigNetconfOperation {
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application,
                     ErrorTag.operation_not_supported, ErrorSeverity.error, errorInfo);
         }
-        final Set<ObjectName> runtimeBeans = configRegistryClient.lookupRuntimeBeans();
-        final Map<String, Map<String, ModuleRuntime>> moduleMappings = createModuleRuntimes(configRegistryClient,
-                yangStoreSnapshot.getModuleMXBeanEntryMap());
-        final Runtime runtime = new Runtime(moduleMappings);
 
-        final Element element = runtime.toXml(runtimeBeans, document);
+        final Set<ObjectName> runtimeBeans = configRegistryClient.lookupRuntimeBeans();
+
+        //Transaction provider required only for candidate datastore
+        final Set<ObjectName> configBeans = Datastore.getInstanceQueryStrategy(Datastore.running, null)
+                .queryInstances(configRegistryClient);
+
+        final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(configRegistryClient,
+                yangStoreSnapshot.getModuleMXBeanEntryMap());
+        final Map<String, Map<String, ModuleConfig>> moduleConfigs = GetConfig.transform(configRegistryClient,
+                yangStoreSnapshot.getModuleMXBeanEntryMap());
+
+        final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
+
+        final Element element = runtime.toXml(runtimeBeans, configBeans, document);
 
         logger.info("{} operation successful", GET);
 
