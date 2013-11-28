@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7799851e",
+        "filename": "opendaylight/config/config-manager/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-11-28T18:59:05Z",
+      "side": 0,
+      "message": "I\u0027d rather see a list of imports instead of letting bnd genereate it automatically. Got a few surprises using the defaults.",
+      "revId": "6bbe43e23f7f9f7d5373db577874d51636d4cea4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
