@@ -52,7 +52,7 @@ module sal-flow {
     rpc add-flow {
         input {
             uses node-flow;
-            uses tr:transaction-aware;            
+            uses tr:transaction-aware;
         }
         output {
             uses tr:transaction-aware;
@@ -62,7 +62,7 @@ module sal-flow {
     rpc remove-flow {
         input {
             uses node-flow;
-            uses tr:transaction-aware;            
+            uses tr:transaction-aware;
         }
         output {
             uses tr:transaction-aware;
@@ -72,7 +72,7 @@ module sal-flow {
     rpc update-flow {
         input {
             uses flow-update;
-            uses tr:transaction-aware;            
+            uses tr:transaction-aware;
         }
         output {
             uses tr:transaction-aware;

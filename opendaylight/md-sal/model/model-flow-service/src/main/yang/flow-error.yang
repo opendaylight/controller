@@ -16,7 +16,7 @@ module flow-errors {
             enum flow-mod-failed;
             enum group-mod-failed;
             enum port-mod-failed;
-            enum table-mod-failed;            
+            enum table-mod-failed;
             enum queue-op-failed;
             enum switch-config-failed;
             enum role-request-failed;
@@ -34,7 +34,7 @@ module flow-errors {
         }
         
         leaf code {
-            type uint16;        
+            type uint16;
         }
         
         leaf data {
@@ -48,15 +48,15 @@ module flow-errors {
         }
         
         leaf exp-type {
-            type uint16;        
+            type uint16;
         }
         
         leaf experimenter-id {
-            type uint32;        
+            type uint32;
         }
         
         leaf data {
             type string;
         }
-    }   
+    }
 }

@@ -57,7 +57,14 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         val targetCls = createClass(iface.directProxyName, supertype) [
             field(DELEGATE_FIELD, iface);
             implementMethodsFrom(supertype) [
-                body = '''return ($r) «DELEGATE_FIELD».«it.name»($$);'''
+                body = '''
+                {
+                    if(«DELEGATE_FIELD» == null) {
+                        throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                    }
+                    return ($r) «DELEGATE_FIELD».«it.name»($$);
+                }
+                '''
             ]
         ]
         return targetCls.toClass(iface.classLoader).newInstance as T

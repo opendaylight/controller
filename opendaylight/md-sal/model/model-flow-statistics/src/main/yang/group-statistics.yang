@@ -8,9 +8,9 @@ module opendaylight-group-statistics {
     import flow-capable-transaction {prefix tr;}
     
     contact
-    	"Anilkumar Vishnoi
-    	Email: avishnoi@in.ibm.com";
-    		
+        "Anilkumar Vishnoi
+        Email: avishnoi@in.ibm.com";
+            
     revision "2013-11-11" {
         description "Initial revision of group statistics service";
     }
@@ -18,44 +18,44 @@ module opendaylight-group-statistics {
     augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-statistics";
         container group-statistics {
-        	//config "false";
-        	uses group-types:group-statistics-reply;
+            //config "false";
+            uses group-types:group-statistics-reply;
         }
     }
 
-	augment "/inv:nodes/inv:node" {
+    augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-desc-stats";
         container group-desc {
-        	//config "false";
-        	uses group-types:group-desc-stats-reply;
+            //config "false";
+            uses group-types:group-desc-stats-reply;
         }
     }
-	
-	augment "/inv:nodes/inv:node" {
+    
+    augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-features";
         container group-features {
-        	//config "false";
-        	uses group-types:group-features-reply;
+            //config "false";
+            uses group-types:group-features-reply;
         }
     }
 
-	// RPC calls
-	rpc get-all-group-statistics {
-		input {
-            uses inv:node;
+    // RPC calls
+    rpc get-all-group-statistics {
+        input {
+            uses inv:node-context-ref;
         }
         output {
-        	uses group-types:group-statistics-reply;
+            uses group-types:group-statistics-reply;
             uses tr:transaction-aware;
         }
-	
-	}
-	
-	rpc get-group-statistics {
-		input {
-            uses inv:node;
+    
+    }
+    
+    rpc get-group-statistics {
+        input {
+            uses inv:node-context-ref;
             leaf group-id{
-            	type group-types:group-id;
+                type group-types:group-id;
             }
            
         }
@@ -63,56 +63,56 @@ module opendaylight-group-statistics {
             uses group-types:group-statistics-reply;
             uses tr:transaction-aware;
         }
-	
-	}
-	
-	rpc get-group-description {
-		input {
-            uses inv:node;
+    
+    }
+    
+    rpc get-group-description {
+        input {
+            uses inv:node-context-ref;
         }
         output {
             uses group-types:group-desc-stats-reply;
             uses tr:transaction-aware;
         }
-	}
-	
-	rpc get-group-features {
-		input {
-            uses inv:node;
+    }
+    
+    rpc get-group-features {
+        input {
+            uses inv:node-context-ref;
         }
         output {
             uses group-types:group-features-reply;
             uses tr:transaction-aware;
         }
-	}
-	
+    }
+    
 
-	//Notification calls
-	
-	notification group-statistics-updated {
-		leaf moreReplies {
-			type boolean;
-		}
-		uses inv:node;
-		uses group-types:group-statistics-reply;
+    //Notification calls
+    
+    notification group-statistics-updated {
+        leaf moreReplies {
+            type boolean;
+        }
+        uses inv:node;
+        uses group-types:group-statistics-reply;
         uses tr:transaction-aware;
-	}
-	
-	notification group-desc-stats-updated {
-		leaf moreReplies {
-			type boolean;
-		}
-		uses inv:node;
-		uses group-types:group-desc-stats-reply;
+    }
+    
+    notification group-desc-stats-updated {
+        leaf moreReplies {
+            type boolean;
+        }
+        uses inv:node;
+        uses group-types:group-desc-stats-reply;
         uses tr:transaction-aware;
-	}
+    }
 
-	notification group-features-updated {
-		leaf moreReplies {
-			type boolean;
-		}
-		uses inv:node;
-		uses group-types:group-features-reply;
+    notification group-features-updated {
+        leaf moreReplies {
+            type boolean;
+        }
+        uses inv:node;
+        uses group-types:group-features-reply;
         uses tr:transaction-aware;
-	}
+    }
 }
