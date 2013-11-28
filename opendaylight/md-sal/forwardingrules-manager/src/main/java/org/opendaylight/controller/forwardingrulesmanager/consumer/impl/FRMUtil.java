@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.opendaylight.controller.sal.utils.IPProtocols;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
@@ -21,24 +22,26 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ClearActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTable;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.WriteActions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 
 public class FRMUtil {
     protected static final Logger logger = LoggerFactory.getLogger(FRMUtil.class);
@@ -46,6 +49,10 @@ public class FRMUtil {
 
     public static enum operation {
         ADD, DELETE, UPDATE, GET
+    };
+
+    private enum EtherIPType {
+        ANY, V4, V6;
     };
 
     public static boolean isNameValid(String name) {
@@ -59,10 +66,16 @@ public class FRMUtil {
     }
 
     public static boolean validateMatch(Flow flow) {
+
+        EtherIPType etype = EtherIPType.ANY;
+        EtherIPType ipsrctype = EtherIPType.ANY;
+        EtherIPType ipdsttype = EtherIPType.ANY;
+
         Match match = flow.getMatch();
         if (match != null) {
             EthernetMatch ethernetmatch = match.getEthernetMatch();
             IpMatch ipmatch = match.getIpMatch();
+            Layer3Match layer3match = match.getLayer3Match();
             VlanMatch vlanmatch = match.getVlanMatch();
             match.getIcmpv4Match();
 
@@ -87,24 +100,71 @@ public class FRMUtil {
                     if ((type < 0) || (type > 0xffff)) {
                         logger.error("Ethernet type is not valid");
                         return false;
+                    } else {
+                        if (type == 0x800) {
+                            etype = EtherIPType.V4;
+                        } else if (type == 0x86dd) {
+                            etype = EtherIPType.V6;
+                        }
                     }
+
+                }
+            } else if (layer3match != null) {
+                if (layer3match instanceof Ipv4Match) {
+                    if (((Ipv4Match) layer3match).getIpv4Source().getValue() != null
+                            && NetUtils.isIPv4AddressValid(((Ipv4Match) layer3match).getIpv4Source().getValue())) {
+                        ipsrctype = EtherIPType.V4;
+                    } else if (((Ipv4Match) layer3match).getIpv4Destination().getValue() != null
+                            && NetUtils.isIPv4AddressValid(((Ipv4Match) layer3match).getIpv4Destination().getValue())) {
+                        ipdsttype = EtherIPType.V4;
+                    }
+                } else if (layer3match instanceof Ipv6Match) {
+                    if (((Ipv6Match) layer3match).getIpv6Source().getValue() != null
+                            && NetUtils.isIPv6AddressValid(((Ipv6Match) layer3match).getIpv6Source().getValue())) {
+                        ipsrctype = EtherIPType.V6;
+                    } else if (((Ipv6Match) layer3match).getIpv6Destination().getValue() != null
+                            && NetUtils.isIPv6AddressValid(((Ipv6Match) layer3match).getIpv6Destination().getValue())) {
+                        ipdsttype = EtherIPType.V6;
+                    }
+
+                } else {
+                    logger.error("IP source address %s is not valid");
+                    return false;
                 }
             } else if (ipmatch != null) {
-                if (ipmatch.getIpProtocol() != null && isProtocolValid(ipmatch.getIpProtocol().toString())) {
+                if (ipmatch.getIpProtocol() != null && !(isProtocolValid(ipmatch.getIpProtocol().toString()))) {
                     logger.error("Protocol is not valid");
                     return false;
                 }
+
             } else if (vlanmatch != null) {
-                if (vlanmatch.getVlanId() != null && isVlanIdValid(vlanmatch.getVlanId().toString())) {
+                if (vlanmatch.getVlanId() != null && !(isVlanIdValid(vlanmatch.getVlanId().toString()))) {
                     logger.error("Vlan ID is not in the range 0 - 4095");
                     return false;
                 }
 
-                if (vlanmatch.getVlanPcp() != null && isVlanPriorityValid(vlanmatch.getVlanPcp().toString())) {
+                if (vlanmatch.getVlanPcp() != null && !(isVlanPriorityValid(vlanmatch.getVlanPcp().toString()))) {
                     logger.error("Vlan priority is not in the range 0 - 7");
                     return false;
                 }
             }
+            if (etype != EtherIPType.ANY) {
+                if ((ipsrctype != EtherIPType.ANY) && (ipsrctype != etype)) {
+                    logger.error("Type mismatch between Ethernet & Src IP");
+                    return false;
+                }
+                if ((ipdsttype != EtherIPType.ANY) && (ipdsttype != etype)) {
+                    logger.error("Type mismatch between Ethernet & Dst IP");
+                    return false;
+                }
+            }
+            if (ipsrctype != ipdsttype) {
+                if (!((ipsrctype == EtherIPType.ANY) || (ipdsttype == EtherIPType.ANY))) {
+                    logger.error("IP Src Dest Type mismatch");
+                    return false;
+                }
+            }
+
         }
 
         return true;
@@ -202,7 +262,7 @@ public class FRMUtil {
     public static boolean validateInstructions(Flow flow) {
         List<Instruction> instructionsList = new ArrayList<>();
         Instructions instructions = flow.getInstructions();
-        if( instructions == null ) {
+        if (instructions == null) {
             return false;
         }
         instructionsList = instructions.getInstruction();
