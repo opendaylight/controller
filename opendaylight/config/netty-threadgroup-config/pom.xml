@@ -5,8 +5,9 @@
 
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-subsystem</artifactId>
+        <artifactId>config-plugin-parent</artifactId>
         <version>0.2.3-SNAPSHOT</version>
+        <relativePath>../config-plugin-parent</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -81,18 +82,6 @@
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                         <Export-Package>
                         </Export-Package>
-                        <Import-Package>
-                            com.google.common.base,
-                            io.netty.channel.nio,
-                            org.opendaylight.controller.config.yang.netty,
-                            io.netty.util.concurrent,
-                            org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.config.api.annotations,
-                            org.opendaylight.controller.config.api.runtime,
-                            org.opendaylight.controller.config.spi,
-                            org.slf4j,
-                            org.osgi.framework
-                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
