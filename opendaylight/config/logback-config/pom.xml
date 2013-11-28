@@ -81,25 +81,6 @@
                     <instructions>
                         <Private-Package>
                         </Private-Package>
-                        <Import-Package>
-                            ch.qos.logback.classic,
-                            ch.qos.logback.classic.encoder,
-                            ch.qos.logback.classic.filter,
-                            ch.qos.logback.classic.spi,
-                            ch.qos.logback.core,
-                            ch.qos.logback.core.status,
-                            ch.qos.logback.core.encoder,
-                            ch.qos.logback.core.rolling,
-                            org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.config.api.runtime,
-                            org.opendaylight.controller.config.api.annotations,
-                            org.opendaylight.controller.config.spi,
-                            com.google.common.base,
-                            com.google.common.collect,
-                            org.apache.commons.lang3,
-                            org.slf4j,
-                            org.osgi.framework
-                        </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.logback.config,
                         </Export-Package>

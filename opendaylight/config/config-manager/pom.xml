@@ -27,8 +27,8 @@
             <artifactId>org.osgi.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jsr305</artifactId>
         </dependency>
         <!--
         <dependency>
@@ -84,16 +84,6 @@
                             org.opendaylight.controller.config.manager.*,
                             javax.annotation.*,
                         </Private-Package>
-                        <Import-Package>
-                            org.opendaylight.controller.config.api.*,
-                            org.opendaylight.controller.config.spi.*,
-                            org.slf4j,
-                            javax.management,
-                            org.osgi.framework,
-                            org.opendaylight.yangtools.concepts.*,
-                            org.apache.commons.io,
-                            org.osgi.util.tracker,
-                        </Import-Package>
                         <Export-Package>
                         </Export-Package>
                     </instructions>
