@@ -37,8 +37,7 @@ public class TableFeaturesConsumerImpl {
     private boolean inContainerMode; // being used by global instance only
 
     public TableFeaturesConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Tables.class).child(Table.class)
-                .toInstance();
+        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Tables.class).toInstance();
         tableService = FRMConsumerImpl.getProviderSession().getRpcService(SalTableService.class);
 
         if (null == tableService) {
@@ -115,12 +114,14 @@ public class TableFeaturesConsumerImpl {
         }
 
         Map<InstanceIdentifier<?>, TableFeatures> updates = new HashMap<>();
+        Map<InstanceIdentifier<?>, TableFeatures> createdEntries = new HashMap<>();
 
         /**
          * We create a plan which table features will be updated.
          *
          */
         void prepareUpdate() {
+        	Set<Entry<InstanceIdentifier<?>, DataObject>> createdEntries = modification.getCreatedConfigurationData().entrySet();
 
             Set<Entry<InstanceIdentifier<?>, DataObject>> puts = modification.getUpdatedConfigurationData().entrySet();
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
