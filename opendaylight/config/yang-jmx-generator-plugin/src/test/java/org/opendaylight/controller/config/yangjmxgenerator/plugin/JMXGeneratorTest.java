@@ -584,7 +584,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertContains(reqIfc, PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.ThreadFactoryServiceInterface");
 
-        assertEquals("Incorrenct number of generated methods", 24,
+        assertEquals("Incorrenct number of generated methods", 27,
                 visitor.methods.size());
         assertEquals("Incorrenct number of generated method descriptions", 3,
                 visitor.methodDescriptions.size());
