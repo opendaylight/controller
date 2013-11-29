@@ -1,6 +1,5 @@
 package org.opendaylight.controller.sal.restconf.impl
 
-import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.data.DataReader
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession

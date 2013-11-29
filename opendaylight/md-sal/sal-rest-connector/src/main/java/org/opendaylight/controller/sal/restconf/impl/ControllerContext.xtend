@@ -128,6 +128,25 @@ class ControllerContext implements SchemaServiceListener {
     private def dispatch CharSequence toRestconfIdentifier(PathArgument argument, DataSchemaNode node) {
         throw new IllegalArgumentException("Conversion of generic path argument is not supported");
     }
+    
+    def findModuleByNamespace(URI namespace) {
+        checkPreconditions
+        var module = uriToModuleName.get(namespace)
+        if (module === null) {
+            val moduleSchemas = schemas.findModuleByNamespace(namespace);
+            if(moduleSchemas === null) throw new IllegalArgumentException()
+            var latestModule = moduleSchemas.head
+            for (m : moduleSchemas) {
+                if (m.revision.after(latestModule.revision)) {
+                    latestModule = m
+                }
+            }
+            if(latestModule === null) throw new IllegalArgumentException()
+            uriToModuleName.put(namespace, latestModule.name)
+            module = latestModule.name;
+        }
+        return module
+    }
 
     def CharSequence toRestconfIdentifier(QName qname) {
         checkPreconditions

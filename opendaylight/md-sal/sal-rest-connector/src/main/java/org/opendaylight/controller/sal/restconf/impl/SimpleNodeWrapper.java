@@ -18,6 +18,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     private String localName;
     private String value;
     private URI namespace;
+    private QName name;
 
     public SimpleNodeWrapper(String localName, String value) {
         this.localName = Preconditions.checkNotNull(localName);
@@ -27,6 +28,12 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     public SimpleNodeWrapper(URI namespace, String localName, String value) {
         this(localName, value);
         this.namespace = namespace;
+    }
+    
+    @Override
+    public void setQname(QName name) {
+        Preconditions.checkState(simpleNode == null, "Cannot change the object, due to data inconsistencies.");
+        this.name = name;
     }
     
     @Override
@@ -54,12 +61,16 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     @Override
     public SimpleNode<String> unwrap(CompositeNode parent) {
         if (simpleNode == null) {
-            Preconditions.checkNotNull(namespace);
-            simpleNode = NodeFactory.createImmutableSimpleNode(new QName(namespace, localName), parent, value);
+            if (name == null) {
+                Preconditions.checkNotNull(namespace);
+                name = new QName(namespace, localName);
+            }
+            simpleNode = NodeFactory.createImmutableSimpleNode(name, parent, value);
             
             value = null;
             namespace = null;
             localName = null;
+            name = null;
         }
         return simpleNode;
     }
