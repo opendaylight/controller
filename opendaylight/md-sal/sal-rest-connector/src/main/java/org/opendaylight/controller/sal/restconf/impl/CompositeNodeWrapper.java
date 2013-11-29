@@ -24,6 +24,7 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
 
     private String localName;
     private URI namespace;
+    private QName name;
     private List<NodeWrapper<?>> values = new ArrayList<>();
     
     public CompositeNodeWrapper(String localName) {
@@ -33,6 +34,12 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     public CompositeNodeWrapper(URI namespace, String localName) {
         this(localName);
         this.namespace = namespace;
+    }
+    
+    @Override
+    public void setQname(QName name) {
+        Preconditions.checkState(compositeNode == null, "Cannot change the object, due to data inconsistencies.");
+        this.name = name;
     }
 
     @Override
@@ -75,9 +82,11 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     @Override
     public CompositeNode unwrap(CompositeNode parent) {
         if (compositeNode == null) {
-            Preconditions.checkNotNull(namespace);
-            compositeNode = NodeFactory.createMutableCompositeNode(new QName(namespace, localName), 
-                    parent, new ArrayList<Node<?>>(), ModifyAction.CREATE, null);
+            if (name == null) {
+                Preconditions.checkNotNull(namespace);
+                name = new QName(namespace, localName);
+            }
+            compositeNode = NodeFactory.createMutableCompositeNode(name, parent, new ArrayList<Node<?>>(), null, null);
             
             List<Node<?>> nodeValues = new ArrayList<>();
             for (NodeWrapper<?> nodeWrapper : values) {
@@ -88,6 +97,7 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
             values = null;
             namespace = null;
             localName = null;
+            name = null;
         }
         return compositeNode;
     }

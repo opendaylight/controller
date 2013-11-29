@@ -1,10 +1,12 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import java.util.List
+import java.util.Set
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.rest.api.RestconfService
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
 
@@ -77,7 +79,7 @@ class RestconfImpl implements RestconfService {
     
     override readConfigurationData(String identifier) {
         val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        val data = broker.readConfigurationData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
     
@@ -112,16 +114,43 @@ class RestconfImpl implements RestconfService {
     }
 
     private def void addNamespaceToNodeFromSchemaRecursively(NodeWrapper<?> nodeBuilder, DataSchemaNode schema) {
-        if (nodeBuilder.namespace === null) {
-            nodeBuilder.namespace = schema.QName.namespace
+        if (schema === null) {
+            throw new ResponseException(Response.Status.BAD_REQUEST,
+                "Data has bad format\n" + nodeBuilder.localName + " does not exist in yang schema.");
+        }
+        val moduleName = controllerContext.findModuleByNamespace(schema.QName.namespace);
+        if (nodeBuilder.namespace === null || nodeBuilder.namespace == schema.QName.namespace ||
+            nodeBuilder.namespace.path == moduleName) {
+            nodeBuilder.qname = schema.QName
+        } else {
+            throw new ResponseException(Response.Status.BAD_REQUEST,
+                "Data has bad format\nIf data is in XML format then namespace for " + nodeBuilder.localName +
+                    " should be " + schema.QName.namespace + ".\n If data is in Json format then module name for " +
+                    nodeBuilder.localName + " should be " + moduleName + ".");
         }
         if (nodeBuilder instanceof CompositeNodeWrapper) {
             val List<NodeWrapper<?>> children = (nodeBuilder as CompositeNodeWrapper).getValues
             for (child : children) {
                 addNamespaceToNodeFromSchemaRecursively(child,
-                    (schema as DataNodeContainer).childNodes.findFirst[n|n.QName.localName.equals(child.localName)])
+                    findFirstSchemaByLocalName(child.localName, (schema as DataNodeContainer).childNodes))
             }
         }
+    }
+    
+    private def DataSchemaNode findFirstSchemaByLocalName(String localName, Set<DataSchemaNode> schemas) {
+        for (schema : schemas) {
+            if (schema instanceof ChoiceNode) {
+                for (caze : (schema as ChoiceNode).cases) {
+                    val result =  findFirstSchemaByLocalName(localName, caze.childNodes)
+                    if (result !== null) {
+                        return result
+                    }
+                }
+            } else {
+                return schemas.findFirst[n|n.QName.localName.equals(localName)]
+            }
+        }
+        return null
     }
 
 }
