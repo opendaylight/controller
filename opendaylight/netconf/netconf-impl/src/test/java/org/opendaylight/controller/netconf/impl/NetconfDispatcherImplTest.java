@@ -49,7 +49,7 @@ public class NetconfDispatcherImplTest {
                 new HashedWheelTimer(), factoriesListener, idProvider);
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, null);
         NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(Optional.<SSLContext>absent(), serverNegotiatorFactory, listenerFactory);
 
 

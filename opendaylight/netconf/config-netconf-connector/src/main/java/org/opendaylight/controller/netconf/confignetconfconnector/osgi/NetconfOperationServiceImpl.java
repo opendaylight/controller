@@ -8,11 +8,8 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
@@ -25,8 +22,10 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages life cycle of {@link YangStoreSnapshot}.
@@ -76,8 +75,6 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
         // [RFC6241] 8.5.  Rollback-on-Error Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
-        // [RFC6022] get-schema RPC. TODO: implement rest of the RFC
-        capabilities.add(new BasicCapability("urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&revision=2010-10-04"));
 
         final Collection<Map.Entry<Module, String>> modulesAndContents = yangStoreSnapshot.getModuleMap().values();
         for (Map.Entry<Module, String> moduleAndContent : modulesAndContents) {

@@ -28,9 +28,11 @@ import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -60,6 +62,7 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -82,6 +85,8 @@ public class ConcurrentClientsTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
+    @Mock
+    private SessionMonitoringService monitoring;
 
     @Before
     public void setUp() throws Exception {
@@ -107,8 +112,11 @@ public class ConcurrentClientsTest {
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
+        doNothing().when(monitoring).onSessionUp(any(NetconfManagementSession.class));
+        doNothing().when(monitoring).onSessionDown(any(NetconfManagementSession.class));
+
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, monitoring);
         NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
                 Optional.<SSLContext> absent(), serverNegotiatorFactory, listenerFactory);
         dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);

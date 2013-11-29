@@ -17,20 +17,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import javax.management.ObjectName;
-import javax.net.ssl.SSLContext;
-import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -58,6 +44,7 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFa
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
 import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
@@ -73,6 +60,22 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+
+import javax.management.ObjectName;
+import javax.net.ssl.SSLContext;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
 import static java.util.Collections.emptyList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -82,8 +85,9 @@ import static org.mockito.Mockito.mock;
 
 public class NetconfITTest extends AbstractConfigTest {
 
-     private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
-    //
+    // TODO refactor, pull common code up to AbstractNetconfITTest
+
+    private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
     private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 10830);
@@ -97,7 +101,6 @@ public class NetconfITTest extends AbstractConfigTest {
     private EventLoopGroup nettyThreadgroup;
 
     private NetconfClientDispatcher clientDispatcher;
-
 
     @Before
     public void setUp() throws Exception {
@@ -127,11 +130,15 @@ public class NetconfITTest extends AbstractConfigTest {
                 new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, getNetconfMonitoringListenerService(logger));
 
         NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
                 sslC, serverNegotiatorFactory, listenerFactory);
         return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
+    }
+
+    static NetconfMonitoringServiceImpl getNetconfMonitoringListenerService(final Logger logger) {
+        return new NetconfMonitoringServiceImpl();
     }
 
     @After

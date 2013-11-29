@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.impl.osgi;
 import com.google.common.base.Optional;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
@@ -18,12 +19,15 @@ import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 public class NetconfImplActivator implements BundleActivator {
 
@@ -34,14 +38,14 @@ public class NetconfImplActivator implements BundleActivator {
     private NetconfServerDispatcher dispatch;
     private NioEventLoopGroup eventLoopGroup;
     private HashedWheelTimer timer;
+    private ServiceRegistration<NetconfMonitoringService> regMonitoring;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context, "TCP is not configured, netconf not available.");
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
-        factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);
-        factoriesTracker.open();
+        startOperationServiceFactoryTracker(context, factoriesListener);
 
         SessionIdProvider idProvider = new SessionIdProvider();
         timer = new HashedWheelTimer();
@@ -50,8 +54,10 @@ public class NetconfImplActivator implements BundleActivator {
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
+        NetconfMonitoringServiceImpl monitoringService = startMonitoringService(context);
+
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, monitoringService);
 
         eventLoopGroup = new NioEventLoopGroup();
 
@@ -64,6 +70,19 @@ public class NetconfImplActivator implements BundleActivator {
 
     }
 
+    private void startOperationServiceFactoryTracker(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+        factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);
+        factoriesTracker.open();
+    }
+
+    private NetconfMonitoringServiceImpl startMonitoringService(BundleContext context) {
+        NetconfMonitoringServiceImpl netconfMonitoringServiceImpl = new NetconfMonitoringServiceImpl();
+        Dictionary<String, ?> dic = new Hashtable<>();
+        regMonitoring = context.registerService(NetconfMonitoringService.class, netconfMonitoringServiceImpl, dic);
+
+        return netconfMonitoringServiceImpl;
+    }
+
     @Override
     public void stop(final BundleContext context) throws Exception {
         logger.info("Shutting down netconf because YangStoreService service was removed");
@@ -71,5 +90,8 @@ public class NetconfImplActivator implements BundleActivator {
         commitNot.close();
         eventLoopGroup.shutdownGracefully();
         timer.stop();
+
+        regMonitoring.unregister();
+        factoriesTracker.close();
     }
 }

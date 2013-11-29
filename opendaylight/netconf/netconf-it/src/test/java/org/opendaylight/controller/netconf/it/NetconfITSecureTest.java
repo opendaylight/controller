@@ -31,6 +31,7 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFa
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.protocol.util.SSLUtil;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -80,7 +81,7 @@ public class NetconfITSecureTest extends AbstractConfigTest {
                 new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, NetconfITTest.getNetconfMonitoringListenerService(LoggerFactory.getLogger(getClass())));
 
         NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
                 sslC, serverNegotiatorFactory, listenerFactory);
