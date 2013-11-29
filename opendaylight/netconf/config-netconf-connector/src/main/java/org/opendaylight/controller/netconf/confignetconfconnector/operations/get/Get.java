@@ -40,8 +40,6 @@ import java.util.Set;
 
 public class Get extends AbstractConfigNetconfOperation {
 
-    public static final String GET = "get";
-
     private final YangStoreSnapshot yangStoreSnapshot;
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
 
@@ -102,17 +100,17 @@ public class Get extends AbstractConfigNetconfOperation {
     }
 
     private static void checkXml(XmlElement xml) {
-        xml.checkName(GET);
+        xml.checkName(XmlNetconfConstants.GET);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         // Filter option - unsupported
         if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0)
-            throw new UnsupportedOperationException("Unsupported option " + XmlNetconfConstants.FILTER + " for " + GET);
+            throw new UnsupportedOperationException("Unsupported option " + XmlNetconfConstants.FILTER + " for " + XmlNetconfConstants.GET);
     }
 
     @Override
     protected String getOperationName() {
-        return GET;
+        return XmlNetconfConstants.GET;
     }
 
     @Override
@@ -148,7 +146,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Element element = runtime.toXml(runtimeBeans, configBeans, document);
 
-        logger.info("{} operation successful", GET);
+        logger.info("{} operation successful", XmlNetconfConstants.GET);
 
         return element;
     }

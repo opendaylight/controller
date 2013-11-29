@@ -14,18 +14,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import javax.management.ObjectName;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -43,6 +31,7 @@ import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -54,9 +43,24 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+
+import javax.management.ObjectName;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -78,6 +82,8 @@ public class ConcurrentClientsTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
+    @Mock
+    private SessionMonitoringService monitoring;
 
     @Before
     public void setUp() throws Exception {
@@ -103,8 +109,11 @@ public class ConcurrentClientsTest {
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
+        doNothing().when(monitoring).onSessionUp(any(NetconfServerSession.class));
+        doNothing().when(monitoring).onSessionDown(any(NetconfServerSession.class));
+
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, monitoring);
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory, listenerFactory);
         dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);
 

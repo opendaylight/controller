@@ -10,9 +10,9 @@ package org.opendaylight.controller.netconf.impl.osgi;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
@@ -53,8 +53,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
 
     public NetconfOperationRouterImpl(NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
-            CapabilityProvider capabilityProvider,
-            DefaultCommitNotificationProducer commitNotifier) {
+            CapabilityProvider capabilityProvider, DefaultCommitNotificationProducer commitNotifier) {
 
         this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
 
@@ -65,12 +64,10 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
                 .getNetconfSessionIdForReporting()));
         defaultNetconfOperations.add(new DefaultCloseSession(netconfOperationServiceSnapshot
                 .getNetconfSessionIdForReporting()));
-        defaultNetconfOperations.add(new DefaultStartExi(
-                netconfOperationServiceSnapshot
-                        .getNetconfSessionIdForReporting()));
-        defaultNetconfOperations.add(new DefaultStopExi(
-                netconfOperationServiceSnapshot
-                        .getNetconfSessionIdForReporting()));
+        defaultNetconfOperations.add(new DefaultStartExi(netconfOperationServiceSnapshot
+                .getNetconfSessionIdForReporting()));
+        defaultNetconfOperations.add(new DefaultStopExi(netconfOperationServiceSnapshot
+                .getNetconfSessionIdForReporting()));
 
         allNetconfOperations = getAllNetconfOperations(defaultNetconfOperations, netconfOperationServiceSnapshot);
 
@@ -102,7 +99,8 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         for (NetconfOperationService netconfOperationService : netconfOperationServiceSnapshot.getServices()) {
             final Set<NetconfOperationFilter> filtersFromService = netconfOperationService.getFilters();
             for (NetconfOperationFilter filter : filtersFromService) {
-                Preconditions.checkState(result.contains(filter) == false, "Filter %s already present", filter);
+                Preconditions.checkState(result.contains(filter) == false,
+                        "Filter %s already present, all filters so far: %s", filter, result);
                 result.add(filter);
             }
         }
@@ -116,7 +114,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     @Override
     public synchronized Document onNetconfMessage(Document message,
             NetconfSession session) throws NetconfDocumentedException {
-        NetconfOperationExecution netconfOperationExecution = null;
+        NetconfOperationExecution netconfOperationExecution;
 
         String messageAsString = XmlUtil.toString(message);
 

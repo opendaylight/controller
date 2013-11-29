@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -27,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * NetconfMessageFactory for (de)serializing DOM documents.
@@ -47,24 +49,63 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
 
     @Override
     public NetconfMessage parse(byte[] bytes) throws DeserializerException, DocumentedException {
-        String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
-        logger.debug("Parsing message \n{}", s);
-        if (bytes[0] == '[') {
-            // yuma sends auth information in the first line. Ignore until ]\n
-            // is found.
-            int endOfAuthHeader = ByteArray.findByteSequence(bytes, new byte[] { ']', '\n' });
+        logMessage(bytes);
+
+        String additionalHeader = null;
+
+        if (startsWithAdditionalHeader(bytes)) {
+            // Auth information containing username, ip address... extracted for monitoring
+            int endOfAuthHeader = getAdditionalHeaderEndIndex(bytes);
             if (endOfAuthHeader > -1) {
+                byte[] additionalHeaderBytes = Arrays.copyOfRange(bytes, 0, endOfAuthHeader + 2);
+                additionalHeader = additionalHeaderToString(additionalHeaderBytes);
                 bytes = Arrays.copyOfRange(bytes, endOfAuthHeader + 2, bytes.length);
             }
         }
-        NetconfMessage message = null;
+        NetconfMessage message;
         try {
             Document doc = XmlUtil.readXmlToDocument(new ByteArrayInputStream(bytes));
-            message = new NetconfMessage(doc);
+            message = new NetconfMessage(doc, additionalHeader);
         } catch (final SAXException | IOException | IllegalStateException e) {
             throw new NetconfDeserializerException("Could not parse message from " + new String(bytes), e);
         }
         return message;
+    }
+
+    private int getAdditionalHeaderEndIndex(byte[] bytes) {
+        for (String possibleEnd : Lists.newArrayList("]\n", "]\r\n")) {
+            int idx = ByteArray.findByteSequence(bytes, possibleEnd.getBytes(Charsets.UTF_8));
+
+            if (idx != -1) {
+                return idx;
+            }
+        }
+
+        return -1;
+    }
+
+    private boolean startsWithAdditionalHeader(byte[] bytes) {
+        List<String> possibleStarts = Lists.newArrayList("[", "\r\n[", "\n[");
+        for (String possibleStart : possibleStarts) {
+            int i = 0;
+            for (byte b : possibleStart.getBytes(Charsets.UTF_8)) {
+                if(bytes[i]!=b)
+                    break;
+
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    private void logMessage(byte[] bytes) {
+        String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
+        logger.debug("Parsing message \n{}", s);
+    }
+
+    private String additionalHeaderToString(byte[] bytes) {
+        return Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
     }
 
     @Override

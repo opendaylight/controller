@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.api;
 
+import com.google.common.base.Optional;
 import org.w3c.dom.Document;
 
 /**
@@ -20,11 +21,22 @@ public final class NetconfMessage {
 
     private final Document doc;
 
+    private String additionalHeader;
+
     public NetconfMessage(final Document doc) {
+        this(doc, null);
+    }
+
+    public NetconfMessage(Document doc, String additionalHeader) {
         this.doc = doc;
+        this.additionalHeader = additionalHeader;
     }
 
     public Document getDocument() {
         return this.doc;
+    }
+
+    public Optional<String> getAdditionalHeader() {
+        return additionalHeader== null ? Optional.<String>absent() : Optional.of(additionalHeader);
     }
 }

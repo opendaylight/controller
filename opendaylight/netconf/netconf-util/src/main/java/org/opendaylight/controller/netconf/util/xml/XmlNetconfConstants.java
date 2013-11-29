@@ -43,4 +43,5 @@ public class XmlNetconfConstants {
     public static final String URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring";
     // TODO where to store namespace of config ?
     public static final String URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG = "urn:opendaylight:params:xml:ns:yang:controller:config";
+    public static final String GET = "get";
 }
