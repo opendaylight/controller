@@ -8,11 +8,8 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
@@ -25,8 +22,11 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages life cycle of {@link YangStoreSnapshot}.
@@ -76,8 +76,6 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
         // [RFC6241] 8.5.  Rollback-on-Error Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
-        // [RFC6022] get-schema RPC. TODO: implement rest of the RFC
-        capabilities.add(new BasicCapability("urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&revision=2010-10-04"));
 
         final Collection<Map.Entry<Module, String>> modulesAndContents = yangStoreSnapshot.getModuleMap().values();
         for (Map.Entry<Module, String> moduleAndContent : modulesAndContents) {
@@ -101,6 +99,11 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         }
 
         @Override
+        public Optional<String> getModuleNamespace() {
+            return Optional.absent();
+        }
+
+        @Override
         public Optional<String> getModuleName() {
             return Optional.absent();
         }
@@ -114,6 +117,11 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         public Optional<String> getCapabilitySchema() {
             return Optional.absent();
         }
+
+        @Override
+        public Optional<List<String>> getLocation() {
+            return Optional.absent();
+        }
     }
 
     private static class YangStoreCapability extends BasicCapability {
@@ -121,12 +129,14 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         private final String content;
         private final String revision;
         private final String moduleName;
+        private final String moduleNamespace;
 
         public YangStoreCapability(Map.Entry<Module, String> moduleAndContent) {
             super(getAsString(moduleAndContent.getKey()));
             this.content = moduleAndContent.getValue();
             Module module = moduleAndContent.getKey();
             this.moduleName = module.getName();
+            this.moduleNamespace = module.getNamespace().toString();
             this.revision = Util.writeDate(module.getRevision());
         }
 
@@ -148,6 +158,11 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         @Override
         public Optional<String> getModuleName() {
             return Optional.of(moduleName);
+        }
+
+        @Override
+        public Optional<String> getModuleNamespace() {
+            return Optional.of(moduleNamespace);
         }
 
         @Override
