@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
@@ -25,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * StorageAdapter that stores configuration in a plan file.
@@ -187,7 +188,7 @@ public class FileStorageAdapter implements StorageAdapter {
 
         private boolean inLastConfig, inLastSnapshot;
         private final StringBuffer snapshotBuffer = new StringBuffer();
-        private final Set<String> caps = Sets.newHashSet();
+        private final SortedSet<String> caps = new TreeSet<>();
 
         @Override
         public String getResult() {
@@ -231,7 +232,7 @@ public class FileStorageAdapter implements StorageAdapter {
                 return Optional.of(xmlContent);
         }
 
-        Set<String> getCapabilities() throws IOException, SAXException, ParserConfigurationException {
+        SortedSet<String> getCapabilities() throws IOException, SAXException, ParserConfigurationException {
             return caps;
         }
 
@@ -250,9 +251,9 @@ public class FileStorageAdapter implements StorageAdapter {
     private class PersistedConfigImpl implements ConfigSnapshotHolder {
 
         private final String snapshot;
-        private final Set<String> caps;
+        private final SortedSet<String> caps;
 
-        public PersistedConfigImpl(Optional<String> configSnapshot, Set<String> capabilities) {
+        public PersistedConfigImpl(Optional<String> configSnapshot, SortedSet<String> capabilities) {
             this.snapshot = configSnapshot.get();
             this.caps = capabilities;
         }
@@ -263,7 +264,7 @@ public class FileStorageAdapter implements StorageAdapter {
         }
 
         @Override
-        public Set<String> getCapabilities() {
+        public SortedSet<String> getCapabilities() {
             return caps;
         }
     }
