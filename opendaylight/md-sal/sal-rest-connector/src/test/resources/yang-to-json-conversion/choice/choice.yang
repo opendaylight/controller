@@ -10,7 +10,7 @@ module choice-case-test {
 			type string;
 		}		
 		
-		choice choi1 {
+		choice choi1 {            
 			case a1 {
 				leaf lf1a {
 					type uint16;	
@@ -59,6 +59,9 @@ module choice-case-test {
 					type string;
 				}
 			}
+            leaf e1 {
+                type uint32;
+            }
 		}
 		
 		choice choi2 {
@@ -73,6 +76,31 @@ module choice-case-test {
 				}
 			}
 		}
+        
+        choice choi4 {
+            case a4 {
+                list lst4a {
+                    choice choi4aa {
+                        case aa1 {
+                            leaf lf4aa {
+                                type string;
+                            }
+                        }
+                        case ab2 {
+                            leaf lf4ab {
+                                type int16;
+                            }
+                        }
+                    }
+                }
+            }
+            case b4 {
+                leaf-list lflst4b {
+                    type uint32;
+                }
+            }
+            
+        }
 		
 /*		 equal identifiers in various cases are illegal 7.9.2 rfc6020 */
 /*		
