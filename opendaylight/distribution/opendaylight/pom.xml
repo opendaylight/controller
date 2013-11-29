@@ -267,6 +267,16 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-monitoring</artifactId>
+          <version>${netconf.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>ietf-netconf-monitoring</artifactId>
+          <version>${netconf.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-impl</artifactId>
           <version>${netconf.version}</version>
         </dependency>

@@ -13,6 +13,7 @@ import com.google.common.collect.Collections2;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
@@ -66,7 +67,8 @@ public class NetconfClientSessionNegotiator extends
     }
 
     @Override
-    protected NetconfClientSession getSession(SessionListener sessionListener, Channel channel, Document doc) {
-        return new NetconfClientSession(sessionListener, channel, extractSessionId(doc), getCapabilities(doc));
+    protected NetconfClientSession getSession(SessionListener sessionListener, Channel channel, NetconfMessage message) {
+        return new NetconfClientSession(sessionListener, channel, extractSessionId(message.getDocument()),
+                getCapabilities(message.getDocument()));
     }
 }

@@ -80,7 +80,7 @@ public class NetconfITSecureTest extends AbstractConfigTest {
                 new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, NetconfITTest.getNetconfMonitoringListenerService());
 
         NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
                 sslC, serverNegotiatorFactory, listenerFactory);
