@@ -109,6 +109,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
                 logger.trace("Pushing following xml to netconf {}", configSnapshot);
                 try {
                     pushLastConfig(XmlUtil.readXmlToElement(configSnapshot));
+                    return;
                 } catch(ConflictingVersionException e) {
                     closeClientAndDispatcher(netconfClient, netconfClientDispatcher);
                     lastException = e;
