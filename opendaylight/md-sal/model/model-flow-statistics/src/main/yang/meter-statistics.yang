@@ -15,28 +15,41 @@ module opendaylight-meter-statistics {
         description "Initial revision of meter statistics service";
     }
 
-    augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "node-meter-statistics";
-        container meter-statistics {
+	grouping meter-statistics{
+	    container meter-statistics {
             //config "false";
             uses meter-types:meter-statistics-reply;
         }
-    }
-
+    
+	}
+    
     augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "node-meter-config-stats";
+        ext:augment-identifier "node-meter-statistics";
+  		uses meter-statistics;
+    }
+	
+	grouping meter-config-stats {
         container meter-config-stats {
             //config "false";
             uses meter-types:meter-config-stats-reply;
         }
     }
-    
+
     augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "node-meter-features";
+        ext:augment-identifier "node-meter-config-stats";
+        uses meter-config-stats;
+    }
+    
+    grouping meter-features {
         container meter-features {
             //config "false";
             uses meter-types:meter-features-reply;
         }
+    }
+    
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-meter-features";
+        uses meter-features;
     }
 
     // RPC calls

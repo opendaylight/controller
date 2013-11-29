@@ -55,7 +55,9 @@ public class StatisticsProvider implements AutoCloseable {
     
     private Thread statisticsRequesterThread;
     
-    private final  InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder().node(Nodes.class).toInstance();
+    private final  InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).toInstance();
+    
+    private final int STATS_THREAD_EXEC_INTERVAL = 30000;
     
     //Local caching of stats
     
@@ -103,7 +105,7 @@ public class StatisticsProvider implements AutoCloseable {
                     try {
                         statsRequestSender();
                         
-                        Thread.sleep(5000);
+                        Thread.sleep(STATS_THREAD_EXEC_INTERVAL);
                     }catch (Exception e){
                         spLogger.error("Exception occurred while sending stats request : {}",e);
                     }
@@ -111,9 +113,9 @@ public class StatisticsProvider implements AutoCloseable {
             }
         });
         
-        spLogger.debug("Statistics requester thread started with timer interval : {}",5000);
+        spLogger.debug("Statistics requester thread started with timer interval : {}",STATS_THREAD_EXEC_INTERVAL);
         
-        //statisticsRequesterThread.start();
+        statisticsRequesterThread.start();
         
         spLogger.info("Statistics Provider started.");
     }
@@ -141,16 +143,27 @@ public class StatisticsProvider implements AutoCloseable {
                 InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
                 NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 
-                sendAllGroupStatisticsRequest(targetNodeRef);
+                //sendAllGroupStatisticsRequest(targetNodeRef);
                 
                 sendAllMeterStatisticsRequest(targetNodeRef);
                 
-                sendGroupDescriptionRequest(targetNodeRef);
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 
-                sendGroupFeaturesRequest(targetNodeRef);
+                //sendGroupDescriptionRequest(targetNodeRef);
+                
+                //sendGroupFeaturesRequest(targetNodeRef);
                 
                 sendMeterConfigStatisticsRequest(targetNodeRef);
                 
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 sendMeterFeaturesRequest(targetNodeRef);
             }
         }
@@ -160,7 +173,6 @@ public class StatisticsProvider implements AutoCloseable {
         
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         
-        input.setNode(targetNode);
         input.setNode(targetNode);
 
         @SuppressWarnings("unused")

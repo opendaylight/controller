@@ -20,9 +20,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupDescBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupFeaturesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.desc.GroupDescBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.features.GroupFeaturesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -39,16 +39,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterConfigStatsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeaturesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.meter.config.stats.MeterConfigStatsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.meter.features.MeterFeaturesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.meter.statistics.MeterStatisticsBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsListener,
         OpendaylightMeterStatisticsListener {
     
     private final StatisticsProvider statisticsManager;
+
+    public final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
 
     public StatisticsUpdateCommiter(final StatisticsProvider manager){
 
@@ -86,7 +89,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeMeterConfigStats.class, meterConfig.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
 
     }
@@ -114,10 +117,11 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         meterStats.setMeterStatistics(stats.build());
         
         //Update augmented data
+        sucLogger.info("Augmenting meter statistics to node {}",key.toString());
         nodeData.addAugmentation(NodeMeterStatistics.class, meterStats.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
 
     }
@@ -148,7 +152,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
 
     }
@@ -181,7 +185,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeGroupStatistics.class, groupStats.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
     }
     
@@ -217,7 +221,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeMeterFeatures.class, nodeMeterFeatures.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
     }
     
@@ -251,13 +255,14 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeGroupFeatures.class, nodeGroupFeatures.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
     }
 
     private NodeRef getNodeRef(NodeKey nodeKey){
-        InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder().node(Nodes.class);
-        return new NodeRef(builder.node(Node.class,nodeKey).toInstance());
+        InstanceIdentifier<Node> nodeReg = InstanceIdentifier.builder(Nodes.class)//
+                .child(Node.class,nodeKey).toInstance();
+        return new NodeRef(nodeReg);
     }
 
 }
