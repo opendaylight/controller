@@ -38,7 +38,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.openflow.protocol.OFBarrierReply;
 import org.openflow.protocol.OFBarrierRequest;
 import org.openflow.protocol.OFEchoReply;
-import org.openflow.protocol.OFEchoRequest;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFFeaturesReply;
 import org.openflow.protocol.OFFlowMod;
@@ -372,12 +371,6 @@ public class SwitchHandler implements ISwitch {
                 break;
             case ECHO_REQUEST:
                 OFEchoReply echoReply = (OFEchoReply) factory.getMessage(OFType.ECHO_REPLY);
-
-                // the EchoReply must have the same payload as the request
-                byte []payload = ((OFEchoRequest)msg).getPayload();
-                echoReply.setPayload(payload);
-                echoReply.setLength( (short) (echoReply.getLength() + payload.length ));
-
                 // respond immediately
                 asyncSendNow(echoReply, msg.getXid());
 
