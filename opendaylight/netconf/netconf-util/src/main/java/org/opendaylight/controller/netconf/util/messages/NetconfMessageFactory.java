@@ -47,24 +47,35 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
 
     @Override
     public NetconfMessage parse(byte[] bytes) throws DeserializerException, DocumentedException {
-        String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
-        logger.debug("Parsing message \n{}", s);
+        logMessage(bytes);
+
+        String additionalHeader = null;
         if (bytes[0] == '[') {
-            // yuma sends auth information in the first line. Ignore until ]\n
-            // is found.
+            // Auth information containing username, ip address... extracted for monitoring
             int endOfAuthHeader = ByteArray.findByteSequence(bytes, new byte[] { ']', '\n' });
             if (endOfAuthHeader > -1) {
+                additionalHeader = additionalHeaderToString(Arrays.copyOfRange(bytes, 0, endOfAuthHeader + 2));
                 bytes = Arrays.copyOfRange(bytes, endOfAuthHeader + 2, bytes.length);
             }
         }
-        NetconfMessage message = null;
+        NetconfMessage message;
         try {
             Document doc = XmlUtil.readXmlToDocument(new ByteArrayInputStream(bytes));
-            message = new NetconfMessage(doc);
+            message = new NetconfMessage(doc, additionalHeader);
         } catch (final SAXException | IOException | IllegalStateException e) {
             throw new NetconfDeserializerException("Could not parse message from " + new String(bytes), e);
         }
         return message;
+    }
+
+    private void logMessage(byte[] bytes) {
+        // TODO additional parsing
+        String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
+        logger.debug("Parsing message \n{}", s);
+    }
+
+    private String additionalHeaderToString(byte[] bytes) {
+        return Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
     }
 
     @Override

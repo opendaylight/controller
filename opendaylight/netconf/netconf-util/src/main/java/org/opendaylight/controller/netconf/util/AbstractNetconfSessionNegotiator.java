@@ -20,8 +20,8 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
@@ -130,7 +130,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
                 channel.pipeline().addAfter("aggregator", "chunkDecoder", new NetconfMessageChunkDecoder());
             }
             changeState(State.ESTABLISHED);
-            S session = getSession(sessionListener, channel, doc);
+            S session = getSession(sessionListener, channel, netconfMessage);
             negotiationSuccessful(session);
         } else {
             final IllegalStateException cause = new IllegalStateException(
@@ -139,7 +139,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         }
     }
 
-    protected abstract S getSession(SessionListener sessionListener, Channel channel, Document doc);
+    protected abstract S getSession(SessionListener sessionListener, Channel channel, NetconfMessage message);
 
     private boolean isHelloMessage(Document doc) {
         try {
