@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -21,6 +22,7 @@ import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
 import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -37,6 +39,8 @@ import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.net.ssl.SSLContext;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,7 +70,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
     private final Persister persister;
     private final MBeanServerConnection mbeanServer;
-    private Long currentSessionId;
+
 
     private final ObjectName on = DefaultCommitOperationMXBean.objectName;
 
@@ -96,16 +100,25 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
         if (maybeConfig.isPresent()) {
             logger.debug("Last config found {}", persister);
+            ConflictingVersionException lastException = null;
+            int maxAttempts = 30;
+            for(int i = 0 ; i < maxAttempts; i++) {
+                registerToNetconf(maybeConfig.get().getCapabilities());
 
-            registerToNetconf(maybeConfig.get().getCapabilities());
-
-            final String configSnapshot = maybeConfig.get().getConfigSnapshot();
-            logger.trace("Pushing following xml to netconf {}", configSnapshot);
-            try {
-                pushLastConfig(XmlUtil.readXmlToElement(configSnapshot));
-            } catch (SAXException | IOException e) {
-                throw new IllegalStateException("Unable to load last config", e);
+                final String configSnapshot = maybeConfig.get().getConfigSnapshot();
+                logger.trace("Pushing following xml to netconf {}", configSnapshot);
+                try {
+                    pushLastConfig(XmlUtil.readXmlToElement(configSnapshot));
+                } catch(ConflictingVersionException e) {
+                    closeClientAndDispatcher(netconfClient, netconfClientDispatcher);
+                    lastException = e;
+                    Thread.sleep(1000);
+                } catch (SAXException | IOException e) {
+                    throw new IllegalStateException("Unable to load last config", e);
+                }
             }
+            throw new IllegalStateException("Failed to push configuration, maximum attempt count has been reached: "
+                    + maxAttempts, lastException);
 
         } else {
             // this ensures that netconf is initialized, this is first
@@ -130,9 +143,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
         int attempt = 0;
 
-        while (true) {
+        long deadline = pollingStart + timeout;
+        while (System.currentTimeMillis() < deadline) {
             attempt++;
-
             netconfClientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
             try {
                 netconfClient = new NetconfClient(this.toString(), address, delay, netconfClientDispatcher);
@@ -146,14 +159,12 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
 
             if (isSubset(currentCapabilities, expectedCaps)) {
                 logger.debug("Hello from netconf stable with {} capabilities", currentCapabilities);
-                currentSessionId = netconfClient.getSessionId();
+                long currentSessionId = netconfClient.getSessionId();
                 logger.info("Session id received from netconf server: {}", currentSessionId);
                 return currentSessionId;
             }
 
-            if (System.currentTimeMillis() > pollingStart + timeout) {
-                break;
-            }
+
 
             logger.debug("Polling hello from netconf, attempt {}, capabilities {}", attempt, currentCapabilities);
 
@@ -245,7 +256,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         return maybeConfigElement;
     }
 
-    private synchronized void pushLastConfig(Element xmlToBePersisted) {
+    private synchronized void pushLastConfig(Element xmlToBePersisted) throws ConflictingVersionException {
         logger.info("Pushing last configuration to netconf");
         StringBuilder response = new StringBuilder("editConfig response = {");
 
@@ -276,19 +287,26 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         logger.trace("Detailed message {}", response);
     }
 
-    private void checkIsOk(XmlElement element, NetconfMessage responseMessage) {
+    static void checkIsOk(XmlElement element, NetconfMessage responseMessage) throws ConflictingVersionException {
         if (element.getName().equals(XmlNetconfConstants.OK)) {
             return;
-        } else {
-            if (element.getName().equals(XmlNetconfConstants.RPC_ERROR)) {
-                logger.warn("Can not load last configuration, operation failed");
-                throw new IllegalStateException("Can not load last configuration, operation failed: "
-                        + XmlUtil.toString(responseMessage.getDocument()));
+        }
+
+        if (element.getName().equals(XmlNetconfConstants.RPC_ERROR)) {
+            logger.warn("Can not load last configuration, operation failed");
+            // is it ConflictingVersionException ?
+            XPathExpression xPathExpression = XMLNetconfUtil.compileXPath("/netconf:rpc-reply/netconf:rpc-error/netconf:error-info/netconf:error");
+            String error = (String) XmlUtil.evaluateXPath(xPathExpression, element.getDomElement(), XPathConstants.STRING);
+            if (error!=null && error.contains(ConflictingVersionException.class.getCanonicalName())) {
+                throw new ConflictingVersionException(error);
             }
-            logger.warn("Can not load last configuration. Operation failed.");
-            throw new IllegalStateException("Can not load last configuration. Operation failed: "
+            throw new IllegalStateException("Can not load last configuration, operation failed: "
                     + XmlUtil.toString(responseMessage.getDocument()));
         }
+
+        logger.warn("Can not load last configuration. Operation failed.");
+        throw new IllegalStateException("Can not load last configuration. Operation failed: "
+                + XmlUtil.toString(responseMessage.getDocument()));
     }
 
     private static NetconfMessage createEditConfigMessage(Element dataElement, String editConfigResourcename) {

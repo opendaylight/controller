@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
+import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.spi.ModuleFactory;
@@ -19,7 +20,7 @@ import javax.management.ObjectName;
 
 /**
  * Every time factory is added or removed, blank transaction is triggered to handle
- * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory)}
+ * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory, org.osgi.framework.BundleContext)}
  * functionality.
  */
 public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<ModuleFactory, Object> {
@@ -38,14 +39,30 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     private synchronized void blankTransaction() {
-        // create transaction
-        ObjectName tx = configRegistry.beginConfig();
-        CommitStatus commitStatus = configRegistry.commitConfig(tx);
-        logger.debug("Committed blank transaction with status {}", commitStatus);
+        // race condition check: config-persister might push new configuration while server is starting up.
+        ConflictingVersionException lastException = null;
+        for (int i = 0; i < 10; i++) {
+            try {
+                // create transaction
+                ObjectName tx = configRegistry.beginConfig();
+                CommitStatus commitStatus = configRegistry.commitConfig(tx);
+                logger.debug("Committed blank transaction with status {}", commitStatus);
+                return;
+            } catch (ConflictingVersionException e) {
+                lastException = e;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(interruptedException);
+                }
+            }
+        }
+        throw lastException;
     }
 
     @Override
-    public void modifiedService(ServiceReference<ModuleFactory> moduleFactoryServiceReference, Object o) {
+    public void modifiedService(ServiceReference <ModuleFactory> moduleFactoryServiceReference, Object o) {
         blankTransaction();
     }
 
