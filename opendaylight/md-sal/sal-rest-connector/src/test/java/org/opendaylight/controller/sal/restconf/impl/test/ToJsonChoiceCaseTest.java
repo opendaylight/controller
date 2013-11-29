@@ -25,39 +25,56 @@ public class ToJsonChoiceCaseTest {
     }
 
     /**
-     * Test when some data are in one case node and other in another. Exception
-     * expected!!
+     * Test when some data are in one case node and other in another. This isn't
+     * correct. Next Json validator should return error because nodes has to be
+     * from one case below concrete choice.
+     * 
      */
     @Test
-    public void compNodeDataOnVariousChoiceCasePathTest() {
-        boolean exceptionCatched = false;
+    public void nodeSchemasOnVariousChoiceCasePathTest() {
         try {
             TestUtils.writeCompNodeWithSchemaContextToJson(
-                    TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_various_path.xml"),
+                    TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_various_path_err.xml"),
                     "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
-        } catch (UnsupportedDataTypeException e) {
-            exceptionCatched = true;
-
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here
             assertTrue(false);
         }
+    }
 
-        assertTrue(exceptionCatched);
-
+    /**
+     * Test when some data are in one case node and other in another.
+     * Additionally data are loadef from various choices. This isn't
+     * correct. Next Json validator should return error because nodes has to be
+     * from one case below concrete choice.
+     * 
+     */
+    @Test
+    public void nodeSchemasOnVariousChoiceCasePathAndMultipleChoicesTest() {
+        try {
+            TestUtils
+                    .writeCompNodeWithSchemaContextToJson(
+                            TestUtils
+                                    .loadCompositeNode("/yang-to-json-conversion/choice/xml/data_more_choices_same_level_various_paths_err.xml"),
+                            "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
+        } catch (WebApplicationException | IOException e) {
+            // shouldn't end here
+            assertTrue(false);
+        }
     }
 
     /**
      * Test when second level data are red first, then first and at the end
      * third level. Level represents pass through couple choice-case
      */
-    @Ignore
+
     @Test
-    public void compNodeDataWithRandomOrderAccordingLevel() {
+    public void nodeSchemasWithRandomOrderAccordingLevel() {
         try {
-            String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(
+            TestUtils.writeCompNodeWithSchemaContextToJson(
                     TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_random_level.xml"),
                     "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
+
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here
             assertTrue(false);
@@ -67,11 +84,10 @@ public class ToJsonChoiceCaseTest {
     /**
      * Test when element from no first case is used
      */
-    @Ignore
     @Test
-    public void compNodeDataNoFirstCase() {
+    public void nodeSchemasNotInFirstCase() {
         try {
-            String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(
+            TestUtils.writeCompNodeWithSchemaContextToJson(
                     TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_no_first_case.xml"),
                     "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
         } catch (WebApplicationException | IOException e) {
@@ -83,11 +99,10 @@ public class ToJsonChoiceCaseTest {
     /**
      * Test when element in case is list
      */
-    @Ignore
     @Test
-    public void compNodeDataAsList() {
+    public void nodeSchemaAsList() {
         try {
-            String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(
+            TestUtils.writeCompNodeWithSchemaContextToJson(
                     TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_list.xml"),
                     "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
         } catch (WebApplicationException | IOException e) {
@@ -99,11 +114,10 @@ public class ToJsonChoiceCaseTest {
     /**
      * Test when element in case is container
      */
-    @Ignore
     @Test
-    public void compNodeDataAsContainer() {
+    public void nodeSchemaAsContainer() {
         try {
-            String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(
+            TestUtils.writeCompNodeWithSchemaContextToJson(
                     TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_container.xml"),
                     "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
         } catch (WebApplicationException | IOException e) {
@@ -113,13 +127,12 @@ public class ToJsonChoiceCaseTest {
     }
 
     /**
-     * Test when element in case is container
+     * Test when element in case is leaflist
      */
-    @Ignore
     @Test
-    public void compNodeDataAsLeafList() {
+    public void nodeSchemaAsLeafList() {
         try {
-            String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(
+            TestUtils.writeCompNodeWithSchemaContextToJson(
                     TestUtils.loadCompositeNode("/yang-to-json-conversion/choice/xml/data_leaflist.xml"),
                     "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
         } catch (WebApplicationException | IOException e) {
@@ -128,4 +141,50 @@ public class ToJsonChoiceCaseTest {
         }
     }
 
+    /**
+     * 
+     */
+    @Test
+    public void nodeSchemasInMultipleChoicesTest() {
+        try {
+            TestUtils
+                    .writeCompNodeWithSchemaContextToJson(TestUtils
+                            .loadCompositeNode("/yang-to-json-conversion/choice/xml/data_more_choices_same_level.xml"),
+                            "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
+        } catch (WebApplicationException | IOException e) {
+            // shouldn't end here
+            assertTrue(false);
+        }
+    }
+
+    /**
+     * Test whether is possible to find data schema for node which is specified
+     * as dirrect subnode of choice (case without CASE key word)
+     */
+    @Test
+    public void nodeSchemasInCaseNotDefinedWithCaseKeyword() {
+        try {
+            TestUtils.writeCompNodeWithSchemaContextToJson(TestUtils
+                    .loadCompositeNode("/yang-to-json-conversion/choice/xml/data_case_defined_without_case.xml"),
+                    "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
+        } catch (WebApplicationException | IOException e) {
+            // shouldn't end here
+            assertTrue(false);
+        }
+    }
+
+    /**
+     * Test of multiple use of choices
+     */
+    @Test
+    public void nodeSchemasInThreeChoicesAtSameLevel() {
+        try {
+            TestUtils.writeCompNodeWithSchemaContextToJson(TestUtils
+                    .loadCompositeNode("/yang-to-json-conversion/choice/xml/data_three_choices_same_level.xml"),
+                    "/yang-to-json-conversion/choice/xml", modules, dataSchemaNode);
+        } catch (WebApplicationException | IOException e) {
+            // shouldn't end here
+            assertTrue(false);
+        }
+    }
 }
