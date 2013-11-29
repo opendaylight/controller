@@ -14,25 +14,25 @@ import org.osgi.util.tracker.ServiceTracker;
 
 class NetconfOperationServiceFactoryTracker extends
         ServiceTracker<NetconfOperationServiceFactory, NetconfOperationServiceFactory> {
-    private final NetconfOperationServiceFactoryListener operationRouter;
+    private final NetconfOperationServiceFactoryListener factoriesListener;
 
     NetconfOperationServiceFactoryTracker(BundleContext context,
-            final NetconfOperationServiceFactoryListener operationRouter) {
+            final NetconfOperationServiceFactoryListener factoriesListener) {
         super(context, NetconfOperationServiceFactory.class, null);
-        this.operationRouter = operationRouter;
+        this.factoriesListener = factoriesListener;
     }
 
     @Override
     public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
         NetconfOperationServiceFactory netconfOperationServiceFactory = super.addingService(reference);
-        operationRouter.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
+        factoriesListener.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
         return netconfOperationServiceFactory;
     }
 
     @Override
     public void removedService(ServiceReference<NetconfOperationServiceFactory> reference,
             NetconfOperationServiceFactory netconfOperationServiceFactory) {
-        operationRouter.onRemoveNetconfOperationServiceFactory(netconfOperationServiceFactory);
+        factoriesListener.onRemoveNetconfOperationServiceFactory(netconfOperationServiceFactory);
     }
 
 }
