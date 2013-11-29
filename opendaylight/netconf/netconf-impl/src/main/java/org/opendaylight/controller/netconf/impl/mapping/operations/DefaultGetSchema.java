@@ -11,9 +11,9 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
