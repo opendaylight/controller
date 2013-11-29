@@ -80,7 +80,6 @@
                             javax.xml.transform.stream,
                             org.apache.commons.lang3,
                             org.opendaylight.controller.config.persist.api,
-                            org.opendaylight.controller.config.persist.api.storage,
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax,

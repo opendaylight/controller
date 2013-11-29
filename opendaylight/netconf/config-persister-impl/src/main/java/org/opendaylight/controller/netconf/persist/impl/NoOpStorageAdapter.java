@@ -9,18 +9,22 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.config.persist.api.storage.StorageAdapter;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class NoOpStorageAdapter implements StorageAdapter {
+public class NoOpStorageAdapter implements StorageAdapter, Persister {
     private static final Logger logger = LoggerFactory.getLogger(NoOpStorageAdapter.class);
 
     @Override
-    public void setProperties(PropertiesProvider propertiesProvider) {
-        logger.debug("setProperties called with {}", propertiesProvider);
+    public Persister instantiate(PropertiesProvider propertiesProvider) {
+        logger.debug("instantiate called with {}", propertiesProvider);
+        return this;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class NoOpStorageAdapter implements StorageAdapter {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         logger.debug("close called");
     }
 }

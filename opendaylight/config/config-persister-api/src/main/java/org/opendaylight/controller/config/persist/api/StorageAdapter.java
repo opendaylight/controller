@@ -8,20 +8,13 @@
 
 package org.opendaylight.controller.config.persist.api;
 
-import com.google.common.base.Optional;
-
-import java.io.IOException;
-
 /**
- * Base interface for persister implementation.
+ * Plugins for {@link org.opendaylight.controller.config.persist.api.Persister}
+ * must implement this interface.
  */
-public interface Persister extends AutoCloseable {
+public interface StorageAdapter {
 
-    void persistConfig(ConfigSnapshotHolder configSnapshotHolder) throws IOException;
+    Persister instantiate(PropertiesProvider propertiesProvider);
 
-    Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException;
-
-    @Override
-    void close();
 
 }

@@ -9,7 +9,7 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.opendaylight.controller.config.persist.api.Persister.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
