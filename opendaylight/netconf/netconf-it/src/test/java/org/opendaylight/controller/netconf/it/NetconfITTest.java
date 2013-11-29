@@ -17,19 +17,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +44,11 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFa
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
 import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
@@ -72,17 +63,35 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
 import static java.util.Collections.emptyList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public class NetconfITTest extends AbstractConfigTest {
 
-     private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
-    //
+    // TODO refactor, pull common code up to AbstractNetconfITTest
+
+    private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
     private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 10830);
@@ -96,7 +105,6 @@ public class NetconfITTest extends AbstractConfigTest {
     private EventLoopGroup nettyThreadgroup;
 
     private NetconfClientDispatcher clientDispatcher;
-
 
     @Before
     public void setUp() throws Exception {
@@ -125,11 +133,19 @@ public class NetconfITTest extends AbstractConfigTest {
                 new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider);
+                factoriesListener, commitNot, idProvider, getNetconfMonitoringListenerService());
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
                 serverNegotiatorFactory, listenerFactory);
         return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
+    }
+
+    static NetconfMonitoringServiceImpl getNetconfMonitoringListenerService() {
+        NetconfOperationServiceFactoryListener factoriesListener = mock(NetconfOperationServiceFactoryListener.class);
+        NetconfOperationServiceSnapshot snap = mock(NetconfOperationServiceSnapshot.class);
+        doReturn(Collections.<NetconfOperationService>emptySet()).when(snap).getServices();
+        doReturn(snap).when(factoriesListener).getSnapshot(anyLong());
+        return new NetconfMonitoringServiceImpl(factoriesListener);
     }
 
     @After
@@ -367,23 +383,6 @@ public class NetconfITTest extends AbstractConfigTest {
     private void assertIsOK(final Document rpcReply) {
         assertEquals("rpc-reply", rpcReply.getDocumentElement().getLocalName());
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
-    }
-
-    @Ignore
-    @Test
-    // TODO can only send NetconfMessage - it must be valid xml
-    public void testClientHelloWithAuth() throws Exception {
-        final String fileName = "netconfMessages/client_hello_with_auth.xml";
-        // final InputStream resourceAsStream =
-        // AbstractListenerTest.class.getResourceAsStream(fileName);
-        // assertNotNull(resourceAsStream);
-        try (NetconfClient netconfClient = new NetconfClient("test", tcpAddress, 5000, clientDispatcher)) {
-            // IOUtils.copy(resourceAsStream, netconfClient.getStream());
-            // netconfClient.getOutputStream().write(NetconfMessageFactory.endOfMessage);
-            // server should not write anything back
-            // assertEquals(null, netconfClient.readMessage());
-            assertGetConfigWorks(netconfClient);
-        }
     }
 
     private Document assertGetConfigWorks(final NetconfClient netconfClient) throws InterruptedException {
