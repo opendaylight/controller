@@ -39,26 +39,21 @@ public class SimpleTypeResolver {
         return expectedSimpleType;
     }
 
-    private static final Map<String, SimpleType<?>> JAVA_TYPE_TO_SIMPLE_TYPE = Maps
-            .newHashMap();
+    private static final Map<String, SimpleType<?>> JAVA_TYPE_TO_SIMPLE_TYPE = Maps.newHashMap();
     static {
         // TODO add all
-        JAVA_TYPE_TO_SIMPLE_TYPE.put(Integer.class.getName(),
-                SimpleType.INTEGER);
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(Integer.class.getName(), SimpleType.INTEGER);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(int.class.getName(), SimpleType.INTEGER);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Short.class.getName(), SimpleType.SHORT);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(short.class.getName(), SimpleType.SHORT);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Long.class.getName(), SimpleType.LONG);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(long.class.getName(), SimpleType.LONG);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(String.class.getName(), SimpleType.STRING);
-        JAVA_TYPE_TO_SIMPLE_TYPE.put(Boolean.class.getName(),
-                SimpleType.BOOLEAN);
-        JAVA_TYPE_TO_SIMPLE_TYPE.put(boolean.class.getName(),
-                SimpleType.BOOLEAN);
-        JAVA_TYPE_TO_SIMPLE_TYPE.put(BigInteger.class.getName(),
-                SimpleType.BIGINTEGER);
-        JAVA_TYPE_TO_SIMPLE_TYPE.put(BigDecimal.class.getName(),
-                SimpleType.BIGDECIMAL);
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(Enum.class.getName(), SimpleType.STRING);
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(Boolean.class.getName(), SimpleType.BOOLEAN);
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(boolean.class.getName(), SimpleType.BOOLEAN);
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(BigInteger.class.getName(), SimpleType.BIGINTEGER);
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(BigDecimal.class.getName(), SimpleType.BIGDECIMAL);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Byte.class.getName(), SimpleType.BYTE);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(byte.class.getName(), SimpleType.BYTE);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Date.class.getName(), SimpleType.DATE);
