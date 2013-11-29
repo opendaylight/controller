@@ -9,8 +9,8 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
 import com.google.common.collect.Sets;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -40,17 +40,10 @@ public class ModuleRuntime {
         throw new IllegalStateException("Root runtime bean not found among " + runtimeBeanOns);
     }
 
-    public Element toXml(String namespace, String instanceName, Collection<ObjectName> runtimeBeanOns, Document document) {
-        Element moduleElement = document.createElement(XmlNetconfConstants.MODULE_KEY);
+    public Element toXml(String namespace, Collection<ObjectName> runtimeBeanOns,
+                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON, Services serviceTracker) {
 
-        final String prefix = getPrefix(namespace);
-        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlNetconfConstants.TYPE_KEY, prefix,
-                moduleName);
-        XmlUtil.addPrefixedNamespaceAttr(typeElement, prefix, namespace);
-        moduleElement.appendChild(typeElement);
-
-        Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, instanceName);
-        moduleElement.appendChild(nameElement);
+        Element moduleElement = moduleConfig.toXml(configBeanON, serviceTracker, document, namespace);
 
         ObjectName rootName = findRoot(runtimeBeanOns);
 
@@ -60,10 +53,6 @@ public class ModuleRuntime {
         instanceRuntime.toXml(rootName, childrenRuntimeBeans, document, moduleElement, namespace);
 
         return moduleElement;
-    }
-
-    private String getPrefix(String namespace) {
-        return XmlNetconfConstants.PREFIX;
     }
 
 }

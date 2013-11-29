@@ -11,14 +11,13 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.w3c.dom.Document;
 
 import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.SimpleType;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,28 +51,33 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaAttribute(JavaAttribute attributeIfc) {
-
-        if (attributeIfc.getOpenType() instanceof SimpleType<?>)
-            return new SimpleAttributeWritingStrategy(document, key);
-        else if (attributeIfc.getOpenType() instanceof ArrayType<?>) {
-            AttributeWritingStrategy innerStrategy = new SimpleAttributeWritingStrategy(document, key);
-            return new ArrayAttributeWritingStrategy(innerStrategy);
-        }
-        throw new IllegalStateException(JavaAttribute.class + " can only provide open type " + SimpleType.class
-                + " or " + ArrayType.class);
+    protected AttributeWritingStrategy caseJavaSimpleAttribute(SimpleType<?> openType) {
+        return new SimpleAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseDependencyAttribute(DependencyAttribute attributeIfc) {
+    protected AttributeWritingStrategy caseJavaArrayAttribute(ArrayType<?> openType) {
+        AttributeWritingStrategy innerStrategy = new SimpleAttributeWritingStrategy(document, key);
+        return new ArrayAttributeWritingStrategy(innerStrategy);
+    }
+
+    @Override
+    protected AttributeWritingStrategy caseJavaCompositeAttribute(CompositeType openType) {
+        return new SimpleCompositeAttributeWritingStrategy(document, key);
+    }
+
+    @Override
+    protected AttributeWritingStrategy caseDependencyAttribute(SimpleType<?> openType) {
         return new ObjectNameAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseTOAttribute(TOAttribute attributeIfc) {
+    protected AttributeWritingStrategy caseTOAttribute(CompositeType openType) {
+        Preconditions.checkState(lastAttribute instanceof TOAttribute);
+
         Map<String, AttributeWritingStrategy> innerStrats = Maps.newHashMap();
         String currentKey = key;
-        for (Entry<String, AttributeIfc> innerAttrEntry : attributeIfc.getYangPropertiesToTypesMap().entrySet()) {
+        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute) lastAttribute).getYangPropertiesToTypesMap().entrySet()) {
 
             AttributeWritingStrategy innerStrategy = prepareWritingStrategy(innerAttrEntry.getKey(),
                     innerAttrEntry.getValue(), document);
@@ -84,9 +88,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
-    protected AttributeWritingStrategy caseListAttribute(ListAttribute attributeIfc) {
-        AttributeIfc inner = attributeIfc.getInnerAttribute();
-        AttributeWritingStrategy innerStrategy = prepareWritingStrategy(key, inner, document);
+    protected AttributeWritingStrategy caseListAttribute(ArrayType<?> openType) {
+        Preconditions.checkState(lastAttribute instanceof ListAttribute);
+        AttributeIfc innerAttribute = ((ListAttribute) lastAttribute).getInnerAttribute();
+
+        AttributeWritingStrategy innerStrategy = prepareWritingStrategy(key, innerAttribute, document);
         return new ArrayAttributeWritingStrategy(innerStrategy);
     }
 

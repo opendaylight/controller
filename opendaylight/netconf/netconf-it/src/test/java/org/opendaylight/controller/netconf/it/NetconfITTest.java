@@ -36,22 +36,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
-import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.impl.HardcodedYangStoreService;
-import org.opendaylight.controller.config.yang.test.impl.Asdf;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeMXBean;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistrator;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
@@ -165,7 +159,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
     static Collection<InputStream> getBasicYangs() throws IOException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
-                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang",
+                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         List<String> failedToFind = new ArrayList<>();
@@ -281,7 +275,7 @@ public class NetconfITTest extends AbstractConfigTest {
         NetconfTestImplModuleMXBean proxy = configRegistryClient
                 .newMXBeanProxy(impl, NetconfTestImplModuleMXBean.class);
         proxy.setTestingDep(dep);
-        registerRuntimeBean();
+        proxy.setSimpleShort((short)0);
 
         transaction.commit();
 
@@ -304,29 +298,6 @@ public class NetconfITTest extends AbstractConfigTest {
             final String namespace = resultElement.getNamespaceAttribute();
             assertEquals(expectedNamespace, namespace);
         }
-    }
-
-    private void registerRuntimeBean() {
-        BaseJMXRegistrator baseJMXRegistrator = new BaseJMXRegistrator(ManagementFactory.getPlatformMBeanServer());
-        RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = baseJMXRegistrator
-                .createRuntimeBeanRegistrator(new ModuleIdentifier(NetconfTestImplModuleFactory.NAME, "instance"));
-        NetconfTestImplRuntimeRegistrator reg = new NetconfTestImplRuntimeRegistrator(runtimeBeanRegistrator);
-        reg.register(new NetconfTestImplRuntimeMXBean() {
-            @Override
-            public Asdf getAsdf() {
-                return null;
-            }
-
-            @Override
-            public Long getCreatedSessions() {
-                return null;
-            }
-
-            @Override
-            public String noArg(String arg1) {
-                return "from no arg";
-            }
-        });
     }
 
     @Test

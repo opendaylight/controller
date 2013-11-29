@@ -18,40 +18,22 @@ import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yang.store.impl.MbeParser;
-import org.opendaylight.controller.config.yang.test.impl.Asdf;
 import org.opendaylight.controller.config.yang.test.impl.ComplexDtoBInner;
 import org.opendaylight.controller.config.yang.test.impl.ComplexList;
 import org.opendaylight.controller.config.yang.test.impl.Deep;
-import org.opendaylight.controller.config.yang.test.impl.Deep2;
-import org.opendaylight.controller.config.yang.test.impl.Deep3;
-import org.opendaylight.controller.config.yang.test.impl.Deep4;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInnerInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoC;
 import org.opendaylight.controller.config.yang.test.impl.DtoD;
-import org.opendaylight.controller.config.yang.test.impl.InnerInnerRunningDataRuntimeMXBean;
-import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataAdditionalRuntimeMXBean;
-import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataRuntimeMXBean;
-import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataRuntimeRegistration;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeMXBean;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistration;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistrator;
-import org.opendaylight.controller.config.yang.test.impl.NotStateBean;
-import org.opendaylight.controller.config.yang.test.impl.NotStateBeanInternal;
 import org.opendaylight.controller.config.yang.test.impl.Peers;
-import org.opendaylight.controller.config.yang.test.impl.RetValContainer;
-import org.opendaylight.controller.config.yang.test.impl.RetValList;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
@@ -143,7 +125,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/editConfig.xml");
         checkBinaryLeafEdited(getConfigCandidate());
 
-
         // default-operation:none, should not affect binary leaf
         edit("netconfMessages/editConfig_none.xml");
         checkBinaryLeafEdited(getConfigCandidate());
@@ -151,9 +132,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // check after edit
         commit();
         Element response = getConfigRunning();
-
+        System.err.println(XmlUtil.toString(response));
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
+        checkTypedefs(response);
 
         edit("netconfMessages/editConfig_remove.xml");
 
@@ -375,7 +357,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
             buf.append(XmlElement.fromDomElement(e).getTextContent());
         }
         assertEquals("810", buf.toString());
+    }
 
+    private void checkTypedefs(final Element response) {
+        NodeList children = response.getElementsByTagName("extended");
+        assertEquals(1, children.getLength());
+
+        children = response.getElementsByTagName("extended-twice");
+        assertEquals(1, children.getLength());
     }
 
     private void checkTypeConfigAttribute(Element response) {
@@ -407,51 +396,28 @@ public class NetconfMappingTest extends AbstractConfigTest {
     @Test
     public void testConfigNetconfRuntime() throws Exception {
 
-        ModuleIdentifier id = new ModuleIdentifier(NetconfTestImplModuleFactory.NAME, "instance");
-        RootRuntimeBeanRegistrator rootReg = new RootRuntimeBeanRegistratorImpl(internalJmxRegistrator, id);
-        NetconfTestImplRuntimeRegistrator registrator = new NetconfTestImplRuntimeRegistrator(rootReg);
+        createModule(INSTANCE_NAME);
 
-        NetconfTestImplRuntimeRegistration a = registerRoot(registrator);
-        InnerRunningDataRuntimeRegistration reg = registerInner(a);
-        registerInner2(reg);
+        edit("netconfMessages/editConfig.xml");
+        checkBinaryLeafEdited(getConfigCandidate());
 
-        id = new ModuleIdentifier(NetconfTestImplModuleFactory.NAME, "instance2");
-        rootReg = new RootRuntimeBeanRegistratorImpl(internalJmxRegistrator, id);
-        registrator = new NetconfTestImplRuntimeRegistrator(rootReg);
-
-        a = registerRoot(registrator);
-        registerAdditional(a);
-        registerAdditional(a);
-        registerAdditional(a);
-        registerAdditional(a);
-        reg = registerInner(a);
-        registerInner2(reg);
-        reg = registerInner(a);
-        registerInner2(reg);
-        registerInner2(reg);
-        reg = registerInner(a);
-        registerInner2(reg);
-        registerInner2(reg);
-        registerInner2(reg);
-        reg = registerInner(a);
-        registerInner2(reg);
-        registerInner2(reg);
-        registerInner2(reg);
-        registerInner2(reg);
-
+        // check after edit
+        commit();
         Element response = get();
 
-        System.err.println(XmlUtil.toString(response));
-
-        assertEquals(2, getElementsSize(response, "module"));
+        assertEquals(2/*With runtime beans*/ + 2 /*Without runtime beans*/, getElementsSize(response, "module"));
+        // data from state
         assertEquals(2, getElementsSize(response, "asdf"));
-        assertEquals(5, getElementsSize(response, "inner-running-data"));
-        assertEquals(5, getElementsSize(response, "deep2"));
-        assertEquals(11, getElementsSize(response, "inner-inner-running-data"));
-        assertEquals(11, getElementsSize(response, "deep3"));
-        assertEquals(11 * 2, getElementsSize(response, "list-of-strings"));
-        assertEquals(4, getElementsSize(response, "inner-running-data-additional"));
-        assertEquals(4, getElementsSize(response, "deep4"));
+        // data from running config
+        assertEquals(2, getElementsSize(response, "simple-short"));
+
+        assertEquals(8, getElementsSize(response, "inner-running-data"));
+        assertEquals(8, getElementsSize(response, "deep2"));
+        assertEquals(8 * 4, getElementsSize(response, "inner-inner-running-data"));
+        assertEquals(8 * 4, getElementsSize(response, "deep3"));
+        assertEquals(8 * 4 * 2, getElementsSize(response, "list-of-strings"));
+        assertEquals(8, getElementsSize(response, "inner-running-data-additional"));
+        assertEquals(8, getElementsSize(response, "deep4"));
         // TODO assert keys
 
         RuntimeRpc netconf = new RuntimeRpc(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
@@ -479,153 +445,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         return response.getElementsByTagName(elementName).getLength();
     }
 
-    private Object registerAdditional(final NetconfTestImplRuntimeRegistration a) {
-        class InnerRunningDataAdditionalRuntimeMXBeanTest implements InnerRunningDataAdditionalRuntimeMXBean {
-
-            private final int simpleInt;
-            private final String simpleString;
-
-            public InnerRunningDataAdditionalRuntimeMXBeanTest(final int simpleInt, final String simpleString) {
-                this.simpleInt = simpleInt;
-                this.simpleString = simpleString;
-            }
-
-            @Override
-            public Integer getSimpleInt3() {
-                return this.simpleInt;
-            }
-
-            @Override
-            public Deep4 getDeep4() {
-                final Deep4 d = new Deep4();
-                d.setBoool(false);
-                return d;
-            }
-
-            @Override
-            public String getSimpleString() {
-                return this.simpleString;
-            }
-
-            @Override
-            public void noArgInner() {
-            }
-
-        }
-
-        final int simpleInt = counter++;
-        return a.register(new InnerRunningDataAdditionalRuntimeMXBeanTest(simpleInt, "randomString_" + simpleInt));
-    }
-
-    private void registerInner2(final InnerRunningDataRuntimeRegistration reg) {
-        class InnerInnerRunningDataRuntimeMXBeanTest implements InnerInnerRunningDataRuntimeMXBean {
-
-            private final int simpleInt;
-
-            public InnerInnerRunningDataRuntimeMXBeanTest(final int simpleInt) {
-                this.simpleInt = simpleInt;
-            }
-
-            @Override
-            public List<NotStateBean> getNotStateBean() {
-                final NotStateBean notStateBean = new NotStateBean();
-                final NotStateBeanInternal notStateBeanInternal = new NotStateBeanInternal();
-                notStateBean.setNotStateBeanInternal(Lists.newArrayList(notStateBeanInternal));
-                return Lists.newArrayList(notStateBean);
-            }
-
-            @Override
-            public Integer getSimpleInt3() {
-                return this.simpleInt;
-            }
-
-            @Override
-            public Deep3 getDeep3() {
-                return new Deep3();
-            }
-
-            @Override
-            public List<String> getListOfStrings() {
-                return Lists.newArrayList("l1", "l2");
-            }
-
-            @Override
-            public List<RetValList> listOutput() {
-                return Lists.newArrayList(new RetValList());
-            }
-
-            @Override
-            public Boolean noArgInnerInner(Integer integer, Boolean aBoolean) {
-                return aBoolean;
-            }
-
-            @Override
-            public RetValContainer containerOutput() {
-                return new RetValContainer();
-            }
-
-            @Override
-            public List<String> leafListOutput() {
-                return Lists.newArrayList("1", "2");
-            }
-
-        }
-
-        reg.register(new InnerInnerRunningDataRuntimeMXBeanTest(counter++));
-
-    }
-
-    private static int counter = 1000;
-
-    private InnerRunningDataRuntimeRegistration registerInner(final NetconfTestImplRuntimeRegistration a) {
-
-        class InnerRunningDataRuntimeMXBeanTest implements InnerRunningDataRuntimeMXBean {
-
-            private final int simpleInt;
-
-            public InnerRunningDataRuntimeMXBeanTest(final int simpleInt) {
-                this.simpleInt = simpleInt;
-            }
-
-            @Override
-            public Integer getSimpleInt3() {
-                return this.simpleInt;
-            }
-
-            @Override
-            public Deep2 getDeep2() {
-                return new Deep2();
-            }
-
-        }
-        return a.register(new InnerRunningDataRuntimeMXBeanTest(counter++));
-    }
-
-    private NetconfTestImplRuntimeRegistration registerRoot(final NetconfTestImplRuntimeRegistrator registrator) {
-        final NetconfTestImplRuntimeRegistration a = registrator.register(new NetconfTestImplRuntimeMXBean() {
-
-            @Override
-            public Long getCreatedSessions() {
-                return 11L;
-            }
-
-            @Override
-            public Asdf getAsdf() {
-                final Asdf asdf = new Asdf();
-                asdf.setSimpleInt(55);
-                asdf.setSimpleString("asdf");
-                return asdf;
-            }
-
-            @Override
-            public String noArg(final String arg1) {
-                return arg1.toUpperCase();
-            }
-
-        });
-        return a;
-    }
-
     private Element executeOp(final NetconfOperation op, final String filename) throws ParserConfigurationException,
             SAXException, IOException, NetconfDocumentedException {
 
@@ -643,7 +462,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private List<InputStream> getYangs() throws FileNotFoundException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
-                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang",
+                "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         for (String path : paths) {
