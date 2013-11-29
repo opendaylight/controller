@@ -18,6 +18,8 @@ public interface Capability {
 
     public String getCapabilityUri();
 
+    public Optional<String> getModuleNamespace();
+
     public Optional<String> getModuleName();
 
     public Optional<String> getRevision();
