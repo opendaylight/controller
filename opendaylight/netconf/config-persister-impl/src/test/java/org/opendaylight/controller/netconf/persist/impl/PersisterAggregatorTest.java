@@ -9,109 +9,97 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.base.Optional;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.api.PropertiesProvider;
-import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderBaseImpl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.matchers.JUnitMatchers.containsString;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.netconf.persist.impl.PersisterAggregator.PersisterWithConfiguration;
+import static org.opendaylight.controller.netconf.persist.impl.PersisterAggregatorTest.TestingPropertiesProvider.loadFile;
 
 public class PersisterAggregatorTest {
-    @Mock
-    TestingPropertiesProvider propertiesProvider;
 
-    class TestingPropertiesProvider extends PropertiesProviderBaseImpl {
-        TestingPropertiesProvider() {
+    static class TestingPropertiesProvider extends PropertiesProviderBaseImpl {
+
+        private static Properties prop = new Properties();
+
+        public TestingPropertiesProvider() {
             super(null);
+        }
+
+        public static TestingPropertiesProvider loadFile(String fileName) {
+            try {
+                prop.load(TestingPropertiesProvider.class.getClassLoader().getResourceAsStream(fileName));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return new TestingPropertiesProvider();
         }
 
         @Override
         public String getFullKeyForReporting(String key) {
-            return "prefix." + key;
+            return ConfigPersisterActivator.NETCONF_CONFIG_PERSISTER + "." + key;
         }
 
         @Override
         public String getProperty(String key) {
-            throw new UnsupportedOperationException("should be mocked");
+            return prop.getProperty(getFullKeyForReporting(key));
+        }
+
+        @Override
+        public String getPropertyWithoutPrefix(String fullKey){
+            return prop.getProperty(fullKey);
         }
     }
 
-    @Before
-    public void setUpMocks() {
-        MockitoAnnotations.initMocks(this);
-        doCallRealMethod().when(propertiesProvider).getFullKeyForReporting(anyString());
-    }
-
-    @Ignore
     @Test
-    public void testFromProperties() throws Exception {
-        doReturn("").when(propertiesProvider).getProperty(ConfigPersisterActivator.NETCONF_CONFIG_PERSISTER);
-        doReturn(MockAdapter.class.getName()).when(propertiesProvider).getProperty(
-                ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
-        doReturn("false").when(propertiesProvider).getProperty("readOnly");
+    public void testDummyAdapter() throws Exception {
+        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(loadFile("test1.properties"));
+        List<PersisterWithConfiguration> persisters = persisterAggregator.getPersisterWithConfigurations();
+        assertEquals(1, persisters.size());
+        PersisterWithConfiguration persister = persisters.get(0);
+        assertEquals(DummyAdapter.class.getName() ,persister.getStorage().getClass().getName());
+        assertFalse(persister.isReadOnly());
 
-        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
         persisterAggregator.persistConfig(null);
         persisterAggregator.loadLastConfig();
         persisterAggregator.persistConfig(null);
         persisterAggregator.loadLastConfig();
 
-        assertEquals(2, MockAdapter.persist);
-        assertEquals(2, MockAdapter.load);
-        assertEquals(1, MockAdapter.props);
+        assertEquals(2, DummyAdapter.persist);
+        assertEquals(2, DummyAdapter.load);
+        assertEquals(1, DummyAdapter.props);
     }
 
-
-    @Ignore
     @Test
-    public void testFromProperties2() throws Exception {
-        String prefix = "";
-        doReturn(prefix).when(propertiesProvider).getProperty(ConfigPersisterActivator.NETCONF_CONFIG_PERSISTER);
-        doReturn(FileStorageAdapter.class.getName()).when(propertiesProvider).getProperty(
-                ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
-
-        doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
-                propertiesProvider).getProperty("prefix.properties.fileStorage");
-        doReturn("propertiesProvider").when(propertiesProvider).toString();
-        doReturn(null).when(propertiesProvider).getProperty("prefix.properties.numberOfBackups");
-
-        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
+    public void testLoadFromPropertyFile() throws Exception {
+        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(loadFile("test2.properties"));
+        List<PersisterWithConfiguration> persisters = persisterAggregator.getPersisterWithConfigurations();
+        assertEquals(1, persisters.size());
+        PersisterWithConfiguration persister = persisters.get(0);
+        assertEquals(FileStorageAdapter.class.getName() ,persister.getStorage().getClass().getName());
+        assertFalse(persister.isReadOnly());
     }
 
-    @Ignore
     @Test
-    public void testFromProperties3() throws Exception {
-        doReturn("").when(propertiesProvider).getProperty(ConfigPersisterActivator.NETCONF_CONFIG_PERSISTER);
-        doReturn(FileStorageAdapter.class.getName()).when(propertiesProvider).getProperty(
-                ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX);
-        doReturn("target" + File.separator + "generated-test-sources" + File.separator + "testFile").when(
-                propertiesProvider).getProperty("prefix.properties.fileStorage");
-        doReturn("false").when(propertiesProvider).getProperty("readOnly");
-        doReturn("propertiesProvider").when(propertiesProvider).toString();
-        doReturn("0").when(propertiesProvider).getProperty("prefix.properties.numberOfBackups");
+    public void testFileStorageNumberOfBackups() throws Exception {
         try {
-            PersisterAggregator.createFromProperties(propertiesProvider);
+            PersisterAggregator.createFromProperties(loadFile("test3.properties"));
             fail();
         } catch (RuntimeException e) {
             assertThat(
@@ -122,18 +110,18 @@ public class PersisterAggregatorTest {
 
     @Test
     public void loadLastConfig() throws Exception {
-        List<PersisterAggregator.PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
-        PersisterAggregator.PersisterWithConfiguration first = new PersisterAggregator.PersisterWithConfiguration(mock(Persister.class), false);
+        List<PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
+        PersisterWithConfiguration first = new PersisterWithConfiguration(mock(Persister.class), false);
 
         ConfigSnapshotHolder ignored = mock(ConfigSnapshotHolder.class);
-        doReturn(Optional.of(ignored)).when(first.storage).loadLastConfig(); // should be ignored
+        doReturn(Optional.of(ignored)).when(first.getStorage()).loadLastConfig(); // should be ignored
 
         ConfigSnapshotHolder used = mock(ConfigSnapshotHolder.class);
-        PersisterAggregator.PersisterWithConfiguration second = new PersisterAggregator.PersisterWithConfiguration(mock(Persister.class), false);
-        doReturn(Optional.of(used)).when(second.storage).loadLastConfig(); // should be used
+        PersisterWithConfiguration second = new PersisterWithConfiguration(mock(Persister.class), false);
+        doReturn(Optional.of(used)).when(second.getStorage()).loadLastConfig(); // should be used
 
-        PersisterAggregator.PersisterWithConfiguration third = new PersisterAggregator.PersisterWithConfiguration(mock(Persister.class), false);
-        doReturn(Optional.absent()).when(third.storage).loadLastConfig();
+        PersisterWithConfiguration third = new PersisterWithConfiguration(mock(Persister.class), false);
+        doReturn(Optional.absent()).when(third.getStorage()).loadLastConfig();
 
         persisterWithConfigurations.add(first);
         persisterWithConfigurations.add(second);
@@ -143,52 +131,6 @@ public class PersisterAggregatorTest {
         Optional<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfig();
         assertTrue(configSnapshotHolderOptional.isPresent());
         assertEquals(used, configSnapshotHolderOptional.get());
-    }
-
-    @Ignore
-    @Test
-    public void test() throws Exception {
-//        Persister storage = mock(Persister.class);
-//        doReturn(null).when(storage).loadLastConfig();
-//        doNothing().when(storage).persistConfig(any(ConfigSnapshotHolder.class));
-//
-//        PersisterAggregator persister = new PersisterAggregator(storage);
-//        persister.loadLastConfig();
-//        persister.persistConfig(null);
-//
-//        verify(storage).loadLastConfig();
-//        verify(storage).persistConfig(any(ConfigSnapshotHolder.class));
-    }
-
-    public static class MockAdapter implements StorageAdapter, Persister {
-
-        static int persist = 0;
-
-        @Override
-        public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
-            persist++;
-        }
-
-        static int load = 0;
-
-        @Override
-        public Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException {
-            load++;
-            return Optional.absent();
-        }
-
-        static int props = 0;
-
-        @Override
-        public Persister instantiate(PropertiesProvider propertiesProvider) {
-            props++;
-            return this;
-        }
-
-        @Override
-        public void close() {
-        }
-
     }
 
 }
