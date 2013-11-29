@@ -20,8 +20,8 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;

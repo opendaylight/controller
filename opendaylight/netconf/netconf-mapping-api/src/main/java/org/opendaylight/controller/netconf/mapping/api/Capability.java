@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.mapping.api;
 
 import com.google.common.base.Optional;
 
+import java.util.List;
+
 /**
  * Contains capability URI announced by server hello message and optionally its
  * corresponding yang schema that can be retrieved by get-schema rpc.
@@ -18,9 +20,13 @@ public interface Capability {
 
     public String getCapabilityUri();
 
+    public Optional<String> getModuleNamespace();
+
     public Optional<String> getModuleName();
 
     public Optional<String> getRevision();
 
     public Optional<String> getCapabilitySchema();
+
+    public Optional<List<String>> getLocation();
 }
