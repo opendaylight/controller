@@ -47,12 +47,26 @@ class JsonMapper {
         checkNotNull(parent);
         checkNotNull(parentSchema);
 
+        List<String> longestPathToElementViaChoiceCase = new ArrayList<>();
         for (Node<?> child : parent.getChildren()) {
-            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
-            if (childSchema == null) {
-                throw new UnsupportedDataTypeException("Probably the data node \"" + child.getNodeType().getLocalName()
-                        + "\" is not conform to schema");
+            Deque<String> choiceCasePathStack = new ArrayDeque<>(longestPathToElementViaChoiceCase);
+            SchemaLocation schemaLocation = findFirstSchemaForNode(child, parentSchema.getChildNodes(),
+                    choiceCasePathStack);
+
+            if (schemaLocation == null) {
+                if (!choiceCasePathStack.isEmpty()) {
+                    throw new UnsupportedDataTypeException("On choice-case path " + choiceCasePathStack
+                            + " wasn't found data schema for " + child.getNodeType().getLocalName());
+                } else {
+                    throw new UnsupportedDataTypeException("Probably the data node \""
+                            + child.getNodeType().getLocalName() + "\" is not conform to schema");
+                }
             }
+
+            longestPathToElementViaChoiceCase = resolveLongerPath(longestPathToElementViaChoiceCase,
+                    schemaLocation.getLocation());
+
+            DataSchemaNode childSchema = schemaLocation.getSchema();
 
             if (childSchema instanceof ContainerSchemaNode) {
                 Preconditions.checkState(child instanceof CompositeNode,
@@ -83,7 +97,10 @@ class JsonMapper {
         }
 
         for (Node<?> child : parent.getChildren()) {
-            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
+            SchemaLocation schemaLocation = findFirstSchemaForNode(child, parentSchema.getChildNodes(),
+                    new ArrayDeque<>(longestPathToElementViaChoiceCase));
+
+            DataSchemaNode childSchema = schemaLocation.getSchema();
             if (childSchema instanceof LeafListSchemaNode) {
                 foundLeafLists.remove((LeafListSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
@@ -92,10 +109,45 @@ class JsonMapper {
         }
     }
 
-    private DataSchemaNode findFirstSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
+    private List<String> resolveLongerPath(List<String> l1, List<String> l2) {
+        return l1.size() > l2.size() ? l1 : l2;
+    }
+
+    private SchemaLocation findFirstSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode,
+            Deque<String> pathIterator) {
+        Map<String, ChoiceNode> choiceSubnodes = new HashMap<>();
         for (DataSchemaNode dsn : dataSchemaNode) {
-            if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
-                return dsn;
+            if (dsn instanceof ChoiceNode) {
+                choiceSubnodes.put(dsn.getQName().getLocalName(), (ChoiceNode) dsn);
+            } else if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
+                return new SchemaLocation(dsn);
+            }
+        }
+
+        for (ChoiceNode choiceSubnode : choiceSubnodes.values()) {
+            if ((!pathIterator.isEmpty() && pathIterator.peekLast().equals(choiceSubnode.getQName().getLocalName()))
+                    || pathIterator.isEmpty()) {
+                String pathPartChoice = pathIterator.pollLast();
+                for (ChoiceCaseNode concreteCase : choiceSubnode.getCases()) {
+                    if ((!pathIterator.isEmpty() && pathIterator.peekLast().equals(
+                            concreteCase.getQName().getLocalName()))
+                            || pathIterator.isEmpty()) {
+                        String pathPartCase = pathIterator.pollLast();
+                        SchemaLocation schemaLocation = findFirstSchemaForNode(node, concreteCase.getChildNodes(),
+                                pathIterator);
+                        if (schemaLocation != null) {
+                            schemaLocation.addPathPart(concreteCase.getQName().getLocalName());
+                            schemaLocation.addPathPart(choiceSubnode.getQName().getLocalName());
+                            return schemaLocation;
+                        }
+                        if (pathPartCase != null) {
+                            pathIterator.addLast(pathPartCase);
+                        }
+                    }
+                }
+                if (pathPartChoice != null) {
+                    pathIterator.addLast(pathPartChoice);
+                }
             }
         }
         return null;
