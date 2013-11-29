@@ -8,11 +8,13 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import javax.net.ssl.SSLContext;
-
+import com.google.common.base.Optional;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -31,14 +33,9 @@ import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
-import com.google.common.base.Optional;
-
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.Promise;
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 

@@ -52,6 +52,7 @@ public abstract class NetconfSession extends AbstractProtocolSession<NetconfMess
     @Override
     public void close() {
         channel.close();
+        up = false;
         sessionListener.onSessionTerminated(this, new NetconfTerminationReason("Session closed"));
     }
 

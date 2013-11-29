@@ -12,6 +12,7 @@ import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 public class NetconfServerSessionListenerFactory implements SessionListenerFactory<NetconfServerSessionListener> {
@@ -22,12 +23,15 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
 
     private final SessionIdProvider idProvider;
 
+    private final SessionMonitoringService monitor;
+
     public NetconfServerSessionListenerFactory(NetconfOperationServiceFactoryListener factoriesListener,
-            DefaultCommitNotificationProducer commitNotifier,
-            SessionIdProvider idProvider) {
+                                               DefaultCommitNotificationProducer commitNotifier,
+                                               SessionIdProvider idProvider, SessionMonitoringService monitor) {
         this.factoriesListener = factoriesListener;
         this.commitNotifier = commitNotifier;
         this.idProvider = idProvider;
+        this.monitor = monitor;
     }
 
     @Override
@@ -41,6 +45,6 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
                 netconfOperationServiceSnapshot, capabilityProvider,
                 commitNotifier);
 
-        return new NetconfServerSessionListener(operationRouter);
+        return new NetconfServerSessionListener(operationRouter, monitor);
     }
 }
