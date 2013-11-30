@@ -48,4 +48,8 @@ public class Field {
     public String getDefinition() {
         return definition;
     }
+
+    public boolean isArray() {
+        return type.endsWith("[]");
+    }
 }

@@ -55,6 +55,11 @@ package ${packageName};
         dependencyResolver.validateDependency(${field.dependency.sie.fullyQualifiedName}.class, ${field.name}, ${field.name}JmxAttribute);
         </#if>
     </#list>
+        customValidation();
+    }
+
+    protected void customValidation(){
+
     }
 
     // caches of resolved dependencies
@@ -110,7 +115,7 @@ package ${packageName};
 
     public boolean canReuseInstance(${typeDeclaration.name} oldModule){
         // allow reusing of old instance if no parameters was changed
-        return equals(oldModule);
+        return isSame(oldModule);
     }
 
     public ${instanceType} reuseInstance(${instanceType} oldInstance){
@@ -120,34 +125,50 @@ package ${packageName};
 
     public abstract ${instanceType} createInstance();
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ${typeDeclaration.name} other = (${typeDeclaration.name}) obj;
-
-
+    public boolean isSame(${typeDeclaration.name} other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Parameter 'other' is null");
+        }
         <#list moduleFields as field>
         <#if field.dependent==true>
         if (${field.name}Dependency == null) {
             if (other.${field.name}Dependency != null)
                 return false;
-        } else if (!${field.name}Dependency.equals(other.${field.name}Dependency))
+        } else if (!${field.name}Dependency.equals(other.${field.name}Dependency)) {
             return false;
+        }
         <#else>
         if (${field.name} == null) {
-            if (other.${field.name} != null)
+            if (other.${field.name} != null) {
                 return false;
-        } else if (!${field.name}.equals(other.${field.name}))
+            }
+        } else if
+            <#if field.array == false>
+                (${field.name}.equals(other.${field.name}) == false)
+            <#else>
+                (java.util.Arrays.equals(${field.name},other.${field.name}) == false)
+            </#if>
+                 {
             return false;
+        }
         </#if>
         </#list>
 
         return true;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ${typeDeclaration.name} that = (${typeDeclaration.name}) o;
+
+        return identifier.equals(that.identifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return identifier.hashCode();
+    }
 }
