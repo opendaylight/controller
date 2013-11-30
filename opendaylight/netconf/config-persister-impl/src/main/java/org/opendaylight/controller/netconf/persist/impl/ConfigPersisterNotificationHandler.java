@@ -101,25 +101,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         if (maybeConfig.isPresent()) {
             logger.debug("Last config found {}", persister);
             ConflictingVersionException lastException = null;
-            int maxAttempts = 30;
-            for(int i = 0 ; i < maxAttempts; i++) {
-                registerToNetconf(maybeConfig.get().getCapabilities());
-
-                final String configSnapshot = maybeConfig.get().getConfigSnapshot();
-                logger.trace("Pushing following xml to netconf {}", configSnapshot);
-                try {
-                    pushLastConfig(XmlUtil.readXmlToElement(configSnapshot));
-                    return;
-                } catch(ConflictingVersionException e) {
-                    closeClientAndDispatcher(netconfClient, netconfClientDispatcher);
-                    lastException = e;
-                    Thread.sleep(1000);
-                } catch (SAXException | IOException e) {
-                    throw new IllegalStateException("Unable to load last config", e);
-                }
-            }
-            throw new IllegalStateException("Failed to push configuration, maximum attempt count has been reached: "
-                    + maxAttempts, lastException);
+            pushLastConfigWithRetries(maybeConfig, lastException);
 
         } else {
             // this ensures that netconf is initialized, this is first
@@ -130,6 +112,28 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
             logger.info("No last config provided by backend storage {}", persister);
         }
         registerAsJMXListener();
+    }
+
+    private void pushLastConfigWithRetries(Optional<ConfigSnapshotHolder> maybeConfig, ConflictingVersionException lastException) throws InterruptedException {
+        int maxAttempts = 30;
+        for(int i = 0 ; i < maxAttempts; i++) {
+            registerToNetconf(maybeConfig.get().getCapabilities());
+
+            final String configSnapshot = maybeConfig.get().getConfigSnapshot();
+            logger.trace("Pushing following xml to netconf {}", configSnapshot);
+            try {
+                pushLastConfig(XmlUtil.readXmlToElement(configSnapshot));
+                return;
+            } catch(ConflictingVersionException e) {
+                closeClientAndDispatcher(netconfClient, netconfClientDispatcher);
+                lastException = e;
+                Thread.sleep(1000);
+            } catch (SAXException | IOException e) {
+                throw new IllegalStateException("Unable to load last config", e);
+            }
+        }
+        throw new IllegalStateException("Failed to push configuration, maximum attempt count has been reached: "
+                + maxAttempts, lastException);
     }
 
     private synchronized long registerToNetconf(Set<String> expectedCaps) throws InterruptedException {
@@ -209,6 +213,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
     }
 
     private void registerAsJMXListener() {
+        logger.trace("Called registerAsJMXListener");
         try {
             mbeanServer.addNotificationListener(on, this, null, null);
         } catch (InstanceNotFoundException | IOException e) {
