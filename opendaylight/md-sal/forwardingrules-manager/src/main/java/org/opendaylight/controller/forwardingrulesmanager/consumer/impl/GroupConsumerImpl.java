@@ -35,15 +35,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.Gro
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.GroupRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.GroupUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.RemoveGroupInputBuilder;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.UpdatedGroupBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes.GroupType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.Buckets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.Bucket;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.config.rev131024.meters.Meter;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -239,8 +237,8 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
                 return new Status(StatusCode.BADREQUEST, "Group record does not exist");
             }*/
 
-            if (!(group.getGroupType().getIntValue() >= GroupType.GroupAll.getIntValue() && group.getGroupType()
-                    .getIntValue() <= GroupType.GroupFf.getIntValue())) {
+            if (!(group.getGroupType().getIntValue() >= GroupTypes.GroupAll.getIntValue() && group.getGroupType()
+                    .getIntValue() <= GroupTypes.GroupFf.getIntValue())) {
                 logger.error("Invalid Group type %d" + group.getGroupType().getIntValue());
                 return new Status(StatusCode.BADREQUEST, "Invalid Group type");
             }
