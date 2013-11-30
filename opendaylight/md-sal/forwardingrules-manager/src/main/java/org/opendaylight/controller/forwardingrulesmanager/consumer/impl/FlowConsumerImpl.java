@@ -185,6 +185,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private void addFlow(InstanceIdentifier<?> path, Flow dataObject) {
 
         AddFlowInputBuilder input = new AddFlowInputBuilder();
+        
         List<Instruction> inst = (dataObject).getInstructions().getInstruction();
         input.setNode((dataObject).getNode());
         input.setPriority((dataObject).getPriority());

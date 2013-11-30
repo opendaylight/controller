@@ -14,24 +14,25 @@ module opendaylight-meter-types {
             type uint32;
     }
     
-    grouping meter-flags {
-        leaf flags {
-            type bits {
-                bit meter-kbps;
-                bit meter-pktps;
-                bit meter-burst;
-                bit meter-stats;
-            }
-        }
+    // field types
+    identity meter-flags {
+        description "Base identity for match Fields";
     }
     
-    grouping meter-band-type {
-        leaf flags {
-            type bits {
-                bit ofpmbt-drop;
-                bit ofpmbt-dscp-remark;
-                bit ofpmbt-experimenter;               
-            }
+    typedef meter-flags {        
+        type bits {
+            bit meter-kbps;
+            bit meter-pktps;
+            bit meter-burst;
+            bit meter-stats;
+        }        
+    }
+    
+    typedef meter-band-type {
+        type bits {
+            bit ofpmbt-drop;
+            bit ofpmbt-dscp-remark;
+            bit ofpmbt-experimenter;               
         }
     }
     
@@ -79,7 +80,9 @@ module opendaylight-meter-types {
     
     grouping meter {
         
-        uses meter-flags;        
+        leaf flags {
+           type meter-flags;        
+        }
         
         leaf meter-id {
             type meter-id;
@@ -104,7 +107,9 @@ module opendaylight-meter-types {
                 }
                 
                 container meter-band-types {
-                    uses meter-band-type;
+                    leaf flags {
+                        type meter-band-type;
+                    }
                 }
             
                 leaf rate {

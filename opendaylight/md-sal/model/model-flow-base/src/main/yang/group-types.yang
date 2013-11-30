@@ -14,30 +14,30 @@ module opendaylight-group-types {
         type uint32;
     }
     
-    grouping group-types {
-        leaf group-type {
-            type enumeration {
-                enum group-all;
-                enum group-select;
-                enum group-indirect;
-                enum group-ff;
-            }
-        }
+    typedef group-types {        
+        type enumeration {
+            enum group-all;
+            enum group-select;
+            enum group-indirect;
+            enum group-ff;
+        }        
     }
     
     typedef group-capabilities { 
-        	type enumeration {
-                enum select-weight;
-                enum select-liveness;
-                enum chaining;
-                enum chaining-checks;
-            }   
-        }
+        type enumeration {
+            enum select-weight;
+            enum select-liveness;
+            enum chaining;
+            enum chaining-checks;
+        }   
+    }
     
     
     grouping group {
         
-        uses group-types;
+        leaf group-type {
+            type group-types;
+        }
         
         leaf group-id {
             type group-id;
