@@ -69,18 +69,6 @@
                         <Private-Package>
                             org.opendaylight.controller.config.yangjmxgenerator.plugin.util,
                         </Private-Package>
-                        <Import-Package>
-                            org.slf4j,
-                            com.google.common.base,
-                            com.google.common.collect,
-                            javax.management.*,
-                            <!-- YANGTOOLS -->
-                            org.opendaylight.yangtools.binding.generator.util,
-                            org.opendaylight.yangtools.sal.binding.generator.spi,
-                            org.opendaylight.yangtools.sal.binding.model.api,
-                            org.opendaylight.yangtools.yang.common,
-                            org.opendaylight.yangtools.yang.model.api
-                        </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yangjmxgenerator,
                             org.opendaylight.controller.config.yangjmxgenerator.attribute,
