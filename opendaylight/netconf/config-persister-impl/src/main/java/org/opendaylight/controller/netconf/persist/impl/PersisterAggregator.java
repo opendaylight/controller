@@ -61,12 +61,22 @@ public final class PersisterAggregator implements Persister {
 
     public static class PersisterWithConfiguration {
 
-        public final Persister storage;
+        private final Persister storage;
         private final boolean readOnly;
 
         public PersisterWithConfiguration(Persister storage, boolean readOnly) {
             this.storage = storage;
             this.readOnly = readOnly;
+        }
+
+        @VisibleForTesting
+        public Persister getStorage() {
+            return storage;
+        }
+
+        @VisibleForTesting
+        public boolean isReadOnly() {
+            return readOnly;
         }
 
         @Override
