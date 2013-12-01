@@ -478,7 +478,7 @@ public class LazyGeneratedCodecRegistry implements //
 
         @Override
         public boolean isAcceptable(Node<?> input) {
-            if (false == (input instanceof CompositeNode)) {
+            if (!(input instanceof CompositeNode)) {
                 if (augmenting) {
                     return checkAugmenting((CompositeNode) input);
                 } else {
@@ -492,10 +492,7 @@ public class LazyGeneratedCodecRegistry implements //
             QName parent = input.getNodeType();
             for (Node<?> childNode : input.getChildren()) {
                 QName child = childNode.getNodeType();
-                if (false == Objects.equals(parent.getNamespace(), child.getNamespace())) {
-                    continue;
-                }
-                if (false == Objects.equals(parent.getRevision(), child.getRevision())) {
+                if (!Objects.equals(parent.getNamespace(), child.getNamespace()) || Objects.equals(parent.getRevision(), child.getRevision())) {
                     continue;
                 }
                 if (validNames.contains(child.getLocalName())) {
@@ -558,7 +555,7 @@ public class LazyGeneratedCodecRegistry implements //
 
         @Override
         public Set<java.util.Map.Entry<Class, BindingCodec<Object, Object>>> entrySet() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
@@ -584,7 +581,7 @@ public class LazyGeneratedCodecRegistry implements //
 
         @Override
         public BindingCodec get(Object key) {
-            if (false == (key instanceof CompositeNode)) {
+            if (!(key instanceof CompositeNode)) {
                 return null;
             }
             for (java.util.Map.Entry<Class, ChoiceCaseCodecImpl<?>> entry : choiceCases.entrySet()) {
@@ -636,7 +633,7 @@ public class LazyGeneratedCodecRegistry implements //
 
         @Override
         public Collection<BindingCodec<?, ?>> values() {
-            return null;
+            return Collections.emptySet();
         }
 
         private UnsupportedOperationException notModifiable() {
@@ -660,18 +657,17 @@ public class LazyGeneratedCodecRegistry implements //
 
         @Override
         public boolean isEmpty() {
-            return false;
+            return true;
         }
 
         @Override
         public Set<T> keySet() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
         public Set<java.util.Map.Entry<T, BindingCodec<?, ?>>> entrySet() {
-            // TODO Auto-generated method stub
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
@@ -709,15 +705,9 @@ public class LazyGeneratedCodecRegistry implements //
                 augmentationField.setAccessible(true);
                 Map<Class, Augmentation> augMap = (Map<Class, Augmentation>) augmentationField.get(input);
                 return augMap;
-            } catch (NoSuchFieldException e) {
-
-            } catch (SecurityException e) {
-
-            } catch (IllegalArgumentException e) {
-
-            } catch (IllegalAccessException e) {
-
-            }
+            } catch (IllegalArgumentException | IllegalAccessException |NoSuchFieldException | SecurityException e) {
+                LOG.debug("Could not read augmentations for {}",input,e);
+            } 
             return Collections.emptyMap();
         }
 
@@ -742,9 +732,9 @@ public class LazyGeneratedCodecRegistry implements //
                 rawAugmentationCodecs.put(key, ret);
                 return ret;
             } catch (InstantiationException e) {
-
+                LOG.error("Can not instantiate raw augmentation codec {}",key.getSimpleName(),e);
             } catch (IllegalAccessException e) {
-
+                LOG.debug("BUG: Constructor for {} is not accessible.",key.getSimpleName(),e);
             }
             return null;
         }

@@ -17,8 +17,7 @@ import org.osgi.framework.BundleContext;
 /**
 *
 */
-public class BindingBrokerImplModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModuleFactory
-{
+public class BindingBrokerImplModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModuleFactory {
 
     
     @Override

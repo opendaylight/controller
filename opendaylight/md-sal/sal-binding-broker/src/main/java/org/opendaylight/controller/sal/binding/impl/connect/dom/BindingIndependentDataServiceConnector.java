@@ -191,7 +191,6 @@ public class BindingIndependentDataServiceConnector implements //
 
     @Override
     public void close() throws Exception {
-
         if (baCommitHandlerRegistration != null) {
             baCommitHandlerRegistration.close();
         }

@@ -149,6 +149,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         try {
             deserializationBlock.call()
         } catch (Exception e) {
+
             // FIXME: Make this block providing more information.
             throw new DeserializationException(e);
         }
