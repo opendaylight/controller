@@ -166,11 +166,12 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
         flow.setNode(NODE_REF);
         InstructionsBuilder instructions = new InstructionsBuilder();
         InstructionBuilder instruction = new InstructionBuilder();
+        instruction.setOrder(10);
         ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
         List<Action> actionList = new ArrayList<>();
         PopMplsActionBuilder popMplsAction = new PopMplsActionBuilder();
         popMplsAction.setEthernetType(34);
-        actionList.add(new ActionBuilder().setAction(popMplsAction.build()).build());
+        actionList.add(new ActionBuilder().setAction(popMplsAction.build()).setOrder(0).build());
 
         applyActions.setAction(actionList );
         

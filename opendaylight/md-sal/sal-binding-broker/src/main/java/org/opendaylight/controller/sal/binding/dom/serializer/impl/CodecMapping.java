@@ -7,7 +7,6 @@ import org.opendaylight.controller.sal.binding.dom.serializer.api.InstanceIdenti
 import org.opendaylight.yangtools.yang.binding.BindingCodec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
 
 public class CodecMapping {
 
@@ -16,7 +15,7 @@ public class CodecMapping {
     public static final String COMPOSITE_TO_CASE = "COMPOSITE_TO_CASE";
     public static final String AUGMENTATION_CODEC = "AUGMENTATION_CODEC";
     
-    public static void setIdentifierCodec(Class obj,InstanceIdentifierCodec codec) {
+    public static void setIdentifierCodec(Class<?> obj,InstanceIdentifierCodec codec) {
         Field instanceIdField;
         try {
             instanceIdField = obj.getField(INSTANCE_IDENTIFIER_CODEC);

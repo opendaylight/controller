@@ -2,7 +2,6 @@ package org.opendaylight.controller.sal.binding.dom.serializer.impl;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -337,15 +336,11 @@ public class LazyGeneratedCodecRegistry implements //
 
     @Override
     public void onValueCodecCreated(Class<?> valueClass, Class<?> valueCodec) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onCaseCodecCreated(Class<?> choiceClass,
             Class<? extends BindingCodec<Map<QName, Object>, Object>> choiceCodec) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

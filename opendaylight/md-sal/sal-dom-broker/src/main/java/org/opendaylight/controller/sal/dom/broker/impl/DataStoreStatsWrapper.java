@@ -52,7 +52,7 @@ public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
         } finally {
             final long endTime = System.nanoTime();
             final long runTime = endTime - startTime;
-            cfgReadTimeTotal.addAndGet(runTime);
+            operReadTimeTotal.addAndGet(runTime);
         }
     }
 
@@ -98,40 +98,40 @@ public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
         return requestCommitCount.get();
     }
 
-    public final long getConfigurationReadTotalTime() {
-        return cfgReadTimeTotal.get();
+    public final double getConfigurationReadTotalTime() {
+        return cfgReadTimeTotal.get() / 1000.0d;
     }
 
-    public final long getOperationalReadTotalTime() {
-        return operReadTimeTotal.get();
+    public final double getOperationalReadTotalTime() {
+        return operReadTimeTotal.get() / 1000.0d;
     }
 
-    public final long getRequestCommitTotalTime() {
-        return requestCommitTimeTotal.get();
+    public final double getRequestCommitTotalTime() {
+        return requestCommitTimeTotal.get() / 1000.0d;
     }
 
-    public final long getConfigurationReadAverageTime() {
+    public final double getConfigurationReadAverageTime() {
         long readCount = cfgReadCount.get();
         if(readCount == 0) {
             return 0;
         }
-        return cfgReadTimeTotal.get() / readCount;
+        return getConfigurationReadTotalTime() / readCount;
     }
 
-    public final long getOperationalReadAverageTime() {
+    public final double getOperationalReadAverageTime() {
         long readCount = operReadCount.get();
         if(readCount == 0) {
             return 0;
         }
-        return operReadTimeTotal.get() / readCount;
+        return getOperationalReadTotalTime() / readCount;
     }
 
-    public final long getRequestCommitAverageTime() {
+    public final double getRequestCommitAverageTime() {
         long count = requestCommitCount.get();
         if(count == 0) {
             return 0;
         }
-        return requestCommitTimeTotal.get() / count;
+        return getRequestCommitTotalTime() / count;
     }
 
 }
