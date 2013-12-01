@@ -17,11 +17,11 @@ module threadpool-impl {
          thread services pure Java implementation.
 
         Copyright (c)2013 Cisco Systems, Inc. All rights reserved.;
-        
+
         This program and the accompanying materials are made available
-		under the terms of the Eclipse Public License v1.0 which
-		accompanies this distribution, and is available at
-		http://www.eclipse.org/legal/epl-v10.html";
+        under the terms of the Eclipse Public License v1.0 which
+        accompanies this distribution, and is available at
+        http://www.eclipse.org/legal/epl-v10.html";
 
     revision "2013-04-05" {
         description
@@ -40,21 +40,21 @@ module threadpool-impl {
         config:java-name-prefix EventBus;
     }
 
-	augment "/config:modules/config:module/config:configuration" {
-		case eventbus {
-			when "/config:modules/config:module/config:type = 'eventbus'";
-			// No real configuration
+    augment "/config:modules/config:module/config:configuration" {
+        case eventbus {
+            when "/config:modules/config:module/config:type = 'eventbus'";
+            // No real configuration
         }
     }
 
-	augment "/config:modules/config:module/config:state" {
-		case eventbus {
-			when "/config:modules/config:module/config:type = 'eventbus'";
-			rpcx:rpc-context-instance "event-bus-rpc";
+    augment "/config:modules/config:module/config:state" {
+        case eventbus {
+            when "/config:modules/config:module/config:type = 'eventbus'";
+            rpcx:rpc-context-instance "event-bus-rpc";
         }
     }
 
-	identity event-bus-rpc;
+    identity event-bus-rpc;
 
     identity async-eventbus {
         base config:module-type;
@@ -62,134 +62,134 @@ module threadpool-impl {
         config:java-name-prefix AsyncEventBus;
     }
 
-	augment "/config:modules/config:module/config:configuration" {
-		case async-eventbus {
-			when "/config:modules/config:module/config:type = 'async-eventbus'";
-			container threadpool {
-				uses config:service-ref {
-					refine type {
-						//mandatory true;
-						config:required-identity th:threadpool;
-					}
-				}
-			}
-		}
-	}
-
-	augment "/config:modules/config:module/config:state" {
-		case async-eventbus {
-			when "/config:modules/config:module/config:type = 'async-eventbus'";
-			rpcx:rpc-context-instance "event-bus-rpc";
+    augment "/config:modules/config:module/config:configuration" {
+        case async-eventbus {
+            when "/config:modules/config:module/config:type = 'async-eventbus'";
+            container threadpool {
+                uses config:service-ref {
+                    refine type {
+                        //mandatory true;
+                        config:required-identity th:threadpool;
+                    }
+                }
+            }
         }
     }
 
-	rpc get-dead-events-count {
-		config:java-name-prefix countDeadEvents;
-		input {
-			uses rpcx:rpc-context-ref {
-				refine context-instance {
-					rpcx:rpc-context-instance event-bus-rpc;
-				}
-			}
-		}
-		output {
-			leaf result {
-				type uint32;
-			}
-		}
-	}
-	
-	identity threadfactory-naming {
+    augment "/config:modules/config:module/config:state" {
+        case async-eventbus {
+            when "/config:modules/config:module/config:type = 'async-eventbus'";
+            rpcx:rpc-context-instance "event-bus-rpc";
+        }
+    }
+
+    rpc get-dead-events-count {
+        config:java-name-prefix countDeadEvents;
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance event-bus-rpc;
+                }
+            }
+        }
+        output {
+            leaf result {
+                type uint32;
+            }
+        }
+    }
+
+    identity threadfactory-naming {
         base config:module-type;
-		config:provided-service th:threadfactory;
+        config:provided-service th:threadfactory;
         config:java-name-prefix NamingThreadFactory;
     }
 
-	augment "/config:modules/config:module/config:configuration" {
-		case threadfactory-naming {
-			when "/config:modules/config:module/config:type = 'threadfactory-naming'";
-			leaf name-prefix {
-				type string;
-			}
+    augment "/config:modules/config:module/config:configuration" {
+        case threadfactory-naming {
+            when "/config:modules/config:module/config:type = 'threadfactory-naming'";
+            leaf name-prefix {
+                type string;
+            }
         }
     }
 
     identity threadpool-fixed {
-    	base config:module-type;
-    	config:provided-service th:threadpool;
-    	config:java-name-prefix FixedThreadPool;
+        base config:module-type;
+        config:provided-service th:threadpool;
+        config:java-name-prefix FixedThreadPool;
     }
 
-	augment "/config:modules/config:module/config:configuration" {
-		case threadpool-fixed {
-			when "/config:modules/config:module/config:type = 'threadpool-fixed'";
-			leaf max-thread-count {
-				type uint16;
-			}
+    augment "/config:modules/config:module/config:configuration" {
+        case threadpool-fixed {
+            when "/config:modules/config:module/config:type = 'threadpool-fixed'";
+            leaf max-thread-count {
+                type uint16;
+            }
 
-			container threadFactory {
-				uses config:service-ref {
-					refine type {
-						//mandatory true;
-						config:required-identity th:threadfactory;
-					}
-				}
-			}
+            container threadFactory {
+                uses config:service-ref {
+                    refine type {
+                        //mandatory true;
+                        config:required-identity th:threadfactory;
+                    }
+                }
+            }
         }
-	}
+    }
 
-	identity threadpool-flexible {
-		base config:module-type;
-		config:provided-service th:threadpool;
-		config:java-name-prefix FlexibleThreadPool;
-	}
+    identity threadpool-flexible {
+        base config:module-type;
+        config:provided-service th:threadpool;
+        config:java-name-prefix FlexibleThreadPool;
+    }
 
-	augment "/config:modules/config:module/config:configuration" {
-		case threadpool-flexible {
-			when "/config:modules/config:module/config:type = 'threadpool-flexible'";
-			leaf max-thread-count {
-				type uint16;
-			}
-			leaf minThreadCount {
-				type uint16;
-			}
-			leaf keepAliveMillis {
-				type uint32;
-			}
+    augment "/config:modules/config:module/config:configuration" {
+        case threadpool-flexible {
+            when "/config:modules/config:module/config:type = 'threadpool-flexible'";
+            leaf max-thread-count {
+                type uint16;
+            }
+            leaf minThreadCount {
+                type uint16;
+            }
+            leaf keepAliveMillis {
+                type uint32;
+            }
 
-			container threadFactory {
-				uses config:service-ref {
-					refine type {
-					   // mandatory true;
-						config:required-identity th:threadfactory;
-					}
-				}
-			}
+            container threadFactory {
+                uses config:service-ref {
+                    refine type {
+                       // mandatory true;
+                        config:required-identity th:threadfactory;
+                    }
+                }
+            }
         }
-	}
+    }
 
     identity threadpool-scheduled {
-		base config:module-type;
-		config:provided-service th:scheduled-threadpool;
-		config:java-name-prefix ScheduledThreadPool;
-	}
+        base config:module-type;
+        config:provided-service th:scheduled-threadpool;
+        config:java-name-prefix ScheduledThreadPool;
+    }
 
-	augment "/config:modules/config:module/config:configuration" {
-		case threadpool-scheduled {
-			when "/config:modules/config:module/config:type = 'threadpool-scheduled'";
-			leaf max-thread-count {
-				type uint16;
-			}
+    augment "/config:modules/config:module/config:configuration" {
+        case threadpool-scheduled {
+            when "/config:modules/config:module/config:type = 'threadpool-scheduled'";
+            leaf max-thread-count {
+                type uint16;
+            }
 
-			container threadFactory {
-				uses config:service-ref {
-					refine type {
-					 //   mandatory true;
-						config:required-identity th:threadfactory;
-					}
-				}
-			}
-		}
-	}
+            container threadFactory {
+                uses config:service-ref {
+                    refine type {
+                     //   mandatory true;
+                        config:required-identity th:threadfactory;
+                    }
+                }
+            }
+        }
+    }
 }
 
