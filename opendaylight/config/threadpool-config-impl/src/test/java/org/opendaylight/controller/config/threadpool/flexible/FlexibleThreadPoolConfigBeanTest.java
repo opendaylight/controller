@@ -1,13 +1,5 @@
 package org.opendaylight.controller.config.threadpool.flexible;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -16,10 +8,18 @@ import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.config.yang.threadpool.impl.FlexibleThreadPoolModuleFactory;
-import org.opendaylight.controller.config.yang.threadpool.impl.FlexibleThreadPoolModuleMXBean;
 import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFactoryModuleFactory;
 import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFactoryModuleMXBean;
+import org.opendaylight.controller.config.yang.threadpool.impl.flexible.FlexibleThreadPoolModuleFactory;
+import org.opendaylight.controller.config.yang.threadpool.impl.flexible.FlexibleThreadPoolModuleMXBean;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class FlexibleThreadPoolConfigBeanTest extends AbstractConfigTest {
 

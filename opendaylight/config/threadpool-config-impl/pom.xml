@@ -69,7 +69,7 @@
                   <Private-Package>
                      org.opendaylight.controller.config.threadpool.util,
                      javax.annotation.*,
-                     org.opendaylight.controller.config.yang.threadpool.impl,
+                     org.opendaylight.controller.config.yang.threadpool.impl*,
                   </Private-Package>
                   <Export-Package>
                       org.opendaylight.controller.config.threadpool.util,
