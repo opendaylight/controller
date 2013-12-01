@@ -28,8 +28,6 @@ import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRo
 import org.opendaylight.yangtools.concepts.Path
 import org.slf4j.LoggerFactory
 import java.util.HashSet
-import java.util.Map.Entry
-import java.util.Iterator
 import java.util.Collection
 import com.google.common.collect.FluentIterable;
 import java.util.Set
@@ -37,7 +35,6 @@ import com.google.common.collect.ImmutableList
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
-import java.util.concurrent.atomic.AtomicLong
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
 
 abstract class AbstractDataBroker<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> implements DataModificationTransactionFactory<P, D>, //

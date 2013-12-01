@@ -5,23 +5,35 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
+import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification;
 import org.opendaylight.controller.md.sal.common.impl.util.AbstractLockableDelegator;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.util.YangDataOperations;
+import org.opendaylight.yangtools.yang.util.YangSchemaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +41,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
 import static com.google.common.base.Preconditions.*;
+import org.opendaylight.yangtools.yang.util.YangDataOperations;
 
 public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements //
         DataStore, //
@@ -39,7 +52,6 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     private SchemaContext schema = null;
     private boolean validationEnabled = false;
-    private SchemaAwareDataMerger dataMerger = null;
     private DataReader<InstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
 
     @Override
@@ -100,7 +112,8 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(
             DataModification<InstanceIdentifier, CompositeNode> modification) {
         validateAgainstSchema(modification);
-        DataModification<InstanceIdentifier, CompositeNode> cleanedUp = prepareMergedTransaction(modification);
+        NormalizedDataModification cleanedUp = prepareMergedTransaction(modification);
+        cleanedUp.status = TransactionStatus.SUBMITED;
         return retrieveDelegate().requestCommit(cleanedUp);
     }
 
@@ -138,10 +151,39 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         this.schema = null;
     }
 
-    private DataModification<InstanceIdentifier, CompositeNode> prepareMergedTransaction(
+    protected CompositeNode mergeData(InstanceIdentifier path, CompositeNode stored, CompositeNode modified, boolean config) {
+        long startTime = System.nanoTime();
+        try {
+        DataSchemaNode node = schemaNodeFor(path);
+        return YangDataOperations.merge(node,stored,modified,config);
+        } finally {
+            //System.out.println("Merge time: " + ((System.nanoTime() - startTime) / 1000.0d));
+        }
+    }
+    
+    
+    private DataSchemaNode schemaNodeFor(InstanceIdentifier path) {
+        checkState(schema != null,"YANG Schema is not available");
+        return YangSchemaUtils.getSchemaNode(schema, path);
+    }
+
+    private NormalizedDataModification prepareMergedTransaction(
             DataModification<InstanceIdentifier, CompositeNode> original) {
         // NOOP for now
-        return original;
+        NormalizedDataModification normalized = new NormalizedDataModification(original);
+        for (Entry<InstanceIdentifier,CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
+            normalized.putConfigurationData(entry.getKey(), entry.getValue());
+        }
+        for (Entry<InstanceIdentifier,CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
+            normalized.putOperationalData(entry.getKey(), entry.getValue());
+        }
+        for (InstanceIdentifier entry : original.getRemovedConfigurationData()) {
+            normalized.removeConfigurationData(entry);
+        }
+        for(InstanceIdentifier entry : original.getRemovedOperationalData()) {
+            normalized.removeOperationalData(entry);
+        }
+        return normalized;
     }
 
     private final Comparator<Entry<InstanceIdentifier, CompositeNode>> preparationComparator = new Comparator<Entry<InstanceIdentifier, CompositeNode>>() {
@@ -242,4 +284,44 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
     }
+    
+    private class NormalizedDataModification extends AbstractDataModification<InstanceIdentifier, CompositeNode> {
+
+        private Object identifier;
+        private TransactionStatus status;
+
+        public NormalizedDataModification(DataModification<InstanceIdentifier, CompositeNode> original) {
+            super(getDelegate());
+            identifier = original;
+            status = TransactionStatus.NEW;
+        }
+        
+        @Override
+        public Object getIdentifier() {
+            return this.identifier;
+        }
+        
+        @Override
+        public TransactionStatus getStatus() {
+            return status;
+        }
+
+        @Override
+        public Future<RpcResult<TransactionStatus>> commit() {
+            throw new UnsupportedOperationException("Commit should not be invoked on this");
+        }
+        
+        @Override
+        protected CompositeNode mergeConfigurationData(InstanceIdentifier path,CompositeNode stored, CompositeNode modified) {
+            return mergeData(path,stored, modified,true);
+        }
+        
+        @Override
+        protected CompositeNode mergeOperationalData(InstanceIdentifier path,CompositeNode stored, CompositeNode modified) {
+            // TODO Auto-generated method stub
+            return mergeData(path,stored,modified,false);
+        }
+        
+    }
+
 }

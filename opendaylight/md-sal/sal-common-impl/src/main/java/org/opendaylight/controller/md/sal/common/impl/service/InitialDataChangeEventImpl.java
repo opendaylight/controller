@@ -5,15 +5,28 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.yangtools.concepts.Immutable;
+import org.opendaylight.yangtools.concepts.Path;
 
-public class InitialDataChangeEventImpl<P,D> implements DataChangeEvent<P, D> {
+public class InitialDataChangeEventImpl<P extends Path<P>,D> implements DataChangeEvent<P, D>, Immutable {
 
-    private final D originalOperationalTree;
-    private final D originalConfigurationTree;
+    private final D updatedOperationalTree;
+    private final D updatedConfigurationTree;
+    private final Map<P,D> updatedConfigurationData;
+    private final Map<P,D> updatedOperationalData;
 
     public InitialDataChangeEventImpl(D configTree, D operTree) {
-        originalConfigurationTree = configTree;
-        originalOperationalTree = operTree;
+        updatedConfigurationTree = configTree;
+        updatedOperationalTree = operTree;
+        updatedConfigurationData = Collections.emptyMap();
+        updatedOperationalData = Collections.emptyMap();
+    }
+    
+    public InitialDataChangeEventImpl(D configTree, D operTree, Map<P, D> updatedCfgData, Map<P, D> updatedOperData) {
+        updatedConfigurationTree = configTree;
+        updatedOperationalTree = operTree;
+        updatedConfigurationData = updatedCfgData;
+        updatedOperationalData = updatedOperData;
     }
     
     @Override
@@ -44,31 +57,31 @@ public class InitialDataChangeEventImpl<P,D> implements DataChangeEvent<P, D> {
     }
     @Override
     public Map<P, D> getUpdatedConfigurationData() {
-        return Collections.emptyMap();
+        return updatedConfigurationData;
     }
     
     @Override
     public D getUpdatedConfigurationSubtree() {
-        return originalConfigurationTree;
+        return updatedConfigurationTree;
     }
     @Override
     public D getUpdatedOperationalSubtree() {
-        return originalOperationalTree;
+        return updatedOperationalTree;
     }
     
     @Override
     public D getOriginalConfigurationSubtree() {
-        return originalConfigurationTree;
+        return updatedConfigurationTree;
     }
     
     @Override
     public D getOriginalOperationalSubtree() {
-        return originalOperationalTree;
+        return updatedOperationalTree;
     }
     
     @Override
     public Map<P, D> getUpdatedOperationalData() {
-        return Collections.emptyMap();
+        return updatedOperationalData;
     }
     
 

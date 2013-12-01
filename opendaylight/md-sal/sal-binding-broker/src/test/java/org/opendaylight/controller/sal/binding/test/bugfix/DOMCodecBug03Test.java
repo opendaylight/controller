@@ -97,9 +97,6 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         
         
         testAddingNodeConnector();
-        
-        
-        
         testNodeRemove();
         
         

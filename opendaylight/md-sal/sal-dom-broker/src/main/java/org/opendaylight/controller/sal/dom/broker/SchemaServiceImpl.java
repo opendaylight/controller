@@ -41,9 +41,9 @@ import com.google.common.collect.Sets;
 import static com.google.common.base.Preconditions.*;
 
 public class SchemaServiceImpl implements //
-SchemaService, //
-ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
-AutoCloseable {
+        SchemaService, //
+        ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
+        AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(SchemaServiceImpl.class);
 
     private ListenerRegistry<SchemaServiceListener> listeners;
@@ -61,7 +61,7 @@ AutoCloseable {
     private BundleTracker<Object> bundleTracker;
     private final YangStoreCache cache = new YangStoreCache();
 
-    private ServiceTracker<SchemaServiceListener,SchemaServiceListener> listenerTracker;
+    private ServiceTracker<SchemaServiceListener, SchemaServiceListener> listenerTracker;
 
     public ListenerRegistry<SchemaServiceListener> getListeners() {
         return listeners;
@@ -93,7 +93,7 @@ AutoCloseable {
         if (listeners == null) {
             listeners = new ListenerRegistry<>();
         }
-        
+
         listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, this);
         bundleTracker = new BundleTracker<Object>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
         bundleTracker.open();
@@ -132,12 +132,11 @@ AutoCloseable {
         throw new UnsupportedOperationException();
     }
 
-    
     @Override
     public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener listener) {
         return listeners.register(listener);
     }
-    
+
     @Override
     public void close() throws Exception {
         bundleTracker.close();
@@ -196,15 +195,15 @@ AutoCloseable {
 
     private void updateCache(SchemaContext snapshot) {
         cache.cacheYangStore(consistentBundlesToYangURLs, snapshot);
-        
+
         Object[] services = listenerTracker.getServices();
-        if(services != null) {
-            for(Object rawListener : services) {
+        if (services != null) {
+            for (Object rawListener : services) {
                 SchemaServiceListener listener = (SchemaServiceListener) rawListener;
                 try {
                     listener.onGlobalContextUpdated(snapshot);
                 } catch (Exception e) {
-                    logger.error("Exception occured during invoking listener",e);
+                    logger.error("Exception occured during invoking listener", e);
                 }
             }
         }
@@ -212,7 +211,7 @@ AutoCloseable {
             try {
                 listener.getInstance().onGlobalContextUpdated(snapshot);
             } catch (Exception e) {
-                logger.error("Exception occured during invoking listener",e);
+                logger.error("Exception occured during invoking listener", e);
             }
         }
     }
@@ -243,7 +242,7 @@ AutoCloseable {
                     proposedNewState.putAll(inconsistentBundlesToYangURLs);
                     proposedNewState.putAll(bundle, addedURLs);
                     boolean adding = true;
-                    
+
                     if (tryToUpdateState(addedURLs, proposedNewState, adding) == false) {
                         inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
                     }
@@ -301,23 +300,23 @@ AutoCloseable {
             this.cachedContextSnapshot = ctx;
         }
     }
-    
+
     @Override
     public SchemaServiceListener addingService(ServiceReference<SchemaServiceListener> reference) {
-        
+
         SchemaServiceListener listener = context.getService(reference);
         SchemaContext _ctxContext = getGlobalContext();
-        if(getContext() != null) {
+        if (getContext() != null) {
             listener.onGlobalContextUpdated(_ctxContext);
         }
         return listener;
     }
-    
+
     @Override
     public void modifiedService(ServiceReference<SchemaServiceListener> reference, SchemaServiceListener service) {
         // NOOP
     }
-    
+
     @Override
     public void removedService(ServiceReference<SchemaServiceListener> reference, SchemaServiceListener service) {
         context.ungetService(reference);

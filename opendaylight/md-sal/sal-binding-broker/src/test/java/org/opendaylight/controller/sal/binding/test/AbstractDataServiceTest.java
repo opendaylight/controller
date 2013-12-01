@@ -51,7 +51,7 @@ public abstract class AbstractDataServiceTest {
     protected ListeningExecutorService executor;
     protected BindingIndependentDataServiceConnector connectorServiceImpl;
     protected HashMapDataStore rawDataStore;
-    private SchemaAwareDataStoreAdapter schemaAwareDataStore;
+    protected SchemaAwareDataStoreAdapter schemaAwareDataStore;
     private DataStoreStatsWrapper dataStoreStats;
 
     protected DataStore dataStore;
@@ -137,15 +137,15 @@ public abstract class AbstractDataServiceTest {
     @After
     public void afterTest() {
 
-        log.info("BIDataStore Statistics: Configuration Read Count: {} TotalTime: {} ns AverageTime (ns): {} ns",
+        log.info("BIDataStore Statistics: Configuration Read Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
                 dataStoreStats.getConfigurationReadCount(), dataStoreStats.getConfigurationReadTotalTime(),
                 dataStoreStats.getConfigurationReadAverageTime());
 
-        log.info("BIDataStore Statistics: Operational Read Count: {} TotalTime: {} ns AverageTime (ns): {} ns",
+        log.info("BIDataStore Statistics: Operational Read Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
                 dataStoreStats.getOperationalReadCount(), dataStoreStats.getOperationalReadTotalTime(),
                 dataStoreStats.getOperationalReadAverageTime());
 
-        log.info("BIDataStore Statistics: Request Commit Count: {} TotalTime: {} ns AverageTime (ns): {} ns",
+        log.info("BIDataStore Statistics: Request Commit Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
                 dataStoreStats.getRequestCommitCount(), dataStoreStats.getRequestCommitTotalTime(),
                 dataStoreStats.getRequestCommitAverageTime());
 
