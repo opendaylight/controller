@@ -35,38 +35,39 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.ActionList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.VlanCfi;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAllAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.HwPathAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.LoopbackAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushMplsAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushPbbAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlTypeAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetMplsTtlAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNextHopAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTtlAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetQueueAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanCfiAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAllActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.HwPathActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.LoopbackActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushMplsActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushPbbActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlTypeActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetMplsTtlActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNextHopActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTtlActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetQueueActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanCfiActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
@@ -147,8 +148,8 @@ public class ToSalConversionsUtils {
             org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
         if (source.getInstructions() != null) {
             for (Instruction instruction : source.getInstructions().getInstruction()) {
-                if (instruction.getInstruction() instanceof ActionList) {
-                    return (((ActionList) instruction.getInstruction()).getAction());
+                if (instruction.getInstruction() instanceof ApplyActionsCase) {
+                    return (((ApplyActionsCase) instruction.getInstruction()).getApplyActions().getAction());
                 }
             }
         }
@@ -162,119 +163,119 @@ public class ToSalConversionsUtils {
         	org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action sourceAction = action
                     .getAction();
 
-            if (sourceAction instanceof ControllerAction) {
+            if (sourceAction instanceof ControllerActionCase) {
                 targetAction.add(new Controller());
-            } else if (sourceAction instanceof OutputAction) {
+            } else if (sourceAction instanceof OutputActionCase) {
 
-                Uri nodeConnector = ((OutputAction) sourceAction).getOutputNodeConnector();
+                Uri nodeConnector = ((OutputActionCase) sourceAction).getOutputAction().getOutputNodeConnector();
                 if (nodeConnector != null) {
                     //for (Uri uri : nodeConnectors) {
                         targetAction.add(new Output(fromNodeConnectorRef(nodeConnector)));
                     //}
                 }
-            } else if (sourceAction instanceof PopMplsAction) {
+            } else if (sourceAction instanceof PopMplsActionCase) {
                 // TODO: define maping
-            } else if (sourceAction instanceof PushMplsAction) {
+            } else if (sourceAction instanceof PushMplsActionCase) {
                 // TODO: define maping
-            } else if (sourceAction instanceof PushPbbAction) {
+            } else if (sourceAction instanceof PushPbbActionCase) {
                 // TODO: define maping
-            } else if (sourceAction instanceof SetMplsTtlAction) {
-                // TODO: define maping
-                // targetAction = //no action to map
-            } else if (sourceAction instanceof SetNwTtlAction) {
-                // TODO: define maping
-            } else if (sourceAction instanceof SetQueueAction) {
+            } else if (sourceAction instanceof SetMplsTtlActionCase) {
                 // TODO: define maping
                 // targetAction = //no action to map
-            } else if (sourceAction instanceof DropAction) {
+            } else if (sourceAction instanceof SetNwTtlActionCase) {
+                // TODO: define maping
+            } else if (sourceAction instanceof SetQueueActionCase) {
+                // TODO: define maping
+                // targetAction = //no action to map
+            } else if (sourceAction instanceof DropActionCase) {
                 targetAction.add(new Drop());
-            } else if (sourceAction instanceof FloodAction) {
+            } else if (sourceAction instanceof FloodActionCase) {
                 targetAction.add(new Flood());
-            } else if (sourceAction instanceof FloodAllAction) {
+            } else if (sourceAction instanceof FloodAllActionCase) {
                 targetAction.add(new FloodAll());
-            } else if (sourceAction instanceof HwPathAction) {
+            } else if (sourceAction instanceof HwPathActionCase) {
                 targetAction.add(new HwPath());
-            } else if (sourceAction instanceof LoopbackAction) {
+            } else if (sourceAction instanceof LoopbackActionCase) {
                 targetAction.add(new Loopback());
-            } else if (sourceAction instanceof PopVlanAction) {
+            } else if (sourceAction instanceof PopVlanActionCase) {
                 targetAction.add(new PopVlan());
-            } else if (sourceAction instanceof PushVlanAction) {
-                PushVlanAction pushVlanAction = (PushVlanAction) sourceAction;
-                PushVlan pushVlan = pushVlanFrom(pushVlanAction);
+            } else if (sourceAction instanceof PushVlanActionCase) {
+                PushVlanActionCase pushVlanAction = (PushVlanActionCase) sourceAction;
+                PushVlan pushVlan = pushVlanFrom(pushVlanAction.getPushVlanAction());
                 if (pushVlan != null) {
                     targetAction.add(pushVlan);
                 }
-            } else if (sourceAction instanceof SetDlDstAction) {
-                MacAddress addressL2Dest = ((SetDlDstAction) sourceAction).getAddress();
+            } else if (sourceAction instanceof SetDlDstActionCase) {
+                MacAddress addressL2Dest = ((SetDlDstActionCase) sourceAction).getSetDlDstAction().getAddress();
                 if (addressL2Dest != null) {
                     targetAction.add(new SetDlDst(bytesFrom(addressL2Dest)));
                 }
-            } else if (sourceAction instanceof SetDlSrcAction) {
-                MacAddress addressL2Src = ((SetDlSrcAction) sourceAction).getAddress();
+            } else if (sourceAction instanceof SetDlSrcActionCase) {
+                MacAddress addressL2Src = ((SetDlSrcActionCase) sourceAction).getSetDlSrcAction().getAddress();
                 if (addressL2Src != null) {
                     targetAction.add(new SetDlSrc(bytesFrom(addressL2Src)));
 
                 }
-            } else if (sourceAction instanceof SetDlTypeAction) {
-                EtherType dlType = ((SetDlTypeAction) sourceAction).getDlType();
+            } else if (sourceAction instanceof SetDlTypeActionCase) {
+                EtherType dlType = ((SetDlTypeActionCase) sourceAction).getSetDlTypeAction().getDlType();
                 if (dlType != null) {
                     Long dlTypeValue = dlType.getValue();
                     if (dlTypeValue != null) {
                         targetAction.add(new SetDlType(dlTypeValue.intValue()));
                     }
                 }
-            } else if (sourceAction instanceof SetNextHopAction) {
-                Address addressL3 = ((SetNextHopAction) sourceAction).getAddress();
+            } else if (sourceAction instanceof SetNextHopActionCase) {
+                Address addressL3 = ((SetNextHopActionCase) sourceAction).getSetNextHopAction().getAddress();
 
                 InetAddress inetAddress = inetAddressFrom(addressL3);
                 if (inetAddress != null) {
                     targetAction.add(new SetNextHop(inetAddress));
                 }
-            } else if (sourceAction instanceof SetNwDstAction) {
-                Address addressL3 = ((SetNwDstAction) sourceAction).getAddress();
+            } else if (sourceAction instanceof SetNwDstActionCase) {
+                Address addressL3 = ((SetNwDstActionCase) sourceAction).getSetNwDstAction().getAddress();
 
                 InetAddress inetAddress = inetAddressFrom(addressL3);
                 if (inetAddress != null) {
                     targetAction.add(new SetNwDst(inetAddress));
                 }
-            } else if (sourceAction instanceof SetNwSrcAction) {
-                Address addressL3 = ((SetNwSrcAction) sourceAction).getAddress();
+            } else if (sourceAction instanceof SetNwSrcActionCase) {
+                Address addressL3 = ((SetNwSrcActionCase) sourceAction).getSetNwSrcAction().getAddress();
 
                 InetAddress inetAddress = inetAddressFrom(addressL3);
                 if (inetAddress != null) {
                     targetAction.add(new SetNwSrc(inetAddress));
                 }
-            } else if (sourceAction instanceof SetNwTosAction) {
-                Integer tos = ((SetNwTosAction) sourceAction).getTos();
+            } else if (sourceAction instanceof SetNwTosActionCase) {
+                Integer tos = ((SetNwTosActionCase) sourceAction).getSetNwTosAction().getTos();
                 if (tos != null) {
                     targetAction.add(new SetNwTos(tos));
                 }
-            } else if (sourceAction instanceof SetTpDstAction) {
-                PortNumber port = ((SetTpDstAction) sourceAction).getPort();
+            } else if (sourceAction instanceof SetTpDstActionCase) {
+                PortNumber port = ((SetTpDstActionCase) sourceAction).getSetTpDstAction().getPort();
                 if (port != null) {
                     Integer portValue = port.getValue();
                     if (port.getValue() != null) {
                         targetAction.add(new SetTpDst(portValue));
                     }
                 }
-            } else if (sourceAction instanceof SetTpSrcAction) {
-                PortNumber port = ((SetTpSrcAction) sourceAction).getPort();
+            } else if (sourceAction instanceof SetTpSrcActionCase) {
+                PortNumber port = ((SetTpSrcActionCase) sourceAction).getSetTpSrcAction().getPort();
                 if (port != null) {
                     Integer portValue = port.getValue();
                     if (port.getValue() != null) {
                         targetAction.add(new SetTpSrc(portValue));
                     }
                 }
-            } else if (sourceAction instanceof SetVlanCfiAction) {
-                VlanCfi vlanCfi = ((SetVlanCfiAction) sourceAction).getVlanCfi();
+            } else if (sourceAction instanceof SetVlanCfiActionCase) {
+                VlanCfi vlanCfi = ((SetVlanCfiActionCase) sourceAction).getSetVlanCfiAction().getVlanCfi();
                 if (vlanCfi != null) {
                     Integer vlanCfiValue = vlanCfi.getValue();
                     if (vlanCfiValue != null) {
                         targetAction.add(new SetVlanCfi(vlanCfiValue));
                     }
                 }
-            } else if (sourceAction instanceof SetVlanIdAction) {
-                org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanID = ((SetVlanIdAction) sourceAction)
+            } else if (sourceAction instanceof SetVlanIdActionCase) {
+                org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanID = ((SetVlanIdActionCase) sourceAction).getSetVlanIdAction()
                         .getVlanId();
                 if (vlanID != null) {
                     Integer vlanIdValue = vlanID.getValue();
@@ -282,15 +283,15 @@ public class ToSalConversionsUtils {
                         targetAction.add(new SetVlanId(vlanIdValue));
                     }
                 }
-            } else if (sourceAction instanceof SetVlanPcpAction) {
-                VlanPcp vlanPcp = ((SetVlanPcpAction) sourceAction).getVlanPcp();
+            } else if (sourceAction instanceof SetVlanPcpActionCase) {
+                VlanPcp vlanPcp = ((SetVlanPcpActionCase) sourceAction).getSetVlanPcpAction().getVlanPcp();
                 if (vlanPcp != null) {
                     Short vlanPcpValue = vlanPcp.getValue();
                     if (vlanPcpValue != null) {
                         targetAction.add(new SetVlanPcp(vlanPcpValue));
                     }
                 }
-            } else if (sourceAction instanceof SwPathAction) {
+            } else if (sourceAction instanceof SwPathActionCase) {
                 targetAction.add(new SwPath());
             }
         }
@@ -315,7 +316,7 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    private static PushVlan pushVlanFrom(PushVlanAction pushVlanAction) {
+    private static PushVlan pushVlanFrom(org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanAction pushVlanAction) {
         final int tag;
         final int pcp;
         final int cfi;
