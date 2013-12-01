@@ -21,6 +21,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import static org.junit.Assert.*;
 
@@ -77,8 +78,10 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
                 return transaction.commit();
             }
         });
-        mappingServiceImpl.onGlobalContextUpdated(getContext(getAllModelFilenames()));
         
+        SchemaContext ctx = getContext(getAllModelFilenames());
+        schemaAwareDataStore.onGlobalContextUpdated(ctx);
+        mappingServiceImpl.onGlobalContextUpdated(ctx);
         RpcResult<TransactionStatus> result = future.get().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
         

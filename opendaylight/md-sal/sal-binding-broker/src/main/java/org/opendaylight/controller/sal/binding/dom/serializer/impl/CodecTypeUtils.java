@@ -3,7 +3,6 @@ package org.opendaylight.controller.sal.binding.dom.serializer.impl;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 public class CodecTypeUtils {
 
@@ -13,5 +12,4 @@ public class CodecTypeUtils {
         Identifier<? extends Identifiable<?>> identifier = (Identifier<? extends Identifiable<?>>) key;
         return new IdentifiableItem(identifiableType,identifier);
     }
-
 }

@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.controller.sal.core.api.data.DataStore
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter
+import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
 
 class BrokerConfigActivator implements AutoCloseable {
     
@@ -51,6 +52,8 @@ class BrokerConfigActivator implements AutoCloseable {
         wrappedStore = new SchemaAwareDataStoreAdapter();
         wrappedStore.changeDelegate(store);
         wrappedStore.setValidationEnabled(false);
+       
+        context.registerService(SchemaServiceListener,wrappedStore,emptyProperties)  
         
         dataService.registerConfigurationReader(ROOT, wrappedStore);
         dataService.registerCommitHandler(ROOT, wrappedStore);

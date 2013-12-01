@@ -11,7 +11,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class CommitHandlersTransactions {
 
-    private static class AllwaysSuccessfulTransaction<P,D> implements DataCommitTransaction<P, D> {
+    private static class AllwaysSuccessfulTransaction<P extends Path<P>,D> implements DataCommitTransaction<P, D> {
         
         private final  DataModification<P, D> modification;
 

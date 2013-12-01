@@ -12,9 +12,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.Set
 import java.util.Collections
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
-import org.opendaylight.controller.md.sal.common.impl.ListenerRegistry
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 import org.slf4j.LoggerFactory
+import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 
 class RpcRouterImpl implements RpcRouter, Identifiable<String> {
 

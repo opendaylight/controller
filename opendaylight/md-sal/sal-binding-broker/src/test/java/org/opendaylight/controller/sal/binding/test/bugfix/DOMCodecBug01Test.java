@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 
 
 
+
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
@@ -28,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.M
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -148,7 +150,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         assertEquals(TransactionStatus.COMMITED, ret2.getResult());
 
         // Data are not in the store.
-        assertNull(baDataService.readOperationalData(FLOW_INSTANCE_ID_BA));
+        assertNull(baDataService.readConfigurationData(FLOW_INSTANCE_ID_BA));
 
     }
 
@@ -169,11 +171,13 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         flow.setNode(NODE_REF);
         InstructionsBuilder instructions = new InstructionsBuilder();
         InstructionBuilder instruction = new InstructionBuilder();
+        
+        instruction.setOrder(10);
         ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
         List<Action> actionList = new ArrayList<>();
         PopMplsActionBuilder popMplsAction = new PopMplsActionBuilder();
         popMplsAction.setEthernetType(34);
-        actionList.add(new ActionBuilder().setAction(popMplsAction.build()).build());
+        actionList.add(new ActionBuilder().setAction(popMplsAction.build()).setOrder(10).build());
 
         applyActions.setAction(actionList );
         
@@ -200,17 +204,9 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         FlowBuilder flow = new FlowBuilder();
         flow.setKey(key);
         MatchBuilder match = new MatchBuilder();
-        Ipv4MatchBuilder ipv4Match = new Ipv4MatchBuilder();
-        // ipv4Match.setIpv4Destination(new Ipv4Prefix(cliInput.get(4)));
         match.setLayer4Match(new TcpMatchBuilder().build());
         flow.setMatch(match.build());
-        DropAction dropAction = new DropActionBuilder().build();
-        //   ActionBuilder action = new ActionBuilder();
-
-        //  List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action> actions = Collections
-             //   .singletonList(action.build());
-        //   flow.setAction(actions);
-        flow.setPriority(2);
+        
         System.out.println("Putting the configuration Data................");
         path1 = InstanceIdentifier.builder(Flows.class).child(Flow.class, key).toInstance();
        // DataObject cls = (DataObject) modification.readConfigurationData(path1);

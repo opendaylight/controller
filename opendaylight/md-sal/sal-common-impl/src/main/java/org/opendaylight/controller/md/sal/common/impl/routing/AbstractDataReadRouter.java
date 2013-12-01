@@ -20,7 +20,7 @@ import com.google.common.collect.Multimap;
  * @param <P>
  * @param <D>
  */
-public abstract class AbstractDataReadRouter<P extends Path<?>, D> implements DataReader<P, D> {
+public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements DataReader<P, D> {
 
     Multimap<P, DataReaderRegistration<P, D>> configReaders = HashMultimap.create();
     Multimap<P, DataReaderRegistration<P, D>> operationalReaders = HashMultimap.create();
@@ -139,14 +139,15 @@ public abstract class AbstractDataReadRouter<P extends Path<?>, D> implements Da
             
             @Override
             public boolean apply(Entry<P, DataReaderRegistration<P, D>> input) {
-                final Path key = input.getKey();
-                return key.contains(path) || ((Path) path).contains(key);
+                final P key = input.getKey();
+                return key.contains(path) || ((P) path).contains(key);
             }
             
         };
     }
 
-    private class ConfigurationDataReaderRegistration<P extends Path<?>, D> extends DataReaderRegistration<P, D> {
+    @SuppressWarnings("hiding")
+    private class ConfigurationDataReaderRegistration<P extends Path<P>, D> extends DataReaderRegistration<P, D> {
 
         public ConfigurationDataReaderRegistration(P key, DataReader<P, D> instance) {
             super(key, instance);
@@ -158,7 +159,8 @@ public abstract class AbstractDataReadRouter<P extends Path<?>, D> implements Da
         }
     }
 
-    private class OperationalDataReaderRegistration<P extends Path<?>, D> extends DataReaderRegistration<P, D> {
+    @SuppressWarnings("hiding")
+    private class OperationalDataReaderRegistration<P extends Path<P>, D> extends DataReaderRegistration<P, D> {
 
         public OperationalDataReaderRegistration(P key, DataReader<P, D> instance) {
             super(key, instance);
@@ -170,7 +172,7 @@ public abstract class AbstractDataReadRouter<P extends Path<?>, D> implements Da
         }
     }
 
-    private abstract static class DataReaderRegistration<P extends Path<?>, D> extends
+    private abstract static class DataReaderRegistration<P extends Path<P>, D> extends
             AbstractObjectRegistration<DataReader<P, D>> {
 
         private final P key;
