@@ -15,8 +15,7 @@ import org.osgi.framework.BundleContext;
 /**
 *
 */
-public final class BindingBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModule
-{
+public final class BindingBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModule {
 
     private BundleContext bundleContext;
 
