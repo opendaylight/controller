@@ -59,14 +59,14 @@ public abstract class AbstractTest {
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
 
-                
-                
                 mdSalCoreBundles(),
 
                 bindingAwareSalBundles(),
                 configMinumumBundles(),
                 // BASE Models
-                baseModelBundles(), flowCapableModelBundles(), junitAndMockitoBundles());
+                baseModelBundles(), 
+                flowCapableModelBundles(), 
+                junitAndMockitoBundles());
     }
     
 }
