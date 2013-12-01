@@ -11,13 +11,16 @@ import java.util.concurrent.Executors;
 
 
 
+
+
+
+
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropAction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.mpls.action._case.PopMplsActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.Flows;
@@ -26,7 +29,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
@@ -177,13 +181,11 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         List<Action> actionList = new ArrayList<>();
         PopMplsActionBuilder popMplsAction = new PopMplsActionBuilder();
         popMplsAction.setEthernetType(34);
-        actionList.add(new ActionBuilder().setAction(popMplsAction.build()).setOrder(10).build());
+        actionList.add(new ActionBuilder().setAction(new PopMplsActionCaseBuilder().setPopMplsAction(popMplsAction.build()).build()).setOrder(10).build());
 
         applyActions.setAction(actionList );
-        
 
-
-        instruction.setInstruction(applyActions.build());
+        instruction.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(applyActions.build()).build());
 
 
         List<Instruction> instructionList = Collections.<Instruction>singletonList(instruction.build());
@@ -207,7 +209,6 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         match.setLayer4Match(new TcpMatchBuilder().build());
         flow.setMatch(match.build());
         
-        System.out.println("Putting the configuration Data................");
         path1 = InstanceIdentifier.builder(Flows.class).child(Flow.class, key).toInstance();
        // DataObject cls = (DataObject) modification.readConfigurationData(path1);
         modification.putConfigurationData(path1, flow.build());
