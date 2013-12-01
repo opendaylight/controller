@@ -29,6 +29,34 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Flow
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.VlanCfi;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.controller.action._case.ControllerActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.drop.action._case.DropActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.flood.action._case.FloodActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.flood.all.action._case.FloodAllActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.hw.path.action._case.HwPathActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.loopback.action._case.LoopbackActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.mpls.action._case.PopMplsActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.mpls.action._case.PushMplsActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.pbb.action._case.PushPbbActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.src.action._case.SetDlSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.type.action._case.SetDlTypeActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.mpls.ttl.action._case.SetMplsTtlActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.next.hop.action._case.SetNextHopActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.tos.action._case.SetNwTosActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.ttl.action._case.SetNwTtlActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.queue.action._case.SetQueueActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.tp.dst.action._case.SetTpDstActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.tp.src.action._case.SetTpSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.cfi.action._case.SetVlanCfiActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.id.action._case.SetVlanIdActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.pcp.action._case.SetVlanPcpActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.sw.path.action._case.SwPathActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6Builder;
@@ -54,8 +82,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActions;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 
 import com.google.common.net.InetAddresses;
 
@@ -282,31 +311,31 @@ public class TestToSalConversionsUtils {
     private Instructions prepareOdActions() {
         List<Action> odActions = new ArrayList<>();
 
-        ControllerActionBuilder controllerActionBuilder = new ControllerActionBuilder();
-        DropActionBuilder dropActionBuilder = new DropActionBuilder();
-        FloodActionBuilder floodActionBuilder = new FloodActionBuilder();
-        FloodAllActionBuilder floodAllActionBuilder = new FloodAllActionBuilder();
-        HwPathActionBuilder hwPathActionBuilder = new HwPathActionBuilder();
-        LoopbackActionBuilder loopbackActionBuilder = new LoopbackActionBuilder();
-        OutputActionBuilder outputActionBuilder = new OutputActionBuilder();
-        PopMplsActionBuilder popMplsActionBuilder = new PopMplsActionBuilder();
-        PopVlanActionBuilder popVlanActionBuilder = new PopVlanActionBuilder();
-        PushMplsActionBuilder pushMplsActionBuilder = new PushMplsActionBuilder();
-        PushPbbActionBuilder pushPbbActionBuilder = new PushPbbActionBuilder();
-        PushVlanActionBuilder pushVlanActionBuilder = new PushVlanActionBuilder();
-        SetDlDstActionBuilder setDlDstActionBuilder = new SetDlDstActionBuilder();
-        SetDlSrcActionBuilder setDlSrcActionBuilder = new SetDlSrcActionBuilder();
-        SetDlTypeActionBuilder setDlTypeActionBuilder = new SetDlTypeActionBuilder();
-        SetMplsTtlActionBuilder setMplsTtlActionBuilder = new SetMplsTtlActionBuilder();
-        SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
-        SetNwTtlActionBuilder setNwTtlActionBuilder = new SetNwTtlActionBuilder();
-        SetQueueActionBuilder setQueueActionBuilder = new SetQueueActionBuilder();
-        SetTpDstActionBuilder setTpDstActionBuilder = new SetTpDstActionBuilder();
-        SetTpSrcActionBuilder setTpSrcActionBuilder = new SetTpSrcActionBuilder();
-        SetVlanCfiActionBuilder setVlanCfiActionBuilder = new SetVlanCfiActionBuilder();
-        SetVlanIdActionBuilder setVlanIdActionBuilder = new SetVlanIdActionBuilder();
-        SetVlanPcpActionBuilder setVlanPcpActionBuilder = new SetVlanPcpActionBuilder();
-        SwPathActionBuilder swPathActionBuilder = new SwPathActionBuilder();
+        ControllerActionCaseBuilder controllerActionBuilder = new ControllerActionCaseBuilder();
+        DropActionCaseBuilder dropActionBuilder = new DropActionCaseBuilder();
+        FloodActionCaseBuilder floodActionBuilder = new FloodActionCaseBuilder();
+        FloodAllActionCaseBuilder floodAllActionBuilder = new FloodAllActionCaseBuilder();
+        HwPathActionCaseBuilder hwPathActionBuilder = new HwPathActionCaseBuilder();
+        LoopbackActionCaseBuilder loopbackActionBuilder = new LoopbackActionCaseBuilder();
+        OutputActionCaseBuilder outputActionBuilder = new OutputActionCaseBuilder();
+        PopMplsActionCaseBuilder popMplsActionBuilder = new PopMplsActionCaseBuilder();
+        PopVlanActionCaseBuilder popVlanActionBuilder = new PopVlanActionCaseBuilder();
+        PushMplsActionCaseBuilder pushMplsActionBuilder = new PushMplsActionCaseBuilder();
+        PushPbbActionCaseBuilder pushPbbActionBuilder = new PushPbbActionCaseBuilder();
+        PushVlanActionCaseBuilder pushVlanActionBuilder = new PushVlanActionCaseBuilder();
+        SetDlDstActionCaseBuilder setDlDstActionBuilder = new SetDlDstActionCaseBuilder();
+        SetDlSrcActionCaseBuilder setDlSrcActionBuilder = new SetDlSrcActionCaseBuilder();
+        SetDlTypeActionCaseBuilder setDlTypeActionBuilder = new SetDlTypeActionCaseBuilder();
+        SetMplsTtlActionCaseBuilder setMplsTtlActionBuilder = new SetMplsTtlActionCaseBuilder();
+        SetNwTosActionCaseBuilder setNwTosActionBuilder = new SetNwTosActionCaseBuilder();
+        SetNwTtlActionCaseBuilder setNwTtlActionBuilder = new SetNwTtlActionCaseBuilder();
+        SetQueueActionCaseBuilder setQueueActionBuilder = new SetQueueActionCaseBuilder();
+        SetTpDstActionCaseBuilder setTpDstActionBuilder = new SetTpDstActionCaseBuilder();
+        SetTpSrcActionCaseBuilder setTpSrcActionBuilder = new SetTpSrcActionCaseBuilder();
+        SetVlanCfiActionCaseBuilder setVlanCfiActionBuilder = new SetVlanCfiActionCaseBuilder();
+        SetVlanIdActionCaseBuilder setVlanIdActionBuilder = new SetVlanIdActionCaseBuilder();
+        SetVlanPcpActionCaseBuilder setVlanPcpActionBuilder = new SetVlanPcpActionCaseBuilder();
+        SwPathActionCaseBuilder swPathActionBuilder = new SwPathActionCaseBuilder();
 
         prepareActionOutput(outputActionBuilder);
         prepareActionPushVlan(pushVlanActionBuilder);
@@ -350,7 +379,7 @@ public class TestToSalConversionsUtils {
         odActions.add(new ActionBuilder().setAction(swPathActionBuilder.build()).build());
 
         
-        ApplyActions innerInst = new ApplyActionsBuilder().setAction(odActions).build();
+        ApplyActionsCase innerInst = new ApplyActionsCaseBuilder().setApplyActions(new ApplyActionsBuilder().setAction(odActions).build()).build();
         Instruction applyActions = new InstructionBuilder().setInstruction(innerInst).build();
         List<Instruction> instructions = Collections.singletonList(applyActions );
         InstructionsBuilder instBuilder = new InstructionsBuilder();
@@ -360,64 +389,77 @@ public class TestToSalConversionsUtils {
         return instBuilder.build();
     }
 
-    private void prepareActionSetVlanPcp(SetVlanPcpActionBuilder setVlanPcpActionBuilder) {
+    private void prepareActionSetVlanPcp(SetVlanPcpActionCaseBuilder wrapper) {
+        SetVlanPcpActionBuilder setVlanPcpActionBuilder = new SetVlanPcpActionBuilder();
         setVlanPcpActionBuilder.setVlanPcp(new VlanPcp((short) 7));
+        wrapper.setSetVlanPcpAction(setVlanPcpActionBuilder.build());
     }
 
-    private void prepareActionSetVladId(SetVlanIdActionBuilder setVlanIdActionBuilder) {
+    private void prepareActionSetVladId(SetVlanIdActionCaseBuilder wrapper) {
+        SetVlanIdActionBuilder setVlanIdActionBuilder = new SetVlanIdActionBuilder();
         setVlanIdActionBuilder.setVlanId(new VlanId(4095));
+        wrapper.setSetVlanIdAction(setVlanIdActionBuilder.build());
     }
 
-    private void prepareActionSetVlanCfi(SetVlanCfiActionBuilder setVlanCfiActionBuilder) {
+    private void prepareActionSetVlanCfi(SetVlanCfiActionCaseBuilder wrapper) {
+        SetVlanCfiActionBuilder setVlanCfiActionBuilder = new SetVlanCfiActionBuilder();
         setVlanCfiActionBuilder.setVlanCfi(new VlanCfi(1));
+        wrapper.setSetVlanCfiAction(setVlanCfiActionBuilder.build());
     }
 
-    private void prepareActionSetTpDst(SetTpDstActionBuilder setTpDstActionBuilder) {
+    private void prepareActionSetTpDst(SetTpDstActionCaseBuilder wrapper) {
+        SetTpDstActionBuilder setTpDstActionBuilder = new SetTpDstActionBuilder();
         setTpDstActionBuilder.setPort(new PortNumber(65535));
+        wrapper.setSetTpDstAction(setTpDstActionBuilder.build());
     }
 
-    private void prepareActionSetTpSrc(SetTpSrcActionBuilder setTpSrcActionBuilder) {
+    private void prepareActionSetTpSrc(SetTpSrcActionCaseBuilder wrapper) {
+        SetTpSrcActionBuilder setTpSrcActionBuilder = new SetTpSrcActionBuilder();
         setTpSrcActionBuilder.setPort(new PortNumber(65535));
+        wrapper.setSetTpSrcAction(setTpSrcActionBuilder.build());
     }
 
-    private void prepareActionSetNwTos(SetNwTosActionBuilder setNwTosActionBuilder) {
+    private void prepareActionSetNwTos(SetNwTosActionCaseBuilder wrapper) {
+        SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
         setNwTosActionBuilder.setTos(63);
+        wrapper.setSetNwTosAction(setNwTosActionBuilder.build());
     }
 
     private void prepareActionSetNwSrc(List<Action> odActions) {
         // test case for IPv4
         SetNwSrcActionBuilder setNwSrcActionBuilderIpv4 = new SetNwSrcActionBuilder();
         setNwSrcActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.102"));
-        odActions.add(new ActionBuilder().setAction(setNwSrcActionBuilderIpv4.build()).build());
+        odActions.add(new ActionBuilder().setAction(new SetNwSrcActionCaseBuilder().setSetNwSrcAction(setNwSrcActionBuilderIpv4.build()).build()).build());
 
         // test case for IPv6
         SetNwSrcActionBuilder setNwSrcActionBuilderIpv6 = new SetNwSrcActionBuilder();
         setNwSrcActionBuilderIpv6.setAddress(prapareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7336"));
-        odActions.add(new ActionBuilder().setAction(setNwSrcActionBuilderIpv6.build()).build());
+        odActions.add(new ActionBuilder().setAction(new SetNwSrcActionCaseBuilder().setSetNwSrcAction(setNwSrcActionBuilderIpv6.build()).build()).build());
     }
 
     private void prepareActionSetNwDst(List<Action> odActions) {
         // test case for IPv4
+        
         SetNwDstActionBuilder setNwDstActionBuilderIpv4 = new SetNwDstActionBuilder();
         setNwDstActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.101"));
-        odActions.add(new ActionBuilder().setAction(setNwDstActionBuilderIpv4.build()).build());
+        odActions.add(new ActionBuilder().setAction(new SetNwDstActionCaseBuilder().setSetNwDstAction(setNwDstActionBuilderIpv4.build()).build()).build());
 
         // test case for IPv6
         SetNwDstActionBuilder setNwDstActionBuilderIpv6 = new SetNwDstActionBuilder();
         setNwDstActionBuilderIpv6.setAddress(prapareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7335"));
-        odActions.add(new ActionBuilder().setAction(setNwDstActionBuilderIpv6.build()).build());
+        odActions.add(new ActionBuilder().setAction(new SetNwDstActionCaseBuilder().setSetNwDstAction(setNwDstActionBuilderIpv6.build()).build()).build());
     }
 
     private void prepareActionNextHop(List<Action> odActions) {
         // test case for IPv4
         SetNextHopActionBuilder setNextHopActionBuilderIpv4 = new SetNextHopActionBuilder();
         setNextHopActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.100"));
-        odActions.add(new ActionBuilder().setAction(setNextHopActionBuilderIpv4.build()).build());
+        odActions.add(new ActionBuilder().setAction(new SetNextHopActionCaseBuilder().setSetNextHopAction(setNextHopActionBuilderIpv4.build()).build()).build());
 
         // test case for IPv6
         SetNextHopActionBuilder setNextHopActionBuilderIpv6 = new SetNextHopActionBuilder();
         setNextHopActionBuilderIpv6.setAddress(prapareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
-        odActions.add(new ActionBuilder().setAction(setNextHopActionBuilderIpv6.build()).build());
+        odActions.add(new ActionBuilder().setAction(new SetNextHopActionCaseBuilder().setSetNextHopAction(setNextHopActionBuilderIpv6.build()).build()).build());
     }
 
     private Address prapareIpv4Address(String ipv4Address) {
@@ -432,27 +474,37 @@ public class TestToSalConversionsUtils {
         return ipv6Builder.build();
     }
 
-    private void prepareActionSetDlType(SetDlTypeActionBuilder setDlTypeActionBuilder) {
+    private void prepareActionSetDlType(SetDlTypeActionCaseBuilder wrapper) {
+        SetDlTypeActionBuilder setDlTypeActionBuilder = new SetDlTypeActionBuilder();
         setDlTypeActionBuilder.setDlType(new EtherType(513l));
+        wrapper.setSetDlTypeAction(setDlTypeActionBuilder.build());
     }
 
-    private void prepareActionSetDlSrc(SetDlSrcActionBuilder setDlSrcActionBuilder) {
+    private void prepareActionSetDlSrc(SetDlSrcActionCaseBuilder wrapper) {
+        SetDlSrcActionBuilder setDlSrcActionBuilder = new SetDlSrcActionBuilder();
         setDlSrcActionBuilder.setAddress(new MacAddress("24:77:03:7C:C5:F1"));
+        wrapper.setSetDlSrcAction(setDlSrcActionBuilder.build());
     }
 
-    private void prepareActionSetDlDst(SetDlDstActionBuilder setDlDstActionBuilder) {
+    private void prepareActionSetDlDst(SetDlDstActionCaseBuilder wrapper) {
+        SetDlDstActionBuilder setDlDstActionBuilder = new SetDlDstActionBuilder();
         setDlDstActionBuilder.setAddress(new MacAddress("3C:A9:F4:00:E0:C8"));
+        wrapper.setSetDlDstAction(setDlDstActionBuilder.build());
     }
 
-    private void prepareActionPushVlan(PushVlanActionBuilder pushVlanActionBuilder) {
+    private void prepareActionPushVlan(PushVlanActionCaseBuilder wrapper) {
+        PushVlanActionBuilder pushVlanActionBuilder = new PushVlanActionBuilder();
         pushVlanActionBuilder.setPcp(7); // 3 bits
         pushVlanActionBuilder.setCfi(new VlanCfi(1)); // 1 bit
         pushVlanActionBuilder.setVlanId(new VlanId(4095));
         pushVlanActionBuilder.setTag(0x8100); // 12 bit
+        wrapper.setPushVlanAction(pushVlanActionBuilder.build());
     }
 
-    private void prepareActionOutput(OutputActionBuilder outputActionBuilder) {       
+    private void prepareActionOutput(OutputActionCaseBuilder wrapper) {
+        OutputActionBuilder outputActionBuilder = new OutputActionBuilder();
         outputActionBuilder.setOutputNodeConnector(new Uri("uri1"));
+        wrapper.setOutputAction(outputActionBuilder.build());
     }
 
     private Match prepOdMatch(MtchType mt) {

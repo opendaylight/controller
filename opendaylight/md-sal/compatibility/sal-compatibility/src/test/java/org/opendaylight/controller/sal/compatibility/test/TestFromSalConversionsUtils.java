@@ -27,6 +27,7 @@ import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
@@ -186,25 +187,25 @@ public class TestFromSalConversionsUtils {
 
     private void checkOdActions(
             List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actions) {
-        checkOdAction(actions, FloodAction.class, false);
-        checkOdAction(actions, FloodAllAction.class, false);
-        checkOdAction(actions, HwPathAction.class, false);
-        checkOdAction(actions, LoopbackAction.class, false);
-        checkOdAction(actions, PopVlanAction.class, false);
-        checkOdAction(actions, PushVlanAction.class, true);
-        checkOdAction(actions, SetDlDstAction.class, true);
-        checkOdAction(actions, SetDlSrcAction.class, true);
-        checkOdAction(actions, SetDlTypeAction.class, true);
-        checkOdAction(actions, SetNwTosAction.class, true);
-        checkOdAction(actions, SetNwDstAction.class, true);
-        checkOdAction(actions, SetNwSrcAction.class, true);
-        checkOdAction(actions, SetNextHopAction.class, true);
-        checkOdAction(actions, SetTpDstAction.class, true);
-        checkOdAction(actions, SetTpSrcAction.class, true);
-        checkOdAction(actions, SetVlanCfiAction.class, true);
-        checkOdAction(actions, SetVlanIdAction.class, true);
-        checkOdAction(actions, SetVlanPcpAction.class, true);
-        checkOdAction(actions, SwPathAction.class, false);
+        checkOdAction(actions, FloodActionCase.class, false);
+        checkOdAction(actions, FloodAllActionCase.class, false);
+        checkOdAction(actions, HwPathActionCase.class, false);
+        checkOdAction(actions, LoopbackActionCase.class, false);
+        checkOdAction(actions, PopVlanActionCase.class, false);
+        checkOdAction(actions, PushVlanActionCase.class, true);
+        checkOdAction(actions, SetDlDstActionCase.class, true);
+        checkOdAction(actions, SetDlSrcActionCase.class, true);
+        checkOdAction(actions, SetDlTypeActionCase.class, true);
+        checkOdAction(actions, SetNwTosActionCase.class, true);
+        checkOdAction(actions, SetNwDstActionCase.class, true);
+        checkOdAction(actions, SetNwSrcActionCase.class, true);
+        checkOdAction(actions, SetNextHopActionCase.class, true);
+        checkOdAction(actions, SetTpDstActionCase.class, true);
+        checkOdAction(actions, SetTpSrcActionCase.class, true);
+        checkOdAction(actions, SetVlanCfiActionCase.class, true);
+        checkOdAction(actions, SetVlanIdActionCase.class, true);
+        checkOdAction(actions, SetVlanPcpActionCase.class, true);
+        checkOdAction(actions, SwPathActionCase.class, false);
     }
 
     private void checkOdAction(
@@ -216,26 +217,26 @@ public class TestFromSalConversionsUtils {
                     .getAction();
             if (cl.isInstance(innerAction)) {
                 numOfFoundActions++;
-                if (innerAction instanceof PushVlanAction) {
-                    assertEquals("Wrong value of cfi in PushVlanAction.", (Integer) 1, ((PushVlanAction) innerAction)
+                if (innerAction instanceof PushVlanActionCase) {
+                    assertEquals("Wrong value of cfi in PushVlanAction.", (Integer) 1, ((PushVlanActionCase) innerAction).getPushVlanAction()
                             .getCfi().getValue());
                     assertEquals("Wrong value of pcp in PushVlanAction.", (Integer) 7,
-                            ((PushVlanAction) innerAction).getPcp());
+                            ((PushVlanActionCase) innerAction).getPushVlanAction().getPcp());
                     assertEquals("Wrong value of tag in PushVlanAction.", (Integer) 0x8100,
-                            ((PushVlanAction) innerAction).getTag());
+                            ((PushVlanActionCase) innerAction).getPushVlanAction().getTag());
                     assertEquals("Wrong value of vlad ID in PushVlanAction.", (Integer) 4095,
-                            ((PushVlanAction) innerAction).getVlanId().getValue());
-                } else if (innerAction instanceof SetDlDstAction) {
+                            ((PushVlanActionCase) innerAction).getPushVlanAction().getVlanId().getValue());
+                } else if (innerAction instanceof SetDlDstActionCase) {
                     assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
-                            ((SetDlDstAction) innerAction).getAddress().getValue());
-                } else if (innerAction instanceof SetDlSrcAction) {
+                            ((SetDlDstActionCase) innerAction).getSetDlDstAction().getAddress().getValue());
+                } else if (innerAction instanceof SetDlSrcActionCase) {
                     assertEquals("Wrong MAC source address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
-                            ((SetDlSrcAction) innerAction).getAddress().getValue());
-                } else if (innerAction instanceof SetDlTypeAction) {
+                            ((SetDlSrcActionCase) innerAction).getSetDlSrcAction().getAddress().getValue());
+                } else if (innerAction instanceof SetDlTypeActionCase) {
                     assertEquals("Wrong data link type in SetDlTypeAction.", (long) 513,
-                            (long) ((SetDlTypeAction) innerAction).getDlType().getValue());
-                } else if (innerAction instanceof SetNextHopAction) {
-                    Address address = ((SetNextHopAction) innerAction).getAddress();
+                            (long) ((SetDlTypeActionCase) innerAction).getSetDlTypeAction().getDlType().getValue());
+                } else if (innerAction instanceof SetNextHopActionCase) {
+                    Address address = ((SetNextHopActionCase) innerAction).getSetNextHopAction().getAddress();
                     boolean ipv4AddressFound = false;
                     if (address instanceof Ipv4) {
                         ipv4AddressFound = true;
@@ -243,10 +244,10 @@ public class TestFromSalConversionsUtils {
                                 .getIpv4Address().getValue());
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);
-                } else if (innerAction instanceof SetNwTosAction) {
-                    assertEquals("Wrong TOS in SetNwTosAction.", (Integer) 63, ((SetNwTosAction) innerAction).getTos());
-                } else if (innerAction instanceof SetNwDstAction) {
-                    Address address = ((SetNwDstAction) innerAction).getAddress();
+                } else if (innerAction instanceof SetNwTosActionCase) {
+                    assertEquals("Wrong TOS in SetNwTosAction.", (Integer) 63, ((SetNwTosActionCase) innerAction).getSetNwTosAction().getTos());
+                } else if (innerAction instanceof SetNwDstActionCase) {
+                    Address address = ((SetNwDstActionCase) innerAction).getSetNwDstAction().getAddress();
                     boolean ipv4AddressFound = false;
                     if (address instanceof Ipv4) {
                         ipv4AddressFound = true;
@@ -254,8 +255,8 @@ public class TestFromSalConversionsUtils {
                                 .getIpv4Address().getValue());
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);
-                } else if (innerAction instanceof SetNwSrcAction) {
-                    Address address = ((SetNwSrcAction) innerAction).getAddress();
+                } else if (innerAction instanceof SetNwSrcActionCase) {
+                    Address address = ((SetNwSrcActionCase) innerAction).getSetNwSrcAction().getAddress();
                     boolean ipv4AddressFound = false;
                     if (address instanceof Ipv4) {
                         ipv4AddressFound = true;
@@ -263,21 +264,21 @@ public class TestFromSalConversionsUtils {
                                 .getIpv4Address().getValue());
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);
-                } else if (innerAction instanceof SetTpDstAction) {
+                } else if (innerAction instanceof SetTpDstActionCase) {
                     assertEquals("Port number is incorrect in SetTpDstAction.", (Integer) 65534,
-                            ((SetTpDstAction) innerAction).getPort().getValue());
-                } else if (innerAction instanceof SetTpSrcAction) {
+                            ((SetTpDstActionCase) innerAction).getSetTpDstAction().getPort().getValue());
+                } else if (innerAction instanceof SetTpSrcActionCase) {
                     assertEquals("Port number is incorrect in SetTpSrcAction.", (Integer) 65535,
-                            ((SetTpSrcAction) innerAction).getPort().getValue());
-                } else if (innerAction instanceof SetVlanCfiAction) {
+                            ((SetTpSrcActionCase) innerAction).getSetTpSrcAction().getPort().getValue());
+                } else if (innerAction instanceof SetVlanCfiActionCase) {
                     assertEquals("Vlan cfi number is incorrect in SetVlanCfiAction.", (Integer) 1,
-                            ((SetVlanCfiAction) innerAction).getVlanCfi().getValue());
-                } else if (innerAction instanceof SetVlanIdAction) {
+                            ((SetVlanCfiActionCase) innerAction).getSetVlanCfiAction().getVlanCfi().getValue());
+                } else if (innerAction instanceof SetVlanIdActionCase) {
                     assertEquals("Vlan id number is incorrect in SetVlanIdAction.", (Integer) 4095,
-                            ((SetVlanIdAction) innerAction).getVlanId().getValue());
-                } else if (innerAction instanceof SetVlanPcpAction) {
+                            ((SetVlanIdActionCase) innerAction).getSetVlanIdAction().getVlanId().getValue());
+                } else if (innerAction instanceof SetVlanPcpActionCase) {
                     assertEquals("Vlan pcp number is incorrect in SetVlanPcpAction.", new Short((short) 7),
-                            ((SetVlanPcpAction) innerAction).getVlanPcp().getValue());
+                            ((SetVlanPcpActionCase) innerAction).getSetVlanPcpAction().getVlanPcp().getValue());
                 }
             }
         }
