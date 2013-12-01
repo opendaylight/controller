@@ -1,4 +1,3 @@
-// vi: set smarttab et sw=4 tabstop=4:
 module threadpool-impl {
     yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl";
@@ -110,84 +109,6 @@ module threadpool-impl {
             when "/config:modules/config:module/config:type = 'threadfactory-naming'";
             leaf name-prefix {
                 type string;
-            }
-        }
-    }
-
-    identity threadpool-fixed {
-        base config:module-type;
-        config:provided-service th:threadpool;
-        config:java-name-prefix FixedThreadPool;
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
-        case threadpool-fixed {
-            when "/config:modules/config:module/config:type = 'threadpool-fixed'";
-            leaf max-thread-count {
-                type uint16;
-            }
-
-            container threadFactory {
-                uses config:service-ref {
-                    refine type {
-                        //mandatory true;
-                        config:required-identity th:threadfactory;
-                    }
-                }
-            }
-        }
-    }
-
-    identity threadpool-flexible {
-        base config:module-type;
-        config:provided-service th:threadpool;
-        config:java-name-prefix FlexibleThreadPool;
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
-        case threadpool-flexible {
-            when "/config:modules/config:module/config:type = 'threadpool-flexible'";
-            leaf max-thread-count {
-                type uint16;
-            }
-            leaf minThreadCount {
-                type uint16;
-            }
-            leaf keepAliveMillis {
-                type uint32;
-            }
-
-            container threadFactory {
-                uses config:service-ref {
-                    refine type {
-                       // mandatory true;
-                        config:required-identity th:threadfactory;
-                    }
-                }
-            }
-        }
-    }
-
-    identity threadpool-scheduled {
-        base config:module-type;
-        config:provided-service th:scheduled-threadpool;
-        config:java-name-prefix ScheduledThreadPool;
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
-        case threadpool-scheduled {
-            when "/config:modules/config:module/config:type = 'threadpool-scheduled'";
-            leaf max-thread-count {
-                type uint16;
-            }
-
-            container threadFactory {
-                uses config:service-ref {
-                    refine type {
-                     //   mandatory true;
-                        config:required-identity th:threadfactory;
-                    }
-                }
             }
         }
     }
