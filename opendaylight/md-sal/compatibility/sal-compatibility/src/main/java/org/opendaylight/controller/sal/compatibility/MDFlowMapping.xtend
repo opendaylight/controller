@@ -42,28 +42,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Remo
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsInputBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.VlanCfi
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAllActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.HwPathActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.LoopbackActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlTypeActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNextHopActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanCfiActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6Builder
@@ -80,9 +58,54 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder
 import java.util.Collections
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.controller.action._case.ControllerActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.drop.action._case.DropActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.flood.action._case.FloodActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.flood.all.action._case.FloodAllActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.hw.path.action._case.HwPathActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.loopback.action._case.LoopbackActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.src.action._case.SetDlSrcActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.type.action._case.SetDlTypeActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.next.hop.action._case.SetNextHopActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.tos.action._case.SetNwTosActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.tp.dst.action._case.SetTpDstActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.tp.src.action._case.SetTpSrcActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.cfi.action._case.SetVlanCfiActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.id.action._case.SetVlanIdActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.pcp.action._case.SetVlanPcpActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.sw.path.action._case.SwPathActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNextHopActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlTypeActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAllActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.HwPathActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.LoopbackActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanCfiActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathActionCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder
 
 public class MDFlowMapping {
 
@@ -114,7 +137,7 @@ public class MDFlowMapping {
     public static def Instructions toApplyInstruction(ArrayList<Action> actions) {
         val it = new InstructionsBuilder;
         val applyActions = new InstructionBuilder;
-        applyActions.instruction = new ApplyActionsBuilder().setAction(actions).build()
+        applyActions.instruction = new ApplyActionsCaseBuilder().setApplyActions(new ApplyActionsBuilder().setAction(actions).build()).build()
         instruction = Collections.<Instruction>singletonList(applyActions.build)
         return it.build;
     }
@@ -153,37 +176,37 @@ public class MDFlowMapping {
 
     public static dispatch def toAction(Controller sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new ControllerActionBuilder().build();
+        actionBuilder.action = new ControllerActionCaseBuilder().setControllerAction(new ControllerActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
     public static dispatch def toAction(Drop sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new DropActionBuilder().build();
+        actionBuilder.action = new DropActionCaseBuilder().setDropAction(new DropActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
     public static dispatch def toAction(Flood sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new FloodActionBuilder().build();
+        actionBuilder.action = new FloodActionCaseBuilder().setFloodAction(new FloodActionBuilder().build).build();
         return actionBuilder.build();
     }
 
     public static dispatch def toAction(FloodAll sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new FloodAllActionBuilder().build();
+        actionBuilder.action = new FloodAllActionCaseBuilder().setFloodAllAction(new FloodAllActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
     public static dispatch def toAction(HwPath sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new HwPathActionBuilder().build();
+        actionBuilder.action = new HwPathActionCaseBuilder().setHwPathAction(new HwPathActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
     public static dispatch def toAction(Loopback sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new LoopbackActionBuilder().build();
+        actionBuilder.action = new LoopbackActionCaseBuilder().setLoopbackAction(new LoopbackActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
@@ -191,14 +214,14 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new OutputActionBuilder();
         outputNodeConnector = sourceAction.port.toUri;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new OutputActionCaseBuilder().setOutputAction(it.build()).build();
         return actionBuilder.build();
 
     }
 
     public static dispatch def toAction(PopVlan sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new PopVlanActionBuilder().build();
+        actionBuilder.action = new PopVlanActionCaseBuilder().build();
         return actionBuilder.build();
     }
 
@@ -209,7 +232,7 @@ public class MDFlowMapping {
         vlanId = new VlanId(sourceAction.vlanId);
         pcp = sourceAction.pcp;
         tag = sourceAction.tag;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new PushVlanActionCaseBuilder().setPushVlanAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -217,7 +240,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetDlDstActionBuilder();
         address = sourceAction.dlAddress.toMacAddress();
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetDlDstActionCaseBuilder().setSetDlDstAction(it.build()).build;
         return actionBuilder.build();
     }
 
@@ -225,7 +248,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetDlSrcActionBuilder();
         address = sourceAction.dlAddress.toMacAddress;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetDlSrcActionCaseBuilder().setSetDlSrcAction(it.build()).build;
         return actionBuilder.build();
     }
 
@@ -233,7 +256,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetDlTypeActionBuilder();
         dlType = new EtherType(sourceAction.dlType as long);
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetDlTypeActionCaseBuilder().setSetDlTypeAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -242,7 +265,7 @@ public class MDFlowMapping {
         val it = new SetNextHopActionBuilder();
         val inetAddress = sourceAction.address;
         address = inetAddress.toInetAddress;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetNextHopActionCaseBuilder().setSetNextHopAction(it.build).build();
         return actionBuilder.build();
     }
 
@@ -251,7 +274,7 @@ public class MDFlowMapping {
         val it = new SetNwDstActionBuilder();
         val inetAddress = sourceAction.address;
         address = inetAddress.toInetAddress;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetNwDstActionCaseBuilder().setSetNwDstAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -260,7 +283,7 @@ public class MDFlowMapping {
         val it = new SetNwSrcActionBuilder();
         val inetAddress = sourceAction.address;
         address = inetAddress.toInetAddress;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetNwSrcActionCaseBuilder().setSetNwSrcAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -268,7 +291,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetNwTosActionBuilder();
         tos = sourceAction.nwTos;
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetNwTosActionCaseBuilder().setSetNwTosAction(it.build).build;
         return actionBuilder.build();
     }
 
@@ -276,7 +299,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetTpDstActionBuilder();
         port = new PortNumber(sourceAction.port);
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetTpDstActionCaseBuilder().setSetTpDstAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -284,7 +307,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetTpSrcActionBuilder();
         port = new PortNumber(sourceAction.port);
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetTpSrcActionCaseBuilder().setSetTpSrcAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -292,7 +315,7 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetVlanCfiActionBuilder();
         vlanCfi = new VlanCfi(sourceAction.cfi);
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetVlanCfiActionCaseBuilder().setSetVlanCfiAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -301,7 +324,7 @@ public class MDFlowMapping {
 
         val it = new SetVlanIdActionBuilder();
         vlanId = new VlanId(sourceAction.vlanId);
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetVlanIdActionCaseBuilder().setSetVlanIdAction(it.build()).build();
         return actionBuilder.build();
     }
 
@@ -309,13 +332,13 @@ public class MDFlowMapping {
         val actionBuilder = new ActionBuilder();
         val it = new SetVlanPcpActionBuilder();
         vlanPcp = new VlanPcp(sourceAction.pcp as short);
-        actionBuilder.action = it.build();
+        actionBuilder.action = new SetVlanPcpActionCaseBuilder().setSetVlanPcpAction(it.build).build;
         return actionBuilder.build();
     }
 
     public static dispatch def toAction(SwPath sourceAction) {
         val actionBuilder = new ActionBuilder();
-        actionBuilder.action = new SwPathActionBuilder().build();
+        actionBuilder.action = new SwPathActionCaseBuilder().setSwPathAction(new SwPathActionBuilder().build()).build();
         return actionBuilder.build();
     }
 

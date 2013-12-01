@@ -21,46 +21,54 @@ module opendaylight-flow-types {
         }
     }
 
-    grouping instruction {
-        choice instruction {
-            case go-to-table {
-                leaf table_id {
-                    type uint8;
-                }
+     grouping instruction {
+         choice instruction {
+            case go-to-table-case {
+                container go-to-table {
+                 leaf table_id {
+                     type uint8;
+                 }
+             }
             }
-            
-            case write-metadata {
-                leaf metadata {
-                    type uint64;
-                }
-                
-                leaf metadata-mask {
-                    type uint64;
-                }
+             
+            case write-metadata-case {
+                container write-metadata {
+                 leaf metadata {
+                     type uint64;
+                 }
+                 
+                 leaf metadata-mask {
+                     type uint64;
+                 }
+             }
             }
-            
-            case write-actions {
-                uses action:action-list;
+             
+            case write-actions-case {
+                container write-actions {
+                 uses action:action-list;
+             }
             }
-            
-            case apply-actions {
-                uses action:action-list;
+             
+            case apply-actions-case {
+                container apply-actions {
+                 uses action:action-list;
+             }
             }
-            
-            case clear-actions {
-                uses action:action-list;
+             
+            case clear-actions-case {
+                container clear-actions {
+                 uses action:action-list;
+             }
             }
-            
-            case meter {
-                leaf meter {
-                    type string;
-                }
-                
-                leaf meter-id {
-                    type uint32;
-                }
-            }   
-        }
+             
+            case meter-case {
+                container meter {
+                     leaf meter {
+                         type string;
+                     }
+                 }
+             }
+         }
     }
     
     typedef flow-mod-flags {
@@ -161,7 +169,7 @@ module opendaylight-flow-types {
     grouping flow-statistics {
         leaf packet-count {
             type yang:counter64;
-        } 
+        }
 
         leaf byte-count {
             type yang:counter64;

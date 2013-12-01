@@ -4,31 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-
-
-
-
-
-
-
-
-
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-
-
-
-
-
-
-
-
-
-
 
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -37,7 +17,8 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.CommitHandlersTransactions;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.mpls.action._case.PopMplsActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.Flows;
@@ -46,7 +27,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -171,20 +153,17 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
         List<Action> actionList = new ArrayList<>();
         PopMplsActionBuilder popMplsAction = new PopMplsActionBuilder();
         popMplsAction.setEthernetType(34);
-        actionList.add(new ActionBuilder().setAction(popMplsAction.build()).setOrder(0).build());
+        actionList.add(new ActionBuilder().setAction(new PopMplsActionCaseBuilder().setPopMplsAction(popMplsAction.build()).build()).setOrder(10).build());
 
         applyActions.setAction(actionList );
-        
 
-
-        instruction.setInstruction(applyActions.build());
+        instruction.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(applyActions.build()).build());
 
 
         List<Instruction> instructionList = Collections.<Instruction>singletonList(instruction.build());
         instructions.setInstruction(instructionList );
-
         flow.setInstructions(instructions.build());
-        
+
         CompositeNode domFlow = mappingService.toDataDom(flow.build());
         return domFlow;
     }
