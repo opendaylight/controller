@@ -15,28 +15,40 @@ module opendaylight-group-statistics {
         description "Initial revision of group statistics service";
     }
     
-    augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "node-group-statistics";
+	grouping group-statistics {
         container group-statistics {
             //config "false";
             uses group-types:group-statistics-reply;
         }
+	}    
+    
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-group-statistics";
+        uses group-statistics;
     }
 
-    augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "node-group-desc-stats";
+	grouping group-desc {
         container group-desc {
             //config "false";
             uses group-types:group-desc-stats-reply;
         }
-    }
+	}
     
     augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "node-group-features";
-        container group-features {
+        ext:augment-identifier "node-group-desc-stats";
+        uses group-desc;
+    }
+
+	grouping group-features {
+	        container group-features {
             //config "false";
             uses group-types:group-features-reply;
         }
+    }
+	    
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "node-group-features";
+        uses group-features;
     }
 
     // RPC calls

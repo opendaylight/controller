@@ -20,9 +20,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupDescBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupFeaturesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.nodes.node.GroupStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.desc.GroupDescBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.features.GroupFeaturesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -86,7 +86,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeMeterConfigStats.class, meterConfig.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
 
     }
@@ -117,7 +117,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeMeterStatistics.class, meterStats.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
 
     }
@@ -148,7 +148,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
 
     }
@@ -181,7 +181,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeGroupStatistics.class, groupStats.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
     }
     
@@ -194,8 +194,8 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             cache.put(notification.getId(), new NodeStatistics());
         }
         MeterFeaturesBuilder meterFeature = new MeterFeaturesBuilder();
-        meterFeature.setBandTypes(notification.getBandTypes());
-        meterFeature.setCapabilities(notification.getCapabilities());
+        meterFeature.setMeterBandSupported(notification.getMeterBandSupported());
+        meterFeature.setMeterCapabilitiesSupported(notification.getMeterCapabilitiesSupported());
         meterFeature.setMaxBands(notification.getMaxBands());
         meterFeature.setMaxColor(notification.getMaxColor());
         meterFeature.setMaxMeter(notification.getMaxMeter());
@@ -217,12 +217,13 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeMeterFeatures.class, nodeMeterFeatures.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
     }
     
     @Override
     public void onGroupFeaturesUpdated(GroupFeaturesUpdated notification) {
+
         //Add statistics to local cache
         ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
         if(!cache.containsKey(notification.getId())){
@@ -231,8 +232,8 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         
         GroupFeaturesBuilder groupFeatures = new GroupFeaturesBuilder();
         groupFeatures.setActions(notification.getActions());
-        groupFeatures.setCapabilities(notification.getCapabilities());
-        groupFeatures.setTypes(notification.getTypes());
+        groupFeatures.setGroupCapabilitiesSupported(notification.getGroupCapabilitiesSupported());
+        groupFeatures.setGroupTypesSupported(notification.getGroupTypesSupported());
         groupFeatures.setMaxGroups(notification.getMaxGroups());
         cache.get(notification.getId()).setGroupFeatures(groupFeatures.build());
         
@@ -251,13 +252,13 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         nodeData.addAugmentation(NodeGroupFeatures.class, nodeGroupFeatures.build());
         
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
-        it.putRuntimeData(refValue, nodeData.build());
+        it.putOperationalData(refValue, nodeData.build());
         it.commit();
     }
 
     private NodeRef getNodeRef(NodeKey nodeKey){
-        InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder().node(Nodes.class);
-        return new NodeRef(builder.node(Node.class,nodeKey).toInstance());
+        InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeKey);
+        return new NodeRef(builder.toInstance());
     }
 
 }

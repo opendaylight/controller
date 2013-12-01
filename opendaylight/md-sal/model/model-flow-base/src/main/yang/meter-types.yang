@@ -14,11 +14,6 @@ module opendaylight-meter-types {
             type uint32;
     }
     
-    // field types
-    identity meter-flags {
-        description "Base identity for match Fields";
-    }
-    
     typedef meter-flags {        
         type bits {
             bit meter-kbps;
@@ -28,6 +23,26 @@ module opendaylight-meter-types {
         }        
     }
     
+    identity meter-capability {
+    	description "Base identity for all the supported meter capabilities/flags";
+    }
+    identity meter-kbps {
+    	base meter-capability;
+    	description "Rate value in kb/s (kilo-bit per second)";
+    } 
+    identity meter-pktps {
+    	base meter-capability;
+    	description "Rate value in packet/sec.";
+    } 
+    identity meter-burst {
+    	base meter-capability;
+    	description "Do burst size.";
+    } 
+    identity meter-stats {
+    	base meter-capability;
+    	description "Collect statistics.";
+    } 
+    
     typedef meter-band-type {
         type bits {
             bit ofpmbt-drop;
@@ -36,6 +51,22 @@ module opendaylight-meter-types {
         }
     }
     
+    identity meter-band {
+    	description "Base identity for all the band type available";
+    }
+    identity meter-band-drop {
+    	base meter-band;
+    	description "Drop packet";
+    }
+    identity meter-band-dscp-remark {
+    	base meter-band;
+    	description "Remark DSCP in the IP header";
+    }
+    identity meter-band-experimenter {
+    	base meter-band;
+    	description "Experimenter meter band";
+    }
+
     grouping band-type {
         choice band-type {
             case drop {
@@ -175,13 +206,17 @@ module opendaylight-meter-types {
             type yang:counter32;
         }
            
-        leaf band_types {
-            type yang:counter32;
-        }
+    	leaf-list meter-band-supported {
+	    	type identityref {
+	    		base meter-band;
+	    	}
+	   	}
         
-        leaf capabilities {
-            type yang:counter32;
-        }
+    	leaf-list meter-capabilities-supported {
+	    	type identityref {
+	    		base meter-capability;
+	    	}
+	   	}
         
         leaf max_bands {
             type uint8;

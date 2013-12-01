@@ -32,6 +32,53 @@ module opendaylight-group-types {
         }   
     }
     
+    identity group-type {
+    	description "Base identity for all the available group types"; 
+    }
+    
+    identity group-all {
+    	base group-type;
+    	description "All (multicast/broadcast) group";
+    }
+    
+    identity group-select {
+    	base group-type;
+    	description "Select group";
+    }
+    
+    identity group-indirect {
+    	base group-type;
+    	description "Indirect group";
+    }
+    
+    identity group-ff {
+    	base group-type;
+    	description "Fast failover group";
+    }
+    
+    identity group-capability {
+    	description "Base identity for all the supported group capabilities";
+    }
+    
+    identity select-weight{
+    	base group-capability;
+    	description "Support weight for select groups";
+    }
+
+    identity select-liveness{
+    	base group-capability;
+    	description "Support liveness for select groups";
+    }
+
+    identity chaining{
+    	base group-capability;
+    	description "Support chaining groups";
+    }
+
+    identity chaining-checks{
+    	base group-capability;
+    	description "Check chaining for loops and delete";
+    }
     
     grouping group {
         
@@ -129,23 +176,18 @@ module opendaylight-group-types {
     }
 
     grouping group-features {
-        leaf types {
-            type bits {
-            	bit group-all;
-            	bit group-select;
-            	bit group-indirect;
-            	bit group-ff;
-            }
-        }
+    
+    	leaf-list group-types-supported {
+	    	type identityref {
+	    		base group-type;
+	    	}
+	   	}
             
-        leaf capabilities { 
-        	type bits {
-                bit select-weight;
-                bit select-liveness;
-                bit chaining;
-                bit chaining-checks;
-            }   
-        }
+    	leaf-list group-capabilities-supported {
+	    	type identityref {
+	    		base group-capability;
+	    	}
+	   	}
 
         leaf-list max-groups {
             type uint32;

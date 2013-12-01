@@ -20,8 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupFeaturesInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupFeaturesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -31,8 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetMeterFeaturesInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetMeterFeaturesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -55,8 +51,9 @@ public class StatisticsProvider implements AutoCloseable {
     
     private Thread statisticsRequesterThread;
     
-    private final  InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder().node(Nodes.class).toInstance();
+    private final  InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).toInstance();
     
+    private final int STATS_THREAD_EXECUTION_TIME= 50000;
     //Local caching of stats
     
     private final ConcurrentMap<NodeId,NodeStatistics> statisticsCache = 
@@ -103,7 +100,7 @@ public class StatisticsProvider implements AutoCloseable {
                     try {
                         statsRequestSender();
                         
-                        Thread.sleep(5000);
+                        Thread.sleep(STATS_THREAD_EXECUTION_TIME);
                     }catch (Exception e){
                         spLogger.error("Exception occurred while sending stats request : {}",e);
                     }
@@ -111,9 +108,9 @@ public class StatisticsProvider implements AutoCloseable {
             }
         });
         
-        spLogger.debug("Statistics requester thread started with timer interval : {}",5000);
+        spLogger.debug("Statistics requester thread started with timer interval : {}",STATS_THREAD_EXECUTION_TIME);
         
-        //statisticsRequesterThread.start();
+        statisticsRequesterThread.start();
         
         spLogger.info("Statistics Provider started.");
     }
@@ -141,17 +138,18 @@ public class StatisticsProvider implements AutoCloseable {
                 InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
                 NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 
-                sendAllGroupStatisticsRequest(targetNodeRef);
-                
-                sendAllMeterStatisticsRequest(targetNodeRef);
-                
-                sendGroupDescriptionRequest(targetNodeRef);
-                
-                sendGroupFeaturesRequest(targetNodeRef);
-                
-                sendMeterConfigStatisticsRequest(targetNodeRef);
-                
-                sendMeterFeaturesRequest(targetNodeRef);
+                try{
+                  sendAllGroupStatisticsRequest(targetNodeRef);
+                  Thread.sleep(1000);
+                  sendAllMeterStatisticsRequest(targetNodeRef);
+                  Thread.sleep(1000);
+                  sendGroupDescriptionRequest(targetNodeRef);
+                  Thread.sleep(1000);
+                  sendMeterConfigStatisticsRequest(targetNodeRef);
+                  Thread.sleep(1000);
+                }catch(Exception e){
+                    spLogger.error("Exception occured while sending statistics request : {}", e);
+                }
             }
         }
     }
@@ -178,17 +176,6 @@ public class StatisticsProvider implements AutoCloseable {
                 groupStatsService.getGroupDescription(input.build());
     }
     
-    private void sendGroupFeaturesRequest(NodeRef targetNode){
-        
-        GetGroupFeaturesInputBuilder input = new GetGroupFeaturesInputBuilder();
-        
-        input.setNode(targetNode);
-
-        @SuppressWarnings("unused")
-        Future<RpcResult<GetGroupFeaturesOutput>> response = 
-                groupStatsService.getGroupFeatures(input.build());
-    }
-    
     private void sendAllMeterStatisticsRequest(NodeRef targetNode){
         
         GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
@@ -210,16 +197,6 @@ public class StatisticsProvider implements AutoCloseable {
         Future<RpcResult<GetAllMeterConfigStatisticsOutput>> response = 
                 meterStatsService.getAllMeterConfigStatistics(input.build());
         
-    }
-    private void sendMeterFeaturesRequest(NodeRef targetNode){
-     
-        GetMeterFeaturesInputBuilder input = new GetMeterFeaturesInputBuilder();
-        
-        input.setNode(targetNode);
-
-        @SuppressWarnings("unused")
-        Future<RpcResult<GetMeterFeaturesOutput>> response = 
-                meterStatsService.getMeterFeatures(input.build());
     }
     
     public ConcurrentMap<NodeId, NodeStatistics> getStatisticsCache() {
