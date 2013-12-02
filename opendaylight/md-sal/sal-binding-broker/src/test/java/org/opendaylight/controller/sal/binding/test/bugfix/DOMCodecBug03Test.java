@@ -3,6 +3,13 @@ import java.util.Collections;
 import java.util.Map;
 
 
+
+
+
+
+
+
+
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
@@ -11,6 +18,9 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
@@ -20,11 +30,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+
+
+
+
+
+
+
 
 
 
@@ -44,14 +63,36 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .toInstance();
 
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(NODES_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier//
+            .builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY).toInstance();
+    private static final TableKey TABLE_KEY = new TableKey((short) 10);
+    
+    
+    private static final InstanceIdentifier<Table> TABLE_INSTANCE_ID_BA = InstanceIdentifier//
+            .builder(NODES_INSTANCE_ID_BA) //
+            .child(Node.class, NODE_KEY) //
+            .augmentation(FlowCapableNode.class) //
+            .child(Table.class, TABLE_KEY)
+            .toInstance();
+    
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
+    private static final QName TABLE_QNAME = QName.create(FlowCapableNode.QNAME, Table.QNAME.getLocalName());
+    private static final Map<QName, Object> TABLE_KEY_BI = Collections.
+            <QName, Object>singletonMap(QName.create(TABLE_QNAME, "table-id"), TABLE_KEY.getId());
+    
+    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier TABLE_INSTANCE_ID_BI = //
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+                    .node(Nodes.QNAME) //
+                    .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
+                    .nodeWithKey(TABLE_QNAME, TABLE_KEY_BI) //
+                    .toInstance();
+    
     private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
 
     
@@ -94,10 +135,27 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         Nodes nodes = checkForNodes();
         verifyNodes(nodes,original);
         
-        
-        
         testAddingNodeConnector();
         testNodeRemove();
+
+    }
+    
+    @Test
+    public void testAugmentNestedSerialization() throws Exception {
+        DataModificationTransaction transaction = baDataService.beginTransaction();
+        TableBuilder table = new TableBuilder();
+        table.setId(TABLE_KEY.getId());
+        TableFeaturesBuilder feature = new TableFeaturesBuilder();
+        feature.setTableId(TABLE_KEY.getId());
+        feature.setMaxEntries(10L);
+        table.setTableFeatures(Collections.singletonList(feature.build()));
+        transaction.putOperationalData(TABLE_INSTANCE_ID_BA, table.build());
+        RpcResult<TransactionStatus> putResult = transaction.commit().get();
+        assertNotNull(putResult);
+        assertEquals(TransactionStatus.COMMITED, putResult.getResult());
+        Table readedTable = (Table) baDataService.readOperationalData(TABLE_INSTANCE_ID_BA);
+        assertNotNull(readedTable);
+        assertEquals(TABLE_KEY, readedTable.getKey());
         
         
     }
@@ -121,10 +179,6 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         assertFalse(node.getNodeConnector().isEmpty());
         NodeConnector readedNc = node.getNodeConnector().get(0);
         assertNotNull(readedNc);
-        
-        
-        
-        
     }
 
     private void testNodeRemove() throws Exception {
