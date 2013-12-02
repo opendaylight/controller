@@ -1,7 +1,7 @@
 // vi: set smarttab et sw=4 tabstop=4:
 module threadgroup {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup";
+	namespace "urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup";
     prefix "netty-th";
 
     import config { prefix config; revision-date 2013-04-05; }
