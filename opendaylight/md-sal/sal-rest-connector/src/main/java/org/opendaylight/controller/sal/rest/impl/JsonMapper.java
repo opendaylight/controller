@@ -1,6 +1,8 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.findDataSchemaNode;
+import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.findDataSchemaNodeForRelativeXPath;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,6 +13,7 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.api.type.*;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.stream.JsonWriter;
@@ -144,7 +147,7 @@ class JsonMapper {
 
         List<SimpleNode<?>> nodeLeafLists = nodeParent.getSimpleNodesByName(node.getNodeType());
         for (SimpleNode<?> nodeLeafList : nodeLeafLists) {
-            writeValueOfNodeByType(writer, nodeLeafList, schema.getType());
+            writeValueOfNodeByType(writer, nodeLeafList, resolveTypeFromLeafList(schema));
         }
 
         writer.endArray();
@@ -152,7 +155,58 @@ class JsonMapper {
 
     private void writeLeaf(JsonWriter writer, SimpleNode<?> node, LeafSchemaNode schema) throws IOException {
         writeName(node, schema, writer);
-        writeValueOfNodeByType(writer, node, schema.getType());
+        writeValueOfNodeByType(writer, node, resolveTypeFromLeaf(schema));
+    }
+
+    private TypeDefinition<?> resolveTypeFromLeaf(LeafSchemaNode leafSchemaNode) {
+        TypeDefinition<?> baseType = null;
+        baseType = resolveBaseTypeFrom(leafSchemaNode.getType());
+        if (baseType instanceof LeafrefTypeDefinition) {
+            return resolveTypeFromLeafref((LeafrefTypeDefinition) baseType, leafSchemaNode);
+        }
+        return baseType;
+    }
+
+    private TypeDefinition<?> resolveTypeFromLeafList(LeafListSchemaNode leafListSchemaNode) {
+        TypeDefinition<?> baseType = null;
+        baseType = resolveBaseTypeFrom(leafListSchemaNode.getType());
+        if (baseType instanceof LeafrefTypeDefinition) {
+            return resolveTypeFromLeafref((LeafrefTypeDefinition) baseType, leafListSchemaNode);
+        }
+        return baseType;
+    }
+
+    /**
+     * Resolve target type from leafref type.
+     * 
+     * According to RFC 6020 referenced element has to be leaf (chapter 9.9).
+     * Therefore if other element is referenced then null value is returned.
+     * 
+     * Currently only cases without path-predicate are supported.
+     * 
+     * @param leafRef
+     * @param schemaNode
+     *            data schema node which contains reference
+     * @return type if leaf is referenced and it is possible to find referenced
+     *         node in schema context. In other cases null value is returned
+     */
+    private TypeDefinition<?> resolveTypeFromLeafref(LeafrefTypeDefinition leafRef, DataSchemaNode schemaNode) {
+        RevisionAwareXPath xPath = leafRef.getPathStatement();
+        ControllerContext controllerContext = ControllerContext.getInstance();
+        SchemaContext schemaContext = controllerContext.getSchemas();
+        Module module = SchemaContextUtil.findParentModule(schemaContext, schemaNode);
+        SchemaNode foundSchemaNode = null;
+        if (xPath.isAbsolute()) {
+            foundSchemaNode = findDataSchemaNode(schemaContext, module, xPath);
+        } else {
+            foundSchemaNode = findDataSchemaNodeForRelativeXPath(schemaContext, module, schemaNode, xPath);
+        }
+
+        if (foundSchemaNode instanceof LeafSchemaNode) {
+            return resolveTypeFromLeaf((LeafSchemaNode) foundSchemaNode);
+        }
+
+        return null;
     }
 
     private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type)
@@ -161,17 +215,16 @@ class JsonMapper {
         String value = String.valueOf(node.getValue());
         // TODO check Leafref, InstanceIdentifierTypeDefinition,
         // IdentityrefTypeDefinition, UnionTypeDefinition
-        TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
-        if (baseType instanceof InstanceIdentifierTypeDefinition) {
-            writer.value(((InstanceIdentifierTypeDefinition) baseType).getPathStatement().toString());
-        } else if (baseType instanceof UnionTypeDefinition) {
-            processTypeIsUnionType(writer, (UnionTypeDefinition) baseType, value);
-        } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
-                || baseType instanceof UnsignedIntegerTypeDefinition) {
+        if (type instanceof InstanceIdentifierTypeDefinition) {
+            writer.value(((InstanceIdentifierTypeDefinition) type).getPathStatement().toString());
+        } else if (type instanceof UnionTypeDefinition) {
+            processTypeIsUnionType(writer, (UnionTypeDefinition) type, value);
+        } else if (type instanceof DecimalTypeDefinition || type instanceof IntegerTypeDefinition
+                || type instanceof UnsignedIntegerTypeDefinition) {
             writer.value(new NumberForJsonWriter(value));
-        } else if (baseType instanceof BooleanTypeDefinition) {
+        } else if (type instanceof BooleanTypeDefinition) {
             writer.value(Boolean.parseBoolean(value));
-        } else if (baseType instanceof EmptyTypeDefinition) {
+        } else if (type instanceof EmptyTypeDefinition) {
             writeEmptyDataTypeToJson(writer);
         } else {
             writer.value(value.equals("null") ? "" : value);
