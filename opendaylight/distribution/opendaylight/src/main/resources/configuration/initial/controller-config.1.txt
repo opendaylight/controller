@@ -1,5 +1,0 @@
-//MODULES START
-//SERVICES START
-
-//CAPABILITIES START
-urn:opendaylight:params:xml:ns:yang:controller:logback:config?module=config-logging&revision=2013-07-16
