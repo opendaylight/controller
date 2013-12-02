@@ -57,7 +57,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
     private final MeterEventListener meterEventListener = new MeterEventListener();
     private Registration<NotificationListener> meterListener;
     private SalMeterService meterService;
-    private MeterDataCommitHandler commitHandler;
+    private MeterDataCommitHandler meterCommitHandler;
 
     private ConcurrentMap<MeterKey, Meter> originalSwMeterView;
     @SuppressWarnings("unused")
@@ -73,16 +73,16 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
     
 
     public MeterConsumerImpl() {
-        InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Meters.class).toInstance();
+        InstanceIdentifier<? extends DataObject> metersPath = InstanceIdentifier.builder(Meters.class).toInstance();
         meterService = FRMConsumerImpl.getProviderSession().getRpcService(SalMeterService.class);
-        clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
+        //clusterMeterContainerService = FRMConsumerImpl.getClusterContainerService();
 
-        container = FRMConsumerImpl.getContainer();
+      //  container = FRMConsumerImpl.getContainer();
 
-        if (!(cacheStartup())) {
+       /* if (!(cacheStartup())) {
             logger.error("Unable to allocate/retrieve meter cache");
             System.out.println("Unable to allocate/retrieve meter cache");
-        }
+        }*/
 
         if (null == meterService) {
             logger.error("Consumer SAL Meter Service is down or NULL. FRM may not function as intended");
@@ -99,8 +99,8 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
             return;
         }
 
-        commitHandler = new MeterDataCommitHandler();
-        FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
+        meterCommitHandler = new MeterDataCommitHandler();
+        FRMConsumerImpl.getDataProviderService().registerCommitHandler(metersPath, meterCommitHandler);
     }
 
     private boolean allocateMeterCaches() {
@@ -216,7 +216,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
         MeterKey meterKey = meterAddDataObject.getKey();
 
         if (null != meterKey && validateMeter(meterAddDataObject, FRMUtil.operation.ADD).isSuccess()) {
-            if (meterAddDataObject.isInstall()) {
+           // if (meterAddDataObject.isInstall()) {
                 AddMeterInputBuilder meterBuilder = new AddMeterInputBuilder();
 
                 meterBuilder.setContainerName(meterAddDataObject.getContainerName());
@@ -226,7 +226,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 meterBuilder.setNode(meterAddDataObject.getNode());
                // originalSwMeterView.put(meterKey, meterAddDataObject);
                 meterService.addMeter(meterBuilder.build());
-            }
+           // }
 
            // originalSwMeterView.put(meterKey, meterAddDataObject);
         } else {
@@ -254,7 +254,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 originalSwMeterView.put(meterKey, meterUpdateDataObject);
             }*/
 
-            if (meterUpdateDataObject.isInstall()) {
+         //   if (meterUpdateDataObject.isInstall()) {
                 UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder();
                 updateMeterBuilder = new UpdatedMeterBuilder();
                 updateMeterBuilder.fieldsFrom(meterUpdateDataObject);
@@ -266,7 +266,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
                 }*/
 
                 meterService.updateMeter(updateMeterInputBuilder.build());
-            }
+           // }
 
         } else {
             return new Status(StatusCode.BADREQUEST, "Meter Key or attribute validation failed");

@@ -29,6 +29,7 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
     private static NotificationService notificationService;
     private FlowConsumerImpl flowImplRef;
     private GroupConsumerImpl groupImplRef;
+    private MeterConsumerImpl meterImplRef;
     private static DataProviderService dataProviderService;
 
 	private static IClusterContainerServices clusterContainerService = null;
@@ -56,7 +57,8 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
 
                     if (null != dataProviderService) {
                         flowImplRef = new FlowConsumerImpl();
-                        // groupImplRef = new GroupConsumerImpl();
+                         groupImplRef = new GroupConsumerImpl();
+                         meterImplRef = new MeterConsumerImpl();
                         registerWithOSGIConsole();
                     } else {
                         logger.error("Data Provider Service is down or NULL. "

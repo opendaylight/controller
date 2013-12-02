@@ -25,6 +25,7 @@ import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.config.rev131024.Groups;
@@ -58,7 +59,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
     private final GroupEventListener groupEventListener = new GroupEventListener();
     private Registration<NotificationListener> groupListener;
     private SalGroupService groupService;
-    private GroupDataCommitHandler commitHandler;
+    private GroupDataCommitHandler groupCommitHandler;
 
     private ConcurrentMap<GroupKey, Group> originalSwGroupView;
     private ConcurrentMap<GroupKey, Group> installedSwGroupView;
@@ -72,10 +73,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
     public GroupConsumerImpl() {
 
         InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Groups.class).toInstance();
-        groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);
-
-        clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();
-        container = FRMConsumerImpl.getContainer();
+        groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);        
 
         if (!(cacheStartup())) {
             logger.error("Unanle to allocate/retrieve group cache");
@@ -97,8 +95,10 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             return;
         }
 
-        commitHandler = new GroupDataCommitHandler();
-        FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, commitHandler);
+        groupCommitHandler = new GroupDataCommitHandler();
+        FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, groupCommitHandler);
+        clusterGroupContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
+                IClusterContainerServices.class, this);
     }
 
     private boolean allocateGroupCaches() {
@@ -284,6 +284,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
      * @param dataObject
      */
     private Status updateGroup(InstanceIdentifier<?> path, Group groupUpdateDataObject) {
+        System.out.println("Group updated-------");
         GroupKey groupKey = groupUpdateDataObject.getKey();
         UpdatedGroupBuilder updateGroupBuilder = null;
 
@@ -299,7 +300,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             originalSwGroupView.put(groupKey, groupUpdateDataObject);
         }
 */
-        if (groupUpdateDataObject.isInstall()) {
+       // if (groupUpdateDataObject.isInstall()) {
             UpdateGroupInputBuilder groupData = new UpdateGroupInputBuilder();
             updateGroupBuilder = new UpdatedGroupBuilder();
             updateGroupBuilder.fieldsFrom(groupUpdateDataObject);
@@ -312,7 +313,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             }*/
 
             groupService.updateGroup(groupData.build());
-        }
+       // }
 
         return groupOperationStatus;
     }
@@ -324,6 +325,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
      * @param dataObject
      */
     private Status addGroup(InstanceIdentifier<?> path, Group groupAddDataObject) {
+        System.out.println("Group addddd-------");
         GroupKey groupKey = groupAddDataObject.getKey();
         Status groupOperationStatus = validateGroup(groupAddDataObject, FRMUtil.operation.ADD);
 
@@ -334,7 +336,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
         //originalSwGroupView.put(groupKey, groupAddDataObject);
 
-        if (groupAddDataObject.isInstall()) {
+       // if (groupAddDataObject.isInstall()) {
             AddGroupInputBuilder groupData = new AddGroupInputBuilder();
             groupData.setBuckets(groupAddDataObject.getBuckets());
             groupData.setContainerName(groupAddDataObject.getContainerName());
@@ -343,7 +345,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
             groupData.setNode(groupAddDataObject.getNode());
         //   installedSwGroupView.put(groupKey, groupAddDataObject);
             groupService.addGroup(groupData.build());
-        }
+       // }
 
         return groupOperationStatus;
     }
