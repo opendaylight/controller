@@ -248,4 +248,12 @@ public class NeutronPort {
     public boolean isBoundToFloatingIP(String fixedIP) {
         return floatingIPMap.containsKey(fixedIP);
     }
+
+    @Override
+    public String toString() {
+        return "NeutronPort [portUUID=" + portUUID + ", networkUUID=" + networkUUID + ", name=" + name
+                + ", adminStateUp=" + adminStateUp + ", status=" + status + ", macAddress=" + macAddress
+                + ", fixedIPs=" + fixedIPs + ", deviceID=" + deviceID + ", deviceOwner=" + deviceOwner + ", tenantID="
+                + tenantID + ", floatingIPMap=" + floatingIPMap + "]";
+    }
 }
