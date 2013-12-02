@@ -35,6 +35,8 @@ import java.util.Hashtable
 import org.osgi.framework.ServiceRegistration
 import org.opendaylight.controller.sal.binding.impl.connect.dom.DeserializationException
 import java.util.concurrent.Callable
+import org.opendaylight.yangtools.yang.binding.Augmentation
+import org.opendaylight.controller.sal.binding.impl.util.YangSchemaUtils
 
 class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener, AutoCloseable {
 
@@ -83,8 +85,17 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
             updateBindingFor(context.cases, schemaContext);
 
             val typedefs = context.typedefs;
-            for (typedef : typedefs.values) {
-                binding.typeDefinitions.put(typedef, typedef as GeneratedType);
+            for (typedef : typedefs.entrySet) {
+                val typeRef = new ReferencedTypeImpl(typedef.value.packageName,typedef.value.name)
+                binding.typeDefinitions.put(typeRef, typedef.value as GeneratedType);
+                val schemaNode = YangSchemaUtils.findTypeDefinition(schemaContext,typedef.key);
+                if(schemaNode != null) {
+                    
+                    binding.typeToSchemaNode.put(typeRef,schemaNode);
+                } else {
+                    LOG.error("Type definition for {} is not available",typedef.value);
+                }
+                
             }
             val augmentations = context.augmentations;
             for (augmentation : augmentations) {
@@ -114,7 +125,14 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         return ret as CompositeNode;
     }
 
-    private def waitForSchema(Class<? extends DataContainer> class1) {
+    private def void waitForSchema(Class<? extends DataContainer> class1) {
+        if(Augmentation.isAssignableFrom(class1)) {
+            /*  FIXME: We should wait also for augmentations. Currently YANGTools does not provide correct
+             *  mapping between java Augmentation classes and augmentations.
+             */
+            return;
+        }
+        
         val ref = Types.typeForClass(class1);
         getSchemaWithRetry(ref);
     }
@@ -161,9 +179,10 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
 
             //LOG.info("{} : {}",entry.key,entry.value.fullyQualifiedName)
             if (schemaNode != null) {
-                typeToSchemaNode.put(entry.value, schemaNode);
-                typeToDefinition.put(entry.value, entry.value);
-                updatePromisedSchemas(entry.value, schemaNode);
+                val typeRef = new ReferencedTypeImpl(entry.value.packageName,entry.value.name)
+                typeToSchemaNode.put(typeRef, schemaNode);
+                typeToDefinition.put(typeRef, entry.value);
+                updatePromisedSchemas(typeRef, schemaNode);
             }
         }
     }
@@ -213,6 +232,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         if (typeDef !== null) {
             return typeDef;
         }
+        LOG.info("Thread blocked waiting for schema for: {}",type.fullyQualifiedName)
         return type.getSchemaInFuture.get();
     }
 
