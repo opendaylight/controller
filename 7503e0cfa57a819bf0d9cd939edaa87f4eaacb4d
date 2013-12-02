@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f33fc4d4",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2013-12-02T19:13:55Z",
+      "side": 1,
+      "message": "could you please replace all System.out.println with logger.debug?",
+      "revId": "7503e0cfa57a819bf0d9cd939edaa87f4eaacb4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f348e488",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2013-12-02T19:13:55Z",
+      "side": 1,
+      "message": "this line throws NPE in case instruction is empty, could you please sanitize it or remove it?",
+      "revId": "7503e0cfa57a819bf0d9cd939edaa87f4eaacb4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d35f2040",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2013-12-02T19:13:55Z",
+      "side": 1,
+      "message": "another NPE source",
+      "revId": "7503e0cfa57a819bf0d9cd939edaa87f4eaacb4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7354f420",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2013-12-02T19:13:55Z",
+      "side": 1,
+      "message": "type of value has been already tested",
+      "revId": "7503e0cfa57a819bf0d9cd939edaa87f4eaacb4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_33367c04",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2013-12-02T19:13:55Z",
+      "side": 1,
+      "message": "type of value has been already tested",
+      "revId": "7503e0cfa57a819bf0d9cd939edaa87f4eaacb4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_133db8de",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FlowConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2013-12-02T19:13:55Z",
+      "side": 1,
+      "message": "type of value has been already tested",
+      "revId": "7503e0cfa57a819bf0d9cd939edaa87f4eaacb4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
