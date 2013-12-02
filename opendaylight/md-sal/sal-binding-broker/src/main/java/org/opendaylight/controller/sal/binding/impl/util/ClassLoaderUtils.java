@@ -59,4 +59,13 @@ public final class ClassLoaderUtils {
 
         return Thread.currentThread().getContextClassLoader().loadClass(name);
     }
+
+    public static Class<?> tryToLoadClassWithTCCL(String fullyQualifiedName) {
+        try {
+            return loadClassWithTCCL(fullyQualifiedName);
+        } catch (ClassNotFoundException e) {
+            
+        }
+        return null;
+    }
 }
