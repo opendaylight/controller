@@ -78,7 +78,7 @@ public class DirectoryPersister implements Persister {
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
 
-            final MyLineProcessor lineProcessor = new MyLineProcessor();
+            final MyLineProcessor lineProcessor = new MyLineProcessor(file.getAbsolutePath());
             Files.readLines(file, ENCODING, lineProcessor);
 
             modulesBuilder.append(lineProcessor.getModules());
@@ -103,10 +103,15 @@ public class DirectoryPersister implements Persister {
 }
 
 class MyLineProcessor implements com.google.common.io.LineProcessor<String> {
+    private final String fileNameForReporting;
 
     private boolean inModules, inServices, inCapabilities;
     private final StringBuffer modulesBuffer = new StringBuffer(), servicesBuilder = new StringBuffer();
     private final SortedSet<String> caps = new TreeSet<>();
+
+    MyLineProcessor(String fileNameForReporting) {
+        this.fileNameForReporting = fileNameForReporting;
+    }
 
     @Override
     public String getResult() {
@@ -138,18 +143,25 @@ class MyLineProcessor implements com.google.common.io.LineProcessor<String> {
         return true;
     }
 
+    private void checkFileConsistency(){
+        checkState(inCapabilities, "File {} is missing delimiters in this order: {}", fileNameForReporting,
+                Arrays.asList(DirectoryPersister.MODULES_START,
+                        DirectoryPersister.SERVICES_START,
+                        DirectoryPersister.CAPABILITIES_START));
+    }
+
     String getModules() {
-        checkState(inCapabilities);
+        checkFileConsistency();
         return modulesBuffer.toString();
     }
 
     String getServices() {
-        checkState(inCapabilities);
+        checkFileConsistency();
         return servicesBuilder.toString();
     }
 
     SortedSet<String> getCapabilities() {
-        checkState(inCapabilities);
+        checkFileConsistency();
         return caps;
     }
 
