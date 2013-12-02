@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_109b6e68",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfSshClientDispatcher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-12-02T10:42:09Z",
+      "side": 1,
+      "message": "Code duplicate with NetconfServerDispatcher",
+      "revId": "514fe4b58a488edd0add2335587fe7c1d68fbca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f09d7a5a",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/NetconfServerDispatcher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-12-02T10:42:09Z",
+      "side": 1,
+      "message": "code duplicate with NetconfSshClientDispatcher",
+      "revId": "514fe4b58a488edd0add2335587fe7c1d68fbca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
