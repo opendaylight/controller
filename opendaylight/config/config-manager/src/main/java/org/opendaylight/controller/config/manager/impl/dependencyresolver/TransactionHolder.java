@@ -36,4 +36,6 @@ interface TransactionHolder {
     void assertNotExists(ModuleIdentifier moduleIdentifier)
             throws InstanceAlreadyExistsException;
 
+    ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier);
+
 }

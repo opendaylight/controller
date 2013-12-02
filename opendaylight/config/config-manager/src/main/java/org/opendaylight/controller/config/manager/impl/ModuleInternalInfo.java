@@ -35,12 +35,14 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     private final OsgiRegistration osgiRegistration;
     private final ModuleJMXRegistrator moduleJMXRegistrator;
     private final int orderingIdx;
+    private final boolean isDefaultBean;
 
     public ModuleInternalInfo(ModuleIdentifier name,
             @Nullable DynamicReadableWrapper readableModule,
             OsgiRegistration osgiRegistration,
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
-            ModuleJMXRegistrator moduleJMXRegistrator, int orderingIdx) {
+            ModuleJMXRegistrator moduleJMXRegistrator, int orderingIdx,
+            boolean isDefaultBean) {
 
         if (osgiRegistration == null) {
             throw new IllegalArgumentException(
@@ -56,6 +58,7 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
         this.name = name;
         this.moduleJMXRegistrator = moduleJMXRegistrator;
         this.orderingIdx = orderingIdx;
+        this.isDefaultBean = isDefaultBean;
     }
 
     public DynamicReadableWrapper getReadableModule() {
@@ -116,5 +119,9 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     @Override
     public ModuleIdentifier getIdentifier() {
         return name;
+    }
+
+    public boolean isDefaultBean() {
+        return isDefaultBean;
     }
 }

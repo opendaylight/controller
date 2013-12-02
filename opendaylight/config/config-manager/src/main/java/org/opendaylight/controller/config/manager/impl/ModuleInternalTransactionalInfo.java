@@ -24,26 +24,21 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     @Nullable
     private final ModuleInternalInfo maybeOldInternalInfo;
     private final TransactionModuleJMXRegistration transactionModuleJMXRegistration;
+    private final boolean isDefaultBean;
 
     ModuleInternalTransactionalInfo(ModuleIdentifier name, Module module,
             ModuleFactory moduleFactory,
             ModuleInternalInfo maybeOldInternalInfo,
-            TransactionModuleJMXRegistration transactionModuleJMXRegistration) {
+            TransactionModuleJMXRegistration transactionModuleJMXRegistration,
+            boolean isDefaultBean) {
         this.name = name;
         this.module = module;
         this.moduleFactory = moduleFactory;
         this.maybeOldInternalInfo = maybeOldInternalInfo;
         this.transactionModuleJMXRegistration = transactionModuleJMXRegistration;
+        this.isDefaultBean = isDefaultBean;
     }
 
-
-    /**
-     * Use {@link #getIdentifier()} instead.
-     */
-    @Deprecated
-    public ModuleIdentifier getName() {
-        return name;
-    }
 
     public boolean hasOldModule() {
         return maybeOldInternalInfo != null;
@@ -84,5 +79,9 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     @Override
     public ModuleIdentifier getIdentifier() {
         return name;
+    }
+
+    public boolean isDefaultBean() {
+        return isDefaultBean;
     }
 }

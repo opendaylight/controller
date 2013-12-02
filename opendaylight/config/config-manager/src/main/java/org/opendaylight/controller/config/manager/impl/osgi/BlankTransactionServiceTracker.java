@@ -44,7 +44,8 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
         for (int i = 0; i < 10; i++) {
             try {
                 // create transaction
-                ObjectName tx = configRegistry.beginConfig();
+                boolean blankTransaction = true;
+                ObjectName tx = configRegistry.beginConfig(blankTransaction);
                 CommitStatus commitStatus = configRegistry.commitConfig(tx);
                 logger.debug("Committed blank transaction with status {}", commitStatus);
                 return;

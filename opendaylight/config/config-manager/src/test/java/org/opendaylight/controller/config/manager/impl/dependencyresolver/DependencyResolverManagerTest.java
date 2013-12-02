@@ -86,7 +86,7 @@ public class DependencyResolverManagerTest {
     private static void mockGetInstance(DependencyResolverManager tested,
             ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo mock = mock(ModuleInternalTransactionalInfo.class);
-        doReturn(moduleIdentifier).when(mock).getName();
+        doReturn(moduleIdentifier).when(mock).getIdentifier();
         doReturn(mockedModule()).when(mock).getModule();
         tested.put(mock);
     }
