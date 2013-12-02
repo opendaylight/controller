@@ -158,7 +158,9 @@ public class LazyGeneratedCodecRegistry implements //
         LOG.info("Binding Class {} encountered.",cls);
         WeakReference<Class> weakRef = new WeakReference<>(cls);
         typeToClass.put(typeRef, weakRef);
-        if(DataObject.class.isAssignableFrom(cls)) {
+        if(Augmentation.class.isAssignableFrom(cls)) {
+            
+        } else if(DataObject.class.isAssignableFrom(cls)) {
             @SuppressWarnings({"unchecked","unused"})
             Object cdc = getCodecForDataObject((Class<? extends DataObject>) cls);
         }
