@@ -7,22 +7,20 @@
  */
 package org.opendaylight.controller.sal.binding.impl
 
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService
-import org.opendaylight.yangtools.yang.binding.Notification
-import com.google.common.collect.Multimap
-import org.opendaylight.controller.sal.binding.api.NotificationListener
 import com.google.common.collect.HashMultimap
-import java.util.concurrent.ExecutorService
+import com.google.common.collect.Multimap
 import java.util.Collection
-import org.opendaylight.yangtools.concepts.Registration
-import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator
-import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
-import org.opendaylight.yangtools.concepts.ListenerRegistration
+import java.util.Collections
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import org.opendaylight.controller.sal.binding.api.NotificationListener
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
-import java.util.Collections
+import org.opendaylight.yangtools.concepts.ListenerRegistration
+import org.opendaylight.yangtools.concepts.Registration
+import org.opendaylight.yangtools.yang.binding.Notification
 import org.slf4j.LoggerFactory
-import java.util.concurrent.Callable
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
 

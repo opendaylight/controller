@@ -57,6 +57,9 @@ module opendaylight-md-sal-common {
             leaf created {
                 type uint32;
             }
+            leaf submitted {
+                type uint32;
+            }
             leaf successful {
                 type uint32;
             }

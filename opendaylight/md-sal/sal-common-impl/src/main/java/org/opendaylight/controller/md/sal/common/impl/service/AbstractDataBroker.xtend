@@ -1,41 +1,42 @@
 package org.opendaylight.controller.md.sal.common.impl.service
 
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus
-import org.opendaylight.controller.md.sal.common.api.data.DataReader
-import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
-import org.opendaylight.yangtools.concepts.ListenerRegistration
-import com.google.common.collect.Multimap
-import static com.google.common.base.Preconditions.*;
-import java.util.List
+import com.google.common.collect.FluentIterable
 import com.google.common.collect.HashMultimap
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Callable
-import org.opendaylight.yangtools.yang.common.RpcResult
-import java.util.Collections
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
-import java.util.ArrayList
-import org.opendaylight.yangtools.concepts.CompositeObjectRegistration
-import java.util.Arrays
-import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService
-import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory
-import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener
-import org.opendaylight.controller.sal.common.util.Rpcs
-import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification
-import java.util.concurrent.Future
-import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter
-import org.opendaylight.yangtools.concepts.Path
-import org.slf4j.LoggerFactory
-import java.util.HashSet
-import java.util.Collection
-import com.google.common.collect.FluentIterable;
-import java.util.Set
 import com.google.common.collect.ImmutableList
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration
+import com.google.common.collect.Multimap
+import java.util.ArrayList
+import java.util.Arrays
+import java.util.Collection
+import java.util.Collections
+import java.util.HashSet
+import java.util.List
+import java.util.Set
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
+import java.util.concurrent.atomic.AtomicLong
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener
+import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration
+import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory
+import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService
+import org.opendaylight.controller.md.sal.common.api.data.DataReader
+import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification
+import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter
+import org.opendaylight.controller.sal.common.util.Rpcs
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
+import org.opendaylight.yangtools.concepts.CompositeObjectRegistration
+import org.opendaylight.yangtools.concepts.ListenerRegistration
+import org.opendaylight.yangtools.concepts.Path
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
+import org.opendaylight.yangtools.yang.common.RpcResult
+import org.slf4j.LoggerFactory
+
+import static com.google.common.base.Preconditions.*import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
 
 abstract class AbstractDataBroker<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> implements DataModificationTransactionFactory<P, D>, //
 DataReader<P, D>, //
@@ -49,6 +50,15 @@ DataProvisionService<P, D> {
 
     @Property
     var AbstractDataReadRouter<P, D> dataReadRouter;
+    
+    @Property
+    private val AtomicLong submittedTransactionsCount = new AtomicLong;
+    
+    @Property
+    private val AtomicLong failedTransactionsCount = new AtomicLong
+    
+    @Property
+    private val AtomicLong finishedTransactionsCount = new AtomicLong
 
     Multimap<P, DataChangeListenerRegistration<P, D, DCL>> listeners = HashMultimap.create();
     Multimap<P, DataCommitHandlerRegistrationImpl<P, D>> commitHandlers = HashMultimap.create();
@@ -162,6 +172,7 @@ DataProvisionService<P, D> {
         checkNotNull(transaction);
         transaction.changeStatus(TransactionStatus.SUBMITED);
         val task = new TwoPhaseCommit(transaction, this);
+        submittedTransactionsCount.andIncrement;
         return executor.submit(task);
     }
 
@@ -230,7 +241,7 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
 
     val AbstractDataTransaction<P, D> transaction;
     val AbstractDataBroker<P, D, DCL> dataBroker;
-
+    
     new(AbstractDataTransaction<P, D> transaction, AbstractDataBroker<P, D, DCL> broker) {
         this.transaction = transaction;
         this.dataBroker = broker;
@@ -263,6 +274,7 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
             }
         } catch (Exception e) {
             log.error("Transaction: {} Request Commit failed", transactionId,e);
+            dataBroker.failedTransactionsCount.andIncrement
             return rollback(handlerTransactions, e);
         }
         val List<RpcResult<Void>> results = new ArrayList();
@@ -273,9 +285,11 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
             listeners.publishDataChangeEvent();
         } catch (Exception e) {
             log.error("Transaction: {} Finish Commit failed",transactionId, e);
+            dataBroker.failedTransactionsCount.andIncrement
             return rollback(handlerTransactions, e);
         }
-        log.info("Transaction: {} Finished succesfully.",transactionId);
+        log.info("Transaction: {} Finished successfully.",transactionId);
+        dataBroker.finishedTransactionsCount.andIncrement;
         return Rpcs.getRpcResult(true, TransactionStatus.COMMITED, Collections.emptySet());
 
     }

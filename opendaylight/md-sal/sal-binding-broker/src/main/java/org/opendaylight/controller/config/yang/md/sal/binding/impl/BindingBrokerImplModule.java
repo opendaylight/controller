@@ -12,6 +12,8 @@ package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 import org.opendaylight.controller.sal.binding.impl.BindingAwareBrokerImpl;
 import org.osgi.framework.BundleContext;
 
+import com.google.common.base.Preconditions;
+
 /**
 *
 */
@@ -30,7 +32,6 @@ public final class BindingBrokerImplModule extends org.opendaylight.controller.c
     @Override
     public void validate(){
         super.validate();
-        // Add custom validation for module attributes here.
     }
 
     @Override

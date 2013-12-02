@@ -1,16 +1,13 @@
 package org.opendaylight.controller.sal.binding.impl;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataBroker;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.impl.util.BindingAwareDataReaderRouter;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -20,10 +17,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> implements
         DataProviderService, AutoCloseable {
 
-    
-    
     private final AtomicLong nextTransaction = new AtomicLong();
+    private final AtomicLong createdTransactionsCount = new AtomicLong();
     
+    public AtomicLong getCreatedTransactionsCount() {
+        return createdTransactionsCount;
+    }
+
     public DataBrokerImpl() {
         setDataReadRouter(new BindingAwareDataReaderRouter());
     }
@@ -31,6 +31,7 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     @Override
     public DataTransactionImpl beginTransaction() {
         String transactionId = "BA-" + nextTransaction.getAndIncrement();
+        createdTransactionsCount.getAndIncrement();
         return new DataTransactionImpl(transactionId,this);
     }
 
