@@ -36,8 +36,7 @@ class ControllerContext implements SchemaServiceListener {
 
     val static NULL_VALUE = "null"
 
-    @Property
-    SchemaContext schemas;
+    var SchemaContext schemas;
 
     private val BiMap<URI, String> uriToModuleName = HashBiMap.create();
     private val Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
@@ -60,6 +59,10 @@ class ControllerContext implements SchemaServiceListener {
         }
     }
 
+    def setSchemas(SchemaContext schemas) {
+        onGlobalContextUpdated(schemas)
+    }
+
     public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
         val ret = InstanceIdentifier.builder();
         val pathArgs = restconfInstance.split("/");
@@ -73,7 +76,7 @@ class ControllerContext implements SchemaServiceListener {
         if (schemaNode === null) {
             return null
         }
-        new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
+        return new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
     }
 
     private def findModule(String restconfInstance) {
@@ -85,13 +88,13 @@ class ControllerContext implements SchemaServiceListener {
         }
         val modulWithFirstYangStatement = pathArgs.filter[s|s.contains(":")].head
         val startModule = modulWithFirstYangStatement.toModuleName();
-        schemas.getLatestModule(startModule)
+        return getLatestModule(startModule)
     }
 
-    private def getLatestModule(SchemaContext schema, String moduleName) {
-        checkNotNull(schema)
+    private def getLatestModule(String moduleName) {
+        checkPreconditions
         checkArgument(moduleName !== null && !moduleName.empty)
-        val modules = schema.modules.filter[m|m.name == moduleName]
+        val modules = schemas.modules.filter[m|m.name == moduleName]
         var latestModule = modules.head
         for (module : modules) {
             if (module.revision.after(latestModule.revision)) {
@@ -308,12 +311,16 @@ class ControllerContext implements SchemaServiceListener {
             return str;
         }
     }
-
-    public def QName toQName(String name) {
+    
+    private def QName toQName(String name) {
         val module = name.toModuleName;
         val node = name.toNodeName;
         val namespace = moduleNameToUri.get(module);
         return new QName(namespace,null,node);
+    }
+    
+    def getRpcDefinition(String name) {
+        return qnameToRpc.get(name.toQName)
     }
 
     override onGlobalContextUpdated(SchemaContext context) {
@@ -324,12 +331,4 @@ class ControllerContext implements SchemaServiceListener {
         }
     }
     
-    def ContainerSchemaNode getRpcOutputSchema(QName name) {
-        qnameToRpc.get(name)?.output;
-    }
-    
-    def ContainerSchemaNode getRpcInputSchema(QName name) {
-        qnameToRpc.get(name)?.input;
-    }
-
 }

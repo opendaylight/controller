@@ -262,7 +262,7 @@ public class FromXmlToCompositeNodeTest {
             if (dummyNamespaces) {
                 try {
                     TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-                    return ((CompositeNodeWrapper) compositeNode).unwrap(null);
+                    return ((CompositeNodeWrapper) compositeNode).unwrap();
                 } catch (URISyntaxException e) {
                     LOG.error(e.getMessage());
                     assertTrue(e.getMessage(), false);

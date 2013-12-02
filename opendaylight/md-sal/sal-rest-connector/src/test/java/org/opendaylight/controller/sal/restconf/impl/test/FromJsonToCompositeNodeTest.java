@@ -3,25 +3,24 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.junit.*;
+import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.*;
-import org.opendaylight.yangtools.yang.data.api.*;
-import org.slf4j.*;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.model.api.*;
+import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -203,7 +202,7 @@ public class FromJsonToCompositeNodeTest {
         TestUtils.supplementNamespace(dataSchemaNode1, compositeNode);
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
-        CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap(null);
+        CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
 
         assertEquals("lst", compNode.getNodeType().getLocalName());
         verifyCompositeNode(compNode, "simple:list:yang1");
@@ -232,7 +231,7 @@ public class FromJsonToCompositeNodeTest {
         TestUtils.supplementNamespace(dataSchemaNode, compositeNode);
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
-        CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap(null);
+        CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
 
         assertEquals(topLevelElementName, compNode.getNodeType().getLocalName());
         verifyCompositeNode(compNode, namespace);
@@ -334,7 +333,7 @@ public class FromJsonToCompositeNodeTest {
             if (dummyNamespaces) {
                 try {
                     TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-                    return ((CompositeNodeWrapper) compositeNode).unwrap(null);
+                    return ((CompositeNodeWrapper) compositeNode).unwrap();
                 } catch (URISyntaxException e) {
                     LOG.error(e.getMessage());
                     assertTrue(e.getMessage(), false);
