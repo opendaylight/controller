@@ -240,5 +240,13 @@ public class NeutronNetwork {
         return ans;
     }
 
+    @Override
+    public String toString() {
+        return "NeutronNetwork [networkUUID=" + networkUUID + ", networkName=" + networkName + ", adminStateUp="
+                + adminStateUp + ", shared=" + shared + ", tenantID=" + tenantID + ", routerExternal=" + routerExternal
+                + ", providerNetworkType=" + providerNetworkType + ", providerPhysicalNetwork="
+                + providerPhysicalNetwork + ", providerSegmentationID=" + providerSegmentationID + ", status=" + status
+                + ", subnets=" + subnets + ", myPorts=" + myPorts + "]";
+    }
 }
 

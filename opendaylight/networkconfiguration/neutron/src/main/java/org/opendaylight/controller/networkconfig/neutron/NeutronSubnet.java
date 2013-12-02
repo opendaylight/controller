@@ -11,6 +11,7 @@ package org.opendaylight.controller.networkconfig.neutron;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -427,5 +428,14 @@ public class NeutronSubnet {
 
     public void resetGatewayIPAllocated() {
         gatewayIPAssigned = false;
+    }
+
+    @Override
+    public String toString() {
+        return "NeutronSubnet [subnetUUID=" + subnetUUID + ", networkUUID=" + networkUUID + ", name=" + name
+                + ", ipVersion=" + ipVersion + ", cidr=" + cidr + ", gatewayIP=" + gatewayIP + ", dnsNameservers="
+                + dnsNameservers + ", allocationPools=" + allocationPools + ", hostRoutes=" + hostRoutes
+                + ", enableDHCP=" + enableDHCP + ", tenantID=" + tenantID + ", myPorts=" + myPorts
+                + ", gatewayIPAssigned=" + gatewayIPAssigned + "]";
     }
 }
