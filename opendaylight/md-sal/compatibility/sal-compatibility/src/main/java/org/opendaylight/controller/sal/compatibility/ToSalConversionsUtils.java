@@ -93,7 +93,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.SCTP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
 import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
@@ -464,7 +464,7 @@ public class ToSalConversionsUtils {
             }
         }
 
-        target.setField(NW_PROTO, SCTP);
+        target.setField(NW_PROTO, CRUDP);
 
     }
 

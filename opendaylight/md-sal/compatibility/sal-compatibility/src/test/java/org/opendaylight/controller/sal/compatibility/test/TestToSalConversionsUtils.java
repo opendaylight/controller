@@ -60,7 +60,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import com.google.common.net.InetAddresses;
 
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.SCTP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
 
@@ -142,7 +142,7 @@ public class TestToSalConversionsUtils {
         case sctp:
             assertEquals("TP_SRC isn't equal.", 31, (short) match.getField(MatchType.TP_SRC).getValue());
             assertEquals("TP_DST isn't equal.", 32, (short) match.getField(MatchType.TP_DST).getValue());
-            assertEquals("NW_PROTO isn't equal.", SCTP, (byte) match.getField(MatchType.NW_PROTO).getValue());
+            assertEquals("NW_PROTO isn't equal.", CRUDP, (byte) match.getField(MatchType.NW_PROTO).getValue());
             break;
         case tcp:
             assertEquals("TP_SRC isn't equal.", 21, (short) match.getField(MatchType.TP_SRC).getValue());

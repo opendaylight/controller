@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.SCTP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
 
@@ -134,7 +134,7 @@ public class TestFromSalConversionsUtils {
             break;
         case sctp:
             boolean sctpFound = false;
-            assertEquals("Wrong protocol", SCTP, match.getIpMatch().getIpProtocol().byteValue());
+            assertEquals("Wrong protocol", CRUDP, match.getIpMatch().getIpProtocol().byteValue());
             Layer4Match layer4Match = match.getLayer4Match();
             if (layer4Match instanceof SctpMatch) {
                 assertEquals("Sctp source port is incorrect.", 0xffff, (int) ((SctpMatch) layer4Match)
@@ -325,7 +325,7 @@ public class TestFromSalConversionsUtils {
             salMatch.setField(MatchType.NW_TOS, (byte) 0x3f);
             break;
         case sctp:
-            salMatch.setField(MatchType.NW_PROTO, SCTP);
+            salMatch.setField(MatchType.NW_PROTO, CRUDP);
             salMatch.setField(MatchType.TP_SRC, (short) 0xffff);
             salMatch.setField(MatchType.TP_DST, (short) 0xfffe);
             break;
