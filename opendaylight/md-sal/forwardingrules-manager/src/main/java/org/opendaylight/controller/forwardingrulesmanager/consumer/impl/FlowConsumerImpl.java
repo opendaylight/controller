@@ -185,7 +185,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     private void addFlow(InstanceIdentifier<?> path, Flow dataObject) {
 
         AddFlowInputBuilder input = new AddFlowInputBuilder();
-        
+
         List<Instruction> inst = (dataObject).getInstructions().getInstruction();
         input.setNode((dataObject).getNode());
         input.setPriority((dataObject).getPriority());
@@ -202,19 +202,18 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
         // updating the staticflow cache
         /*
-         *  Commented out... as in many other places... use of ClusteringServices is breaking things
-         *  insufficient time to debug
-        Integer ordinal = staticFlowsOrdinal.get(0);
-        staticFlowsOrdinal.put(0, ++ordinal);
-        staticFlows.put(ordinal, dataObject);
-        */
+         * Commented out... as in many other places... use of ClusteringServices
+         * is breaking things insufficient time to debug Integer ordinal =
+         * staticFlowsOrdinal.get(0); staticFlowsOrdinal.put(0, ++ordinal);
+         * staticFlows.put(ordinal, dataObject);
+         */
 
         // We send flow to the sounthbound plugin
         flowService.addFlow(input.build());
         /*
-         * Commented out as this will also break due to improper use of ClusteringServices
-        updateLocalDatabase((NodeFlow) dataObject, true);
-        */
+         * Commented out as this will also break due to improper use of
+         * ClusteringServices updateLocalDatabase((NodeFlow) dataObject, true);
+         */
     }
 
     /**
@@ -242,18 +241,18 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
         // updating the staticflow cache
         /*
-         * Commented out due to problems caused by improper use of ClusteringServices
-        Integer ordinal = staticFlowsOrdinal.get(0);
-        staticFlowsOrdinal.put(0, ++ordinal);
-        staticFlows.put(ordinal, dataObject);
-        */
+         * Commented out due to problems caused by improper use of
+         * ClusteringServices Integer ordinal = staticFlowsOrdinal.get(0);
+         * staticFlowsOrdinal.put(0, ++ordinal); staticFlows.put(ordinal,
+         * dataObject);
+         */
 
         // We send flow to the sounthbound plugin
         flowService.removeFlow(input.build());
         /*
-         * Commented out due to problems caused by improper use of ClusteringServices
-        updateLocalDatabase((NodeFlow) dataObject, false);
-        */
+         * Commented out due to problems caused by improper use of
+         * ClusteringServices updateLocalDatabase((NodeFlow) dataObject, false);
+         */
     }
 
     /**
@@ -272,52 +271,80 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
 
         // updating the staticflow cache
         /*
-         * Commented out due to problems caused by improper use of ClusteringServices.
-        Integer ordinal = staticFlowsOrdinal.get(0);
-        staticFlowsOrdinal.put(0, ++ordinal);
-        staticFlows.put(ordinal, dataObject);
-        */
+         * Commented out due to problems caused by improper use of
+         * ClusteringServices. Integer ordinal = staticFlowsOrdinal.get(0);
+         * staticFlowsOrdinal.put(0, ++ordinal); staticFlows.put(ordinal,
+         * dataObject);
+         */
 
         // We send flow to the sounthbound plugin
         flowService.updateFlow(input.build());
         /*
-         * Commented out due to problems caused by improper use of ClusteringServices.
-        updateLocalDatabase((NodeFlow) dataObject, true);
-        */
+         * Commented out due to problems caused by improper use of
+         * ClusteringServices. updateLocalDatabase((NodeFlow) dataObject, true);
+         */
     }
 
     @SuppressWarnings("unchecked")
     private void commitToPlugin(internalTransaction transaction) {
-        Set<Entry<InstanceIdentifier<?>, DataObject>> createdEntries = transaction.getModification().getCreatedConfigurationData().entrySet();
+        Set<Entry<InstanceIdentifier<?>, DataObject>> createdEntries = transaction.getModification()
+                .getCreatedConfigurationData().entrySet();
 
         /*
-         * This little dance is because updatedEntries contains both created and modified entries
-         * The reason I created a new HashSet is because the collections we are returned are immutable.
+         * This little dance is because updatedEntries contains both created and
+         * modified entries The reason I created a new HashSet is because the
+         * collections we are returned are immutable.
          */
         Set<Entry<InstanceIdentifier<?>, DataObject>> updatedEntries = new HashSet<Entry<InstanceIdentifier<?>, DataObject>>();
         updatedEntries.addAll(transaction.getModification().getUpdatedConfigurationData().entrySet());
         updatedEntries.removeAll(createdEntries);
 
-        Set<InstanceIdentifier<?>> removeEntriesInstanceIdentifiers = transaction.getModification().getRemovedConfigurationData();
+        Set<InstanceIdentifier<?>> removeEntriesInstanceIdentifiers = transaction.getModification()
+                .getRemovedConfigurationData();
         transaction.getModification().getOriginalConfigurationData();
         for (Entry<InstanceIdentifier<?>, DataObject> entry : createdEntries) {
-            if(entry.getValue() instanceof Flow) {
+            if (entry.getValue() instanceof Flow) {
                 System.out.println("Coming add cc in FlowDatacommitHandler");
+                DataObject value = entry.getValue();
+                if (value instanceof Flow) {
+                    Flow flow = (Flow) value;
+                    boolean status = validate(flow);
+                    if (!status) {
+                        return;
+                    }
+                }
                 addFlow(entry.getKey(), (Flow) entry.getValue());
             }
         }
         for (@SuppressWarnings("unused")
         Entry<InstanceIdentifier<?>, DataObject> entry : updatedEntries) {
-            if(entry.getValue() instanceof Flow) {
+            if (entry.getValue() instanceof Flow) {
                 System.out.println("Coming update cc in FlowDatacommitHandler");
+                DataObject value = entry.getValue();
+                if (value instanceof Flow) {
+                    Flow flow = (Flow) value;
+                    boolean status = validate(flow);
+                    if (!status) {
+                        return;
+                    }
+                }
                 updateFlow(entry.getKey(), (Flow) entry.getValue());
             }
         }
 
-        for (InstanceIdentifier<?> instanceId : removeEntriesInstanceIdentifiers ) {
+        for (InstanceIdentifier<?> instanceId : removeEntriesInstanceIdentifiers) {
             DataObject removeValue = transaction.getModification().getOriginalConfigurationData().get(instanceId);
-            if(removeValue instanceof Flow) {
+            if (removeValue instanceof Flow) {
                 System.out.println("Coming remove cc in FlowDatacommitHandler");
+                DataObject value = removeValue;
+                if (value instanceof Flow) {
+                    Flow flow = (Flow) value;
+                    boolean status = validate(flow);
+                    if (!status) {
+                        return;
+                    }
+                }
+
                 removeFlow(instanceId, (Flow) removeValue);
 
             }
@@ -366,42 +393,44 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             for (Entry<InstanceIdentifier<?>, DataObject> entry : puts) {
 
                 // validating the DataObject
-                DataObject value = entry.getValue();
-                if(value instanceof Flow ) {
-                    Flow flow = (Flow)value;
-                    boolean status = validate(flow);
-                    if (!status) {
-                        return;
-                    }
-                    // Presence check
-                    /*
-                     * This is breaking due to some improper use of caches...
-                     *
-                    if (flowEntryExists(flow)) {
-                        String error = "Entry with this name on specified table already exists";
-                        logger.warn("Entry with this name on specified table already exists: {}", entry);
-                        logger.error(error);
-                        return;
-                    }
-                    if (originalSwView.containsKey(entry)) {
-                        logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
-                        logger.trace("Aborting to install {}", entry);
-                        continue;
-                    }
-                    */
-                    if (!FRMUtil.validateMatch(flow)) {
-                        logger.error("Not a valid Match");
-                        return;
-                    }
-                    if (!FRMUtil.validateInstructions(flow)) {
-                        logger.error("Not a valid Instruction");
-                        return;
-                    }
-                    /*
-                     * Commented out due to Clustering Services issues
-                     * preparePutEntry(entry.getKey(), flow);
-                     */
-                }
+                // DataObject value = entry.getValue();
+                // if(value instanceof Flow ) {
+                // Flow flow = (Flow)value;
+                // boolean status = validate(flow);
+                // if (!status) {
+                // return;
+                // }
+                // // Presence check
+                // /*
+                // * This is breaking due to some improper use of caches...
+                // *
+                // if (flowEntryExists(flow)) {
+                // String error =
+                // "Entry with this name on specified table already exists";
+                // logger.warn("Entry with this name on specified table already exists: {}",
+                // entry);
+                // logger.error(error);
+                // return;
+                // }
+                // if (originalSwView.containsKey(entry)) {
+                // logger.warn("Operation Rejected: A flow with same match and priority exists on the target node");
+                // logger.trace("Aborting to install {}", entry);
+                // continue;
+                // }
+                // */
+                // if (!FRMUtil.validateMatch(flow)) {
+                // logger.error("Not a valid Match");
+                // return;
+                // }
+                // if (!FRMUtil.validateInstructions(flow)) {
+                // logger.error("Not a valid Instruction");
+                // return;
+                // }
+                // /*
+                // * Commented out due to Clustering Services issues
+                // * preparePutEntry(entry.getKey(), flow);
+                // */
+                // }
             }
 
             // removals = modification.getRemovedConfigurationData();
@@ -438,7 +467,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             commitToPlugin(this);
             // We return true if internal transaction is successful.
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
-            return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
+            return Rpcs.getRpcResult(true, null, Collections.<RpcError> emptySet());
         }
 
         /**
@@ -451,42 +480,43 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             // NOOP - we did not modified any internal state during
             // requestCommit phase
             // return Rpcs.getRpcResult(true, null, Collections.emptySet());
-            return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
+            return Rpcs.getRpcResult(true, null, Collections.<RpcError> emptySet());
 
         }
 
-        public boolean validate(Flow flow) {
-
-            String msg = ""; // Specific part of warn/error log
-
-            boolean result  = true;
-            // flow Name validation
-            if (flow.getFlowName() == null || flow.getFlowName().trim().isEmpty()
-                    || !flow.getFlowName().matches(NAMEREGEX)) {
-                msg = "Invalid Flow name";
-                result = false;
-            }
-            // Node Validation
-            if (result == true && flow.getNode() == null) {
-                msg = "Node is null";
-                result = false;
-            }
-
-            // TODO: Validate we are seeking to program a flow against a valid Node
-
-            if (result == true && flow.getPriority() != null) {
-                if (flow.getPriority() < 0 || flow.getPriority() > 65535) {
-                    msg = String.format("priority %s is not in the range 0 - 65535",
-                            flow.getPriority());
-                    result = false;
-                }
-            }
-            if (result == false) {
-                logger.warn("Invalid Configuration for flow {}. The failure is {}",flow,msg);
-                logger.error("Invalid Configuration ({})",msg);
-            }
-            return result;
-        }
+        // public boolean validate(Flow flow) {
+        //
+        // String msg = ""; // Specific part of warn/error log
+        //
+        // boolean result = true;
+        // // flow Name validation
+        // if (flow.getFlowName() == null || flow.getFlowName().trim().isEmpty()
+        // || !flow.getFlowName().matches(NAMEREGEX)) {
+        // msg = "Invalid Flow name";
+        // result = false;
+        // }
+        // // Node Validation
+        // if (result == true && flow.getNode() == null) {
+        // msg = "Node is null";
+        // result = false;
+        // }
+        //
+        // // TODO: Validate we are seeking to program a flow against a valid
+        // Node
+        //
+        // if (result == true && flow.getPriority() != null) {
+        // if (flow.getPriority() < 0 || flow.getPriority() > 65535) {
+        // msg = String.format("priority %s is not in the range 0 - 65535",
+        // flow.getPriority());
+        // result = false;
+        // }
+        // }
+        // if (result == false) {
+        // logger.warn("Invalid Configuration for flow {}. The failure is {}",flow,msg);
+        // logger.error("Invalid Configuration ({})",msg);
+        // }
+        // return result;
+        // }
 
         private boolean flowEntryExists(Flow flow) {
             // Flow name has to be unique on per table id basis
@@ -579,6 +609,60 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
     // }
     // }
     // }
+
+    public boolean validate(Flow flow) {
+
+        String msg = ""; // Specific part of warn/error log
+
+        boolean result = true;
+        // flow Name validation
+        if (flow.getFlowName() == null || flow.getFlowName().trim().isEmpty() || !flow.getFlowName().matches(NAMEREGEX)) {
+            msg = "Invalid Flow name";
+            result = false;
+        }
+        // Node Validation
+        if (result == true && flow.getNode() == null) {
+            msg = "Node is null";
+            result = false;
+        }
+
+        // TODO: Validate we are seeking to program a flow against a valid
+        // Node
+
+        if (result == true && flow.getPriority() != null) {
+            if (flow.getPriority() < 0 || flow.getPriority() > 65535) {
+                msg = String.format("priority %s is not in the range 0 - 65535", flow.getPriority());
+                result = false;
+            }
+        }
+
+        // Presence check
+        /*
+         * This is breaking due to some improper use of caches...
+         *
+         * if (flowEntryExists(flow)) { String error =
+         * "Entry with this name on specified table already exists";
+         * logger.warn(
+         * "Entry with this name on specified table already exists: {}" ,
+         * entry); logger.error(error); return; } if
+         * (originalSwView.containsKey(entry)) { logger.warn(
+         * "Operation Rejected: A flow with same match and priority exists on the target node"
+         * ); logger.trace("Aborting to install {}", entry); continue; }
+         */
+        if (!FRMUtil.validateMatch(flow)) {
+            logger.error("Not a valid Match");
+            result = false;
+        }
+        if (!FRMUtil.validateInstructions(flow)) {
+            logger.error("Not a valid Instruction");
+            result = false;
+        }
+        if (result == false) {
+            logger.warn("Invalid Configuration for flow {}. The failure is {}", flow, msg);
+            logger.error("Invalid Configuration ({})", msg);
+        }
+        return result;
+    }
 
     private static void updateLocalDatabase(NodeFlow entry, boolean add) {
 
