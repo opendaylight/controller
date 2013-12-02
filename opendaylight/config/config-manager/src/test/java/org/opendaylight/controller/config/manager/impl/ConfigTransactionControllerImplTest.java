@@ -67,7 +67,7 @@ public class ConfigTransactionControllerImplTest extends
         testedTxController = new ConfigTransactionControllerImpl(
                 transactionName123, jmxRegistrator123, 1, 1,
                 currentlyRegisteredFactories, transactionsMBeanServer,
-                ManagementFactory.getPlatformMBeanServer(), null);
+                ManagementFactory.getPlatformMBeanServer(), false);
         TransactionModuleJMXRegistrator transactionModuleJMXRegistrator123 = testedTxController
                 .getTxModuleJMXRegistrator();
         transactionModuleJMXRegistrator123.registerMBean(

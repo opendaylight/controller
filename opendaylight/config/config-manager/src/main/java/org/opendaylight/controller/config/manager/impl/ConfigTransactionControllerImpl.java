@@ -78,13 +78,14 @@ class ConfigTransactionControllerImpl implements
             configBeanModificationDisabled);
     private final MBeanServer configMBeanServer;
 
-    private final BundleContext bundleContext;
+    private final boolean blankTransaction;
 
     public ConfigTransactionControllerImpl(String transactionName,
                                            TransactionJMXRegistrator transactionRegistrator,
                                            long parentVersion, long currentVersion,
                                            Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
-                                           MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer, BundleContext bundleContext) {
+                                           MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer,
+                                           boolean blankTransaction) {
 
         this.transactionIdentifier = new TransactionIdentifier(transactionName);
         this.controllerON = ObjectNameUtil
@@ -100,7 +101,7 @@ class ConfigTransactionControllerImpl implements
         this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
-        this.bundleContext = bundleContext;
+        this.blankTransaction = blankTransaction;
     }
 
     @Override
@@ -143,7 +144,8 @@ class ConfigTransactionControllerImpl implements
                 // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
                 DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
                 try {
-                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null, dependencyResolver);
+                    boolean defaultBean = true;
+                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null, dependencyResolver, defaultBean);
                 } catch (InstanceAlreadyExistsException e) {
                     throw new IllegalStateException(e);
                 }
@@ -184,7 +186,8 @@ class ConfigTransactionControllerImpl implements
                     "Error while copying old configuration from %s to %s",
                     oldConfigBeanInfo, moduleFactory), e);
         }
-        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo, dependencyResolver);
+        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo, dependencyResolver,
+                oldConfigBeanInfo.isDefaultBean());
     }
 
     @Override
@@ -201,14 +204,15 @@ class ConfigTransactionControllerImpl implements
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
         Module module = moduleFactory.createModule(instanceName, dependencyResolver,
                 getModuleFactoryBundleContext(moduleFactory.getImplementationName()));
+        boolean defaultBean = false;
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
-                moduleFactory, null, dependencyResolver);
+                moduleFactory, null, dependencyResolver, defaultBean);
     }
 
     private synchronized ObjectName putConfigBeanToJMXAndInternalMaps(
             ModuleIdentifier moduleIdentifier, Module module,
             ModuleFactory moduleFactory,
-            @Nullable ModuleInternalInfo maybeOldConfigBeanInfo, DependencyResolver dependencyResolver)
+            @Nullable ModuleInternalInfo maybeOldConfigBeanInfo, DependencyResolver dependencyResolver, boolean isDefaultBean)
             throws InstanceAlreadyExistsException {
 
         logger.debug("Adding module {} to transaction {}", moduleIdentifier, this);
@@ -232,14 +236,14 @@ class ConfigTransactionControllerImpl implements
                 .registerMBean(writableDynamicWrapper, writableON);
         ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = new ModuleInternalTransactionalInfo(
                 moduleIdentifier, module, moduleFactory,
-                maybeOldConfigBeanInfo, transactionModuleJMXRegistration);
+                maybeOldConfigBeanInfo, transactionModuleJMXRegistration, isDefaultBean);
 
         dependencyResolverManager.put(moduleInternalTransactionalInfo);
         return writableON;
     }
 
     @Override
-    public void destroyModule(ObjectName objectName)
+    public synchronized void destroyModule(ObjectName objectName)
             throws InstanceNotFoundException {
         String foundTransactionName = ObjectNameUtil
                 .getTransactionName(objectName);
@@ -253,9 +257,17 @@ class ConfigTransactionControllerImpl implements
         destroyModule(moduleIdentifier);
     }
 
-    private void destroyModule(ModuleIdentifier moduleIdentifier) {
+    private synchronized void destroyModule(ModuleIdentifier moduleIdentifier) {
         logger.debug("Destroying module {} in transaction {}", moduleIdentifier, this);
         transactionStatus.checkNotAborted();
+
+        if (blankTransaction == false) {
+            ModuleInternalTransactionalInfo found =
+                    dependencyResolverManager.findModuleInternalTransactionalInfo(moduleIdentifier);
+            if (found.isDefaultBean()) {
+                logger.warn("Warning: removing default bean. This will be forbidden in next version of config-subsystem");
+            }
+        }
         ModuleInternalTransactionalInfo removedTInfo = dependencyResolverManager.destroyModule(moduleIdentifier);
         // remove from jmx
         removedTInfo.getTransactionModuleJMXRegistration().close();
