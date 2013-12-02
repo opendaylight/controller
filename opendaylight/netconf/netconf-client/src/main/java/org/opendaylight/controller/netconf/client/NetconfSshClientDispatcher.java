@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-
-import javax.net.ssl.SSLContext;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -24,6 +27,7 @@ import org.opendaylight.controller.netconf.util.handler.ssh.authentication.Authe
 import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageFactory;
+import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ProtocolHandlerFactory;
 import org.opendaylight.protocol.framework.ProtocolMessageDecoder;
 import org.opendaylight.protocol.framework.ProtocolMessageEncoder;
@@ -31,16 +35,7 @@ import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
-import com.google.common.base.Optional;
-
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.Promise;
-
-public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
+public class NetconfSshClientDispatcher extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener> {
 
     private AuthenticationHandler authHandler;
     private HashedWheelTimer timer;
@@ -48,13 +43,12 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 
     public NetconfSshClientDispatcher(AuthenticationHandler authHandler, EventLoopGroup bossGroup,
             EventLoopGroup workerGroup) {
-        super(Optional.<SSLContext> absent(), bossGroup, workerGroup);
+        super(bossGroup, workerGroup);
         this.authHandler = authHandler;
         this.timer = new HashedWheelTimer();
         this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer);
     }
 
-    @Override
     public Future<NetconfClientSession> createClient(InetSocketAddress address,
             final NetconfClientSessionListener sessionListener, ReconnectStrategy strat) {
         return super.createClient(address, strat, new PipelineInitializer<NetconfClientSession>() {
