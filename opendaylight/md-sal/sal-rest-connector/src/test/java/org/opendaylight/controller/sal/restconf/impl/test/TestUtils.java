@@ -211,10 +211,12 @@ final class TestUtils {
                 null, byteArrayOS);
 
         jsonResult = byteArrayOS.toString();
-        try {
-            outputToFile(byteArrayOS, outputPath);
-        } catch (IOException e) {
-            System.out.println("Output file wasn't cloased sucessfuly.");
+        if (outputPath != null) {
+            try {            
+                outputToFile(byteArrayOS, outputPath);
+            } catch (IOException e) {
+                System.out.println("Output file wasn't cloased sucessfuly.");
+            }
         }
 
         return jsonResult;
