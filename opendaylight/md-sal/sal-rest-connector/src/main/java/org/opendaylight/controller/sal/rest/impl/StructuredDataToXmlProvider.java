@@ -25,7 +25,7 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.NodeUtils;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -56,8 +56,9 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
         if (data == null) {
             throw new ResponseException(Response.Status.NOT_FOUND, "No data exists.");
         }
-
-        Document domTree = NodeUtils.buildShadowDomTree(data);
+        
+        XmlMapper xmlMapper = new XmlMapper();
+        Document domTree = xmlMapper.write(data, (DataNodeContainer) t.getSchema());
         try {
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
