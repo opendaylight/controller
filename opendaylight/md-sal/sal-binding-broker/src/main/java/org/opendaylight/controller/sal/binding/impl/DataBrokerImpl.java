@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package org.opendaylight.controller.sal.binding.impl;
 
 import java.util.concurrent.Future;
@@ -99,5 +100,21 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     @Override
     public void close() throws Exception {
         
+    }
+    
+    
+    @Override
+    protected boolean isAffectedBy(InstanceIdentifier<? extends DataObject> key,
+            Set<InstanceIdentifier<? extends DataObject>> paths) {
+        if (paths.contains(key)) {
+            return true;
+        }
+        for (InstanceIdentifier<?> path : paths) {
+            if (key.containsWildcarded(path)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

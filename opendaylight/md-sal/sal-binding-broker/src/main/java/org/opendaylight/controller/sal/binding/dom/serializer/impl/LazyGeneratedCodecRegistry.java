@@ -26,6 +26,7 @@ import org.opendaylight.controller.sal.binding.dom.serializer.api.DomCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.IdentifierCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.InstanceIdentifierCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.ValueWithQName;
+import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils;
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
 import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.yangtools.binding.generator.util.Types;
@@ -40,6 +41,8 @@ import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -48,6 +51,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.UsesNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +64,8 @@ import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
+
+import com.google.common.util.concurrent.CycleDetectingLockFactory.WithExplicitOrdering;
 
 public class LazyGeneratedCodecRegistry implements //
         CodecRegistry, //
@@ -90,6 +96,7 @@ public class LazyGeneratedCodecRegistry implements //
     private CaseClassMapFacade classToCaseRawCodec = new CaseClassMapFacade();
 
     Map<SchemaPath, GeneratedTypeBuilder> pathToType = new ConcurrentHashMap<>();
+    Map<List<QName>, Type> pathToInstantiatedType = new ConcurrentHashMap<>();
 
     private SchemaContext currentSchema;
 
@@ -116,15 +123,27 @@ public class LazyGeneratedCodecRegistry implements //
     public Class<?> getClassForPath(List<QName> names) {
         DataSchemaNode node = getSchemaNode(names);
         SchemaPath path = node.getPath();
-        GeneratedTypeBuilder type = pathToType.get(path);
-        ReferencedTypeImpl typeref = new ReferencedTypeImpl(type.getPackageName(), type.getName());
+        Type type = pathToType.get(path);
+        if (type != null) {
+            type = new ReferencedTypeImpl(type.getPackageName(), type.getName());
+        } else {
+            type = pathToInstantiatedType.get(names);
+        }
         @SuppressWarnings("rawtypes")
-        WeakReference<Class> weakRef = typeToClass.get(typeref);
-        if(weakRef == null) {
-            LOG.error("Could not find loaded class for path: {} and type: {}",path,typeref.getFullyQualifiedName());
+        WeakReference<Class> weakRef = typeToClass.get(type);
+        if (weakRef == null) {
+            LOG.error("Could not find loaded class for path: {} and type: {}", path, type.getFullyQualifiedName());
         }
         return weakRef.get();
     }
+    
+    @Override
+    public void putPathToClass(List<QName> names,Class<?> cls) {
+        Type reference = Types.typeForClass(cls);
+        pathToInstantiatedType.put(names, reference );
+        bindingClassEncountered(cls);
+    }
+
 
     @Override
     public IdentifierCodec<?> getKeyCodecForPath(List<QName> names) {
@@ -150,27 +169,29 @@ public class LazyGeneratedCodecRegistry implements //
     @Override
     @SuppressWarnings("rawtypes")
     public void bindingClassEncountered(Class cls) {
-        
+
         ConcreteType typeRef = Types.typeForClass(cls);
-        if(typeToClass.containsKey(typeRef)) {
+        if (typeToClass.containsKey(typeRef)) {
             return;
         }
-        LOG.info("Binding Class {} encountered.",cls);
+        LOG.info("Binding Class {} encountered.", cls);
         WeakReference<Class> weakRef = new WeakReference<>(cls);
         typeToClass.put(typeRef, weakRef);
-        if(DataObject.class.isAssignableFrom(cls)) {
-            @SuppressWarnings({"unchecked","unused"})
+        if (Augmentation.class.isAssignableFrom(cls)) {
+
+        } else if (DataObject.class.isAssignableFrom(cls)) {
+            @SuppressWarnings({ "unchecked", "unused" })
             Object cdc = getCodecForDataObject((Class<? extends DataObject>) cls);
         }
     }
-    
+
     @Override
     public void onClassProcessed(Class<?> cls) {
         ConcreteType typeRef = Types.typeForClass(cls);
-        if(typeToClass.containsKey(typeRef)) {
+        if (typeToClass.containsKey(typeRef)) {
             return;
         }
-        LOG.info("Binding Class {} encountered.",cls);
+        LOG.info("Binding Class {} encountered.", cls);
         WeakReference<Class> weakRef = new WeakReference<>((Class) cls);
         typeToClass.put(typeRef, weakRef);
     }
@@ -294,7 +315,6 @@ public class LazyGeneratedCodecRegistry implements //
 
     public void onModuleContextAdded(SchemaContext schemaContext, Module module, ModuleContext context) {
         pathToType.putAll(context.getChildNodes());
-
         captureCases(context.getCases(), schemaContext);
     }
 
@@ -309,6 +329,7 @@ public class LazyGeneratedCodecRegistry implements //
                 continue;
             }
 
+            pathToType.put(caseNode.getKey(), caseNode.getValue());
             @SuppressWarnings("rawtypes")
             ChoiceCaseCodecImpl value = new ChoiceCaseCodecImpl(node);
             typeToCaseNodes.putIfAbsent(typeref, value);
@@ -323,7 +344,7 @@ public class LazyGeneratedCodecRegistry implements //
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void onChoiceCodecCreated(Class<?> choiceClass,
-            Class<? extends BindingCodec<Map<QName, Object>, Object>> choiceCodec) {
+            Class<? extends BindingCodec<Map<QName, Object>, Object>> choiceCodec, ChoiceNode schema) {
         ChoiceCodec<?> oldCodec = choiceCodecs.get(choiceClass);
         checkState(oldCodec == null);
         BindingCodec<Map<QName, Object>, Object> delegate = newInstanceOf(choiceCodec);
@@ -331,6 +352,22 @@ public class LazyGeneratedCodecRegistry implements //
         choiceCodecs.put(choiceClass, newCodec);
         CodecMapping.setClassToCaseMap(choiceCodec, (Map<Class<?>, BindingCodec<?, ?>>) classToCaseRawCodec);
         CodecMapping.setCompositeNodeToCaseMap(choiceCodec, newCodec.getCompositeToCase());
+        
+        tryToCreateCasesCodecs(schema);
+
+    }
+
+    private void tryToCreateCasesCodecs(ChoiceNode schema) {
+        for(ChoiceCaseNode caseNode : schema.getCases()) {
+            SchemaPath path = caseNode.getPath();
+            GeneratedTypeBuilder type;
+            if(path != null && (type = pathToType.get(path)) != null) {
+                Class<?> caseClass = ClassLoaderUtils.tryToLoadClassWithTCCL(type.getFullyQualifiedName());
+                if(caseClass != null) {
+                    getCaseCodecFor(caseClass);
+                }
+            }
+        }
 
     }
 
@@ -345,7 +382,7 @@ public class LazyGeneratedCodecRegistry implements //
 
     @Override
     public void onDataContainerCodecCreated(Class<?> dataClass,
-            Class<? extends BindingCodec<Map<QName, Object>, Object>> dataCodec) {
+            Class<? extends BindingCodec<?,?>> dataCodec) {
         if (Augmentable.class.isAssignableFrom(dataClass)) {
             AugmentableCompositeCodec augmentableCodec = getAugmentableCodec(dataClass);
             CodecMapping.setAugmentationCodec(dataCodec, augmentableCodec);
@@ -478,7 +515,7 @@ public class LazyGeneratedCodecRegistry implements //
 
         @Override
         public boolean isAcceptable(Node<?> input) {
-            if (!(input instanceof CompositeNode)) {
+            if (input instanceof CompositeNode) {
                 if (augmenting) {
                     return checkAugmenting((CompositeNode) input);
                 } else {
@@ -492,7 +529,8 @@ public class LazyGeneratedCodecRegistry implements //
             QName parent = input.getNodeType();
             for (Node<?> childNode : input.getChildren()) {
                 QName child = childNode.getNodeType();
-                if (!Objects.equals(parent.getNamespace(), child.getNamespace()) || Objects.equals(parent.getRevision(), child.getRevision())) {
+                if (!Objects.equals(parent.getNamespace(), child.getNamespace())
+                        || !Objects.equals(parent.getRevision(), child.getRevision())) {
                     continue;
                 }
                 if (validNames.contains(child.getLocalName())) {
@@ -562,7 +600,7 @@ public class LazyGeneratedCodecRegistry implements //
         public BindingCodec get(Object key) {
             if (key instanceof Class) {
                 Class cls = (Class) key;
-                //bindingClassEncountered(cls);
+                // bindingClassEncountered(cls);
                 ChoiceCaseCodecImpl caseCodec = getCaseCodecFor(cls);
                 return caseCodec.getDelegate();
             }
@@ -592,8 +630,7 @@ public class LazyGeneratedCodecRegistry implements //
             }
             return null;
         }
-        
-        
+
     }
 
     /**
@@ -641,7 +678,7 @@ public class LazyGeneratedCodecRegistry implements //
         }
 
         @Override
-        public BindingCodec<Map<QName, Object>, Object> put(T key, BindingCodec<?,?> value) {
+        public BindingCodec<Map<QName, Object>, Object> put(T key, BindingCodec<?, ?> value) {
             throw notModifiable();
         }
 
@@ -705,9 +742,9 @@ public class LazyGeneratedCodecRegistry implements //
                 augmentationField.setAccessible(true);
                 Map<Class, Augmentation> augMap = (Map<Class, Augmentation>) augmentationField.get(input);
                 return augMap;
-            } catch (IllegalArgumentException | IllegalAccessException |NoSuchFieldException | SecurityException e) {
-                LOG.debug("Could not read augmentations for {}",input,e);
-            } 
+            } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+                LOG.debug("Could not read augmentations for {}", input, e);
+            }
             return Collections.emptyMap();
         }
 
@@ -732,9 +769,9 @@ public class LazyGeneratedCodecRegistry implements //
                 rawAugmentationCodecs.put(key, ret);
                 return ret;
             } catch (InstantiationException e) {
-                LOG.error("Can not instantiate raw augmentation codec {}",key.getSimpleName(),e);
+                LOG.error("Can not instantiate raw augmentation codec {}", key.getSimpleName(), e);
             } catch (IllegalAccessException e) {
-                LOG.debug("BUG: Constructor for {} is not accessible.",key.getSimpleName(),e);
+                LOG.debug("BUG: Constructor for {} is not accessible.", key.getSimpleName(), e);
             }
             return null;
         }

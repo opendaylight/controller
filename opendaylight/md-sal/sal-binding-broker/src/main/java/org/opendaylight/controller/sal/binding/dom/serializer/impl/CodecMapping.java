@@ -59,7 +59,7 @@ public class CodecMapping {
         }
     }
 
-    public static void setAugmentationCodec(Class<? extends BindingCodec<Map<QName, Object>, Object>> dataCodec,
+    public static void setAugmentationCodec(Class<? extends BindingCodec<?,?>> dataCodec,
             BindingCodec<?,?> augmentableCodec) {
             Field instanceIdField;
             try {

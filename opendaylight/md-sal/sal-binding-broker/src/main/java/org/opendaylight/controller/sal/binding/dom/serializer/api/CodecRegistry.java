@@ -29,4 +29,6 @@ public interface CodecRegistry {
     
     
     void bindingClassEncountered(Class<?> cls);
+
+    void putPathToClass(List<QName> names, Class<?> cls);
 }

@@ -46,6 +46,9 @@ import java.util.Iterator
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema
 import java.util.concurrent.ConcurrentHashMap
 import static extension org.opendaylight.controller.sal.binding.impl.util.YangSchemaUtils.*;
+import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl
+import org.opendaylight.yangtools.yang.model.util.ExtendedType
+import org.opendaylight.yangtools.yang.model.util.EnumerationType
 
 class TransformerGenerator {
 
@@ -221,6 +224,19 @@ class TransformerGenerator {
         ]
     }
 
+    private def Class<?> getValueSerializer(Enumeration type) {
+        val cls = loadClassWithTCCL(type.resolvedName);
+        val transformer = cls.generatedClass;
+        if (transformer !== null) {
+            return transformer;
+        }
+
+        return withClassLoaderAndLock(cls.classLoader, lock) [ |
+            val valueTransformer = generateValueTransformer(cls, type);
+            return valueTransformer;
+        ]
+    }
+
     private def generateKeyTransformerFor(Class<? extends Object> inputType, GeneratedType typeSpec, ListSchemaNode node) {
         try {
 
@@ -342,16 +358,18 @@ class TransformerGenerator {
                 method(Object, "deserialize", Object) [
                     body = '''
                         {
-                            
-                            return fromDomStatic(QNAME,$1);
+                            //System.out.println("«type.name»#deserialize: " +$1);
+                            java.util.Map.Entry _input = (java.util.Map.Entry) $1;
+                            return fromDomStatic((«QName.name»)_input.getKey(),_input.getValue());
                         }
                     '''
                 ]
             ]
 
-            val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
+            val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)  as Class<? extends BindingCodec<Object, Object>>
+            listener?.onDataContainerCodecCreated(inputType,ret);
             log.info("DOM Codec for {} was generated {}", inputType, ret)
-            return ret as Class<? extends BindingCodec<Object, Object>>;
+            return ret;
         } catch (Exception e) {
             processException(inputType, e);
             return null;
@@ -548,7 +566,7 @@ class TransformerGenerator {
 
             val rawRet = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
             val ret = rawRet as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
-            listener?.onChoiceCodecCreated(inputType, ret);
+            listener?.onChoiceCodecCreated(inputType, ret, node);
             log.info("DOM Codec for {} was generated {}", inputType, ret)
             return ret;
         } catch (Exception e) {
@@ -759,6 +777,10 @@ class TransformerGenerator {
         («type.resolvedName») «type.valueSerializer.resolvedName».fromDomValue(«domParameter»)
     '''
 
+    private def dispatch String deserializeValue(Enumeration type, String domParameter) '''
+        («type.resolvedName») «type.valueSerializer.resolvedName».fromDomValue(«domParameter»)
+    '''
+
     private def dispatch Class<? extends BindingCodec<Map<QName, Object>, Object>> generateValueTransformer(
         Class<?> inputType, GeneratedTransferObject typeSpec) {
         try {
@@ -888,6 +910,9 @@ class TransformerGenerator {
 
     private def dispatch Class<?> generateValueTransformer(Class<?> inputType, Enumeration typeSpec) {
         try {
+            val typeRef = new ReferencedTypeImpl(typeSpec.packageName, typeSpec.name);
+            val schema = typeToSchemaNode.get(typeRef) as ExtendedType;
+            val enumSchema = schema.baseType as EnumerationType;
 
             //log.info("Generating DOM Codec for {} with {}", inputType, inputType.classLoader)
             val ctCls = createClass(typeSpec.codecClassName) [
@@ -895,12 +920,18 @@ class TransformerGenerator {
                 //implementsType(BINDING_CODEC)
                 method(Object, "toDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
-                        if($1 == null) {
+                    body = '''{
+                            if($1 == null) {
+                                return null;
+                            }
+                            «typeSpec.resolvedName» _value = («typeSpec.resolvedName») $1;
+                            «FOR en : enumSchema.values»
+                            if(«typeSpec.resolvedName».«BindingGeneratorUtil.parseToClassName(en.name)».equals(_value)) {
+                                return "«en.name»";
+                            }
+                            «ENDFOR»
                             return null;
                         }
-                        «typeSpec.resolvedName» _value = («typeSpec.resolvedName») $1;
-                        return _value.getValue();
                     '''
                 ]
                 method(Object, "serialize", Object) [
@@ -911,12 +942,18 @@ class TransformerGenerator {
                 method(Object, "fromDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
                     body = '''
-                        if($1 == null) {
+                        {
+                            if($1 == null) {
+                                return null;
+                            }
+                            String _value = (String) $1;
+                            «FOR en : enumSchema.values»
+                                if("«en.name»".equals(_value)) {
+                                    return «typeSpec.resolvedName».«BindingGeneratorUtil.parseToClassName(en.name)»;
+                                }
+                            «ENDFOR»
                             return null;
                         }
-                        _simpleValue = null;
-                        «typeSpec.resolvedName» _value = new «typeSpec.resolvedName»(null);
-                        return _value;
                     '''
                 ]
                 method(Object, "deserialize", Object) [
@@ -1125,6 +1162,8 @@ class TransformerGenerator {
 
     private def dispatch serializeValue(GeneratedTransferObject type, String parameter) '''«type.valueSerializer.
         resolvedName».toDomValue(«parameter»)'''
+
+    private def dispatch serializeValue(Enumeration type, String parameter) '''«type.valueSerializer.resolvedName».toDomValue(«parameter»)'''
 
     private def dispatch serializeValue(Type signature, String property) {
         if (INSTANCE_IDENTIFIER == signature) {
