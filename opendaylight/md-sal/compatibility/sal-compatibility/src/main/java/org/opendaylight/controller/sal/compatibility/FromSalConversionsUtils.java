@@ -9,7 +9,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 
 
-import org.opendaylight.controller.sal.compatibility.MDFlowMapping;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
 
@@ -118,7 +117,7 @@ public class FromSalConversionsUtils {
                 return Layer4MatchAsTcp(sourceMatch);
             case UDP:
                 return Layer4MatchAsUdp(sourceMatch);
-            case SCTP:
+            case CRUDP:
                 return Layer4MatchAsSctp(sourceMatch);
             }
         }
