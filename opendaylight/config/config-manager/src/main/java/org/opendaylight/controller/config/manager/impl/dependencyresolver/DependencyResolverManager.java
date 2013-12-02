@@ -118,6 +118,11 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
     }
 
     @Override
+    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier) {
+        return modulesHolder.findModuleInternalTransactionalInfo(moduleIdentifier);
+    }
+
+    @Override
     public ModuleFactory findModuleFactory(ModuleIdentifier moduleIdentifier,
             JmxAttribute jmxAttributeForReporting) {
         return modulesHolder.findModuleFactory(moduleIdentifier,
@@ -139,7 +144,7 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
         List<ModuleIdentifier> result = new ArrayList<>();
         for( ModuleInternalTransactionalInfo  info : modulesHolder.getAllInfos()) {
             if (factory.equals(info.getModuleFactory())) {
-                result.add(info.getName());
+                result.add(info.getIdentifier());
             }
         }
         return result;

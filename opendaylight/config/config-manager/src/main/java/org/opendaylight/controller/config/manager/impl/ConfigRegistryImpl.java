@@ -129,10 +129,18 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      */
     @Override
     public synchronized ObjectName beginConfig() {
-        return beginConfigInternal().getControllerObjectName();
+        return beginConfig(false);
     }
 
-    private synchronized ConfigTransactionControllerInternal beginConfigInternal() {
+    /**
+     * @param blankTransaction true if this transaction is created automatically by
+     *                         org.opendaylight.controller.config.manager.impl.osgi.BlankTransactionServiceTracker
+     */
+    public synchronized ObjectName beginConfig(boolean blankTransaction) {
+        return beginConfigInternal(blankTransaction).getControllerObjectName();
+    }
+
+    private synchronized ConfigTransactionControllerInternal beginConfigInternal(boolean blankTransaction) {
         versionCounter++;
         String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
         TransactionJMXRegistrator transactionRegistrator = baseJMXRegistrator
@@ -140,7 +148,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(resolver.getAllFactories());
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
                 transactionName, transactionRegistrator, version,
-                versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer, bundleContext);
+                versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer, blankTransaction);
         try {
             transactionRegistrator.registerMBean(transactionController, transactionController.getControllerObjectName());
         } catch (InstanceAlreadyExistsException e) {
@@ -223,7 +231,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator;
             if (entry.hasOldModule() == false) {
                 runtimeBeanRegistrator = baseJMXRegistrator
-                        .createRuntimeBeanRegistrator(entry.getName());
+                        .createRuntimeBeanRegistrator(entry.getIdentifier());
             } else {
                 // reuse old JMX registrator
                 runtimeBeanRegistrator = entry.getOldInternalInfo()
@@ -236,7 +244,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                         .setRuntimeBeanRegistrator(runtimeBeanRegistrator);
             }
             // save it to info so it is accessible afterwards
-            runtimeRegistrators.put(entry.getName(), runtimeBeanRegistrator);
+            runtimeRegistrators.put(entry.getIdentifier(), runtimeBeanRegistrator);
         }
 
         // can register runtime beans
@@ -264,8 +272,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             // determine if current instance was recreated or reused or is new
 
             // rules for closing resources:
-            // osgi registration - will be (re)created every time, so it needs
-            // to be closed here
+            // osgi registration - will be reused if possible.
             // module jmx registration - will be (re)created every time, needs
             // to be closed here
             // runtime jmx registration - should be taken care of by module
@@ -279,7 +286,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 ModuleInternalInfo oldInternalInfo = entry.getOldInternalInfo();
                 DynamicReadableWrapper oldReadableConfigBean = oldInternalInfo
                         .getReadableModule();
-                currentConfig.remove(entry.getName());
+                currentConfig.remove(entry.getIdentifier());
 
                 // test if old instance == new instance
                 if (oldReadableConfigBean.getInstance().equals(module.getInstance())) {
@@ -324,7 +331,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                     BundleContext bc = configTransactionController.
                             getModuleFactoryBundleContext(moduleFactory.getImplementationName());
                     osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
-                            newReadableConfigBean.getInstance(), entry.getName(), bc);
+                            newReadableConfigBean.getInstance(), entry.getIdentifier(), bc);
                 } else {
                     throw new NullPointerException(entry.getIdentifier().getFactoryName() + " ModuleFactory not found.");
                 }
@@ -332,11 +339,11 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators
-                    .get(entry.getName());
+                    .get(entry.getIdentifier());
             ModuleInternalInfo newInfo = new ModuleInternalInfo(
-                    entry.getName(), newReadableConfigBean, osgiRegistration,
+                    entry.getIdentifier(), newReadableConfigBean, osgiRegistration,
                     runtimeBeanRegistrator, newModuleJMXRegistrator,
-                    orderingIdx);
+                    orderingIdx, entry.isDefaultBean());
 
             newConfigEntries.put(module, newInfo);
             orderingIdx++;
@@ -367,7 +374,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     /**
      * Abort open transactions and unregister read only modules. Since this
      * class is not responsible for registering itself under
-     * {@link ConfigRegistryMXBean#OBJECT_NAME}, it will not unregister itself
+     * {@link org.opendaylight.controller.config.api.ConfigRegistry#OBJECT_NAME}, it will not unregister itself
      * here.
      */
     @Override

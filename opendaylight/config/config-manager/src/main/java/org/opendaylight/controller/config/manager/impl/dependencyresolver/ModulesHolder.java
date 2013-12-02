@@ -85,7 +85,7 @@ class ModulesHolder implements TransactionHolder {
     public Map<ModuleIdentifier, Module> getAllModules() {
         Map<ModuleIdentifier, Module> result = new HashMap<>();
         for (ModuleInternalTransactionalInfo entry : commitMap.values()) {
-            ModuleIdentifier name = entry.getName();
+            ModuleIdentifier name = entry.getIdentifier();
             result.put(name, entry.getModule());
         }
         return result;
@@ -94,17 +94,17 @@ class ModulesHolder implements TransactionHolder {
     @Override
     public void put(
             ModuleInternalTransactionalInfo moduleInternalTransactionalInfo) {
-        commitMap.put(moduleInternalTransactionalInfo.getName(),
+        commitMap.put(moduleInternalTransactionalInfo.getIdentifier(),
                 moduleInternalTransactionalInfo);
     }
 
     @Override
     public ModuleInternalTransactionalInfo destroyModule(
             ModuleIdentifier moduleIdentifier) {
-        ModuleInternalTransactionalInfo found = commitMap
-                .remove(moduleIdentifier);
-        if (found == null)
+        ModuleInternalTransactionalInfo found = commitMap.remove(moduleIdentifier);
+        if (found == null) {
             throw new IllegalStateException("Not found:" + moduleIdentifier);
+        }
         if (found.hasOldModule()) {
             unorderedDestroyedFromPreviousTransactions.add(found);
         }
@@ -122,5 +122,14 @@ class ModulesHolder implements TransactionHolder {
 
     public Collection<ModuleInternalTransactionalInfo> getAllInfos(){
         return commitMap.values();
+    }
+
+    @Override
+    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier) {
+        ModuleInternalTransactionalInfo found = commitMap.get(moduleIdentifier);
+        if (found == null) {
+            throw new IllegalStateException("Not found:" + moduleIdentifier);
+        }
+        return found;
     }
 }
