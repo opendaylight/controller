@@ -8,6 +8,7 @@ import java.util.*;
 import javax.activation.UnsupportedDataTypeException;
 
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.api.type.*;
@@ -144,25 +145,43 @@ class JsonMapper {
 
         List<SimpleNode<?>> nodeLeafLists = nodeParent.getSimpleNodesByName(node.getNodeType());
         for (SimpleNode<?> nodeLeafList : nodeLeafLists) {
-            writeValueOfNodeByType(writer, nodeLeafList, schema.getType());
+            writeValueOfNodeByType(writer, nodeLeafList, schema.getType(), schema);
         }
-
         writer.endArray();
     }
 
     private void writeLeaf(JsonWriter writer, SimpleNode<?> node, LeafSchemaNode schema) throws IOException {
         writeName(node, schema, writer);
-        writeValueOfNodeByType(writer, node, schema.getType());
+        writeValueOfNodeByType(writer, node, schema.getType(), schema);
     }
 
-    private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type)
-            throws IOException {
+    private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type,
+            DataSchemaNode schema) throws IOException {
 
         String value = String.valueOf(node.getValue());
-        // TODO check Leafref, InstanceIdentifierTypeDefinition,
-        // IdentityrefTypeDefinition, UnionTypeDefinition
         TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
-        if (baseType instanceof InstanceIdentifierTypeDefinition) {
+
+        // TODO check InstanceIdentifierTypeDefinition,
+        // IdentityrefTypeDefinition
+        if (baseType instanceof IdentityrefTypeDefinition) {
+            if (node.getValue() instanceof QName) {
+                QName qName = (QName) node.getValue();
+
+                ControllerContext contContext = ControllerContext.getInstance();
+                String moduleName = contContext.findModuleByNamespace(qName.getNamespace());
+
+                writer.value(moduleName + ":" + qName.getLocalName());
+            }
+
+        } else if (baseType instanceof LeafrefTypeDefinition) {
+            ControllerContext contContext = ControllerContext.getInstance();
+            LeafSchemaNode lfSchemaNode = contContext.resolveTypeFromLeafref((LeafrefTypeDefinition) baseType, schema);
+            if (lfSchemaNode != null) {
+                writeValueOfNodeByType(writer, node, lfSchemaNode.getType(), lfSchemaNode);
+            } else {
+                writer.value(value);
+            }
+        } else if (baseType instanceof InstanceIdentifierTypeDefinition) {
             writer.value(((InstanceIdentifierTypeDefinition) baseType).getPathStatement().toString());
         } else if (baseType instanceof UnionTypeDefinition) {
             processTypeIsUnionType(writer, (UnionTypeDefinition) baseType, value);
