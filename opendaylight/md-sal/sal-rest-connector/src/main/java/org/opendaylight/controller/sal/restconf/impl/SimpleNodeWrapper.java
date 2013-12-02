@@ -59,13 +59,13 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public SimpleNode<String> unwrap(CompositeNode parent) {
+    public SimpleNode<String> unwrap() {
         if (simpleNode == null) {
             if (name == null) {
                 Preconditions.checkNotNull(namespace);
                 name = new QName(namespace, localName);
             }
-            simpleNode = NodeFactory.createImmutableSimpleNode(name, parent, value);
+            simpleNode = NodeFactory.createImmutableSimpleNode(name, null, value);
             
             value = null;
             namespace = null;
@@ -77,37 +77,37 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
 
     @Override
     public QName getNodeType() {
-        return unwrap(null).getNodeType();
+        return unwrap().getNodeType();
     }
 
     @Override
     public CompositeNode getParent() {
-        return unwrap(null).getParent();
+        return unwrap().getParent();
     }
 
     @Override
     public String getValue() {
-        return unwrap(null).getValue();
+        return unwrap().getValue();
     }
 
     @Override
     public ModifyAction getModificationAction() {
-        return unwrap(null).getModificationAction();
+        return unwrap().getModificationAction();
     }
 
     @Override
     public MutableSimpleNode<String> asMutable() {
-        return unwrap(null).asMutable();
+        return unwrap().asMutable();
     }
 
     @Override
     public QName getKey() {
-        return unwrap(null).getKey();
+        return unwrap().getKey();
     }
 
     @Override
     public String setValue(String value) {
-        return unwrap(null).setValue(value);
+        return unwrap().setValue(value);
     }
 
 

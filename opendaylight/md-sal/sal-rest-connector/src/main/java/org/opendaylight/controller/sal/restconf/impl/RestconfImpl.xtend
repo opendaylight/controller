@@ -1,11 +1,14 @@
 package org.opendaylight.controller.sal.restconf.impl
 
+import java.util.ArrayList
 import java.util.List
 import java.util.Set
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.rest.api.RestconfService
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.Node
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
@@ -70,11 +73,16 @@ class RestconfImpl implements RestconfService {
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
-        val rpc = identifier.toQName;
-        val value = resolveNodeNamespaceBySchema(payload, controllerContext.getRpcInputSchema(rpc))
-        val rpcResult = broker.invokeRpc(rpc, value);
-        val schema = controllerContext.getRpcOutputSchema(rpc);
-        return new StructuredData(rpcResult.result, schema);
+        val rpc = identifier.rpcDefinition
+        if (rpc === null) {
+            throw new ResponseException(Response.Status.NOT_FOUND, "RPC does not exist.");
+        }
+        val value = resolveNodeNamespaceBySchema(payload, rpc.input)
+        val List<Node<?>> input = new ArrayList
+        input.add(value)
+        val rpcRequest = NodeFactory.createMutableCompositeNode(rpc.QName, null, input, null, null)
+        val rpcResult = broker.invokeRpc(rpc.QName, rpcRequest);
+        return new StructuredData(rpcResult.result, rpc.output);
     }
     
     override readConfigurationData(String identifier) {
@@ -108,7 +116,7 @@ class RestconfImpl implements RestconfService {
     private def CompositeNode resolveNodeNamespaceBySchema(CompositeNode node, DataSchemaNode schema) {
         if (node instanceof CompositeNodeWrapper) {
             addNamespaceToNodeFromSchemaRecursively(node as CompositeNodeWrapper, schema)
-            return (node as CompositeNodeWrapper).unwrap(null)
+            return (node as CompositeNodeWrapper).unwrap()
         }
         return node
     }
