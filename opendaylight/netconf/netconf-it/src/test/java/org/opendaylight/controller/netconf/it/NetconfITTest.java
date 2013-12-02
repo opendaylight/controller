@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.management.ObjectName;
-import javax.net.ssl.SSLContext;
 import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.Assert;
 import org.junit.After;
@@ -113,15 +112,14 @@ public class NetconfITTest extends AbstractConfigTest {
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
-        dispatch = createDispatcher(Optional.<SSLContext> absent(), factoriesListener);
+        dispatch = createDispatcher(factoriesListener);
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
+        clientDispatcher = new NetconfClientDispatcher( nettyThreadgroup, nettyThreadgroup);
     }
 
-    private NetconfServerDispatcher createDispatcher(Optional<SSLContext> sslC,
-            NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+    private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
         SessionIdProvider idProvider = new SessionIdProvider();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
@@ -129,8 +127,8 @@ public class NetconfITTest extends AbstractConfigTest {
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
 
-        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
-                sslC, serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+                serverNegotiatorFactory, listenerFactory);
         return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 
