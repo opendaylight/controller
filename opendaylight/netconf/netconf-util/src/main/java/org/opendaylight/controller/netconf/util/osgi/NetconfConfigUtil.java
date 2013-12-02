@@ -9,117 +9,50 @@
 package org.opendaylight.controller.netconf.util.osgi;
 
 import com.google.common.base.Optional;
-import org.opendaylight.protocol.util.SSLUtil;
-import org.osgi.framework.BundleContext;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
-
+import org.osgi.framework.BundleContext;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-public class NetconfConfigUtil {
+    public class NetconfConfigUtil {
     private static final String PREFIX_PROP = "netconf.";
 
     private enum InfixProp {
-        tcp, tls, ssh
+        tcp, ssh
     }
 
     private static final String PORT_SUFFIX_PROP = ".port";
     private static final String ADDRESS_SUFFIX_PROP = ".address";
 
-    private static final String NETCONF_TLS_KEYSTORE_PROP = PREFIX_PROP + InfixProp.tls + ".keystore";
-    private static final String NETCONF_TLS_KEYSTORE_PASSWORD_PROP = NETCONF_TLS_KEYSTORE_PROP + ".password";
-
     public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound) {
 
-        Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp);
+        Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp, exceptionMessageIfNotFound);
+
         if (inetSocketAddressOptional.isPresent() == false) {
             throw new IllegalStateException("Netconf tcp address not found." + exceptionMessageIfNotFound);
         }
         return inetSocketAddressOptional.get();
     }
 
-    public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context) {
-        return extractSomeNetconfAddress(context, InfixProp.ssh);
-    }
-
-
-    public static Optional<TLSConfiguration> extractTLSConfiguration(BundleContext context) {
-        Optional<InetSocketAddress> address = extractSomeNetconfAddress(context, InfixProp.tls);
-        if (address.isPresent()) {
-            String keystoreFileName = context.getProperty(NETCONF_TLS_KEYSTORE_PROP);
-            File keystoreFile = new File(keystoreFileName);
-            checkState(keystoreFile.exists() && keystoreFile.isFile() && keystoreFile.canRead(),
-                    "Keystore file %s does not exist or is not readable file", keystoreFileName);
-            keystoreFile = keystoreFile.getAbsoluteFile();
-            String keystorePassword = context.getProperty(NETCONF_TLS_KEYSTORE_PASSWORD_PROP);
-            checkNotNull(keystoreFileName, "Property %s must be defined for tls netconf server",
-                    NETCONF_TLS_KEYSTORE_PROP);
-            keystorePassword = keystorePassword != null ? keystorePassword : "";
-            return Optional.of(new TLSConfiguration(address.get(), keystoreFile, keystorePassword));
-        } else {
-            return Optional.absent();
-        }
-    }
-
-    public static class TLSConfiguration {
-        private final InetSocketAddress address;
-        private final File keystoreFile;
-        private final String keystorePassword;
-        private final SSLContext sslContext;
-
-        TLSConfiguration(InetSocketAddress address, File keystoreFile, String keystorePassword) {
-            this.address = address;
-            this.keystoreFile = keystoreFile;
-            this.keystorePassword = keystorePassword;
-            try {
-                try (InputStream keyStoreIS = new FileInputStream(keystoreFile)) {
-                    try (InputStream trustStoreIS = new FileInputStream(keystoreFile)) {
-                        sslContext = SSLUtil.initializeSecureContext("password", keyStoreIS, trustStoreIS, KeyManagerFactory.getDefaultAlgorithm());
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot initialize ssl context for netconf file " + keystoreFile, e);
-            }
-        }
-
-        public SSLContext getSslContext() {
-            return sslContext;
-        }
-
-        public InetSocketAddress getAddress() {
-            return address;
-        }
-
-        public File getKeystoreFile() {
-            return keystoreFile;
-        }
-
-        public String getKeystorePassword() {
-            return keystorePassword;
-        }
+    public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context, String exceptionMessage) {
+        return extractSomeNetconfAddress(context, InfixProp.ssh, exceptionMessage);
     }
 
     /**
      * @param context
      *            from which properties are being read.
      * @param infixProp
-     *            either tcp or tls
-     * @return absent if address is missing, value if address and port are
-     *         valid.
+     *            either tcp or ssh
+     * @return value if address and port are valid.
      * @throws IllegalStateException
-     *             if address or port are invalid
+     *             if address or port are invalid, or configuration is missing
      */
     private static Optional<InetSocketAddress> extractSomeNetconfAddress(BundleContext context,
-            InfixProp infixProp) {
+            InfixProp infixProp, String exceptionMessage) {
         String address = context.getProperty(PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
         if (address == null) {
-            return Optional.absent();
+            throw new IllegalStateException("Cannot find initial netconf configuration for parameter    "
+                    +PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP
+                    +" in config.ini. "+exceptionMessage);
         }
         String portKey = PREFIX_PROP + infixProp + PORT_SUFFIX_PROP;
         String portString = context.getProperty(portKey);

@@ -8,11 +8,24 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import com.google.common.base.Optional;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,21 +44,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFa
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.protocol.util.SSLUtil;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class NetconfITSecureTest extends AbstractConfigTest {
 
@@ -68,13 +66,12 @@ public class NetconfITSecureTest extends AbstractConfigTest {
 
         nettyThreadgroup = new NioEventLoopGroup();
 
-        dispatchS = createDispatcher(Optional.of(getSslContext()), factoriesListener);
+        dispatchS = createDispatcher(factoriesListener);
         ChannelFuture s = dispatchS.createServer(tlsAddress);
         s.await();
     }
 
-    private NetconfServerDispatcher createDispatcher(Optional<SSLContext> sslC,
-            NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+    private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
         SessionIdProvider idProvider = new SessionIdProvider();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
@@ -82,8 +79,8 @@ public class NetconfITSecureTest extends AbstractConfigTest {
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider);
 
-        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
-                sslC, serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+                serverNegotiatorFactory, listenerFactory);
         return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 
@@ -114,7 +111,7 @@ public class NetconfITSecureTest extends AbstractConfigTest {
 
     @Test
     public void testSecure() throws Exception {
-        NetconfClientDispatcher dispatch = new NetconfClientDispatcher(Optional.of(getSslContext()), nettyThreadgroup, nettyThreadgroup);
+        NetconfClientDispatcher dispatch = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
         try (NetconfClient netconfClient = new NetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
 
         }
