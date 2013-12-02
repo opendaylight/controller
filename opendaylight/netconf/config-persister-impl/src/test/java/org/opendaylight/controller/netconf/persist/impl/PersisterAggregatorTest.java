@@ -36,19 +36,21 @@ public class PersisterAggregatorTest {
 
     static class TestingPropertiesProvider extends PropertiesProviderBaseImpl {
 
-        private static Properties prop = new Properties();
+        private final Properties prop;
 
-        public TestingPropertiesProvider() {
+        public TestingPropertiesProvider(Properties prop) {
             super(null);
+            this.prop = prop;
         }
 
         public static TestingPropertiesProvider loadFile(String fileName) {
+            Properties prop = new Properties();
             try {
                 prop.load(TestingPropertiesProvider.class.getClassLoader().getResourceAsStream(fileName));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            return new TestingPropertiesProvider();
+            return new TestingPropertiesProvider(prop);
         }
 
         @Override
@@ -73,7 +75,7 @@ public class PersisterAggregatorTest {
         List<PersisterWithConfiguration> persisters = persisterAggregator.getPersisterWithConfigurations();
         assertEquals(1, persisters.size());
         PersisterWithConfiguration persister = persisters.get(0);
-        assertEquals(DummyAdapter.class.getName() ,persister.getStorage().getClass().getName());
+        assertEquals(DummyAdapter.class.getName(), persister.getStorage().getClass().getName());
         assertFalse(persister.isReadOnly());
 
         persisterAggregator.persistConfig(null);
