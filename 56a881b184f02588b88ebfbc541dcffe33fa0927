@@ -33,6 +33,24 @@
       "revId": "56a881b184f02588b88ebfbc541dcffe33fa0927",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_701ceac1",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfSshClientDispatcher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-12-02T11:53:07Z",
+      "side": 0,
+      "message": "Sorry - AbstractDispatcher, method createClient is protected .",
+      "parentUuid": "da6255ed_d04036a7",
+      "revId": "56a881b184f02588b88ebfbc541dcffe33fa0927",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
