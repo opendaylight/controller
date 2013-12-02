@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.opendaylight.controller.config.yang.md.sal.binding.statistics.DataBrokerRuntimeMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
@@ -51,15 +52,13 @@ public final class DataBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        DataBrokerImpl dataBindingBroker = new DataBrokerImpl();
+        DataBrokerRuntimeMXBeanImpl dataBindingBroker = new DataBrokerRuntimeMXBeanImpl();
         
         // FIXME: obtain via dependency management
         ExecutorService executor = Executors.newCachedThreadPool();
         ExecutorService listeningExecutor = MoreExecutors.listeningDecorator(executor);
         dataBindingBroker.setExecutor(listeningExecutor);
 
-        
-        
         Broker domBroker = getDomBrokerDependency();
         BindingIndependentMappingService mappingService = getMappingServiceDependency();
         
@@ -69,7 +68,7 @@ public final class DataBrokerImplModule extends
             runtimeMapping.setBaDataService(dataBindingBroker);
             domBroker.registerProvider(runtimeMapping, getBundleContext());
         }
-
+        getRootRuntimeBeanRegistratorWrapper().register(dataBindingBroker);
         return dataBindingBroker;
     }
 
