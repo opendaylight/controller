@@ -1,7 +1,8 @@
 package org.opendaylight.controller.sal.binding.test.bugfix;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-
 
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -11,6 +12,10 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SupportedActions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SupportedActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.supported.actions.ActionType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.supported.actions.ActionTypeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
@@ -19,14 +24,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.SupportType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-
-
 
 import static org.junit.Assert.*;
 
@@ -44,14 +50,34 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .toInstance();
 
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(NODES_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier//
+            .builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY).toInstance();
+    
+    
+    private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = InstanceIdentifier//
+            .builder(NODES_INSTANCE_ID_BA) //
+            .child(Node.class, NODE_KEY) //
+            .augmentation(FlowCapableNode.class) //
+            .child(SupportedActions.class)
+            .toInstance();
+    
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
+    private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME, SupportedActions.QNAME.getLocalName());
+
+    
+    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier SUPPORTED_ACTIONS_INSTANCE_ID_BI = //
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+                    .node(Nodes.QNAME) //
+                    .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
+                    .node(SUPPORTED_ACTIONS_QNAME) //
+                    .toInstance();
+    
     private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
 
     
@@ -94,11 +120,31 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         Nodes nodes = checkForNodes();
         verifyNodes(nodes,original);
         
-        
-        
         testAddingNodeConnector();
         testNodeRemove();
+
+    }
+    
+    @Test
+    public void testAugmentNestedSerialization() throws Exception {
+        DataModificationTransaction transaction = baDataService.beginTransaction();
         
+        SupportedActionsBuilder actions = new SupportedActionsBuilder();
+        ActionTypeBuilder action = new ActionTypeBuilder();
+        action.setAction("foo-action");
+        action.setSupportState(SupportType.Native);
+        List<ActionType> actionTypes = Collections.singletonList(action.build());
+        actions.setActionType(actionTypes );
+        
+        transaction.putOperationalData(SUPPORTED_ACTIONS_INSTANCE_ID_BA, actions.build());
+        RpcResult<TransactionStatus> putResult = transaction.commit().get();
+        assertNotNull(putResult);
+        assertEquals(TransactionStatus.COMMITED, putResult.getResult());
+        SupportedActions readedTable = (SupportedActions) baDataService.readOperationalData(SUPPORTED_ACTIONS_INSTANCE_ID_BA);
+        assertNotNull(readedTable);
+        
+        CompositeNode biSupportedActions = biDataService.readOperationalData(SUPPORTED_ACTIONS_INSTANCE_ID_BI);
+        assertNotNull(biSupportedActions);
         
     }
 
@@ -121,10 +167,6 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         assertFalse(node.getNodeConnector().isEmpty());
         NodeConnector readedNc = node.getNodeConnector().get(0);
         assertNotNull(readedNc);
-        
-        
-        
-        
     }
 
     private void testNodeRemove() throws Exception {

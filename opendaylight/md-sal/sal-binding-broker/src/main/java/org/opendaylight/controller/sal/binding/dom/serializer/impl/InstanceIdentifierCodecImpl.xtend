@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.binding.Augmentable
 
 class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
     
@@ -79,9 +80,13 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
         val components = new ArrayList<PathArgument>(pathArgs.size);
         for(baArg : pathArgs) { 
             codecRegistry.bindingClassEncountered(baArg.type);
-            val biArg = serializePathArgument(baArg,previousQName);
-            previousQName = biArg.nodeType;
-            components.add(biArg);
+            if(Augmentable.isAssignableFrom(baArg.type)) {
+                val biArg = serializePathArgument(baArg,previousQName);
+                previousQName = biArg.nodeType;
+                components.add(biArg);
+            } else {
+                previousQName = resolveQname(baArg.type);
+            }
         }
         return new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(components);
     }
