@@ -220,6 +220,19 @@ class TransformerGenerator {
             return valueTransformer;
         ]
     }
+    
+    private def Class<?> getValueSerializer(Enumeration type) {
+        val cls = loadClassWithTCCL(type.resolvedName);
+        val transformer = cls.generatedClass;
+        if (transformer !== null) {
+            return transformer;
+        }
+        
+        return withClassLoaderAndLock(cls.classLoader, lock) [ |
+            val valueTransformer = generateValueTransformer(cls, type);
+            return valueTransformer;
+        ]
+    }
 
     private def generateKeyTransformerFor(Class<? extends Object> inputType, GeneratedType typeSpec, ListSchemaNode node) {
         try {
@@ -1124,6 +1137,9 @@ class TransformerGenerator {
     '''
 
     private def dispatch serializeValue(GeneratedTransferObject type, String parameter) '''«type.valueSerializer.
+        resolvedName».toDomValue(«parameter»)'''
+
+    private def dispatch serializeValue(Enumeration type, String parameter) '''«type.valueSerializer.
         resolvedName».toDomValue(«parameter»)'''
 
     private def dispatch serializeValue(Type signature, String property) {

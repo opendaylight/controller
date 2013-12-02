@@ -35,6 +35,7 @@ import java.util.Hashtable
 import org.osgi.framework.ServiceRegistration
 import org.opendaylight.controller.sal.binding.impl.connect.dom.DeserializationException
 import java.util.concurrent.Callable
+import org.opendaylight.yangtools.yang.binding.Augmentation
 
 class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener, AutoCloseable {
 
@@ -114,7 +115,14 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         return ret as CompositeNode;
     }
 
-    private def waitForSchema(Class<? extends DataContainer> class1) {
+    private def void waitForSchema(Class<? extends DataContainer> class1) {
+        if(Augmentation.isAssignableFrom(class1)) {
+            /*  FIXME: We should wait also for augmentations. Currently YANGTools does not provide correct
+             *  mapping between java Augmentation classes and augmentations.
+             */
+            return;
+        }
+        
         val ref = Types.typeForClass(class1);
         getSchemaWithRetry(ref);
     }
@@ -213,6 +221,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         if (typeDef !== null) {
             return typeDef;
         }
+        LOG.info("Thread blocked waiting for schema for: {}",type.fullyQualifiedName)
         return type.getSchemaInFuture.get();
     }
 
