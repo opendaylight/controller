@@ -13,6 +13,22 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServerConnection;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -31,24 +47,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServerConnection;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
-import javax.net.ssl.SSLContext;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Responsible for listening for notifications from netconf containing latest
@@ -151,7 +149,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         long deadline = pollingStart + timeout;
         while (System.currentTimeMillis() < deadline) {
             attempt++;
-            netconfClientDispatcher = new NetconfClientDispatcher(Optional.<SSLContext>absent(), nettyThreadgroup, nettyThreadgroup);
+            netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
             try {
                 netconfClient = new NetconfClient(this.toString(), address, delay, netconfClientDispatcher);
             } catch (IllegalStateException e) {

@@ -8,25 +8,21 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Optional;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
+import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
-import org.opendaylight.controller.netconf.util.AbstractSslChannelInitializer;
+import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import java.net.InetSocketAddress;
 
 public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, NetconfServerSessionListener> {
 
-    private final ServerSslChannelInitializer initializer;
+    private final ServerChannelInitializer initializer;
 
-    public NetconfServerDispatcher(ServerSslChannelInitializer serverChannelInitializer, EventLoopGroup bossGroup,
+    public NetconfServerDispatcher(ServerChannelInitializer serverChannelInitializer, EventLoopGroup bossGroup,
             EventLoopGroup workerGroup) {
         super(bossGroup, workerGroup);
         this.initializer = serverChannelInitializer;
@@ -43,15 +39,13 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         });
     }
 
-    public static class ServerSslChannelInitializer extends AbstractSslChannelInitializer {
+    public static class ServerChannelInitializer extends AbstractChannelInitializer {
 
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
         private final NetconfServerSessionListenerFactory listenerFactory;
 
-        public ServerSslChannelInitializer(Optional<SSLContext> maybeContext,
-                                            NetconfServerSessionNegotiatorFactory negotiatorFactory,
+        public ServerChannelInitializer(NetconfServerSessionNegotiatorFactory negotiatorFactory,
                                             NetconfServerSessionListenerFactory listenerFactory) {
-            super(maybeContext);
             this.negotiatorFactory = negotiatorFactory;
             this.listenerFactory = listenerFactory;
         }
@@ -62,10 +56,6 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
             ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(listenerFactory, ch, promise));
         }
 
-        @Override
-        protected void initSslEngine(SSLEngine sslEngine) {
-            sslEngine.setUseClientMode(false);
-        }
     }
 
 }
