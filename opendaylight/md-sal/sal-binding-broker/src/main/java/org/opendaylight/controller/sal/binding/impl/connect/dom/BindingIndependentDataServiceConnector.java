@@ -116,7 +116,7 @@ public class BindingIndependentDataServiceConnector implements //
                 DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
                 target.putConfigurationData(baKey, baData);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry.getKey(), e);
+                LOG.error("Ommiting from BA transaction: {}. Reason {}.", entry.getKey(), e);
             }
         }
         for (Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
@@ -127,7 +127,7 @@ public class BindingIndependentDataServiceConnector implements //
                 DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
                 target.putOperationalData(baKey, baData);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry.getKey(), e);
+                LOG.error("Ommiting from BA transaction: {}. Reason {}.", entry.getKey(), e);
             }
         }
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
@@ -136,7 +136,7 @@ public class BindingIndependentDataServiceConnector implements //
                 InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
                 target.removeConfigurationData(baEntry);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry, e);
+                LOG.error("Ommiting from BA transaction: {}. Reason {}.", entry, e);
             }
         }
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedOperationalData()) {
@@ -312,7 +312,6 @@ public class BindingIndependentDataServiceConnector implements //
 
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = mappingService.toDataDom(registration
                     .getPath());
-            // FIXME: do registration based on only active commit handlers.
 
         }
 

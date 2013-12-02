@@ -22,6 +22,10 @@ import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.binding.Augmentable
+import com.google.common.collect.ImmutableList
+import org.opendaylight.yangtools.yang.binding.Augmentation
+import java.util.concurrent.ConcurrentHashMap
 
 class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
     
@@ -29,7 +33,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
     val CodecRegistry codecRegistry;
     
     val Map<Class<?>,QName> classToQName = new WeakHashMap;
-    
+    val Map<Class<?>, Map<List<QName>, Class<?>>> classToPreviousAugment = new WeakHashMap;
     
     public new(CodecRegistry registry) {
         codecRegistry = registry;
@@ -44,8 +48,15 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
         for(biArg : biArgs) {
             scannedPath.add(biArg.nodeType);
             val baArg = deserializePathArgument(biArg,scannedPath)
-            baArgs.add(baArg)
             baType = baArg?.type
+            val injectAugment = classToPreviousAugment.get(baType);
+            if(injectAugment != null) {
+                val augment = injectAugment.get(scannedPath) as Class<? extends DataObject>;
+                if(augment != null) {
+                    baArgs.add(new Item(augment));
+                }
+            }
+            baArgs.add(baArg)
         }
         val ret = new InstanceIdentifier(baArgs,baType as Class<? extends DataObject>);
         return ret;
@@ -74,16 +85,39 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
     }
     
     override serialize(InstanceIdentifier input) {
+        var Class<?> previousAugmentation = null
         val pathArgs = input.path as List<org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument>
         var QName previousQName = null;
         val components = new ArrayList<PathArgument>(pathArgs.size);
+        val qnamePath = new ArrayList<QName>(pathArgs.size);
         for(baArg : pathArgs) { 
-            codecRegistry.bindingClassEncountered(baArg.type);
-            val biArg = serializePathArgument(baArg,previousQName);
-            previousQName = biArg.nodeType;
-            components.add(biArg);
+            
+            if(!Augmentation.isAssignableFrom(baArg.type)) {
+                
+                val biArg = serializePathArgument(baArg,previousQName);
+                previousQName = biArg.nodeType;
+                components.add(biArg);
+                qnamePath.add(biArg.nodeType);
+                val immutableList = ImmutableList.copyOf(qnamePath);
+                codecRegistry.putPathToClass(immutableList,baArg.type);
+                if(previousAugmentation !== null) {
+                    updateAugmentationInjection(baArg.type,immutableList,previousAugmentation)
+                }
+                
+                previousAugmentation = null;
+            } else {
+                previousQName = resolveQname(baArg.type);
+                previousAugmentation = baArg.type;
+            }
         }
         return new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(components);
+    }
+    
+    def updateAugmentationInjection(Class<? extends DataObject> class1, ImmutableList<QName> list, Class<?> augmentation) {
+        if(classToPreviousAugment.get(class1) == null) {
+            classToPreviousAugment.put(class1,new ConcurrentHashMap());
+        }
+        classToPreviousAugment.get(class1).put(list,augmentation);
     }
     
     private def dispatch PathArgument serializePathArgument(Item argument, QName previousQname) {
