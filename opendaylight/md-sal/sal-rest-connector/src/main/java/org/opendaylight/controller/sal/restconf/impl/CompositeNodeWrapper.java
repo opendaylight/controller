@@ -26,11 +26,11 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     private URI namespace;
     private QName name;
     private List<NodeWrapper<?>> values = new ArrayList<>();
-    
+
     public CompositeNodeWrapper(String localName) {
         this.localName = Preconditions.checkNotNull(localName);
     }
-    
+
     public CompositeNodeWrapper(URI namespace, String localName) {
         this(localName);
         this.namespace = namespace;
@@ -80,19 +80,18 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     }
 
     @Override
-    public CompositeNode unwrap(CompositeNode parent) {
+    public CompositeNode unwrap() {
         if (compositeNode == null) {
             if (name == null) {
                 Preconditions.checkNotNull(namespace);
                 name = new QName(namespace, localName);
             }
-            compositeNode = NodeFactory.createMutableCompositeNode(name, parent, new ArrayList<Node<?>>(), null, null);
             
             List<Node<?>> nodeValues = new ArrayList<>();
             for (NodeWrapper<?> nodeWrapper : values) {
-                nodeValues.add(nodeWrapper.unwrap(compositeNode));
+                nodeValues.add(nodeWrapper.unwrap());
             }
-            compositeNode.setValue(nodeValues);
+            compositeNode = NodeFactory.createMutableCompositeNode(name, null, nodeValues, null, null);
             
             values = null;
             namespace = null;
@@ -104,132 +103,132 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
 
     @Override
     public QName getNodeType() {
-        return unwrap(null).getNodeType();
+        return unwrap().getNodeType();
     }
 
     @Override
     public CompositeNode getParent() {
-        return unwrap(null).getParent();
+        return unwrap().getParent();
     }
 
     @Override
     public List<Node<?>> getValue() {
-        return unwrap(null).getValue();
+        return unwrap().getValue();
     }
 
     @Override
     public ModifyAction getModificationAction() {
-        return unwrap(null).getModificationAction();
+        return unwrap().getModificationAction();
     }
 
     @Override
     public List<Node<?>> getChildren() {
-        return unwrap(null).getChildren();
+        return unwrap().getChildren();
     }
 
     @Override
     public List<CompositeNode> getCompositesByName(QName children) {
-        return unwrap(null).getCompositesByName(children);
+        return unwrap().getCompositesByName(children);
     }
 
     @Override
     public List<CompositeNode> getCompositesByName(String children) {
-        return unwrap(null).getCompositesByName(children);
+        return unwrap().getCompositesByName(children);
     }
 
     @Override
     public List<SimpleNode<?>> getSimpleNodesByName(QName children) {
-        return unwrap(null).getSimpleNodesByName(children);
+        return unwrap().getSimpleNodesByName(children);
     }
 
     @Override
     public List<SimpleNode<?>> getSimpleNodesByName(String children) {
-        return unwrap(null).getSimpleNodesByName(children);
+        return unwrap().getSimpleNodesByName(children);
     }
 
     @Override
     public CompositeNode getFirstCompositeByName(QName container) {
-        return unwrap(null).getFirstCompositeByName(container);
+        return unwrap().getFirstCompositeByName(container);
     }
 
     @Override
     public SimpleNode<?> getFirstSimpleByName(QName leaf) {
-        return unwrap(null).getFirstSimpleByName(leaf);
+        return unwrap().getFirstSimpleByName(leaf);
     }
 
     @Override
     public MutableCompositeNode asMutable() {
-        return unwrap(null).asMutable();
+        return unwrap().asMutable();
     }
 
     @Override
     public QName getKey() {
-        return unwrap(null).getKey();
+        return unwrap().getKey();
     }
 
     @Override
     public List<Node<?>> setValue(List<Node<?>> value) {
-        return unwrap(null).setValue(value);
+        return unwrap().setValue(value);
     }
 
     @Override
     public int size() {
-        return unwrap(null).size();
+        return unwrap().size();
     }
 
     @Override
     public boolean isEmpty() {
-        return unwrap(null).isEmpty();
+        return unwrap().isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return unwrap(null).containsKey(key);
+        return unwrap().containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return unwrap(null).containsValue(value);
+        return unwrap().containsValue(value);
     }
 
     @Override
     public List<Node<?>> get(Object key) {
-        return unwrap(null).get(key);
+        return unwrap().get(key);
     }
 
     @Override
     public List<Node<?>> put(QName key, List<Node<?>> value) {
-        return unwrap(null).put(key, value);
+        return unwrap().put(key, value);
     }
 
     @Override
     public List<Node<?>> remove(Object key) {
-        return unwrap(null).remove(key);
+        return unwrap().remove(key);
     }
 
     @Override
     public void putAll(Map<? extends QName, ? extends List<Node<?>>> m) {
-        unwrap(null).putAll(m);
+        unwrap().putAll(m);
     }
 
     @Override
     public void clear() {
-        unwrap(null).clear();
+        unwrap().clear();
     }
 
     @Override
     public Set<QName> keySet() {
-        return unwrap(null).keySet();
+        return unwrap().keySet();
     }
 
     @Override
     public Collection<List<Node<?>>> values() {
-        return unwrap(null).values();
+        return unwrap().values();
     }
 
     @Override
     public Set<java.util.Map.Entry<QName, List<Node<?>>>> entrySet() {
-        return unwrap(null).entrySet();
+        return unwrap().entrySet();
     }
 
 }
