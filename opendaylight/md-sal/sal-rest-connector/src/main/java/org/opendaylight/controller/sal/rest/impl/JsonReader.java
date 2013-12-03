@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 
 import com.google.common.collect.Lists;
@@ -69,7 +70,7 @@ class JsonReader {
             }
         } else if (childType.isJsonArray()) {
             if (childType.getAsJsonArray().size() == 1 && childType.getAsJsonArray().get(0).isJsonNull()) {
-                parent.addValue(new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), null));
+                parent.addValue(new EmptyNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName)));
 
             } else {
                 for (JsonElement childOfChildType : childType.getAsJsonArray()) {

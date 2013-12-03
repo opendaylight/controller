@@ -14,8 +14,10 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
+import org.opendaylight.yangtools.yang.data.api.Node;
 
 public class XmlReader {
 
@@ -121,7 +123,7 @@ public class XmlReader {
         return false;
     }
 
-    private SimpleNodeWrapper resolveSimpleNodeFromStartElement(final StartElement startElement)
+    private NodeWrapper<? extends Node<?>> resolveSimpleNodeFromStartElement(final StartElement startElement)
             throws XMLStreamException {
         checkArgument(startElement != null, "Start Element cannot be NULL!");
         String data = null;
@@ -141,7 +143,9 @@ public class XmlReader {
                 }
             }
         }
-
+        if(data == null) {
+            return new EmptyNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement));
+        }
         return new SimpleNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement), data);
     }
 

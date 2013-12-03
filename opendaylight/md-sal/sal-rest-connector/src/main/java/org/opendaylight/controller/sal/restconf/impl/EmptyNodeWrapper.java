@@ -1,78 +1,86 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import java.net.URI;
+import java.util.Collections;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 import com.google.common.base.Preconditions;
 
-public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<Object> {
+public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> {
     
-    private SimpleNode<?> simpleNode;
+    private Node<?> unwrapped;
     
     private String localName;
-    private Object value;
     private URI namespace;
     private QName name;
 
-    public SimpleNodeWrapper(String localName, Object value) {
-        this.localName = Preconditions.checkNotNull(localName);
-        this.value = value;
+    private boolean composite;
+
+    public boolean isComposite() {
+        return composite;
     }
     
-    public SimpleNodeWrapper(URI namespace, String localName, String value) {
-        this(localName, value);
+    public void setComposite(boolean composite) {
+        this.composite = composite;
+    }
+    
+    public EmptyNodeWrapper(URI namespace, String localName) {
+        this.localName = Preconditions.checkNotNull(localName);
         this.namespace = namespace;
     }
     
     @Override
     public void setQname(QName name) {
-        Preconditions.checkState(simpleNode == null, "Cannot change the object, due to data inconsistencies.");
+        Preconditions.checkState(unwrapped == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
     
     @Override
     public String getLocalName() {
-        if (simpleNode != null) {
-            return simpleNode.getNodeType().getLocalName();
+        if (unwrapped != null) {
+            return unwrapped.getNodeType().getLocalName();
         }
         return localName;
     }
     
     @Override
     public URI getNamespace() {
-        if (simpleNode != null) {
-            return simpleNode.getNodeType().getNamespace();
+        if (unwrapped != null) {
+            return unwrapped.getNodeType().getNamespace();
         }
         return namespace;
     }
 
     @Override
     public void setNamespace(URI namespace) {
-        Preconditions.checkState(simpleNode == null, "Cannot change the object, due to data inconsistencies.");
+        Preconditions.checkState(unwrapped == null, "Cannot change the object, due to data inconsistencies.");
         this.namespace = namespace;
     }
 
     @Override
-    public SimpleNode<Object> unwrap() {
-        if (simpleNode == null) {
+    public Node<?> unwrap() {
+        if (unwrapped == null) {
             if (name == null) {
                 Preconditions.checkNotNull(namespace);
                 name = new QName(namespace, localName);
             }
-            simpleNode = NodeFactory.createImmutableSimpleNode(name, null, value);
-            
-            value = null;
+            if(composite) {
+                unwrapped = NodeFactory.createImmutableCompositeNode(name, null, Collections.<Node<?>>emptyList(),null);
+            } else {
+                unwrapped = NodeFactory.createImmutableSimpleNode(name, null, null);
+            }
             namespace = null;
             localName = null;
             name = null;
         }
-        return (SimpleNode<Object>) simpleNode;
+        return unwrapped;
     }
 
     @Override
@@ -86,18 +94,8 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public Object getValue() {
-        return unwrap().getValue();
-    }
-
-    @Override
-    public ModifyAction getModificationAction() {
-        return unwrap().getModificationAction();
-    }
-
-    @Override
-    public MutableSimpleNode<Object> asMutable() {
-        return unwrap().asMutable();
+    public Void getValue() {
+        return null;
     }
 
     @Override
@@ -106,10 +104,8 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public Object setValue(Object value) {
-        return unwrap().setValue(value);
+    public Void setValue(Void value) {
+        return null;
     }
-    
-
 
 }
