@@ -132,8 +132,8 @@ module opendaylight-meter-types {
         
         container meter-band-headers {
             list meter-band-header {
-                key "order";
-                leaf order {
+                key "band-id";
+                leaf band-id {
                     type int32;
                 }
                 
@@ -184,8 +184,8 @@ module opendaylight-meter-types {
         
         container meter-band-stats {
             list band-stat {
-                key "order";
-                leaf order {
+                key "band-id";
+                leaf band-id {
                     type int32;
                 }
             
@@ -230,7 +230,6 @@ module opendaylight-meter-types {
     grouping meter-stats-config-request {
         list meter-stats {
             key "meter-id";         
-            
             leaf meter-id {
                 type int32;
             }           
@@ -239,21 +238,14 @@ module opendaylight-meter-types {
     
     grouping meter-statistics-reply {
         list meter-stats {
-            key "meter-stats-order";
-            leaf meter-stats-order {
-                type int32;
-            }
+            key "meter-id";
             uses meter-statistics;
         }
     }
     
     grouping meter-config-stats-reply {
         list meter-config-stats {
-            key "meter-config-order";
-            leaf meter-config-order {
-                type int32;
-            }
-            
+            key "meter-id";
             uses meter;
         } 
     }
