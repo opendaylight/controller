@@ -27,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatch;
@@ -343,7 +344,7 @@ public class FRMUtil {
 
             else if (curInstruction instanceof MeterCase) {
 
-                String meter = ((MeterCase) curInstruction).getMeter().getMeter();
+                MeterId meter = ((MeterCase) curInstruction).getMeter().getMeterId();
                 if (meter != null && !isValidMeter(meter)) {
                     logger.error("Meter Id is not valid");
                     return false;
@@ -355,7 +356,7 @@ public class FRMUtil {
         return true;
     }
 
-    public static boolean isValidMeter(String meter) {
+    public static boolean isValidMeter(MeterId meter) {
         // TODO
         return true;
     }

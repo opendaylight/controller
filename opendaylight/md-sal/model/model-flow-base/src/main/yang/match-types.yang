@@ -91,6 +91,11 @@ module opendaylight-match-types {
             description "IP ECN (2 bits in ToS field).";
             type uint8; 
         }
+        
+        leaf ip-proto {		
+           description "IP Proto (IPv4 or IPv6 Protocol Number).";		
+	       type inet:ip-version; 		
+		}
     } 
     
     grouping "ipv4-match-fields" {

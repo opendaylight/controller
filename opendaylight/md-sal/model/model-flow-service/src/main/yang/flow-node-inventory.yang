@@ -7,6 +7,10 @@ module flow-node-inventory {
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-port-types {prefix port;revision-date "2013-09-25";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import opendaylight-table-types {prefix table;revision-date "2013-10-26";}
+    import opendaylight-flow-types {prefix flow;revision-date "2013-10-26";}
+    import opendaylight-group-types {prefix group;revision-date "2013-10-18";}
+    import opendaylight-meter-types {prefix meter;revision-date "2013-09-18";}
     
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
@@ -34,9 +38,37 @@ module flow-node-inventory {
         }
     }
 
-    grouping table {
+    typedef flow-id {
+        type uint32; // Note: This doesn't really belong here, and not sure if unint32 is right
+    }
 
-
+    grouping tables {
+        list table {
+            key "id"; 
+    
+            leaf id {
+                    type uint8;
+            }            
+    
+            uses table:table-features;
+    
+            list flow {
+                key "id"; 
+    
+                leaf id {
+                    type flow-id;
+                }           
+    
+                uses flow:flow;
+            }
+        }
+    }
+    
+    grouping meters {
+        list meter {
+            key "meter-id";
+            uses meter:meter;
+        }
     }
 
     grouping flow-node {
@@ -57,16 +89,10 @@ module flow-node-inventory {
             type string;
         }
 
-        container tables {
-            uses feature;
-            list table {
-                uses table;
-            }
-        }
-        
-        container group-tables {
-            uses feature;
-        }
+        uses tables;
+        uses group:groups;
+        uses meters;
+        // TODO: ports
         
         container supported-match-types {
             list match-type {
