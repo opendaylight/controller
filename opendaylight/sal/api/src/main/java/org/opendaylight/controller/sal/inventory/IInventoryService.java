@@ -10,6 +10,7 @@
 package org.opendaylight.controller.sal.inventory;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.core.Node;
@@ -28,6 +29,13 @@ public interface IInventoryService {
      */
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps();
 
+    /**
+     * The method retrieves all the configured nodes that are not connected to
+     * the controller
+     *
+     * @return Set of {@link org.opendaylight.controller.sal.core.Node}
+     */
+    public Set<Node> getConfiguredNotConnectedNodes();
     /**
      * The method retrieve all the existing nodeConnectors and their properties
      *
