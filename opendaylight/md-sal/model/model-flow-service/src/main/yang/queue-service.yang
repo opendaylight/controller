@@ -10,12 +10,7 @@ module sal-queue {
         description "Initial revision of queue service";
     }        
     
-    grouping node-queue {
-        uses "inv:node-context-ref";
-        
-        uses queue-type:queue-packet;
-    }
-
+   
      
     rpc get-queue {
         output {
@@ -23,6 +18,11 @@ module sal-queue {
         }
     }  
     
+    grouping node-queue {
+        uses "inv:node-context-ref";
+     
+        uses queue-type:queue-list;
+    }
     notification queue-get-config-reply {
         uses node-queue;
     }

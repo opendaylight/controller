@@ -9,50 +9,35 @@ module opendaylight-queue-types {
         description "Initial revision of Queue Inventory model";
     }
     
-    typedef queue-properties {
-        type enumeration {
-            enum min_rate;
-            enum max_rate;
+     grouping queue-properties {
+        leaf queue-property {
+            type enumeration {
+                 enum min_rate;
+            	enum max_rate;
+            }
         }
     }
-   
     
-    grouping common-queue {
-
-        leaf property {
+    grouping property-list{
+ 	  
+        list property {
+            key "order";
+            leaf order {
+                type int32;
+            }
+            leaf property {
             type uint16;
             description "One of OFPQT_.";  
+        }             
+        leaf rate {
+            type uint16;
+            description "OFPQT_, len: 16";  
         }
-           
-    }
-    
+        }
+ 	}
      
-    grouping queue-prop-min-rate	{
-		
-		uses common-queue;
-		
-        leaf rate {
-            type uint16;
-            description "OFPQT_MIN, len: 16";  
-        }
-           
-    }
-    
-    
-      
-    grouping queue-prop-max-rate	{
-		
-		uses common-queue;
-		
-        leaf rate {
-            type uint16;
-            description "OFPQT_MAX, len: 16";  
-        }
-           
-    }
      grouping queue-packet	{
-		
-		
+				
         leaf queue-id {
             type uint32;
             description "id for the specific queue.";  
@@ -62,16 +47,35 @@ module opendaylight-queue-types {
             type uint32;
             description "Port this queue is attached to.";  
         }
-        uses common-queue;
+       uses property-list;
+       
     }
-    
-   grouping queue-config-request 
-   {
-           leaf port {
-            type uint32;
-            description "Port to be queried.";  
-        }
         
-        }
+  
+   grouping get-queue-config-request 
+   {
+          list port {
+            key "order";
+            leaf order {
+                type int32;
+            }
+         }
+        
  }
+ 
+  grouping queue-list 
+   {
+   	   leaf port {
+            type uint32;
+            description "Port this queue is attached to.";  
+            }
+            list queue {
+                key "order";
+                leaf order {
+                    type int32;
+                }
+            uses queue-packet;
+          }
+    }
+  
 }

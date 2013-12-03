@@ -17,7 +17,7 @@ module queue-management {
             type inv:node-connector-ref;
            
         }
-        uses queue:queue-config-request;
+        uses queue:get-queue-config-request;
     }   
      
     container queues {
