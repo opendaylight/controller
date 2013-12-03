@@ -847,6 +847,17 @@ public class ForwardingRulesManager implements
         }
 
         if (add) {
+            // there may be an already existing entry.
+            // remove it before adding the new one.
+            // This is necessary since we have observed that in some cases
+            // Infinispan does aggregation for operations (eg:- remove and then put a different value)
+            // related to the same key within the same transaction.
+            // Need this defensive code as the new FlowEntryInstall may be different
+            // than the old one even though the equals method returns true. This is because
+            // the equals method does not take into account the action list.
+            if(nodeIndeces.contains(flowEntries)) {
+                nodeIndeces.remove(flowEntries);
+            }
             nodeIndeces.add(flowEntries);
         } else {
             nodeIndeces.remove(flowEntries);
@@ -881,6 +892,11 @@ public class ForwardingRulesManager implements
         }
 
         if (add) {
+            // same comments in the similar code section in
+            // updateNodeFlowsDB method apply here too
+            if(indices.contains(flowEntries)) {
+                indices.remove(flowEntries);
+            }
             indices.add(flowEntries);
         } else {
             indices.remove(flowEntries);
@@ -1215,7 +1231,7 @@ public class ForwardingRulesManager implements
         if (policyName != null && !policyName.trim().isEmpty()) {
             for (Map.Entry<FlowEntry, FlowEntry> entry : this.originalSwView.entrySet()) {
                 if (policyName.equals(entry.getKey().getGroupName())) {
-                    list.add(entry.getKey().clone());
+                    list.add(entry.getValue().clone());
                 }
             }
         }
@@ -1228,7 +1244,7 @@ public class ForwardingRulesManager implements
         if (policyName != null && !policyName.trim().isEmpty()) {
             for (Map.Entry<FlowEntryInstall, FlowEntryInstall> entry : this.installedSwView.entrySet()) {
                 if (policyName.equals(entry.getKey().getGroupName())) {
-                    list.add(entry.getKey().getInstall().clone());
+                    list.add(entry.getValue().getInstall().clone());
                 }
             }
         }
@@ -2610,7 +2626,7 @@ public class ForwardingRulesManager implements
 
         // replay the installedSwView data structure to populate
         // node flows and group flows
-        for (FlowEntryInstall fei : installedSwView.keySet()) {
+        for (FlowEntryInstall fei : installedSwView.values()) {
             pendingEvents.offer(new UpdateIndexDBs(fei, true));
         }
 
@@ -3031,7 +3047,7 @@ public class ForwardingRulesManager implements
          * Streamline the updates for the per node and per group index databases
          */
         if (cacheName.equals(INSTALLED_SW_VIEW_CACHE)) {
-            pendingEvents.offer(new UpdateIndexDBs((FlowEntryInstall)key, true));
+            pendingEvents.offer(new UpdateIndexDBs((FlowEntryInstall)new_value, true));
         }
 
         if (originLocal) {
@@ -3101,7 +3117,7 @@ public class ForwardingRulesManager implements
         if (node != null) {
             for (Map.Entry<FlowEntry, FlowEntry> entry : this.originalSwView.entrySet()) {
                 if (node.equals(entry.getKey().getNode())) {
-                    list.add(entry.getKey().clone());
+                    list.add(entry.getValue().clone());
                 }
             }
         }
