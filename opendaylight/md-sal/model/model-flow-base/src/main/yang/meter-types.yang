@@ -11,7 +11,10 @@ module opendaylight-meter-types {
     }
 
     typedef meter-id {
-            type uint32;
+        type uint32;
+    }
+    typedef band-id {
+    	type uint32;
     }
     
     typedef meter-flags {        
@@ -132,9 +135,9 @@ module opendaylight-meter-types {
         
         container meter-band-headers {
             list meter-band-header {
-                key "order";
-                leaf order {
-                    type int32;
+                key "band-id";
+                leaf band-id {
+                    type band-id;
                 }
                 
                 container meter-band-types {
@@ -158,7 +161,7 @@ module opendaylight-meter-types {
     grouping meter-statistics {
             
         leaf meter-id {
-            type int32;
+            type meter-id;
         }
         
         leaf flow-count {
@@ -184,9 +187,9 @@ module opendaylight-meter-types {
         
         container meter-band-stats {
             list band-stat {
-                key "order";
-                leaf order {
-                    type int32;
+                key "band-id";
+                leaf band-id {
+                    type band-id;
                 }
             
                 leaf packet-band-count {
@@ -230,30 +233,22 @@ module opendaylight-meter-types {
     grouping meter-stats-config-request {
         list meter-stats {
             key "meter-id";         
-            
             leaf meter-id {
-                type int32;
+                type meter-id;
             }           
         }
     }
     
     grouping meter-statistics-reply {
         list meter-stats {
-            key "meter-stats-order";
-            leaf meter-stats-order {
-                type int32;
-            }
+            key "meter-id";
             uses meter-statistics;
         }
     }
     
     grouping meter-config-stats-reply {
         list meter-config-stats {
-            key "meter-config-order";
-            leaf meter-config-order {
-                type int32;
-            }
-            
+            key "meter-id";
             uses meter;
         } 
     }

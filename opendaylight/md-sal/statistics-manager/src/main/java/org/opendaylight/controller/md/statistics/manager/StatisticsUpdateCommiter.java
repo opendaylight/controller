@@ -146,7 +146,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         
         //Update augmented data
         nodeData.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
-        
+
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
         it.putOperationalData(refValue, nodeData.build());
         it.commit();
@@ -168,7 +168,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         DataModificationTransaction it = this.statisticsManager.startChange();
         NodeKey key = new NodeKey(notification.getId());
         NodeRef ref = getNodeRef(key);
-        
+
         final NodeBuilder nodeData = new NodeBuilder(); 
         nodeData.setKey(key);
         
@@ -176,13 +176,21 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         GroupStatisticsBuilder stats = new GroupStatisticsBuilder();
         stats.setGroupStats(notification.getGroupStats());
         groupStats.setGroupStatistics(stats.build());
-        
+                
         //Update augmented data
         nodeData.addAugmentation(NodeGroupStatistics.class, groupStats.build());
-        
+
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
         it.putOperationalData(refValue, nodeData.build());
         it.commit();
+
+//        for (GroupStats groupstat : notification.getGroupStats()) {
+//        
+//            GroupStatsKey groupKey = groupstat.getKey();
+//            InstanceIdentifier<? extends Object> id = InstanceIdentifier.builder(Nodes.class).child(Node.class, key).augmentation(NodeGroupStatistics.class).child(GroupStatistics.class).child(GroupStats.class,groupKey).toInstance();
+//            it.putOperationalData(id, groupstat);
+//            it.commit();
+//        }
     }
     
     @Override
