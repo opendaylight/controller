@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_21b622fb",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/threads/IOThread.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-03T14:41:09Z",
+      "side": 1,
+      "message": "Why not set a special name/prefix to the IOThread objects? (by using setName)\nThat way, when taking a thread dump it will be much easier to spot them.",
+      "revId": "187136e034c74172d7f9ba5d05af5b3f84b47c20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
