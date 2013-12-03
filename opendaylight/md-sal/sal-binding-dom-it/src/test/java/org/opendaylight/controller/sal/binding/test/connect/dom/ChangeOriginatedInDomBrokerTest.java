@@ -17,14 +17,23 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.CommitHandlersTransactions;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DecNwTtlCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.dec.nw.ttl._case.DecNwTtl;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.dec.nw.ttl._case.DecNwTtlBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.mpls.action._case.PopMplsActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpVersion;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.Flows;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
@@ -38,7 +47,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -54,13 +66,16 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
     private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
-    private static final long FLOW_ID = 1234;
-    private static final String NODE_ID = "node:1";
-    
-    private DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modificationCapture;
+    private static final QName TABLE_ID_QNAME = QName.create(Table.QNAME, "id");
 
+    private static final String NODE_ID = "node:1";
+    private static final FlowId FLOW_ID = new FlowId(1234L);
+    private static final Short TABLE_ID = Short.valueOf((short) 0);
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
+    private static final FlowKey FLOW_KEY = new FlowKey(FLOW_ID);
+
+    private DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modificationCapture;
 
     private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
             NODE_ID);
@@ -75,34 +90,41 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             .toInstance();
     private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
 
-    private static final FlowKey FLOW_KEY = new FlowKey(FLOW_ID, NODE_REF);
-
     private static final Map<QName, Object> FLOW_KEY_BI = //
-    ImmutableMap.<QName, Object> of(FLOW_ID_QNAME, FLOW_ID, FLOW_NODE_QNAME, NODE_INSTANCE_ID_BI);
+    ImmutableMap.<QName, Object> of(FLOW_ID_QNAME, FLOW_ID.getValue());
+
+    private static final Map<QName, Object> TABLE_KEY_BI = //
+    ImmutableMap.<QName, Object> of(TABLE_ID_QNAME, TABLE_ID);;
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier FLOW_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Flows.QNAME) //
+            .node(Nodes.QNAME) //
+            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
+            .nodeWithKey(Table.QNAME, TABLE_KEY_BI) //
             .nodeWithKey(Flow.QNAME, FLOW_KEY_BI) //
             .toInstance();
-    
-    private static final InstanceIdentifier<Flows> FLOWS_PATH_BA = //
-            InstanceIdentifier.builder(Flows.class) //
-                    .toInstance();
-            
-    
+    private static final TableKey TABLE_KEY_BA = new TableKey((short) 0);
+
+    private static final InstanceIdentifier<Flow> FLOWS_PATH_BA = //
+    InstanceIdentifier.builder(NODE_INSTANCE_ID_BA) //
+            .augmentation(FlowCapableNode.class) //
+            .child(Table.class, TABLE_KEY_BA) //
+            .child(Flow.class) //
+            .toInstance();
+
     private static final InstanceIdentifier<Flow> FLOW_INSTANCE_ID_BA = //
-    InstanceIdentifier.builder(Flows.class) //
+    InstanceIdentifier.builder(FLOWS_PATH_BA.firstIdentifierOf(Table.class)) //
             .child(Flow.class, FLOW_KEY) //
             .toInstance();
-    
+
     @Test
     public void simpleModifyOperation() throws Exception {
+
         assertNull(biDataService.readConfigurationData(FLOW_INSTANCE_ID_BI));
-        
+
         registerCommitHandler();
-        
-        CompositeNode domflow = createXmlFlow();
+
+        CompositeNode domflow = createTestFlow();
         DataModificationTransaction biTransaction = biDataService.beginTransaction();
         biTransaction.putConfigurationData(FLOW_INSTANCE_ID_BI, domflow);
         RpcResult<TransactionStatus> biResult = biTransaction.commit().get();
@@ -112,59 +134,78 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
         assertNotNull(flow);
         assertNotNull(flow.getMatch());
         assertEquals(TransactionStatus.COMMITED, biResult.getResult());
-        
-    }
 
-    
+    }
 
     private void registerCommitHandler() {
         DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> flowTestCommitHandler = new DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>() {
-            
-            
+
             @Override
             public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> requestCommit(
                     DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
                 modificationCapture = modification;
                 return CommitHandlersTransactions.allwaysSuccessfulTransaction(modification);
             }
-            
-            
+
         };
-        Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> registration = baDataService.registerCommitHandler(FLOWS_PATH_BA, flowTestCommitHandler);
+        Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> registration = baDataService
+                .registerCommitHandler(FLOWS_PATH_BA, flowTestCommitHandler);
         assertNotNull(registration);
     }
-    
-    private CompositeNode createXmlFlow() {
-        
+
+    private CompositeNode createTestFlow() {
         FlowBuilder flow = new FlowBuilder();
-        MatchBuilder match = new MatchBuilder();
-        VlanMatchBuilder vlanBuilder = new VlanMatchBuilder();
-        VlanIdBuilder vlanIdBuilder = new VlanIdBuilder();
-        VlanId vlanId = new VlanId(10);
-        vlanBuilder.setVlanId(vlanIdBuilder.setVlanId(vlanId).build());
-        match.setVlanMatch(vlanBuilder.build());
-
         flow.setKey(FLOW_KEY);
+        Short tableId = 0;
+        flow.setTableId(tableId);
+        MatchBuilder match = new MatchBuilder();
+        match.setIpMatch(new IpMatchBuilder().setIpProto(IpVersion.Ipv4).build());
+        Ipv4MatchBuilder ipv4Match = new Ipv4MatchBuilder();
+        // ipv4Match.setIpv4Destination(new Ipv4Prefix(cliInput.get(4)));
+        Ipv4Prefix prefix = new Ipv4Prefix("10.0.0.1/24");
+        ipv4Match.setIpv4Destination(prefix);
+        Ipv4Match i4m = ipv4Match.build();
+        match.setLayer3Match(i4m);
         flow.setMatch(match.build());
-        flow.setNode(NODE_REF);
-        InstructionsBuilder instructions = new InstructionsBuilder();
-        InstructionBuilder instruction = new InstructionBuilder();
-        instruction.setOrder(10);
-        ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
-        List<Action> actionList = new ArrayList<>();
-        PopMplsActionBuilder popMplsAction = new PopMplsActionBuilder();
-        popMplsAction.setEthernetType(34);
-        actionList.add(new ActionBuilder().setAction(new PopMplsActionCaseBuilder().setPopMplsAction(popMplsAction.build()).build()).setOrder(10).build());
-
-        applyActions.setAction(actionList );
-
-        instruction.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(applyActions.build()).build());
 
 
-        List<Instruction> instructionList = Collections.<Instruction>singletonList(instruction.build());
-        instructions.setInstruction(instructionList );
-        flow.setInstructions(instructions.build());
 
+        // Create a drop action
+        /*
+         * Note: We are mishandling drop actions DropAction dropAction = new
+         * DropActionBuilder().build(); ActionBuilder ab = new ActionBuilder();
+         * ab.setAction(dropAction);
+         */
+
+        DecNwTtl decNwTtl = new DecNwTtlBuilder().build();
+        ActionBuilder ab = new ActionBuilder();
+        ActionKey actionKey = new ActionKey(0);
+        ab.setKey(actionKey );
+        ab.setAction(new DecNwTtlCaseBuilder().setDecNwTtl(decNwTtl).build());
+
+        // Add our drop action to a list
+        List<Action> actionList = new ArrayList<Action>();
+        actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        InstructionBuilder ib = new InstructionBuilder();
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        // Put our Instruction in a list of Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(ib.build());
+        isb.setInstruction(instructions);
+
+        // Add our instructions to the flow
+        flow.setInstructions(isb.build());
+
+        flow.setPriority(2);
+        flow.setFlowName("Foo Name");
         CompositeNode domFlow = mappingService.toDataDom(flow.build());
         return domFlow;
     }
