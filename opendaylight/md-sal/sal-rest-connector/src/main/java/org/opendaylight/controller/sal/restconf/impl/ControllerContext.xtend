@@ -27,6 +27,9 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
+import org.opendaylight.yangtools.yang.model.api.SchemaNode
+import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
 
 import static com.google.common.base.Preconditions.*
 
@@ -40,8 +43,7 @@ class ControllerContext implements SchemaServiceListener {
 
     private val BiMap<URI, String> uriToModuleName = HashBiMap.create();
     private val Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
-    private val Map<QName,RpcDefinition> qnameToRpc = new ConcurrentHashMap();
-    
+    private val Map<QName, RpcDefinition> qnameToRpc = new ConcurrentHashMap();
 
     private new() {
         if (INSTANCE !== null) {
@@ -52,7 +54,7 @@ class ControllerContext implements SchemaServiceListener {
     static def getInstance() {
         return INSTANCE
     }
-    
+
     private def void checkPreconditions() {
         if (schemas === null) {
             throw new ResponseException(Response.Status.SERVICE_UNAVAILABLE, RestconfProvider::NOT_INITALIZED_MSG)
@@ -131,7 +133,7 @@ class ControllerContext implements SchemaServiceListener {
     private def dispatch CharSequence toRestconfIdentifier(PathArgument argument, DataSchemaNode node) {
         throw new IllegalArgumentException("Conversion of generic path argument is not supported");
     }
-    
+
     def findModuleByNamespace(URI namespace) {
         checkPreconditions
         var module = uriToModuleName.get(namespace)
@@ -311,24 +313,55 @@ class ControllerContext implements SchemaServiceListener {
             return str;
         }
     }
-    
+
     private def QName toQName(String name) {
         val module = name.toModuleName;
         val node = name.toNodeName;
         val namespace = moduleNameToUri.get(module);
-        return new QName(namespace,null,node);
+        return new QName(namespace, null, node);
     }
-    
+
     def getRpcDefinition(String name) {
         return qnameToRpc.get(name.toQName)
     }
 
     override onGlobalContextUpdated(SchemaContext context) {
         this.schemas = context;
-        for(operation : context.operations) {
-            val qname = new QName(operation.QName.namespace,null,operation.QName.localName);
-            qnameToRpc.put(qname,operation);
+        for (operation : context.operations) {
+            val qname = new QName(operation.QName.namespace, null, operation.QName.localName);
+            qnameToRpc.put(qname, operation);
         }
     }
-    
+
+    /**
+     * Resolve target type from leafref type.
+     * 
+     * According to RFC 6020 referenced element has to be leaf (chapter 9.9).
+     * Therefore if other element is referenced then null value is returned.
+     * 
+     * Currently only cases without path-predicate are supported.
+     * 
+     * @param leafRef
+     * @param schemaNode
+     *            data schema node which contains reference
+     * @return type if leaf is referenced and it is possible to find referenced
+     *         node in schema context. In other cases null value is returned
+     */
+    def LeafSchemaNode resolveTypeFromLeafref(LeafrefTypeDefinition leafRef, DataSchemaNode schemaNode) {
+        val xPath = leafRef.getPathStatement();
+        val module = SchemaContextUtil.findParentModule(schemas, schemaNode);
+
+        var SchemaNode foundSchemaNode
+        if (xPath.isAbsolute()) {
+            foundSchemaNode = SchemaContextUtil.findDataSchemaNode(schemas, module, xPath);
+        } else {
+            foundSchemaNode = SchemaContextUtil.findDataSchemaNodeForRelativeXPath(schemas, module, schemaNode, xPath);
+        }
+
+        if (foundSchemaNode instanceof LeafSchemaNode) {
+            return foundSchemaNode as LeafSchemaNode;
+        }
+
+        return null;
+    }
 }
