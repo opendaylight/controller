@@ -77,10 +77,9 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         
         EventLoopGroup bossGroup = getBossThreadGroupDependency();
         EventLoopGroup workerGroup = getWorkerThreadGroupDependency();
-        Optional<SSLContext> maybeContext = Optional.absent();
         NetconfClientDispatcher dispatcher = null;
         if(getTcpOnly()) {
-            dispatcher = new NetconfClientDispatcher(maybeContext , bossGroup, workerGroup);
+            dispatcher = new NetconfClientDispatcher( bossGroup, workerGroup);
         } else {
             AuthenticationHandler authHandler = new LoginPassword(getUsername(),getPassword());
             dispatcher = new NetconfSshClientDispatcher(authHandler , bossGroup, workerGroup);

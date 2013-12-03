@@ -30,15 +30,15 @@ public class NetconfSSHActivator implements BundleActivator{
 
     private NetconfSSHServer server;
     private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHActivator.class);
+    private static final String EXCEPTION_MESSAGE = "Netconf ssh bridge is not available.";
 
     @Override
     public void start(BundleContext context) throws Exception {
 
         logger.trace("Starting netconf SSH  bridge.");
 
-        Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context);
-        InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                "TCP is not configured, netconf ssh bridge is not available.");
+        Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context,EXCEPTION_MESSAGE);
+        InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,EXCEPTION_MESSAGE);
 
         if (sshSocketAddressOptional.isPresent()){
             server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress);

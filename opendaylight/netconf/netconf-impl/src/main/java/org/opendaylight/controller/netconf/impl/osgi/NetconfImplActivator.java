@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import com.google.common.base.Optional;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
@@ -20,10 +21,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.net.ssl.SSLContext;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
 
 public class NetconfImplActivator implements BundleActivator {
 
@@ -55,8 +52,8 @@ public class NetconfImplActivator implements BundleActivator {
 
         eventLoopGroup = new NioEventLoopGroup();
 
-        NetconfServerDispatcher.ServerSslChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerSslChannelInitializer(
-                Optional.<SSLContext>absent(), serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+                serverNegotiatorFactory, listenerFactory);
         dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
         logger.info("Starting TCP netconf server at {}", address);
