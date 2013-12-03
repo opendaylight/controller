@@ -236,4 +236,12 @@ module opendaylight-group-types {
     	uses group-features;
     }
     
+    grouping groups {
+        list group {
+            key "group-id";                  
+        
+            uses group;
+        }
+    }
+    
 }
