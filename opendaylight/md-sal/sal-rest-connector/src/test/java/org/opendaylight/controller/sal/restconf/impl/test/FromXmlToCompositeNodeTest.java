@@ -138,7 +138,7 @@ public class FromXmlToCompositeNodeTest {
         SimpleNode<?> cont11_lf111 = (SimpleNode<?>) cont11.getChildren().get(0);
         assertEquals(nameSpaceCont, cont11_lf111.getNodeType().getNamespace().toString());
         assertEquals("lf111", cont11_lf111.getNodeType().getLocalName());
-        assertEquals("100", cont11_lf111.getValue());
+        assertEquals((short) 100, cont11_lf111.getValue());
         // :lst1_2
 
     }
@@ -251,7 +251,7 @@ public class FromXmlToCompositeNodeTest {
         SimpleNode<?> cont1_lf11 = (SimpleNode<?>) cont1suf.getChildren().get(0);
         assertEquals(nameSpace, cont1_lf11.getNodeType().getNamespace().toString());
         assertEquals("lf11" + suf, cont1_lf11.getNodeType().getLocalName());
-        assertEquals("100", cont1_lf11.getValue());
+        assertEquals((short) 100, cont1_lf11.getValue());
     }
 
     private CompositeNode compositeContainerFromXml(String xmlPath, boolean dummyNamespaces) {

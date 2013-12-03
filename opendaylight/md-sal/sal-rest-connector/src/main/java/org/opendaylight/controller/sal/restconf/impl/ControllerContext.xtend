@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
 
 import static com.google.common.base.Preconditions.*
+import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
 
 class ControllerContext implements SchemaServiceListener {
 
@@ -288,9 +289,10 @@ class ControllerContext implements SchemaServiceListener {
     private def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {
         checkNotNull(uriValue);
         checkArgument(node instanceof LeafSchemaNode);
-        val decoded = URLDecoder.decode(uriValue);
+        val urlDecoded = URLDecoder.decode(uriValue);
+        val typedef = (node as LeafSchemaNode).type;
+        val decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
         map.put(node.QName, decoded);
-
     }
 
     private def String toModuleName(String str) {

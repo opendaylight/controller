@@ -11,16 +11,16 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 import com.google.common.base.Preconditions;
 
-public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<String> {
+public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<Object> {
     
-    private SimpleNode<String> simpleNode;
+    private SimpleNode<?> simpleNode;
     
     private String localName;
-    private String value;
+    private Object value;
     private URI namespace;
     private QName name;
 
-    public SimpleNodeWrapper(String localName, String value) {
+    public SimpleNodeWrapper(String localName, Object value) {
         this.localName = Preconditions.checkNotNull(localName);
         this.value = value;
     }
@@ -59,7 +59,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public SimpleNode<String> unwrap() {
+    public SimpleNode<Object> unwrap() {
         if (simpleNode == null) {
             if (name == null) {
                 Preconditions.checkNotNull(namespace);
@@ -72,7 +72,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
             localName = null;
             name = null;
         }
-        return simpleNode;
+        return (SimpleNode<Object>) simpleNode;
     }
 
     @Override
@@ -86,7 +86,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public String getValue() {
+    public Object getValue() {
         return unwrap().getValue();
     }
 
@@ -96,7 +96,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public MutableSimpleNode<String> asMutable() {
+    public MutableSimpleNode<Object> asMutable() {
         return unwrap().asMutable();
     }
 
@@ -106,9 +106,10 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public String setValue(String value) {
+    public Object setValue(Object value) {
         return unwrap().setValue(value);
     }
+    
 
 
 }

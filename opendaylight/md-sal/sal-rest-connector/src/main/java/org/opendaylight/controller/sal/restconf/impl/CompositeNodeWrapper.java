@@ -230,5 +230,4 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     public Set<java.util.Map.Entry<QName, List<Node<?>>>> entrySet() {
         return unwrap().entrySet();
     }
-
 }
