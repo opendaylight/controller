@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.utils.IPProtocols;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
@@ -21,24 +23,26 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ClearActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTable;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.WriteActions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 
 public class FRMUtil {
     protected static final Logger logger = LoggerFactory.getLogger(FRMUtil.class);
@@ -46,6 +50,10 @@ public class FRMUtil {
 
     public static enum operation {
         ADD, DELETE, UPDATE, GET
+    };
+
+    private enum EtherIPType {
+        ANY, V4, V6;
     };
 
     public static boolean isNameValid(String name) {
@@ -59,55 +67,134 @@ public class FRMUtil {
     }
 
     public static boolean validateMatch(Flow flow) {
+        EtherIPType etype = EtherIPType.ANY;
+        EtherIPType ipsrctype = EtherIPType.ANY;
+        EtherIPType ipdsttype = EtherIPType.ANY;
+
         Match match = flow.getMatch();
         if (match != null) {
             EthernetMatch ethernetmatch = match.getEthernetMatch();
             IpMatch ipmatch = match.getIpMatch();
+            Layer3Match layer3match = match.getLayer3Match();
             VlanMatch vlanmatch = match.getVlanMatch();
             match.getIcmpv4Match();
 
             if (ethernetmatch != null) {
                 if ((ethernetmatch.getEthernetSource() != null)
-                        && !isL2AddressValid(ethernetmatch.getEthernetSource().toString())) {
+                        && !isL2AddressValid(ethernetmatch.getEthernetSource().getAddress().getValue())) {
 
-                    logger.error("Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                    logger.error("Ethernet source address is not valid. Example: 00:05:b9:7c:81:5f",
                             ethernetmatch.getEthernetSource());
                     return false;
                 }
 
                 if ((ethernetmatch.getEthernetDestination() != null)
-                        && !isL2AddressValid(ethernetmatch.getEthernetDestination().toString())) {
-                    logger.error("Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                        && !isL2AddressValid(ethernetmatch.getEthernetDestination().getAddress().getValue())) {
+                    logger.error("Ethernet destination address is not valid. Example: 00:05:b9:7c:81:5f",
                             ethernetmatch.getEthernetDestination());
                     return false;
                 }
 
                 if (ethernetmatch.getEthernetType() != null) {
-                    int type = Integer.decode(ethernetmatch.getEthernetType().toString());
+                    long type = ethernetmatch.getEthernetType().getType().getValue().longValue();
                     if ((type < 0) || (type > 0xffff)) {
                         logger.error("Ethernet type is not valid");
                         return false;
+                    } else {
+                        if (type == 0x0800) {
+                            etype = EtherIPType.V4;
+                        } else if (type == 0x86dd) {
+                            etype = EtherIPType.V6;
+                        }
+                    }
+
+                }
+            }
+
+            if (layer3match != null) {
+                if (layer3match instanceof Ipv4Match) {
+                    if (((Ipv4Match) layer3match).getIpv4Source() != null) {
+                        if (NetUtils.isIPv4AddressValid(((Ipv4Match) layer3match).getIpv4Source().getValue())) {
+                            ipsrctype = EtherIPType.V4;
+                        } else {
+                            logger.error("IP source address is not valid");
+                            return false;
+                        }
+
+                    } else if (((Ipv4Match) layer3match).getIpv4Destination() != null) {
+                        if (NetUtils.isIPv4AddressValid(((Ipv4Match) layer3match).getIpv4Destination().getValue())) {
+                            ipdsttype = EtherIPType.V4;
+                        } else {
+                            logger.error("IP Destination address is not valid");
+                            return false;
+                        }
+
+                    }
+                } else if (layer3match instanceof Ipv6Match) {
+                    if (((Ipv6Match) layer3match).getIpv6Source() != null) {
+                        if (NetUtils.isIPv6AddressValid(((Ipv6Match) layer3match).getIpv6Source().getValue())) {
+                            ipsrctype = EtherIPType.V6;
+                        } else {
+                            logger.error("IPv6 source address is not valid");
+                            return false;
+                        }
+
+                    } else if (((Ipv6Match) layer3match).getIpv6Destination() != null) {
+                        if (NetUtils.isIPv6AddressValid(((Ipv6Match) layer3match).getIpv6Destination().getValue())) {
+                            ipdsttype = EtherIPType.V6;
+                        } else {
+                            logger.error("IPv6 Destination address is not valid");
+                            return false;
+                        }
+
+                    }
+
+                }
+
+                if (etype != EtherIPType.ANY) {
+                    if ((ipsrctype != EtherIPType.ANY) && (ipsrctype != etype)) {
+                        logger.error("Type mismatch between Ethernet & Src IP");
+                        return false;
+                    }
+                    if ((ipdsttype != EtherIPType.ANY) && (ipdsttype != etype)) {
+                        logger.error("Type mismatch between Ethernet & Dst IP");
+                        return false;
                     }
                 }
-            } else if (ipmatch != null) {
-                if (ipmatch.getIpProtocol() != null && isProtocolValid(ipmatch.getIpProtocol().toString())) {
+                if (ipsrctype != ipdsttype) {
+                    if (!((ipsrctype == EtherIPType.ANY) || (ipdsttype == EtherIPType.ANY))) {
+                        logger.error("IP Src Dest Type mismatch");
+                        return false;
+                    }
+                }
+            }
+
+            if (ipmatch != null) {
+                if (ipmatch.getIpProtocol() != null && !(isProtocolValid(ipmatch.getIpProtocol().toString()))) {
                     logger.error("Protocol is not valid");
                     return false;
                 }
-            } else if (vlanmatch != null) {
-                if (vlanmatch.getVlanId() != null && isVlanIdValid(vlanmatch.getVlanId().toString())) {
+
+            }
+
+            if (vlanmatch != null) {
+                if (vlanmatch.getVlanId() != null
+                        && !(isVlanIdValid(vlanmatch.getVlanId().getVlanId().getValue().toString()))) {
                     logger.error("Vlan ID is not in the range 0 - 4095");
                     return false;
                 }
 
-                if (vlanmatch.getVlanPcp() != null && isVlanPriorityValid(vlanmatch.getVlanPcp().toString())) {
+                if (vlanmatch.getVlanPcp() != null
+                        && !(isVlanPriorityValid(vlanmatch.getVlanPcp().getValue().toString()))) {
                     logger.error("Vlan priority is not in the range 0 - 7");
                     return false;
                 }
             }
+
         }
 
         return true;
+
     }
 
     public static boolean validateActions(List<Action> actions) {
@@ -134,7 +221,24 @@ public class FRMUtil {
                     return false;
                 }
                 if (outputnodeconnector != null) {
-                    // TODO
+                    if (!outputnodeconnector.getValue().equals(NodeConnectorIDType.ALL)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.CONTROLLER)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.HWPATH)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.ONEPK)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.ONEPK2OPENFLOW)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.ONEPK2PCEP)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.OPENFLOW)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.OPENFLOW2ONEPK)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.OPENFLOW2PCEP)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PCEP)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PCEP2ONEPK)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PCEP2OPENFLOW)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PRODUCTION)
+                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.SWSTACK)) {
+                        logger.error("Output Action: NodeConnector Type is not valid");
+                        return false;
+                    }
+
                 }
             } else if (action instanceof PushMplsAction) {
                 Integer ethertype = ((PushMplsAction) action).getEthernetType();
@@ -154,7 +258,7 @@ public class FRMUtil {
                     logger.error("Ether Type is not valid for PushVlanAction");
                     return false;
                 }
-            } else if (action instanceof SetDlDstAction || action instanceof SetDlSrcAction) {
+            } else if (action instanceof SetDlDstAction) {
                 MacAddress address = ((SetDlDstAction) action).getAddress();
                 if (address != null && !isL2AddressValid(address.toString())) {
                     logger.error("SetDlDstAction: Address not valid");
@@ -184,25 +288,26 @@ public class FRMUtil {
                 }
             } else if (action instanceof SetVlanIdAction) {
                 VlanId vlanid = ((SetVlanIdAction) action).getVlanId();
-                if (vlanid != null && !isVlanIdValid(vlanid.toString())) {
-                    logger.error("Vlan ID %s is not in the range 0 - 4095");
+                if (vlanid != null && !isVlanIdValid(vlanid.getValue().toString())) {
+                    logger.error("Vlan ID is not in the range 0 - 4095");
                     return false;
                 }
             } else if (action instanceof SetVlanPcpAction) {
                 VlanPcp vlanpcp = ((SetVlanPcpAction) action).getVlanPcp();
-                if (vlanpcp != null && !isVlanPriorityValid(vlanpcp.toString())) {
-                    logger.error("Vlan priority %s is not in the range 0 - 7");
+                if (vlanpcp != null && !isVlanPriorityValid(vlanpcp.getValue().toString())) {
+                    logger.error("Vlan priority is not in the range 0 - 7");
                     return false;
                 }
             }
         }
         return true;
+
     }
 
     public static boolean validateInstructions(Flow flow) {
         List<Instruction> instructionsList = new ArrayList<>();
         Instructions instructions = flow.getInstructions();
-        if( instructions == null ) {
+        if (instructions == null) {
             return false;
         }
         instructionsList = instructions.getInstruction();
