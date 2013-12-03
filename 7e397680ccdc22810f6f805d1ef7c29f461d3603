@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b6e37a04",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/FRMConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T05:09:28Z",
+      "side": 1,
+      "message": "I know it\u0027s not related to your change, but could you replace tabs in line 34 - 37 with white space, please?",
+      "revId": "7e397680ccdc22810f6f805d1ef7c29f461d3603",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d6e82ee4",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T05:09:28Z",
+      "side": 1,
+      "message": "Please remove trailing white space.",
+      "revId": "7e397680ccdc22810f6f805d1ef7c29f461d3603",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_36a66ac2",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T05:09:28Z",
+      "side": 1,
+      "message": "Please remove if you added this for debugging.",
+      "revId": "7e397680ccdc22810f6f805d1ef7c29f461d3603",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d696ee4b",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T05:09:28Z",
+      "side": 1,
+      "message": "If you commented this if statement out for debugging, please comment this back in.",
+      "revId": "7e397680ccdc22810f6f805d1ef7c29f461d3603",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f6afb292",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T05:09:28Z",
+      "side": 1,
+      "message": "Please remove if you added this for debugging.",
+      "revId": "7e397680ccdc22810f6f805d1ef7c29f461d3603",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b6913a54",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/consumer/impl/GroupConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T05:09:28Z",
+      "side": 1,
+      "message": "If you commented this if statement out for debugging, please comment this back in.",
+      "revId": "7e397680ccdc22810f6f805d1ef7c29f461d3603",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
