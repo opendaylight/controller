@@ -101,6 +101,19 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>yang-test-plugin</artifactId>
+                <version>${config.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>delete-sources</goal>
+                            <goal>process-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

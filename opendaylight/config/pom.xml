@@ -39,6 +39,7 @@
         <module>netty-event-executor-config</module>
         <module>netty-timer-config</module>
         <module>config-persister-directory-adapter</module>
+        <module>yang-test-plugin</module>
     </modules>
 
     <profiles>
