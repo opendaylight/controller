@@ -138,6 +138,12 @@ public class InventoryService implements IInventoryShimInternalListener,
         return nodeProps;
     }
 
+    // nothing to return
+    @Override
+    public Set<Node> getConfiguredNotConnectedNodes() {
+        return new HashSet<Node>();
+    }
+
     @Override
     public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps(
             Boolean refresh) {

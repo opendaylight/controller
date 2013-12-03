@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,6 +144,18 @@ public class Inventory implements IPluginOutInventoryService, IInventoryService 
         }
 
         return nodeProps;
+    }
+
+    @Override
+    public Set<Node> getConfiguredNotConnectedNodes() {
+        Set<Node> configuredNotConnected = new HashSet<Node>(), rv;
+        for (IPluginInInventoryService s : this.pluginService) {
+            rv = s.getConfiguredNotConnectedNodes();
+            if (rv != null) {
+                configuredNotConnected.addAll(rv);
+            }
+        }
+        return configuredNotConnected;
     }
 
     @Override
