@@ -29,14 +29,13 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
     private static NotificationService notificationService;
     private FlowConsumerImpl flowImplRef;
     private GroupConsumerImpl groupImplRef;
+    private MeterConsumerImpl meterImplRef;
     private static DataProviderService dataProviderService;
-
-	private static IClusterContainerServices clusterContainerService = null;
-	private static IContainer container;
-	
-	@Override
+    private static IClusterContainerServices clusterContainerService = null;
+    private static IContainer container;
+    
+    @Override
     public void onSessionInitiated(ProviderContext session) {
-
         FRMConsumerImpl.p_session = session;
 
         if (!getDependentModule()) {
@@ -56,7 +55,8 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
 
                     if (null != dataProviderService) {
                         flowImplRef = new FlowConsumerImpl();
-                        // groupImplRef = new GroupConsumerImpl();
+                        groupImplRef = new GroupConsumerImpl();
+                        meterImplRef = new MeterConsumerImpl();
                         registerWithOSGIConsole();
                     } else {
                         logger.error("Data Provider Service is down or NULL. "
@@ -78,7 +78,7 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
         }
 
     }
-
+    
     public static IClusterContainerServices getClusterContainerService() {
         return clusterContainerService;
     }
@@ -99,35 +99,32 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this, null);
     }
-	
-	private boolean getDependentModule() {
-	    do {
-        clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(IClusterContainerServices.class, this);
-        try {
-            Thread.sleep(4);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-	    } while(clusterContainerService == null);
-	    
-	    do {
-	        
-	    
-        container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
-        try {
-            Thread.sleep(5);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-	    } while (container == null);
-	    
-	   
-        return true;
-	}
 
-	
+    private boolean getDependentModule() {
+        do {
+            clusterContainerService = (IClusterContainerServices) ServiceHelper.getGlobalInstance(
+                    IClusterContainerServices.class, this);
+            try {
+                Thread.sleep(4);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } while (clusterContainerService == null);
+
+        do {
+
+            container = (IContainer) ServiceHelper.getGlobalInstance(IContainer.class, this);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } while (container == null);
+
+        return true;
+    }
 
     public static DataProviderService getDataProviderService() {
         return dataProviderService;
@@ -138,9 +135,8 @@ public class FRMConsumerImpl extends AbstractBindingAwareProvider implements Com
     }
 
     public GroupConsumerImpl getGroupImplRef() {
-	return groupImplRef;
+        return groupImplRef;
     }
-		
 
     public static ProviderContext getProviderSession() {
         return p_session;
