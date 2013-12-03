@@ -67,6 +67,13 @@ public interface ISwitchManager {
     public List<Switch> getNetworkDevices();
 
     /**
+     * Return a Set of all configured devices that are not connected to the controller
+     *
+     * @return Set of {@link org.opendaylight.controller.sal.core.Node}
+     */
+    public Set<Switch> getConfiguredNotConnectedNetworkDevices();
+
+    /**
      * Return a list of subnet that were previously configured
      *
      * @return list of L3 interface {@link org.opendaylight.controller.switchmanager.SubnetConfig} configurations
