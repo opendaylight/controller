@@ -28,6 +28,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
     private ServerConnection conn = null;
     private long sessionId;
+    private String currentUser;
 
 
     public static void start(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException{
@@ -146,7 +147,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public String initAuthentication(ServerConnection sc)
     {
-        return "";
+        logger.trace("Established connection with host {}",socket.getRemoteSocketAddress());
+        return "Established connection with host "+socket.getRemoteSocketAddress().toString().replaceFirst("/","")+"\r\n";
     }
 
     public String[] getRemainingAuthMethods(ServerConnection sc)
@@ -161,8 +163,12 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public AuthenticationResult authenticateWithPassword(ServerConnection sc, String username, String password)
     {
-        if (USER.equals(username) && PASSWORD.equals(password))
+        if (USER.equals(username) && PASSWORD.equals(password)){
+            currentUser = username;
+            logger.trace("user {}@{} authenticated",currentUser,socket.getRemoteSocketAddress().toString().replaceFirst("/",""));
             return AuthenticationResult.SUCCESS;
+        }
+
 
         return AuthenticationResult.FAILURE;
     }
