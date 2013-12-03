@@ -26,6 +26,7 @@ public class IOThread extends Thread {
     private String id;
     private ServerSession servSession;
     private ServerConnection servconnection;
+    private String customHeader;
 
 
     public IOThread (InputStream is, OutputStream os, String id,ServerSession ss, ServerConnection conn){
@@ -36,11 +37,24 @@ public class IOThread extends Thread {
         super.setName(id);
         logger.trace("IOThread {} created", super.getName());
     }
+    public IOThread (InputStream is, OutputStream os, String id,ServerSession ss, ServerConnection conn,String header){
+        this.inputStream = is;
+        this.outputStream = os;
+        this.servSession = ss;
+        this.servconnection = conn;
+        this.customHeader = header;
+        super.setName(id);
+        logger.trace("IOThread {} created", super.getName());
+    }
 
     @Override
     public void run() {
         logger.trace("thread {} started", super.getName());
         try {
+            if (this.customHeader!=null && !this.customHeader.equals("")){
+                this.outputStream.write(this.customHeader.getBytes());
+                logger.trace("adding  {} header", this.customHeader);
+            }
             IOUtils.copy(this.inputStream, this.outputStream);
         } catch (Exception e) {
             logger.error("inputstream -> outputstream copy error ",e);
