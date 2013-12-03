@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_36942a36",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-03T06:23:55Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we call computeLength? Or perhaps the function is called internally and we don\u0027t need to manually compute the length by ourselves?",
+      "revId": "acaeb05101736e59003b0950bcd175fc0773f758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
