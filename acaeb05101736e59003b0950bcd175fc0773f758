@@ -16,6 +16,24 @@
       "revId": "acaeb05101736e59003b0950bcd175fc0773f758",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_369aea14",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1091
+      },
+      "writtenOn": "2013-12-03T09:59:59Z",
+      "side": 1,
+      "message": "The setPayload method does not compute the length internally:\n  public void setPayload(byte[] payload) {\n        this.payload \u003d payload;\n    }\n\nWhat do you mean by \u0027call computeLength\u0027. I can\u0027t find it anywhere in the message class hierarchy.",
+      "parentUuid": "da6255ed_36942a36",
+      "revId": "acaeb05101736e59003b0950bcd175fc0773f758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
