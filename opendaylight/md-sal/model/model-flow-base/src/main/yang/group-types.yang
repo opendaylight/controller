@@ -14,6 +14,10 @@ module opendaylight-group-types {
         type uint32;
     }
     
+    typedef bucket-id {
+    	type uint32;
+    }
+    
     typedef group-types {        
         type enumeration {
             enum group-all;
@@ -108,9 +112,9 @@ module opendaylight-group-types {
         
         container buckets {
             list bucket {
-                key "order";
-                leaf order {
-                    type int32;
+                key "bucket-id";
+                leaf bucket-id {
+                    type bucket-id;
                 }
                 
                 leaf weight {
@@ -133,7 +137,7 @@ module opendaylight-group-types {
     grouping group-statistics {
             
         leaf group-id {
-            type int32;
+            type group-id;
         }
         
         leaf ref-count {
@@ -159,9 +163,9 @@ module opendaylight-group-types {
         
         container buckets {
             list bucket-counter {
-                key "order";
-                leaf order {
-                    type int32;
+                key "bucket-id";
+                leaf bucket-id {
+                    type bucket-id;
                 }
                 
                 leaf packet-count {
@@ -205,9 +209,8 @@ module opendaylight-group-types {
     grouping group-statistics-request {
         list group-stats {
             key "group-id";         
-            
             leaf group-id {
-                type int32;
+                type group-id;
             }           
         }
     }
@@ -216,11 +219,7 @@ module opendaylight-group-types {
     grouping group-statistics-reply {
     	
         list group-stats {
-            key "group-stats-order";
-            leaf group-stats-order {
-                type int32;
-            }
-            
+            key "group-id";
             uses group-statistics;
         }
     }
@@ -228,11 +227,7 @@ module opendaylight-group-types {
     grouping group-desc-stats-reply {
    	
         list group-desc-stats {
-            key "order-id";         
-            leaf order-id {
-                type int32;
-            }
-            
+            key "group-id";         
             uses group;
         }
     }

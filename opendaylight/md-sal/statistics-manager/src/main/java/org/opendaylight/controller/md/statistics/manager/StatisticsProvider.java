@@ -16,6 +16,7 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
@@ -131,10 +132,7 @@ public class StatisticsProvider implements AutoCloseable {
 
         for (Node targetNode : targetNodes){
             spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
-            
-            //We need to add check, so see if groups/meters are supported
-            //by the target node. Below check doesn't look good.
-            if(targetNode.getId().getValue().contains("openflow:")){
+            if(targetNode.getAugmentation(FlowCapableNode.class) != null){
                 InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
                 NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 

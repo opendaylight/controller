@@ -146,7 +146,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         
         //Update augmented data
         nodeData.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
-        
+
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
         it.putOperationalData(refValue, nodeData.build());
         it.commit();
@@ -171,15 +171,14 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         
         final NodeBuilder nodeData = new NodeBuilder(); 
         nodeData.setKey(key);
-        
         NodeGroupStatisticsBuilder groupStats = new NodeGroupStatisticsBuilder();
         GroupStatisticsBuilder stats = new GroupStatisticsBuilder();
         stats.setGroupStats(notification.getGroupStats());
         groupStats.setGroupStatistics(stats.build());
-        
+            
         //Update augmented data
         nodeData.addAugmentation(NodeGroupStatistics.class, groupStats.build());
-        
+
         InstanceIdentifier<? extends Object> refValue = ref.getValue();
         it.putOperationalData(refValue, nodeData.build());
         it.commit();
