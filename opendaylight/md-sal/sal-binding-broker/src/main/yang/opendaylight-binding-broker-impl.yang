@@ -25,6 +25,7 @@ module opendaylight-sal-binding-broker-impl {
     identity binding-broker-impl {
         base config:module-type;
         config:provided-service sal:binding-broker-osgi-registry;
+        config:provided-service sal:binding-rpc-registry;
         config:java-name-prefix BindingBrokerImpl;
     }
     

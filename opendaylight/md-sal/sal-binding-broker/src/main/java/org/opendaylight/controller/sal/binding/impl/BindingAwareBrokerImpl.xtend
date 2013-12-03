@@ -48,8 +48,9 @@ import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.Callable
 import java.util.WeakHashMap
 import javax.annotation.concurrent.GuardedBy
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry
 
-class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
+class BindingAwareBrokerImpl implements BindingAwareBroker, RpcProviderRegistry, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
 
     private InstanceIdentifier<? extends DataObject> root = InstanceIdentifier.builder().toInstance();
@@ -188,21 +189,29 @@ class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
      * Registers RPC Implementation
      * 
      */
-    def <T extends RpcService> registerRpcImplementation(Class<T> type, T service, OsgiProviderContext context,
-        Hashtable<String, String> properties) {
+    override <T extends RpcService> addRpcImplementation(Class<T> type, T service) {
+        checkNotNull(type, "Service type should not be null")
+        checkNotNull(service, "Service type should not be null")
+        
         val proxy = getManagedDirectProxy(type)
         checkState(proxy.delegate === null, "The Service for type %s is already registered", type)
 
-        val osgiReg = context.bundleContext.registerService(type, service, properties);
         proxy.delegate = service;
-        return new RpcServiceRegistrationImpl<T>(type, service, osgiReg, this);
+        return new RpcServiceRegistrationImpl<T>(type, service, this);
     }
 
-    def <T extends RpcService> RoutedRpcRegistration<T> registerRoutedRpcImplementation(Class<T> type, T service,
-        OsgiProviderContext context) {
+    override <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> type, T service) {
+        checkNotNull(type, "Service type should not be null")
+        checkNotNull(service, "Service type should not be null")
+        
         val router = resolveRpcRouter(type);
         checkState(router !== null)
         return new RoutedRpcRegistrationImpl<T>(service, router, this)
+    }
+    
+    override <T extends RpcService> getRpcService(Class<T> service) {
+        checkNotNull(service, "Service should not be null");
+        return getManagedDirectProxy(service) as T;
     }
 
     private def <T extends RpcService> RpcRouter<T> resolveRpcRouter(Class<T> type) {
@@ -357,16 +366,14 @@ class RoutedRpcRegistrationImpl<T extends RpcService> extends AbstractObjectRegi
 
 class RpcServiceRegistrationImpl<T extends RpcService> extends AbstractObjectRegistration<T> implements RpcRegistration<T> {
 
-    val ServiceRegistration<T> osgiRegistration;
     private var BindingAwareBrokerImpl broker;
 
     @Property
     val Class<T> serviceType;
 
-    public new(Class<T> type, T service, ServiceRegistration<T> osgiReg, BindingAwareBrokerImpl broker) {
+    public new(Class<T> type, T service, BindingAwareBrokerImpl broker) {
         super(service);
         this._serviceType = type;
-        this.osgiRegistration = osgiReg;
         this.broker = broker;
     }
 

@@ -33,22 +33,13 @@ class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext
     }
 
     override <T extends RpcService> addRpcImplementation(Class<T> type, T implementation) {
-
-        // TODO Auto-generated method stub
-        val properties = new Hashtable<String, String>();
-        properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER
-
-        // Fill requirements
-        val salReg = broker.registerRpcImplementation(type, implementation, this, properties)
+        val salReg = broker.addRpcImplementation(type, implementation)
         registeredServices.put(type, salReg)
         return salReg;
     }
 
     override <T extends RpcService> addRoutedRpcImplementation(Class<T> type, T implementation) throws IllegalStateException {
-        checkNotNull(type, "Service type should not be null")
-        checkNotNull(implementation, "Service type should not be null")
-        
-        val salReg = broker.registerRoutedRpcImplementation(type, implementation, this)
+        val salReg = broker.addRoutedRpcImplementation(type, implementation)
         registeredServices.put(type, salReg)
         return salReg;
     }
