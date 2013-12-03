@@ -28,6 +28,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
     private ServerConnection conn = null;
     private long sessionId;
+    private String currentUser;
+    private final String remoteAddressWithPort;
 
 
     public static void start(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException{
@@ -40,6 +42,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         this.socket = socket;
         this.clientAddress = clientAddress;
         this.sessionId = sessionId;
+        this.remoteAddressWithPort = socket.getRemoteSocketAddress().toString().replaceFirst("/","");
 
     }
 
@@ -81,7 +84,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                 netconf_ssh_input.start();
 
                                 logger.trace("starting netconf_ssh_output thread");
-                                netconf_ssh_output = new IOThread(ss.getStdout(),echoSocket.getOutputStream(),"output_thread_"+sessionId,ss,conn);
+                                final String customHeader = "["+currentUser+";"+remoteAddressWithPort+";ssh;;;;;;]\n";
+                                netconf_ssh_output = new IOThread(ss.getStdout(),echoSocket.getOutputStream(),"output_thread_"+sessionId,ss,conn,customHeader);
                                 netconf_ssh_output.setDaemon(false);
                                 netconf_ssh_output.start();
 
@@ -146,7 +150,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public String initAuthentication(ServerConnection sc)
     {
-        return "";
+        logger.trace("Established connection with host {}",remoteAddressWithPort);
+        return "Established connection with host "+remoteAddressWithPort+"\r\n";
     }
 
     public String[] getRemainingAuthMethods(ServerConnection sc)
@@ -161,8 +166,12 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public AuthenticationResult authenticateWithPassword(ServerConnection sc, String username, String password)
     {
-        if (USER.equals(username) && PASSWORD.equals(password))
+        if (USER.equals(username) && PASSWORD.equals(password)){
+            currentUser = username;
+            logger.trace("user {}@{} authenticated",currentUser,remoteAddressWithPort);
             return AuthenticationResult.SUCCESS;
+        }
+
 
         return AuthenticationResult.FAILURE;
     }
