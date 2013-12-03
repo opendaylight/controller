@@ -119,6 +119,12 @@ module config-test-impl {
                 type tt:extend-enum;
             }
 
+            leaf sleep-factor {
+                type decimal64 {
+                    fraction-digits 2;
+                }
+            }
+
            container dto-c {
                 leaf simple-arg {
                     type uint32;

@@ -137,6 +137,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         checkTypeConfigAttribute(response);
         checkTypedefs(response);
         checkEnum(response);
+        checkBigDecimal(response);
 
         edit("netconfMessages/editConfig_remove.xml");
 
@@ -160,6 +161,11 @@ public class NetconfMappingTest extends AbstractConfigTest {
         closeSession();
         verify(netconfOperationRouter).close();
         verifyNoMoreInteractions(netconfOperationRouter);
+    }
+
+    private void checkBigDecimal(Element response) {
+        int size = response.getElementsByTagName("sleep-factor").getLength();
+        assertEquals(1, size);
     }
 
     private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,

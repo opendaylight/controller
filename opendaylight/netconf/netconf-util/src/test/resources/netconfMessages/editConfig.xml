@@ -31,6 +31,10 @@
 
                     <name>test1</name>
 
+                    <sleep-factor>
+                        2.00
+                    </sleep-factor>
+
                     <extended>
                             1
                     </extended>

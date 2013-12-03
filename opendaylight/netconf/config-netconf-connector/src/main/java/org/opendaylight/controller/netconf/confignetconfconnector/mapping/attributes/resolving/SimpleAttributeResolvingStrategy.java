@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.openmbean.SimpleType;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
@@ -65,6 +66,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         resolverPlugins.put(Date.class.getCanonicalName(), new DateResolver());
         resolverPlugins.put(Character.class.getCanonicalName(), new CharResolver());
         resolverPlugins.put(BigInteger.class.getCanonicalName(), new BigIntegerResolver());
+        resolverPlugins.put(BigDecimal.class.getCanonicalName(), new BigDecimalResolver());
     }
 
     static interface Resolver {
@@ -103,6 +105,14 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         @Override
         protected Object parseObject(Class<?> type, String value) throws Exception {
             return new BigInteger(value);
+        }
+    }
+
+    static class BigDecimalResolver extends DefaultResolver {
+
+        @Override
+        protected Object parseObject(Class<?> type, String value) throws Exception {
+            return new BigDecimal(value);
         }
     }
 
