@@ -315,7 +315,7 @@
                                     </generator>
                                     <generator>
                                         <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
-                                        <outputBaseDir>target/site</outputBaseDir>
+                                        <outputBaseDir>target/site/models</outputBaseDir>
                                     </generator>
                                 </codeGenerators>
                                 <inspectDependencies>true</inspectDependencies>
