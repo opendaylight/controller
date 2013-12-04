@@ -124,6 +124,7 @@
         </pluginManagement>
     </build>
 
+
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>

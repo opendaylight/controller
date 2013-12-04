@@ -29,6 +29,7 @@
         <module>sal-binding-broker</module>
 
         <module>sal-binding-util</module>
+        <module>sal-binding-dom-it</module>
 
         <!-- Samples -->
         <module>samples</module>
@@ -193,9 +194,11 @@
 
     <dependencyManagement>
         <dependencies>
-
-
-
+            <dependency>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+                <version>1.4.01</version>
+            </dependency>
 
             <!-- YANG Tools Dependencies -->
             <dependency>

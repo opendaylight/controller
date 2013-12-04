@@ -53,11 +53,6 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
             .toInstance();
     private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
 
-    @Override
-    protected String[] getModelFilenames() {
-        return null;
-    }
-
     /**
      * 
      * 
@@ -79,9 +74,7 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
             }
         });
         
-        SchemaContext ctx = getContext(getAllModelFilenames());
-        schemaAwareDataStore.onGlobalContextUpdated(ctx);
-        mappingServiceImpl.onGlobalContextUpdated(ctx);
+        testContext.loadYangSchemaFromClasspath();
         RpcResult<TransactionStatus> result = future.get().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
         
@@ -94,6 +87,11 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
     private Nodes checkForNodes() {
         return (Nodes) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
 
+    }
+    
+    @Override
+    protected boolean getStartWithSchema() {
+        return false;
     }
 
 }

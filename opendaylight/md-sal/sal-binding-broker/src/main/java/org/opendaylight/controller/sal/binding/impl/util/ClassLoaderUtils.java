@@ -7,9 +7,10 @@ import static com.google.common.base.Preconditions.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 
 public final class ClassLoaderUtils {
@@ -56,15 +57,28 @@ public final class ClassLoaderUtils {
         if ("byte[]".equals(name)) {
             return byte[].class;
         }
-
-        return Thread.currentThread().getContextClassLoader().loadClass(name);
+        try {
+            return Thread.currentThread().getContextClassLoader().loadClass(name);
+        } catch (ClassNotFoundException e) {
+            String[] components = name.split("\\.");
+            String potentialOuter;
+            int length = components.length;
+            if (length > 2 && (potentialOuter = components[length - 2]) != null && Character.isUpperCase(potentialOuter.charAt(0))) {
+                
+                    String outerName = Joiner.on(".").join(Arrays.asList(components).subList(0, length - 1));
+                    String innerName = outerName + "$" + components[length-1];
+                    return Thread.currentThread().getContextClassLoader().loadClass(innerName);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public static Class<?> tryToLoadClassWithTCCL(String fullyQualifiedName) {
         try {
             return loadClassWithTCCL(fullyQualifiedName);
         } catch (ClassNotFoundException e) {
-            
+
         }
         return null;
     }

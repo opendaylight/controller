@@ -17,8 +17,18 @@
 
     <artifactId>clustered-datastore.integrationtest</artifactId>
     <version>0.4.0-SNAPSHOT</version>
-    <dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+                <version>1.4.01</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -47,6 +57,16 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xml-apis</artifactId>
+                    <groupId>xml-apis</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>reflections</artifactId>
+                    <groupId>org.reflections</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -126,6 +146,12 @@
             <artifactId>config-netconf-connector</artifactId>
             <version>${netconf.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xml-apis</artifactId>
+                    <groupId>xml-apis</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

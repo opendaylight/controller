@@ -91,7 +91,7 @@ public class LazyGeneratedCodecRegistry implements //
     Map<Type, WeakReference<Class>> typeToClass = new ConcurrentHashMap<>();
 
     @SuppressWarnings("rawtypes")
-    private ConcurrentMap<Type, ChoiceCaseCodecImpl> typeToCaseNodes = new ConcurrentHashMap<>();
+    private ConcurrentMap<Type, ChoiceCaseCodecImpl> typeToCaseCodecs = new ConcurrentHashMap<>();
 
     private CaseClassMapFacade classToCaseRawCodec = new CaseClassMapFacade();
 
@@ -136,14 +136,13 @@ public class LazyGeneratedCodecRegistry implements //
         }
         return weakRef.get();
     }
-    
+
     @Override
-    public void putPathToClass(List<QName> names,Class<?> cls) {
+    public void putPathToClass(List<QName> names, Class<?> cls) {
         Type reference = Types.typeForClass(cls);
-        pathToInstantiatedType.put(names, reference );
+        pathToInstantiatedType.put(names, reference);
         bindingClassEncountered(cls);
     }
-
 
     @Override
     public IdentifierCodec<?> getKeyCodecForPath(List<QName> names) {
@@ -297,10 +296,12 @@ public class LazyGeneratedCodecRegistry implements //
             return potential;
         }
         ConcreteType typeref = Types.typeForClass(caseClass);
-        ChoiceCaseCodecImpl caseCodec = typeToCaseNodes.get(typeref);
+        ChoiceCaseCodecImpl caseCodec = typeToCaseCodecs.get(typeref);
 
+        checkState(caseCodec != null, "Case Codec was not created proactivelly for %s", caseClass.getName());
+        checkState(caseCodec.getSchema() != null, "Case schema is not available for %s", caseClass.getName());
         @SuppressWarnings("unchecked")
-        Class<? extends BindingCodec> newCodec = generator.caseCodecFor(caseClass, caseCodec.schema);
+        Class<? extends BindingCodec> newCodec = generator.caseCodecFor(caseClass, caseCodec.getSchema());
         BindingCodec newInstance = newInstanceOf(newCodec);
         caseCodec.setDelegate(newInstance);
         caseCodecs.put(caseClass, caseCodec);
@@ -322,17 +323,23 @@ public class LazyGeneratedCodecRegistry implements //
         for (Entry<SchemaPath, GeneratedTypeBuilder> caseNode : cases.entrySet()) {
             ReferencedTypeImpl typeref = new ReferencedTypeImpl(caseNode.getValue().getPackageName(), caseNode
                     .getValue().getName());
+
+            LOG.info("Case path: {} Type : {}", caseNode.getKey(), caseNode.getValue().getFullyQualifiedName());
+            pathToType.put(caseNode.getKey(), caseNode.getValue());
+
             ChoiceCaseNode node = (ChoiceCaseNode) SchemaContextUtil.findDataSchemaNode(module, caseNode.getKey());
+
             if (node == null) {
                 LOG.error("YANGTools Bug: SchemaNode for {}, with path {} was not found in context.",
                         typeref.getFullyQualifiedName(), caseNode.getKey());
+                @SuppressWarnings("rawtypes")
+                ChoiceCaseCodecImpl value = new ChoiceCaseCodecImpl();
+                typeToCaseCodecs.putIfAbsent(typeref, value);
                 continue;
             }
-
-            pathToType.put(caseNode.getKey(), caseNode.getValue());
             @SuppressWarnings("rawtypes")
             ChoiceCaseCodecImpl value = new ChoiceCaseCodecImpl(node);
-            typeToCaseNodes.putIfAbsent(typeref, value);
+            typeToCaseCodecs.putIfAbsent(typeref, value);
         }
     }
 
@@ -352,18 +359,24 @@ public class LazyGeneratedCodecRegistry implements //
         choiceCodecs.put(choiceClass, newCodec);
         CodecMapping.setClassToCaseMap(choiceCodec, (Map<Class<?>, BindingCodec<?, ?>>) classToCaseRawCodec);
         CodecMapping.setCompositeNodeToCaseMap(choiceCodec, newCodec.getCompositeToCase());
-        
+
         tryToCreateCasesCodecs(schema);
 
     }
 
     private void tryToCreateCasesCodecs(ChoiceNode schema) {
-        for(ChoiceCaseNode caseNode : schema.getCases()) {
+        for (ChoiceCaseNode caseNode : schema.getCases()) {
             SchemaPath path = caseNode.getPath();
             GeneratedTypeBuilder type;
-            if(path != null && (type = pathToType.get(path)) != null) {
+            if (path != null && (type = pathToType.get(path)) != null) {
+                ReferencedTypeImpl typeref = new ReferencedTypeImpl(type.getPackageName(), type.getName());
+                ChoiceCaseCodecImpl partialCodec = typeToCaseCodecs.get(typeref);
+                if(partialCodec.getSchema() == null ) {
+                    partialCodec.setSchema(caseNode);
+                }
+                
                 Class<?> caseClass = ClassLoaderUtils.tryToLoadClassWithTCCL(type.getFullyQualifiedName());
-                if(caseClass != null) {
+                if (caseClass != null) {
                     getCaseCodecFor(caseClass);
                 }
             }
@@ -381,8 +394,7 @@ public class LazyGeneratedCodecRegistry implements //
     }
 
     @Override
-    public void onDataContainerCodecCreated(Class<?> dataClass,
-            Class<? extends BindingCodec<?,?>> dataCodec) {
+    public void onDataContainerCodecCreated(Class<?> dataClass, Class<? extends BindingCodec<?, ?>> dataCodec) {
         if (Augmentable.class.isAssignableFrom(dataClass)) {
             AugmentableCompositeCodec augmentableCodec = getAugmentableCodec(dataClass);
             CodecMapping.setAugmentationCodec(dataCodec, augmentableCodec);
@@ -471,15 +483,15 @@ public class LazyGeneratedCodecRegistry implements //
     @SuppressWarnings("rawtypes")
     private static class ChoiceCaseCodecImpl<T extends DataContainer> implements ChoiceCaseCodec<T>, //
             Delegator<BindingCodec> {
-        private final boolean augmenting;
+        private boolean augmenting;
         private BindingCodec delegate;
 
-        private final Set<String> validNames;
-        private final Set<QName> validQNames;
+        private Set<String> validNames;
+        private Set<QName> validQNames;
         private ChoiceCaseNode schema;
 
-        public ChoiceCaseCodecImpl(ChoiceCaseNode caseNode) {
-            this.delegate = NOT_READY_CODEC;
+        public void setSchema(ChoiceCaseNode caseNode) {
+            this.schema = schema;
             this.schema = caseNode;
             validNames = new HashSet<>();
             validQNames = new HashSet<>();
@@ -489,6 +501,15 @@ public class LazyGeneratedCodecRegistry implements //
                 validNames.add(qname.getLocalName());
             }
             augmenting = caseNode.isAugmenting();
+        }
+
+        public ChoiceCaseCodecImpl() {
+            this.delegate = NOT_READY_CODEC;
+        }
+
+        public ChoiceCaseCodecImpl(ChoiceCaseNode caseNode) {
+            this.delegate = NOT_READY_CODEC;
+            setSchema(caseNode);
         }
 
         @Override
