@@ -10,6 +10,7 @@
 package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 
 import io.netty.channel.EventLoopGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -21,6 +22,8 @@ import org.opendaylight.controller.netconf.client.NetconfSshClientDispatcher;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
+import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.osgi.framework.BundleContext;
 
 import static com.google.common.base.Preconditions.*;
@@ -62,6 +65,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         String addressValue = getAddress();
         
         
+        int attemptMsTimeout = 60*1000;
+        int connectionAttempts = 5;
         /*
          * Uncomment after Switch to IP Address
         if(getAddress().getIpv4Address() != null) {
@@ -71,6 +76,11 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         }
         
         */
+        ReconnectStrategy strategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, attemptMsTimeout, 1000, 1.0, null,
+                Long.valueOf(connectionAttempts), null);
+        
+        
+        
         InetAddress addr = InetAddresses.forString(addressValue);
         InetSocketAddress socketAddress = new InetSocketAddress(addr , getPort().intValue());
         device.setSocketAddress(socketAddress);

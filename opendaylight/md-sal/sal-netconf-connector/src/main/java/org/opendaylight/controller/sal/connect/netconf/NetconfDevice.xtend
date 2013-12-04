@@ -22,6 +22,7 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
+import org.opendaylight.protocol.framework.ReconnectStrategy
 
 class NetconfDevice implements Provider, DataReader<InstanceIdentifier, CompositeNode>, RpcImplementation, AutoCloseable {
 
@@ -35,6 +36,9 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
 
     @Property
     var InstanceIdentifier path;
+
+    @Property
+    var ReconnectStrategy strategy;
 
     Registration<DataReader<InstanceIdentifier, CompositeNode>> operReaderReg
 
@@ -51,7 +55,7 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
     }
 
     def start(NetconfClientDispatcher dispatcher) {
-        client = new NetconfClient(name, socketAddress, dispatcher);
+        client = new NetconfClient(name, socketAddress, strategy, dispatcher);
         confReaderReg = mountInstance.registerConfigurationReader(path, this);
         operReaderReg = mountInstance.registerOperationalReader(path, this);
     }
