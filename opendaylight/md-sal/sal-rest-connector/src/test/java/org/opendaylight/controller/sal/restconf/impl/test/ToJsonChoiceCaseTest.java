@@ -1,27 +1,18 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Set;
 
-import javax.activation.UnsupportedDataTypeException;
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.*;
-import org.opendaylight.yangtools.yang.model.api.*;
 
-public class ToJsonChoiceCaseTest {
-
-    private static Set<Module> modules;
-    private static DataSchemaNode dataSchemaNode;
+public class ToJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialization() {
-        modules = TestUtils.resolveModules("/yang-to-json-conversion/choice");
-        Module module = TestUtils.resolveModule(null, modules);
-        dataSchemaNode = TestUtils.resolveDataSchemaNode(module, null);
-
+        dataLoad("/yang-to-json-conversion/choice");
     }
 
     /**
@@ -44,9 +35,9 @@ public class ToJsonChoiceCaseTest {
 
     /**
      * Test when some data are in one case node and other in another.
-     * Additionally data are loadef from various choices. This isn't
-     * correct. Next Json validator should return error because nodes has to be
-     * from one case below concrete choice.
+     * Additionally data are loadef from various choices. This isn't correct.
+     * Next Json validator should return error because nodes has to be from one
+     * case below concrete choice.
      * 
      */
     @Test

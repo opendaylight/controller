@@ -1,31 +1,20 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.regex.Matcher;
 
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.*;
-import org.opendaylight.yangtools.yang.model.api.*;
 
-public class ToJsonLeafrefType {
-    private static Set<Module> modules;
-    private static DataSchemaNode dataSchemaNode;
+public class ToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialization() {
-        modules = TestUtils.resolveModules("/yang-to-json-conversion/leafref");
-        assertEquals(2, modules.size());
-        Module module = TestUtils.resolveModule("main-module", modules);
-        assertNotNull(module);
-        dataSchemaNode = TestUtils.resolveDataSchemaNode(module, "cont");
-        assertNotNull(dataSchemaNode);
-
+        dataLoad("/yang-to-json-conversion/leafref", 2, "main-module", "cont");
     }
 
     @Test

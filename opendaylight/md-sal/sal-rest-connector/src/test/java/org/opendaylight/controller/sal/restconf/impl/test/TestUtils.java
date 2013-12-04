@@ -205,14 +205,14 @@ final class TestUtils {
 
         ControllerContext contContext = ControllerContext.getInstance();
         contContext.setSchemas(loadSchemaContext(modules));
-        
+
         StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
         structuredDataToJsonProvider.writeTo(new StructuredData(compositeNode, dataSchemaNode), null, null, null, null,
                 null, byteArrayOS);
 
         jsonResult = byteArrayOS.toString();
         if (outputPath != null) {
-            try {            
+            try {
                 outputToFile(byteArrayOS, outputPath);
             } catch (IOException e) {
                 System.out.println("Output file wasn't cloased sucessfuly.");
@@ -343,7 +343,8 @@ final class TestUtils {
         ControllerContext controllerContext = mock(ControllerContext.class);
         BrokerFacade broker = mock(BrokerFacade.class);
 
-        RpcResult<TransactionStatus> rpcResult = DummyRpcResult.builder().result(TransactionStatus.COMMITED).build();
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
+                TransactionStatus.COMMITED).build();
         Future<RpcResult<TransactionStatus>> future = DummyFuture.builder().rpcResult(rpcResult).build();
         when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
         when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(

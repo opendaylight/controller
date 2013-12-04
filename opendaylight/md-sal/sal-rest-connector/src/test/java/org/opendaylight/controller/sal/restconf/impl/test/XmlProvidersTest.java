@@ -54,7 +54,8 @@ public class XmlProvidersTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs").getPath());
+        Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs")
+                .getPath());
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
@@ -75,11 +76,11 @@ public class XmlProvidersTest extends JerseyTest {
     @Test
     public void testStructuredDataToXmlProvider() throws FileNotFoundException, UnsupportedEncodingException {
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
-        
+
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
         CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode(xmlStream);
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
-        
+
         Response response = target(uri).request(MEDIA_TYPE).get();
         assertEquals(200, response.getStatus());
     }
@@ -87,94 +88,100 @@ public class XmlProvidersTest extends JerseyTest {
     @Test
     public void testBadFormatXmlToCompositeNodeProvider() throws UnsupportedEncodingException, URISyntaxException {
         String uri = createUri("/operations/", "ietf-interfaces:interfaces/interface/eth0");
-        
+
         Response response = target(uri).request(Draft01.MediaTypes.DATA + RestconfService.XML).post(
                 Entity.entity("<SimpleNode/>", MEDIA_TYPE));
         assertEquals(400, response.getStatus());
-        
+
         response = target(uri).request(Draft01.MediaTypes.DATA + RestconfService.XML).post(
                 Entity.entity("<SimpleNode>", MEDIA_TYPE));
         assertEquals(400, response.getStatus());
     }
-    
+
     @Test
     public void testXmlToCompositeNode404NotFound() throws UnsupportedEncodingException, URISyntaxException {
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
-        
+
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
-        
-        Response response = target(uri).request(Draft01.MediaTypes.DATA+RestconfService.XML).get();
+
+        Response response = target(uri).request(Draft01.MediaTypes.DATA + RestconfService.XML).get();
         assertEquals(404, response.getStatus());
     }
-    
+
     @Test
     public void testXmlToCompositeNode400() throws UnsupportedEncodingException, URISyntaxException {
         String uri = createUri("/datastore/", "simple-nodes:user/name");
-        
+
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
-        
-        Response response = target(uri).request(Draft01.MediaTypes.DATA+RestconfService.XML).get();
+
+        Response response = target(uri).request(Draft01.MediaTypes.DATA + RestconfService.XML).get();
         assertEquals(400, response.getStatus());
     }
-    
+
     @Test
     public void testRpcResultCommitedToStatusCodes() throws UnsupportedEncodingException {
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
         String xml = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
         Entity<String> entity = Entity.entity(xml, MEDIA_TYPE_DRAFT02);
-        RpcResult<TransactionStatus> rpcResult = DummyRpcResult.builder().result(TransactionStatus.COMMITED).build();
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
+                TransactionStatus.COMMITED).build();
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
-        when(brokerFacade.commitOperationalDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-        
+        when(brokerFacade.commitOperationalDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+                .thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+                .thenReturn(dummyFuture);
+
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
         assertEquals(204, response.getStatus());
         response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(200, response.getStatus());
-        
+
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
         assertEquals(204, response.getStatus());
         response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(200, response.getStatus());
-        
+
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE).put(entity);
         assertEquals(204, response.getStatus());
         response = target(uri).request(MEDIA_TYPE).post(entity);
         assertEquals(200, response.getStatus());
     }
-    
+
     @Test
     public void testRpcResultOtherToStatusCodes() throws UnsupportedEncodingException {
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
         String xml = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
         Entity<String> entity = Entity.entity(xml, MEDIA_TYPE_DRAFT02);
-        RpcResult<TransactionStatus> rpcResult = DummyRpcResult.builder().result(TransactionStatus.FAILED).build();
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
+                TransactionStatus.FAILED).build();
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
-        when(brokerFacade.commitOperationalDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-        
+        when(brokerFacade.commitOperationalDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+                .thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+                .thenReturn(dummyFuture);
+
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
         assertEquals(500, response.getStatus());
         response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(500, response.getStatus());
-        
+
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
         assertEquals(500, response.getStatus());
         response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(500, response.getStatus());
-        
+
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE).put(entity);
         assertEquals(500, response.getStatus());
         response = target(uri).request(MEDIA_TYPE).post(entity);
         assertEquals(500, response.getStatus());
     }
-    
+
     private String createUri(String prefix, String encodedPart) throws UnsupportedEncodingException {
         return URI.create(prefix + URLEncoder.encode(encodedPart, Charsets.US_ASCII.name()).toString()).toASCIIString();
     }
@@ -185,9 +192,10 @@ public class XmlProvidersTest extends JerseyTest {
         enable(TestProperties.DUMP_ENTITY);
         enable(TestProperties.RECORD_LOG_LEVEL);
         set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
-        
+
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE);
+        resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
+                XmlToCompositeNodeProvider.INSTANCE);
         return resourceConfig;
     }
 
