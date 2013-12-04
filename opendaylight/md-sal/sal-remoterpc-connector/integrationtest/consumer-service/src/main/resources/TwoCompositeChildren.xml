@@ -1,0 +1,14 @@
+<rpc>
+    <innerinterface1>
+        <name>eth1</name>
+        <type>ethernet</type>
+        <enabled>false</enabled>
+        <description>some interface</description>
+    </innerinterface1>
+    <innerinterface2>
+        <name>eth2</name>
+        <type>ethernet</type>
+        <enabled>true</enabled>
+        <description>some interface</description>
+    </innerinterface2>
+</rpc>
