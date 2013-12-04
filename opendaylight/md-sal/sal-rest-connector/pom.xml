@@ -42,6 +42,11 @@
       <artifactId>yang-data-impl</artifactId>
       <version>${yang.version}</version>
     </dependency>
+        <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-model-util</artifactId>
+      <version>${yang.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
