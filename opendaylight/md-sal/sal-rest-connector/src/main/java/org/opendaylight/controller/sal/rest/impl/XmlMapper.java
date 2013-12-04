@@ -59,7 +59,6 @@ public class XmlMapper {
             throws UnsupportedDataTypeException {
         QName dataType = data.getNodeType();
         Element itemEl = doc.createElementNS(dataType.getNamespace().toString(), dataType.getLocalName());
-
         if (data instanceof SimpleNode<?>) {
             if (schema instanceof LeafListSchemaNode) {
                 writeValueOfNodeByType(itemEl, (SimpleNode<?>) data, ((LeafListSchemaNode) schema).getType());
@@ -73,11 +72,14 @@ public class XmlMapper {
             }
         } else { // CompositeNode
             for (Node<?> child : ((CompositeNode) data).getChildren()) {
-                DataSchemaNode childSchema = findFirstSchemaForNode(child, ((DataNodeContainer) schema).getChildNodes());
-                if (logger.isDebugEnabled()) {
-                    if (childSchema == null) {
-                        logger.debug("Probably the data node \"" + ((child == null) ? "" : child.getNodeType().getLocalName())
-                                + "\" is not conform to schema");
+                DataSchemaNode childSchema = null;
+                if(schema != null){
+                    childSchema = findFirstSchemaForNode(child, ((DataNodeContainer) schema).getChildNodes());
+                    if (logger.isDebugEnabled()) {
+                        if (childSchema == null) {
+                            logger.debug("Probably the data node \"" + ((child == null) ? "" : child.getNodeType().getLocalName())
+                                    + "\" is not conform to schema");
+                        }
                     }
                 }
                 itemEl.appendChild(translateToXmlAndReturnRootElement(doc, child, childSchema));
