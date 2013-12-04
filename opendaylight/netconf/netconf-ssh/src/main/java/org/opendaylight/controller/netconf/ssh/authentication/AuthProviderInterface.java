@@ -9,6 +9,8 @@ package org.opendaylight.controller.netconf.ssh.authentication;
 
 import ch.ethz.ssh2.signature.RSAPrivateKey;
 
-public interface KeyStoreHandler {
+public interface AuthProviderInterface {
+
+    public boolean authenticated(String username, String password);
     public RSAPrivateKey getPrivateKey();
 }

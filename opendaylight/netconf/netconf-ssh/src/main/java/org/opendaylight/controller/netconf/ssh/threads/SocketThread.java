@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import javax.annotation.concurrent.ThreadSafe;
-import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,35 +22,38 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 {
 
     private Socket socket;
-    private static final String USER = "netconf";
-    private static final String PASSWORD = "netconf";
     private InetSocketAddress clientAddress;
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
     private ServerConnection conn = null;
     private long sessionId;
     private String currentUser;
+    private final AuthProvider authProvider;
+
     private final String remoteAddressWithPort;
 
-
-    public static void start(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException{
-        Thread netconf_ssh_socket_thread = new Thread(new SocketThread(socket,clientAddress,sessionId));
+    public static void start(Socket socket,
+                             InetSocketAddress clientAddress,
+                             long sessionId,
+                             AuthProvider authProvider)
+            throws IOException{
+        Thread netconf_ssh_socket_thread = new Thread(new SocketThread(socket,clientAddress,sessionId,authProvider));
         netconf_ssh_socket_thread.setDaemon(true);
         netconf_ssh_socket_thread.start();
     }
-    private SocketThread(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException {
+    private SocketThread(Socket socket, InetSocketAddress clientAddress, long sessionId,AuthProvider authProvider) throws IOException {
 
         this.socket = socket;
         this.clientAddress = clientAddress;
         this.sessionId = sessionId;
         this.remoteAddressWithPort = socket.getRemoteSocketAddress().toString().replaceFirst("/","");
+        this.authProvider = authProvider;
 
     }
 
     @Override
     public void run() {
         conn = new ServerConnection(socket);
-        RSAKey keyStore = new RSAKey();
-        conn.setRsaHostKey(keyStore.getPrivateKey());
+        conn.setRsaHostKey(authProvider.getPrivateKey());
         conn.setAuthenticationCallback(this);
         conn.setServerConnectionCallback(this);
         try {
@@ -166,13 +169,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public AuthenticationResult authenticateWithPassword(ServerConnection sc, String username, String password)
     {
-        if (USER.equals(username) && PASSWORD.equals(password)){
-            currentUser = username;
-            logger.trace("user {}@{} authenticated",currentUser,remoteAddressWithPort);
+        if (authProvider.authenticated(username,password))
             return AuthenticationResult.SUCCESS;
-        }
-
-
         return AuthenticationResult.FAILURE;
     }
 

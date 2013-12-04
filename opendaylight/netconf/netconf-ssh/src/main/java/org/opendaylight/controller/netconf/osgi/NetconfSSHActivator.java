@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.osgi;
 import com.google.common.base.Optional;
 import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -39,9 +40,11 @@ public class NetconfSSHActivator implements BundleActivator{
 
         Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context,EXCEPTION_MESSAGE);
         InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,EXCEPTION_MESSAGE);
+        AuthProvider authProvider = new AuthProvider();
+        authProvider.addIdentity(NetconfConfigUtil.getSshDefaultCredentials(context));
 
         if (sshSocketAddressOptional.isPresent()){
-            server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress);
+            server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);
             serverThread.start();
