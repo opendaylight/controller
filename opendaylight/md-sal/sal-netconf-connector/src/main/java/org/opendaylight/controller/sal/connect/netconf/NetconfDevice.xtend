@@ -22,6 +22,7 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
+import org.opendaylight.protocol.framework.ReconnectStrategy
 
 class NetconfDevice implements Provider, DataReader<InstanceIdentifier, CompositeNode>, RpcImplementation, AutoCloseable {
 
@@ -35,6 +36,9 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
 
     @Property
     var InstanceIdentifier path;
+
+    @Property
+    var ReconnectStrategy strategy;
 
     Registration<DataReader<InstanceIdentifier, CompositeNode>> operReaderReg
 
@@ -51,13 +55,13 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
     }
 
     def start(NetconfClientDispatcher dispatcher) {
-        client = new NetconfClient(name, socketAddress, dispatcher);
+        client = NetconfClient.clientFor(name, socketAddress, strategy, dispatcher);
         confReaderReg = mountInstance.registerConfigurationReader(path, this);
         operReaderReg = mountInstance.registerOperationalReader(path, this);
     }
 
     override readConfigurationData(InstanceIdentifier path) {
-        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME, wrap(NETCONF_GET_CONFIG_QNAME, path.toFilterStructure()));
+        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME, wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, path.toFilterStructure()));
         val data = result.result.getFirstCompositeByName(NETCONF_DATA_QNAME);
         return data?.findNode(path) as CompositeNode;
     }
