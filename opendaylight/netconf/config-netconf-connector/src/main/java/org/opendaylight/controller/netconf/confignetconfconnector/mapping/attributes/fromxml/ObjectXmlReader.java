@@ -18,6 +18,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,11 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     private AttributeReadingStrategy prepareReadingStrategy(String key, AttributeIfc attributeIfc) {
         this.key = key;
         return switchAttribute(attributeIfc);
+    }
+
+    @Override
+    protected AttributeReadingStrategy caseJavaBinaryAttribute(OpenType<?> openType) {
+        return new SimpleBinaryAttributeReadingStrategy(lastAttribute.getNullableDefault());
     }
 
     @Override

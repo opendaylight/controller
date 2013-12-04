@@ -19,6 +19,7 @@ import org.w3c.dom.Document;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,6 +50,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
         this.document = document;
         this.key = key;
         return switchAttribute(expectedAttr);
+    }
+
+    @Override
+    protected AttributeWritingStrategy caseJavaBinaryAttribute(OpenType<?> openType) {
+        return new SimpleBinaryAttributeWritingStrategy(document, key);
     }
 
     @Override

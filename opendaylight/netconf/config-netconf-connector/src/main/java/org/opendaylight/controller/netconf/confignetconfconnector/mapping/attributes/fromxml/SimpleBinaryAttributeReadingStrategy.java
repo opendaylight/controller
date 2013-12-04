@@ -8,23 +8,25 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.google.common.io.BaseEncoding;
 
-import java.util.HashMap;
+import java.util.List;
 
-public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
+public class SimpleBinaryAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
 
-    private final String key;
-
-    public SimpleCompositeAttributeReadingStrategy(String nullableDefault, String key) {
+    public SimpleBinaryAttributeReadingStrategy(String nullableDefault) {
         super(nullableDefault);
-        this.key = key;
     }
 
     protected Object postprocessParsedValue(String textContent) {
-        HashMap<String,String> map = Maps.newHashMap();
-        map.put(key, textContent);
-        return map;
+        BaseEncoding en = BaseEncoding.base64();
+        byte[] decode = en.decode(textContent);
+        List<String> parsed = Lists.newArrayListWithCapacity(decode.length);
+        for (byte b : decode) {
+            parsed.add(Byte.toString(b));
+        }
+        return parsed;
     }
 
     @Override

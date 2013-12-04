@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.AttributeResolvingStrategy;
 
 import javax.management.openmbean.OpenType;
@@ -47,23 +46,13 @@ public class AttributeConfigElement {
 
     }
 
-    public static AttributeConfigElement create(AttributeIfc attributeIfc, Object value) {
-        String nullableDefault = attributeIfc.getNullableDefault();
-        return create(nullableDefault, value);
-    }
-
-    public static AttributeConfigElement create(String nullableDefault, Object value) {
+    public static AttributeConfigElement create(Object nullableDefault, Object value) {
         return new AttributeConfigElement(nullableDefault, value);
     }
 
-    public static AttributeConfigElement createNullValue(AttributeIfc attributeIfc) {
-        return new AttributeConfigElement(attributeIfc.getNullableDefault(), null);
-    }
-
-    public static AttributeConfigElement createNullValue(String nullableDefault) {
+    public static AttributeConfigElement createNullValue(Object nullableDefault) {
         return new AttributeConfigElement(nullableDefault, null);
     }
-
 
     public Object getValue() {
         return value;

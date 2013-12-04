@@ -14,6 +14,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.yangtools.yang.model.api.type.BinaryTypeDefinition;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
@@ -30,7 +31,10 @@ public abstract class AttributeIfcSwitchStatement<T> {
 
         if (attributeIfc instanceof JavaAttribute) {
             try {
-                return caseJavaAttribute(attributeIfc.getOpenType());
+                if(((JavaAttribute)attributeIfc).getTypeDefinition() instanceof BinaryTypeDefinition) {
+                    return caseJavaBinaryAttribute(attributeIfc.getOpenType());
+                } else
+                    return caseJavaAttribute(attributeIfc.getOpenType());
             } catch (UnknownOpenTypeException e) {
                 throw getIllegalArgumentException(attributeIfc);
             }
@@ -48,6 +52,9 @@ public abstract class AttributeIfcSwitchStatement<T> {
         throw getIllegalArgumentException(attributeIfc);
     }
 
+    protected T caseJavaBinaryAttribute(OpenType<?> openType) {
+        return caseJavaAttribute(openType);
+    }
 
     private IllegalArgumentException getIllegalArgumentException(AttributeIfc attributeIfc) {
         return new IllegalArgumentException("Unknown attribute type " + attributeIfc.getClass() + ", " + attributeIfc

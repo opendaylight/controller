@@ -55,7 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -125,6 +124,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/editConfig.xml");
         checkBinaryLeafEdited(getConfigCandidate());
 
+
         // default-operation:none, should not affect binary leaf
         edit("netconfMessages/editConfig_none.xml");
         checkBinaryLeafEdited(getConfigCandidate());
@@ -132,7 +132,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // check after edit
         commit();
         Element response = getConfigRunning();
-        System.err.println(XmlUtil.toString(response));
 
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
@@ -163,6 +162,15 @@ public class NetconfMappingTest extends AbstractConfigTest {
         closeSession();
         verify(netconfOperationRouter).close();
         verifyNoMoreInteractions(netconfOperationRouter);
+    }
+
+    private void checkBigDecimal(Element response) {
+        String responseTrimmed = XmlUtil.toString(response).replaceAll("\\s", "");
+
+        assertContainsString(responseTrimmed, "<sleep-factorxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.58</sleep-factor>");
+        // Default
+        assertContainsString(responseTrimmed, "<sleep-factorxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.00</sleep-factor>");
+
     }
 
     private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,
@@ -232,14 +240,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
             edit("netconfMessages/namespaces/editConfig_sameAttrDifferentNamespaces.xml");
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
-            assertThat(message,
-                    JUnitMatchers
-                            .containsString("Element simple-long-2 present multiple times with different namespaces"));
-            assertThat(message,
-                    JUnitMatchers.containsString("urn:opendaylight:params:xml:ns:yang:controller:test:impl"));
-            assertThat(message,
-                    JUnitMatchers
-                            .containsString(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
+            assertContainsString(message, "Element simple-long-2 present multiple times with different namespaces");
+            assertContainsString(message, "urn:opendaylight:params:xml:ns:yang:controller:test:impl");
+            assertContainsString(message, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             throw e;
         }
     }
@@ -250,9 +253,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
             edit("netconfMessages/namespaces/editConfig_differentNamespaceTO.xml");
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
-            assertThat(message, JUnitMatchers.containsString("Unrecognised elements"));
-            assertThat(message, JUnitMatchers.containsString("simple-int2"));
-            assertThat(message, JUnitMatchers.containsString("dto_d"));
+            assertContainsString(message, "Unrecognised elements");
+            assertContainsString(message, "simple-int2");
+            assertContainsString(message, "dto_d");
             throw e;
         }
     }
@@ -263,13 +266,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
             edit("netconfMessages/namespaces/editConfig_sameAttrDifferentNamespacesList.xml");
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
-            assertThat(message,
-                    JUnitMatchers.containsString("Element binaryLeaf present multiple times with different namespaces"));
-            assertThat(message,
-                    JUnitMatchers.containsString("urn:opendaylight:params:xml:ns:yang:controller:test:impl"));
-            assertThat(message,
-                    JUnitMatchers
-                            .containsString(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
+            assertContainsString(message, "Element binaryLeaf present multiple times with different namespaces");
+            assertContainsString(message, "urn:opendaylight:params:xml:ns:yang:controller:test:impl");
+            assertContainsString(message, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             throw e;
         }
     }
@@ -306,8 +305,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
             try {
                 edit(file);
             } catch (NetconfDocumentedException e) {
-                assertThat(e.getMessage(), JUnitMatchers.containsString("Unrecognised elements"));
-                assertThat(e.getMessage(), JUnitMatchers.containsString("unknownAttribute"));
+                assertContainsString(e.getMessage(), "Unrecognised elements");
+                assertContainsString(e.getMessage(), "unknownAttribute");
                 continue;
             }
             fail("Unrecognised test should throw exception " + file);
@@ -353,22 +352,37 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private void checkBinaryLeafEdited(final Element response) {
-        final NodeList children = response.getElementsByTagName("binaryLeaf");
-        assertEquals(3, children.getLength());
-        final StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < 3; i++) {
-            final Element e = (Element) children.item(i);
-            buf.append(XmlElement.fromDomElement(e).getTextContent());
-        }
-        assertEquals("810", buf.toString());
+        String responseTrimmed = XmlUtil.toString(response).replaceAll("\\s", "");
+        String substring = "<binaryLeafxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">YmluYXJ5</binaryLeaf>";
+        assertContainsString(responseTrimmed, substring);
+        substring = "<binaryLeafxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ZGVmYXVsdEJpbg==</binaryLeaf>";
+        assertContainsString(responseTrimmed, substring);
     }
 
     private void checkTypedefs(final Element response) {
-        NodeList children = response.getElementsByTagName("extended");
-        assertEquals(1, children.getLength());
+        String responseTrimmed = XmlUtil.toString(response).replaceAll("\\s", "");
 
-        children = response.getElementsByTagName("extended-twice");
-        assertEquals(1, children.getLength());
+        String substring = "<extendedxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">10</extended>";
+        assertContainsString(responseTrimmed, substring);
+        // Default
+        assertContainsString(responseTrimmed,
+                "<extendedxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">1</extended>");
+
+        assertContainsString(responseTrimmed,
+                "<extended-twicexmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">20</extended-twice>");
+        // Default
+        assertContainsString(responseTrimmed,
+                "<extended-twicexmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2</extended-twice>");
+
+        assertContainsString(responseTrimmed,
+                "<extended-enumxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">TWO</extended-enum>");
+        // Default
+        assertContainsString(responseTrimmed,
+                "<extended-enumxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ONE</extended-enum>");
+    }
+
+    private void assertContainsString(String string, String substring) {
+        assertThat(string, JUnitMatchers.containsString(substring));
     }
 
     private void checkEnum(final Element response) {
@@ -395,12 +409,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         int testingDepsSize = response.getElementsByTagName("testing-deps").getLength();
         assertEquals(2, testingDepsSize);
     }
-
-    private void checkBigDecimal(Element response) {
-        int size = response.getElementsByTagName("sleep-factor").getLength();
-        assertEquals(1, size);
-    }
-
 
     private void checkTypeConfigAttribute(Element response) {
 
@@ -458,17 +466,17 @@ public class NetconfMappingTest extends AbstractConfigTest {
         RuntimeRpc netconf = new RuntimeRpc(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
 
         response = executeOp(netconf, "netconfMessages/rpc.xml");
-        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("testarg1".toUpperCase()));
+        assertContainsString(XmlUtil.toString(response), "testarg1".toUpperCase());
 
         response = executeOp(netconf, "netconfMessages/rpcInner.xml");
-        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("ok"));
+        assertContainsString(XmlUtil.toString(response), "ok");
 
         response = executeOp(netconf, "netconfMessages/rpcInnerInner.xml");
-        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("true"));
+        assertContainsString(XmlUtil.toString(response), "true");
 
         response = executeOp(netconf, "netconfMessages/rpcInnerInner_complex_output.xml");
-        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("1"));
-        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("2"));
+        assertContainsString(XmlUtil.toString(response), "1");
+        assertContainsString(XmlUtil.toString(response), "2");
     }
 
     private Element get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
