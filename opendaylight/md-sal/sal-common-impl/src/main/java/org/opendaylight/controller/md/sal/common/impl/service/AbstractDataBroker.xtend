@@ -345,10 +345,19 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D> extends Abst
     }
 
     override readConfigurationData(P path) {
+        val local = this.updatedConfigurationData.get(path);
+        if(local != null) {
+            return local;
+        }
+        
         return broker.readConfigurationData(path);
     }
 
     override readOperationalData(P path) {
+        val local = this.updatedOperationalData.get(path);
+        if(local != null) {
+            return local;
+        }
         return broker.readOperationalData(path);
     }
 

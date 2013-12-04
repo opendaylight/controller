@@ -1,0 +1,59 @@
+package org.opendaylight.controller.sal.binding.test.util;
+
+import java.util.concurrent.ExecutorService;
+
+import javassist.ClassPool;
+
+import org.opendaylight.controller.sal.core.api.data.DataStore;
+import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
+import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
+
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
+public class BindingBrokerTestFactory {
+
+    private static final ClassPool CLASS_POOL = new ClassPool();
+    private boolean startWithParsedSchema = true;
+    private ExecutorService executor;
+    private ClassPool classPool;
+
+    
+    public boolean isStartWithParsedSchema() {
+        return startWithParsedSchema;
+    }
+
+    public void setStartWithParsedSchema(boolean startWithParsedSchema) {
+        this.startWithParsedSchema = startWithParsedSchema;
+    }
+
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(ExecutorService executor) {
+        this.executor = executor;
+    }
+
+
+    public BindingTestContext getTestContext() {
+        Preconditions.checkState(executor != null, "Executor is not set.");
+        ListeningExecutorService listenableExecutor = MoreExecutors.listeningDecorator(executor);
+        return new BindingTestContext(listenableExecutor, getClassPool(),startWithParsedSchema);
+    }
+
+    public ClassPool getClassPool() {
+        if(classPool == null) {
+            return CLASS_POOL;
+        }
+        
+        return classPool;
+    }
+
+    public void setClassPool(ClassPool classPool) {
+        this.classPool = classPool;
+    }
+
+}
