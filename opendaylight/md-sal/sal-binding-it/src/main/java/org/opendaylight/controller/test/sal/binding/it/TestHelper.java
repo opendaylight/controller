@@ -111,6 +111,8 @@ public class TestHelper {
 
                 systemProperty("netconf.tcp.address").value("0.0.0.0"), //
                 systemProperty("netconf.tcp.port").value("18383"), //
+                systemProperty("netconf.tcp.client.address").value("127.0.0.1"), //
+                systemProperty("netconf.tcp.client.port").value("18383"), //
                 systemProperty("netconf.config.persister.active").value("1"), //
                 systemProperty("netconf.config.persister.1.storageAdapterClass").value(
                         "org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter"), //
