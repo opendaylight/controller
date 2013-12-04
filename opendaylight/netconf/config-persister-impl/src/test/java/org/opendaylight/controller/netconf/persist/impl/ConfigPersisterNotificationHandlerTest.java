@@ -24,7 +24,7 @@ public class ConfigPersisterNotificationHandlerTest {
     public void testConflictingVersionDetection() throws Exception {
         Document document = XmlUtil.readXmlToDocument(getClass().getResourceAsStream("/conflictingVersionResponse.xml"));
         try{
-            ConfigPersisterNotificationHandler.checkIsOk(XmlElement.fromDomDocument(document).getOnlyChildElement(), new NetconfMessage(document));
+            Util.checkIsOk(XmlElement.fromDomDocument(document).getOnlyChildElement(), new NetconfMessage(document));
             fail();
         }catch(ConflictingVersionException e){
             assertThat(e.getMessage(), containsString("Optimistic lock failed. Expected parent version 21, was 18"));

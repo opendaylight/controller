@@ -8,14 +8,13 @@
 
 package org.opendaylight.controller.config.persist.storage.directory;
 
-import com.google.common.base.Optional;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -25,21 +24,13 @@ import static org.junit.Assert.fail;
 
 public class DirectoryStorageAdapterTest {
     DirectoryPersister tested;
-    SortedSet<String> expectedCapabilities;
-    String expectedSnapshot;
-
-    @Before
-    public void setUp() throws Exception {
-        expectedCapabilities = new TreeSet<>(IOUtils.readLines(getClass().getResourceAsStream("/expectedCapabilities.txt")));
-        expectedSnapshot = IOUtils.toString(getClass().getResourceAsStream("/expectedSnapshot.xml"));
-    }
 
     @Test
     public void testEmptyDirectory() throws Exception {
         File folder = new File("target/emptyFolder");
         folder.mkdir();
         tested = new DirectoryPersister((folder));
-        assertEquals(Optional.<ConfigSnapshotHolder>absent(), tested.loadLastConfig());
+        assertEquals(Collections.<ConfigSnapshotHolder>emptyList(), tested.loadLastConfigs());
 
         try {
             tested.persistConfig(new ConfigSnapshotHolder() {
@@ -70,22 +61,28 @@ public class DirectoryStorageAdapterTest {
     public void testOneFile() throws Exception {
         File folder = getFolder("oneFile");
         tested = new DirectoryPersister((folder));
-        assertExpected();
+        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        assertEquals(1, results.size());
+        ConfigSnapshotHolder result = results.get(0);
+        assertSnapshot(result, "oneFileExpected");
     }
 
-    private void assertExpected() throws IOException {
-        Optional<ConfigSnapshotHolder> maybeResult = tested.loadLastConfig();
-        assertTrue(maybeResult.isPresent());
-        ConfigSnapshotHolder result = maybeResult.get();
-        assertEquals(expectedCapabilities, result.getCapabilities());
-        assertEquals(expectedSnapshot, result.getConfigSnapshot());
-    }
 
     @Test
     public void testTwoFiles() throws Exception {
         File folder = getFolder("twoFiles");
         tested = new DirectoryPersister((folder));
-        assertExpected();
+        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        assertEquals(2, results.size());
+        assertSnapshot(results.get(0), "twoFilesExpected1");
+        assertSnapshot(results.get(1), "twoFilesExpected2");
+    }
+
+    private void assertSnapshot(ConfigSnapshotHolder result, String directory) throws Exception {
+        SortedSet<String> expectedCapabilities = new TreeSet<>(IOUtils.readLines(getClass().getResourceAsStream("/" + directory + "/expectedCapabilities.txt")));
+        String expectedSnapshot = IOUtils.toString(getClass().getResourceAsStream("/" + directory + "/expectedSnapshot.xml"));
+        assertEquals(expectedCapabilities, result.getCapabilities());
+        assertEquals(expectedSnapshot, result.getConfigSnapshot());
     }
 
 }

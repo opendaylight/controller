@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.persist.storage.file;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import org.junit.Before;
@@ -20,11 +19,11 @@ import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Collection;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -75,11 +74,12 @@ public class FileStorageAdapterTest {
                 });
         assertEquals(14, readLines.size());
 
-        Optional<ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
-        assertTrue(lastConf.isPresent());
+        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        assertEquals(1, lastConf.size());
+        ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
         assertEquals("<config>2</config>",
-                lastConf.get().getConfigSnapshot().replaceAll("\\s", ""));
-        assertEquals(createCaps(), lastConf.get().getCapabilities());
+                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
+        assertEquals(createCaps(), configSnapshotHolder.getCapabilities());
     }
 
     private SortedSet<String> createCaps() {
@@ -123,10 +123,11 @@ public class FileStorageAdapterTest {
                 });
         assertEquals(7, readLines.size());
 
-        Optional<ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
-        assertTrue(lastConf.isPresent());
+        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        assertEquals(1, lastConf.size());
+        ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
         assertEquals("<config>2</config>",
-                lastConf.get().getConfigSnapshot().replaceAll("\\s", ""));
+                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
     }
 
     @Test
@@ -163,10 +164,11 @@ public class FileStorageAdapterTest {
 
         assertEquals(14, readLines.size());
 
-        Optional<ConfigSnapshotHolder> lastConf = storage.loadLastConfig();
-        assertTrue(lastConf.isPresent());
+        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        assertEquals(1, lastConf.size());
+        ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
         assertEquals("<config>3</config>",
-               lastConf.get().getConfigSnapshot().replaceAll("\\s", ""));
+                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
         assertFalse(readLines.contains(holder.getConfigSnapshot()));
     }
 
@@ -178,14 +180,14 @@ public class FileStorageAdapterTest {
         FileStorageAdapter storage = new FileStorageAdapter();
         storage.setFileStorage(file);
 
-        Optional<ConfigSnapshotHolder> elementOptional = storage.loadLastConfig();
-        assertThat(elementOptional.isPresent(), is(false));
+        List<ConfigSnapshotHolder> elementOptional = storage.loadLastConfigs();
+        assertThat(elementOptional.size(), is(0));
     }
 
     @Test(expected = NullPointerException.class)
     public void testNoProperties() throws Exception {
         FileStorageAdapter storage = new FileStorageAdapter();
-        storage.loadLastConfig();
+        storage.loadLastConfigs();
     }
 
     @Test(expected = NullPointerException.class)

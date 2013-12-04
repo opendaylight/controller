@@ -15,17 +15,19 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolderImpl;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -105,7 +107,7 @@ public class FileStorageAdapter implements StorageAdapter, Persister {
         } else {
             numberOfStoredBackups = Integer.MAX_VALUE;
         }
-
+        logger.trace("Property {} set to {}", NUMBER_OF_BACKUPS, numberOfStoredBackups);
         return result;
     }
 
@@ -164,27 +166,23 @@ public class FileStorageAdapter implements StorageAdapter, Persister {
     }
 
     @Override
-    public Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException {
+    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
         Preconditions.checkNotNull(storage, "Storage file is null");
 
         if (!storage.exists()) {
-            return Optional.absent();
+            return Collections.emptyList();
         }
 
         final LineProcessor lineProcessor = new LineProcessor();
-        String result = Files.readLines(storage, ENCODING, lineProcessor);
+        Files.readLines(storage, ENCODING, lineProcessor);
 
-        try {
-            if (lineProcessor.getConfigSnapshot().isPresent() == false) {
-                return Optional.absent();
-            } else {
-                return Optional.<ConfigSnapshotHolder> of(new PersistedConfigImpl(lineProcessor.getConfigSnapshot(),
-                        lineProcessor.getCapabilities()));
-            }
-
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new IOException("Unable to load last config ", e);
+        if (lineProcessor.getConfigSnapshot().isPresent() == false) {
+            return Collections.emptyList();
+        } else {
+            return Arrays.<ConfigSnapshotHolder>asList(new ConfigSnapshotHolderImpl(lineProcessor.getConfigSnapshot().get(),
+                    lineProcessor.getCapabilities(), storage.getAbsolutePath()));
         }
+
     }
 
     private static final class LineProcessor implements com.google.common.io.LineProcessor<String> {
@@ -227,15 +225,16 @@ public class FileStorageAdapter implements StorageAdapter, Persister {
             return true;
         }
 
-        Optional<String> getConfigSnapshot() throws IOException, SAXException, ParserConfigurationException {
+        Optional<String> getConfigSnapshot() {
             final String xmlContent = snapshotBuffer.toString();
-            if (xmlContent == null || xmlContent.equals("")) {
+            if (xmlContent.equals("")) {
                 return Optional.absent();
-            } else
+            } else {
                 return Optional.of(xmlContent);
+            }
         }
 
-        SortedSet<String> getCapabilities() throws IOException, SAXException, ParserConfigurationException {
+        SortedSet<String> getCapabilities() {
             return caps;
         }
 
@@ -249,27 +248,6 @@ public class FileStorageAdapter implements StorageAdapter, Persister {
     @Override
     public String toString() {
         return "FileStorageAdapter [storage=" + storage + "]";
-    }
-
-    private class PersistedConfigImpl implements ConfigSnapshotHolder {
-
-        private final String snapshot;
-        private final SortedSet<String> caps;
-
-        public PersistedConfigImpl(Optional<String> configSnapshot, SortedSet<String> capabilities) {
-            this.snapshot = configSnapshot.get();
-            this.caps = capabilities;
-        }
-
-        @Override
-        public String getConfigSnapshot() {
-            return snapshot;
-        }
-
-        @Override
-        public SortedSet<String> getCapabilities() {
-            return caps;
-        }
     }
 
 }

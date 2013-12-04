@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Optional;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
@@ -17,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class NoOpStorageAdapter implements StorageAdapter, Persister {
     private static final Logger logger = LoggerFactory.getLogger(NoOpStorageAdapter.class);
@@ -33,9 +34,9 @@ public class NoOpStorageAdapter implements StorageAdapter, Persister {
     }
 
     @Override
-    public Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException {
+    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
         logger.debug("loadLastConfig called");
-        return Optional.absent();
+        return Collections.emptyList();
     }
 
     @Override

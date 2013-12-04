@@ -100,6 +100,10 @@ public class NetconfClient implements Closeable {
         clientSession.close();
     }
 
+    public NetconfClientDispatcher getNetconfClientDispatcher() {
+        return dispatch;
+    }
+
     private static ReconnectStrategy getReconnectStrategy(int connectionAttempts, int attemptMsTimeout) {
         return new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, attemptMsTimeout, 1000, 1.0, null,
                 Long.valueOf(connectionAttempts), null);
