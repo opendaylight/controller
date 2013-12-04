@@ -8,12 +8,12 @@
 
 package org.opendaylight.controller.netconf.util.osgi;
 
-import com.google.common.base.Optional;
-import java.net.InetSocketAddress;
-import org.osgi.framework.BundleContext;
-import static com.google.common.base.Preconditions.checkNotNull;
+        import com.google.common.base.Optional;
+        import java.net.InetSocketAddress;
+        import org.osgi.framework.BundleContext;
+        import static com.google.common.base.Preconditions.checkNotNull;
 
-    public class NetconfConfigUtil {
+public class NetconfConfigUtil {
     private static final String PREFIX_PROP = "netconf.";
 
     private enum InfixProp {
@@ -22,10 +22,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     private static final String PORT_SUFFIX_PROP = ".port";
     private static final String ADDRESS_SUFFIX_PROP = ".address";
+    private static final String CLIENT_PROP = ".client";
 
-    public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound) {
+    public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound, boolean forClient) {
 
-        Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp, exceptionMessageIfNotFound);
+        Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp, exceptionMessageIfNotFound, forClient);
 
         if (inetSocketAddressOptional.isPresent() == false) {
             throw new IllegalStateException("Netconf tcp address not found." + exceptionMessageIfNotFound);
@@ -34,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context, String exceptionMessage) {
-        return extractSomeNetconfAddress(context, InfixProp.ssh, exceptionMessage);
+        return extractSomeNetconfAddress(context, InfixProp.ssh, exceptionMessage, false);
     }
 
     /**
@@ -47,14 +48,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
      *             if address or port are invalid, or configuration is missing
      */
     private static Optional<InetSocketAddress> extractSomeNetconfAddress(BundleContext context,
-            InfixProp infixProp, String exceptionMessage) {
-        String address = context.getProperty(PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
-        if (address == null) {
+                                                                         InfixProp infixProp,
+                                                                         String exceptionMessage,
+                                                                         boolean client) {
+        String address = "";
+        if (client) {
+            address = context.getProperty(PREFIX_PROP + infixProp + CLIENT_PROP + ADDRESS_SUFFIX_PROP);
+        }
+        if (address == null || address.equals("")){
+            address = context.getProperty(PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
+        }
+        if (address == null || address.equals("")) {
             throw new IllegalStateException("Cannot find initial netconf configuration for parameter    "
                     +PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP
                     +" in config.ini. "+exceptionMessage);
         }
-        String portKey = PREFIX_PROP + infixProp + PORT_SUFFIX_PROP;
+        String portKey = "";
+        if (client) {
+            portKey = PREFIX_PROP + infixProp + CLIENT_PROP + PORT_SUFFIX_PROP;
+        }
+        if (portKey == null || portKey.equals("")){
+            portKey = PREFIX_PROP + infixProp + PORT_SUFFIX_PROP;
+        }
         String portString = context.getProperty(portKey);
         checkNotNull(portString, "Netconf port must be specified in properties file with " + portKey);
         try {

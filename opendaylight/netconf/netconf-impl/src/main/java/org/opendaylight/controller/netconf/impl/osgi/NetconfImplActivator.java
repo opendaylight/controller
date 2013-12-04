@@ -34,7 +34,8 @@ public class NetconfImplActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context, "TCP is not configured, netconf not available.");
+        InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
+                "TCP is not configured, netconf not available.", false);
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);

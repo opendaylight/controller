@@ -53,7 +53,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         PersisterAggregator persister = PersisterAggregator.createFromProperties(propertiesProvider);
 
         InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                "Netconf is not configured, persister is not operational");
+                "Netconf is not configured, persister is not operational",true);
         configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(persister, address,
                 platformMBeanServer, ignoredMissingCapabilityRegex);
 
