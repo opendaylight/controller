@@ -80,6 +80,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
                 Long.valueOf(connectionAttempts), null);
         
         
+        device.setStrategy(strategy);
         
         InetAddress addr = InetAddresses.forString(addressValue);
         InetSocketAddress socketAddress = new InetSocketAddress(addr , getPort().intValue());

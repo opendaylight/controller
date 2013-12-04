@@ -55,13 +55,13 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
     }
 
     def start(NetconfClientDispatcher dispatcher) {
-        client = new NetconfClient(name, socketAddress, strategy, dispatcher);
+        client = NetconfClient.clientFor(name, socketAddress, strategy, dispatcher);
         confReaderReg = mountInstance.registerConfigurationReader(path, this);
         operReaderReg = mountInstance.registerOperationalReader(path, this);
     }
 
     override readConfigurationData(InstanceIdentifier path) {
-        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME, wrap(NETCONF_GET_CONFIG_QNAME, path.toFilterStructure()));
+        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME, wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, path.toFilterStructure()));
         val data = result.result.getFirstCompositeByName(NETCONF_DATA_QNAME);
         return data?.findNode(path) as CompositeNode;
     }

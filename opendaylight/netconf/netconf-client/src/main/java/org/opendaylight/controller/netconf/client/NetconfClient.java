@@ -67,6 +67,10 @@ public class NetconfClient implements Closeable {
         }
     }
 
+    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
+        return new NetconfClient(clientLabelForLogging,address,strat,netconfClientDispatcher);
+    }
+
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
             NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this(clientLabelForLogging, address,

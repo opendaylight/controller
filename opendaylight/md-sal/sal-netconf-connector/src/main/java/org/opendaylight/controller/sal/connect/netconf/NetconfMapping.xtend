@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.opendaylight.controller.sal.common.util.Rpcs
+import java.util.List
+import com.google.common.collect.ImmutableList
 
 class NetconfMapping {
 
@@ -26,12 +28,18 @@ class NetconfMapping {
     public static val NETCONF_RPC_QNAME = new QName(NETCONF_QNAME,"rpc");
     public static val NETCONF_GET_QNAME = new QName(NETCONF_QNAME,"get");
     public static val NETCONF_GET_CONFIG_QNAME = new QName(NETCONF_QNAME,"get-config");
+    public static val NETCONF_SOURCE_QNAME = new QName(NETCONF_QNAME,"source");
+    public static val NETCONF_RUNNING_QNAME = new QName(NETCONF_QNAME,"running");
     public static val NETCONF_RPC_REPLY_QNAME = new QName(NETCONF_QNAME,"rpc-reply");
     public static val NETCONF_OK_QNAME = new QName(NETCONF_QNAME,"ok");
     public static val NETCONF_DATA_QNAME = new QName(NETCONF_QNAME,"data");
     
+     static List<Node<?>> RUNNING = Collections.<Node<?>>singletonList(new SimpleNodeTOImpl(NETCONF_RUNNING_QNAME,null,null));
+    public static val CONFIG_SOURCE_RUNNING = new CompositeNodeTOImpl(NETCONF_SOURCE_QNAME,null,RUNNING);
 
     static val messageId = new AtomicInteger(0);
+    
+   
 
 
 
@@ -85,6 +93,15 @@ class NetconfMapping {
         }
         else {
             return new CompositeNodeTOImpl(name,null,Collections.emptyList());
+        }
+    }
+    
+        static def wrap(QName name,Node<?> additional,Node<?> node) {
+        if(node != null) {
+            return new CompositeNodeTOImpl(name,null,ImmutableList.of(additional,node));
+        }
+        else {
+            return new CompositeNodeTOImpl(name,null,ImmutableList.of(additional));
         }
     }
     
