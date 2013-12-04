@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a7dc6213",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/InventoryService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-12-04T23:32:09Z",
+      "side": 1,
+      "message": "You can return Collections.emptySet()",
+      "revId": "f7b4c292f2944d16bc9e5fe4ce479a510eba9c62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_67066a88",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/ISwitchManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-12-04T23:32:09Z",
+      "side": 1,
+      "message": "can we name it something shorter? i.e. getDisconnectedDevices etc. ?",
+      "revId": "f7b4c292f2944d16bc9e5fe4ce479a510eba9c62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_87d71eed",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2170,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-12-04T23:32:09Z",
+      "side": 1,
+      "message": "It\u0027s a good idea to check for null Switch here",
+      "revId": "f7b4c292f2944d16bc9e5fe4ce479a510eba9c62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
