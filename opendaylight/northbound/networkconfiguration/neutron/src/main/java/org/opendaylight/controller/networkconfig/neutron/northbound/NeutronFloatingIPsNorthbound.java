@@ -95,7 +95,7 @@ public class NeutronFloatingIPsNorthbound {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        List<NeutronFloatingIP> allFloatingIPs = floatingIPInterface.getAllFloatingIPs();
+        List<NeutronFloatingIP> allFloatingIPs = floatingIPInterface.getAll();
         List<NeutronFloatingIP> ans = new ArrayList<NeutronFloatingIP>();
         Iterator<NeutronFloatingIP> i = allFloatingIPs.iterator();
         while (i.hasNext()) {
@@ -138,15 +138,15 @@ public class NeutronFloatingIPsNorthbound {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!floatingIPInterface.floatingIPExists(floatingipUUID))
+        if (!floatingIPInterface.exists(floatingipUUID))
             return Response.status(404).build();
         if (fields.size() > 0) {
-            NeutronFloatingIP ans = floatingIPInterface.getFloatingIP(floatingipUUID);
+            NeutronFloatingIP ans = floatingIPInterface.get(floatingipUUID);
             return Response.status(200).entity(
                     new NeutronFloatingIPRequest(extractFields(ans, fields))).build();
         } else
             return Response.status(200).entity(
-                    new NeutronFloatingIPRequest(floatingIPInterface.getFloatingIP(floatingipUUID))).build();
+                    new NeutronFloatingIPRequest(floatingIPInterface.get(floatingipUUID))).build();
 
     }
 
@@ -186,15 +186,15 @@ public class NeutronFloatingIPsNorthbound {
         if (input.isSingleton()) {
             NeutronFloatingIP singleton = input.getSingleton();
             // check existence of id in cache and return badrequest if exists
-            if (floatingIPInterface.floatingIPExists(singleton.getID()))
+            if (floatingIPInterface.exists(singleton.getID()))
                 return Response.status(400).build();
             // check if the external network is specified, exists, and is an external network
             String externalNetworkUUID = singleton.getFloatingNetworkUUID();
             if (externalNetworkUUID == null)
                 return Response.status(400).build();
-            if (!networkInterface.networkExists(externalNetworkUUID))
+            if (!networkInterface.exists(externalNetworkUUID))
                 return Response.status(400).build();
-            NeutronNetwork externNetwork = networkInterface.getNetwork(externalNetworkUUID);
+            NeutronNetwork externNetwork = networkInterface.get(externalNetworkUUID);
             if (!externNetwork.isRouterExternal())
                 return Response.status(400).build();
             // if floating IP is specified, make sure it can come from the network
@@ -202,7 +202,7 @@ public class NeutronFloatingIPsNorthbound {
             if (floatingIP != null) {
                 if (externNetwork.getSubnets().size() > 1)
                     return Response.status(400).build();
-                NeutronSubnet externSubnet = subnetInterface.getSubnet(externNetwork.getSubnets().get(0));
+                NeutronSubnet externSubnet = subnetInterface.get(externNetwork.getSubnets().get(0));
                 if (!externSubnet.isValidIP(floatingIP))
                     return Response.status(400).build();
                 if (externSubnet.isIPInUse(floatingIP))
@@ -212,9 +212,9 @@ public class NeutronFloatingIPsNorthbound {
             String port_id = singleton.getPortUUID();
             if (port_id != null) {
                 String fixedIP = null;        // used for the fixedIP calculation
-                if (!portInterface.portExists(port_id))
+                if (!portInterface.exists(port_id))
                     return Response.status(404).build();
-                NeutronPort port = portInterface.getPort(port_id);
+                NeutronPort port = portInterface.get(port_id);
                 if (port.getFixedIPs().size() < 1)
                     return Response.status(400).build();
                 // if there is more than one fixed IP then check for fixed_ip_address
@@ -251,7 +251,7 @@ public class NeutronFloatingIPsNorthbound {
                         return Response.status(status).build();
                 }
             }
-            floatingIPInterface.addFloatingIP(singleton);
+            floatingIPInterface.add(singleton);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
@@ -302,17 +302,17 @@ public class NeutronFloatingIPsNorthbound {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!floatingIPInterface.floatingIPExists(floatingipUUID))
+        if (!floatingIPInterface.exists(floatingipUUID))
             return Response.status(404).build();
 
-        NeutronFloatingIP sourceFloatingIP = floatingIPInterface.getFloatingIP(floatingipUUID);
+        NeutronFloatingIP sourceFloatingIP = floatingIPInterface.get(floatingipUUID);
         if (!input.isSingleton())
             return Response.status(400).build();
         NeutronFloatingIP singleton = input.getSingleton();
         if (singleton.getID() != null)
             return Response.status(400).build();
 
-        NeutronNetwork externNetwork = networkInterface.getNetwork(
+        NeutronNetwork externNetwork = networkInterface.get(
                 sourceFloatingIP.getFloatingNetworkUUID());
 
         // if floating IP is specified, make sure it can come from the network
@@ -320,7 +320,7 @@ public class NeutronFloatingIPsNorthbound {
         if (floatingIP != null) {
             if (externNetwork.getSubnets().size() > 1)
                 return Response.status(400).build();
-            NeutronSubnet externSubnet = subnetInterface.getSubnet(externNetwork.getSubnets().get(0));
+            NeutronSubnet externSubnet = subnetInterface.get(externNetwork.getSubnets().get(0));
             if (!externSubnet.isValidIP(floatingIP))
                 return Response.status(400).build();
             if (externSubnet.isIPInUse(floatingIP))
@@ -331,9 +331,9 @@ public class NeutronFloatingIPsNorthbound {
         String port_id = singleton.getPortUUID();
         if (port_id != null) {
             String fixedIP = null;        // used for the fixedIP calculation
-            if (!portInterface.portExists(port_id))
+            if (!portInterface.exists(port_id))
                 return Response.status(404).build();
-            NeutronPort port = portInterface.getPort(port_id);
+            NeutronPort port = portInterface.get(port_id);
             if (port.getFixedIPs().size() < 1)
                 return Response.status(400).build();
             // if there is more than one fixed IP then check for fixed_ip_address
@@ -362,7 +362,7 @@ public class NeutronFloatingIPsNorthbound {
                 return Response.status(409).build();
             singleton.setFixedIPAddress(fixedIP);
         }
-        NeutronFloatingIP target = floatingIPInterface.getFloatingIP(floatingipUUID);
+        NeutronFloatingIP target = floatingIPInterface.get(floatingipUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
@@ -372,8 +372,8 @@ public class NeutronFloatingIPsNorthbound {
                     return Response.status(status).build();
             }
         }
-        floatingIPInterface.updateFloatingIP(floatingipUUID, singleton);
-        target = floatingIPInterface.getFloatingIP(floatingipUUID);
+        floatingIPInterface.update(floatingipUUID, singleton);
+        target = floatingIPInterface.get(floatingipUUID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
@@ -402,10 +402,10 @@ public class NeutronFloatingIPsNorthbound {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!floatingIPInterface.floatingIPExists(floatingipUUID))
+        if (!floatingIPInterface.exists(floatingipUUID))
             return Response.status(404).build();
         // TODO: need to undo port association if it exists
-        NeutronFloatingIP singleton = floatingIPInterface.getFloatingIP(floatingipUUID);
+        NeutronFloatingIP singleton = floatingIPInterface.get(floatingipUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
@@ -415,7 +415,7 @@ public class NeutronFloatingIPsNorthbound {
                     return Response.status(status).build();
             }
         }
-        floatingIPInterface.removeFloatingIP(floatingipUUID);
+        floatingIPInterface.remove(floatingipUUID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;

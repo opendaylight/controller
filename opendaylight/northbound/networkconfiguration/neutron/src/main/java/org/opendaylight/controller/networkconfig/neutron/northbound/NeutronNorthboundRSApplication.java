@@ -32,6 +32,7 @@ public class NeutronNorthboundRSApplication extends Application {
         classes.add(NeutronPortsNorthbound.class);
         classes.add(NeutronRoutersNorthbound.class);
         classes.add(NeutronFloatingIPsNorthbound.class);
+        classes.add(NeutronNorthboundRSApplication.class);
         return classes;
     }
 

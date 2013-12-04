@@ -8,19 +8,23 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Dictionary;
-import org.apache.felix.dm.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -55,12 +59,13 @@ public class Activator extends ComponentActivatorAbstractBase {
      * Object
      */
     public Object[] getImplementations() {
-        Object[] res = { NeutronFloatingIPInterface.class,
+        return new Object[]{ NeutronFloatingIPInterface.class,
                 NeutronRouterInterface.class,
                 NeutronPortInterface.class,
                 NeutronSubnetInterface.class,
-                NeutronNetworkInterface.class };
-        return res;
+                NeutronNetworkInterface.class,
+                NeutronSecurityGroupInterface.class,
+                NeutronSecurityGroupRuleInterface.class};
     }
 
     /**
@@ -77,60 +82,25 @@ public class Activator extends ComponentActivatorAbstractBase {
      * should not be the case though.
      */
     public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(NeutronFloatingIPInterface.class)) {
+        if (ifToCRUD.containsKey(imp)) {
             // export the service
-            c.setInterface(
-                    new String[] { INeutronFloatingIPCRUD.class.getName() }, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
+            Dictionary<String, String> props = new Hashtable<>();
             props.put("salListenerName", "neutron");
+            c.setInterface(new String[] { ifToCRUD.get(imp).getName() }, props);
             c.add(createContainerServiceDependency(containerName)
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronRouterInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronRouterCRUD.class.getName() }, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronPortInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronPortCRUD.class.getName() }, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronSubnetInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronSubnetCRUD.class.getName() }, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronNetworkInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronNetworkCRUD.class.getName() }, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
+                            "unsetClusterContainerService").setRequired(true));
         }
     }
+
+    private static HashMap<Class<?>, Class<?>> ifToCRUD = new HashMap<Class<?>, Class<?>>() {{
+        put(NeutronFloatingIPInterface.class, INeutronFloatingIPCRUD.class);
+        put(NeutronRouterInterface.class, INeutronRouterCRUD.class);
+        put(NeutronPortInterface.class, INeutronPortCRUD.class);
+        put(NeutronSubnetInterface.class, INeutronSubnetCRUD.class);
+        put(NeutronNetworkInterface.class, INeutronNetworkCRUD.class);
+        put(NeutronSecurityGroupInterface.class, INeutronSecurityGroupCRUD.class);
+        put(NeutronSecurityGroupRuleInterface.class, INeutronSecurityGroupRuleCRUD.class);
+    }};
 }

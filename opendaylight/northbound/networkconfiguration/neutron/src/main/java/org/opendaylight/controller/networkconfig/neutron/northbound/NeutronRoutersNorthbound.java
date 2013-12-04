@@ -97,7 +97,7 @@ public class NeutronRoutersNorthbound {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        List<NeutronRouter> allRouters = routerInterface.getAllRouters();
+        List<NeutronRouter> allRouters = routerInterface.getAll();
         List<NeutronRouter> ans = new ArrayList<NeutronRouter>();
         Iterator<NeutronRouter> i = allRouters.iterator();
         while (i.hasNext()) {
@@ -141,15 +141,15 @@ public class NeutronRoutersNorthbound {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!routerInterface.routerExists(routerUUID))
+        if (!routerInterface.exists(routerUUID))
             return Response.status(404).build();
         if (fields.size() > 0) {
-            NeutronRouter ans = routerInterface.getRouter(routerUUID);
+            NeutronRouter ans = routerInterface.get(routerUUID);
             return Response.status(200).entity(
                     new NeutronRouterRequest(extractFields(ans, fields))).build();
         } else
             return Response.status(200).entity(
-                    new NeutronRouterRequest(routerInterface.getRouter(routerUUID))).build();
+                    new NeutronRouterRequest(routerInterface.get(routerUUID))).build();
     }
 
     /**
@@ -183,13 +183,13 @@ public class NeutronRoutersNorthbound {
              * if there is external gateway information provided, verify that the specified network
              * exists and has been designated as "router:external"
              */
-            if (routerInterface.routerExists(singleton.getID()))
+            if (routerInterface.exists(singleton.getID()))
                 return Response.status(400).build();
             if (singleton.getExternalGatewayInfo() != null) {
                 String externNetworkPtr = singleton.getExternalGatewayInfo().getNetworkID();
-                if (!networkInterface.networkExists(externNetworkPtr))
+                if (!networkInterface.exists(externNetworkPtr))
                     return Response.status(400).build();
-                NeutronNetwork externNetwork = networkInterface.getNetwork(externNetworkPtr);
+                NeutronNetwork externNetwork = networkInterface.get(externNetworkPtr);
                 if (!externNetwork.isRouterExternal())
                     return Response.status(400).build();
             }
@@ -206,7 +206,7 @@ public class NeutronRoutersNorthbound {
             /*
              * add router to the cache
              */
-            routerInterface.addRouter(singleton);
+            routerInterface.add(singleton);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -255,12 +255,12 @@ public class NeutronRoutersNorthbound {
         /*
          * router has to exist and only a single delta can be supplied
          */
-        if (!routerInterface.routerExists(routerUUID))
+        if (!routerInterface.exists(routerUUID))
             return Response.status(404).build();
         if (!input.isSingleton())
             return Response.status(400).build();
         NeutronRouter singleton = input.getSingleton();
-        NeutronRouter original = routerInterface.getRouter(routerUUID);
+        NeutronRouter original = routerInterface.get(routerUUID);
 
         /*
          * attribute changes blocked by Neutron
@@ -284,9 +284,9 @@ public class NeutronRoutersNorthbound {
          */
         if (singleton.getExternalGatewayInfo() != null) {
             String externNetworkPtr = singleton.getExternalGatewayInfo().getNetworkID();
-            if (!networkInterface.networkExists(externNetworkPtr))
+            if (!networkInterface.exists(externNetworkPtr))
                 return Response.status(400).build();
-            NeutronNetwork externNetwork = networkInterface.getNetwork(externNetworkPtr);
+            NeutronNetwork externNetwork = networkInterface.get(externNetworkPtr);
             if (!externNetwork.isRouterExternal())
                 return Response.status(400).build();
         }
@@ -294,8 +294,8 @@ public class NeutronRoutersNorthbound {
         /*
          * update the router entry and return the modified object
          */
-        routerInterface.updateRouter(routerUUID, singleton);
-        NeutronRouter updatedRouter = routerInterface.getRouter(routerUUID);
+        routerInterface.update(routerUUID, singleton);
+        NeutronRouter updatedRouter = routerInterface.get(routerUUID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -303,7 +303,7 @@ public class NeutronRoutersNorthbound {
             }
         }
         return Response.status(200).entity(
-                new NeutronRouterRequest(routerInterface.getRouter(routerUUID))).build();
+                new NeutronRouterRequest(routerInterface.get(routerUUID))).build();
 
     }
 
@@ -329,11 +329,11 @@ public class NeutronRoutersNorthbound {
         /*
          * verify that the router exists and is not in use before removing it
          */
-        if (!routerInterface.routerExists(routerUUID))
+        if (!routerInterface.exists(routerUUID))
             return Response.status(404).build();
         if (routerInterface.routerInUse(routerUUID))
             return Response.status(409).build();
-        NeutronRouter singleton = routerInterface.getRouter(routerUUID);
+        NeutronRouter singleton = routerInterface.get(routerUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
@@ -343,7 +343,7 @@ public class NeutronRoutersNorthbound {
                     return Response.status(status).build();
             }
         }
-        routerInterface.removeRouter(routerUUID);
+        routerInterface.remove(routerUUID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -392,18 +392,18 @@ public class NeutronRoutersNorthbound {
          *  While the Neutron specification says that the router has to exist and the input can only specify either a subnet id
          *  or a port id, but not both, this code assumes that the plugin has filled everything in for us and so both must be present
          */
-        if (!routerInterface.routerExists(routerUUID))
+        if (!routerInterface.exists(routerUUID))
             return Response.status(400).build();
-        NeutronRouter target = routerInterface.getRouter(routerUUID);
+        NeutronRouter target = routerInterface.get(routerUUID);
         if (input.getSubnetUUID() == null ||
                     input.getPortUUID() == null)
                 return Response.status(400).build();
 
         // check that the port is part of the subnet
-        NeutronSubnet targetSubnet = subnetInterface.getSubnet(input.getSubnetUUID());
+        NeutronSubnet targetSubnet = subnetInterface.get(input.getSubnetUUID());
         if (targetSubnet == null)
             return Response.status(400).build();
-        NeutronPort targetPort = portInterface.getPort(input.getPortUUID());
+        NeutronPort targetPort = portInterface.get(input.getPortUUID());
         if (targetPort == null)
             return Response.status(400).build();
         if (!targetSubnet.getPortsInSubnet().contains(targetPort))
@@ -474,9 +474,9 @@ public class NeutronRoutersNorthbound {
         }
 
         // verify the router exists
-        if (!routerInterface.routerExists(routerUUID))
+        if (!routerInterface.exists(routerUUID))
             return Response.status(400).build();
-        NeutronRouter target = routerInterface.getRouter(routerUUID);
+        NeutronRouter target = routerInterface.get(routerUUID);
 
         /*
          * remove by subnet id.  Collect information about the impacted router for the response and
@@ -523,7 +523,7 @@ public class NeutronRoutersNorthbound {
             input.setSubnetUUID(targetInterface.getSubnetUUID());
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
-            NeutronPort port = portInterface.getPort(input.getPortUUID());
+            NeutronPort port = portInterface.get(input.getPortUUID());
             port.setDeviceID(null);
             port.setDeviceOwner(null);
             target.removeInterface(input.getPortUUID());
@@ -542,8 +542,8 @@ public class NeutronRoutersNorthbound {
          */
         if (input.getPortUUID() != null &&
                 input.getSubnetUUID() != null) {
-            NeutronPort port = portInterface.getPort(input.getPortUUID());
-            NeutronSubnet subnet = subnetInterface.getSubnet(input.getSubnetUUID());
+            NeutronPort port = portInterface.get(input.getPortUUID());
+            NeutronSubnet subnet = subnetInterface.get(input.getSubnetUUID());
             if (!subnet.isValidIP(port.getFixedIPs().get(0).getIpAddress()))
                 return Response.status(409).build();
             input.setID(target.getID());

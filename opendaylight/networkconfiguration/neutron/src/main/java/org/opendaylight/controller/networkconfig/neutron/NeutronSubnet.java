@@ -23,7 +23,7 @@ import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronSubnet {
+public class NeutronSubnet implements INeutronObject {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 

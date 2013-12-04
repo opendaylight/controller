@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronRouter {
+public class NeutronRouter implements INeutronObject {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
     @XmlElement (name="id")

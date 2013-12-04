@@ -30,8 +30,15 @@ import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroupRule;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroupRule_Direction;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroupRule_Ethertype;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
@@ -95,7 +102,7 @@ public class NeutronNetworksNorthbound {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        List<NeutronNetwork> allNetworks = networkInterface.getAllNetworks();
+        List<NeutronNetwork> allNetworks = networkInterface.getAll();
         List<NeutronNetwork> ans = new ArrayList<NeutronNetwork>();
         Iterator<NeutronNetwork> i = allNetworks.iterator();
         while (i.hasNext()) {
@@ -153,16 +160,16 @@ public class NeutronNetworksNorthbound {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!networkInterface.networkExists(netUUID)) {
+        if (!networkInterface.exists(netUUID)) {
             return Response.status(404).build();
         }
         if (fields.size() > 0) {
-            NeutronNetwork ans = networkInterface.getNetwork(netUUID);
+            NeutronNetwork ans = networkInterface.get(netUUID);
             return Response.status(200).entity(
                     new NeutronNetworkRequest(extractFields(ans, fields))).build();
         } else {
             return Response.status(200).entity(
-                    new NeutronNetworkRequest(networkInterface.getNetwork(netUUID))).build();
+                    new NeutronNetworkRequest(networkInterface.get(netUUID))).build();
         }
     }
 
@@ -182,30 +189,52 @@ public class NeutronNetworksNorthbound {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
+
+        INeutronSecurityGroupCRUD sgCRUD = NeutronCRUDInterfaces.getNeutronSecurityGroupCRUD(this);
+        if (sgCRUD == null) {
+            throw new ServiceUnavailableException("SecurityGroup CRUD Interface "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        INeutronSecurityGroupRuleCRUD sgRuleCRUD = NeutronCRUDInterfaces.getNeutronSecurityGroupRuleCRUD(this);
+        if (sgRuleCRUD == null) {
+            throw new ServiceUnavailableException("SecurityGroupRule CRUD Interface "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
+        INeutronSecurityGroupAware[] sgInstances = (INeutronSecurityGroupAware[])ServiceHelper
+                                    .getGlobalInstances(INeutronSecurityGroupAware.class, this, null);
+
         if (input.isSingleton()) {
             NeutronNetwork singleton = input.getSingleton();
 
             /*
              * network ID can't already exist
              */
-            if (networkInterface.networkExists(singleton.getID())) {
+            if (networkInterface.exists(singleton.getID())) {
                 return Response.status(400).build();
             }
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronNetworkAware service = (INeutronNetworkAware) instance;
                     int status = service.canCreateNetwork(singleton);
-                    if (status < 200 || status > 299) {
+                    if (!isOk(status)) {
                         return Response.status(status).build();
                     }
                 }
             }
 
+            int status = tryCreateDefaultGroup(singleton.getTenantID(), sgRuleCRUD,
+                                               sgCRUD, sgInstances);
+            if (!isOk(status)) {
+                return Response.status(status).build();
+            }
+
             // add network to cache
             singleton.initDefaults();
-            networkInterface.addNetwork(singleton);
+            networkInterface.add(singleton);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -217,7 +246,6 @@ public class NeutronNetworksNorthbound {
             List<NeutronNetwork> bulk = input.getBulk();
             Iterator<NeutronNetwork> i = bulk.iterator();
             HashMap<String, NeutronNetwork> testMap = new HashMap<String, NeutronNetwork>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
             while (i.hasNext()) {
                 NeutronNetwork test = i.next();
 
@@ -225,7 +253,7 @@ public class NeutronNetworksNorthbound {
                  * network ID can't already exist, nor can there be an entry for this UUID
                  * already in this bulk request
                  */
-                if (networkInterface.networkExists(test.getID())) {
+                if (networkInterface.exists(test.getID())) {
                     return Response.status(400).build();
                 }
                 if (testMap.containsKey(test.getID())) {
@@ -235,11 +263,18 @@ public class NeutronNetworksNorthbound {
                     for (Object instance: instances) {
                         INeutronNetworkAware service = (INeutronNetworkAware) instance;
                         int status = service.canCreateNetwork(test);
-                        if (status < 200 || status > 299) {
+                        if (!isOk(status)) {
                             return Response.status(status).build();
                         }
                     }
                 }
+
+                int status = tryCreateDefaultGroup(test.getTenantID(), sgRuleCRUD,
+                                                   sgCRUD, sgInstances);
+                if (!isOk(status)) {
+                    return Response.status(status).build();
+                }
+
                 testMap.put(test.getID(),test);
             }
 
@@ -248,7 +283,7 @@ public class NeutronNetworksNorthbound {
             while (i.hasNext()) {
                 NeutronNetwork test = i.next();
                 test.initDefaults();
-                networkInterface.addNetwork(test);
+                networkInterface.add(test);
                 if (instances != null) {
                     for (Object instance: instances) {
                         INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -284,7 +319,7 @@ public class NeutronNetworksNorthbound {
         /*
          * network has to exist and only a single delta is supported
          */
-        if (!networkInterface.networkExists(netUUID)) {
+        if (!networkInterface.exists(netUUID)) {
             return Response.status(404).build();
         }
         if (!input.isSingleton()) {
@@ -304,17 +339,17 @@ public class NeutronNetworksNorthbound {
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
-                NeutronNetwork original = networkInterface.getNetwork(netUUID);
+                NeutronNetwork original = networkInterface.get(netUUID);
                 int status = service.canUpdateNetwork(delta, original);
-                if (status < 200 || status > 299) {
+                if (!isOk(status)) {
                     return Response.status(status).build();
                 }
             }
         }
 
         // update network object and return the modified object
-                networkInterface.updateNetwork(netUUID, delta);
-                NeutronNetwork updatedSingleton = networkInterface.getNetwork(netUUID);
+                networkInterface.update(netUUID, delta);
+                NeutronNetwork updatedSingleton = networkInterface.get(netUUID);
                 if (instances != null) {
                     for (Object instance : instances) {
                         INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -322,7 +357,7 @@ public class NeutronNetworksNorthbound {
                     }
                 }
                 return Response.status(200).entity(
-                        new NeutronNetworkRequest(networkInterface.getNetwork(netUUID))).build();
+                        new NeutronNetworkRequest(networkInterface.get(netUUID))).build();
     }
 
     /**
@@ -346,25 +381,25 @@ public class NeutronNetworksNorthbound {
         /*
          * network has to exist and not be in use before it can be removed
          */
-        if (!networkInterface.networkExists(netUUID)) {
+        if (!networkInterface.exists(netUUID)) {
             return Response.status(404).build();
         }
         if (networkInterface.networkInUse(netUUID)) {
             return Response.status(409).build();
         }
 
-        NeutronNetwork singleton = networkInterface.getNetwork(netUUID);
+        NeutronNetwork singleton = networkInterface.get(netUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
                 int status = service.canDeleteNetwork(singleton);
-                if (status < 200 || status > 299) {
+                if (!isOk(status)) {
                     return Response.status(status).build();
                 }
             }
         }
-        networkInterface.removeNetwork(netUUID);
+        networkInterface.remove(netUUID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -372,5 +407,73 @@ public class NeutronNetworksNorthbound {
             }
         }
         return Response.status(204).build();
+    }
+
+    //TODO: Is it a good idea for the default SG to share the ID of the tenant?
+    //      For now, it seems to be the most efficient way.
+    private int tryCreateDefaultGroup(String tenantID,
+                                      INeutronSecurityGroupRuleCRUD sgRuleCRUD,
+                                      INeutronSecurityGroupCRUD sgCRUD,
+                                      INeutronSecurityGroupAware[] services) {
+        if (sgCRUD.exists(tenantID))  {
+            return 200;
+        }
+
+        NeutronSecurityGroup secGroup = new NeutronSecurityGroup();
+        secGroup.setSecGroupUUID(tenantID);
+        secGroup.setTenantUUID(tenantID);
+        secGroup.setName(NeutronSecurityGroup.DEFAULT_NAME);
+        secGroup.setDescription(NeutronSecurityGroup.DEFAULT_NAME);
+        secGroup.initDefaults();
+
+        NeutronSecurityGroupRule tenantRuleIPv4 =
+                getTenantIntercommunicationRule(secGroup, NeutronSecurityGroupRule_Ethertype.IPv4);
+        NeutronSecurityGroupRule tenantRuleIPv6 =
+                getTenantIntercommunicationRule(secGroup, NeutronSecurityGroupRule_Ethertype.IPv6);
+
+        if (services != null) {
+            for (INeutronSecurityGroupAware service: services) {
+                int status = service.canCreateSecurityGroup(secGroup);
+                if (!isOk(status)) return status;
+
+                status = service.canAddSecurityGroupRule(secGroup, tenantRuleIPv4);
+                if (!isOk(status)) return status;
+
+                status = service.canAddSecurityGroupRule(secGroup, tenantRuleIPv6);
+                if (!isOk(status)) return status;
+            }
+        }
+
+        sgCRUD.add(secGroup);
+        sgRuleCRUD.add(tenantRuleIPv4);
+        sgRuleCRUD.add(tenantRuleIPv6);
+
+        if (services != null) {
+            for (INeutronSecurityGroupAware service: services) {
+                service.neutronSecurityGroupCreated(secGroup);
+                service.neutronSecurityGroupRuleAdded(secGroup, tenantRuleIPv4);
+                service.neutronSecurityGroupRuleAdded(secGroup, tenantRuleIPv6);
+            }
+        }
+
+        return 200;
+    }
+
+    private NeutronSecurityGroupRule getTenantIntercommunicationRule(
+                                                NeutronSecurityGroup sg,
+                                                NeutronSecurityGroupRule_Ethertype ethertype) {
+        NeutronSecurityGroupRule rule = new NeutronSecurityGroupRule();
+        rule.setEthertype(ethertype);
+        rule.setDirection(NeutronSecurityGroupRule_Direction.INGRESS);
+        rule.setTenantUUID(sg.getTenantUUID());
+        rule.setSecGroupUUID(sg.getSecGroupUUID());
+        rule.setRemoteGroupUUID(sg.getSecGroupUUID());
+        rule.initDefaults();
+
+        return rule;
+    }
+
+    private static boolean isOk(int status) {
+        return status >= 200 && status <= 299;
     }
 }

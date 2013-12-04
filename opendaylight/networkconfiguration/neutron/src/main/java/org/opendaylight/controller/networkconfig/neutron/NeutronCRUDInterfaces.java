@@ -13,27 +13,34 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 public class NeutronCRUDInterfaces {
 
     public static INeutronNetworkCRUD getINeutronNetworkCRUD(Object o) {
-        INeutronNetworkCRUD answer = (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, o);
-        return answer;
+        return getCrudService(INeutronNetworkCRUD.class, o);
     }
 
     public static INeutronSubnetCRUD getINeutronSubnetCRUD(Object o) {
-        INeutronSubnetCRUD answer = (INeutronSubnetCRUD) ServiceHelper.getGlobalInstance(INeutronSubnetCRUD.class, o);
-        return answer;
+        return getCrudService(INeutronSubnetCRUD.class, o);
     }
 
     public static INeutronPortCRUD getINeutronPortCRUD(Object o) {
-        INeutronPortCRUD answer = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, o);
-        return answer;
+        return getCrudService(INeutronPortCRUD.class, o);
     }
 
     public static INeutronRouterCRUD getINeutronRouterCRUD(Object o) {
-        INeutronRouterCRUD answer = (INeutronRouterCRUD) ServiceHelper.getGlobalInstance(INeutronRouterCRUD.class, o);
-        return answer;
+        return getCrudService(INeutronRouterCRUD.class, o);
     }
 
     public static INeutronFloatingIPCRUD getINeutronFloatingIPCRUD(Object o) {
-        INeutronFloatingIPCRUD answer = (INeutronFloatingIPCRUD) ServiceHelper.getGlobalInstance(INeutronFloatingIPCRUD.class, o);
-        return answer;
+        return getCrudService(INeutronFloatingIPCRUD.class, o);
+    }
+
+    public static INeutronSecurityGroupCRUD getNeutronSecurityGroupCRUD(Object o) {
+        return getCrudService(INeutronSecurityGroupCRUD.class, o);
+    }
+
+    public static INeutronSecurityGroupRuleCRUD getNeutronSecurityGroupRuleCRUD(Object o) {
+        return getCrudService(INeutronSecurityGroupRuleCRUD.class, o);
+    }
+
+    private static <S extends INeutronCRUD<?>> S getCrudService(Class<S> klass, Object o) {
+        return klass.cast(ServiceHelper.getGlobalInstance(klass, o));
     }
 }
