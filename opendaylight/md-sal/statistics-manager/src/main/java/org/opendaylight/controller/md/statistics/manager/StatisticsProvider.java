@@ -130,11 +130,12 @@ public class StatisticsProvider implements AutoCloseable {
             return;
 
         for (Node targetNode : targetNodes){
-            spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
+            
             
             //We need to add check, so see if groups/meters are supported
             //by the target node. Below check doesn't look good.
             if(targetNode.getId().getValue().contains("openflow:")){
+                spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
                 InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
                 NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 
