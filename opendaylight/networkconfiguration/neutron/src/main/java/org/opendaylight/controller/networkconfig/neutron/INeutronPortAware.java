@@ -80,4 +80,66 @@ public interface INeutronPortAware {
      * @return void
      */
     public void neutronPortDeleted(NeutronPort port);
+
+    /**
+     * Services provide this interface method for taking action after a SecurityGroup has been deleted
+     *
+     * @param secGroup
+     *            instance of deleted Neutron SecurityGroup object
+     * @return void
+     */
+    public void neutronSecurityGroupDeleted(NeutronSecurityGroup secGroup);
+
+    /**
+     * Services provide this interface method to indicate if the specified SecurityGroupRule can be attached
+     * to the specified SecurityGroup
+     *
+     * @param secGroup
+     *            instance of the base Neutron SecurityGroup object
+     * @param secGroupRule
+     *            instance of the Neutron SecurityGroupRule to be attached to the SecurityGroup
+     * @return integer
+     *            the return value is understood to be a HTTP status code.  A return value outside of 200 through 299
+     *            results in the attach operation being interrupted and the returned status value reflected in the
+     *            HTTP response.
+     */
+    public int canAddRule(NeutronSecurityGroup secGroup, NeutronSecurityGroupRule secGroupRule);
+
+    /**
+     * Services provide this interface method for taking action after a SecurityGroupRule has been added to a SecurityGroup
+     *
+     * @param secGroup
+     *            instance of the base Neutron SecurityGroup object
+     * @param secGroupRule
+     *            instance of the Neutron SecurityGroupRule being added to the SecurityGroup
+     * @return void
+     */
+    public void neutronSecurityRuleAdded(NeutronSecurityGroup secGroup, NeutronSecurityGroupRule secGroupRule);
+
+    /**
+     * Services provide this interface method to indicate if the specified SecurityGroupRule can be removed from
+     * the specified SecurityGroup
+     *
+     * @param secGroup
+     *            instance of the base Neutron SecurityGroup object
+     * @param secGroupRule
+     *            instance of the Neutron SecurityGroupRule to be removed from the SecurityGroup
+     * @return integer
+     *            the return value is understood to be a HTTP status code.  A return value outside of 200 through 299
+     *            results in the detach operation being interrupted and the returned status value reflected in the
+     *            HTTP response.
+     */
+    public int canRemoveSecurityGroupRule(NeutronSecurityGroup secGroup, NeutronSecurityGroupRule secGroupRule);
+
+    /**
+     * Services provide this interface method for taking action after a SecurityGroupRule has been removed from
+     * a SecurityGroup
+     *
+     * @param secGroup
+     *            instance of the base Neutron SecurityGroup object
+     * @param secGroupRule
+     *            instance of the Neutron SecurityGroupRule being detached from the SecurityGroup
+     * @return void
+     */
+    public void neutronSecurityGroupRuleRemoved(NeutronSecurityGroup secGroup, NeutronSecurityGroupRule secGroupRule);
 }

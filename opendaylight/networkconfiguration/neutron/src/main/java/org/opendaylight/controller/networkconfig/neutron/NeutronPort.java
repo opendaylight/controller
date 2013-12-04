@@ -18,11 +18,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronPort {
+public class NeutronPort implements INeutronObject {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -56,9 +55,8 @@ public class NeutronPort {
     @XmlElement (name="tenant_id")
     String tenantID;
 
-    // TODO: add security groups
-    //        @XmlElement (name="security_groups")
-    //        List<String> securityGroups;
+    @XmlElement (name="security_groups")
+    List<String> securityGroups;
 
     /* this attribute stores the floating IP address assigned to
      * each fixed IP address
@@ -157,6 +155,14 @@ public class NeutronPort {
         this.tenantID = tenantID;
     }
 
+    public List<String> getSecurityGroups() {
+        return securityGroups;
+    }
+
+    public void setSecurityGroups(List<String> securityGroups) {
+        this.securityGroups = securityGroups;
+    }
+
     public NeutronFloatingIP getFloatingIP(String key) {
         if (!floatingIPMap.containsKey(key)) {
             return null;
@@ -221,17 +227,25 @@ public class NeutronPort {
             if (s.equals("tenant_id")) {
                 ans.setTenantID(this.getTenantID());
             }
+            if (s.equals("security_groups")) {
+                ans.setSecurityGroups(this.getSecurityGroups());
+            }
         }
         return ans;
     }
 
     public void initDefaults() {
-        adminStateUp = true;
+        if (adminStateUp == null) {
+           adminStateUp = true;
+        }
         if (status == null) {
             status = "ACTIVE";
         }
         if (fixedIPs == null) {
-            fixedIPs = new ArrayList<Neutron_IPs>();
+            fixedIPs = new ArrayList<>();
+        }
+        if (securityGroups == null) {
+            securityGroups = new ArrayList<>();
         }
     }
 
@@ -254,6 +268,6 @@ public class NeutronPort {
         return "NeutronPort [portUUID=" + portUUID + ", networkUUID=" + networkUUID + ", name=" + name
                 + ", adminStateUp=" + adminStateUp + ", status=" + status + ", macAddress=" + macAddress
                 + ", fixedIPs=" + fixedIPs + ", deviceID=" + deviceID + ", deviceOwner=" + deviceOwner + ", tenantID="
-                + tenantID + ", floatingIPMap=" + floatingIPMap + "]";
+                + tenantID + ", securityGroups=" + securityGroups + ", floatingIPMap=" + floatingIPMap + "]";
     }
 }
