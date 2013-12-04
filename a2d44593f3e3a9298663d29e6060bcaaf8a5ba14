@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_87c03e2b",
+        "filename": "opendaylight/netconf/netconf-monitoring/src/main/java/org/opendaylight/controller/netconf/monitoring/xml/JaxBSerializer.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-12-04T21:59:22Z",
+      "side": 1,
+      "message": "fixme",
+      "revId": "a2d44593f3e3a9298663d29e6060bcaaf8a5ba14",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
