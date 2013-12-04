@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 public class Field {
     private final String type;
@@ -19,6 +19,10 @@ public class Field {
 
     public Field(String type, String name) {
         this(Lists.<String> newArrayList(), type, name, null);
+    }
+
+    public Field(String type, String name, String definition) {
+        this(Lists.<String> newArrayList(), type, name, definition);
     }
 
     public Field(List<String> modifiers, String type, String name) {

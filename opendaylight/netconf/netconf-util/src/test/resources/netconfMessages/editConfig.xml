@@ -32,15 +32,15 @@
                     <name>test1</name>
 
                     <sleep-factor>
-                        2.00
+                        2.58
                     </sleep-factor>
 
                     <extended>
-                            1
+                            10
                     </extended>
 
                     <extended-twice>
-                            1
+                            20
                     </extended-twice>
 
                     <extended-enum>
@@ -48,9 +48,8 @@
                     </extended-enum>
 
                     <simple-long-2>44</simple-long-2>
-                    <binaryLeaf>8</binaryLeaf>
-                    <binaryLeaf>1</binaryLeaf>
-                    <binaryLeaf>0</binaryLeaf>
+                    <binaryLeaf>YmluYXJ5</binaryLeaf>
+
                     <type xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">configAttributeType</type>
                     <dto_d xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         <simple-int1>444</simple-int1>

@@ -136,7 +136,9 @@
                             org.osgi.framework,
                             org.osgi.util.tracker,
                             org.slf4j,
-                            org.w3c.dom
+                            org.w3c.dom,
+                            com.google.common.io,
+                            org.opendaylight.yangtools.yang.model.api.type
                         </Import-Package>
                         <Export-Package>
                         </Export-Package>

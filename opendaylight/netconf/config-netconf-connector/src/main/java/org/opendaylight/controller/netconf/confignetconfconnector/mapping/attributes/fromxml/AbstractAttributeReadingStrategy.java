@@ -27,11 +27,14 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
     @Override
     public AttributeConfigElement readElement(List<XmlElement> configNodes) {
         if (configNodes.size() == 0)
-            return AttributeConfigElement.createNullValue(nullableDefault);
+            return AttributeConfigElement.createNullValue(postprocessNullableDefault(nullableDefault));
 
         return readElementHook(configNodes);
     }
 
     abstract AttributeConfigElement readElementHook(List<XmlElement> configNodes);
 
+    protected Object postprocessNullableDefault(String nullableDefault) {
+        return nullableDefault;
+    }
 }
