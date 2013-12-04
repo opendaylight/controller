@@ -151,6 +151,9 @@ public class ServiceProviderController {
                 systemProperty("netconf.tcp.address").value("127.0.0.1"),
                 systemProperty("netconf.tcp.port").value("8383"),
 
+                systemProperty("netconf.tcp.client.address").value("127.0.0.1"),
+                systemProperty("netconf.tcp.client.port").value("8383"),
+
                 // Set the systemPackages (used by clustering)
                 systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
 
