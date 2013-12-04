@@ -59,8 +59,8 @@
     <yang.version>0.5.9-SNAPSHOT</yang.version>
     <guava.version>14.0.1</guava.version>
     <osgi.core.version>5.0.0</osgi.core.version>
-    <ietf-inet-types.version>2010.09.24.1</ietf-inet-types.version>
-    <ietf-yang-types.version>2010.09.24.1</ietf-yang-types.version>
+    <ietf-inet-types.version>2010.09.24.2-SNAPSHOT</ietf-inet-types.version>
+    <ietf-yang-types.version>2010.09.24.2-SNAPSHOT</ietf-yang-types.version>
     <opendaylight-l2-types.version>2013.08.27.1</opendaylight-l2-types.version>
     <yang-ext.version>2013.09.07.1</yang-ext.version>
     <javassist.version>3.17.1-GA</javassist.version>
