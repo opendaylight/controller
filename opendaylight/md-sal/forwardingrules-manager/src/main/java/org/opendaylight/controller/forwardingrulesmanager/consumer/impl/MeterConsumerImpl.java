@@ -242,6 +242,8 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
         if (null != meterKey && validateMeter(meterUpdateDataObject, FRMUtil.operation.UPDATE).isSuccess()) {                UpdateMeterInputBuilder updateMeterInputBuilder = new UpdateMeterInputBuilder();
             updateMeterBuilder = new UpdatedMeterBuilder();
             updateMeterBuilder.fieldsFrom(meterUpdateDataObject);
+            updateMeterBuilder.setMeterId(new MeterId(meterUpdateDataObject.getId()));
+            
             updateMeterInputBuilder.setUpdatedMeter(updateMeterBuilder.build());
             meterService.updateMeter(updateMeterInputBuilder.build());
         } else {
@@ -267,7 +269,7 @@ public class MeterConsumerImpl implements IForwardingRulesManager {
             meterBuilder.setNode(meterRemoveDataObject.getNode());
             meterBuilder.setFlags(meterRemoveDataObject.getFlags());
             meterBuilder.setMeterBandHeaders(meterRemoveDataObject.getMeterBandHeaders());
-            meterBuilder.setMeterId(meterRemoveDataObject.getMeterId());
+            meterBuilder.setMeterId(new MeterId(meterRemoveDataObject.getId()));
             meterBuilder.setNode(meterRemoveDataObject.getNode());        
             meterService.removeMeter(meterBuilder.build());
         } else {
