@@ -78,7 +78,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         for (entry : newBinding.moduleContexts.entrySet) {
 
             registry.onModuleContextAdded(schemaContext, entry.key, entry.value);
-
+            binding.pathToType.putAll(entry.value.childNodes)
             //val module = entry.key;
             val context = entry.value;
             updateBindingFor(context.childNodes, schemaContext);
@@ -174,16 +174,18 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
     }
 
     private def void updateBindingFor(Map<SchemaPath, GeneratedTypeBuilder> map, SchemaContext module) {
+        
         for (entry : map.entrySet) {
             val schemaNode = SchemaContextUtil.findDataSchemaNode(module, entry.key);
 
             //LOG.info("{} : {}",entry.key,entry.value.fullyQualifiedName)
+            val typeRef = new ReferencedTypeImpl(entry.value.packageName,entry.value.name)
+            typeToDefinition.put(typeRef, entry.value);
             if (schemaNode != null) {
-                val typeRef = new ReferencedTypeImpl(entry.value.packageName,entry.value.name)
                 typeToSchemaNode.put(typeRef, schemaNode);
-                typeToDefinition.put(typeRef, entry.value);
                 updatePromisedSchemas(typeRef, schemaNode);
             }
+            
         }
     }
 

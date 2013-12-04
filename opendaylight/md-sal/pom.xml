@@ -29,6 +29,7 @@
         <module>sal-binding-broker</module>
 
         <module>sal-binding-util</module>
+        <module>sal-binding-dom-it</module>
 
         <!-- Samples -->
         <module>samples</module>

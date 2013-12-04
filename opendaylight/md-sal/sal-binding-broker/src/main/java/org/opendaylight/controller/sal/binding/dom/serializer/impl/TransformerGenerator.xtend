@@ -49,6 +49,8 @@ import static extension org.opendaylight.controller.sal.binding.impl.util.YangSc
 import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl
 import org.opendaylight.yangtools.yang.model.util.ExtendedType
 import org.opendaylight.yangtools.yang.model.util.EnumerationType
+import static com.google.common.base.Preconditions.*
+import org.opendaylight.yangtools.yang.model.api.SchemaPath
 
 class TransformerGenerator {
 
@@ -79,6 +81,9 @@ class TransformerGenerator {
     var Map<Type, GeneratedTypeBuilder> typeToDefinition = new ConcurrentHashMap();
 
     @Property
+    var Map<SchemaPath, GeneratedTypeBuilder> pathToType = new ConcurrentHashMap();
+
+    @Property
     var Map<Type, SchemaNode> typeToSchemaNode = new ConcurrentHashMap();
 
     @Property
@@ -105,6 +110,27 @@ class TransformerGenerator {
             val ref = Types.typeForClass(inputType)
             val node = typeToSchemaNode.get(ref)
             val typeSpecBuilder = typeToDefinition.get(ref)
+            checkState(typeSpecBuilder !== null, "Could not find typedefinition for %s", inputType.name);
+            val typeSpec = typeSpecBuilder.toInstance();
+            val newret = generateTransformerFor(inputType, typeSpec, node);
+            listener.onClassProcessed(inputType);
+            return newret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+        ]
+    }
+
+    def Class<? extends BindingCodec<Map<QName, Object>, Object>> transformerFor(Class<?> inputType, DataSchemaNode node) {
+        return withClassLoaderAndLock(inputType.classLoader, lock) [ |
+            val ret = getGeneratedClass(inputType)
+            if (ret !== null) {
+                listener.onClassProcessed(inputType);
+                return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+            }
+            val ref = Types.typeForClass(inputType)
+            var typeSpecBuilder = typeToDefinition.get(ref)
+            if (typeSpecBuilder == null) {
+                typeSpecBuilder = pathToType.get(node.path);
+            }
+            checkState(typeSpecBuilder !== null, "Could not find TypeDefinition for %s, $s", inputType.name, node);
             val typeSpec = typeSpecBuilder.toInstance();
             val newret = generateTransformerFor(inputType, typeSpec, node);
             listener.onClassProcessed(inputType);
@@ -205,11 +231,9 @@ class TransformerGenerator {
         keyTransformerFor(cls, type, node);
     }
 
-    private def serializer(Type type) {
+    private def serializer(Type type, DataSchemaNode node) {
         val cls = loadClassWithTCCL(type.resolvedName);
-
-        transformerFor(cls);
-
+        transformerFor(cls, node);
     }
 
     private def Class<?> getValueSerializer(GeneratedTransferObject type) {
@@ -367,7 +391,7 @@ class TransformerGenerator {
             ]
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)  as Class<? extends BindingCodec<Object, Object>>
-            listener?.onDataContainerCodecCreated(inputType,ret);
+            listener?.onDataContainerCodecCreated(inputType, ret);
             log.info("DOM Codec for {} was generated {}", inputType, ret)
             return ret;
         } catch (Exception e) {
@@ -710,7 +734,7 @@ class TransformerGenerator {
                 Object _listItem = _iterator.next();
                 _is_empty = false;
                 //System.out.println("  item" + _listItem);
-                Object _value = «type.actualTypeArguments.get(0).serializer.resolvedName».fromDomStatic(_localQName,_listItem);
+                Object _value = «type.actualTypeArguments.get(0).serializer(schema).resolvedName».fromDomStatic(_localQName,_listItem);
                 //System.out.println("  value" + _value);
                 «propertyName».add(_value);
                 _hasNext = _iterator.hasNext();
@@ -762,12 +786,12 @@ class TransformerGenerator {
         if(_dom_«propertyName»_list != null && _dom_«propertyName»_list.size() > 0) {
             _is_empty = false;
             java.util.Map _dom_«propertyName» = (java.util.Map) _dom_«propertyName»_list.get(0);
-            «propertyName» =  «type.serializer.resolvedName».fromDomStatic(_localQName,_dom_«propertyName»);
+            «propertyName» =  «type.serializer(schema).resolvedName».fromDomStatic(_localQName,_dom_«propertyName»);
         }
     '''
 
     private def dispatch CharSequence deserializeProperty(ChoiceNode schema, Type type, String propertyName) '''
-        «type.resolvedName» «propertyName» = «type.serializer.resolvedName».fromDomStatic(_localQName,_compositeNode);
+        «type.resolvedName» «propertyName» = «type.serializer(schema).resolvedName».fromDomStatic(_localQName,_compositeNode);
         if(«propertyName» != null) {
             _is_empty = false;
         }
@@ -1140,7 +1164,7 @@ class TransformerGenerator {
             boolean _hasNext = _iterator.hasNext();
             while(_hasNext) {
                 Object _listItem = _iterator.next();
-                Object _domValue = «type.actualTypeArguments.get(0).serializer.resolvedName».toDomStatic(_resultName,_listItem);
+                Object _domValue = «type.actualTypeArguments.get(0).serializer(schema).resolvedName».toDomStatic(_resultName,_listItem);
                 _childNodes.add(_domValue);
                 _hasNext = _iterator.hasNext();
             }
@@ -1193,7 +1217,7 @@ class TransformerGenerator {
         String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();
         if(«propertyName» != null) {
-            java.util.List domValue = «type.serializer.resolvedName».toDomStatic(_resultName,«propertyName»);
+            java.util.List domValue = «type.serializer(container).resolvedName».toDomStatic(_resultName,«propertyName»);
             _childNodes.addAll(domValue);
         }
     '''
@@ -1219,7 +1243,7 @@ class TransformerGenerator {
         String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();
         if(«propertyName» != null) {
-            Object domValue = «type.serializer.resolvedName».toDomStatic(_resultName,«propertyName»);
+            Object domValue = «type.serializer(container).resolvedName».toDomStatic(_resultName,«propertyName»);
             _childNodes.add(domValue);
         }
     '''

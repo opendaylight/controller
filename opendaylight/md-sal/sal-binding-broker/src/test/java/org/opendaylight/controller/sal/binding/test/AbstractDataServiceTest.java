@@ -14,6 +14,8 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
+import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
+import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
@@ -37,117 +39,34 @@ public abstract class AbstractDataServiceTest {
 
     protected org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;
     protected DataProviderService baDataService;
-
-    /**
-     * Workaround for JUNIT sharing classloaders
-     * 
-     */
-    protected static final ClassPool POOL = new ClassPool();
-
-    protected RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
     protected BindingIndependentMappingService mappingService;
-    protected DataBrokerImpl baDataImpl;
-    protected org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
-    protected ListeningExecutorService executor;
-    protected BindingIndependentDataServiceConnector connectorServiceImpl;
-    protected HashMapDataStore rawDataStore;
-    protected SchemaAwareDataStoreAdapter schemaAwareDataStore;
     private DataStoreStatsWrapper dataStoreStats;
-
     protected DataStore dataStore;
+    protected BindingTestContext testContext;
 
     @Before
     public void setUp() {
-        executor = MoreExecutors.sameThreadExecutor();
-        baDataImpl = new DataBrokerImpl();
-        baDataService = baDataImpl;
-        baDataImpl.setExecutor(executor);
-
-        biDataImpl = new org.opendaylight.controller.sal.dom.broker.DataBrokerImpl();
-        biDataService = biDataImpl;
-        biDataImpl.setExecutor(executor);
-
-        rawDataStore = new HashMapDataStore();
-        schemaAwareDataStore = new SchemaAwareDataStoreAdapter();
-        schemaAwareDataStore.changeDelegate(rawDataStore);
-        dataStoreStats = new DataStoreStatsWrapper(schemaAwareDataStore);
-        dataStore = dataStoreStats;
-
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier treeRoot = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
-                .builder().toInstance();
-        biDataImpl.registerConfigurationReader(treeRoot, dataStore);
-        biDataImpl.registerOperationalReader(treeRoot, dataStore);
-        biDataImpl.registerCommitHandler(treeRoot, dataStore);
-
-        mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl();
-        mappingServiceImpl.setPool(POOL);
-        mappingService = mappingServiceImpl;
-        File pathname = new File("target/gen-classes-debug");
-        // System.out.println("Generated classes are captured in " +
-        // pathname.getAbsolutePath());
-        mappingServiceImpl.start(null);
-        // mappingServiceImpl.getBinding().setClassFileCapturePath(pathname);
-
-        connectorServiceImpl = new BindingIndependentDataServiceConnector();
-        connectorServiceImpl.setBaDataService(baDataService);
-        connectorServiceImpl.setBiDataService(biDataService);
-        connectorServiceImpl.setMappingService(mappingServiceImpl);
-        connectorServiceImpl.start();
-
-        String[] yangFiles = getModelFilenames();
-        if (yangFiles != null && yangFiles.length > 0) {
-            SchemaContext context = getContext(yangFiles);
-            mappingServiceImpl.onGlobalContextUpdated(context);
-            schemaAwareDataStore.onGlobalContextUpdated(context);
-        }
+        ListeningExecutorService executor = MoreExecutors.sameThreadExecutor();
+        BindingBrokerTestFactory factory = new BindingBrokerTestFactory();
+        factory.setExecutor(executor);
+        factory.setStartWithParsedSchema(getStartWithSchema());
+        testContext = factory.getTestContext();
+        testContext.start();
+        
+        baDataService = testContext.getBindingDataBroker();
+        biDataService = testContext.getDomDataBroker();
+        dataStore = testContext.getDomDataStore();
+        mappingService = testContext.getBindingToDomMappingService();
     }
 
-    protected String[] getModelFilenames() {
-        return getAllModelFilenames();
-    }
-
-    public static String[] getAllModelFilenames() {
-        Predicate<String> predicate = new Predicate<String>() {
-            @Override
-            public boolean apply(String input) {
-                return input.endsWith(".yang");
-            }
-        };
-        Reflections reflection = new Reflections("META-INF.yang", new ResourcesScanner());
-        Set<String> result = reflection.getResources(predicate);
-        return (String[]) result.toArray(new String[result.size()]);
-    }
-
-    public static SchemaContext getContext(String[] yangFiles) {
-
-        ClassLoader loader = AbstractDataServiceTest.class.getClassLoader();
-
-        List<InputStream> streams = new ArrayList<>();
-        for (String string : yangFiles) {
-            InputStream stream = loader.getResourceAsStream(string);
-            streams.add(stream);
-
-        }
-        YangParserImpl parser = new YangParserImpl();
-
-        Set<Module> modules = parser.parseYangModelsFromStreams(streams);
-        return parser.resolveSchemaContext(modules);
+    protected boolean getStartWithSchema() {
+        return true;
     }
 
     @After
     public void afterTest() {
 
-        log.info("BIDataStore Statistics: Configuration Read Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
-                dataStoreStats.getConfigurationReadCount(), dataStoreStats.getConfigurationReadTotalTime(),
-                dataStoreStats.getConfigurationReadAverageTime());
-
-        log.info("BIDataStore Statistics: Operational Read Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
-                dataStoreStats.getOperationalReadCount(), dataStoreStats.getOperationalReadTotalTime(),
-                dataStoreStats.getOperationalReadAverageTime());
-
-        log.info("BIDataStore Statistics: Request Commit Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
-                dataStoreStats.getRequestCommitCount(), dataStoreStats.getRequestCommitTotalTime(),
-                dataStoreStats.getRequestCommitAverageTime());
+        testContext.logDataStoreStatistics();
 
     }
 }
