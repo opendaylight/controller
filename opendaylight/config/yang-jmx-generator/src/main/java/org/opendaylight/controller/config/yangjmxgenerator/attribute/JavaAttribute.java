@@ -22,7 +22,7 @@ import javax.management.openmbean.SimpleType;
 public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     private final Type type;
-    private final String nullableDescription, nullableDefault;
+    private final String nullableDescription, nullableDefault, nullableDefaultWrappedForCode;
     private final TypeProviderWrapper typeProviderWrapper;
     private final TypeDefinition<?> typeDefinition;
 
@@ -33,6 +33,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         this.typeDefinition = leaf.getType();
         this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = leaf.getDefault();
+        this.nullableDefaultWrappedForCode = leaf.getDefault() == null ? null : typeProviderWrapper.getDefault(leaf);
         this.nullableDescription = leaf.getDescription();
     }
 
@@ -42,7 +43,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         this.type = typeProviderWrapper.getType(leaf);
         this.typeDefinition = leaf.getType();
         this.typeProviderWrapper = typeProviderWrapper;
-        this.nullableDefault = null;
+        this.nullableDefault = nullableDefaultWrappedForCode = null;
         this.nullableDescription = leaf.getDescription();
     }
 
@@ -54,6 +55,10 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             baseType = baseType.getBaseType();
         }
         return baseType;
+    }
+
+    public String getNullableDefaultWrappedForCode() {
+        return nullableDefaultWrappedForCode;
     }
 
     @Override

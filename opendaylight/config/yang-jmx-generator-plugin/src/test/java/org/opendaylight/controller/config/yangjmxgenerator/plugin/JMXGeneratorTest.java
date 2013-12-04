@@ -572,7 +572,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertDeclaredField(fieldDeclarations,
                 "private java.util.concurrent.ThreadFactory threadfactoryDependency");
         assertDeclaredField(fieldDeclarations,
-                "private java.lang.Long keepAlive=10");
+                "private java.lang.Long keepAlive=new java.lang.Long(\"10\")");
         assertDeclaredField(fieldDeclarations,
                 "private java.lang.Long coreSize");
         assertDeclaredField(fieldDeclarations, "private byte[] binary");
