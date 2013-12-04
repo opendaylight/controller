@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_bcc0f97c",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1040
+      },
+      "writtenOn": "2013-12-04T07:06:12Z",
+      "side": 1,
+      "message": "Just a comment. I\u0027m not sure if you want to allow a user to set timeout to such a large value as Integer.MAX_VALUE - 1, though it may not be an issue in practice.",
+      "revId": "c6deff15901f1f4ae649bf6aaf257484175113b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
