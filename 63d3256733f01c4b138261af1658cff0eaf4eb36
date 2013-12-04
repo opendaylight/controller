@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_5cd57d1a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-04T09:55:32Z",
+      "side": 1,
+      "message": "Can you please make a more detailed commit message? It\u0027s not clear what this patch contains.\nIf you have a feature page, please specify it here.",
+      "revId": "63d3256733f01c4b138261af1658cff0eaf4eb36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
