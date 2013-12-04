@@ -11,9 +11,12 @@ import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +32,16 @@ public class SSHServerTest {
 
 //    @Before
     public void startSSHServer() throws Exception{
-            logger.info("Creating SSH server");
-            NetconfSSHServer server = NetconfSSHServer.start(PORT,tcpAddress);
-            Thread sshServerThread = new Thread(server);
-            sshServerThread.setDaemon(true);
-            sshServerThread.start();
-            logger.info("SSH server on");
+        logger.info("Creating SSH server");
+        AuthProvider authProvider = new AuthProvider();
+        Map<String,String> users = new HashMap<String,String>();
+        users.put("netconf","netconf");
+        authProvider.addIdentity(users);
+        NetconfSSHServer server = NetconfSSHServer.start(PORT,tcpAddress,authProvider);
+        Thread sshServerThread = new Thread(server);
+        sshServerThread.setDaemon(true);
+        sshServerThread.start();
+        logger.info("SSH server on");
     }
 
     @Test

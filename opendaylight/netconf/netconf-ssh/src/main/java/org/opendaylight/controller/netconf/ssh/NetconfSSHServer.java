@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.concurrent.ThreadSafe;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.threads.SocketThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,22 +25,24 @@ public class NetconfSSHServer implements Runnable {
     private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHServer.class);
     private static final AtomicLong sesssionId = new AtomicLong();
     private final InetSocketAddress clientAddress;
+    private AuthProvider authProvider;
 
-    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress) throws Exception{
+    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress,AuthProvider authProvider) throws Exception{
 
-        logger.trace("Creating SSH server socket on port {}",serverPort);
+        logger.trace("Creating SSH server socket okorn port {}",serverPort);
         this.ss = new ServerSocket(serverPort);
         if (!ss.isBound()){
             throw new Exception("Socket can't be bound to requested port :"+serverPort);
         }
         logger.trace("Server socket created.");
         this.clientAddress = clientAddress;
+        this.authProvider = authProvider;
 
     }
 
 
-    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress) throws Exception {
-        return new NetconfSSHServer(serverPort, clientAddress);
+    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress,AuthProvider authProvider) throws Exception {
+        return new NetconfSSHServer(serverPort, clientAddress,authProvider);
     }
 
     public void stop() throws Exception {
@@ -54,7 +57,7 @@ public class NetconfSSHServer implements Runnable {
         while (acceptMore) {
             logger.trace("Starting new socket thread.");
             try {
-               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet());
+               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
