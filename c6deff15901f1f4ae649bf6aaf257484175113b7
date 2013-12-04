@@ -16,6 +16,24 @@
       "revId": "c6deff15901f1f4ae649bf6aaf257484175113b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9c5655d1",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-04T08:26:43Z",
+      "side": 1,
+      "message": "You have a point, but it would be difficult to assess a valid parameter value, so this check is only looking at integer validation which i think is fine unless we have better indication.",
+      "parentUuid": "da6255ed_bcc0f97c",
+      "revId": "c6deff15901f1f4ae649bf6aaf257484175113b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
