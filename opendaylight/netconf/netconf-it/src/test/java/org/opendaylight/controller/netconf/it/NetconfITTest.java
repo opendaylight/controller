@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -68,6 +70,7 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFact
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -435,7 +438,11 @@ public class NetconfITTest extends AbstractConfigTest {
 
     private void startSSHServer() throws Exception{
         logger.info("Creating SSH server");
-        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830,tcpAddress));
+        AuthProvider authProvider = new AuthProvider();
+        Map<String,String> users = new HashMap<String,String>();
+        users.put("netconf","netconf");
+        authProvider.addIdentity(users);
+        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830,tcpAddress,authProvider));
         sshServerThread.setDaemon(true);
         sshServerThread.start();
         logger.info("SSH server on");

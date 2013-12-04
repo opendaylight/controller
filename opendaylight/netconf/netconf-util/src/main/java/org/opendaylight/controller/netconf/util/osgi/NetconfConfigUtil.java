@@ -8,16 +8,21 @@
 
 package org.opendaylight.controller.netconf.util.osgi;
 
-        import com.google.common.base.Optional;
-        import java.net.InetSocketAddress;
-        import org.osgi.framework.BundleContext;
-        import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Optional;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import org.osgi.framework.BundleContext;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class NetconfConfigUtil {
     private static final String PREFIX_PROP = "netconf.";
 
     private enum InfixProp {
         tcp, ssh
+    }
+    private enum SshProperty{
+        user, password
     }
 
     private static final String PORT_SUFFIX_PROP = ".port";
@@ -38,6 +43,12 @@ public class NetconfConfigUtil {
         return extractSomeNetconfAddress(context, InfixProp.ssh, exceptionMessage, false);
     }
 
+    public static Map<String,String> getSshDefaultCredentials(BundleContext context){
+        Map<String,String> users = new HashMap<String,String>();
+        users.put(context.getProperty(PREFIX_PROP + InfixProp.ssh +"."+SshProperty.user),
+                context.getProperty(PREFIX_PROP + InfixProp.ssh +"."+SshProperty.password));
+        return users;
+    }
     /**
      * @param context
      *            from which properties are being read.
