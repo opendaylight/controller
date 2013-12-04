@@ -8,8 +8,13 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
+import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
+import org.opendaylight.controller.netconf.persist.impl.Util;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -28,13 +33,18 @@ public class ConfigPersisterActivator implements BundleActivator {
     private final static MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
     private static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
 
-    private ConfigPersisterNotificationHandler configPersisterNotificationHandler;
-
-    private Thread initializationThread;
-
     public static final String NETCONF_CONFIG_PERSISTER = "netconf.config.persister";
-    public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX =  "storageAdapterClass";
+
+    public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX = "storageAdapterClass";
+
     public static final String DEFAULT_IGNORED_REGEX = "^urn:ietf:params:xml:ns:netconf:base:1.0";
+
+
+    private volatile ConfigPersisterNotificationHandler jmxNotificationHandler;
+    private volatile NetconfClient netconfClient;
+    private Thread initializationThread;
+    private EventLoopGroup nettyThreadgroup;
+    private PersisterAggregator persisterAggregator;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -49,20 +59,24 @@ public class ConfigPersisterActivator implements BundleActivator {
         } else {
             regex = DEFAULT_IGNORED_REGEX;
         }
-        Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
-        PersisterAggregator persister = PersisterAggregator.createFromProperties(propertiesProvider);
+        final Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
+        nettyThreadgroup = new NioEventLoopGroup();
 
-        InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                "Netconf is not configured, persister is not operational",true);
-        configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(persister, address,
-                platformMBeanServer, ignoredMissingCapabilityRegex);
+        persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
+        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context, "Netconf is not configured, persister is not operational", true);
+        final ConfigPusher configPusher = new ConfigPusher(address, nettyThreadgroup);
+
 
         // offload initialization to another thread in order to stop blocking activator
         Runnable initializationRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    configPersisterNotificationHandler.init();
+                    netconfClient = configPusher.init(persisterAggregator.loadLastConfigs());
+                    jmxNotificationHandler = new ConfigPersisterNotificationHandler(
+                            platformMBeanServer, netconfClient, persisterAggregator,
+                            ignoredMissingCapabilityRegex);
+                    jmxNotificationHandler.init();
                 } catch (InterruptedException e) {
                     logger.info("Interrupted while waiting for netconf connection");
                 }
@@ -75,6 +89,18 @@ public class ConfigPersisterActivator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         initializationThread.interrupt();
-        configPersisterNotificationHandler.close();
+        if (jmxNotificationHandler != null) {
+            jmxNotificationHandler.close();
+        }
+        if (netconfClient != null) {
+            netconfClient = jmxNotificationHandler.getNetconfClient();
+            try {
+                Util.closeClientAndDispatcher(netconfClient);
+            } catch (Exception e) {
+                logger.warn("Unable to close connection to netconf {}", netconfClient, e);
+            }
+        }
+        nettyThreadgroup.shutdownGracefully();
+        persisterAggregator.close();
     }
 }

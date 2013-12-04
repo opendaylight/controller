@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -48,7 +48,7 @@ import java.util.ListIterator;
  </pre>
  * During server startup {@link ConfigPersisterNotificationHandler} requests last snapshot from underlying storages.
  * Each storage can respond by giving snapshot or absent response.
- * The {@link #loadLastConfig()} will search for first non-absent response from storages ordered backwards as user
+ * The {@link #loadLastConfigs()} will search for first non-absent response from storages ordered backwards as user
  * specified (first '3', then '2').
  *
  * When a commit notification is received, '2' will be omitted because readonly flag is set to true, so
@@ -154,19 +154,29 @@ public final class PersisterAggregator implements Persister {
         }
     }
 
+    /**
+     * @return last non-empty result from input persisters
+     */
     @Override
-    public Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException {
+    public List<ConfigSnapshotHolder> loadLastConfigs()  {
         // iterate in reverse order
         ListIterator<PersisterWithConfiguration> li = persisterWithConfigurations.listIterator(persisterWithConfigurations.size());
         while(li.hasPrevious()) {
             PersisterWithConfiguration persisterWithConfiguration = li.previous();
-            Optional<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterWithConfiguration.storage.loadLastConfig();
-            if (configSnapshotHolderOptional.isPresent()) {
-                return configSnapshotHolderOptional;
+            List<ConfigSnapshotHolder> configs = null;
+            try {
+                configs = persisterWithConfiguration.storage.loadLastConfigs();
+            } catch (IOException e) {
+                throw new RuntimeException("Error while calling loadLastConfig on " +  persisterWithConfiguration, e);
+            }
+            if (configs.isEmpty() == false) {
+                logger.debug("Found non empty configs using {}:{}", persisterWithConfiguration, configs);
+                return configs;
             }
         }
         // no storage had an answer
-        return Optional.absent();
+        logger.debug("No non-empty list of configuration snapshots found");
+        return Collections.emptyList();
     }
 
     @VisibleForTesting

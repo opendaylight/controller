@@ -8,9 +8,8 @@
 
 package org.opendaylight.controller.config.persist.api;
 
-import com.google.common.base.Optional;
-
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Base interface for persister implementation.
@@ -19,7 +18,7 @@ public interface Persister extends AutoCloseable {
 
     void persistConfig(ConfigSnapshotHolder configSnapshotHolder) throws IOException;
 
-    Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException;
+    List<ConfigSnapshotHolder> loadLastConfigs() throws IOException;
 
     @Override
     void close();

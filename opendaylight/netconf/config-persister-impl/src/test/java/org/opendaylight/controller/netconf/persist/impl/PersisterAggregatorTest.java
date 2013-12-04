@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -18,14 +17,14 @@ import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderB
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -79,9 +78,9 @@ public class PersisterAggregatorTest {
         assertFalse(persister.isReadOnly());
 
         persisterAggregator.persistConfig(null);
-        persisterAggregator.loadLastConfig();
+        persisterAggregator.loadLastConfigs();
         persisterAggregator.persistConfig(null);
-        persisterAggregator.loadLastConfig();
+        persisterAggregator.loadLastConfigs();
 
         assertEquals(2, DummyAdapter.persist);
         assertEquals(2, DummyAdapter.load);
@@ -110,29 +109,41 @@ public class PersisterAggregatorTest {
         }
     }
 
+    private ConfigSnapshotHolder mockHolder(String name){
+        ConfigSnapshotHolder result = mock(ConfigSnapshotHolder.class);
+        doReturn("mock:" + name).when(result).toString();
+        return result;
+    }
+
+    private Persister mockPersister(String name){
+        Persister result = mock(Persister.class);
+        doReturn("mock:" + name).when(result).toString();
+        return result;
+    }
+
     @Test
     public void loadLastConfig() throws Exception {
         List<PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
         PersisterWithConfiguration first = new PersisterWithConfiguration(mock(Persister.class), false);
 
-        ConfigSnapshotHolder ignored = mock(ConfigSnapshotHolder.class);
-        doReturn(Optional.of(ignored)).when(first.getStorage()).loadLastConfig(); // should be ignored
+        ConfigSnapshotHolder ignored = mockHolder("ignored");
+        doReturn(Arrays.asList(ignored)).when(first.getStorage()).loadLastConfigs(); // should be ignored
 
-        ConfigSnapshotHolder used = mock(ConfigSnapshotHolder.class);
-        PersisterWithConfiguration second = new PersisterWithConfiguration(mock(Persister.class), false);
-        doReturn(Optional.of(used)).when(second.getStorage()).loadLastConfig(); // should be used
 
-        PersisterWithConfiguration third = new PersisterWithConfiguration(mock(Persister.class), false);
-        doReturn(Optional.absent()).when(third.getStorage()).loadLastConfig();
+        ConfigSnapshotHolder used = mockHolder("used");
+        PersisterWithConfiguration second = new PersisterWithConfiguration(mockPersister("p1"), false);
+        doReturn(Arrays.asList(used)).when(second.getStorage()).loadLastConfigs(); // should be used
+
+        PersisterWithConfiguration third = new PersisterWithConfiguration(mockPersister("p2"), false);
+        doReturn(Arrays.asList()).when(third.getStorage()).loadLastConfigs();
 
         persisterWithConfigurations.add(first);
         persisterWithConfigurations.add(second);
         persisterWithConfigurations.add(third);
 
         PersisterAggregator persisterAggregator = new PersisterAggregator(persisterWithConfigurations);
-        Optional<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfig();
-        assertTrue(configSnapshotHolderOptional.isPresent());
-        assertEquals(used, configSnapshotHolderOptional.get());
+        List<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfigs();
+        assertEquals(1, configSnapshotHolderOptional.size());
+        assertEquals(used, configSnapshotHolderOptional.get(0));
     }
-
 }

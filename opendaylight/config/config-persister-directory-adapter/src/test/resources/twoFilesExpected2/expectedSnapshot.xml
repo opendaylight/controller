@@ -1,0 +1,25 @@
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+        <module>
+            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-broker</type>
+            <name>binding-data-broker</name>
+            <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                <name>ref_dom-broker</name>
+            </dom-broker>
+            <mapping-service xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                <name>ref_runtime-mapping-singleton</name>
+            </mapping-service>
+        </module>
+    </modules>
+    <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+        <service>
+            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
+            <instance>
+                <name>ref_binding-data-broker</name>
+                <provider>/config/modules/module[name='binding-data-broker']/instance[name='binding-data-broker']</provider>
+            </instance>
+        </service>
+    </services>
+</data>

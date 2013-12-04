@@ -8,10 +8,10 @@
 package org.opendaylight.controller.config.persist.storage.directory;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolderImpl;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,30 +64,25 @@ public class DirectoryPersister implements Persister {
     }
 
     @Override
-    public Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException {
+    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
         File[] filesArray = storage.listFiles();
-        if (filesArray.length == 0) {
-            return Optional.absent();
+        if (filesArray == null || filesArray.length == 0) {
+            return Collections.emptyList();
         }
         List<File> sortedFiles = new ArrayList<>(Arrays.asList(filesArray));
         Collections.sort(sortedFiles);
         // combine all found files
+        logger.debug("Reading files in following order: {}", sortedFiles);
 
-        SortedSet<String> combinedCapabilities = new TreeSet<>();
-        StringBuilder modulesBuilder = new StringBuilder(), servicesBuilder = new StringBuilder();
+        List<ConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
 
             final MyLineProcessor lineProcessor = new MyLineProcessor(file.getAbsolutePath());
             Files.readLines(file, ENCODING, lineProcessor);
-
-            modulesBuilder.append(lineProcessor.getModules());
-            servicesBuilder.append(lineProcessor.getServices());
-            combinedCapabilities.addAll(lineProcessor.getCapabilities());
+            result.add(lineProcessor.getConfigSnapshotHolder(header, middle, footer));
         }
-        String combinedSnapshot = header + modulesBuilder.toString() + middle + servicesBuilder.toString() + footer;
-        ConfigSnapshotHolder result = new ConfigSnapshotHolderImpl(combinedSnapshot, combinedCapabilities);
-        return Optional.of(result);
+        return result;
     }
 
 
@@ -165,25 +160,11 @@ class MyLineProcessor implements com.google.common.io.LineProcessor<String> {
         return caps;
     }
 
+    ConfigSnapshotHolder getConfigSnapshotHolder(String header, String middle, String footer) {
+        String combinedSnapshot = header + getModules() + middle + getServices() + footer;
+        ConfigSnapshotHolder result = new ConfigSnapshotHolderImpl(combinedSnapshot, getCapabilities(), fileNameForReporting);
+        return result;
+    }
+
 }
 
-class ConfigSnapshotHolderImpl implements ConfigSnapshotHolder {
-
-    private final String snapshot;
-    private final SortedSet<String> caps;
-
-    public ConfigSnapshotHolderImpl(String configSnapshot, SortedSet<String> capabilities) {
-        this.snapshot = configSnapshot;
-        this.caps = capabilities;
-    }
-
-    @Override
-    public String getConfigSnapshot() {
-        return snapshot;
-    }
-
-    @Override
-    public SortedSet<String> getCapabilities() {
-        return caps;
-    }
-}

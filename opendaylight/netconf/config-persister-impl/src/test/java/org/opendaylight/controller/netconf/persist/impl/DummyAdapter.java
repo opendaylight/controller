@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Optional;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class DummyAdapter implements StorageAdapter, Persister {
 
@@ -27,9 +28,9 @@ public class DummyAdapter implements StorageAdapter, Persister {
     static int load = 0;
 
     @Override
-    public Optional<ConfigSnapshotHolder> loadLastConfig() throws IOException {
+    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
         load++;
-        return Optional.absent();
+        return Collections.emptyList();
     }
 
     static int props = 0;
