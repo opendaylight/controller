@@ -37,6 +37,8 @@ public class NodeTableStatistics implements Serializable {
     private long lookupCount;
     @XmlElement
     private long matchedCount;
+    @XmlElement
+    private int maximumEntries;
 
 
     @Override
@@ -162,6 +164,20 @@ public class NodeTableStatistics implements Serializable {
      */
     public void setMatchedCount(long matchedCount) {
         this.matchedCount = matchedCount;
+    }
+
+    /**
+     * @return the maximumEntries
+     */
+    public long getMaximumEntries() {
+        return maximumEntries;
+    }
+
+    /**
+     * @param maximumEntries the maximumEntries to set
+     */
+    public void setMaximumEntries(int maximumEntries) {
+        this.maximumEntries = maximumEntries;
     }
 
     @Override

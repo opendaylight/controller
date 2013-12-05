@@ -54,6 +54,7 @@ public class TableStatisticsConverter {
                 ntStat.setActiveCount(ofTableStat.getActiveCount());
                 ntStat.setLookupCount(ofTableStat.getLookupCount());
                 ntStat.setMatchedCount(ofTableStat.getMatchedCount());
+                ntStat.setMaximumEntries(ofTableStat.getMaximumEntries());
                 this.ntStatsList.add(ntStat);
             }
         }

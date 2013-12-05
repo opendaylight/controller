@@ -24,12 +24,14 @@ public class NodeTableStatisticsTest {
         ntStats.setActiveCount(100);
         ntStats.setLookupCount(200);
         ntStats.setMatchedCount(500);
+        ntStats.setMaximumEntries(1000);
         ntStats.setName("Test");
 
         Assert.assertTrue(ntStats.getNodeTable().equals(nt));
         Assert.assertTrue(ntStats.getActiveCount() == 100);
         Assert.assertTrue(ntStats.getLookupCount() == 200);
         Assert.assertTrue(ntStats.getMatchedCount() == 500);
+        Assert.assertTrue(ntStats.getMaximumEntries() == 1000);
         Assert.assertTrue(ntStats.getName().equals("Test"));
     }
 }
