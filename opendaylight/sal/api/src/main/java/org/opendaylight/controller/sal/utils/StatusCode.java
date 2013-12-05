@@ -15,6 +15,7 @@ package org.opendaylight.controller.sal.utils;
  */
 public enum StatusCode {
         SUCCESS("Success"),
+        CREATED("Created"),
 
         BADREQUEST("Bad Request"),
         UNAUTHORIZED("UnAuthorized"),
