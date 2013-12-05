@@ -71,7 +71,7 @@ public class UserConfig implements Serializable {
 
     static {
         try {
-            UserConfig.oneWayFunction = MessageDigest.getInstance("SHA-1");
+            UserConfig.oneWayFunction = MessageDigest.getInstance("SHA-384");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
