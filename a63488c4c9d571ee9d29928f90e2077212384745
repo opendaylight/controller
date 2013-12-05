@@ -16,6 +16,24 @@
       "revId": "a63488c4c9d571ee9d29928f90e2077212384745",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_624c189f",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-05T16:55:14Z",
+      "side": 1,
+      "message": "So far the convention we use (here and in other bundles) when referencing configs names is case sensitive.",
+      "parentUuid": "da6255ed_42f35473",
+      "revId": "a63488c4c9d571ee9d29928f90e2077212384745",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
