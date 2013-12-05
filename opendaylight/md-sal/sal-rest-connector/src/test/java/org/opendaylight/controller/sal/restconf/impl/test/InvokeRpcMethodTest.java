@@ -27,7 +27,7 @@ public class InvokeRpcMethodTest {
         @Override
         public RpcResult<CompositeNode> answer(InvocationOnMock invocation) throws Throwable {
             CompositeNode compNode = (CompositeNode) invocation.getArguments()[1];
-            return new DummyRpcResult.Builder<CompositeNode>().result(compNode).build();
+            return new DummyRpcResult.Builder<CompositeNode>().result(compNode).isSuccessful(true).build();
         }
     }
 

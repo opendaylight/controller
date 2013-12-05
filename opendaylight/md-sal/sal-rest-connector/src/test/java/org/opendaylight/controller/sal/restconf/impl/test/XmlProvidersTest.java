@@ -133,21 +133,21 @@ public class XmlProvidersTest extends JerseyTest {
 
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
-        assertEquals(204, response.getStatus());
-        response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(200, response.getStatus());
+        response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
+        assertEquals(204, response.getStatus());
 
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
-        assertEquals(204, response.getStatus());
-        response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(200, response.getStatus());
+        response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
+        assertEquals(204, response.getStatus());
 
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE).put(entity);
-        assertEquals(204, response.getStatus());
-        response = target(uri).request(MEDIA_TYPE).post(entity);
         assertEquals(200, response.getStatus());
+        response = target(uri).request(MEDIA_TYPE).post(entity);
+        assertEquals(204, response.getStatus());
     }
 
     @Test
