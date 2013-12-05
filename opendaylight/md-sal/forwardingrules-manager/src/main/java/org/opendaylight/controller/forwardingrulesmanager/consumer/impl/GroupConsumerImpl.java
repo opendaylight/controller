@@ -39,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.Sal
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.UpdatedGroupBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.Buckets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.Bucket;
@@ -269,6 +270,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         
         UpdateGroupInputBuilder groupData = new UpdateGroupInputBuilder();
         updateGroupBuilder = new UpdatedGroupBuilder();
+        updateGroupBuilder.setGroupId(new GroupId(groupUpdateDataObject.getId()));
         updateGroupBuilder.fieldsFrom(groupUpdateDataObject);
         groupData.setUpdatedGroup(updateGroupBuilder.build());        
         groupService.updateGroup(groupData.build());
@@ -293,7 +295,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         AddGroupInputBuilder groupData = new AddGroupInputBuilder();
         groupData.setBuckets(groupAddDataObject.getBuckets());
         groupData.setContainerName(groupAddDataObject.getContainerName());
-        groupData.setGroupId(groupAddDataObject.getGroupId());
+        groupData.setGroupId(new GroupId(groupAddDataObject.getId()));
         groupData.setGroupType(groupAddDataObject.getGroupType());
         groupData.setNode(groupAddDataObject.getNode());    
         groupService.addGroup(groupData.build());
@@ -318,7 +320,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         RemoveGroupInputBuilder groupData = new RemoveGroupInputBuilder();
         groupData.setBuckets(groupRemoveDataObject.getBuckets());
         groupData.setContainerName(groupRemoveDataObject.getContainerName());
-        groupData.setGroupId(groupRemoveDataObject.getGroupId());
+        groupData.setGroupId(new GroupId(groupRemoveDataObject.getId()));
         groupData.setGroupType(groupRemoveDataObject.getGroupType());
         groupData.setNode(groupRemoveDataObject.getNode());    
         groupService.removeGroup(groupData.build());  
@@ -336,7 +338,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
         for (Entry<InstanceIdentifier<?>, Group> entry : transaction.updates.entrySet()) {
 
-            if (!updateGroup(entry.getKey(), entry.getValue()).isSuccess()) {
+            if (!addGroup(entry.getKey(), entry.getValue()).isSuccess()) {
                 transaction.updates.remove(entry.getKey());
                 return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
             }
