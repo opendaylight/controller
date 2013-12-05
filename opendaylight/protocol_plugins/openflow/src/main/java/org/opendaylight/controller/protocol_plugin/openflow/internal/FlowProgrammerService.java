@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -225,6 +226,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                     action, "Invalid node type"));
         }
 
+        Status status = validateFlow(flow);
+        if (!status.isSuccess()) {
+            return status;
+        }
+
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
@@ -256,12 +262,52 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 "Internal plugin error"));
     }
 
+    /*
+     * Method which runs openflow 1.0 specific validation on the requested flow
+     * This validation is needed because the openflow switch will silently accept
+     * the request and install only the applicable match fields
+     */
+    private Status validateFlow(Flow flow) {
+        Match m = flow.getMatch();
+        boolean isIPEthertypeSet = m.isPresent(MatchType.DL_TYPE)
+                && (m.getField(MatchType.DL_TYPE).getValue().equals(IPProtocols.IPV4.byteValue()) || m
+                        .getField(MatchType.DL_TYPE).getValue().equals(IPProtocols.IPV6.byteValue()));
+
+        // network address check
+        if ((m.isPresent(MatchType.NW_SRC) || m.isPresent(MatchType.NW_DST)) && !isIPEthertypeSet) {
+            return new Status(StatusCode.NOTACCEPTABLE,
+                    "The match on network source or destination address cannot be accepted if the match "
+                     + "on proper ethertype is missing");
+        }
+
+        // transport protocol check
+        if (m.isPresent(MatchType.NW_PROTO) && !isIPEthertypeSet) {
+            return new Status(StatusCode.NOTACCEPTABLE,
+                    "The match on network protocol cannot be accepted if the match on proper ethertype is missing");
+        }
+
+        // transport ports check
+        if ((m.isPresent(MatchType.TP_SRC) || m.isPresent(MatchType.TP_DST))
+                && (!isIPEthertypeSet || m.isAny(MatchType.NW_PROTO))) {
+            return new Status(
+                    StatusCode.NOTACCEPTABLE,
+                    "The match on transport source or destination port cannot be accepted if the match on network protocol and match on IP ethertype are missing");
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
+
     private Status modifyFlowInternal(Node node, Flow oldFlow, Flow newFlow, long rid) {
         String action = "modify";
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             return new Status(StatusCode.NOTACCEPTABLE, errorString("send",
                     action, "Invalid node type"));
         }
+
+        Status status = validateFlow(newFlow);
+        if (!status.isSuccess()) {
+            return status;
+        }
+
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
