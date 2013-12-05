@@ -7,6 +7,7 @@ package ${packageName};
 {
     // attributes
     <@moduleFieldsD moduleFields=moduleFields/>
+    <@fieldsD object=fields/>
     //attributes end
 
     private static final ${loggerType} logger = ${loggerFactoryType}.getLogger(${typeDeclaration.name}.class);

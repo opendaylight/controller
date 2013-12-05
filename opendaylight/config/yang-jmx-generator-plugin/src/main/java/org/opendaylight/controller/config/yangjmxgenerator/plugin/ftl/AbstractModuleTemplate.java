@@ -35,11 +35,11 @@ public class AbstractModuleTemplate extends GeneralClassTemplate {
 
     public AbstractModuleTemplate(Header header, String packageName,
             String abstractModuleName, List<String> implementedIfcs,
-            List<ModuleField> moduleFields, List<MethodDefinition> methods,
+            List<Field> fields, List<ModuleField> moduleFields,
+            List<MethodDefinition> methods,
             boolean isRuntime, String registratorType) {
         super(header, packageName, abstractModuleName, Collections
-                .<String> emptyList(), implementedIfcs, Collections
-                .<Field> emptyList(), methods, true, false, Collections
+                .<String> emptyList(), implementedIfcs, fields, methods, true, false, Collections
                 .<Constructor> emptyList());
         this.moduleFields = moduleFields;
         this.runtime = isRuntime;

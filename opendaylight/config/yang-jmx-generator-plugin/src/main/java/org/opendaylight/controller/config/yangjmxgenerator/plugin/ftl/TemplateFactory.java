@@ -7,11 +7,17 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.management.openmbean.SimpleType;
+
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.runtime.RuntimeBean;
@@ -21,13 +27,13 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute.Dependency;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute.Dependency;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation.Parameter;
@@ -41,15 +47,11 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQual
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 
-import javax.management.openmbean.SimpleType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class TemplateFactory {
 
@@ -238,6 +240,7 @@ public class TemplateFactory {
                 mbe.getPackageName());
 
         List<ModuleField> moduleFields = attrProcessor.getModuleFields();
+        List<Field> fields = attrProcessor.getFields();
         List<String> implementedIfcs = Lists.newArrayList(
                 Module.class.getCanonicalName(),
                 mbe.getFullyQualifiedName(mbe.getMXBeanInterfaceName()));
@@ -263,7 +266,7 @@ public class TemplateFactory {
 
         AbstractModuleTemplate abstractModuleTemplate = new AbstractModuleTemplate(
                 getHeaderFromEntry(mbe), mbe.getPackageName(),
-                mbe.getAbstractModuleName(), implementedIfcs, moduleFields,
+                mbe.getAbstractModuleName(), implementedIfcs, fields, moduleFields,
                 attrProcessor.getMethods(), generateRuntime,
                 registratorFullyQualifiedName);
 
@@ -426,6 +429,19 @@ public class TemplateFactory {
                 fields = Lists.newArrayList();
                 methods = Lists.newArrayList();
 
+                final String lineSeparator = System.lineSeparator();
+
+                StringBuffer hashCodeBody = new StringBuffer();
+                StringBuffer equlasBody = new StringBuffer();
+                hashCodeBody
+                        .append("final int prime = 31;").append(lineSeparator)
+                        .append("int result = 1;").append(lineSeparator);
+                equlasBody.append("if (obj == null) {").append(lineSeparator)
+                        .append("return false;").append(lineSeparator).append("}").append(lineSeparator)
+                        .append("if (getClass() != obj.getClass()) {").append(lineSeparator).append("return false;").append(lineSeparator)
+                        .append("}").append(lineSeparator)
+                        .append("final ").append(type).append(" other = (").append(type).append(") obj;").append(lineSeparator);
+
                 for (Entry<String, AttributeIfc> attrEntry : attrs.entrySet()) {
                     String innerName = attrEntry.getKey();
                     String varName = BindingGeneratorUtil
@@ -450,6 +466,12 @@ public class TemplateFactory {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
 
+                    hashCodeBody.append("result = prime * result + ((").append(varName).append(" == null) ? 0 : ").
+                            append(varName).append(".hashCode());").append(lineSeparator);
+                    equlasBody.append("if (this.").append(varName).append(" != other.").append(varName).append(") {").append(lineSeparator).
+                            append("return false;").append(lineSeparator)
+                            .append("}").append(lineSeparator);
+
                     fields.add(new Field(fullyQualifiedName, varName));
 
                     String getterName = "get" + innerName;
@@ -466,6 +488,16 @@ public class TemplateFactory {
                     methods.add(getter);
                     methods.add(setter);
                 }
+
+                hashCodeBody.append("return result;");
+                equlasBody.append("return true;");
+                Annotation overrideAnnotation = new Annotation("Override", Collections.<Parameter> emptyList());
+                MethodDefinition hashCodeMethod = new MethodDefinition("int", "hashCode", Collections.<Field> emptyList(),
+                        Lists.newArrayList(overrideAnnotation), hashCodeBody.toString());
+                MethodDefinition equalsMethod = new MethodDefinition("boolean", "equals", Lists.newArrayList(new Field("Object", "obj")),
+                        Lists.newArrayList(overrideAnnotation), equlasBody.toString());
+                methods.add(hashCodeMethod);
+                methods.add(equalsMethod);
 
             }
 
@@ -605,8 +637,9 @@ public class TemplateFactory {
 
     private static class AbstractModuleAttributesProcessor {
 
-        private static final String STRING_FULLY_QUALIFIED_NAME = "java.util.List";
+        private static final String STRING_FULLY_QUALIFIED_NAME = "java.util.LinkedHashSet";
 
+        private final List<Field> fields = Lists.newArrayList();
         private final List<ModuleField> moduleFields = Lists.newArrayList();
         private final List<MethodDefinition> methods = Lists.newArrayList();
 
@@ -614,6 +647,7 @@ public class TemplateFactory {
                 String packageName) {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 String type;
+                String listType = null;
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
                 if (attributeIfc instanceof TypedAttribute) {
@@ -635,8 +669,9 @@ public class TemplateFactory {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
                     }
-
                     type = STRING_FULLY_QUALIFIED_NAME.concat("<")
+                            .concat(fullyQualifiedName).concat(">");
+                    listType = "java.util.List".concat("<")
                             .concat(fullyQualifiedName).concat(">");
                 } else {
                     throw new UnsupportedOperationException(
@@ -661,16 +696,25 @@ public class TemplateFactory {
 
                 String varName = BindingGeneratorUtil
                         .parseToValidParamName(attrEntry.getKey());
+                String defaultValue = attributeIfc.getNullableDefault();
+                if(listType != null && defaultValue == null) {
+                    defaultValue = "new ".concat(STRING_FULLY_QUALIFIED_NAME).concat("<>()");
+                    fields.add(new Field(Lists.<String> newArrayList(), listType, varName + "BackupList",
+                            "new java.util.ArrayList<>()"));
+                }
                 moduleFields.add(new ModuleField(type, varName, attributeIfc
-                        .getUpperCaseCammelCase(), attributeIfc
-                        .getNullableDefault(), isDependency, dependency));
+                        .getUpperCaseCammelCase(), defaultValue, isDependency, dependency));
 
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();
+                String body = "return ".concat(varName).concat(";");
+                if(listType != null) {
+                    body = "return ".concat(varName + "BackupList;");
+                    type = listType;
+                }
                 MethodDefinition getter = new MethodDefinition(type,
                         getterName, Collections.<Field> emptyList(),
-                        Lists.newArrayList(overrideAnnotation), "return "
-                                + varName + ";");
+                        Lists.newArrayList(overrideAnnotation), body);
 
                 String setterName = "set"
                         + attributeIfc.getUpperCaseCammelCase();
@@ -680,10 +724,18 @@ public class TemplateFactory {
                             .createDescriptionAnnotation(attributeIfc.getNullableDescription()));
                 }
 
+                body = "this." + varName + " = " + varName + ";";
+                if(listType != null) {
+                    body = "this.".concat(varName).concat(" = new java.util.LinkedHashSet<>(").
+                            concat(varName).concat(");").concat(System.lineSeparator())
+                            .concat("this.").concat(varName).concat("BackupList = ").concat(varName).concat(";");
+                    type = listType;
+                }
+
                 MethodDefinition setter = new MethodDefinition("void",
                         setterName,
                         Lists.newArrayList(new Field(type, varName)),
-                        annotations, "this." + varName + " = " + varName + ";");
+                        annotations, body);
                 setter.setJavadoc(attributeIfc.getNullableDescription());
 
                 methods.add(getter);
@@ -697,6 +749,10 @@ public class TemplateFactory {
 
         List<MethodDefinition> getMethods() {
             return methods;
+        }
+
+        List<Field> getFields() {
+            return fields;
         }
 
     }
