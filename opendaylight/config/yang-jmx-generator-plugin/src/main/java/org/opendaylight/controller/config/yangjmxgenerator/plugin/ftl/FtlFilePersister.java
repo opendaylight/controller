@@ -7,19 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
-
+import com.google.common.annotations.VisibleForTesting;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.directives.AnnotationsDirective;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.directives.ConstructorsDirective;
@@ -33,11 +23,18 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.directives
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 public class FtlFilePersister {
     private static final Logger logger = LoggerFactory
@@ -56,7 +53,7 @@ public class FtlFilePersister {
                         ftlFile.getFtlTempleteLocation());
                 try {
                     template.process(ftlFile, writer);
-                } catch (TemplateException e) {
+                } catch (Throwable e) {
                     throw new IllegalStateException(
                             "Template error while generating " + ftlFile, e);
                 }
