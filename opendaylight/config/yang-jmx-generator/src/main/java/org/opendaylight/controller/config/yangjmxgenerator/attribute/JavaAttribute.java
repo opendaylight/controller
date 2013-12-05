@@ -7,19 +7,25 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import java.util.Arrays;
+import java.util.List;
 
 public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
+
+    public static final String DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION = "valueOfArtificialUnionProperty";
 
     private final Type type;
     private final String nullableDescription, nullableDefault, nullableDefaultWrappedForCode;
@@ -45,6 +51,11 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = nullableDefaultWrappedForCode = null;
         this.nullableDescription = leaf.getDescription();
+    }
+
+    public boolean isUnion() {
+        TypeDefinition<?> base = getBaseType(typeProviderWrapper, typeDefinition);
+        return base instanceof UnionTypeDefinition;
     }
 
     public TypeDefinition<?> getTypeDefinition() {
@@ -132,11 +143,68 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             return getArrayType();
         } else if (isEnum(baseType)) {
             return getSimpleType(baseType);
-        } else if (isDerivedType(baseType)) {
+        } else if (isUnion()) {
+            return getCompositeTypeForUnion(baseTypeDefinition);
+        } else if (isDerivedType(baseType, getType())) {
             return getCompositeType(baseType, baseTypeDefinition);
         }
 
         return getSimpleType(getType());
+    }
+
+    private OpenType<?> getCompositeTypeForUnion(TypeDefinition<?> baseTypeDefinition) {
+        Preconditions.checkArgument(baseTypeDefinition instanceof UnionTypeDefinition,
+                "Expected %s instance but was %s", UnionTypeDefinition.class, baseTypeDefinition);
+
+        List<TypeDefinition<?>> types = ((UnionTypeDefinition) baseTypeDefinition).getTypes();
+
+        String[] itemNames = new String[types.size()+1];
+        OpenType<?>[] itemTypes = new OpenType[itemNames.length];
+
+        addArtificialPropertyToUnionCompositeType(baseTypeDefinition, itemNames, itemTypes);
+
+        String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
+
+        int i = 1;
+        for (TypeDefinition<?> innerTypeDefinition : types) {
+
+            Type innerType = typeProviderWrapper.getType(innerTypeDefinition, innerTypeDefinition);
+
+            TypeDefinition<?> baseInnerTypeDefinition = getBaseType(typeProviderWrapper, innerTypeDefinition);
+            Type innerTypeBaseType = typeProviderWrapper.getType(baseInnerTypeDefinition, baseInnerTypeDefinition);
+
+            OpenType<?> innerCompositeType;
+
+            if(isDerivedType(innerTypeBaseType, innerType)) {
+                innerCompositeType = getCompositeType(innerTypeBaseType, baseInnerTypeDefinition);
+            } else {
+                innerCompositeType = SimpleTypeResolver.getSimpleType(innerType);
+            }
+
+            itemNames[i] = typeProviderWrapper.getJMXParamForUnionInnerType(innerTypeDefinition);
+            itemTypes[i++] = innerCompositeType;
+        }
+
+        String[] descriptions = Arrays.copyOf(itemNames, itemNames.length);
+        descriptions[0] = DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION;
+
+        try {
+            return new CompositeType(getUpperCaseCammelCase(), description, itemNames, descriptions, itemTypes);
+        } catch (OpenDataException e) {
+            throw new RuntimeException("Unable to create " + CompositeType.class + " with inner elements "
+                    + Arrays.toString(itemTypes), e);
+        }
+    }
+
+    public static final Class<Character> TYPE_OF_ARTIFICIAL_UNION_PROPERTY = char.class;
+
+    private void addArtificialPropertyToUnionCompositeType(TypeDefinition<?> baseTypeDefinition, String[] itemNames, OpenType<?>[] itemTypes) {
+        String artificialPropertyName = typeProviderWrapper.getJMXParamForBaseType(baseTypeDefinition);
+        itemNames[0] = artificialPropertyName;
+
+        OpenType<?> artificialPropertyType = getArrayOpenTypeForSimpleType(TYPE_OF_ARTIFICIAL_UNION_PROPERTY.getName(),
+                SimpleTypeResolver.getSimpleType(TYPE_OF_ARTIFICIAL_UNION_PROPERTY.getName()));
+        itemTypes[0] = artificialPropertyType;
     }
 
     private boolean isEnum(Type baseType) {
@@ -163,12 +231,15 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             throw new RuntimeException("Unable to create " + CompositeType.class + " with inner element of type "
                     + itemTypes, e);
         }
-
     }
 
     private OpenType<?> getArrayType() {
         String innerTypeFullyQName = getInnerType(getType());
         SimpleType<?> innerSimpleType = SimpleTypeResolver.getSimpleType(innerTypeFullyQName);
+        return getArrayOpenTypeForSimpleType(innerTypeFullyQName, innerSimpleType);
+    }
+
+    private OpenType<?> getArrayOpenTypeForSimpleType(String innerTypeFullyQName, SimpleType<?> innerSimpleType) {
         try {
             ArrayType<Object> arrayType = isPrimitive(innerTypeFullyQName) ? new ArrayType<>(innerSimpleType, true)
                     : new ArrayType<>(1, innerSimpleType);
@@ -191,8 +262,8 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         return type.getName().endsWith("[]");
     }
 
-    private boolean isDerivedType(Type baseType) {
-        return  baseType.equals(getType()) == false;
+    private boolean isDerivedType(Type baseType, Type currentType) {
+        return  baseType.equals(currentType) == false;
     }
 
     private static String getInnerType(Type type) {

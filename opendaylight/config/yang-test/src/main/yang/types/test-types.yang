@@ -23,4 +23,12 @@ module test-types {
         }
     }
 
+      typedef unionTest {
+        type union {
+          type string;
+          type uint32;
+          type extend-twice;
+        }
+      }
+
 }

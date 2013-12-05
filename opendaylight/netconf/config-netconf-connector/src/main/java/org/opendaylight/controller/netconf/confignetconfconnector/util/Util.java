@@ -38,7 +38,7 @@ public final class Util {
 
     public static void checkType(final Object value, final Class<?> clazz) {
         Preconditions.checkArgument(clazz.isAssignableFrom(value.getClass()), "Unexpected type " + value.getClass()
-                + " should be " + clazz);
+                + " should be " + clazz + " of " + value);
     }
 
     // TODO: add message and proper error types

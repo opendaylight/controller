@@ -72,13 +72,30 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaCompositeAttribute(CompositeType openType) {
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap = Maps.newHashMap();
-
         Map<String, String> yangToJmxMapping = Maps.newHashMap();
+
+        fillMappingForComposite(openType, innerMap, yangToJmxMapping);
+        return new CompositeAttributeResolvingStrategy(innerMap, openType, yangToJmxMapping);
+    }
+
+    private void fillMappingForComposite(CompositeType openType, Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap, Map<String, String> yangToJmxMapping) {
         for (String innerAttributeKey : openType.keySet()) {
             innerMap.put(innerAttributeKey, caseJavaAttribute(openType.getType(innerAttributeKey)));
             yangToJmxMapping.put(innerAttributeKey, innerAttributeKey);
         }
-        return new CompositeAttributeResolvingStrategy(innerMap, openType, yangToJmxMapping);
+    }
+
+    @Override
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaUnionAttribute(OpenType<?> openType) {
+
+        Preconditions.checkState(openType instanceof CompositeType, "Unexpected open type, expected %s but was %s");
+        CompositeType compositeType = (CompositeType) openType;
+
+        Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap = Maps.newHashMap();
+        Map<String, String> yangToJmxMapping = Maps.newHashMap();
+        fillMappingForComposite(compositeType, innerMap, yangToJmxMapping);
+
+        return new UnionCompositeAttributeResolvingStrategy(innerMap, compositeType, yangToJmxMapping);
     }
 
     @Override

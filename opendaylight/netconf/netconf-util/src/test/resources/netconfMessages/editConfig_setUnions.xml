@@ -1,0 +1,30 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <test-option>
+            set
+        </test-option>
+        <default-operation>merge</default-operation>
+        <config>
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-netconf
+                    </type>
+
+                    <name>instance-from-code</name>
+
+                    <ip xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">127.1.2.3</ip>
+                    <union-test-attr xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">randomStringForUnion</union-test-attr>
+
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+
+            </services>
+        </config>
+    </edit-config>
+</rpc>

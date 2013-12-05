@@ -29,12 +29,16 @@ public abstract class AttributeIfcSwitchStatement<T> {
 
         this.lastAttribute = attributeIfc;
 
+        OpenType<?> openType = attributeIfc.getOpenType();
+
         if (attributeIfc instanceof JavaAttribute) {
             try {
                 if(((JavaAttribute)attributeIfc).getTypeDefinition() instanceof BinaryTypeDefinition) {
-                    return caseJavaBinaryAttribute(attributeIfc.getOpenType());
+                    return caseJavaBinaryAttribute(openType);
+                } else if(((JavaAttribute)attributeIfc).isUnion()) {
+                    return caseJavaUnionAttribute(openType);
                 } else
-                    return caseJavaAttribute(attributeIfc.getOpenType());
+                    return caseJavaAttribute(openType);
             } catch (UnknownOpenTypeException e) {
                 throw getIllegalArgumentException(attributeIfc);
             }
@@ -42,14 +46,18 @@ public abstract class AttributeIfcSwitchStatement<T> {
         } else if (attributeIfc instanceof DependencyAttribute) {
             return caseDependencyAttribute(((DependencyAttribute) attributeIfc).getOpenType());
         } else if (attributeIfc instanceof ListAttribute) {
-            return caseListAttribute((ArrayType<?>) attributeIfc.getOpenType());
+            return caseListAttribute((ArrayType<?>) openType);
         } else if (attributeIfc instanceof ListDependenciesAttribute) {
-            return caseListDependeciesAttribute((ArrayType<?>) attributeIfc.getOpenType());
+            return caseListDependeciesAttribute((ArrayType<?>) openType);
         } else if (attributeIfc instanceof TOAttribute) {
             return caseTOAttribute(((TOAttribute) attributeIfc).getOpenType());
         }
 
         throw getIllegalArgumentException(attributeIfc);
+    }
+
+    protected T caseJavaUnionAttribute(OpenType<?> openType) {
+        return caseJavaAttribute(openType);
     }
 
     protected T caseJavaBinaryAttribute(OpenType<?> openType) {

@@ -144,7 +144,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
                 "ref_from_code_to_instance-from-code_1");
 
         edit("netconfMessages/editConfig_addServiceName.xml");
-         config = getConfigCandidate();
+        config = getConfigCandidate();
         assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
@@ -197,6 +197,29 @@ public class NetconfMappingTest extends AbstractConfigTest {
         for (String s : refNames) {
             assertThat(trimmedServices, JUnitMatchers.containsString(s));
         }
+    }
+
+    @Test
+    public void testConfigNetconfUnionTypes() throws Exception {
+
+        createModule(INSTANCE_NAME);
+
+        edit("netconfMessages/editConfig.xml");
+        commit();
+        Element response = getConfigRunning();
+        String trimmedResponse = XmlUtil.toString(response).replaceAll("\\s", "");
+        assertContainsString(trimmedResponse, "<ipxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">0:0:0:0:0:0:0:1</ip>");
+        assertContainsString(trimmedResponse, "<union-test-attrxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">456</union-test-attr>");
+
+
+        edit("netconfMessages/editConfig_setUnions.xml");
+        commit();
+        response = getConfigRunning();
+
+        trimmedResponse = XmlUtil.toString(response).replaceAll("\\s", "");
+        assertContainsString(trimmedResponse, "<ipxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">127.1.2.3</ip>");
+        assertContainsString(trimmedResponse, "<union-test-attrxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">randomStringForUnion</union-test-attr>");
+
     }
 
     @Test

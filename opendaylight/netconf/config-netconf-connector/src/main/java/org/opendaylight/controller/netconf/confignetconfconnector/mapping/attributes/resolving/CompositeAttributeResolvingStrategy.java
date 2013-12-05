@@ -21,7 +21,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import java.util.Map;
 
-final class CompositeAttributeResolvingStrategy extends
+class CompositeAttributeResolvingStrategy extends
         AbstractAttributeResolvingStrategy<CompositeDataSupport, CompositeType> {
     private final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes;
     private final Map<String, String> yangToJavaAttrMapping;
@@ -49,6 +49,7 @@ final class CompositeAttributeResolvingStrategy extends
 
         Util.checkType(value, Map.class);
         Map<?, ?> valueMap = (Map<?, ?>) value;
+        valueMap = preprocessValueMap(valueMap);
 
         Map<String, Object> items = Maps.newHashMap();
         Map<String, OpenType<?>> openTypes = Maps.newHashMap();
@@ -81,5 +82,9 @@ final class CompositeAttributeResolvingStrategy extends
         logger.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(), parsedValue);
 
         return Optional.of(parsedValue);
+    }
+
+    protected Map<?, ?> preprocessValueMap(Map<?, ?> valueMap) {
+        return valueMap;
     }
 }
