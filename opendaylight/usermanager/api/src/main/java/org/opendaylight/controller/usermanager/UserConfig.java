@@ -27,6 +27,8 @@ import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Configuration Java Object which represents a Local AAA user configuration
@@ -36,6 +38,23 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 @XmlAccessorType(XmlAccessType.NONE)
 public class UserConfig implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(UserConfig.class);
+    private static final boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");
+    private static final String DIGEST_ALGORITHM = "SHA-384";
+    private static final String BAD_PASSWORD = "Bad Password";
+    private static final int USERNAME_MAXLENGTH = 32;
+    protected static final String PASSWORD_REGEX = "(?=.*[^a-zA-Z0-9])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
+    private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
+    private static MessageDigest oneWayFunction;
+
+    static {
+        try {
+            UserConfig.oneWayFunction = MessageDigest.getInstance(DIGEST_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            log.error(String.format("Implementation of %s digest algorithm not found: %s", DIGEST_ALGORITHM,
+                    e.getMessage()));
+        }
+    }
 
     /**
      * User Id
@@ -48,7 +67,7 @@ public class UserConfig implements Serializable {
      * example
      * System-Admin
      * Network-Admin
-     * Netowrk-Operator
+     * Network-Operator
      */
     @XmlElement
     protected List<String> roles;
@@ -62,20 +81,7 @@ public class UserConfig implements Serializable {
     @XmlElement
     private String password;
 
-    private static final boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");
-    private static final String BAD_PASSWORD = "Bad Password";
-    private static final int USERNAME_MAXLENGTH = 32;
-    protected static final String PASSWORD_REGEX = "(?=.*[^a-zA-Z0-9])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
-    private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
-    private static MessageDigest oneWayFunction = null;
 
-    static {
-        try {
-            UserConfig.oneWayFunction = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-    }
 
     public UserConfig() {
     }
