@@ -34,6 +34,24 @@
       "revId": "72cd1c5dc996974948daab57eef1182cbf06d1d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_677b0af6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 956
+      },
+      "writtenOn": "2013-12-05T05:26:56Z",
+      "side": 1,
+      "message": "As michal mentioned , missed the implementation of SALFlowService , as notifications from switch were not used, but co-incedentely both notification from datastore and switch are under SalFlowListener. This was breaking addflow, so pushed it in",
+      "parentUuid": "da6255ed_a7aea283",
+      "revId": "72cd1c5dc996974948daab57eef1182cbf06d1d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
