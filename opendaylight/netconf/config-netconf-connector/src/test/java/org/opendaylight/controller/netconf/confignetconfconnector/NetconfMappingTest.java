@@ -132,6 +132,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // check after edit
         commit();
         Element response = getConfigRunning();
+        System.err.println(XmlUtil.toString(response));
 
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
