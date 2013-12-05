@@ -40,13 +40,25 @@ public abstract class NodeConnectorCreator {
         if (node.getType().equals(NodeIDType.OPENFLOW)) {
             try {
                 return new NodeConnector(NodeConnectorIDType.OPENFLOW,
-                        (Short) portId, node);
+                        portId, node);
             } catch (ConstructionException e1) {
                 logger.error("",e1);
                 return null;
             }
         }
         return null;
+    }
+
+    /**
+     * Generic NodeConnector creator
+     * The nodeConnector type is inferred from the node type
+     *
+     * @param portId The string representing the port id
+     * @param node The network node as {@link org.opendaylight.controller.sal.core.Node Node} object
+     * @return The corresponding {@link org.opendaylight.controller.sal.core.NodeConnector NodeConnector} object
+     */
+    public static NodeConnector createNodeConnector(String portId, Node node) {
+        return NodeConnector.fromString(String.format("%s|%s@%s", node.getType(), portId, node.toString()));
     }
 
     /**

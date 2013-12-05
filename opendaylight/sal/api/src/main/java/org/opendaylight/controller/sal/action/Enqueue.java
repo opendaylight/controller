@@ -21,6 +21,8 @@ public class Enqueue extends Action {
     private static final long serialVersionUID = 1L;
     @XmlElement
     private NodeConnector port;
+    @XmlElement
+    private int queue;
 
     /* Dummy constructor for JAXB */
     @SuppressWarnings("unused")
@@ -30,9 +32,25 @@ public class Enqueue extends Action {
     public Enqueue(NodeConnector port) {
         type = ActionType.ENQUEUE;
         this.port = port;
+        this.queue = 0;
+    }
+
+    public Enqueue(NodeConnector port, int queue) {
+        type = ActionType.ENQUEUE;
+        this.port = port;
+        this.queue = queue;
     }
 
     public NodeConnector getPort() {
         return port;
+    }
+
+    public int getQueue() {
+        return queue;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[%s:%s]", type, port, queue);
     }
 }

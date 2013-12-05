@@ -13,7 +13,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +25,7 @@ import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.HwPath;
 import org.opendaylight.controller.sal.action.Loopback;
@@ -609,25 +609,13 @@ public class FlowConfig implements Serializable {
         return true;
     }
 
-    public boolean isPortValid(Switch sw, Short port) {
-        if (port < 1) {
-            log.debug("port {} is not valid", port);
-            return false;
-        }
-
+    public boolean isPortValid(Switch sw, String port) {
         if (sw == null) {
             log.debug("switch info is not available. Skip checking if port is part of a switch or not.");
             return true;
         }
-
-        Set<NodeConnector> nodeConnectorSet = sw.getNodeConnectors();
-        for (NodeConnector nodeConnector : nodeConnectorSet) {
-            if (((Short) nodeConnector.getID()).equals(port)) {
-                return true;
-            }
-        }
-        log.debug("port {} is not a valid port of node {}", port, sw.getNode());
-        return false;
+        NodeConnector nc = NodeConnectorCreator.createNodeConnector(port, sw.getNode());
+        return sw.getNodeConnectors().contains(nc);
     }
 
     public boolean isVlanIdValid(String vlanId) {
@@ -735,9 +723,8 @@ public class FlowConfig implements Serializable {
             }
 
             if (ingressPort != null) {
-                Short port = Short.decode(ingressPort);
-                if (isPortValid(sw, port) == false) {
-                    String msg = String.format("Ingress port %d is not valid for the Switch", port);
+                if (!isPortValid(sw, ingressPort)) {
+                    String msg = String.format("Ingress port %s is not valid for the Switch", ingressPort);
                     if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
                         msg += " in Container " + containerName;
                     }
@@ -851,10 +838,10 @@ public class FlowConfig implements Serializable {
                     for (String t : sstr.group(1).split(",")) {
                         Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
                         if (n.matches()) {
-                            if (n.group(1) != null) {
-                                Short port = Short.parseShort(n.group(1));
-                                if (isPortValid(sw, port) == false) {
-                                    String msg = String.format("Output port %d is not valid for this switch", port);
+                            String port = n.group(1);
+                            if (port != null) {
+                                if (!isPortValid(sw, port)) {
+                                    String msg = String.format("Output port %s is not valid for this switch", port);
                                     if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
                                         msg += " in Container " + containerName;
                                     }
@@ -863,6 +850,29 @@ public class FlowConfig implements Serializable {
                             }
                         } else {
                             String msg = String.format("Output port %s is not valid", t);
+                            return new Status(StatusCode.BADREQUEST, msg);
+                        }
+                    }
+                    continue;
+                }
+                // check enqueue
+                sstr = Pattern.compile("ENQUEUE=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    for (String t : sstr.group(1).split(",")) {
+                        Matcher n = Pattern.compile("(?:(\\d+:\\d+))").matcher(t);
+                        if (n.matches()) {
+                            if (n.group(1) != null) {
+                                String port = n.group(1).split(":")[0];
+                                if (!isPortValid(sw, port)) {
+                                    String msg = String.format("Output port %d is not valid for this switch", port);
+                                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                                        msg += " in Container " + containerName;
+                                    }
+                                    return new Status(StatusCode.BADREQUEST, msg);
+                                }
+                            }
+                        } else {
+                            String msg = String.format("Enqueue port %s is not valid", t);
                             return new Status(StatusCode.BADREQUEST, msg);
                         }
                     }
@@ -990,7 +1000,7 @@ public class FlowConfig implements Serializable {
 
         if (this.ingressPort != null) {
             match.setField(MatchType.IN_PORT,
-                    NodeConnectorCreator.createOFNodeConnector(Short.parseShort(ingressPort), getNode()));
+                    NodeConnector.fromString(String.format("%s|%s@%s", node.getType(), ingressPort, node.toString())));
         }
         if (this.dlSrc != null) {
             match.setField(MatchType.DL_SRC, HexEncode.bytesFromHexString(this.dlSrc));
@@ -1095,9 +1105,28 @@ public class FlowConfig implements Serializable {
                         Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
                         if (n.matches()) {
                             if (n.group(1) != null) {
-                                short ofPort = Short.parseShort(n.group(1));
-                                actionList.add(new Output(NodeConnectorCreator.createOFNodeConnector(ofPort,
-                                        this.getNode())));
+                                String nc = String.format("%s|%s@%s", node.getType(), n.group(1), node.toString());
+                                actionList.add(new Output(NodeConnector.fromString(nc)));
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.ENQUEUE + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    for (String t : sstr.group(1).split(",")) {
+                        Matcher n = Pattern.compile("(?:(\\d+:\\d+))").matcher(t);
+                        if (n.matches()) {
+                            if (n.group(1) != null) {
+                                String parts[] = n.group(1).split(":");
+                                String nc = String.format("%s|%s@%s", node.getType(), parts[0], node.toString());
+                                if (parts.length == 1) {
+                                    actionList.add(new Enqueue(NodeConnector.fromString(nc)));
+                                } else {
+                                    actionList
+                                            .add(new Enqueue(NodeConnector.fromString(nc), Integer.parseInt(parts[1])));
+                                }
                             }
                         }
                     }
