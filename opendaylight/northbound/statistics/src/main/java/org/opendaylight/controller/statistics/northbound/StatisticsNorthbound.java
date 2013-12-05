@@ -844,7 +844,8 @@ public class StatisticsNorthbound {
      *                     },
      *                     "activeCount": "11",
      *                     "lookupCount": "816",
-     *                     "matchedCount": "220"
+     *                     "matchedCount": "220",
+     *                     "maximumEntries": "1000"
      *                 },
      *                 {
      *                     ...another table
@@ -876,6 +877,7 @@ public class StatisticsNorthbound {
      *          &lt;activeCount&gt;12&lt;/activeCount&gt;
      *          &lt;lookupCount&gt;10935&lt;/lookupCount&gt;
      *          &lt;matchedCount&gt;10084&lt;/matchedCount&gt;
+     *          &lt;maximumEntries&gt;1000&lt;/maximumEntries&gt;
      *      &lt;/tableStatistic&gt;
      *      &lt;tableStatistic&gt;
      *          &lt;nodeTable&gt;
@@ -888,6 +890,7 @@ public class StatisticsNorthbound {
      *          &lt;activeCount&gt;0&lt;/activeCount&gt;
      *          &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *          &lt;matchedCount&gt;0&lt;/matchedCount&gt;
+     *          &lt;maximumEntries&gt;0&lt;/maximumEntries&gt;
      *      &lt;/tableStatistic&gt;
      *      &lt;tableStatistic&gt;
      *          &lt;nodeTable&gt;
@@ -900,6 +903,7 @@ public class StatisticsNorthbound {
      *          &lt;activeCount&gt;0&lt;/activeCount&gt;
      *          &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *          &lt;matchedCount&gt;0&lt;/matchedCount&gt;
+     *          &lt;maximumEntries&gt;0&lt;/maximumEntries&gt;
      *      &lt;/tableStatistic&gt;
      *  &lt;/tableStatistics&gt;
      *  &lt;tableStatistics&gt;
@@ -987,7 +991,8 @@ public class StatisticsNorthbound {
      *             },
      *             "activeCount": "12",
      *             "lookupCount": "11382",
-     *             "matchedCount": "10524"
+     *             "matchedCount": "10524",
+     *             "maximumEntries": "1000"
      *         },
      *         {
      *             "nodeTable": {
@@ -999,7 +1004,8 @@ public class StatisticsNorthbound {
      *             },
      *             "activeCount": "0",
      *             "lookupCount": "0",
-     *             "matchedCount": "0"
+     *             "matchedCount": "0",
+     *             "maximumEntries": "0"
      *         }
      *    ]
      * }
@@ -1022,6 +1028,7 @@ public class StatisticsNorthbound {
      *         &lt;activeCount&gt;12&lt;/activeCount&gt;
      *         &lt;lookupCount&gt;10935&lt;/lookupCount&gt;
      *         &lt;matchedCount&gt;10084&lt;/matchedCount&gt;
+     *         &lt;maximumEntries&gt;1000&lt;/maximumEntries&gt;
      *     &lt;/tableStatistic&gt;
      *     &lt;tableStatistic&gt;
      *         &lt;nodeTable&gt;
@@ -1034,6 +1041,7 @@ public class StatisticsNorthbound {
      *         &lt;activeCount&gt;0&lt;/activeCount&gt;
      *         &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *         &lt;matchedCount&gt;0&lt;/matchedCount&gt;
+     *         &lt;maximumEntries&gt;0&lt;/maximumEntries&gt;
      *     &lt;/tableStatistic&gt;
      *     &lt;tableStatistic&gt;
      *         &lt;nodeTable&gt;
@@ -1046,6 +1054,7 @@ public class StatisticsNorthbound {
      *         &lt;activeCount&gt;0&lt;/activeCount&gt;
      *         &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *         &lt;matchedCount&gt;0&lt;/matchedCount&gt;
+     *         &lt;maximumEntries&gt;0&lt;/maximumEntries&gt;
      *     &lt;/tableStatistic&gt;
      * &lt;/nodeTableStatistics&gt;
      *
