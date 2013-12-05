@@ -2155,4 +2155,25 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         return (desc == null /* || desc.getValue().equalsIgnoreCase("none") */) ? ""
                 : desc.getValue();
     }
+
+    @Override
+    public Set<Switch> getConfiguredNotConnectedSwitches() {
+        Set<Switch> configuredNotConnectedSwitches = new HashSet<Switch>();
+        if (this.inventoryService == null) {
+            log.trace("inventory service not avaiable");
+            return configuredNotConnectedSwitches;
+        }
+
+        Set<Node> configuredNotConnectedNodes = this.inventoryService.getConfiguredNotConnectedNodes();
+        if (configuredNotConnectedNodes != null) {
+            for (Node node : configuredNotConnectedNodes) {
+                Switch sw = getSwitchByNode(node);
+                if (sw != null) {
+                    configuredNotConnectedSwitches.add(sw);
+                }
+            }
+        }
+        return configuredNotConnectedSwitches;
+    }
+
 }

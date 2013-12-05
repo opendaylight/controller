@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -136,6 +137,12 @@ public class InventoryService implements IInventoryShimInternalListener,
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
         logger.debug("getNodePros for container {}", containerName);
         return nodeProps;
+    }
+
+    // nothing to return
+    @Override
+    public Set<Node> getConfiguredNotConnectedNodes() {
+        return Collections.emptySet();
     }
 
     @Override
