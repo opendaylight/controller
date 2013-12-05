@@ -45,8 +45,11 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
@@ -810,4 +813,38 @@ public class FlowConverter {
         return list;
     }
 
+    /*
+     * Method which runs openflow 1.0 specific validation on the requested flow
+     * This validation is needed because the openflow switch will silently accept
+     * the request and install only the applicable match fields
+     */
+    public static Status validateFlow(Flow flow) {
+        Match m = flow.getMatch();
+        boolean isIPEthertypeSet = m.isPresent(MatchType.DL_TYPE)
+                && (m.getField(MatchType.DL_TYPE).getValue().equals(IPProtocols.IPV4.byteValue()) || m
+                        .getField(MatchType.DL_TYPE).getValue().equals(IPProtocols.IPV6.byteValue()));
+
+        // network address check
+        if ((m.isPresent(MatchType.NW_SRC) || m.isPresent(MatchType.NW_DST)) && !isIPEthertypeSet) {
+            return new Status(StatusCode.NOTACCEPTABLE,
+                    "The match on network source or destination address cannot be accepted if the match "
+                     + "on proper ethertype is missing");
+        }
+
+        // transport protocol check
+        if (m.isPresent(MatchType.NW_PROTO) && !isIPEthertypeSet) {
+            return new Status(StatusCode.NOTACCEPTABLE,
+                    "The match on network protocol cannot be accepted if the match on proper ethertype is missing");
+        }
+
+        // transport ports check
+        if ((m.isPresent(MatchType.TP_SRC) || m.isPresent(MatchType.TP_DST))
+                && (!isIPEthertypeSet || m.isAny(MatchType.NW_PROTO))) {
+            return new Status(
+                    StatusCode.NOTACCEPTABLE,
+                    "The match on transport source or destination port cannot be accepted if the match on network protocol and match on IP ethertype are missing");
+        }
+
+        return new Status(StatusCode.SUCCESS);
+    }
 }

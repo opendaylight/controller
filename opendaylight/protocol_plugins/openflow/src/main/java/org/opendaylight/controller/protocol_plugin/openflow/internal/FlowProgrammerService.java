@@ -225,6 +225,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                     action, "Invalid node type"));
         }
 
+        Status status = FlowConverter.validateFlow(flow);
+        if (!status.isSuccess()) {
+            return status;
+        }
+
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
@@ -262,6 +267,12 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             return new Status(StatusCode.NOTACCEPTABLE, errorString("send",
                     action, "Invalid node type"));
         }
+
+        Status status = FlowConverter.validateFlow(newFlow);
+        if (!status.isSuccess()) {
+            return status;
+        }
+
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
@@ -673,6 +684,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
      * @param xid
      *            The OF message xid
      */
+    @SuppressWarnings("unused")
     private void removeXid2Rid(long swid, int xid) {
         Map<Integer, Long> swxid2rid = this.xid2rid.get(swid);
         if (swxid2rid != null) {
