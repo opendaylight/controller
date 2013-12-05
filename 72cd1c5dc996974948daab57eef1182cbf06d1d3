@@ -52,6 +52,24 @@
       "revId": "72cd1c5dc996974948daab57eef1182cbf06d1d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c26e2496",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-05T09:40:58Z",
+      "side": 1,
+      "message": "Please add the explanations to the commit message itself. Once it\u0027s merged, noone sees the gerrit comments in git log, while the commit message is visible in git log.",
+      "parentUuid": "da6255ed_677b0af6",
+      "revId": "72cd1c5dc996974948daab57eef1182cbf06d1d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
