@@ -501,25 +501,26 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         args.add(instanceNameArg);
         args.add(dependencyResolverArg);
         args.add(bundleContextArg);
-        assertMethodPresent(methods, new MethodAssertion(Module.class.getCanonicalName(), "createModule", args));
+        String namingThreadFactoryModule = "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule";
+        assertMethodPresent(methods, new MethodAssertion(namingThreadFactoryModule, "createModule", args));
 
         args.add(2, oldInstanceArg);
-        assertMethodPresent(methods, new MethodAssertion(Module.class.getCanonicalName(), "createModule", args));
+        assertMethodPresent(methods, new MethodAssertion(namingThreadFactoryModule, "createModule", args));
 
         args.clear();
         args.add(oldInstanceArg);
-        assertMethodPresent(methods, new MethodAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "handleChangedClass", args));
+        assertMethodPresent(methods, new MethodAssertion(namingThreadFactoryModule, "handleChangedClass", args));
 
         args.clear();
         args.add(instanceNameArg);
         args.add(dependencyResolverArg);
         args.add(bundleContextArg);
-        assertMethodPresent(methods, new MethodAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "instantiateModule", args));
+        assertMethodPresent(methods, new MethodAssertion(namingThreadFactoryModule, "instantiateModule", args));
 
 
-        args.add(2, new ArgumentAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "oldModule"));
+        args.add(2, new ArgumentAssertion(namingThreadFactoryModule, "oldModule"));
         args.add(3, new ArgumentAssertion(AutoCloseable.class.getCanonicalName(), "oldInstance"));
-        assertMethodPresent(methods, new MethodAssertion("org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule", "instantiateModule", args));
+        assertMethodPresent(methods, new MethodAssertion(namingThreadFactoryModule, "instantiateModule", args));
 
         args.clear();
         args.add(new ArgumentAssertion(DependencyResolverFactory.class.getCanonicalName(), "dependencyResolverFactory"));

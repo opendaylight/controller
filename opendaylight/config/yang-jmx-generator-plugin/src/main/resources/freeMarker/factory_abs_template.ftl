@@ -26,12 +26,12 @@ package ${packageName};
     }
 
     @Override
-    public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {
+    public ${moduleInstanceType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {
         return instantiateModule(instanceName, dependencyResolver, bundleContext);
     }
 
     @Override
-    public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${dynamicMBeanWithInstanceType} old, ${bundleContextType} bundleContext) throws Exception {
+    public ${moduleInstanceType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${dynamicMBeanWithInstanceType} old, ${bundleContextType} bundleContext) throws Exception {
         ${moduleInstanceType} oldModule = null;
         try {
             oldModule = (${moduleInstanceType}) old.getModule();
