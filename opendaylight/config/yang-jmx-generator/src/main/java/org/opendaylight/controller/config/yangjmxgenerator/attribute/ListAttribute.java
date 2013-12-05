@@ -101,12 +101,16 @@ public class ListAttribute extends AbstractAttribute {
 
     @Override
     public ArrayType<?> getOpenType() {
-        OpenType<?> inerOpenType = innerAttribute.getOpenType();
+        OpenType<?> innerOpenType = innerAttribute.getOpenType();
+        return constructArrayType(innerOpenType);
+    }
+
+    static ArrayType<?> constructArrayType(OpenType<?> innerOpenType){
         try {
-            return new ArrayType<>(1, inerOpenType);
+            return new ArrayType<>(1, innerOpenType);
         } catch (OpenDataException e) {
             throw new RuntimeException("Unable to create " + ArrayType.class
-                    + " with inner element of type " + inerOpenType, e);
+                    + " with inner element of type " + innerOpenType, e);
         }
     }
 

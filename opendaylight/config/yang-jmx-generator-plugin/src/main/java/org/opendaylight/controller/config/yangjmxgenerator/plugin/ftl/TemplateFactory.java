@@ -21,13 +21,13 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute.Dependency;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.Dependency;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation.Parameter;
@@ -39,6 +39,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Meth
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
+import org.opendaylight.yangtools.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 
 import javax.management.openmbean.SimpleType;
@@ -150,18 +151,41 @@ public class TemplateFactory {
         return result;
     }
 
+    static String serializeType(Type type) {
+        if (type instanceof ParameterizedType){
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            StringBuffer sb = new StringBuffer();
+            sb.append(parameterizedType.getRawType().getFullyQualifiedName());
+            sb.append("<");
+            boolean first = true;
+            for(Type parameter: parameterizedType.getActualTypeArguments()) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(",");
+                }
+                sb.append(serializeType(parameter));
+            }
+            sb.append(">");
+            return sb.toString();
+        } else {
+            return type.getFullyQualifiedName();
+        }
+    }
+
+
     private static String getReturnType(RuntimeBeanEntry entry, AttributeIfc attributeIfc) {
         String returnType;
         if (attributeIfc instanceof TypedAttribute) {
-            returnType = ((TypedAttribute) attributeIfc).getType()
-                    .getFullyQualifiedName();
+            Type type = ((TypedAttribute) attributeIfc).getType();
+            returnType = serializeType(type);
         } else if (attributeIfc instanceof TOAttribute) {
             String fullyQualifiedName = FullyQualifiedNameHelper
                     .getFullyQualifiedName(entry.getPackageName(),
                             attributeIfc.getUpperCaseCammelCase());
 
             returnType = fullyQualifiedName;
-        } else if (attributeIfc instanceof ListAttribute) {
+        } else if (attributeIfc instanceof ListAttribute) { //FIXME: listAttribute might extend TypedAttribute
             AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
                     .getInnerAttribute();
 
@@ -421,8 +445,7 @@ public class TemplateFactory {
                 processAttrs(attrs, packageName);
             }
 
-            private void processAttrs(Map<String, AttributeIfc> attrs,
-                    String packageName) {
+            private void processAttrs(Map<String, AttributeIfc> attrs, String packageName) {
                 fields = Lists.newArrayList();
                 methods = Lists.newArrayList();
 
@@ -431,21 +454,23 @@ public class TemplateFactory {
                     String varName = BindingGeneratorUtil
                             .parseToValidParamName(attrEntry.getKey());
 
-                    String fullyQualifiedName = null;
+                    String fullyQualifiedName;
                     if (attrEntry.getValue() instanceof TypedAttribute) {
-                        Type innerType = ((TypedAttribute) attrEntry.getValue())
-                                .getType();
-                        fullyQualifiedName = innerType.getFullyQualifiedName();
-                    } else if (attrEntry.getValue() instanceof ListAttribute) {
+                        Type type = ((TypedAttribute) attrEntry.getValue()).getType();
+                        fullyQualifiedName = serializeType(type);
+                    } else if (attrEntry.getValue() instanceof ListAttribute) { //FIXME: listAttribute might extend TypedAttribute
                         AttributeIfc innerAttr = ((ListAttribute) attrEntry
                                 .getValue()).getInnerAttribute();
+                        fullyQualifiedName = "java.util.List<";
+                        if (innerAttr instanceof TypedAttribute){
+                            Type type = ((TypedAttribute) innerAttr).getType();
+                            fullyQualifiedName += serializeType(type);
+                        } else {
+                            fullyQualifiedName += FullyQualifiedNameHelper
+                                    .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
+                        }
 
-                        String innerTpe = innerAttr instanceof TypedAttribute ? ((TypedAttribute) innerAttr)
-                                .getType().getFullyQualifiedName()
-                                : FullyQualifiedNameHelper
-                                        .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
-
-                        fullyQualifiedName = "java.util.List<" + innerTpe + ">";
+                        fullyQualifiedName += ">";
                     } else
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
@@ -498,8 +523,8 @@ public class TemplateFactory {
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
                 if (attributeIfc instanceof TypedAttribute) {
-                    returnType = ((TypedAttribute) attributeIfc).getType()
-                            .getFullyQualifiedName();
+                    TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
+                    returnType = serializeType(typedAttribute.getType());
                 } else if (attributeIfc instanceof TOAttribute) {
                     String fullyQualifiedName = FullyQualifiedNameHelper
                             .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
@@ -565,14 +590,14 @@ public class TemplateFactory {
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
                 if (attributeIfc instanceof TypedAttribute) {
-                    type = ((TypedAttribute) attributeIfc).getType()
-                            .getFullyQualifiedName();
+                    TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
+                    type = serializeType(typedAttribute.getType());
                 } else if (attributeIfc instanceof TOAttribute) {
                     String fullyQualifiedName = FullyQualifiedNameHelper
                             .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
 
                     type = fullyQualifiedName;
-                } else if (attributeIfc instanceof ListAttribute) {
+                } else if (attributeIfc instanceof ListAttribute) {  //FIXME: listAttribute might extend TypedAttribute
                     String fullyQualifiedName = null;
                     AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
                             .getInnerAttribute();
@@ -617,8 +642,8 @@ public class TemplateFactory {
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
                 if (attributeIfc instanceof TypedAttribute) {
-                    type = ((TypedAttribute) attributeIfc).getType()
-                            .getFullyQualifiedName();
+                    TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
+                    type = serializeType(typedAttribute.getType());
                 } else if (attributeIfc instanceof TOAttribute) {
                     String fullyQualifiedName = FullyQualifiedNameHelper
                             .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());

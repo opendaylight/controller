@@ -100,10 +100,15 @@ public class SchemaContextTest extends AbstractYangTest {
 
     @Test
     public void testReadingIdentities_threadsJavaModule() {
-        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = ImmutableMap
-                .of("eventbus", Optional.of(MODULE_TYPE_Q_NAME), "async-eventbus", Optional.of(MODULE_TYPE_Q_NAME),
-                        "threadfactory-naming", Optional.of(MODULE_TYPE_Q_NAME), "threadpool-dynamic",
-                        Optional.of(MODULE_TYPE_Q_NAME), "thread-rpc-context", Optional.<QName>absent());
+        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = new HashMap(){{
+            put(ModuleMXBeanEntryTest.EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+            put(ModuleMXBeanEntryTest.ASYNC_EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+            put(ModuleMXBeanEntryTest.THREADFACTORY_NAMING_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+            put(ModuleMXBeanEntryTest.THREADPOOL_DYNAMIC_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+            put("thread-rpc-context", Optional.absent());
+            put(ModuleMXBeanEntryTest.THREADPOOL_REGISTRY_IMPL_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+        }};
+
         assertAllIdentitiesAreExpected(threadsJavaModule,
                 expectedIdentitiesToBases);
     }

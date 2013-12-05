@@ -8,11 +8,14 @@
 package org.opendaylight.controller.config.yangjmxgenerator;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AbstractDependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
@@ -21,6 +24,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
@@ -549,11 +553,12 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         }
     }
 
-    private static int getChildNodeSizeWithoutUses(ContainerSchemaNode csn) {
+    private static int getChildNodeSizeWithoutUses(DataNodeContainer csn) {
         int result = 0;
         for (DataSchemaNode dsn : csn.getChildNodes()) {
-            if (dsn.isAddedByUses() == false)
+            if (dsn.isAddedByUses() == false) {
                 result++;
+            }
         }
         return result;
     }
@@ -570,47 +575,73 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         } else if (attrNode instanceof ContainerSchemaNode) {
             // reference or TO
             ContainerSchemaNode containerSchemaNode = (ContainerSchemaNode) attrNode;
-            if (containerSchemaNode.getUses().size() == 1
-                    && getChildNodeSizeWithoutUses(containerSchemaNode) == 0) {
-                // reference
-                UsesNode usesNode = containerSchemaNode.getUses().iterator()
-                        .next();
-                checkState(usesNode.getRefines().size() == 1,
-                        "Unexpected 'refine' child node size of "
-                                + containerSchemaNode);
-                LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines()
-                        .values().iterator().next();
-                checkState(refine.getUnknownSchemaNodes().size() == 1,
-                        "Unexpected unknown schema node size of " + refine);
-                UnknownSchemaNode requiredIdentity = refine
-                        .getUnknownSchemaNodes().iterator().next();
-                checkState(
-                        ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity
-                                .getNodeType()),
-                        "Unexpected language extension " + requiredIdentity);
-                String prefixAndIdentityLocalName = requiredIdentity
-                        .getNodeParameter();
-                // import should point to a module
-                ServiceInterfaceEntry serviceInterfaceEntry = findSIE(
-                        prefixAndIdentityLocalName, currentModule,
-                        qNamesToSIEs, schemaContext);
-                boolean mandatory = refine.getConstraints().isMandatory();
-                return new DependencyAttribute(attrNode, serviceInterfaceEntry,
-                        mandatory, attrNode.getDescription());
+            Optional<? extends AbstractDependencyAttribute> dependencyAttributeOptional = extractDependency(containerSchemaNode,
+                    attrNode, currentModule, qNamesToSIEs, schemaContext);
+            if (dependencyAttributeOptional.isPresent()) {
+                return dependencyAttributeOptional.get();
             } else {
-                return TOAttribute.create(containerSchemaNode,
-                        typeProviderWrapper);
+                return TOAttribute.create(containerSchemaNode, typeProviderWrapper);
             }
+
         } else if (attrNode instanceof LeafListSchemaNode) {
             return ListAttribute.create((LeafListSchemaNode) attrNode,
                     typeProviderWrapper);
         } else if (attrNode instanceof ListSchemaNode) {
-            return ListAttribute.create((ListSchemaNode) attrNode,
-                    typeProviderWrapper);
+            ListSchemaNode listSchemaNode = (ListSchemaNode) attrNode;
+            Optional<? extends AbstractDependencyAttribute> dependencyAttributeOptional = extractDependency(listSchemaNode,
+                    attrNode, currentModule, qNamesToSIEs, schemaContext);
+            if (dependencyAttributeOptional.isPresent()) {
+                return dependencyAttributeOptional.get();
+            } else {
+                return ListAttribute.create(listSchemaNode, typeProviderWrapper);
+            }
         } else {
             throw new UnsupportedOperationException(
                     "Unknown configuration node " + attrNode.toString());
         }
+    }
+
+    private static Optional<? extends AbstractDependencyAttribute> extractDependency(DataNodeContainer dataNodeContainer,
+                                                            DataSchemaNode attrNode,
+                                                            Module currentModule,
+                                                            Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
+                                                            SchemaContext schemaContext) {
+        if (dataNodeContainer.getUses().size() == 1
+                && getChildNodeSizeWithoutUses(dataNodeContainer) == 0) {
+            // reference
+            UsesNode usesNode = dataNodeContainer.getUses().iterator()
+                    .next();
+            checkState(usesNode.getRefines().size() == 1,
+                    "Unexpected 'refine' child node size of "
+                            + dataNodeContainer);
+            LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines()
+                    .values().iterator().next();
+            checkState(refine.getUnknownSchemaNodes().size() == 1,
+                    "Unexpected unknown schema node size of " + refine);
+            UnknownSchemaNode requiredIdentity = refine
+                    .getUnknownSchemaNodes().iterator().next();
+            checkState(
+                    ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity
+                            .getNodeType()),
+                    "Unexpected language extension " + requiredIdentity);
+            String prefixAndIdentityLocalName = requiredIdentity
+                    .getNodeParameter();
+            // import should point to a module
+            ServiceInterfaceEntry serviceInterfaceEntry = findSIE(
+                    prefixAndIdentityLocalName, currentModule,
+                    qNamesToSIEs, schemaContext);
+            boolean mandatory = refine.getConstraints().isMandatory();
+            AbstractDependencyAttribute reference;
+            if (dataNodeContainer instanceof ContainerSchemaNode ){
+                reference = new DependencyAttribute(attrNode, serviceInterfaceEntry,
+                    mandatory, attrNode.getDescription());
+            } else {
+                reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry,
+                        mandatory, attrNode.getDescription());
+            }
+            return Optional.of(reference);
+        }
+        return Optional.absent();
     }
 
     private static ServiceInterfaceEntry findSIE(
