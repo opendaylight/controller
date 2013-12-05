@@ -634,7 +634,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                 po = e.getValue();
                 if (po != null) {
                     // Populate the Policy field now
-                    Status poStatus = this.frm.installFlowEntry(po);
+                    Status poStatus = this.frm.modifyOrAddFlowEntry(po);
                     if (!poStatus.isSuccess()) {
                         log.error("Failed to install policy: "
                                 + po.getGroupName() + " ("
@@ -842,8 +842,9 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     @Override
     public void notifyNode(Node node, UpdateType type,
             Map<String, Property> propMap) {
-        if (node == null)
+        if (node == null) {
             return;
+        }
 
         switch (type) {
         case REMOVED:
@@ -858,8 +859,9 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     @Override
     public void notifyNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Map<String, Property> propMap) {
-        if (nodeConnector == null)
+        if (nodeConnector == null) {
             return;
+        }
 
         boolean up = false;
         switch (type) {
