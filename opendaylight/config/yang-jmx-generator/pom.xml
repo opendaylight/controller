@@ -57,6 +57,10 @@
             <artifactId>commons-lang3</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-type-provider</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

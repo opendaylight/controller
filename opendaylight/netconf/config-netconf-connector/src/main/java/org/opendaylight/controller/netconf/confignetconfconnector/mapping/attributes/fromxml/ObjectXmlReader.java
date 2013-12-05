@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
@@ -45,6 +46,12 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     @Override
     protected AttributeReadingStrategy caseJavaBinaryAttribute(OpenType<?> openType) {
         return new SimpleBinaryAttributeReadingStrategy(lastAttribute.getNullableDefault());
+    }
+
+    @Override
+    protected AttributeReadingStrategy caseJavaUnionAttribute(OpenType<?> openType) {
+        String mappingKey = JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION;
+        return new SimpleUnionAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey);
     }
 
     @Override

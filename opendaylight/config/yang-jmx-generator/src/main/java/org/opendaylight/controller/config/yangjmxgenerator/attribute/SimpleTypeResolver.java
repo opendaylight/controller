@@ -59,6 +59,8 @@ public class SimpleTypeResolver {
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Date.class.getName(), SimpleType.DATE);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Double.class.getName(), SimpleType.DOUBLE);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(double.class.getName(), SimpleType.DOUBLE);
+
+        JAVA_TYPE_TO_SIMPLE_TYPE.put(char.class.getName(), SimpleType.CHARACTER);
     }
 
 }
