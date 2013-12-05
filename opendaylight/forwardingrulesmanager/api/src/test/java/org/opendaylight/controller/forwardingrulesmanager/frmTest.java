@@ -546,11 +546,6 @@ public class frmTest {
         fc.setCookie("100");
         Assert.assertTrue(fc.validate(null).isSuccess());
 
-        fc.setIngressPort("-1");
-        status = fc.validate(null);
-        Assert.assertFalse(status.isSuccess());
-        Assert.assertTrue(status.getDescription().contains("is not valid for the Switch"));
-
         fc.setIngressPort("100");
         Assert.assertTrue(fc.validate(null).isSuccess());
 

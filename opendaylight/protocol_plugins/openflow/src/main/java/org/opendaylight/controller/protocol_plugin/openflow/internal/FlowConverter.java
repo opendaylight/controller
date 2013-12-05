@@ -57,6 +57,7 @@ import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionDataLayer;
 import org.openflow.protocol.action.OFActionDataLayerDestination;
 import org.openflow.protocol.action.OFActionDataLayerSource;
+import org.openflow.protocol.action.OFActionEnqueue;
 import org.openflow.protocol.action.OFActionNetworkLayerAddress;
 import org.openflow.protocol.action.OFActionNetworkLayerDestination;
 import org.openflow.protocol.action.OFActionNetworkLayerSource;
@@ -278,6 +279,15 @@ public class FlowConverter {
                     ofAction.setPort(PortConverter.toOFPort(a.getPort()));
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
+                    continue;
+                }
+                if (action.getType() == ActionType.ENQUEUE) {
+                    Enqueue a = (Enqueue) action;
+                    OFActionEnqueue ofAction = new OFActionEnqueue();
+                    ofAction.setPort(PortConverter.toOFPort(a.getPort()));
+                    ofAction.setQueueId(a.getQueue());
+                    actionsList.add(ofAction);
+                    actionsLength += OFActionEnqueue.MINIMUM_LENGTH;
                     continue;
                 }
                 if (action.getType() == ActionType.DROP) {
@@ -683,6 +693,10 @@ public class FlowConverter {
                                     NodeConnectorCreator.createOFNodeConnector(
                                             ofPort, node));
                         }
+                    } else if (ofAction instanceof OFActionEnqueue) {
+                        salAction = new Enqueue(NodeConnectorCreator.createOFNodeConnector(
+                                ((OFActionEnqueue) ofAction).getPort(), node),
+                                ((OFActionEnqueue) ofAction).getQueueId());
                     } else if (ofAction instanceof OFActionVirtualLanIdentifier) {
                         salAction = new SetVlanId(
                                 ((OFActionVirtualLanIdentifier) ofAction)
