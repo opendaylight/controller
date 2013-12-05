@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_82e14c9c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-05T14:18:51Z",
+      "side": 1,
+      "message": "manger--\u003emanager",
+      "revId": "3132589220ea5ec4e16ee05ff2ed464d3ce7381e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a2e690b2",
+        "filename": "opendaylight/usermanager/api/src/main/java/org/opendaylight/controller/usermanager/UserConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-05T14:18:51Z",
+      "side": 1,
+      "message": "not related to this patch, but there shouldn\u0027t be printstacktrace in the code. Just standard logging to log.",
+      "revId": "3132589220ea5ec4e16ee05ff2ed464d3ce7381e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
