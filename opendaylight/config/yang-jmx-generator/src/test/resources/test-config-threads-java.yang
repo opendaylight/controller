@@ -241,4 +241,25 @@ module config-threads-java {
             }
         }
     }
+
+    identity threadpool-registry-impl {
+        base config:module-type;
+        config:java-name-prefix ThreadPoolRegistryImpl;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case threadpool-registry-impl {
+            when "/config:modules/config:module/config:type = 'threadpool-registry-impl'";
+
+            // list of dependencies:
+            list threadpools {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity th2:threadpool;
+                    }
+                }
+            }
+        }
+    }
 }

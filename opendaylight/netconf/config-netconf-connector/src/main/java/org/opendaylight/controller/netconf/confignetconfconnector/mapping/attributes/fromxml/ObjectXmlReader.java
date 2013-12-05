@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 
@@ -83,6 +84,13 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     protected AttributeReadingStrategy caseListAttribute(ArrayType<?> openType) {
         Preconditions.checkState(lastAttribute instanceof ListAttribute);
         AttributeReadingStrategy innerStrategy = prepareReadingStrategy(key, ((ListAttribute) lastAttribute).getInnerAttribute());
+        return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
+    }
+
+    @Override
+    protected AttributeReadingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
+        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        AttributeReadingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
         return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
     }
 

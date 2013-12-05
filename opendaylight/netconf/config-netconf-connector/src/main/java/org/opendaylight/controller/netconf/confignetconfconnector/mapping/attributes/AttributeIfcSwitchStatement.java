@@ -12,6 +12,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIf
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 
 import javax.management.openmbean.ArrayType;
@@ -37,13 +38,16 @@ public abstract class AttributeIfcSwitchStatement<T> {
         } else if (attributeIfc instanceof DependencyAttribute) {
             return caseDependencyAttribute(((DependencyAttribute) attributeIfc).getOpenType());
         } else if (attributeIfc instanceof ListAttribute) {
-            return caseListAttribute(((ListAttribute) attributeIfc).getOpenType());
+            return caseListAttribute((ArrayType<?>) attributeIfc.getOpenType());
+        } else if (attributeIfc instanceof ListDependenciesAttribute) {
+            return caseListDependeciesAttribute((ArrayType<?>) attributeIfc.getOpenType());
         } else if (attributeIfc instanceof TOAttribute) {
             return caseTOAttribute(((TOAttribute) attributeIfc).getOpenType());
         }
 
         throw getIllegalArgumentException(attributeIfc);
     }
+
 
     private IllegalArgumentException getIllegalArgumentException(AttributeIfc attributeIfc) {
         return new IllegalArgumentException("Unknown attribute type " + attributeIfc.getClass() + ", " + attributeIfc
@@ -74,6 +78,7 @@ public abstract class AttributeIfcSwitchStatement<T> {
 
     protected abstract T caseListAttribute(ArrayType<?> openType);
 
+    protected abstract T caseListDependeciesAttribute(ArrayType<?> openType);
 
     private static class UnknownOpenTypeException extends RuntimeException {
         public UnknownOpenTypeException(String message) {

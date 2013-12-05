@@ -13,6 +13,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl;
+import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -29,11 +31,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class TOAttribute extends AbstractAttribute {
+public class TOAttribute extends AbstractAttribute implements TypedAttribute {
 
     private final String nullableDescription, nullableDefault;
     private final Map<String, AttributeIfc> yangNameToAttributeMap;
     private final Map<String, String> attributeNameMap;
+    private final String packageName;
 
     private static final Set<Class<? extends DataSchemaNode>> ALLOWED_CHILDREN = Sets
             .newHashSet();
@@ -45,7 +48,7 @@ public class TOAttribute extends AbstractAttribute {
     }
 
     public static <T extends DataNodeContainer & AugmentationTarget & DataSchemaNode> TOAttribute create(
-            T containerSchemaNode, TypeProviderWrapper typeProviderWrapper) {
+            T containerSchemaNode, TypeProviderWrapper typeProviderWrapper, String packageName) {
         // Transfer Object: get the leaves
         Map<String, AttributeIfc> map = new HashMap<>();
         Map<String, String> attributeNameMap = new HashMap<>();
@@ -55,18 +58,18 @@ public class TOAttribute extends AbstractAttribute {
                 String yangName = dataSchemaNode.getQName().getLocalName();
                 map.put(yangName,
                         createInnerAttribute(dataSchemaNode,
-                                typeProviderWrapper));
+                                typeProviderWrapper, packageName));
             } catch (IllegalArgumentException e) {
                 throw new IllegalStateException("Unable to create TO", e);
             }
         }
         return new TOAttribute(containerSchemaNode, map, attributeNameMap,
-                containerSchemaNode.getDescription());
+                containerSchemaNode.getDescription(), packageName);
     }
 
     private static AttributeIfc createInnerAttribute(
             DataSchemaNode dataSchemaNode,
-            TypeProviderWrapper typeProviderWrapper) {
+            TypeProviderWrapper typeProviderWrapper, String packageName) {
         Class<? extends DataSchemaNode> type = isAllowedType(dataSchemaNode);
 
         if (type.equals(LeafSchemaNode.class))
@@ -74,13 +77,13 @@ public class TOAttribute extends AbstractAttribute {
                     typeProviderWrapper);
         else if (type.equals(ListSchemaNode.class))
             return ListAttribute.create((ListSchemaNode) dataSchemaNode,
-                    typeProviderWrapper);
+                    typeProviderWrapper, packageName);
         else if (type.equals(LeafListSchemaNode.class))
             return ListAttribute.create((LeafListSchemaNode) dataSchemaNode,
                     typeProviderWrapper);
         else if (type.equals(ContainerSchemaNode.class))
             return TOAttribute.create((ContainerSchemaNode) dataSchemaNode,
-                    typeProviderWrapper);
+                    typeProviderWrapper, packageName);
 
         throw new IllegalStateException("This should never happen");
     }
@@ -98,12 +101,13 @@ public class TOAttribute extends AbstractAttribute {
 
     private TOAttribute(DataSchemaNode attrNode,
             Map<String, AttributeIfc> transferObject,
-            Map<String, String> attributeNameMap, String nullableDescription) {
+            Map<String, String> attributeNameMap, String nullableDescription, String packageName) {
         super(attrNode);
         yangNameToAttributeMap = transferObject;
         this.attributeNameMap = attributeNameMap;
         this.nullableDescription = nullableDescription;
         nullableDefault = null;
+        this.packageName = packageName;
     }
 
     public Map<String, String> getAttributeNameMap() {
@@ -198,6 +202,12 @@ public class TOAttribute extends AbstractAttribute {
     }
 
     @Override
+    public Type getType() {
+        // TODO: ReferencedTypeImpl from Types
+        return new ReferencedTypeImpl(packageName, getUpperCaseCammelCase());
+    }
+
+    @Override
     public CompositeType getOpenType() {
         String description = getNullableDescription() == null ? getAttributeYangName()
                 : getNullableDescription();
@@ -220,6 +230,10 @@ public class TOAttribute extends AbstractAttribute {
             throw new RuntimeException("Unable to create CompositeType for "
                     + this, e);
         }
+    }
+
+    public String getPackageName() {
+        return packageName;
     }
 
     private static final class FunctionImpl implements

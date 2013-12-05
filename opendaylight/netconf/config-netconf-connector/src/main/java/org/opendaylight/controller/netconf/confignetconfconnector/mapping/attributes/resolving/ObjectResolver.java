@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
@@ -107,6 +108,12 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         Preconditions.checkState(lastAttribute instanceof ListAttribute);
         AttributeIfc innerAttribute = ((ListAttribute) lastAttribute).getInnerAttribute();
         return new ArrayAttributeResolvingStrategy(prepareStrategy(innerAttribute), openType);
+    }
+
+    @Override
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(ArrayType<?> openType) {
+        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        return new ArrayAttributeResolvingStrategy(caseDependencyAttribute(SimpleType.OBJECTNAME), openType);
     }
 
 }

@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.w3c.dom.Document;
@@ -93,6 +94,13 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
         AttributeIfc innerAttribute = ((ListAttribute) lastAttribute).getInnerAttribute();
 
         AttributeWritingStrategy innerStrategy = prepareWritingStrategy(key, innerAttribute, document);
+        return new ArrayAttributeWritingStrategy(innerStrategy);
+    }
+
+    @Override
+    protected AttributeWritingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
+        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        AttributeWritingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
         return new ArrayAttributeWritingStrategy(innerStrategy);
     }
 

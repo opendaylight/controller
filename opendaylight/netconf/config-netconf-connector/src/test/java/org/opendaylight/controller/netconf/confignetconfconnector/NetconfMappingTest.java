@@ -136,6 +136,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
         checkTypedefs(response);
+        checkTestingDeps(response);
         checkEnum(response);
         checkBigDecimal(response);
 
@@ -161,11 +162,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
         closeSession();
         verify(netconfOperationRouter).close();
         verifyNoMoreInteractions(netconfOperationRouter);
-    }
-
-    private void checkBigDecimal(Element response) {
-        int size = response.getElementsByTagName("sleep-factor").getLength();
-        assertEquals(1, size);
     }
 
     private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,
@@ -393,6 +389,17 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         fail("Enum attribute " + enumName + ":" + enumContent + " not present in " + XmlUtil.toString(response));
     }
+
+    private void checkTestingDeps(Element response) {
+        int testingDepsSize = response.getElementsByTagName("testing-deps").getLength();
+        assertEquals(2, testingDepsSize);
+    }
+
+    private void checkBigDecimal(Element response) {
+        int size = response.getElementsByTagName("sleep-factor").getLength();
+        assertEquals(1, size);
+    }
+
 
     private void checkTypeConfigAttribute(Element response) {
 
