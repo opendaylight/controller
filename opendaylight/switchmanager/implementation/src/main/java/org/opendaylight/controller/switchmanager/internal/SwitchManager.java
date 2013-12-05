@@ -461,6 +461,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             if (!status.isSuccess()) {
                 return status;
             }
+        } else {
+            if (conf.getName().equals(DEFAULT_SUBNET_NAME)) {
+                return new Status(StatusCode.NOTALLOWED, "The specified subnet gateway cannot be removed");
+            }
         }
 
         // Update Database
@@ -492,6 +496,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public Status removeSubnet(String name) {
+        if (name.equals(DEFAULT_SUBNET_NAME)) {
+            return new Status(StatusCode.NOTALLOWED, "The specified subnet gateway cannot be removed");
+        }
         SubnetConfig conf = subnetsConfigList.get(name);
         if (conf == null) {
             return new Status(StatusCode.SUCCESS, "Subnet not present");
