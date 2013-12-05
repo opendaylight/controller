@@ -38,7 +38,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.Rem
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.OriginalGroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.UpdatedGroupBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.Buckets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.Bucket;
@@ -52,7 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unused")
-public class GroupConsumerImpl implements IForwardingRulesManager {
+public class GroupConsumerImpl {
 
     protected static final Logger logger = LoggerFactory.getLogger(GroupConsumerImpl.class);
     private final GroupEventListener groupEventListener = new GroupEventListener();
@@ -72,12 +74,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
     public GroupConsumerImpl() {
 
         InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Groups.class).toInstance();
-        groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);
-
-        if (!(cacheStartup())) {
-            logger.error("Unanle to allocate/retrieve group cache");
-            System.out.println("Unable to allocate/retrieve group cache");
-        }
+        groupService = FRMConsumerImpl.getProviderSession().getRpcService(SalGroupService.class);      
 
         if (null == groupService) {
             logger.error("Consumer SAL Group Service is down or NULL. FRM may not function as intended");
@@ -98,128 +95,15 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         FRMConsumerImpl.getDataProviderService().registerCommitHandler(path, groupCommitHandler);
         clusterGroupContainerService = FRMConsumerImpl.getClusterContainerService();
         container = FRMConsumerImpl.getContainer();
-    }
+    }  
 
-    private boolean allocateGroupCaches() {
-        if (this.clusterGroupContainerService == null) {
-            logger.warn("Group: Un-initialized clusterGroupContainerService, can't create cache");
-            return false;
-        }
-
-        try {
-            clusterGroupContainerService.createCache("frm.originalSwGroupView",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            clusterGroupContainerService.createCache("frm.installedSwGroupView",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            clusterGroupContainerService.createCache("frm.inactiveGroups",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            clusterGroupContainerService.createCache("frm.nodeGroups",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            // TODO for cluster mode
-            /*
-             * clusterGroupContainerService.createCache(WORK_STATUS_CACHE,
-             * EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
-             * IClusterServices.cacheMode.ASYNC));
-             *
-             * clusterGroupContainerService.createCache(WORK_ORDER_CACHE,
-             * EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
-             * IClusterServices.cacheMode.ASYNC));
-             */
-
-        } catch (CacheConfigException cce) {
-            logger.error("Group CacheConfigException");
-            return false;
-
-        } catch (CacheExistException cce) {
-            logger.error(" Group CacheExistException");
-        }
-
-        return true;
-    }
-
-    private void nonClusterGroupObjectCreate() {
-        originalSwGroupView = new ConcurrentHashMap<GroupKey, Group>();
-        installedSwGroupView = new ConcurrentHashMap<GroupKey, Group>();
-        nodeGroups = new ConcurrentHashMap<Node, List<Group>>();
-        inactiveGroups = new ConcurrentHashMap<GroupKey, Group>();
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    private boolean retrieveGroupCaches() {
-        ConcurrentMap<?, ?> map;
-
-        if (this.clusterGroupContainerService == null) {
-            logger.warn("Group: un-initialized clusterGroupContainerService, can't retrieve cache");
-            nonClusterGroupObjectCreate();
-            return false;
-        }
-
-        map = clusterGroupContainerService.getCache("frm.originalSwGroupView");
-        if (map != null) {
-            originalSwGroupView = (ConcurrentMap<GroupKey, Group>) map;
-        } else {
-            logger.error("Retrieval of cache(originalSwGroupView) failed");
-            return false;
-        }
-
-        map = clusterGroupContainerService.getCache("frm.installedSwGroupView");
-        if (map != null) {
-            installedSwGroupView = (ConcurrentMap<GroupKey, Group>) map;
-        } else {
-            logger.error("Retrieval of cache(installedSwGroupView) failed");
-            return false;
-        }
-
-        map = clusterGroupContainerService.getCache("frm.inactiveGroups");
-        if (map != null) {
-            inactiveGroups = (ConcurrentMap<GroupKey, Group>) map;
-        } else {
-            logger.error("Retrieval of cache(inactiveGroups) failed");
-            return false;
-        }
-
-        map = clusterGroupContainerService.getCache("frm.nodeGroups");
-        if (map != null) {
-            nodeGroups = (ConcurrentMap<Node, List<Group>>) map;
-        } else {
-            logger.error("Retrieval of cache(nodeGroup) failed");
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean cacheStartup() {
-        if (allocateGroupCaches()) {
-            if (retrieveGroupCaches()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public Status validateGroup(Group group, FRMUtil.operation operation) {
-        String containerName;
+    public Status validateGroup(Group group) {        
         String groupName;
         Iterator<Bucket> bucketIterator;
         boolean returnResult;
         Buckets groupBuckets;
 
-        if (null != group) {
-            containerName = group.getContainerName();
-
-            if (null == containerName) {
-                containerName = GlobalConstants.DEFAULT.toString();
-            } else if (!FRMUtil.isNameValid(containerName)) {
-                logger.error("Container Name is invalid %s" + containerName);
-                return new Status(StatusCode.BADREQUEST, "Container Name is invalid");
-            }
-            
+        if (null != group) {   
             groupName = group.getGroupName();
             if (!FRMUtil.isNameValid(groupName)) {
                 logger.error("Group Name is invalid %s" + groupName);
@@ -256,23 +140,28 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
      * @param path
      * @param dataObject
      */
-    private Status updateGroup(InstanceIdentifier<?> path, Group groupUpdateDataObject) {
-        GroupKey groupKey = groupUpdateDataObject.getKey();
+    private void updateGroup(InstanceIdentifier<?> path, 
+        Group originalGroupDataObject, Group updatedGroupDataObject) {
+        
+        GroupKey groupKey = updatedGroupDataObject.getKey();
+       // Node nodeInstanceID = path.firstIdentifierOf("Node");
         UpdatedGroupBuilder updateGroupBuilder = null;
-
-        Status groupOperationStatus = validateGroup(groupUpdateDataObject, FRMUtil.operation.UPDATE);
+        Status groupOperationStatus = validateGroup(updatedGroupDataObject);
 
         if (!groupOperationStatus.isSuccess()) {
-            logger.error("Group data object validation failed %s" + groupUpdateDataObject.getGroupName());
-            return groupOperationStatus;
+            logger.error("Group data object validation failed %s" + updatedGroupDataObject.getGroupName());
+            return;
         }
         
-        UpdateGroupInputBuilder groupData = new UpdateGroupInputBuilder();
-        updateGroupBuilder = new UpdatedGroupBuilder();
-        updateGroupBuilder.fieldsFrom(groupUpdateDataObject);
-        groupData.setUpdatedGroup(updateGroupBuilder.build());        
-        groupService.updateGroup(groupData.build());
-        return groupOperationStatus;
+        UpdateGroupInputBuilder groupInputBuilder = new UpdateGroupInputBuilder();
+        groupInputBuilder.setNode(updatedGroupDataObject.getNode());
+        updateGroupBuilder = new UpdatedGroupBuilder(updatedGroupDataObject);
+        updateGroupBuilder.setGroupId(new GroupId(updatedGroupDataObject.getId()));        
+        groupInputBuilder.setUpdatedGroup(updateGroupBuilder.build());       
+        OriginalGroupBuilder originalGroupBuilder = new OriginalGroupBuilder(originalGroupDataObject);
+        groupInputBuilder.setOriginalGroup(originalGroupBuilder.build());
+        groupService.updateGroup(groupInputBuilder.build());
+        return;
     }
 
     /**
@@ -281,23 +170,23 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
      * @param path
      * @param dataObject
      */
-    private Status addGroup(InstanceIdentifier<?> path, Group groupAddDataObject) {
+    private void addGroup(InstanceIdentifier<?> path, Group groupAddDataObject) {
         GroupKey groupKey = groupAddDataObject.getKey();
-        Status groupOperationStatus = validateGroup(groupAddDataObject, FRMUtil.operation.ADD);
+        Status groupOperationStatus = validateGroup(groupAddDataObject);
 
         if (!groupOperationStatus.isSuccess()) {
             logger.error("Group data object validation failed %s" + groupAddDataObject.getGroupName());
-            return groupOperationStatus;
+            return;
         }
         
         AddGroupInputBuilder groupData = new AddGroupInputBuilder();
         groupData.setBuckets(groupAddDataObject.getBuckets());
         groupData.setContainerName(groupAddDataObject.getContainerName());
-        groupData.setGroupId(groupAddDataObject.getGroupId());
+        groupData.setGroupId(new GroupId(groupAddDataObject.getId()));
         groupData.setGroupType(groupAddDataObject.getGroupType());
         groupData.setNode(groupAddDataObject.getNode());    
         groupService.addGroup(groupData.build());
-        return groupOperationStatus;
+        return;
     }
 
     /**
@@ -306,50 +195,60 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
      * @param path
      * @param dataObject
      */
-    private Status removeGroup(InstanceIdentifier<?> path, Group groupRemoveDataObject) {
+    private void removeGroup(InstanceIdentifier<?> path, Group groupRemoveDataObject) {
         GroupKey groupKey = groupRemoveDataObject.getKey();
-        Status groupOperationStatus = validateGroup(groupRemoveDataObject, FRMUtil.operation.ADD);
+        Status groupOperationStatus = validateGroup(groupRemoveDataObject);
 
         if (!groupOperationStatus.isSuccess()) {
             logger.error("Group data object validation failed %s" + groupRemoveDataObject.getGroupName());
-            return groupOperationStatus;
+            return;
         }
        
         RemoveGroupInputBuilder groupData = new RemoveGroupInputBuilder();
         groupData.setBuckets(groupRemoveDataObject.getBuckets());
         groupData.setContainerName(groupRemoveDataObject.getContainerName());
-        groupData.setGroupId(groupRemoveDataObject.getGroupId());
+        groupData.setGroupId(new GroupId(groupRemoveDataObject.getId()));
         groupData.setGroupType(groupRemoveDataObject.getGroupType());
         groupData.setNode(groupRemoveDataObject.getNode());    
         groupService.removeGroup(groupData.build());  
-        return groupOperationStatus;
+        return;
     }
     
     private RpcResult<Void> commitToPlugin(InternalTransaction transaction) {
-        for (Entry<InstanceIdentifier<?>, Group> entry : transaction.additions.entrySet()) {
+        DataModification<InstanceIdentifier<?>, DataObject> modification = transaction.modification;         
+        //get created entries      
+        Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> createdEntries = 
+                                        modification.getCreatedConfigurationData().entrySet();
+        
+        //get updated entries
+        Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> updatedEntries = 
+                    new HashSet<Entry<InstanceIdentifier<? extends DataObject>, DataObject>>();        
+        updatedEntries.addAll(modification.getUpdatedConfigurationData().entrySet());
+        updatedEntries.removeAll(createdEntries);
 
-            if (!addGroup(entry.getKey(), entry.getValue()).isSuccess()) {
-                transaction.additions.remove(entry.getKey());
-                return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
-            }
-        }
+        //get removed entries
+        Set<InstanceIdentifier<? extends DataObject>> removeEntriesInstanceIdentifiers = 
+                                                    modification.getRemovedConfigurationData();
+        
+        for (Entry<InstanceIdentifier<? extends DataObject >, DataObject> entry : createdEntries) { 
+            if(entry.getValue() instanceof Group) {   
+                addGroup(entry.getKey(), (Group)entry.getValue());   
+            }   
+        } 
+        
+        for (Entry<InstanceIdentifier<?>, DataObject> entry : updatedEntries) { 
+            if(entry.getValue() instanceof Group) {   
+                Group originalGroup = (Group) modification.getOriginalConfigurationData();    
+                Group updatedGroup = (Group) entry.getValue(); 
+                updateGroup(entry.getKey(), originalGroup, updatedGroup);   
+            }   
+        }   
 
-        for (Entry<InstanceIdentifier<?>, Group> entry : transaction.updates.entrySet()) {
-
-            if (!updateGroup(entry.getKey(), entry.getValue()).isSuccess()) {
-                transaction.updates.remove(entry.getKey());
-                return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet());
-            }
-        }
-
-        for (InstanceIdentifier<?> groupId : transaction.removals) {
-       	 	DataObject removeValue = transaction.getModification().getOriginalConfigurationData().get(groupId);	
-       	 
-       	 	if(removeValue instanceof Group) {
-       	 	    if(!removeGroup(groupId, (Group)removeValue).isSuccess()) {
-       	 	        return Rpcs.getRpcResult(false, null, Collections.<RpcError>emptySet()); 
-       	 	    }             
-       	 	}
+        for (InstanceIdentifier<?> instanceId : removeEntriesInstanceIdentifiers ) {    
+            DataObject removeValue = modification.getOriginalConfigurationData().get(instanceId);   
+            if(removeValue instanceof Group) {   
+                removeGroup(instanceId, (Group)removeValue); 
+            }   
         }
 
         return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
@@ -359,32 +258,21 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
         @Override
         public DataCommitTransaction<InstanceIdentifier<?>, DataObject> requestCommit(
-                DataModification<InstanceIdentifier<?>, DataObject> modification) {
-            // We should verify transaction
-            System.out.println("Coming in GroupDatacommitHandler");
+                DataModification<InstanceIdentifier<?>, DataObject> modification) {            
             InternalTransaction transaction = new InternalTransaction(modification);
             transaction.prepareUpdate();
             return transaction;
         }
     }
 
-    private final class InternalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {
+    private final class InternalTransaction implements DataCommitTransaction<InstanceIdentifier<?>, DataObject> {      
 
         private final DataModification<InstanceIdentifier<?>, DataObject> modification;
-
-        @Override
-        public DataModification<InstanceIdentifier<?>, DataObject> getModification() {
-            return modification;
-        }
-
-        public InternalTransaction(DataModification<InstanceIdentifier<?>, DataObject> modification) {
+        
+        public InternalTransaction(DataModification<InstanceIdentifier<?>, DataObject> modification) {   
             this.modification = modification;
         }
-
-        Map<InstanceIdentifier<?>, Group> additions = new HashMap<>();
-        Map<InstanceIdentifier<?>, Group> updates = new HashMap<>();
-        Set<InstanceIdentifier<?>> removals = new HashSet<>();
-
+        
         /**
          * We create a plan which flows will be added, which will be updated and
          * which will be removed based on our internal state.
@@ -392,28 +280,6 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
          */
         void prepareUpdate() {
         	
-        	 Set<Entry<InstanceIdentifier<?>, DataObject>> groupAdded = modification.getCreatedConfigurationData().entrySet();
-             for (Entry<InstanceIdentifier<?>, DataObject> entry : groupAdded) {
-                 if (entry.getValue() instanceof Group) {
-                     Group group = (Group) entry.getValue();
-                     additions.put(entry.getKey(), group);                     
-                 }
-
-             }
-
-            Set<Entry<InstanceIdentifier<?>, DataObject>> groupUpdate = modification.getUpdatedConfigurationData().entrySet();
-            for (Entry<InstanceIdentifier<?>, DataObject> entry : groupUpdate) {
-                if (entry.getValue() instanceof Group) {
-                    Group group = (Group) entry.getValue();
-                    ///will be fixed once getUpdatedConfigurationData returns only updated data not created data with it.
-                    if (additions.containsKey(entry.getKey())) {
-                    	updates.put(entry.getKey(), group);
-                    }
-                }
-
-            }
-
-            removals = modification.getRemovedConfigurationData();
         }
         
         /**
@@ -423,9 +289,7 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
         @Override
         public RpcResult<Void> finish() throws IllegalStateException {
 
-            RpcResult<Void> rpcStatus = commitToPlugin(this);
-            // We return true if internal transaction is successful.
-            // return Rpcs.getRpcResult(true, null, Collections.emptySet());
+            RpcResult<Void> rpcStatus = commitToPlugin(this);            
             return rpcStatus;
         }
 
@@ -435,12 +299,16 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
          *
          */
         @Override
-        public RpcResult<Void> rollback() throws IllegalStateException {
-            // NOOP - we did not modified any internal state during
-            // requestCommit phase
-            // return Rpcs.getRpcResult(true, null, Collections.emptySet());
+        public RpcResult<Void> rollback() throws IllegalStateException { 
+            
+            ///needs to be implemented as per gerrit 3314
             return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
+        }
 
+        @Override
+        public DataModification<InstanceIdentifier<?>, DataObject> getModification() {
+            // TODO Auto-generated method stub
+            return modification;
         }
 
     }
@@ -468,31 +336,4 @@ public class GroupConsumerImpl implements IForwardingRulesManager {
 
         }
     }
-
-    @Override
-    public List<DataObject> get() {
-
-        List<DataObject> orderedList = new ArrayList<DataObject>();
-        Collection<Group> groupList = originalSwGroupView.values();
-        for (Iterator<Group> iterator = groupList.iterator(); iterator.hasNext();) {
-            orderedList.add(iterator.next());
-        }
-        return orderedList;
-    }
-
-    @Override
-    public DataObject getWithName(String name, Node n) {
-
-        if (this instanceof GroupConsumerImpl) {
-            Collection<Group> groupList = originalSwGroupView.values();
-            for (Iterator<Group> iterator = groupList.iterator(); iterator.hasNext();) {
-                Group group = iterator.next();
-                if (group.getNode().equals(n) && group.getGroupName().equals(name)) {
-
-                    return group;
-                }
-            }
-        }
-        return null;
-    }
-}
+ }
