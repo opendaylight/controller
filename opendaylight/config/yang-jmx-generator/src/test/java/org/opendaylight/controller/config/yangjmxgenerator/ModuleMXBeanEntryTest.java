@@ -7,16 +7,26 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.collect.Sets;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
+import org.opendaylight.yangtools.binding.generator.util.Types;
+import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
 
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.SimpleType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -29,32 +39,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.SimpleType;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
-import org.opendaylight.yangtools.binding.generator.util.Types;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
-
-import com.google.common.collect.Sets;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class ModuleMXBeanEntryTest extends AbstractYangTest {
     public static final String EVENTBUS_MXB_NAME = "eventbus";
     public static final String ASYNC_EVENTBUS_MXB_NAME = "async-eventbus";
     public static final String THREADFACTORY_NAMING_MXB_NAME = "threadfactory-naming";
     public static final String THREADPOOL_DYNAMIC_MXB_NAME = "threadpool-dynamic";
+    public static final String THREADPOOL_REGISTRY_IMPL_NAME = "threadpool-registry-impl";
 
     public static final String BGP_LISTENER_IMPL_MXB_NAME = "bgp-listener-impl";
 
@@ -87,7 +87,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
         assertNotNull(namesToMBEs);
         Set<String> expectedMXBeanNames = Sets.newHashSet(EVENTBUS_MXB_NAME,
                 ASYNC_EVENTBUS_MXB_NAME, THREADFACTORY_NAMING_MXB_NAME,
-                THREADPOOL_DYNAMIC_MXB_NAME);
+                THREADPOOL_DYNAMIC_MXB_NAME, THREADPOOL_REGISTRY_IMPL_NAME);
         assertThat(namesToMBEs.keySet(), is(expectedMXBeanNames));
         return namesToMBEs;
     }
@@ -298,6 +298,15 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
             }
 
+        }
+        { // test multiple dependencies
+            ModuleMXBeanEntry threadPoolRegistry = namesToMBEs.get(THREADPOOL_REGISTRY_IMPL_NAME);
+            Map<String, AttributeIfc> attributes = threadPoolRegistry.getAttributes();
+            assertEquals(1, attributes.size());
+            AttributeIfc threadpoolsAttr = attributes.get("threadpools");
+            assertNotNull(threadpoolsAttr);
+            assertTrue(threadpoolsAttr instanceof ListDependenciesAttribute);
+            ListDependenciesAttribute threadpools = (ListDependenciesAttribute) threadpoolsAttr;
         }
     }
 

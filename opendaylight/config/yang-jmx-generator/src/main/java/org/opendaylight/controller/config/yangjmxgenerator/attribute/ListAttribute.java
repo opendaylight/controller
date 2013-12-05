@@ -7,24 +7,27 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.yangtools.binding.generator.util.Types;
+import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
-public class ListAttribute extends AbstractAttribute {
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import java.util.List;
+
+public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
     private final String nullableDescription, nullableDefault;
-    private final AttributeIfc innerAttribute;
+    private final TypedAttribute innerAttribute;
 
     public static ListAttribute create(ListSchemaNode node,
-            TypeProviderWrapper typeProvider) {
+            TypeProviderWrapper typeProvider, String packageName) {
 
-        AttributeIfc innerAttribute = TOAttribute.create(node, typeProvider);
+        TOAttribute innerAttribute = TOAttribute.create(node, typeProvider, packageName);
 
         return new ListAttribute(node, innerAttribute, node.getDescription());
     }
@@ -32,12 +35,12 @@ public class ListAttribute extends AbstractAttribute {
     public static ListAttribute create(LeafListSchemaNode node,
             TypeProviderWrapper typeProvider) {
 
-        AttributeIfc innerAttribute = new JavaAttribute(node, typeProvider);
+        JavaAttribute innerAttribute = new JavaAttribute(node, typeProvider);
 
         return new ListAttribute(node, innerAttribute, node.getDescription());
     }
 
-    ListAttribute(DataSchemaNode attrNode, AttributeIfc innerAttribute,
+    ListAttribute(DataSchemaNode attrNode, TypedAttribute innerAttribute,
             String description) {
         super(attrNode);
         this.nullableDescription = description;
@@ -99,14 +102,24 @@ public class ListAttribute extends AbstractAttribute {
         return true;
     }
 
+
+    @Override
+    public Type getType() {
+        return Types.parameterizedTypeFor(Types.typeForClass(List.class), innerAttribute.getType());
+    }
+
     @Override
     public ArrayType<?> getOpenType() {
-        OpenType<?> inerOpenType = innerAttribute.getOpenType();
+        OpenType<?> innerOpenType = innerAttribute.getOpenType();
+        return constructArrayType(innerOpenType);
+    }
+
+    static ArrayType<?> constructArrayType(OpenType<?> innerOpenType){
         try {
-            return new ArrayType<>(1, inerOpenType);
+            return new ArrayType<>(1, innerOpenType);
         } catch (OpenDataException e) {
             throw new RuntimeException("Unable to create " + ArrayType.class
-                    + " with inner element of type " + inerOpenType, e);
+                    + " with inner element of type " + innerOpenType, e);
         }
     }
 

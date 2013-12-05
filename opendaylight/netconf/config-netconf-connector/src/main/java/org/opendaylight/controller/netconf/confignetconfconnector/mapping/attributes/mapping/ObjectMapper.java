@@ -13,6 +13,7 @@ import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
@@ -119,6 +120,12 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         Preconditions.checkState(lastAttribute instanceof ListAttribute);
         return new ArrayAttributeMappingStrategy(openType,
                 prepareStrategy(((ListAttribute) lastAttribute).getInnerAttribute()));
+    }
+
+    @Override
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(ArrayType<?> openType) {
+        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        return new ArrayAttributeMappingStrategy(openType, caseDependencyAttribute(SimpleType.OBJECTNAME));
     }
 
 }
