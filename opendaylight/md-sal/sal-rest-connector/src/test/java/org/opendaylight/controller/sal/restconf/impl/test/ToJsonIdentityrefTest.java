@@ -1,9 +1,9 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.regex.*;
 
 import javax.ws.rs.WebApplicationException;
@@ -11,22 +11,12 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.*;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.model.api.*;
 
-public class ToJsonIdentityrefTest {
-
-    private static Set<Module> modules;
-    private static DataSchemaNode dataSchemaNode;
+public class ToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialization() {
-        modules = TestUtils.resolveModules("/yang-to-json-conversion/identityref");
-        assertEquals(2, modules.size());
-        Module module = TestUtils.resolveModule("identityref-module", modules);
-        assertNotNull(module);
-        dataSchemaNode = TestUtils.resolveDataSchemaNode(module, "cont");
-        assertNotNull(dataSchemaNode);
-
+        dataLoad("/yang-to-json-conversion/identityref", 2, "identityref-module", "cont");
     }
 
     @Test

@@ -23,38 +23,11 @@ public class InvokeRpcMethodTest {
 
     private static Set<Module> modules;
 
-    private class RpcResultImpl<T> implements RpcResult<T> {
-
-        final T result;
-
-        public RpcResultImpl(T compNode) {
-            this.result = compNode;
-        }
-
-        @Override
-        public boolean isSuccessful() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public T getResult() {
-            return result;
-        }
-
-        @Override
-        public Collection<RpcError> getErrors() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-    }
-
     private class AnswerImpl implements Answer<RpcResult<CompositeNode>> {
         @Override
         public RpcResult<CompositeNode> answer(InvocationOnMock invocation) throws Throwable {
             CompositeNode compNode = (CompositeNode) invocation.getArguments()[1];
-            return new RpcResultImpl<CompositeNode>(compNode);
+            return new DummyRpcResult.Builder<CompositeNode>().result(compNode).build();
         }
     }
 
