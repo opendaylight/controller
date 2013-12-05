@@ -12,7 +12,7 @@
     </scm>
 
     <modules>
-        <!--  Common APIs & Implementation -->
+        <!-- Common APIs & Implementation -->
         <module>sal-common</module>
         <module>sal-common-api</module>
         <module>sal-common-impl</module>
@@ -42,45 +42,47 @@
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
         <module>sal-netconf-connector</module>
-        
+
+        <module>zeromq-routingtable/implementation</module>
+        <module>sal-remoterpc-connector/implementation</module>
         <!-- Clustered Data Store -->
         <module>clustered-data-store/implementation</module>
 
         <module>inventory-manager</module>
         <module>statistics-manager</module>
         <module>forwardingrules-manager</module>
-        
+
         <!-- Compability Packages -->
         <module>compatibility</module>
-        <module>zeromq-routingtable/implementation</module>
-        <module>sal-zeromq-connector</module>
     </modules>
 
 
     <profiles>
         <profile>
-           <id>integrationtests</id>
-           <activation>
-               <activeByDefault>false</activeByDefault>
-           </activation>
+            <id>integrationtests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
             <modules>
                 <module>sal-binding-it</module>
-                <module>zeromq-routingtable/integrationtest</module>
                 <module>clustered-data-store/integrationtest</module>
-                <module>test</module>
+                <!--module>zeromq-routingtable/integrationtest</module -->
+                <!--module>sal-remoterpc-connector/integrationtest</module -->
+                <!--module>test/sal-rest-connector-it</modulei -->
             </modules>
         </profile>
         <profile>
-          <id>IDE</id>
-          <activation>
-            <property>
-              <name>m2e.version</name>
-            </property>
-          </activation>
-          <build>
-            <!-- Put the IDE's build output in a folder other than target, so that IDE builds don't interact with Maven builds -->
-            <directory>target-ide</directory>
-          </build>
+            <id>IDE</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <!-- Put the IDE's build output in a folder other than target, 
+                    so that IDE builds don't interact with Maven builds -->
+                <directory>target-ide</directory>
+            </build>
         </profile>
     </profiles>
 
@@ -103,9 +105,13 @@
         <guava.version>14.0.1</guava.version>
         <osgi.core.version>5.0.0</osgi.core.version>
         <junit.version>4.8.1</junit.version>
+        <powermock.version>1.5.1</powermock.version>
+        <mockito.version>1.9.5</mockito.version>
         <xtend.version>2.4.3</xtend.version>
         <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
         <jacoco.version>0.5.3.201107060350</jacoco.version>
+        <sal.version>0.5.1-SNAPSHOT</sal.version>  <!-- AD Sal version -->
+
         <!-- Sonar properties using jacoco to retrieve integration test results -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -119,28 +125,28 @@
     <pluginRepositories>
         <!-- OpenDayLight Repo Mirror -->
         <pluginRepository>
-          <id>opendaylight-mirror</id>
-          <name>opendaylight-mirror</name>
-          <url>${nexusproxy}/groups/public/</url>
-          <snapshots>
-              <enabled>false</enabled>
-          </snapshots>
-          <releases>
-              <enabled>true</enabled>
-              <updatePolicy>never</updatePolicy>
-          </releases>
+            <id>opendaylight-mirror</id>
+            <name>opendaylight-mirror</name>
+            <url>${nexusproxy}/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
         </pluginRepository>
         <!-- OpenDayLight Snapshot artifact -->
         <pluginRepository>
-          <id>opendaylight-snapshot</id>
-          <name>opendaylight-snapshot</name>
-          <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
-          <snapshots>
-              <enabled>true</enabled>
-          </snapshots>
-          <releases>
-              <enabled>false</enabled>
-          </releases>
+            <id>opendaylight-snapshot</id>
+            <name>opendaylight-snapshot</name>
+            <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </pluginRepository>
     </pluginRepositories>
 
@@ -148,28 +154,28 @@
     <repositories>
         <!-- OpenDayLight Repo Mirror -->
         <repository>
-          <id>opendaylight-mirror</id>
-          <name>opendaylight-mirror</name>
-          <url>${nexusproxy}/groups/public/</url>
-          <snapshots>
-              <enabled>false</enabled>
-          </snapshots>
-          <releases>
-              <enabled>true</enabled>
-              <updatePolicy>never</updatePolicy>
-          </releases>
+            <id>opendaylight-mirror</id>
+            <name>opendaylight-mirror</name>
+            <url>${nexusproxy}/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
         </repository>
         <!-- OpenDayLight Snapshot artifact -->
         <repository>
-          <id>opendaylight-snapshot</id>
-          <name>opendaylight-snapshot</name>
-          <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
-          <snapshots>
-              <enabled>true</enabled>
-          </snapshots>
-          <releases>
-              <enabled>false</enabled>
-          </releases>
+            <id>opendaylight-snapshot</id>
+            <name>opendaylight-snapshot</name>
+            <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
     </repositories>
 
@@ -218,6 +224,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-data-impl</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-api</artifactId>
                 <version>${yang.version}</version>
             </dependency>
@@ -231,6 +242,17 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sal-connector-api</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal</artifactId>
+                <version>${sal.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Supporting Libraries -->
@@ -249,7 +271,11 @@
                 <artifactId>org.eclipse.xtend.lib</artifactId>
                 <version>${xtend.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.core.version}</version>
+            </dependency>
             <!-- Testing Dependencies -->
             <dependency>
                 <groupId>junit</groupId>
@@ -260,7 +286,25 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.9.5</version>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-core</artifactId>
+                <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -278,15 +322,9 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${bundle.plugin.version}</version>
                     <extensions>true</extensions>
-                    <!--executions>
-                        <execution>
-                            <id>bundle-manifest</id>
-                            <phase>process-classes</phase>
-                            <goals>
-                                <goal>manifest</goal>
-                            </goals>
-                        </execution>
-                    </executions-->
+                    <!--executions> <execution> <id>bundle-manifest</id> 
+                        <phase>process-classes</phase> <goals> <goal>manifest</goal> </goals> </execution> 
+                        </executions -->
                     <configuration>
                         <instructions>
                             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
@@ -328,7 +366,8 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
                 </plugin>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <!--This plugin's configuration is used to store Eclipse 
+                    m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
@@ -346,7 +385,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -360,7 +399,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                      <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -373,7 +412,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
