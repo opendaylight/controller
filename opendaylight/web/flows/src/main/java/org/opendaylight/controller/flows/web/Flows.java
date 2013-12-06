@@ -142,17 +142,17 @@ public class Flows implements IDaylightWeb {
         }
 
         Map<String, Object> nodes = new HashMap<String, Object>();
-        Map<Short, String> port;
+        Map<String, String> port;
 
         for (Switch node : switchManager.getNetworkDevices()) {
-            port = new HashMap<Short, String>(); // new port
+            port = new HashMap<String, String>(); // new port
             Set<NodeConnector> nodeConnectorSet = node.getNodeConnectors();
 
             if (nodeConnectorSet != null) {
                 for (NodeConnector nodeConnector : nodeConnectorSet) {
                     String nodeConnectorName = ((Name) switchManager.getNodeConnectorProp(nodeConnector,
                             Name.NamePropName)).getValue();
-                    port.put((Short) nodeConnector.getID(),
+                    port.put( nodeConnector.getID().toString(),
                             nodeConnectorName + "(" + nodeConnector.getNodeConnectorIDString() + ")");
                 }
             }
