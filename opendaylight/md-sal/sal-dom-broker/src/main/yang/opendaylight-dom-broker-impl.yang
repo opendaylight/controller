@@ -5,6 +5,7 @@ module opendaylight-sal-dom-broker-impl {
 
 	import config { prefix config; revision-date 2013-04-05; }
  	import opendaylight-md-sal-dom {prefix sal;}
+ 	import opendaylight-md-sal-common {prefix common;}
 
     description
         "Service definition for Binding Aware MD-SAL.";
@@ -18,7 +19,7 @@ module opendaylight-sal-dom-broker-impl {
         base config:module-type;
         config:provided-service sal:dom-broker-osgi-registry;
         config:java-name-prefix DomBrokerImpl;
-    }
+    }    
     
     identity hash-map-data-store {
         base config:module-type;
@@ -58,4 +59,12 @@ module opendaylight-sal-dom-broker-impl {
         }
     }
     
+    augment "/config:modules/config:module/config:state" {
+        case dom-broker-impl {
+            when "/config:modules/config:module/config:type = 'dom-broker-impl'";
+            container data {
+                uses common:data-state;
+            } 
+        }
+    }
 }

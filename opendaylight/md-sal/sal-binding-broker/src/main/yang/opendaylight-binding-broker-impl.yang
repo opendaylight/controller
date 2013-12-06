@@ -121,7 +121,9 @@ module opendaylight-sal-binding-broker-impl {
     augment "/config:modules/config:module/config:state" {
         case binding-data-broker {
             when "/config:modules/config:module/config:type = 'binding-data-broker'";
-            uses common:data-state;
+            container data {
+                uses common:data-state;
+            }
         }
     }
     augment "/config:modules/config:module/config:state" {

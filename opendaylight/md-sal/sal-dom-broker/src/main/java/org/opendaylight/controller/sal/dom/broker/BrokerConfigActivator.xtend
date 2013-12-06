@@ -19,15 +19,16 @@ class BrokerConfigActivator implements AutoCloseable {
     
     
     private static val ROOT = InstanceIdentifier.builder().toInstance();
+
+    @Property
+    private var DataBrokerImpl dataService;
     
     private var ServiceRegistration<SchemaService> schemaReg;
     private var ServiceRegistration<DataBrokerService> dataReg;
     private var ServiceRegistration<DataProviderService> dataProviderReg;
     private var ServiceRegistration<MountService> mountReg;
     private var ServiceRegistration<MountProvisionService> mountProviderReg;
-    
     private var SchemaServiceImpl schemaService;
-    private var DataBrokerImpl dataService;
     private var MountPointManagerImpl mountService;
     
     SchemaAwareDataStoreAdapter wrappedStore
