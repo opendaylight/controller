@@ -466,7 +466,7 @@ class TransformerGenerator {
                         {
                             //System.out.println("Qname " + $1);
                             //System.out.println("Value " + $2);
-                            «QName.name» _resultName = «QName.name».create($1,QNAME.getLocalName());
+                            «QName.name» _resultName = «QName.name».create(QNAME,QNAME.getLocalName());
                             java.util.List _childNodes = new java.util.ArrayList();
                             «type.resolvedName» value = («type.resolvedName») $2;
                             «FOR child : node.childNodes»

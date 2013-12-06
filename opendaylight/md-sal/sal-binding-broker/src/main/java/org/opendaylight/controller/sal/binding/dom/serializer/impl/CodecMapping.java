@@ -71,4 +71,18 @@ public class CodecMapping {
                 LOG.error("Augmentation codec could not be set for {}",dataCodec.getName(),e);
             }
     }
+    
+    
+    public static BindingCodec<?,?> getAugmentationCodec(Class<? extends BindingCodec<?,?>> dataCodec) {
+            Field instanceIdField;
+            try {
+                instanceIdField = dataCodec.getField(AUGMENTATION_CODEC);
+                return (BindingCodec<?,?>) instanceIdField.get(null);
+            } catch (NoSuchFieldException e) {
+                LOG.debug("BUG: Augmentation codec is not needed for {}",dataCodec.getName(),e);
+            } catch (SecurityException | IllegalAccessException e) {
+                LOG.error("Augmentation codec could not be set for {}",dataCodec.getName(),e);
+            }
+            return null;
+    }
 }
