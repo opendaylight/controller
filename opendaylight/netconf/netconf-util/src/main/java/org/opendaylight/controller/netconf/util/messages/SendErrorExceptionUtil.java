@@ -10,9 +10,9 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;

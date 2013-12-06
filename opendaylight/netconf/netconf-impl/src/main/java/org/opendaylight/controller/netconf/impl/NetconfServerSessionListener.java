@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -25,29 +25,32 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.base.Preconditions.checkState;
 
 public class NetconfServerSessionListener implements
         SessionListener<NetconfMessage, NetconfServerSession, NetconfTerminationReason> {
 
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionListener.class);
     public static final String MESSAGE_ID = "message-id";
+    private final SessionMonitoringService monitoringService;
 
     private NetconfOperationRouterImpl operationRouter;
 
-    public NetconfServerSessionListener(NetconfOperationRouterImpl operationRouter) {
+    public NetconfServerSessionListener(NetconfOperationRouterImpl operationRouter,
+                                        SessionMonitoringService monitoringService) {
         this.operationRouter = operationRouter;
+        this.monitoringService = monitoringService;
     }
 
     @Override
     public void onSessionUp(NetconfServerSession netconfNetconfServerSession) {
-
+        monitoringService.onSessionUp(netconfNetconfServerSession);
     }
 
     @Override
     public void onSessionDown(NetconfServerSession netconfNetconfServerSession, Exception e) {
         logger.debug("Session {} down, reason: {}", netconfNetconfServerSession, e.getMessage());
+        monitoringService.onSessionDown(netconfNetconfServerSession);
 
         operationRouter.close();
     }
@@ -57,6 +60,7 @@ public class NetconfServerSessionListener implements
             NetconfTerminationReason netconfTerminationReason) {
         logger.debug("Session {} terminated, reason: {}", netconfNetconfServerSession,
                 netconfTerminationReason.getErrorMessage());
+        monitoringService.onSessionDown(netconfNetconfServerSession);
 
         operationRouter.close();
     }
@@ -70,7 +74,7 @@ public class NetconfServerSessionListener implements
             // schemas
             final NetconfMessage message = processDocument(netconfMessage,
                     session);
-            logger.debug("Respondign with message {}", XmlUtil.toString(message.getDocument()));
+            logger.debug("Responding with message {}", XmlUtil.toString(message.getDocument()));
             session.sendMessage(message);
 
             if (isCloseSession(netconfMessage)) {
@@ -78,10 +82,13 @@ public class NetconfServerSessionListener implements
             }
 
         } catch (final RuntimeException e) {
-            logger.error("Unexpected exception", e);
             // TODO: should send generic error or close session?
+            logger.error("Unexpected exception", e);
+            session.onIncommingRpcFail();
             throw new RuntimeException("Unable to process incoming message " + netconfMessage, e);
         } catch (NetconfDocumentedException e) {
+            session.onOutgoingRpcError();
+            session.onIncommingRpcFail();
             SendErrorExceptionUtil.sendErrorMessage(session, e, netconfMessage);
         }
     }
@@ -93,7 +100,7 @@ public class NetconfServerSessionListener implements
     }
 
     private NetconfMessage processDocument(final NetconfMessage netconfMessage,
-            NetconfSession session) throws NetconfDocumentedException {
+            NetconfServerSession session) throws NetconfDocumentedException {
 
         final Document incommingDocument = netconfMessage.getDocument();
         final Node rootNode = incommingDocument.getDocumentElement();
@@ -104,6 +111,9 @@ public class NetconfServerSessionListener implements
             final Document responseDocument = XmlUtil.newDocument();
             Document rpcReply = operationRouter.onNetconfMessage(
                     incommingDocument, session);
+
+            session.onIncommingRpcSuccess();
+
             responseDocument.appendChild(responseDocument.importNode(rpcReply.getDocumentElement(), true));
             return new NetconfMessage(responseDocument);
         } else {

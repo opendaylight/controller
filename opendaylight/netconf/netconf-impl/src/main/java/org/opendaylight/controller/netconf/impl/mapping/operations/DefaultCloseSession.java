@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;

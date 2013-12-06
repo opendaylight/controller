@@ -8,18 +8,21 @@
 
 package org.opendaylight.controller.netconf.impl.util;
 
-import java.util.Map;
-
-import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
-
 import com.google.common.collect.Maps;
-
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public final class DeserializerExceptionHandler implements ChannelHandler {
+import java.util.Map;
+
+public final class
+        DeserializerExceptionHandler implements ChannelHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(DeserializerExceptionHandler.class);
+
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -33,9 +36,8 @@ public final class DeserializerExceptionHandler implements ChannelHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (cause instanceof NetconfDeserializerException) {
-            handleDeserializerException(ctx, cause);
-        }
+        logger.warn("An exception occured during message handling", cause);
+        handleDeserializerException(ctx, cause);
     }
 
     private void handleDeserializerException(ChannelHandlerContext ctx, Throwable cause) {

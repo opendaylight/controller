@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
 import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
