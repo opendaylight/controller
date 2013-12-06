@@ -48,6 +48,7 @@ public class NodeTableStatistics implements Serializable {
         result = prime * result + activeCount;
         result = prime * result + (int) (lookupCount ^ (lookupCount >>> 32));
         result = prime * result + (int) (matchedCount ^ (matchedCount >>> 32));
+        result = prime * result + maximumEntries;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((nodeTable == null) ? 0 : nodeTable.hashCode());
         return result;
@@ -72,6 +73,9 @@ public class NodeTableStatistics implements Serializable {
             return false;
         }
         if (matchedCount != other.matchedCount) {
+            return false;
+        }
+        if (maximumEntries != other.maximumEntries) {
             return false;
         }
         if (name == null) {
@@ -169,7 +173,7 @@ public class NodeTableStatistics implements Serializable {
     /**
      * @return the maximumEntries
      */
-    public long getMaximumEntries() {
+    public int getMaximumEntries() {
         return maximumEntries;
     }
 
@@ -185,6 +189,7 @@ public class NodeTableStatistics implements Serializable {
         return "NodeTableStats[tableId = " + nodeTable
                 + ", activeCount = " + activeCount
                 + ", lookupCount = " + lookupCount
-                + ", matchedCount = " + matchedCount + "]";
+                + ", matchedCount = " + matchedCount
+                + ", maximumEntries = " + maximumEntries + "]";
     }
 }
