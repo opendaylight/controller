@@ -22,12 +22,16 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.YangNode;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.base.Preconditions;
 
 public class XmlMapper {
+    
+    private final Logger logger = LoggerFactory.getLogger(XmlMapper.class); 
 
     public Document write(CompositeNode data, DataNodeContainer schema) throws UnsupportedDataTypeException {
         Preconditions.checkNotNull(data);
@@ -70,9 +74,11 @@ public class XmlMapper {
         } else { // CompositeNode
             for (Node<?> child : ((CompositeNode) data).getChildren()) {
                 DataSchemaNode childSchema = findFirstSchemaForNode(child, ((DataNodeContainer) schema).getChildNodes());
-                if (childSchema == null) {
-                    throw new UnsupportedDataTypeException("Probably the data node \""
-                            + child.getNodeType().getLocalName() + "\" is not conform to schema");
+                if (logger.isDebugEnabled()) {
+                    if (childSchema == null) {
+                        logger.debug("Probably the data node \"" + ((child == null) ? "" : child.getNodeType().getLocalName())
+                                + "\" is not conform to schema");
+                    }
                 }
                 itemEl.appendChild(translateToXmlAndReturnRootElement(doc, child, childSchema));
             }
@@ -97,14 +103,16 @@ public class XmlMapper {
     }
 
     private DataSchemaNode findFirstSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
-        for (DataSchemaNode dsn : dataSchemaNode) {
-            if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
-                return dsn;
-            } else if (dsn instanceof ChoiceNode) {
-                for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
-                    DataSchemaNode foundDsn = findFirstSchemaForNode(node, choiceCase.getChildNodes());
-                    if (foundDsn != null) {
-                        return foundDsn;
+        if (dataSchemaNode != null && node != null) {
+            for (DataSchemaNode dsn : dataSchemaNode) {
+                if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
+                    return dsn;
+                } else if (dsn instanceof ChoiceNode) {
+                    for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
+                        DataSchemaNode foundDsn = findFirstSchemaForNode(node, choiceCase.getChildNodes());
+                        if (foundDsn != null) {
+                            return foundDsn;
+                        }
                     }
                 }
             }
