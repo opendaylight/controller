@@ -169,7 +169,7 @@ public class NodeTableStatistics implements Serializable {
     /**
      * @return the maximumEntries
      */
-    public long getMaximumEntries() {
+    public int getMaximumEntries() {
         return maximumEntries;
     }
 
