@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a29450e2",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/group-types.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 397
+      },
+      "writtenOn": "2013-12-06T04:27:34Z",
+      "side": 1,
+      "message": "So are we saying group Id should be unique across the switches?",
+      "revId": "66451c9658747ea37e800975ee3afec96eee430b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
