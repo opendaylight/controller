@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.binding.dom.serializer.api;
 
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 
@@ -14,6 +15,8 @@ import org.opendaylight.controller.sal.binding.dom.serializer.api.IdentifierCode
 public interface CodecRegistry {
 
     InstanceIdentifierCodec getInstanceIdentifierCodec();
+    
+    IdentitityCodec<?> getIdentityCodec();
 
     <T extends DataContainer> DataContainerCodec<T> getCodecForDataObject(Class<T> object);
 
@@ -22,6 +25,8 @@ public interface CodecRegistry {
     <T extends Identifier<?>> IdentifierCodec<T> getCodecForIdentifier(Class<T> object);
 
     <T extends Augmentation<?>> AugmentationCodec<T> getCodecForAugmentation(Class<T> object);
+    
+    <T extends BaseIdentity> IdentitityCodec<T> getCodecForIdentity(Class<T> codec);
 
     Class<?> getClassForPath(List<QName> names);
 

@@ -37,6 +37,12 @@ import org.opendaylight.controller.sal.binding.impl.connect.dom.DeserializationE
 import java.util.concurrent.Callable
 import org.opendaylight.yangtools.yang.binding.Augmentation
 import org.opendaylight.controller.sal.binding.impl.util.YangSchemaUtils
+import org.opendaylight.controller.sal.binding.dom.serializer.api.AugmentationCodec
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
+import java.util.ArrayList
+import org.opendaylight.yangtools.yang.data.api.Node
+import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
+import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
 
 class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingService, SchemaServiceListener, AutoCloseable {
 
@@ -112,9 +118,21 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
 
     override Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> toDataDom(
         Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry) {
+        
+        try {
         val key = toDataDom(entry.key)
-        val data = toCompositeNodeImpl(entry.value);
+        var CompositeNode data;
+        if(Augmentation.isAssignableFrom(entry.key.targetType)) {
+            data = toCompositeNodeImpl(key,entry.value);
+        } else {
+          data = toCompositeNodeImpl(entry.value);
+        }
         return new SimpleEntry(key, data);
+        
+        } catch (Exception e) {
+            LOG.error("Error during serialization for {}.", entry.key,e);
+            throw e;
+        }
     }
 
     private def CompositeNode toCompositeNodeImpl(DataObject object) {
@@ -122,6 +140,26 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         waitForSchema(cls);
         val codec = registry.getCodecForDataObject(cls) as DataContainerCodec<DataObject>;
         val ret = codec.serialize(new ValueWithQName(null, object));
+        return ret as CompositeNode;
+    }
+    
+    
+    private def CompositeNode toCompositeNodeImpl(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier identifier,DataObject object) {
+       
+        //val cls = object.implementedInterface;
+        //waitForSchema(cls);
+        val last = identifier.path.last;
+        val codec = registry.getCodecForAugmentation(object.implementedInterface as Class) as AugmentationCodec;
+        val ret = codec.serialize(new ValueWithQName(last.nodeType, object));
+        if(last instanceof NodeIdentifierWithPredicates) {
+            val predicates = last as NodeIdentifierWithPredicates;
+            val newNodes = new ArrayList<Node<?>>(predicates.keyValues.size);
+            for(predicate : predicates.keyValues.entrySet) {
+                newNodes.add(new SimpleNodeTOImpl(predicate.key,null,predicate.value));
+            }
+            newNodes.addAll(ret.children);
+            return new CompositeNodeTOImpl(last.nodeType,null,newNodes);
+        }
         return ret as CompositeNode;
     }
 

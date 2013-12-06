@@ -3,6 +3,7 @@ package org.opendaylight.controller.sal.binding.dom.serializer.impl;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import org.opendaylight.controller.sal.binding.dom.serializer.api.IdentitityCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.InstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.binding.BindingCodec;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -15,6 +16,8 @@ public class CodecMapping {
     private static final Logger LOG = LoggerFactory.getLogger(CodecMapping.class);
     
     public static final String INSTANCE_IDENTIFIER_CODEC = "INSTANCE_IDENTIFIER_CODEC";
+    public static final String IDENTITYREF_CODEC = "IDENTITYREF_CODEC";
+    
     public static final String CLASS_TO_CASE_MAP = "CLASS_TO_CASE";
     public static final String COMPOSITE_TO_CASE = "COMPOSITE_TO_CASE";
     public static final String AUGMENTATION_CODEC = "AUGMENTATION_CODEC";
@@ -27,7 +30,22 @@ public class CodecMapping {
                 instanceIdField.set(null, codec);
             }
         } catch (NoSuchFieldException e) {
-           LOG.debug("Instance identifier codec is not needed for {}",obj.getName(),e);
+           LOG.trace("Instance identifier codec is not needed for {}",obj.getName(),e);
+        } catch (SecurityException | IllegalAccessException e) {
+            LOG.error("Instance identifier could not be set for {}",obj.getName(),e);
+        }
+    }
+
+
+    public static void setIdentityRefCodec(Class<?> obj,IdentitityCodec<?> codec) {
+        Field instanceIdField;
+        try {
+            instanceIdField = obj.getField(IDENTITYREF_CODEC);
+            if(obj != null) {
+                instanceIdField.set(null, codec);
+            }
+        } catch (NoSuchFieldException e) {
+           LOG.trace("Instance identifier codec is not needed for {}",obj.getName(),e);
         } catch (SecurityException | IllegalAccessException e) {
             LOG.error("Instance identifier could not be set for {}",obj.getName(),e);
         }
@@ -70,5 +88,19 @@ public class CodecMapping {
             } catch (SecurityException | IllegalAccessException e) {
                 LOG.error("Augmentation codec could not be set for {}",dataCodec.getName(),e);
             }
+    }
+    
+    
+    public static BindingCodec<?,?> getAugmentationCodec(Class<? extends BindingCodec<?,?>> dataCodec) {
+            Field instanceIdField;
+            try {
+                instanceIdField = dataCodec.getField(AUGMENTATION_CODEC);
+                return (BindingCodec<?,?>) instanceIdField.get(null);
+            } catch (NoSuchFieldException e) {
+                LOG.debug("BUG: Augmentation codec is not needed for {}",dataCodec.getName(),e);
+            } catch (SecurityException | IllegalAccessException e) {
+                LOG.error("Augmentation codec could not be set for {}",dataCodec.getName(),e);
+            }
+            return null;
     }
 }

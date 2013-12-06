@@ -13,7 +13,10 @@ class IntermediateMapping {
     
     
     
-    static def Node<?> toNode(Map map) {
+    static def Node<?> toNode(Map<?,?> map) {
+        if(map instanceof Node<?>) {
+            return map as Node<?>;
+        }
         val nodeMap = map as Map<QName,Object>;
         Preconditions.checkArgument(map.size == 1);
         val elem = nodeMap.entrySet.iterator.next;
@@ -22,10 +25,15 @@ class IntermediateMapping {
         toNodeImpl(qname, value);
     }
 
+
     static def dispatch Node<?> toNodeImpl(QName name, List<?> objects) {
         val values = new ArrayList<Node<?>>(objects.size);
         for (obj : objects) {
-            values.add(toNode(obj as Map));
+            if(obj instanceof Node<?>) {
+                values.add(obj as Node<?>);
+            } else if(obj instanceof Map<?,?>) {
+                values.add(toNode(obj as Map<?,?>));
+            }
         }
         return new CompositeNodeTOImpl(name, null, values);
     }

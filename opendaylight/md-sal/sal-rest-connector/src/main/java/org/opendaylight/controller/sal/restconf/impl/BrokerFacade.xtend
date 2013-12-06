@@ -9,9 +9,12 @@ import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.slf4j.LoggerFactory
 
 class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
+
+    val static LOG = LoggerFactory.getLogger(BrokerFacade)
     val static BrokerFacade INSTANCE = new BrokerFacade
 
     @Property
@@ -38,11 +41,13 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
     override readConfigurationData(InstanceIdentifier path) {
         checkPreconditions
+        LOG.info("Read Configuration via Restconf: {}",path)
         return dataService.readConfigurationData(path);
     }
 
     override readOperationalData(InstanceIdentifier path) {
         checkPreconditions
+        LOG.info("Read Operational via Restconf: {}",path)
         return dataService.readOperationalData(path);
     }
 

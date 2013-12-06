@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
 
 import static com.google.common.base.Preconditions.*
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 class ControllerContext implements SchemaServiceListener {
 
@@ -291,7 +292,16 @@ class ControllerContext implements SchemaServiceListener {
         checkArgument(node instanceof LeafSchemaNode);
         val urlDecoded = URLDecoder.decode(uriValue);
         val typedef = (node as LeafSchemaNode).type;
-        val decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
+        var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
+        if(decoded == null) {
+            var baseType = typedef
+            while (baseType.baseType != null) {
+                baseType = baseType.baseType;
+            }
+            if(baseType instanceof IdentityrefTypeDefinition) {
+                decoded = toQName(urlDecoded)
+            }
+        }
         map.put(node.QName, decoded);
     }
 

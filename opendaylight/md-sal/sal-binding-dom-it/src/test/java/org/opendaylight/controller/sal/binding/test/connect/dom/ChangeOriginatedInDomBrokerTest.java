@@ -116,6 +116,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
     
     @Test
     public void simpleModifyOperation() throws Exception {
+        assertNull(biDataService.readConfigurationData(FLOW_INSTANCE_ID_BI));
         
         registerCommitHandler();
         
@@ -123,7 +124,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
         DataModificationTransaction biTransaction = biDataService.beginTransaction();
         biTransaction.putConfigurationData(FLOW_INSTANCE_ID_BI, domflow);
         RpcResult<TransactionStatus> biResult = biTransaction.commit().get();
-        
+        assertEquals(TransactionStatus.COMMITED, biResult.getResult());
         assertNotNull(modificationCapture);
         Flow flow = (Flow) modificationCapture.getCreatedConfigurationData().get(FLOW_INSTANCE_ID_BA);
         assertNotNull(flow);
