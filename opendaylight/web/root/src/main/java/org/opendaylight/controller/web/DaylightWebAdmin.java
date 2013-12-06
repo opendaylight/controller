@@ -143,17 +143,22 @@ public class DaylightWebAdmin {
         return gson.toJson(result);
     }
 
-    @RequestMapping("/users")
+    @RequestMapping(value = "/users", method = RequestMethod.GET)
     @ResponseBody
-    public List<UserConfig> getUsers() {
+    public List<UserBean> getUsers() {
         IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
             return null;
         }
 
-        List<UserConfig> userConfList = userManager.getLocalUserList();
+        List<UserBean> result = new ArrayList<UserBean>();
+        List<UserConfig> configs = userManager.getLocalUserList();
+        for (UserConfig config : configs) {
+            UserBean bean = new UserBean(config);
+            result.add(bean);
+        }
 
-        return userConfList;
+        return result;
     }
 
     /*
