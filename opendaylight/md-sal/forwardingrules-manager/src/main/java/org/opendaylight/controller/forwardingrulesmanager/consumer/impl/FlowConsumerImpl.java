@@ -29,9 +29,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeErrorNotification;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeExperimenterErrorNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -50,8 +57,7 @@ import org.slf4j.LoggerFactory;
 
 public class FlowConsumerImpl implements IForwardingRulesManager {
     protected static final Logger logger = LoggerFactory.getLogger(FlowConsumerImpl.class);
-    // private final FlowEventListener flowEventListener = new
-    // FlowEventListener();
+    private final FlowEventListener flowEventListener = new FlowEventListener();
     private Registration<NotificationListener> listener1Reg;
     private SalFlowService flowService;
     // private FlowDataListener listener;
@@ -96,8 +102,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
         // }
 
         // For switch events
-        // listener1Reg =
-        // FRMConsumerImpl.getNotificationService().registerNotificationListener(flowEventListener);
+        listener1Reg = FRMConsumerImpl.getNotificationService().registerNotificationListener(flowEventListener);
 
         if (null == listener1Reg) {
             logger.error("Listener to listen on flow data modifcation events");
@@ -153,7 +158,7 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             input1.setNode(nodeOne);
             AddFlowInput firstMsg = input1.build();
 
-            if (null != flowService) {
+            if (null == flowService) {
                 logger.error("ConsumerFlowService is NULL");
             }
             @SuppressWarnings("unused")
@@ -444,6 +449,47 @@ public class FlowConsumerImpl implements IForwardingRulesManager {
             }
             return false;
         }
+    }
+
+    final class FlowEventListener implements SalFlowListener {
+
+        List<FlowAdded> addedFlows = new ArrayList<>();
+        List<FlowRemoved> removedFlows = new ArrayList<>();
+        List<FlowUpdated> updatedFlows = new ArrayList<>();
+
+        @Override
+        public void onFlowAdded(FlowAdded notification) {
+            addedFlows.add(notification);
+        }
+
+        @Override
+        public void onFlowRemoved(FlowRemoved notification) {
+            removedFlows.add(notification);
+        }
+
+        @Override
+        public void onFlowUpdated(FlowUpdated notification) {
+            updatedFlows.add(notification);
+        }
+
+        @Override
+        public void onNodeErrorNotification(NodeErrorNotification notification) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onNodeExperimenterErrorNotification(NodeExperimenterErrorNotification notification) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
+            // TODO Auto-generated method stub
+
+        }
+
     }
 
     // Commented out DataChangeListene - to be used by Stats
