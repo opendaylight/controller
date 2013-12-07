@@ -836,21 +836,14 @@ public class FlowConfig implements Serializable {
                 sstr = Pattern.compile("OUTPUT=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     for (String t : sstr.group(1).split(",")) {
-                        Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
-                        if (n.matches()) {
-                            String port = n.group(1);
-                            if (port != null) {
-                                if (!isPortValid(sw, port)) {
-                                    String msg = String.format("Output port %s is not valid for this switch", port);
-                                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                                        msg += " in Container " + containerName;
-                                    }
-                                    return new Status(StatusCode.BADREQUEST, msg);
+                        if (t != null) {
+                            if (!isPortValid(sw, t)) {
+                                String msg = String.format("Output port %s is not valid for this switch", t);
+                                if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                                    msg += " in Container " + containerName;
                                 }
+                                return new Status(StatusCode.BADREQUEST, msg);
                             }
-                        } else {
-                            String msg = String.format("Output port %s is not valid", t);
-                            return new Status(StatusCode.BADREQUEST, msg);
                         }
                     }
                     continue;
@@ -859,21 +852,15 @@ public class FlowConfig implements Serializable {
                 sstr = Pattern.compile("ENQUEUE=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     for (String t : sstr.group(1).split(",")) {
-                        Matcher n = Pattern.compile("(?:(\\d+:\\d+))").matcher(t);
-                        if (n.matches()) {
-                            if (n.group(1) != null) {
-                                String port = n.group(1).split(":")[0];
-                                if (!isPortValid(sw, port)) {
-                                    String msg = String.format("Output port %d is not valid for this switch", port);
-                                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                                        msg += " in Container " + containerName;
-                                    }
-                                    return new Status(StatusCode.BADREQUEST, msg);
+                        if (t != null) {
+                            String port = t.split(":")[0];
+                            if (!isPortValid(sw, port)) {
+                                String msg = String.format("Output port %d is not valid for this switch", port);
+                                if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                                    msg += " in Container " + containerName;
                                 }
+                                return new Status(StatusCode.BADREQUEST, msg);
                             }
-                        } else {
-                            String msg = String.format("Enqueue port %s is not valid", t);
-                            return new Status(StatusCode.BADREQUEST, msg);
                         }
                     }
                     continue;
@@ -1102,12 +1089,9 @@ public class FlowConfig implements Serializable {
                 sstr = Pattern.compile(ActionType.OUTPUT + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     for (String t : sstr.group(1).split(",")) {
-                        Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
-                        if (n.matches()) {
-                            if (n.group(1) != null) {
-                                String nc = String.format("%s|%s@%s", node.getType(), n.group(1), node.toString());
-                                actionList.add(new Output(NodeConnector.fromString(nc)));
-                            }
+                        if (t != null) {
+                            String nc = String.format("%s|%s@%s", node.getType(), t, node.toString());
+                            actionList.add(new Output(NodeConnector.fromString(nc)));
                         }
                     }
                     continue;
@@ -1116,17 +1100,14 @@ public class FlowConfig implements Serializable {
                 sstr = Pattern.compile(ActionType.ENQUEUE + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     for (String t : sstr.group(1).split(",")) {
-                        Matcher n = Pattern.compile("(?:(\\d+:\\d+))").matcher(t);
-                        if (n.matches()) {
-                            if (n.group(1) != null) {
-                                String parts[] = n.group(1).split(":");
-                                String nc = String.format("%s|%s@%s", node.getType(), parts[0], node.toString());
-                                if (parts.length == 1) {
-                                    actionList.add(new Enqueue(NodeConnector.fromString(nc)));
-                                } else {
-                                    actionList
-                                            .add(new Enqueue(NodeConnector.fromString(nc), Integer.parseInt(parts[1])));
-                                }
+                        if (t != null) {
+                            String parts[] = t.split(":");
+                            String nc = String.format("%s|%s@%s", node.getType(), parts[0], node.toString());
+                            if (parts.length == 1) {
+                                actionList.add(new Enqueue(NodeConnector.fromString(nc)));
+                            } else {
+                                actionList
+                                .add(new Enqueue(NodeConnector.fromString(nc), Integer.parseInt(parts[1])));
                             }
                         }
                     }
