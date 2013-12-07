@@ -2,7 +2,6 @@ package org.opendaylight.controller.sal.dom.broker;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataBroker;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
@@ -15,17 +14,23 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, CompositeNode, DataChangeListener> implements
-        DataProviderService {
+        DataProviderService, AutoCloseable {
 
+    private AtomicLong nextTransaction = new AtomicLong();
+    private final AtomicLong createdTransactionsCount = new AtomicLong();
+    
     public DataBrokerImpl() {
         setDataReadRouter(new DataReaderRouter());
     }
-
-    private AtomicLong nextTransaction = new AtomicLong();
+    
+    public AtomicLong getCreatedTransactionsCount() {
+        return createdTransactionsCount;
+    }
     
     @Override
     public DataTransactionImpl beginTransaction() {
         String transactionId = "DOM-" + nextTransaction.getAndIncrement();
+        createdTransactionsCount.getAndIncrement();
         return new DataTransactionImpl(transactionId,this);
     }
 
@@ -64,6 +69,11 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
     @Override
     public void removeRefresher(DataStoreIdentifier store, DataRefresher refresher) {
         throw new UnsupportedOperationException("Deprecated");
+    }
+
+    @Override
+    public void close() throws Exception {
+        
     }
 
 }

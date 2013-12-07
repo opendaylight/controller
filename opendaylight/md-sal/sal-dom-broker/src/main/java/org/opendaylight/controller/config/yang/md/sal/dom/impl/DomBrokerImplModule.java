@@ -9,10 +9,12 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
+import org.opendaylight.controller.config.yang.md.sal.dom.statistics.DomBrokerRuntimeMXBeanImpl;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerConfigActivator;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.osgi.framework.BundleContext;
+
 import static com.google.common.base.Preconditions.*;
 
 /**
@@ -37,14 +39,15 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         checkArgument(getDataStore() != null, "Data Store needs to be provided for DomBroker");
     }
     
-    
-
     @Override
     public java.lang.AutoCloseable createInstance() {
-        BrokerImpl broker = new BrokerImpl();
-        BrokerConfigActivator activator = new BrokerConfigActivator();
-        DataStore store = getDataStoreDependency();
-        activator.start(broker, store,getBundleContext());
+        final BrokerImpl broker = new BrokerImpl();
+        final BrokerConfigActivator activator = new BrokerConfigActivator();
+        final DataStore store = getDataStoreDependency();
+        activator.start(broker, store, getBundleContext());
+        
+        final DomBrokerImplRuntimeMXBean domBrokerRuntimeMXBean = new DomBrokerRuntimeMXBeanImpl(activator.getDataService());
+        getRootRuntimeBeanRegistratorWrapper().register(domBrokerRuntimeMXBean);
         return broker;
     }
 
