@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_794f2ebe",
+        "filename": "opendaylight/forwardingrulesmanager/api/src/main/java/org/opendaylight/controller/forwardingrulesmanager/FlowConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 839,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-07T01:28:07Z",
+      "side": 1,
+      "message": "Thanks for taking care of this.\nBut you need to make the same change in getActionlist()",
+      "revId": "d93ad378efbf2c05896fdbda100e312271edb9f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_d95e1a76",
         "filename": "opendaylight/forwardingrulesmanager/api/src/main/java/org/opendaylight/controller/forwardingrulesmanager/FlowConfig.java",
         "patchSetId": 1
