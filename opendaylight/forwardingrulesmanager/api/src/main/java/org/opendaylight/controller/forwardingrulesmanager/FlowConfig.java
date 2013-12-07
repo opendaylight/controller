@@ -836,21 +836,14 @@ public class FlowConfig implements Serializable {
                 sstr = Pattern.compile("OUTPUT=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     for (String t : sstr.group(1).split(",")) {
-                        Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
-                        if (n.matches()) {
-                            String port = n.group(1);
-                            if (port != null) {
-                                if (!isPortValid(sw, port)) {
-                                    String msg = String.format("Output port %s is not valid for this switch", port);
-                                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                                        msg += " in Container " + containerName;
-                                    }
-                                    return new Status(StatusCode.BADREQUEST, msg);
+                        if (t != null) {
+                            if (!isPortValid(sw, t)) {
+                                String msg = String.format("Output port %s is not valid for this switch", t);
+                                if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                                    msg += " in Container " + containerName;
                                 }
+                                return new Status(StatusCode.BADREQUEST, msg);
                             }
-                        } else {
-                            String msg = String.format("Output port %s is not valid", t);
-                            return new Status(StatusCode.BADREQUEST, msg);
                         }
                     }
                     continue;
