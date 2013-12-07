@@ -132,25 +132,22 @@ public class GroupConsumerImpl {
      * @param dataObject
      */
     private void updateGroup(InstanceIdentifier<?> path, 
-        Group originalGroupDataObject, Group updatedGroupDataObject) {
-        
-        GroupKey groupKey = updatedGroupDataObject.getKey();
-       // Node nodeInstanceID = path.firstIdentifierOf("Node");
+        Group updatedGroupDataObject, Group originalGroupDataObject) {
         UpdatedGroupBuilder updateGroupBuilder = null;
         Status groupOperationStatus = validateGroup(updatedGroupDataObject);
-
+        
         if (!groupOperationStatus.isSuccess()) {
             logger.error("Group data object validation failed %s" + updatedGroupDataObject.getGroupName());
             return;
         }
         
-        UpdateGroupInputBuilder groupInputBuilder = new UpdateGroupInputBuilder();
+        UpdateGroupInputBuilder groupInputBuilder = new UpdateGroupInputBuilder();        
+        updateGroupBuilder = new UpdatedGroupBuilder(updatedGroupDataObject);        
+        updateGroupBuilder.setGroupId(new GroupId(updatedGroupDataObject.getId())); 
         groupInputBuilder.setNode(updatedGroupDataObject.getNode());
-        updateGroupBuilder = new UpdatedGroupBuilder(updatedGroupDataObject);
-        updateGroupBuilder.setGroupId(new GroupId(updatedGroupDataObject.getId()));        
         groupInputBuilder.setUpdatedGroup(updateGroupBuilder.build());       
         OriginalGroupBuilder originalGroupBuilder = new OriginalGroupBuilder(originalGroupDataObject);
-        groupInputBuilder.setOriginalGroup(originalGroupBuilder.build());
+        groupInputBuilder.setOriginalGroup(originalGroupBuilder.build());     
         groupService.updateGroup(groupInputBuilder.build());
         return;
     }
@@ -171,10 +168,8 @@ public class GroupConsumerImpl {
         }
         
         AddGroupInputBuilder groupData = new AddGroupInputBuilder();
-        groupData.setBuckets(groupAddDataObject.getBuckets());
-        groupData.setContainerName(groupAddDataObject.getContainerName());
-        groupData.setGroupId(new GroupId(groupAddDataObject.getId()));
-        groupData.setGroupType(groupAddDataObject.getGroupType());
+        groupData.fieldsFrom(groupAddDataObject);       
+        groupData.setGroupId(new GroupId(groupAddDataObject.getId()));     
         groupData.setNode(groupAddDataObject.getNode());    
         groupService.addGroup(groupData.build());
         return;
@@ -196,11 +191,9 @@ public class GroupConsumerImpl {
         }
        
         RemoveGroupInputBuilder groupData = new RemoveGroupInputBuilder();
-        groupData.setBuckets(groupRemoveDataObject.getBuckets());
-        groupData.setContainerName(groupRemoveDataObject.getContainerName());
-        groupData.setGroupId(new GroupId(groupRemoveDataObject.getId()));
-        groupData.setGroupType(groupRemoveDataObject.getGroupType());
-        groupData.setNode(groupRemoveDataObject.getNode());    
+        groupData.fieldsFrom(groupRemoveDataObject);
+        groupData.setGroupId(new GroupId(groupRemoveDataObject.getId()));    
+        groupData.setNode(groupRemoveDataObject.getNode());
         groupService.removeGroup(groupData.build());  
         return;
     }
