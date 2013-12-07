@@ -29,7 +29,7 @@
                     <instance>
                         <name>ref_dep</name>
                         <unknownAttribute>error</unknownAttribute>
-                        <provider>/config/modules/module[name='impl-dep']/instance[name='dep']
+                        <provider>/modules/module[type='impl-dep'][name='dep']
                         </provider>
                     </instance>
                 </service>

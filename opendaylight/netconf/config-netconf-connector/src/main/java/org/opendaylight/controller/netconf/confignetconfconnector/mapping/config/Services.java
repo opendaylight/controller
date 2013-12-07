@@ -284,8 +284,13 @@ public final class Services {
         public static ServiceInstance fromString(String instanceId) {
             instanceId = instanceId.trim();
             Matcher matcher = p.matcher(instanceId);
+            if(matcher.matches() == false) {
+                matcher = pDeprecated.matcher(instanceId);
+            }
+
             Preconditions.checkArgument(matcher.matches(), "Unexpected format for provider, expected " + p.toString()
-                    + " but was " + instanceId);
+                    + " or " + pDeprecated.toString() + " but was " + instanceId);
+
             String factoryName = matcher.group(1);
             String instanceName = matcher.group(2);
             return new ServiceInstance(factoryName, instanceName);
@@ -310,16 +315,25 @@ public final class Services {
             return instanceName;
         }
 
-        private static final String blueprint = "/" + XmlNetconfConstants.CONFIG_KEY + "/"
+        private static final String blueprint = "/"
                 + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "["
-                + XmlNetconfConstants.NAME_KEY + "='%s']/" + XmlNetconfConstants.INSTANCE_KEY + "["
+                + XmlNetconfConstants.TYPE_KEY + "='%s']["
                 + XmlNetconfConstants.NAME_KEY + "='%s']";
 
-        private static final String blueprintR = "/" + XmlNetconfConstants.CONFIG_KEY + "/"
+        // TODO unify with xpath in RuntimeRpc
+
+        // Previous version of xpath, needs to be supported for backwards compatibility (persisted configs by config-persister)
+        private static final String blueprintRDeprecated = "/" + XmlNetconfConstants.CONFIG_KEY + "/"
                 + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "\\["
                 + XmlNetconfConstants.NAME_KEY + "='%s'\\]/" + XmlNetconfConstants.INSTANCE_KEY + "\\["
                 + XmlNetconfConstants.NAME_KEY + "='%s'\\]";
 
+        private static final String blueprintR = "/"
+                + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "\\["
+                + XmlNetconfConstants.TYPE_KEY + "='%s'\\]\\["
+                + XmlNetconfConstants.NAME_KEY + "='%s'\\]";
+
+        private static final Pattern pDeprecated = Pattern.compile(String.format(blueprintRDeprecated, "(.+)", "(.+)"));
         private static final Pattern p = Pattern.compile(String.format(blueprintR, "(.+)", "(.+)"));
 
         @Override

@@ -96,17 +96,18 @@
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                     <instance>
                         <name>ref_dep</name>
-                        <provider>/config/modules/module[name='impl-dep']/instance[name='dep']
+                        <provider>/modules/module[type='impl-dep'][name='dep']
                         </provider>
                     </instance>
                     <instance>
                         <name>ref_dep_2</name>
-                        <provider>/config/modules/module[name='impl-dep']/instance[name='dep2']
+                        <provider>/modules/module[type='impl-dep'][name='dep2']
                         </provider>
                     </instance>
                     <instance>
                         <name>ref_test1</name>
-                        <provider>/config/modules/module[name='impl-netconf']/instance[name='test1']
+                        <provider>
+                            /modules/module[type='impl-netconf'][name='test1']
                         </provider>
                     </instance>
                 </service>
