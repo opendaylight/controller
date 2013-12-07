@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
+
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.Dependency;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute.Dependency;
 
 public class ModuleField extends Field {
 
@@ -22,10 +24,14 @@ public class ModuleField extends Field {
             String attributeName, String nullableDefault, boolean isDependency,
             Dependency dependency) {
         super(modifiers, type, name);
-        this.nullableDefault = nullableDefault;
         this.dependent = isDependency;
         this.dependency = dependency;
         this.attributeName = attributeName;
+        if (type.startsWith(List.class.getName()) && nullableDefault == null) {
+            String generics = type.substring(List.class.getName().length());
+            nullableDefault = "new " + ArrayList.class.getName() + generics + "()";
+        }
+        this.nullableDefault = nullableDefault;
     }
 
     public ModuleField(String type, String name, String attributeName,
@@ -49,4 +55,5 @@ public class ModuleField extends Field {
     public String getAttributeName() {
         return attributeName;
     }
+
 }

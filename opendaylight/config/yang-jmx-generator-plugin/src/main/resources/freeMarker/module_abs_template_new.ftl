@@ -52,7 +52,13 @@ package ${packageName};
     public void validate(){
     <#list moduleFields as field>
         <#if field.dependent==true && field.dependency.mandatory==true>
+        <#if field.type?starts_with("java.util.List")>
+        for(javax.management.ObjectName dep : ${field.name}) {
+            dependencyResolver.validateDependency(${field.dependency.sie.fullyQualifiedName}.class, dep, ${field.name}JmxAttribute);
+        }
+        <#else>
         dependencyResolver.validateDependency(${field.dependency.sie.fullyQualifiedName}.class, ${field.name}, ${field.name}JmxAttribute);
+        </#if>
         </#if>
     </#list>
         customValidation();
@@ -65,10 +71,17 @@ package ${packageName};
     // caches of resolved dependencies
     <#list moduleFields as field>
     <#if field.dependent==true>
+        <#if field.type?starts_with("java.util.List")>
+        private java.util.List<${field.dependency.sie.exportedOsgiClassName}> ${field.name}Dependency = new java.util.ArrayList<${field.dependency.sie.exportedOsgiClassName}>();
+        protected final java.util.List<${field.dependency.sie.exportedOsgiClassName}> get${field.attributeName}Dependency(){
+            return ${field.name}Dependency;
+        }
+        <#else>
         private ${field.dependency.sie.exportedOsgiClassName} ${field.name}Dependency;
         protected final ${field.dependency.sie.exportedOsgiClassName} get${field.attributeName}Dependency(){
             return ${field.name}Dependency;
         }
+        </#if>
     </#if>
     </#list>
 
@@ -79,12 +92,18 @@ package ${packageName};
 
             <#list moduleFields as field>
                 <#if field.dependent==true>
-
                     <#if field.dependency.mandatory==false>
                         if(${field.name}!=null) {
                     </#if>
 
-                    ${field.name}Dependency = dependencyResolver.resolveInstance(${field.dependency.sie.exportedOsgiClassName}.class, ${field.name}, ${field.name}JmxAttribute);
+                    <#if field.type?starts_with("java.util.List")>
+            ${field.name}Dependency = new java.util.ArrayList<${field.dependency.sie.exportedOsgiClassName}>();
+            for(javax.management.ObjectName dep : ${field.name}) {
+                ${field.name}Dependency.add(dependencyResolver.resolveInstance(${field.dependency.sie.exportedOsgiClassName}.class, dep, ${field.name}JmxAttribute));
+            }
+                    <#else>
+            ${field.name}Dependency = dependencyResolver.resolveInstance(${field.dependency.sie.exportedOsgiClassName}.class, ${field.name}, ${field.name}JmxAttribute);
+                    </#if>
 
                     <#if field.dependency.mandatory==false>
                         }

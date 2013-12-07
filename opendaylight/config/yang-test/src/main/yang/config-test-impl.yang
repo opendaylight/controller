@@ -242,6 +242,15 @@ module config-test-impl {
                     }
                 }
             }
+
+            list testing-deps {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity test:testing;
+                    }
+                }
+            }
         }
     }
 

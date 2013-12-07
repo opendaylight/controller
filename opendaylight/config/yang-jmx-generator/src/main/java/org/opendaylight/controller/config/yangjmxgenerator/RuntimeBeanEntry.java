@@ -67,7 +67,7 @@ public class RuntimeBeanEntry {
     private final Set<Rpc> rpcs;
 
     @VisibleForTesting
-    public RuntimeBeanEntry(String packageName,
+    RuntimeBeanEntry(String packageName,
             DataSchemaNode nodeForReporting, String yangName,
             String javaNamePrefix, boolean isRoot,
             Optional<String> keyYangName, List<AttributeIfc> attributes,
@@ -228,7 +228,7 @@ public class RuntimeBeanEntry {
                 ContainerSchemaNode container = (ContainerSchemaNode) child;
                 // this can be either TO or hierarchical RB
                 TOAttribute toAttribute = TOAttribute.create(container,
-                        typeProviderWrapper);
+                        typeProviderWrapper, packageName);
                 attributes.add(toAttribute);
             } else if (child instanceof ListSchemaNode) {
                 if (isInnerStateBean(child)) {
@@ -239,7 +239,7 @@ public class RuntimeBeanEntry {
                     runtimeBeanEntries.add(hierarchicalChild);
                 } else /* ordinary list attribute */{
                     ListAttribute listAttribute = ListAttribute.create(
-                            (ListSchemaNode) child, typeProviderWrapper);
+                            (ListSchemaNode) child, typeProviderWrapper, packageName);
                     attributes.add(listAttribute);
                 }
 
@@ -280,7 +280,7 @@ public class RuntimeBeanEntry {
                     } else if (rpcDefinition.getOutput().getChildNodes().size() == 1) {
                         DataSchemaNode returnDSN = rpcDefinition.getOutput()
                                 .getChildNodes().iterator().next();
-                        returnType = getReturnTypeAttribute(returnDSN, typeProviderWrapper);
+                        returnType = getReturnTypeAttribute(returnDSN, typeProviderWrapper, packageName);
 
                     } else {
                         throw new IllegalArgumentException(
@@ -311,16 +311,17 @@ public class RuntimeBeanEntry {
                 attributes, rpcs);
     }
 
-    private static AttributeIfc getReturnTypeAttribute(DataSchemaNode child, TypeProviderWrapper typeProviderWrapper) {
+    private static AttributeIfc getReturnTypeAttribute(DataSchemaNode child, TypeProviderWrapper typeProviderWrapper,
+                                                       String packageName) {
         if (child instanceof LeafSchemaNode) {
             LeafSchemaNode leaf = (LeafSchemaNode) child;
             return new JavaAttribute(leaf, typeProviderWrapper);
         } else if (child instanceof ContainerSchemaNode) {
             ContainerSchemaNode container = (ContainerSchemaNode) child;
-            TOAttribute toAttribute = TOAttribute.create(container, typeProviderWrapper);
+            TOAttribute toAttribute = TOAttribute.create(container, typeProviderWrapper, packageName);
             return toAttribute;
         } else if (child instanceof ListSchemaNode) {
-            return ListAttribute.create((ListSchemaNode) child, typeProviderWrapper);
+            return ListAttribute.create((ListSchemaNode) child, typeProviderWrapper, packageName);
         } else if (child instanceof LeafListSchemaNode) {
             return ListAttribute.create((LeafListSchemaNode) child, typeProviderWrapper);
         } else {

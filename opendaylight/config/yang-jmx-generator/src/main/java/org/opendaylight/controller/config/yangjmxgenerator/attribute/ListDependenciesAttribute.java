@@ -13,25 +13,26 @@ import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 import javax.management.ObjectName;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import java.util.List;
 
-public class DependencyAttribute extends AbstractDependencyAttribute {
+public class ListDependenciesAttribute extends AbstractDependencyAttribute {
 
-
-    public DependencyAttribute(DataSchemaNode attrNode,
-            ServiceInterfaceEntry sie, boolean mandatory,
-            String nullableDescription) {
+    public ListDependenciesAttribute(DataSchemaNode attrNode, ServiceInterfaceEntry sie, boolean mandatory, String nullableDescription) {
         super(attrNode, sie, mandatory, nullableDescription);
     }
 
     @Override
     public Type getType() {
-        return Types.typeForClass(ObjectName.class);
+        return Types.parameterizedTypeFor(Types.typeForClass(List.class), Types.typeForClass(ObjectName.class));
     }
 
     @Override
-    public SimpleType<?> getOpenType() {
-        return SimpleType.OBJECTNAME;
+    public ArrayType<?> getOpenType() {
+        OpenType<?> innerOpenType = SimpleType.OBJECTNAME;
+        return ListAttribute.constructArrayType(innerOpenType);
     }
 
 }
