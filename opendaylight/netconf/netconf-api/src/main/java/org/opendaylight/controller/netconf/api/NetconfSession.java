@@ -58,7 +58,7 @@ public abstract class NetconfSession extends AbstractProtocolSession<NetconfMess
 
     @Override
     protected void handleMessage(NetconfMessage netconfMessage) {
-        logger.debug("handlign incomming message");
+        logger.debug("handling incoming message");
         sessionListener.onMessage(this, netconfMessage);
     }
 
