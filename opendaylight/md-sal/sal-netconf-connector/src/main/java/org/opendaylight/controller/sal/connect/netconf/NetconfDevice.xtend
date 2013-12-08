@@ -22,8 +22,16 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
+import org.opendaylight.protocol.framework.ReconnectStrategy
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
+import org.opendaylight.controller.md.sal.common.api.data.DataModification
 
-class NetconfDevice implements Provider, DataReader<InstanceIdentifier, CompositeNode>, RpcImplementation, AutoCloseable {
+class NetconfDevice implements 
+    Provider, // 
+    DataReader<InstanceIdentifier, CompositeNode>, //
+    DataCommitHandler<InstanceIdentifier, CompositeNode>, //
+    RpcImplementation, //
+    AutoCloseable {
 
     var NetconfClient client;
 
@@ -36,14 +44,17 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
     @Property
     var InstanceIdentifier path;
 
+    @Property
+    var ReconnectStrategy strategy;
+
     Registration<DataReader<InstanceIdentifier, CompositeNode>> operReaderReg
-
     Registration<DataReader<InstanceIdentifier, CompositeNode>> confReaderReg
-
-    String name
-
+    Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> commitHandlerReg
+    
+    val String name
     MountProvisionService mountService
-
+    
+    
     public new(String name) {
         this.name = name;
         this.path = InstanceIdentifier.builder(INVENTORY_PATH).nodeWithKey(INVENTORY_NODE,
@@ -51,13 +62,14 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
     }
 
     def start(NetconfClientDispatcher dispatcher) {
-        client = new NetconfClient(name, socketAddress, dispatcher);
+        client = NetconfClient.clientFor(name, socketAddress, strategy, dispatcher);
         confReaderReg = mountInstance.registerConfigurationReader(path, this);
         operReaderReg = mountInstance.registerOperationalReader(path, this);
+        //commitHandlerReg = mountInstance.registerCommitHandler(path,this);
     }
 
     override readConfigurationData(InstanceIdentifier path) {
-        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME, wrap(NETCONF_GET_CONFIG_QNAME, path.toFilterStructure()));
+        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME, wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, path.toFilterStructure()));
         val data = result.result.getFirstCompositeByName(NETCONF_DATA_QNAME);
         return data?.findNode(path) as CompositeNode;
     }
@@ -131,6 +143,10 @@ class NetconfDevice implements Provider, DataReader<InstanceIdentifier, Composit
             }
         }
         return current;
+    }
+
+    override requestCommit(DataModification<InstanceIdentifier, CompositeNode> modification) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
     override close() {
