@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool;
 
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -18,16 +19,16 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     public static final String NAME = "scheduled";
 
-    private static List<Class<? extends TestingThreadPoolServiceInterface>> ifc = Arrays
-            .asList(TestingScheduledThreadPoolServiceInterface.class, TestingThreadPoolServiceInterface.class);
+    private static Set<Class<? extends AbstractServiceInterface>> ifc = Collections.unmodifiableSet(Sets.newHashSet(
+            (Class<? extends AbstractServiceInterface>) TestingScheduledThreadPoolServiceInterface.class,
+                    TestingThreadPoolServiceInterface.class));
 
     @Override
     public boolean isModuleImplementingServiceInterface(
@@ -70,4 +71,11 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
         return new HashSet<Module>();
     }
+
+    @Override
+    public Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces() {
+        return ifc;
+    }
+
+
 }

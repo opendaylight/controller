@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.InstanceNotFoundException;
@@ -143,4 +144,33 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
         }
     }
 
+    @Override
+    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, Map<String, ObjectName>> getServiceMapping() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getServiceInterfaceName(String namespace, String localName) {
+        throw new UnsupportedOperationException();
+    }
 }

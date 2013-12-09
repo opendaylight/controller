@@ -6,12 +6,14 @@ package ${packageName};
 {
 
     public static final java.lang.String NAME = "${globallyUniqueName}";
-    private static final java.util.Set<Class<? extends ${abstractServiceInterfaceType}>> serviceIfcs = new java.util.HashSet<Class<? extends ${abstractServiceInterfaceType}>>();
+    private static final java.util.Set<Class<? extends ${abstractServiceInterfaceType}>> serviceIfcs;
     <#if providedServices??>
     static {
+        java.util.Set<Class<? extends ${abstractServiceInterfaceType}>> serviceIfcs2 = new java.util.HashSet<Class<? extends ${abstractServiceInterfaceType}>>();
         <#list providedServices as refId>
-        serviceIfcs.add(${refId});
+        serviceIfcs2.add(${refId});
         </#list>
+        serviceIfcs = java.util.Collections.unmodifiableSet(serviceIfcs2);
     }
     </#if>
 
@@ -24,6 +26,12 @@ package ${packageName};
         }
         return false;
     }
+
+    @Override
+    public java.util.Set<Class<? extends ${abstractServiceInterfaceType}>> getImplementedServiceIntefaces() {
+        return serviceIfcs;
+    }
+
 
     @Override
     public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {

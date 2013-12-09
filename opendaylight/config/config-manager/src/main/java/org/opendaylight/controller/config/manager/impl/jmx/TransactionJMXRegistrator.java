@@ -65,7 +65,7 @@ public class TransactionJMXRegistrator implements Closeable {
     }
 
     @Override
-    public void close() {
+    public void close() { // closes also all child TransactionModuleJMXRegistrator instances
         childJMXRegistrator.close();
     }
 }
