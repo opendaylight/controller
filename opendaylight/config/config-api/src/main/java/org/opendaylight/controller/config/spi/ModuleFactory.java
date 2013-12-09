@@ -97,6 +97,8 @@ public interface ModuleFactory {
     boolean isModuleImplementingServiceInterface(
             Class<? extends AbstractServiceInterface> serviceInterface);
 
+    Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces();
+
     /**
      * Called when ModuleFactory is registered to config manager.
      * Useful for populating the registry with pre-existing state. Since

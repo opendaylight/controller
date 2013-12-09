@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.api;
 
-import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
+import java.util.Set;
 
 public interface LookupRegistry {
 
@@ -57,5 +56,13 @@ public interface LookupRegistry {
      */
     ObjectName lookupConfigBean(String moduleName, String instanceName)
             throws InstanceNotFoundException;
+
+    /**
+     * Check that object name corresponds with existing module.
+     *
+     * @throws InstanceNotFoundException
+     *             if search did not find exactly one instance
+     */
+    void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException;
 
 }
