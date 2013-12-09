@@ -9,6 +9,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -238,6 +239,7 @@ public class InventoryServiceShim implements IContainerListener,
     @Override
     public void switchAdded(ISwitch sw) {
         if (sw == null) {
+            logger.debug("Ignore null switch addition");
             return;
         }
         Node node = NodeCreator.createOFNode(sw.getId());
@@ -246,17 +248,24 @@ public class InventoryServiceShim implements IContainerListener,
             return;
         }
 
-        // Add all the nodeConnectors of this switch
-        Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
-                .OFSwitchToProps(sw);
-        for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps.entrySet()) {
-            Set<Property> props = new HashSet<Property>();
-            Set<Property> prop = entry.getValue();
-            if (prop != null) {
-                props.addAll(prop);
+        // Add all the nodeConnectors of this switch if any
+        Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper.OFSwitchToProps(sw);
+        if (!ncProps.isEmpty()) {
+            for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps.entrySet()) {
+                Set<Property> props = new HashSet<Property>();
+                Set<Property> prop = entry.getValue();
+                if (prop != null) {
+                    props.addAll(prop);
+                }
+                nodeConnectorProps.put(entry.getKey(), props);
+                notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED, entry.getValue());
             }
-            nodeConnectorProps.put(entry.getKey(), props);
-            notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED, entry.getValue());
+        } else {
+            /*
+             * If no node connector is present, publish the node addition itself
+             * in order to let Connection Manager properly set the node locality
+             */
+            this.notifyInventoryShimListener(node, UpdateType.ADDED, Collections.<Property>emptySet());
         }
 
         // Add this node
