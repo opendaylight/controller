@@ -7,9 +7,21 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AbstractDependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
@@ -41,20 +53,9 @@ import org.opendaylight.yangtools.yang.model.api.UsesNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
-import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 /**
  * Represents part of yang model that describes a module.
@@ -184,8 +185,9 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     }
 
     /**
-     * @return services implemented by this module. Keys are fully qualified java names of generated
-     * ServiceInterface classes, values are identity local names.
+     * @return services implemented by this module. Keys are fully qualified
+     *         java names of generated ServiceInterface classes, values are
+     *         identity local names.
      */
     public Map<String, QName> getProvidedServices() {
         return providedServices;
@@ -360,7 +362,6 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                                     e.getConflictingName(), when.getQName(),
                                     when.getQName());
                         }
-
                         checkUniqueRuntimeBeansGeneratedClasses(
                                 uniqueGeneratedClassesNames, when, runtimeBeans);
                         Set<RuntimeBeanEntry> runtimeBeanEntryValues = Sets
@@ -415,6 +416,11 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                         .<RuntimeBeanEntry> emptyList());
             }
         }
+        // check attributes name uniqueness
+        for (Entry<String, ModuleMXBeanEntry> entry : result.entrySet()) {
+            checkUniqueRuntimeBeanAttributesName(entry.getValue(),
+                    uniqueGeneratedClassesNames);
+        }
         if (unaugmentedModuleIdentities.size() > 0) {
             logger.warn("Augmentation not found for all module identities: {}",
                     unaugmentedModuleIdentities.keySet());
@@ -440,6 +446,25 @@ public class ModuleMXBeanEntry extends AbstractEntry {
             }
             uniqueGeneratedClassesNames.put(javaNameOfRuntimeMXBean,
                     when.getQName());
+        }
+    }
+
+    private static void checkUniqueRuntimeBeanAttributesName(
+            ModuleMXBeanEntry mxBeanEntry,
+            Map<String, QName> uniqueGeneratedClassesNames) {
+        for (RuntimeBeanEntry runtimeBeanEntry : mxBeanEntry.getRuntimeBeans()) {
+            for (String runtimeAttName : runtimeBeanEntry
+                    .getYangPropertiesToTypesMap().keySet()) {
+                if (mxBeanEntry.getAttributes().keySet()
+                        .contains(runtimeAttName)) {
+                    QName qName1 = uniqueGeneratedClassesNames
+                            .get(runtimeBeanEntry.getJavaNameOfRuntimeMXBean());
+                    QName qName2 = uniqueGeneratedClassesNames.get(mxBeanEntry
+                            .getGloballyUniqueName());
+                    throw new NameConflictException(runtimeAttName, qName1,
+                            qName2);
+                }
+            }
         }
     }
 
@@ -566,7 +591,8 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private static AttributeIfc getAttributeValue(DataSchemaNode attrNode,
             Module currentModule,
             Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
-            TypeProviderWrapper typeProviderWrapper, SchemaContext schemaContext, String packageName) {
+            TypeProviderWrapper typeProviderWrapper,
+            SchemaContext schemaContext, String packageName) {
 
         if (attrNode instanceof LeafSchemaNode) {
             // simple type
@@ -575,12 +601,14 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         } else if (attrNode instanceof ContainerSchemaNode) {
             // reference or TO
             ContainerSchemaNode containerSchemaNode = (ContainerSchemaNode) attrNode;
-            Optional<? extends AbstractDependencyAttribute> dependencyAttributeOptional = extractDependency(containerSchemaNode,
-                    attrNode, currentModule, qNamesToSIEs, schemaContext);
+            Optional<? extends AbstractDependencyAttribute> dependencyAttributeOptional = extractDependency(
+                    containerSchemaNode, attrNode, currentModule, qNamesToSIEs,
+                    schemaContext);
             if (dependencyAttributeOptional.isPresent()) {
                 return dependencyAttributeOptional.get();
             } else {
-                return TOAttribute.create(containerSchemaNode, typeProviderWrapper, packageName);
+                return TOAttribute.create(containerSchemaNode,
+                        typeProviderWrapper, packageName);
             }
 
         } else if (attrNode instanceof LeafListSchemaNode) {
@@ -588,12 +616,14 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                     typeProviderWrapper);
         } else if (attrNode instanceof ListSchemaNode) {
             ListSchemaNode listSchemaNode = (ListSchemaNode) attrNode;
-            Optional<? extends AbstractDependencyAttribute> dependencyAttributeOptional = extractDependency(listSchemaNode,
-                    attrNode, currentModule, qNamesToSIEs, schemaContext);
+            Optional<? extends AbstractDependencyAttribute> dependencyAttributeOptional = extractDependency(
+                    listSchemaNode, attrNode, currentModule, qNamesToSIEs,
+                    schemaContext);
             if (dependencyAttributeOptional.isPresent()) {
                 return dependencyAttributeOptional.get();
             } else {
-                return ListAttribute.create(listSchemaNode, typeProviderWrapper, packageName);
+                return ListAttribute.create(listSchemaNode,
+                        typeProviderWrapper, packageName);
             }
         } else {
             throw new UnsupportedOperationException(
@@ -601,16 +631,15 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         }
     }
 
-    private static Optional<? extends AbstractDependencyAttribute> extractDependency(DataNodeContainer dataNodeContainer,
-                                                            DataSchemaNode attrNode,
-                                                            Module currentModule,
-                                                            Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
-                                                            SchemaContext schemaContext) {
+    private static Optional<? extends AbstractDependencyAttribute> extractDependency(
+            DataNodeContainer dataNodeContainer, DataSchemaNode attrNode,
+            Module currentModule,
+            Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
+            SchemaContext schemaContext) {
         if (dataNodeContainer.getUses().size() == 1
                 && getChildNodeSizeWithoutUses(dataNodeContainer) == 0) {
             // reference
-            UsesNode usesNode = dataNodeContainer.getUses().iterator()
-                    .next();
+            UsesNode usesNode = dataNodeContainer.getUses().iterator().next();
             checkState(usesNode.getRefines().size() == 1,
                     "Unexpected 'refine' child node size of "
                             + dataNodeContainer);
@@ -618,26 +647,28 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                     .values().iterator().next();
             checkState(refine.getUnknownSchemaNodes().size() == 1,
                     "Unexpected unknown schema node size of " + refine);
-            UnknownSchemaNode requiredIdentity = refine
-                    .getUnknownSchemaNodes().iterator().next();
+            UnknownSchemaNode requiredIdentity = refine.getUnknownSchemaNodes()
+                    .iterator().next();
             checkState(
                     ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity
-                            .getNodeType()),
-                    "Unexpected language extension " + requiredIdentity);
+                            .getNodeType()), "Unexpected language extension "
+                            + requiredIdentity);
             String prefixAndIdentityLocalName = requiredIdentity
                     .getNodeParameter();
             // import should point to a module
             ServiceInterfaceEntry serviceInterfaceEntry = findSIE(
-                    prefixAndIdentityLocalName, currentModule,
-                    qNamesToSIEs, schemaContext);
+                    prefixAndIdentityLocalName, currentModule, qNamesToSIEs,
+                    schemaContext);
             boolean mandatory = refine.getConstraints().isMandatory();
             AbstractDependencyAttribute reference;
-            if (dataNodeContainer instanceof ContainerSchemaNode ){
-                reference = new DependencyAttribute(attrNode, serviceInterfaceEntry,
-                    mandatory, attrNode.getDescription());
+            if (dataNodeContainer instanceof ContainerSchemaNode) {
+                reference = new DependencyAttribute(attrNode,
+                        serviceInterfaceEntry, mandatory,
+                        attrNode.getDescription());
             } else {
-                reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry,
-                        mandatory, attrNode.getDescription());
+                reference = new ListDependenciesAttribute(attrNode,
+                        serviceInterfaceEntry, mandatory,
+                        attrNode.getDescription());
             }
             return Optional.of(reference);
         }
