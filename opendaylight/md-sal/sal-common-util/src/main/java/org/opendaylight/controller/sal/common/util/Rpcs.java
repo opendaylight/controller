@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.common.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +21,7 @@ public class Rpcs {
         return ret;
     }
 
-    private static class RpcResultTO<T> implements RpcResult<T> {
+    private static class RpcResultTO<T> implements RpcResult<T>, Serializable {
 
         private final Collection<RpcError> errors;
         private final T result;

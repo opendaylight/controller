@@ -13,17 +13,24 @@ import java.util.Collections;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public abstract class AbstractConsumer implements Consumer, BundleActivator {
+public abstract class AbstractConsumer implements Consumer, BundleActivator,ServiceTrackerCustomizer<Broker, Broker> {
 
-    Broker broker;
-    ServiceReference<Broker> brokerRef;
+    
+    
+    
+    private BundleContext context;
+    private ServiceTracker<Broker, Broker> tracker;
+    private Broker broker;
+
     @Override
     public final void start(BundleContext context) throws Exception {
+        this.context = context;
         this.startImpl(context);
-        brokerRef = context.getServiceReference(Broker.class);
-        broker = context.getService(brokerRef);
-        broker.registerConsumer(this,context);
+        tracker = new ServiceTracker<>(context, Broker.class, this);
+        tracker.open();
     }
 
 
@@ -32,9 +39,7 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator {
     public final void stop(BundleContext context) throws Exception {
         stopImpl(context);
         broker = null;
-        if(brokerRef != null) {
-            context.ungetService(brokerRef);
-        }
+        tracker.close();
     }
 
     protected void startImpl(BundleContext context) {
@@ -49,4 +54,25 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator {
         return Collections.emptySet();
     }
 
+    
+    @Override
+    public Broker addingService(ServiceReference<Broker> reference) {
+        if(broker == null) {
+            broker = context.getService(reference);
+            broker.registerConsumer(this, context);
+            return broker;
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public void modifiedService(ServiceReference<Broker> reference, Broker service) {
+        // NOOP
+    }
+    
+    @Override
+    public void removedService(ServiceReference<Broker> reference, Broker service) {
+        stopImpl(context);
+    }
 }
