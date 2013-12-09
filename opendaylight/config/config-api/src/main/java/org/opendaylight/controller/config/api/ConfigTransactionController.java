@@ -64,6 +64,27 @@ public interface ConfigTransactionController extends LookupRegistry {
      */
     String getTransactionName();
 
+    /**
+     * @return all known module factory names as reported by {@link org.opendaylight.controller.config.spi.ModuleFactory#getImplementationName()}
+     */
     Set<String> getAvailableModuleNames();
 
+    /**
+     * Create or update reference name to objectName. Reference name is unique per service interface name.
+     * @throws IllegalArgumentException if there is a mismatch between serviceInterfaceName and objectName
+     * @throws InstanceNotFoundException if search did not find exactly one instance
+     */
+    void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName);
+
+    /**
+     * Remove service reference.
+     * @return true iif removed
+     * @throws IllegalArgumentException if service interface name is not advertised by any module
+     */
+    boolean removeServiceReference(String serviceInterfaceName, String refName);
+
+    /**
+     * Remove all service references.
+     */
+    void removeAllServiceReferences();
 }

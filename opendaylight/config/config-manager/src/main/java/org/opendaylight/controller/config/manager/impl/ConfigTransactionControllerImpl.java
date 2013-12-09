@@ -452,6 +452,9 @@ class ConfigTransactionControllerImpl implements
         return txModuleJMXRegistrator.queryNames(namePattern, null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<String> getAvailableModuleNames() {
         return factoriesHolder.getModuleNames();
