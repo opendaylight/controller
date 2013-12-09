@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.api;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.management.InstanceNotFoundException;
@@ -58,4 +60,30 @@ public interface LookupRegistry {
     ObjectName lookupConfigBean(String moduleName, String instanceName)
             throws InstanceNotFoundException;
 
+    /**
+     * Lookup object name by fully qualified service interface name and service reference name.
+     * @param serviceInterfaceName service interface name
+     * @param refName service reference name supplied in
+     * {@link org.opendaylight.controller.config.api.ConfigTransactionController#saveServiceReference(String, String, javax.management.ObjectName)}
+     */
+    ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName);
+
+    /**
+     * Get mapping of services to reference names and module object names.
+     */
+    Map<String /* serviceInterfaceName */, Map<String/* refName */, ObjectName>> getServiceMapping();
+
+    /**
+     * Get current mapping between reference names and module object names for given service interface name.
+     * @param serviceInterfaceName service interface name
+     * @throws IllegalArgumentException if there is a mismatch between serviceInterfaceName and objectName
+     */
+    Map<String /* refName */, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName);
+
+    /**
+     * Find all available service interface names of a module.
+     * @param objectName module object name
+     * @throws InstanceNotFoundException if search did not find exactly one instance
+     */
+    Set<String> lookupServiceInterfaceNames(ObjectName objectName);
 }

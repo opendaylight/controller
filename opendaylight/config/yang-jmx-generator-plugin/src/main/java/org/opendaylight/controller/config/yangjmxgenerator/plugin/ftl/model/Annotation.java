@@ -50,7 +50,7 @@ public class Annotation {
                 "Cannot create annotation from null exportedClassName");
 
         List<Parameter> params = Lists.newArrayList(new Parameter("value",
-                q(qname.getLocalName())));
+                q(qname.toString())));
         params.add(new Parameter("osgiRegistrationType", exportedClassName
                 + ".class"));
         return new Annotation(
