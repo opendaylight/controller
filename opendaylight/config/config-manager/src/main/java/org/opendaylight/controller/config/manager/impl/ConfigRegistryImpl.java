@@ -10,6 +10,8 @@ package org.opendaylight.controller.config.manager.impl;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
+import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
@@ -102,6 +104,9 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     @GuardedBy("this")
     private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
 
+    @GuardedBy("this") // switched in every 2ndPC
+    private ServiceReferenceReadableRegistry readableSRRegistry = ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
+
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
             BundleContext bundleContext, MBeanServer configMBeanServer) {
@@ -142,21 +147,32 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     private synchronized ConfigTransactionControllerInternal beginConfigInternal(boolean blankTransaction) {
         versionCounter++;
-        String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
-        TransactionJMXRegistrator transactionRegistrator = baseJMXRegistrator
-                .createTransactionJMXRegistrator(transactionName);
-        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(resolver.getAllFactories());
+        final String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
+
+        TransactionJMXRegistratorFactory factory = new TransactionJMXRegistratorFactory() {
+            @Override
+            public TransactionJMXRegistrator create() {
+                return baseJMXRegistrator.createTransactionJMXRegistrator(transactionName);
+            }
+        };
+
+        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
+                transactionName), factory);
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(
+                resolver.getAllFactories());
+        ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
+                readableSRRegistry, txLookupRegistry, allCurrentFactories);
+
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
-                transactionName, transactionRegistrator, version,
-                versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer, blankTransaction);
+                txLookupRegistry, version,
+                versionCounter, allCurrentFactories, transactionsMBeanServer,
+                configMBeanServer, blankTransaction, writableRegistry);
         try {
-            transactionRegistrator.registerMBean(transactionController, transactionController.getControllerObjectName());
+            txLookupRegistry.registerMBean(transactionController, transactionController.getControllerObjectName());
         } catch (InstanceAlreadyExistsException e) {
             throw new IllegalStateException(e);
         }
-
         transactionController.copyExistingModulesAndProcessFactoryDiff(currentConfig.getEntries(), lastListOfFactories);
-
         transactionsHolder.add(transactionName, transactionController);
         return transactionController;
     }
@@ -352,6 +368,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
         // update version
         version = configTransactionController.getVersion();
+
+        // switch readable Service Reference Registry
+        this.readableSRRegistry = ServiceReferenceRegistryImpl.createSRReadableRegistry(configTransactionController.getWritableRegistry(), this);
+
         return new CommitStatus(newInstances, reusedInstances,
                 recreatedInstances);
     }
@@ -493,6 +513,43 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         return baseJMXRegistrator.queryNames(namePattern, null);
     }
 
+    @Override
+    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+        ObjectNameUtil.checkDomain(objectName);
+        ObjectNameUtil.checkType(objectName, ObjectNameUtil.TYPE_MODULE);
+        String transactionName = ObjectNameUtil.getTransactionName(objectName);
+        if (transactionName != null) {
+            throw new IllegalArgumentException("Transaction attribute not supported in registry, wrong ObjectName: " + objectName);
+        }
+        // make sure exactly one match is found:
+        LookupBeansUtil.lookupConfigBean(this, ObjectNameUtil.getFactoryName(objectName), ObjectNameUtil.getInstanceName(objectName));
+    }
+
+    // service reference functionality:
+    @Override
+    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+        return readableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    }
+
+    @Override
+    public synchronized Map<String, Map<String, ObjectName>> getServiceMapping() {
+        return readableSRRegistry.getServiceMapping();
+    }
+
+    @Override
+    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+        return readableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    }
+
+    @Override
+    public synchronized Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+        return readableSRRegistry.lookupServiceInterfaceNames(objectName);
+    }
+
+    @Override
+    public synchronized String getServiceInterfaceName(String namespace, String localName) {
+        return readableSRRegistry.getServiceInterfaceName(namespace, localName);
+    }
 }
 
 /**

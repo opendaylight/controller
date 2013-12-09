@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.config.api.jmx;
 
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
+
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.ObjectName;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,12 +19,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.ObjectName;
-
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 /**
  * Provides ObjectName creation. Each created ObjectName consists of domain that
@@ -129,18 +128,31 @@ public class ObjectNameUtil {
         return objectName.getKeyProperty(TRANSACTION_NAME_KEY);
     }
 
-    public static ObjectName withoutTransactionName(ObjectName on) {
-        if (getTransactionName(on) == null) {
+    /**
+     * Sanitize on: keep only mandatory attributes of module + metadata.
+     */
+    public static ObjectName withoutTransactionName(ObjectName inputON) {
+        if (getTransactionName(inputON) == null) {
             throw new IllegalArgumentException(
-                    "Expected ObjectName with transaction:" + on);
+                    "Expected ObjectName with transaction:" + inputON);
         }
-        if (ON_DOMAIN.equals(on.getDomain()) == false) {
+        if (ON_DOMAIN.equals(inputON.getDomain()) == false) {
             throw new IllegalArgumentException("Expected different domain: "
-                    + on);
+                    + inputON);
         }
-        String moduleName = getFactoryName(on);
-        String instanceName = getInstanceName(on);
-        return createReadOnlyModuleON(moduleName, instanceName);
+        String moduleName = getFactoryName(inputON);
+        String instanceName = getInstanceName(inputON);
+
+
+        Map<String, String> allProperties = getAdditionalProperties(inputON);
+        Map<String, String> outputProperties = new HashMap<>(createModuleON(moduleName, instanceName));
+
+        for(Entry<String, String> entry: allProperties.entrySet()) {
+            if (entry.getKey().startsWith("X-")) {
+                outputProperties.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return createON(ON_DOMAIN, outputProperties);
     }
 
     private static void assertDoesNotContain(

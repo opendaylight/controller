@@ -49,10 +49,13 @@ public class Annotation {
         Preconditions.checkNotNull(exportedClassName,
                 "Cannot create annotation from null exportedClassName");
 
-        List<Parameter> params = Lists.newArrayList(new Parameter("value",
-                q(qname.getLocalName())));
-        params.add(new Parameter("osgiRegistrationType", exportedClassName
-                + ".class"));
+        List<Parameter> params = Lists.newArrayList(new Parameter("value", q(qname.toString())));
+        params.add(new Parameter("osgiRegistrationType", exportedClassName + ".class"));
+
+        params.add(new Parameter("namespace", q(qname.getNamespace().toString())));
+        params.add(new Parameter("revision", q(qname.getFormattedRevision())));
+        params.add(new Parameter("localName", q(qname.getLocalName())));
+
         return new Annotation(
                 ServiceInterfaceAnnotation.class.getCanonicalName(), params);
     }

@@ -438,11 +438,11 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 "public static final java.lang.String NAME=\"threadfactory-naming\"");
         assertDeclaredField(
                 fieldDeclarations,
-                "private static final java.util.Set<Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>> serviceIfcs=new java.util.HashSet<Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>>()");
+                "private static final java.util.Set<Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>> serviceIfcs");
 
         assertEquals(2, fieldDeclarations.size());
 
-        assertFactoryMethods(visitor.methods, 8);
+        assertFactoryMethods(visitor.methods, 9);
         assertEquals("Incorrenct number of generated method descriptions", 0,
                 visitor.methodDescriptions.size());
         assertEquals("Incorrenct number of generated method javadoc", 0,

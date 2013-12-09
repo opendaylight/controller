@@ -23,8 +23,9 @@ import java.lang.annotation.Target;
 public @interface ServiceInterfaceAnnotation {
 
     /**
-     * Specifies human readable name of this service. Each service name should
-     * be globally unique. Should not contain spaces.
+     * Fully qualified name of a service that must be globally unique.
+     * When generating service interfaces from yang, this will be QName of
+     * identity extending service-type.
      */
     String value();
 
@@ -34,4 +35,19 @@ public @interface ServiceInterfaceAnnotation {
      * is called.
      */
     Class<?> osgiRegistrationType();
+
+    /**
+     * Get namespace of {@link #value()}
+     */
+    String namespace();
+
+    /**
+     * Get revision of {@link #value()}
+     */
+    String revision();
+
+    /**
+     * Get local name of {@link #value()}
+     */
+    String localName();
 }

@@ -11,7 +11,8 @@ import org.opendaylight.controller.config.api.annotations.AbstractServiceInterfa
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
 
-@ServiceInterfaceAnnotation(value = "testing-threadpool", osgiRegistrationType = TestingThreadPoolIfc.class)
+@ServiceInterfaceAnnotation(value = "testing-threadpool", osgiRegistrationType = TestingThreadPoolIfc.class,
+    namespace = "ns", revision = "foo", localName = "bar")
 public interface TestingThreadPoolServiceInterface extends
         AbstractServiceInterface {
 }

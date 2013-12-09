@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
@@ -61,13 +62,22 @@ public class ConfigTransactionControllerImplTest extends
                 ManagementFactory.getPlatformMBeanServer());
         transactionsMBeanServer = MBeanServerFactory.createMBeanServer();
         Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories = new HashMap<>();
-        TransactionJMXRegistrator jmxRegistrator123 = baseJMXRegistrator
-                .createTransactionJMXRegistrator(transactionName123);
+
+        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(transactionName123), new TransactionJMXRegistratorFactory() {
+            @Override
+            public TransactionJMXRegistrator create() {
+                return baseJMXRegistrator.createTransactionJMXRegistrator(transactionName123);
+            }
+        });
+
+        ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
+                ServiceReferenceRegistryImpl.createInitialSRLookupRegistry(), txLookupRegistry, currentlyRegisteredFactories);
+
 
         testedTxController = new ConfigTransactionControllerImpl(
-                transactionName123, jmxRegistrator123, 1, 1,
+                txLookupRegistry, 1, 1,
                 currentlyRegisteredFactories, transactionsMBeanServer,
-                ManagementFactory.getPlatformMBeanServer(), false);
+                ManagementFactory.getPlatformMBeanServer(), false, writableRegistry);
         TransactionModuleJMXRegistrator transactionModuleJMXRegistrator123 = testedTxController
                 .getTxModuleJMXRegistrator();
         transactionModuleJMXRegistrator123.registerMBean(

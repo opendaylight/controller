@@ -16,7 +16,7 @@ import javax.management.ObjectName;
 /**
  * Represents functionality provided by configuration transaction.
  */
-public interface ConfigTransactionController extends LookupRegistry {
+public interface ConfigTransactionController extends LookupRegistry, ServiceReferenceReadableRegistry, ServiceReferenceWritableRegistry {
 
     /**
      * Create new configuration bean.
@@ -64,6 +64,9 @@ public interface ConfigTransactionController extends LookupRegistry {
      */
     String getTransactionName();
 
+    /**
+     * @return all known module factory names as reported by {@link org.opendaylight.controller.config.spi.ModuleFactory#getImplementationName()}
+     */
     Set<String> getAvailableModuleNames();
 
 }
