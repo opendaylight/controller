@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class NoneEditConfigStrategy implements EditConfigStrategy {
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
-            ConfigTransactionClient ta) {
+                                     ConfigTransactionClient ta, Services services) {
         logger.debug("Skipping configuration element for {}:{}", module, instance);
     }
 

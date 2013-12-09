@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ge
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -20,6 +21,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
@@ -83,7 +85,13 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
         final Config configMapping = new Config(transform(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap()));
-        dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement);
+
+
+        ObjectName on = transactionProvider.getOrCreateTransaction();
+        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(on);
+
+        Services serviceTracker = new Services(ta);
+        dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
 
         logger.info("{} operation successful", GET_CONFIG);
 

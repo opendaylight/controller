@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ge
 
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -25,6 +26,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtim
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -42,11 +44,13 @@ public class Get extends AbstractConfigNetconfOperation {
 
     private final YangStoreSnapshot yangStoreSnapshot;
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
+    private final TransactionProvider transactionProvider;
 
     public Get(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
-            String netconfSessionIdForReporting) {
+               String netconfSessionIdForReporting, TransactionProvider transactionProvider) {
         super(configRegistryClient, netconfSessionIdForReporting);
         this.yangStoreSnapshot = yangStoreSnapshot;
+        this.transactionProvider = transactionProvider;
     }
 
     private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(ConfigRegistryClient configRegistryClient,
@@ -144,7 +148,9 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 
-        final Element element = runtime.toXml(runtimeBeans, configBeans, document);
+        ObjectName txOn = transactionProvider.getOrCreateTransaction();
+        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(txOn);
+        final Element element = runtime.toXml(runtimeBeans, configBeans, document, ta);
 
         logger.info("{} operation successful", XmlNetconfConstants.GET);
 

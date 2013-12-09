@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runti
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
@@ -60,8 +61,8 @@ public class Runtime {
         return retVal;
     }
 
-    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document) {
-        Services serviceTracker = new Services();
+    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document, ServiceReferenceReadableRegistry serviceRegistry) {
+        Services serviceTracker = new Services(serviceRegistry);
 
         Element root = document.createElement(XmlNetconfConstants.DATA_KEY);
 
@@ -72,7 +73,7 @@ public class Runtime {
 
         Map<String, Multimap<String, ObjectName>> moduleToRuntimeInstance = mapInstancesToModules(instancesToMap);
         Map<String, Map<String, Collection<ObjectName>>> moduleToConfigInstance = Config.getMappedInstances(
-                configBeans, serviceTracker, moduleConfigs);
+                configBeans, moduleConfigs);
 
         for (String localNamespace : moduleConfigs.keySet()) {
 

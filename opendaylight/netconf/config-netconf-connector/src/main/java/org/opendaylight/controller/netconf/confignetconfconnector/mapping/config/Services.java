@@ -9,10 +9,14 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -22,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nullable;
 import javax.management.ObjectName;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Services {
+
     private static final Logger logger = LoggerFactory.getLogger(Services.class);
 
     private static final String PROVIDER_KEY = "provider";
@@ -42,58 +47,33 @@ public final class Services {
 
     private long suffix = 1;
 
-    private final Map<ServiceInstance, String> instanceToRef = Maps.newHashMap();
     private final Map<String /*Namespace*/, Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = Maps
             .newHashMap();
+    private ServiceReferenceReadableRegistry configServiceRefRegistry;
 
-    public String addServiceEntry(String namespace, String serviceName, ObjectName on) {
-
-        String moduleName = on.getKeyProperty("moduleFactoryName");
-        String instanceName = on.getKeyProperty("instanceName");
-
-        String refName = addServiceEntry(namespace, serviceName, moduleName, instanceName);
-        logger.trace("Added service entry to tracker. Service name {}, ref name {}, module name {}, instance name {}",
-                serviceName, refName, moduleName, instanceName);
-        return refName;
+    public Services(ServiceReferenceReadableRegistry configServiceRefRegistry) {
+        this.configServiceRefRegistry = configServiceRefRegistry;
     }
 
     @VisibleForTesting
-    public String addServiceEntry(String namespace, String serviceName, String moduleName, String instanceName) {
-        ServiceInstance serviceInstance = new ServiceInstance(moduleName, instanceName);
-        serviceInstance.setServiceName(serviceName);
+    public String getNewDefaultRefName(String namespace, String serviceName, String moduleName, String instanceName) {
+        String refName;
+        refName = "ref_" + instanceName;
 
-        String refName = instanceToRef.get(serviceInstance);
+        Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
 
-        Map<String, Map<String, ServiceInstance>> serviceNameToRefNameToInstance = namespaceToServiceNameToRefNameToInstance.get(namespace);
-        if (serviceNameToRefNameToInstance == null) {
-            serviceNameToRefNameToInstance = Maps.newHashMap();
-            namespaceToServiceNameToRefNameToInstance.put(namespace, serviceNameToRefNameToInstance);
+        Map<String, String> refNameToInstance;
+        if(serviceNameToRefNameToInstance == null || serviceNameToRefNameToInstance.containsKey(serviceName) == false) {
+            refNameToInstance = Collections.emptyMap();
+        } else
+            refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
+
+        final Set<String> refNamesAsSet = toSet(refNameToInstance.keySet());
+        if (refNamesAsSet.contains(refName)) {
+            refName = findAvailableRefName(refName, refNamesAsSet);
         }
 
-        Map<String, ServiceInstance> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
-        if (refNameToInstance == null) {
-            refNameToInstance = Maps.newHashMap();
-            serviceNameToRefNameToInstance.put(serviceName, refNameToInstance);
-        }
-
-        if (refName != null) {
-            if (serviceNameToRefNameToInstance.get(serviceName).containsKey(moduleName) == false) {
-                refNameToInstance.put(refName, serviceInstance);
-            }
-            return refName;
-        } else {
-            refName = "ref_" + instanceName;
-
-            final Set<String> refNamesAsSet = toSet(instanceToRef.values());
-            if (refNamesAsSet.contains(refName)) {
-                refName = findAvailableRefName(refName, refNamesAsSet);
-            }
-
-            instanceToRef.put(serviceInstance, refName);
-            refNameToInstance.put(refName, serviceInstance);
-
-            return refName;
-        }
+        return refName;
     }
 
     private Set<String> toSet(Collection<String> values) {
@@ -109,15 +89,15 @@ public final class Services {
     }
 
     public ServiceInstance getByServiceAndRefName(String namespace, String serviceName, String refName) {
-        Map<String, Map<String, ServiceInstance>> serviceNameToRefNameToInstance = namespaceToServiceNameToRefNameToInstance.get(namespace);
-        Preconditions.checkArgument(serviceNameToRefNameToInstance != null, "No serviceInstances mapped to " + namespace + " , "
-                + serviceNameToRefNameToInstance.keySet());
+        Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
 
-        Map<String, ServiceInstance> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
+        Preconditions.checkArgument(serviceNameToRefNameToInstance != null, "No serviceInstances mapped to " + namespace);
+
+        Map<String, String> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
         Preconditions.checkArgument(refNameToInstance != null, "No serviceInstances mapped to " + serviceName + " , "
                 + serviceNameToRefNameToInstance.keySet());
 
-        ServiceInstance serviceInstance = refNameToInstance.get(refName);
+        ServiceInstance serviceInstance = ServiceInstance.fromString(refNameToInstance.get(refName));
         Preconditions.checkArgument(serviceInstance != null, "No serviceInstance mapped to " + refName
                 + " under service name " + serviceName + " , " + refNameToInstance.keySet());
         return serviceInstance;
@@ -136,26 +116,61 @@ public final class Services {
 
             for (String serviceName : serviceNameToRefNameToInstance.keySet()) {
 
-                Map<String, String> innerInnerRetVal = Maps.transformValues(
-                        serviceNameToRefNameToInstance.get(serviceName), new Function<ServiceInstance, String>() {
-                            @Nullable
-                            @Override
-                            public String apply(@Nullable ServiceInstance serviceInstance) {
-                                return serviceInstance.toString();
-                            }
-                        });
+                Map<String, String> innerInnerRetVal = Maps.newHashMap();
+                for (Entry<String, ServiceInstance> refNameToSi : serviceNameToRefNameToInstance.get(serviceName).entrySet()) {
+                    innerInnerRetVal.put(refNameToSi.getKey(), refNameToSi.getValue().toString());
+                }
                 innerRetVal.put(serviceName, innerInnerRetVal);
             }
             retVal.put(namespace, innerRetVal);
         }
 
+        Map<String, Map<String, ObjectName>> serviceMapping = configServiceRefRegistry.getServiceMapping();
+        for (String serviceQName : serviceMapping.keySet())
+            for (String refName : serviceMapping.get(serviceQName).keySet()) {
+
+                ObjectName on = serviceMapping.get(serviceQName).get(refName);
+                ServiceInstance si = ServiceInstance.fromObjectName(on);
+
+                // FIXME use QName's new String constructor, after its implemented
+                Pattern p = Pattern.compile("\\(([^\\(\\?]+)\\?[^\\?\\)]*\\)([^\\)]+)");
+                Matcher matcher = p.matcher(serviceQName);
+                Preconditions.checkArgument(matcher.matches());
+                String namespace = matcher.group(1);
+                String localName = matcher.group(2);
+
+                Map<String, Map<String, String>> serviceToRefs = retVal.get(namespace);
+                if(serviceToRefs==null) {
+                    serviceToRefs = Maps.newHashMap();
+                    retVal.put(namespace, serviceToRefs);
+                }
+
+                Map<String, String> refsToSis = serviceToRefs.get(localName);
+                if(refsToSis==null) {
+                    refsToSis = Maps.newHashMap();
+                    serviceToRefs.put(localName, refsToSis);
+                }
+
+                Preconditions.checkState(refsToSis.containsKey(refName) == false,
+                        "Duplicate reference name %s for service %s:%s, now for instance %s", refName, namespace,
+                        localName, on);
+                refsToSis.put(refName, si.toString());
+            }
+
         return retVal;
+    }
+
+    /**
+     *
+     */
+    public Map<String, Map<String, Map<String, ServiceInstance>>> getNamespaceToServiceNameToRefNameToInstance() {
+        return namespaceToServiceNameToRefNameToInstance;
     }
 
     // TODO hide resolveServices, call it explicitly in fromXml
 
-    public static Services resolveServices(Map<String, Map<String, Map<String, String>>> mappedServices) {
-        Services tracker = new Services();
+    public static Services resolveServices(Map<String, Map<String, Map<String, String>>> mappedServices, ServiceReferenceReadableRegistry taClient) {
+        Services tracker = new Services(taClient);
 
         for (Entry<String, Map<String, Map<String, String>>> namespaceEntry : mappedServices.entrySet()) {
             String namespace = namespaceEntry.getKey();
@@ -179,17 +194,17 @@ public final class Services {
                     }
 
                     String refName = refEntry.getKey();
-                    Preconditions.checkState(false == refNameToInstance.containsKey(refName),
-                            "Duplicate reference name to service " + refName + " under service " + serviceName);
+
                     ServiceInstance serviceInstance = ServiceInstance.fromString(refEntry.getValue());
                     refNameToInstance.put(refName, serviceInstance);
 
-                    tracker.instanceToRef.put(serviceInstance, refEntry.getKey());
                 }
             }
         }
         return tracker;
     }
+
+    // TODO support edit strategies on services
 
     public static Map<String, Map<String, Map<String, String>>> fromXml(XmlElement xml) {
         Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
@@ -273,6 +288,51 @@ public final class Services {
 
         }
         return root;
+    }
+
+    public String getRefName(String namespace, String serviceName, ObjectName on, Optional<String> expectedRefName) {
+        Optional<String> refNameOptional = getRefNameOptional(namespace, serviceName, on, expectedRefName);
+        Preconditions.checkState(refNameOptional.isPresent(), "No reference names mapped to %s, %s, %s", namespace,
+                serviceName, on);
+        return refNameOptional.get();
+    }
+
+    public Optional<String> getRefNameOptional(String namespace, String serviceName, ObjectName on,
+            Optional<String> expectedRefName) {
+        Map<String, Map<String, String>> services = getMappedServices().get(namespace);
+
+        if(services == null) return Optional.absent();
+        Map<String, String> refs = services.get(serviceName);
+
+        if(refs == null) return Optional.absent();
+        Multimap<ServiceInstance, String> reverted = revertMap(refs);
+
+        ServiceInstance serviceInstance = ServiceInstance.fromObjectName(on);
+        Collection<String> references = reverted.get(serviceInstance);
+
+        if (expectedRefName.isPresent() && references.contains(expectedRefName.get())) {
+            logger.debug("Returning expected ref name {} for {}", expectedRefName.get(), on);
+            return expectedRefName;
+        } else if (references.size() > 0) {
+            String next = references.iterator().next();
+            logger.debug("Returning random ref name {} for {}", next, on);
+            return Optional.of(next);
+        } else
+            return Optional.absent();
+    }
+
+    private Multimap<ServiceInstance, String> revertMap(Map<String, String> refs) {
+        Multimap<ServiceInstance, String> multimap = HashMultimap.create();
+
+        for (Entry<String, String> e : refs.entrySet()) {
+            multimap.put(ServiceInstance.fromString(e.getValue()), e.getKey());
+        }
+
+        return multimap;
+    }
+
+    public boolean hasRefName(String key, String value, ObjectName on) {
+        return getRefNameOptional(key, value, on, Optional.<String>absent()).isPresent();
     }
 
     public static final class ServiceInstance {
@@ -372,6 +432,13 @@ public final class Services {
             return true;
         }
 
+        public ObjectName getObjectName(String transactionName) {
+            return ObjectNameUtil.createTransactionModuleON(transactionName, moduleName, instanceName);
+        }
+
+        public static ServiceInstance fromObjectName(ObjectName on) {
+            return new ServiceInstance(ObjectNameUtil.getFactoryName(on), ObjectNameUtil.getInstanceName(on));
+        }
     }
 
 }

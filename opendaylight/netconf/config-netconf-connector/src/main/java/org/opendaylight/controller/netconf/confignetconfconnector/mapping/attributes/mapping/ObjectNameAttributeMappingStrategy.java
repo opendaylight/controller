@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributesConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 
@@ -42,7 +43,11 @@ public class ObjectNameAttributeMappingStrategy extends
         Util.checkType(value, ObjectName.class);
 
         ObjectName on = (ObjectName) value;
-        String refName = tracker.addServiceEntry(namespace, serviceName, on);
+
+        String expectedRefName = on.getKeyProperty(AttributesConstants.REF_NAME_ON_PROPERTY_KEY);
+
+        String refName = expectedRefName == null ? tracker.getRefName(namespace, serviceName, on, Optional.<String> absent())
+                : tracker.getRefName(namespace, serviceName, on, Optional.of(expectedRefName));
 
         return Optional.of(new MappedDependency(namespace, serviceName, refName));
     }

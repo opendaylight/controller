@@ -12,10 +12,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -25,9 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.ObjectName;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 public class EditConfigXmlParser {
 
@@ -46,6 +47,8 @@ public class EditConfigXmlParser {
     EditConfigXmlParser.EditConfigExecution fromXml(final XmlElement xml, final Config cfgMapping,
                                                     TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient)
             throws NetconfDocumentedException {
+
+        //TODO remove transactionProvider and CfgRegistry from parameters, accept only service ref store
 
         EditStrategyType editStrategyType = EditStrategyType.getDefaultStrategy();
 
@@ -92,21 +95,14 @@ public class EditConfigXmlParser {
             logger.trace("Setting merge strategy to {}", mergeStrategyString);
             editStrategyType = EditStrategyType.valueOf(mergeStrategyString);
         }
-        Set<ObjectName> instancesForFillingServiceRefMapping = Collections.emptySet();
-        if (editStrategyType == EditStrategyType.merge) {
-            instancesForFillingServiceRefMapping = Datastore.getInstanceQueryStrategy(targetDatastore, transactionProvider)
-                    .queryInstances(configRegistryClient);
-            logger.trace("Pre-filling services from following instances: {}", instancesForFillingServiceRefMapping);
-        }
 
         XmlElement configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
 
-        return new EditConfigXmlParser.EditConfigExecution(xml, cfgMapping, configElement, testOption,
-                instancesForFillingServiceRefMapping, editStrategyType);
-    }
+        ObjectName taON = transactionProvider.getOrCreateTransaction();
+        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
 
-    private void removeMountpointsFromConfig(XmlElement configElement, XmlElement mountpointsElement) {
-        configElement.getDomElement().removeChild(mountpointsElement.getDomElement());
+        return new EditConfigXmlParser.EditConfigExecution(cfgMapping, configElement, testOption,
+                ta, editStrategyType);
     }
 
     @VisibleForTesting
@@ -135,15 +131,16 @@ public class EditConfigXmlParser {
 
     @VisibleForTesting
     static class EditConfigExecution {
-        private final XmlElement editConfigXml;
+
         private final Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements;
         private final TestOption testOption;
         private final EditStrategyType defaultEditStrategyType;
+        private final Services services;
 
-        EditConfigExecution(XmlElement xml, Config configResolver, XmlElement configElement, TestOption testOption, Set<ObjectName> instancesForFillingServiceRefMapping,
-                            EditStrategyType defaultStrategy) {
-            this.editConfigXml = xml;
-            this.resolvedXmlElements = configResolver.fromXml(configElement, instancesForFillingServiceRefMapping, defaultStrategy);
+        EditConfigExecution(Config configResolver, XmlElement configElement, TestOption testOption, ServiceReferenceReadableRegistry ta, EditStrategyType defaultStrategy) {
+            Config.ConfigElementResolved configElementResolved = configResolver.fromXml(configElement, defaultStrategy, ta);
+            this.resolvedXmlElements = configElementResolved.getResolvedModules();
+            this.services = configElementResolved.getServices();
             this.testOption = testOption;
             this.defaultEditStrategyType = defaultStrategy;
         }
@@ -162,6 +159,10 @@ public class EditConfigXmlParser {
 
         EditStrategyType getDefaultStrategy() {
             return defaultEditStrategyType;
+        }
+
+        Services getServices() {
+            return services;
         }
     }
 }

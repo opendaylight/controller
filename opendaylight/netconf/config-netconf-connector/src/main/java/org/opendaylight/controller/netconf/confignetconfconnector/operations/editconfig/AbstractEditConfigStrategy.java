@@ -8,15 +8,15 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import java.util.Map;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
@@ -24,22 +24,22 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
-            ConfigTransactionClient ta) {
+                                     ConfigTransactionClient ta, Services services) {
 
         try {
             ObjectName on = ta.lookupConfigBean(module, instance);
             logger.debug("ServiceInstance for {} {} located successfully under {}", module, instance, on);
-            executeStrategy(configuration, ta, on);
+            executeStrategy(configuration, ta, on, services);
         } catch (InstanceNotFoundException e) {
-            handleMissingInstance(configuration, ta, module, instance);
+            handleMissingInstance(configuration, ta, module, instance, services);
         }
 
     }
 
     abstract void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance);
+                                        String module, String instance, Services services);
 
     abstract void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            ObjectName objectName);
+                                  ObjectName objectName, Services services);
 
 }

@@ -14,6 +14,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -53,7 +54,7 @@ public class Config {
     }
 
     public static Map<String, Map<String, Collection<ObjectName>>> getMappedInstances(Set<ObjectName> instancesToMap,
-                                                                                Services serviceTracker, Map<String, Map<String, ModuleConfig>> configs) {
+                                                                                Map<String, Map<String, ModuleConfig>> configs) {
         Multimap<String, ObjectName> moduleToInstances = mapInstancesToModules(instancesToMap);
 
         Map<String, Map<String, Collection<ObjectName>>> retVal = Maps.newLinkedHashMap();
@@ -75,27 +76,11 @@ public class Config {
 
                 innerRetVal.put(moduleName, instances);
 
-                // All found instances add to service tracker in advance
-                // This way all instances will be serialized as all available
-                // services when get-config is triggered
-                // (even if they are not used as services by other instances)
-                // = more user friendly
-                addServices(serviceTracker, instances, mbeEntry.getValue().getProvidedServices());
-
             }
 
             retVal.put(namespace, innerRetVal);
         }
         return retVal;
-    }
-
-    private static void addServices(Services serviceTracker, Collection<ObjectName> instances,
-            Multimap<String, String> providedServices) {
-        for (ObjectName instanceOn : instances) {
-            for (Entry<String, String> serviceName : providedServices.entries()) {
-                serviceTracker.addServiceEntry(serviceName.getKey(), serviceName.getValue(), instanceOn);
-            }
-        }
     }
 
     private static Multimap<String, ObjectName> mapInstancesToModules(Set<ObjectName> instancesToMap) {
@@ -114,11 +99,10 @@ public class Config {
     // }
 
     public Element toXml(Set<ObjectName> instancesToMap, Optional<String> maybeNamespace, Document document,
-            Element dataElement) {
-        Services serviceTracker = new Services();
+            Element dataElement, Services serviceTracker) {
 
         Map<String, Map<String, Collection<ObjectName>>> moduleToInstances = getMappedInstances(instancesToMap,
-                serviceTracker, moduleConfigs);
+                moduleConfigs);
 
         Element root = dataElement;
         if (maybeNamespace.isPresent()) {
@@ -167,13 +151,13 @@ public class Config {
     // TODO refactor, replace string representing namespace with namespace class
     // TODO refactor, replace Map->Multimap with e.g. ConfigElementResolved
     // class
-    public Map<String, Multimap<String, ModuleElementResolved>> fromXml(XmlElement xml, Set<ObjectName> instancesForFillingServiceRefMapping,
-                                                                        EditStrategyType defaultEditStrategyType) {
+    public ConfigElementResolved fromXml(XmlElement xml,
+                                         EditStrategyType defaultEditStrategyType, ServiceReferenceReadableRegistry taClient) {
         Map<String, Multimap<String, ModuleElementResolved>> retVal = Maps.newHashMap();
 
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        Services serviceTracker = fromXmlServices(xml, recognisedChildren, instancesForFillingServiceRefMapping);
+        Services serviceTracker = fromXmlServices(xml, recognisedChildren, taClient);
         List<XmlElement> moduleElements = fromXmlModules(xml, recognisedChildren);
 
         xml.checkUnrecognisedElements(recognisedChildren);
@@ -182,7 +166,26 @@ public class Config {
             resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType);
         }
 
-        return retVal;
+        return new ConfigElementResolved(retVal, serviceTracker);
+    }
+
+    public static class ConfigElementResolved {
+
+        private final Map<String, Multimap<String, ModuleElementResolved>> resolvedModules;
+        private final Services services;
+
+        public ConfigElementResolved(Map<String, Multimap<String, ModuleElementResolved>> retVal, Services serviceTracker) {
+            this.resolvedModules = retVal;
+            this.services = serviceTracker;
+        }
+
+        public Map<String, Multimap<String, ModuleElementResolved>> getResolvedModules() {
+            return resolvedModules;
+        }
+
+        public Services getServices() {
+            return services;
+        }
     }
 
     private List<XmlElement> fromXmlModules(XmlElement xml, List<XmlElement> recognisedChildren) {
@@ -224,7 +227,8 @@ public class Config {
         innerMap.put(factoryName, moduleElementResolved);
     }
 
-    private Services fromXmlServices(XmlElement xml, List<XmlElement> recognisedChildren, Set<ObjectName> instancesForFillingServiceRefMapping) {
+    private Services fromXmlServices(XmlElement xml, List<XmlElement> recognisedChildren,
+                                     ServiceReferenceReadableRegistry taClient) {
         Optional<XmlElement> servicesElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.SERVICES_KEY,
                 XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
 
@@ -235,22 +239,7 @@ public class Config {
         } else {
             mappedServices = new HashMap<>();
         }
-        Services services = Services.resolveServices(mappedServices);
-        // merge with what candidate db contains by default - ref_
-
-        for(ObjectName existingON: instancesForFillingServiceRefMapping) {
-            logger.trace("Filling services from {}", existingON);
-            // get all its services
-            String factoryName = ObjectNameUtil.getFactoryName(existingON);
-            ModuleConfig moduleConfig = moduleNamesToConfigs.get(factoryName);
-
-            checkState(moduleConfig != null, "Cannot find ModuleConfig with name " + factoryName + " in " + moduleNamesToConfigs);
-            // Set<String> services = ;
-            for (Entry<String, String> serviceName : moduleConfig.getProvidedServices().entries()) {
-
-                services.addServiceEntry(serviceName.getKey(), serviceName.getValue(), existingON);
-            }
-        }
+        Services services = Services.resolveServices(mappedServices, taClient);
 
         return services;
     }

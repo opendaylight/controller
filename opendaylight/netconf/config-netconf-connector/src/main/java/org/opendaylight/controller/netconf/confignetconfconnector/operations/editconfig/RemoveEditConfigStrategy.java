@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class RemoveEditConfigStrategy extends DeleteEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance) {
+                               String module, String instance, Services services) {
         logger.warn("Unable to delete {}:{}, ServiceInstance not found", module, instance);
     }
 }
