@@ -91,6 +91,8 @@ class TransformerGenerator {
 
     @Property
     var GeneratorListener listener;
+    
+    public static val CLASS_TYPE = Types.typeForClass(Class);
 
     public new(ClassPool pool) {
         classPool = pool;
@@ -269,6 +271,7 @@ class TransformerGenerator {
             val ctCls = createClass(inputType.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
                 staticQNameField(node.QName);
                 implementsType(BINDING_CODEC)
                 method(Object, "toDomStatic", QName, Object) [
@@ -351,6 +354,7 @@ class TransformerGenerator {
                 staticQNameField(node.QName);
                 staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
                 staticField(it, AUGMENTATION_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
                 method(Object, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
                     body = '''
@@ -409,6 +413,7 @@ class TransformerGenerator {
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 staticQNameField(node.QName);
                 staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
                 staticField(it, AUGMENTATION_CODEC, BindingCodec)
                 implementsType(BINDING_CODEC)
                 method(Object, "toDomStatic", QName, Object) [
@@ -459,6 +464,7 @@ class TransformerGenerator {
                 staticQNameField(node.augmentationQName);
                 staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
                 staticField(it, AUGMENTATION_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
                 implementsType(BINDING_CODEC)
                 method(Object, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
@@ -466,7 +472,7 @@ class TransformerGenerator {
                         {
                             //System.out.println("Qname " + $1);
                             //System.out.println("Value " + $2);
-                            «QName.name» _resultName = «QName.name».create($1,QNAME.getLocalName());
+                            «QName.name» _resultName = «QName.name».create(QNAME,QNAME.getLocalName());
                             java.util.List _childNodes = new java.util.ArrayList();
                             «type.resolvedName» value = («type.resolvedName») $2;
                             «FOR child : node.childNodes»
@@ -540,6 +546,7 @@ class TransformerGenerator {
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
                 //staticQNameField(inputType);
                 staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
                 staticField(it, CLASS_TO_CASE_MAP, Map)
                 staticField(it, COMPOSITE_TO_CASE, Map)
                 //staticField(it,QNAME_TO_CASE_MAP,BindingCodec)
@@ -828,6 +835,7 @@ class TransformerGenerator {
                 if (hasYangBinding) {
                     implementsType(BINDING_CODEC)
                     staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                    staticField(it, IDENTITYREF_CODEC, BindingCodec)
                     implementsType(BindingDeserializer.asCtClass)
                 }
                 method(Object, "toDomValue", Object) [
@@ -1020,10 +1028,10 @@ class TransformerGenerator {
 
     private def dispatch String deserializeValue(Type type, String domParameter) {
         if (INSTANCE_IDENTIFIER.equals(type)) {
-
             return '''(«InstanceIdentifier.name») «INSTANCE_IDENTIFIER_CODEC».deserialize(«domParameter»)'''
+        } else if (CLASS_TYPE.equals(type)) {
+            return '''(«Class.name») «IDENTITYREF_CODEC».deserialize(«domParameter»)'''
         }
-
         return '''(«type.resolvedName») «domParameter»'''
 
     }
@@ -1192,6 +1200,8 @@ class TransformerGenerator {
     private def dispatch serializeValue(Type signature, String property) {
         if (INSTANCE_IDENTIFIER == signature) {
             return '''«INSTANCE_IDENTIFIER_CODEC».serialize(«property»)'''
+        }else if (CLASS_TYPE.equals(signature)) {
+            return '''(«QName.resolvedName») «IDENTITYREF_CODEC».serialize(«property»)'''
         }
         return '''«property»''';
     }

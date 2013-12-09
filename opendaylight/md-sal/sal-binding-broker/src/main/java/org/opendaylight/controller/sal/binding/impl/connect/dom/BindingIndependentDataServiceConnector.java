@@ -22,6 +22,8 @@ import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.Augmentable;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -61,8 +63,22 @@ public class BindingIndependentDataServiceConnector implements //
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
         try {
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
+            
+            
             CompositeNode result = biDataService.readOperationalData(biPath);
+            Class<? extends DataObject> targetType = path.getTargetType();
+            
+            if(Augmentation.class.isAssignableFrom(targetType)) {
+                path = mappingService.fromDataDom(biPath);
+                Class<? extends Augmentation<?>> augmentType = (Class<? extends Augmentation<?>>) targetType;
+                DataObject parentTo = mappingService.dataObjectFromDataDom(path, result);
+                if(parentTo instanceof Augmentable<?>) {
+                    return (DataObject) ((Augmentable) parentTo).getAugmentation(augmentType);
+                }
+                
+            }
             return mappingService.dataObjectFromDataDom(path, result);
+            
         } catch (DeserializationException e) {
             throw new IllegalStateException(e);
         }
@@ -116,7 +132,7 @@ public class BindingIndependentDataServiceConnector implements //
                 DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
                 target.putConfigurationData(baKey, baData);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason {}.", entry.getKey(), e);
+                LOG.error("Ommiting from BA transaction: {}.", entry.getKey(), e);
             }
         }
         for (Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
@@ -127,7 +143,7 @@ public class BindingIndependentDataServiceConnector implements //
                 DataObject baData = mappingService.dataObjectFromDataDom(baKey, entry.getValue());
                 target.putOperationalData(baKey, baData);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason {}.", entry.getKey(), e);
+                LOG.error("Ommiting from BA transaction: {}.", entry.getKey(), e);
             }
         }
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
@@ -136,7 +152,7 @@ public class BindingIndependentDataServiceConnector implements //
                 InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
                 target.removeConfigurationData(baEntry);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason {}.", entry, e);
+                LOG.error("Ommiting from BA transaction: {}.", entry, e);
             }
         }
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedOperationalData()) {
@@ -145,7 +161,7 @@ public class BindingIndependentDataServiceConnector implements //
                 InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
                 target.removeOperationalData(baEntry);
             } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}. Reason{}.", entry, e);
+                LOG.error("Ommiting from BA transaction: {}.", entry, e);
             }
         }
         return target;

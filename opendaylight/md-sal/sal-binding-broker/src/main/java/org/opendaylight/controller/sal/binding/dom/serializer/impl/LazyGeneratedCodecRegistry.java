@@ -1,7 +1,9 @@
 package org.opendaylight.controller.sal.binding.dom.serializer.impl;
 
+import java.awt.CompositeContext;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,11 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.AugmentationCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.ChoiceCaseCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.ChoiceCodec;
@@ -24,6 +28,7 @@ import org.opendaylight.controller.sal.binding.dom.serializer.api.CodecRegistry;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.DataContainerCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.DomCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.IdentifierCodec;
+import org.opendaylight.controller.sal.binding.dom.serializer.api.IdentitityCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.InstanceIdentifierCodec;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.ValueWithQName;
 import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils;
@@ -34,6 +39,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Augmentable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.BindingCodec;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -41,6 +47,7 @@ import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
@@ -61,10 +68,12 @@ import static org.opendaylight.controller.sal.binding.dom.serializer.impl.Interm
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleContext;
 import org.opendaylight.yangtools.sal.binding.model.api.ConcreteType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.yangtools.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.util.concurrent.CycleDetectingLockFactory.WithExplicitOrdering;
 
 public class LazyGeneratedCodecRegistry implements //
@@ -76,27 +85,31 @@ public class LazyGeneratedCodecRegistry implements //
     private final static LateMixinCodec NOT_READY_CODEC = new LateMixinCodec();
 
     private final InstanceIdentifierCodec instanceIdentifierCodec = new InstanceIdentifierCodecImpl(this);
+    private final IdentityCompositeCodec identityRefCodec = new IdentityCompositeCodec();
 
     private TransformerGenerator generator;
 
     // Concrete class to codecs
-    private Map<Class<?>, DataContainerCodec<?>> containerCodecs = new WeakHashMap<>();
-    private Map<Class<?>, IdentifierCodec<?>> identifierCodecs = new WeakHashMap<>();
-    private Map<Class<?>, ChoiceCodecImpl<?>> choiceCodecs = new WeakHashMap<>();
-    private Map<Class<?>, ChoiceCaseCodecImpl<?>> caseCodecs = new WeakHashMap<>();
-    private Map<Class<?>, AugmentableCompositeCodec> augmentableCodecs = new WeakHashMap<>();
-
+    private static final Map<Class<?>, DataContainerCodec<?>> containerCodecs = new WeakHashMap<>();
+    private static final Map<Class<?>, IdentifierCodec<?>> identifierCodecs = new WeakHashMap<>();
+    private static final Map<Class<?>, ChoiceCodecImpl<?>> choiceCodecs = new WeakHashMap<>();
+    private static final Map<Class<?>, ChoiceCaseCodecImpl<?>> caseCodecs = new WeakHashMap<>();
+    private static final Map<Class<?>, AugmentableCompositeCodec> augmentableCodecs = new WeakHashMap<>();
+    private static final Map<Class<?>, AugmentationCodec<?>> augmentationCodecs = new WeakHashMap<>();
+    private static final Map<Class<?>, QName> identityQNames = new WeakHashMap<>();
+    private static final Map<QName, Type> qnamesToIdentityMap = new ConcurrentHashMap<>();
     /** Binding type to encountered classes mapping **/
     @SuppressWarnings("rawtypes")
-    Map<Type, WeakReference<Class>> typeToClass = new ConcurrentHashMap<>();
+    private static final Map<Type, WeakReference<Class>> typeToClass = new ConcurrentHashMap<>();
 
     @SuppressWarnings("rawtypes")
-    private ConcurrentMap<Type, ChoiceCaseCodecImpl> typeToCaseCodecs = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Type, ChoiceCaseCodecImpl> typeToCaseCodecs = new ConcurrentHashMap<>();
 
     private CaseClassMapFacade classToCaseRawCodec = new CaseClassMapFacade();
 
-    Map<SchemaPath, GeneratedTypeBuilder> pathToType = new ConcurrentHashMap<>();
-    Map<List<QName>, Type> pathToInstantiatedType = new ConcurrentHashMap<>();
+    private static final Map<SchemaPath, GeneratedTypeBuilder> pathToType = new ConcurrentHashMap<>();
+    private static final Map<List<QName>, Type> pathToInstantiatedType = new ConcurrentHashMap<>();
+    private static final Map<Type, QName> typeToQname = new ConcurrentHashMap<>();
 
     private SchemaContext currentSchema;
 
@@ -115,8 +128,56 @@ public class LazyGeneratedCodecRegistry implements //
 
     @Override
     public <T extends Augmentation<?>> AugmentationCodec<T> getCodecForAugmentation(Class<T> object) {
-        // TODO Auto-generated method stub
-        return null;
+        AugmentationCodec<T> codec = null;
+        @SuppressWarnings("rawtypes")
+        AugmentationCodec potentialCodec = augmentationCodecs.get(object);
+        if (potentialCodec != null) {
+            codec = potentialCodec;
+        } else
+            try {
+                Class<? extends BindingCodec<Map<QName, Object>, Object>> augmentRawCodec = generator
+                        .augmentationTransformerFor(object);
+                BindingCodec<Map<QName, Object>, Object> rawCodec = augmentRawCodec.newInstance();
+                codec = new AugmentationCodecWrapper<T>(rawCodec);
+                augmentationCodecs.put(augmentRawCodec, codec);
+            } catch (InstantiationException e) {
+                LOG.error("Can not instantiate raw augmentation codec {}", object.getSimpleName(), e);
+            } catch (IllegalAccessException e) {
+                LOG.debug("BUG: Constructor for {} is not accessible.", object.getSimpleName(), e);
+            }
+        Class<? extends Augmentable<?>> objectSupertype = getAugmentableArgumentFrom(object);
+        if (objectSupertype != null) {
+            getAugmentableCodec(objectSupertype).addAugmentationCodec(object, codec);
+        } else {
+            LOG.warn("Could not find augmentation target for augmentation {}", object);
+        }
+        return codec;
+    }
+
+    private static Class<? extends Augmentable<?>> getAugmentableArgumentFrom(
+            final Class<? extends Augmentation<?>> augmentation) {
+        try {
+            Class<? extends Augmentable<?>> ret = ClassLoaderUtils.withClassLoader(augmentation.getClassLoader(),
+                    new Callable<Class<? extends Augmentable<?>>>() {
+                        @Override
+                        @SuppressWarnings("unchecked")
+                        public Class<? extends Augmentable<?>> call() throws Exception {
+                            for (java.lang.reflect.Type supertype : augmentation.getGenericInterfaces()) {
+                                if (supertype instanceof ParameterizedType
+                                        && Augmentation.class.equals(((ParameterizedType) supertype).getRawType())) {
+                                    ParameterizedType augmentationGeneric = (ParameterizedType) supertype;
+                                    return (Class<? extends Augmentable<?>>) augmentationGeneric
+                                            .getActualTypeArguments()[0];
+                                }
+                            }
+                            return null;
+                        }
+                    });
+            return ret;
+        } catch (Exception e) {
+            LOG.error("Could not find augmentable for {}", augmentation, e);
+            return null;
+        }
     }
 
     @Override
@@ -165,7 +226,6 @@ public class LazyGeneratedCodecRegistry implements //
         return newWrapper;
     }
 
-    @Override
     @SuppressWarnings("rawtypes")
     public void bindingClassEncountered(Class cls) {
 
@@ -269,8 +329,20 @@ public class LazyGeneratedCodecRegistry implements //
     }
 
     @Override
+    public IdentitityCodec<?> getIdentityCodec() {
+        return identityRefCodec;
+    }
+
+    @Override
+    public <T extends BaseIdentity> IdentitityCodec<T> getCodecForIdentity(Class<T> codec) {
+        bindingClassEncountered(codec);
+        return identityRefCodec;
+    }
+
+    @Override
     public void onCodecCreated(Class<?> cls) {
         CodecMapping.setIdentifierCodec(cls, instanceIdentifierCodec);
+        CodecMapping.setIdentityRefCodec(cls, identityRefCodec);
     }
 
     @Override
@@ -316,6 +388,10 @@ public class LazyGeneratedCodecRegistry implements //
 
     public void onModuleContextAdded(SchemaContext schemaContext, Module module, ModuleContext context) {
         pathToType.putAll(context.getChildNodes());
+        qnamesToIdentityMap.putAll(context.getIdentities());
+        for(Entry<QName, GeneratedTOBuilder> identity : context.getIdentities().entrySet()) {
+            typeToQname.put(new ReferencedTypeImpl(identity.getValue().getPackageName(), identity.getValue().getName()),identity.getKey());
+        }
         captureCases(context.getCases(), schemaContext);
     }
 
@@ -324,7 +400,6 @@ public class LazyGeneratedCodecRegistry implements //
             ReferencedTypeImpl typeref = new ReferencedTypeImpl(caseNode.getValue().getPackageName(), caseNode
                     .getValue().getName());
 
-            LOG.info("Case path: {} Type : {}", caseNode.getKey(), caseNode.getValue().getFullyQualifiedName());
             pathToType.put(caseNode.getKey(), caseNode.getValue());
 
             ChoiceCaseNode node = (ChoiceCaseNode) SchemaContextUtil.findDataSchemaNode(module, caseNode.getKey());
@@ -371,10 +446,10 @@ public class LazyGeneratedCodecRegistry implements //
             if (path != null && (type = pathToType.get(path)) != null) {
                 ReferencedTypeImpl typeref = new ReferencedTypeImpl(type.getPackageName(), type.getName());
                 ChoiceCaseCodecImpl partialCodec = typeToCaseCodecs.get(typeref);
-                if(partialCodec.getSchema() == null ) {
+                if (partialCodec.getSchema() == null) {
                     partialCodec.setSchema(caseNode);
                 }
-                
+
                 Class<?> caseClass = ClassLoaderUtils.tryToLoadClassWithTCCL(type.getFullyQualifiedName());
                 if (caseClass != null) {
                     getCaseCodecFor(caseClass);
@@ -402,7 +477,7 @@ public class LazyGeneratedCodecRegistry implements //
 
     }
 
-    private AugmentableCompositeCodec getAugmentableCodec(Class<?> dataClass) {
+    public AugmentableCompositeCodec getAugmentableCodec(Class<?> dataClass) {
         AugmentableCompositeCodec ret = augmentableCodecs.get(dataClass);
         if (ret != null) {
             return ret;
@@ -739,7 +814,7 @@ public class LazyGeneratedCodecRegistry implements //
 
         private final Class augmentableType;
 
-        Map<Class, BindingCodec> rawAugmentationCodecs = new WeakHashMap<>();
+        Map<Class, AugmentationCodec<?>> localAugmentationCodecs = new WeakHashMap<>();
 
         public AugmentableCompositeCodec(Class type) {
             checkArgument(Augmentable.class.isAssignableFrom(type));
@@ -772,51 +847,31 @@ public class LazyGeneratedCodecRegistry implements //
         private List serializeImpl(Map<Class, Augmentation> input) {
             List ret = new ArrayList<>();
             for (Entry<Class, Augmentation> entry : input.entrySet()) {
-                BindingCodec codec = getRawCodecForAugmentation(entry.getKey());
-                List output = (List) codec.serialize(new ValueWithQName(null, entry.getValue()));
-                ret.addAll(output);
+                AugmentationCodec codec = getCodecForAugmentation(entry.getKey());
+                CompositeNode node = codec.serialize(new ValueWithQName(null, entry.getValue()));
+                ret.addAll(node.getChildren());
             }
             return ret;
         }
 
-        private BindingCodec getRawCodecForAugmentation(Class key) {
-            BindingCodec ret = rawAugmentationCodecs.get(key);
-            if (ret != null) {
-                return ret;
-            }
-            try {
-                Class<? extends BindingCodec> retClass = generator.augmentationTransformerFor(key);
-                ret = retClass.newInstance();
-                rawAugmentationCodecs.put(key, ret);
-                return ret;
-            } catch (InstantiationException e) {
-                LOG.error("Can not instantiate raw augmentation codec {}", key.getSimpleName(), e);
-            } catch (IllegalAccessException e) {
-                LOG.debug("BUG: Constructor for {} is not accessible.", key.getSimpleName(), e);
-            }
-            return null;
+        public synchronized <T extends Augmentation<?>> void addAugmentationCodec(Class<T> augmentationClass,
+                AugmentationCodec<T> value) {
+            localAugmentationCodecs.put(augmentationClass, value);
         }
 
         @Override
         public Map<Class, Augmentation> deserialize(Object input) {
             Map<Class, Augmentation> ret = new HashMap<>();
             if (input instanceof CompositeNode) {
-                for (Entry<Class, BindingCodec> codec : rawAugmentationCodecs.entrySet()) {
-                    Augmentation value = (Augmentation) codec.getValue().deserialize(input);
-                    if (value != null) {
-                        ret.put(codec.getKey(), value);
+                List<Entry<Class, AugmentationCodec<?>>> codecs = new ArrayList<>(localAugmentationCodecs.entrySet());
+                for (Entry<Class, AugmentationCodec<?>> codec : codecs) {
+                    ValueWithQName<?> value = codec.getValue().deserialize((CompositeNode) input);
+                    if (value != null && value.getValue() != null) {
+                        ret.put(codec.getKey(), (Augmentation) value.getValue());
                     }
                 }
             }
             return ret;
-        }
-
-        public Map<Class, BindingCodec> getRawAugmentationCodecs() {
-            return rawAugmentationCodecs;
-        }
-
-        public void setRawAugmentationCodecs(Map<Class, BindingCodec> rawAugmentationCodecs) {
-            this.rawAugmentationCodecs = rawAugmentationCodecs;
         }
 
         public Class getAugmentableType() {
@@ -845,6 +900,84 @@ public class LazyGeneratedCodecRegistry implements //
         @Override
         public Object serialize(Object input) {
             return getDelegate().serialize(input);
+        }
+    }
+
+    private static class AugmentationCodecWrapper<T extends Augmentation<?>> implements AugmentationCodec<T>,
+            Delegator<BindingCodec> {
+
+        private BindingCodec delegate;
+
+        public AugmentationCodecWrapper(BindingCodec<Map<QName, Object>, Object> rawCodec) {
+            this.delegate = rawCodec;
+        }
+
+        @Override
+        public BindingCodec getDelegate() {
+            return delegate;
+        }
+
+        @Override
+        public CompositeNode serialize(ValueWithQName<T> input) {
+            @SuppressWarnings("unchecked")
+            List<Map<QName, Object>> rawValues = (List<Map<QName, Object>>) getDelegate().serialize(input);
+            List<Node<?>> serialized = new ArrayList<>(rawValues.size());
+            for (Map<QName, Object> val : rawValues) {
+                serialized.add(toNode(val));
+            }
+            return new CompositeNodeTOImpl(input.getQname(), null, serialized);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public ValueWithQName<T> deserialize(Node<?> input) {
+            Object rawCodecValue = getDelegate().deserialize((Map<QName, Object>) input);
+            return new ValueWithQName<T>(input.getNodeType(), (T) rawCodecValue);
+        }
+    }
+
+    private class IdentityCompositeCodec implements IdentitityCodec {
+
+        @Override
+        public Object deserialize(Object input) {
+            checkArgument(input instanceof QName);
+            return deserialize((QName) input);
+        }
+
+        @Override
+        public Class<?> deserialize(QName input) {
+            Type type = qnamesToIdentityMap.get(input);
+            if(type == null) {
+                return null;
+            }
+            ReferencedTypeImpl typeref = new ReferencedTypeImpl(type.getPackageName(), type.getName());
+            WeakReference<Class> softref = typeToClass.get(typeref);
+            if(softref == null) {
+                return null;
+            }
+            return softref.get();
+        }
+
+        @Override
+        public QName serialize(Class input) {
+            checkArgument(BaseIdentity.class.isAssignableFrom(input));
+            bindingClassEncountered(input);
+            QName qname = identityQNames.get(input);
+            if(qname != null) {
+                return qname;
+            }
+            ConcreteType typeref = Types.typeForClass(input);
+            qname = typeToQname.get(typeref);
+            if(qname != null) {
+                identityQNames.put(input, qname);
+            }
+            return qname;
+        }
+
+        @Override
+        public Object serialize(Object input) {
+            checkArgument(input instanceof Class);
+            return serialize((Class) input);
         }
     }
 }
