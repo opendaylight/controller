@@ -10,7 +10,8 @@ package org.opendaylight.controller.config.manager.testingservices.seviceinterfa
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolIfc;
 
-@ServiceInterfaceAnnotation(value = "threadpool-scheduled", osgiRegistrationType = TestingScheduledThreadPoolIfc.class)
+@ServiceInterfaceAnnotation(value = "threadpool-scheduled", osgiRegistrationType = TestingScheduledThreadPoolIfc.class,
+    namespace = "ns", revision = "rev", localName = "threadpool-scheduled")
 public interface TestingScheduledThreadPoolServiceInterface extends
         TestingThreadPoolServiceInterface {
 }

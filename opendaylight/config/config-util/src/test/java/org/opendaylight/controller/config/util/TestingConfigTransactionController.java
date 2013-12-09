@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.util;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -108,5 +109,50 @@ public class TestingConfigTransactionController implements
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeServiceReference(String serviceInterfaceName, String refName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeAllServiceReferences() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, Map<String, ObjectName>> getServiceMapping() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getServiceInterfaceName(String namespace, String localName) {
+        throw new UnsupportedOperationException();
     }
 }

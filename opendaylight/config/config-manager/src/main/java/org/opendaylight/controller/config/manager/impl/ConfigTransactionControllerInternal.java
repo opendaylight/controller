@@ -13,6 +13,7 @@ import java.util.List;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
@@ -71,4 +72,7 @@ interface ConfigTransactionControllerInternal extends
     List<ModuleFactory> getCurrentlyRegisteredFactories();
 
     BundleContext getModuleFactoryBundleContext(String factoryName);
+
+    ServiceReferenceWritableRegistry getWritableRegistry();
+
 }

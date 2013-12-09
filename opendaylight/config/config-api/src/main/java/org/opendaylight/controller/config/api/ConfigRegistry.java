@@ -19,7 +19,7 @@ import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConsta
  * Provides functionality for working with configuration registry - mainly
  * creating and committing config transactions.
  */
-public interface ConfigRegistry extends LookupRegistry {
+public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadableRegistry {
 
     /**
      * Only well-known ObjectName in configuration system, under which
