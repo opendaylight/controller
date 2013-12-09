@@ -32,9 +32,7 @@
                     <name>test1</name>
 
                     <simple-long-2>44</simple-long-2>
-                    <binaryLeaf>8</binaryLeaf>
-                    <binaryLeaf>1</binaryLeaf>
-                    <binaryLeaf>0</binaryLeaf>
+                    <binaryLeaf>8545649856</binaryLeaf>
                     <dto_d>
                         <unknownAttribute>error</unknownAttribute>
                         <simple-int1>444</simple-int1>

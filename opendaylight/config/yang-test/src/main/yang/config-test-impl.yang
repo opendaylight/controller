@@ -48,28 +48,40 @@ module config-test-impl {
            container dto-a {
                 leaf simple-arg {
                     type uint32;
+                    default 1;
                 }
 
                 leaf port {
                     type inet:port-number;
+                    default 8080;
                 }
 
+                leaf ip4 {
+                    type inet:ipv4-address;
+                    default 127.0.0.1;
+                }
+
+                leaf ip {
+                    type inet:ip-address;
+                    // TODO defaults for union default 0:0:0:0:0:0:0:1;
+                }
             }
 
             leaf as-number {
-                mandatory true;
                 type inet:as-number;
+                default 44;
             }
 
 
             leaf simpleInt {
                 type uint32;
-                default 99L;
+                default 99;
             }
 
             container dto_b {
                 leaf simple-int1 {
                     type uint32;
+                    default 32;
                 }
 
                 leaf simple-int2 {
@@ -101,28 +113,34 @@ module config-test-impl {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
             leaf binaryLeaf {
                 type binary;
+                default ZGVmYXVsdEJpbg==;
             }
 
             leaf type {
                 type string;
+                default "default-string";
             }
 
             leaf extended {
                 type tt:extend-once;
+                default 1;
             }
 
             leaf extended-twice {
                 type tt:extend-twice;
+                default 2;
             }
 
             leaf extended-enum {
                 type tt:extend-enum;
+                default ONE;
             }
 
             leaf sleep-factor {
                 type decimal64 {
                     fraction-digits 2;
                 }
+                default 2.00;
             }
 
            container dto-c {
@@ -153,23 +171,28 @@ module config-test-impl {
             }
 
             leaf simple-long {
-                type int64  ;
+                type int64;
+                default -45;
             }
 
             leaf simple-long-2 {
                 type uint32;
+                default 445;
             }
 
             leaf simple-BigInteger {
                 type uint64;
+                default 545454;
             }
 
             leaf simple-byte {
                 type int8;
+                default -4;
             }
 
             leaf simple-short {
                 type uint8;
+                default 45;
             }
 
             leaf simple-test {
@@ -209,6 +232,7 @@ module config-test-impl {
                     container deep {
                         leaf simple-int3 {
                             type uint16;
+                            default 0;
                         }
                     }
                 }
@@ -393,6 +417,7 @@ module config-test-impl {
             container retValContainer {
                 leaf v1 {
                     type string;
+                    default "from rpc";
                 }
 
                 leaf v2 {

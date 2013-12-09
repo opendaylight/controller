@@ -27,9 +27,7 @@
                     </type>
                     <name>test1</name>
                     <simple-long-2>44</simple-long-2>
-                    <binaryLeaf>8</binaryLeaf>
-                    <binaryLeaf>7</binaryLeaf>
-                    <binaryLeaf>9</binaryLeaf>
+                    <binaryLeaf>8ad1</binaryLeaf>
                     <dto_d>
                         <simple-int1>444</simple-int1>
                         <simple-int2>4444</simple-int2>

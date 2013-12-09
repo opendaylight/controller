@@ -129,7 +129,7 @@ public class TemplateFactory {
                 for (JavaAttribute ja : rpc.getParameters()) {
                     Field field = new Field(Collections.<String> emptyList(),
                             ja.getType().getFullyQualifiedName(),
-                            ja.getLowerCaseCammelCase());
+                            ja.getLowerCaseCammelCase(), ja.getNullableDefaultWrappedForCode());
                     fields.add(field);
                 }
                 MethodDeclaration operation = new MethodDeclaration(
@@ -433,15 +433,18 @@ public class TemplateFactory {
                     String varName = BindingGeneratorUtil
                             .parseToValidParamName(attrEntry.getKey());
 
-                    String fullyQualifiedName;
+                    String fullyQualifiedName, nullableDefault = null;
                     if (attrEntry.getValue() instanceof TypedAttribute) {
                         Type type = ((TypedAttribute) attrEntry.getValue()).getType();
                         fullyQualifiedName = serializeType(type);
+                        if(attrEntry.getValue() instanceof JavaAttribute) {
+                            nullableDefault = ((JavaAttribute)attrEntry.getValue()).getNullableDefaultWrappedForCode();
+                        }
                     } else {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
                     }
-                    fields.add(new Field(fullyQualifiedName, varName));
+                    fields.add(new Field(fullyQualifiedName, varName, nullableDefault));
 
                     String getterName = "get" + innerName;
                     MethodDefinition getter = new MethodDefinition(
@@ -531,6 +534,7 @@ public class TemplateFactory {
                 String packageName) {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 String type;
+                String nullableDefaultWrapped = null;
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
                 if (attributeIfc instanceof TypedAttribute) {
@@ -548,6 +552,7 @@ public class TemplateFactory {
                     if (innerAttr instanceof JavaAttribute) {
                         fullyQualifiedName = ((JavaAttribute) innerAttr)
                                 .getType().getFullyQualifiedName();
+                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
                     } else if (innerAttr instanceof TOAttribute) {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
@@ -563,7 +568,7 @@ public class TemplateFactory {
                 }
 
                 fields.add(new Field(type, attributeIfc
-                        .getUpperCaseCammelCase()));
+                        .getUpperCaseCammelCase(), nullableDefaultWrapped));
             }
         }
 
@@ -582,12 +587,16 @@ public class TemplateFactory {
         void processAttributes(Map<String, AttributeIfc> attributes,
                 String packageName) {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
-                String type;
+                String type, nullableDefaultWrapped = null;
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     type = serializeType(typedAttribute.getType());
+                    if (attributeIfc instanceof JavaAttribute) {
+                        nullableDefaultWrapped = ((JavaAttribute) attributeIfc).getNullableDefaultWrappedForCode();
+                    }
+
                 } else if (attributeIfc instanceof TOAttribute) {
                     String fullyQualifiedName = FullyQualifiedNameHelper
                             .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
@@ -600,6 +609,7 @@ public class TemplateFactory {
                     if (innerAttr instanceof JavaAttribute) {
                         fullyQualifiedName = ((JavaAttribute) innerAttr)
                                 .getType().getFullyQualifiedName();
+                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
                     } else if (innerAttr instanceof TOAttribute) {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
@@ -631,8 +641,7 @@ public class TemplateFactory {
                 String varName = BindingGeneratorUtil
                         .parseToValidParamName(attrEntry.getKey());
                 moduleFields.add(new ModuleField(type, varName, attributeIfc
-                        .getUpperCaseCammelCase(), attributeIfc
-                        .getNullableDefault(), isDependency, dependency));
+                        .getUpperCaseCammelCase(), nullableDefaultWrapped, isDependency, dependency));
 
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();

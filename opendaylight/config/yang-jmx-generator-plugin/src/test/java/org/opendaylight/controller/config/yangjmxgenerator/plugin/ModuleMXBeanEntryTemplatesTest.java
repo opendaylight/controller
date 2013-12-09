@@ -7,14 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.util.Collections;
-import java.util.Map;
-
+import com.google.common.collect.Maps;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -23,7 +16,13 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.AbstractFa
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.TemplateFactory;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 
-import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class ModuleMXBeanEntryTemplatesTest {
 
@@ -61,6 +60,7 @@ public class ModuleMXBeanEntryTemplatesTest {
         doReturn("package.type").when(typeA).getFullyQualifiedName();
         doReturn(typeA).when(attr).getType();
         doReturn("Type").when(attr).getUpperCaseCammelCase();
+        doReturn("new Default()").when(attr).getNullableDefault();
         return attr;
     }
 

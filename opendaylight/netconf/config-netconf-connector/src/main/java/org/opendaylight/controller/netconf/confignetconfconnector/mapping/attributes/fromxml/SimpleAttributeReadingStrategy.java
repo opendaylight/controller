@@ -28,7 +28,13 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
         String textContent = xmlElement.getTextContent();
 
         Preconditions.checkNotNull(textContent, "This element should contain text %s", xmlElement);
-        return AttributeConfigElement.create(getNullableDefault(), postprocessParsedValue(textContent));
+        return AttributeConfigElement.create(postprocessNullableDefault(getNullableDefault()),
+                postprocessParsedValue(textContent));
+    }
+
+    @Override
+    protected Object postprocessNullableDefault(String nullableDefault) {
+        return nullableDefault;
     }
 
     protected Object postprocessParsedValue(String textContent) {

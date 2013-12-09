@@ -26,6 +26,10 @@ public class TypeProviderWrapper {
         return getType(leaf, type);
     }
 
+    public String getDefault(LeafSchemaNode node) {
+        return typeProvider.getTypeDefaultConstruction(node);
+    }
+
     public Type getType(SchemaNode leaf, TypeDefinition<?> type) {
         Type javaType;
         try {

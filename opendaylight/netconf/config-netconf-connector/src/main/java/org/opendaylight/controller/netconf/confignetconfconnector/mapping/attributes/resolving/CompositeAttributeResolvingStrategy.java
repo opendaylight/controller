@@ -70,7 +70,7 @@ final class CompositeAttributeResolvingStrategy extends
                     parsedInnerValue.isPresent() ? parsedInnerValue.get() : null);
         }
 
-        CompositeDataSupport parsedValue = null;
+        CompositeDataSupport parsedValue;
         try {
             parsedValue = new CompositeDataSupport(getOpenType(), items);
         } catch (OpenDataException e) {
