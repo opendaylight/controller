@@ -100,6 +100,9 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
         testedYangModulesToExpectedConflictingName.put(
                 "config-test-runtime-bean-name-conflict2",
                 "StateARuntimeMXBean");
+        testedYangModulesToExpectedConflictingName.put(
+                "config-test-duplicate-attribute-in-runtime-and-mxbean",
+                "port");
     }
 
     private String getYangModuleName(String name) {
