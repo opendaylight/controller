@@ -260,13 +260,13 @@ public class FRMUtil {
                 }
             } else if (action instanceof SetDlDstAction) {
                 MacAddress address = ((SetDlDstAction) action).getAddress();
-                if (address != null && !isL2AddressValid(address.toString())) {
+                if (address != null && !isL2AddressValid(address.getValue())) {
                     logger.error("SetDlDstAction: Address not valid");
                     return false;
                 }
             } else if (action instanceof SetDlSrcAction) {
                 MacAddress address = ((SetDlSrcAction) action).getAddress();
-                if (address != null && !isL2AddressValid(address.toString())) {
+                if (address != null && !isL2AddressValid(address.getValue())) {
                     logger.error("SetDlSrcAction: Address not valid");
                     return false;
                 }
