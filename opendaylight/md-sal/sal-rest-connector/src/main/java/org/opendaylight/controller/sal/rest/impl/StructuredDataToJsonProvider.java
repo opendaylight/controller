@@ -17,6 +17,7 @@ import javax.ws.rs.ext.Provider;
 import org.opendaylight.controller.sal.rest.api.Draft01;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -45,7 +46,7 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
             throws IOException, WebApplicationException {
         CompositeNode data = t.getData();
         if (data == null) {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+            throw new ResponseException(Response.Status.NOT_FOUND, "No data exists.");
         }
 
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, "UTF-8"));
