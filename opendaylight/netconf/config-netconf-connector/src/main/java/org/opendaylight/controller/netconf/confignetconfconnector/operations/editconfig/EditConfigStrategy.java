@@ -10,12 +10,13 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 
 import java.util.Map;
 
 public interface EditConfigStrategy {
 
     void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
-            ConfigTransactionClient ta);
+                              ConfigTransactionClient ta, Services services);
 
 }

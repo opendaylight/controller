@@ -16,24 +16,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.ValidateTest;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 
 import javax.management.ObjectName;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
@@ -82,18 +81,11 @@ public class EditConfigTest {
         EditConfig edit = new EditConfig(yangStoreSnapshot, provider, configRegistry,
                 ValidateTest.NETCONF_SESSION_ID_FOR_REPORTING);
         EditConfigStrategy editStrat = mock(EditConfigStrategy.class);
+
         doNothing().when(editStrat).executeConfiguration(anyString(), anyString(), anyMap(),
-                any(ConfigTransactionClient.class));
-        Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements = getMapping(editStrat);
+                any(ConfigTransactionClient.class), any(Services.class));
 
-        Config cfg = mock(Config.class);
-        XmlElement xmlElement = mock(XmlElement.class);
-        Set<ObjectName> instancesForFillingServiceRefMapping = Collections.emptySet();
-        EditStrategyType defaultStrategy = EditStrategyType.getDefaultStrategy();
-        doReturn(resolvedXmlElements).when(cfg).fromXml(xmlElement, instancesForFillingServiceRefMapping, defaultStrategy);
-
-        EditConfigExecution editConfigExecution = new EditConfigExecution(null, cfg, xmlElement,
-                EditConfigXmlParser.TestOption.testThenSet, instancesForFillingServiceRefMapping, defaultStrategy);
+        EditConfigExecution editConfigExecution = mockExecution(editStrat);
 
         edit.getResponseInternal(XmlUtil.newDocument(), editConfigExecution);
 
@@ -105,7 +97,31 @@ public class EditConfigTest {
 
         // For every instance execute strat
         verify(editStrat, times(2/* Test */+ 2/* Set */)).executeConfiguration(anyString(), anyString(), anyMap(),
-                any(ConfigTransactionClient.class));
+                any(ConfigTransactionClient.class), any(Services.class));
+    }
+
+    private EditConfigExecution mockExecution(EditConfigStrategy editStrat) {
+        EditConfigExecution mock = mock(EditConfigExecution.class);
+        doReturn(getMapping(editStrat)).when(mock).getResolvedXmlElements();
+        doReturn(EditStrategyType.merge).when(mock).getDefaultStrategy();
+        doReturn(true).when(mock).shouldSet();
+        doReturn(true).when(mock).shouldTest();
+        doReturn(mockServices()).when(mock).getServices();
+        return mock;
+    }
+
+    private static ServiceReferenceReadableRegistry mockServiceRegistry() {
+        ServiceReferenceReadableRegistry mock = mock(ServiceReferenceReadableRegistry.class);
+        doReturn(
+                Collections.emptyMap())
+                .when(mock).getServiceMapping();
+        doReturn("mockedServiceReg").when(mock).toString();
+
+        return mock;
+    }
+
+    static Services mockServices() {
+        return new Services(mockServiceRegistry());
     }
 
     private Map<String, Multimap<String, ModuleElementResolved>> getMapping(EditConfigStrategy editStrat) {

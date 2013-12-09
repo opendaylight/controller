@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -128,7 +129,7 @@ public final class InstanceConfig {
     }
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, Services services, String moduleNamespace,
-                                                 EditStrategyType defaultStrategy) {
+            EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig);
@@ -153,7 +154,7 @@ public final class InstanceConfig {
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
-                retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
+                retVal, defaultStrategy, providedServices) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy, providedServices);
 
         resolveConfiguration(instanceConfigElementResolved, services);
         return instanceConfigElementResolved;

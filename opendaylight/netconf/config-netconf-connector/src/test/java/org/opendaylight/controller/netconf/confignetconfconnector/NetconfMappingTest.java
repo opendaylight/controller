@@ -12,12 +12,15 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
@@ -55,15 +58,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,7 +88,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class NetconfMappingTest extends AbstractConfigTest {
     private static final Logger logger = LoggerFactory.getLogger(NetconfMappingTest.class);
 
-    private static final String INSTANCE_NAME = "test1";
+    private static final String INSTANCE_NAME = "instance-from-code";
     private static final String NETCONF_SESSION_ID = "foo";
     private NetconfTestImplModuleFactory factory;
     private DepTestImplModuleFactory factory2;
@@ -105,15 +111,89 @@ public class NetconfMappingTest extends AbstractConfigTest {
         transactionProvider = new TransactionProvider(this.configRegistryClient, NETCONF_SESSION_ID);
     }
 
-    private ObjectName createModule(final String instanceName) throws InstanceAlreadyExistsException {
+    private ObjectName createModule(final String instanceName) throws InstanceAlreadyExistsException, InstanceNotFoundException, URISyntaxException {
         final ConfigTransactionJMXClient transaction = this.configRegistryClient.createTransaction();
 
         final ObjectName on = transaction.createModule(this.factory.getImplementationName(), instanceName);
         final NetconfTestImplModuleMXBean mxBean = transaction.newMXBeanProxy(on, NetconfTestImplModuleMXBean.class);
-        setModule(mxBean, transaction);
+        setModule(mxBean, transaction, instanceName + "_dep");
 
+        int i = 1;
+        for (Class<? extends AbstractServiceInterface> sInterface : factory.getImplementedServiceIntefaces()) {
+            ServiceInterfaceAnnotation annotation = sInterface.getAnnotation(ServiceInterfaceAnnotation.class);
+            transaction.saveServiceReference(
+                    transaction.getServiceInterfaceName(annotation.namespace(), annotation.localName()), "ref_from_code_to_" + instanceName + "_" + i++,
+                    on);
+
+        }
         transaction.commit();
         return on;
+    }
+
+    @Test
+    public void testServicePersistance() throws Exception {
+        createModule(INSTANCE_NAME);
+
+        edit("netconfMessages/editConfig.xml");
+        Element config = getConfigCandidate();
+        assertCorrectServiceNames(config, 6, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+                "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
+                "ref_from_code_to_instance-from-code_1");
+
+        edit("netconfMessages/editConfig_addServiceName.xml");
+         config = getConfigCandidate();
+        assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+                "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
+                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
+
+        commit();
+        config = getConfigRunning();
+        assertCorrectRefNamesForDependencies(config);
+        assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+                "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
+                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
+
+        edit("netconfMessages/editConfig_replace_default.xml");
+        config = getConfigCandidate();
+        assertCorrectServiceNames(config, 2, "ref_dep", "ref_dep2");
+
+        edit("netconfMessages/editConfig_remove.xml");
+        config = getConfigCandidate();
+        assertCorrectServiceNames(config, 0);
+
+        commit();
+        config = getConfigCandidate();
+        assertCorrectServiceNames(config, 0);
+
+    }
+
+    private void assertCorrectRefNamesForDependencies(Element config) {
+        NodeList modulesList = config.getElementsByTagName("modules");
+        assertEquals(1, modulesList.getLength());
+
+        Element modules = (Element) modulesList.item(0);
+
+        String trimmedModules = XmlUtil.toString(modules).replaceAll("\\s", "");
+        int defaultRefNameCount = StringUtils.countMatches(trimmedModules, "ref_dep2");
+        int userRefNameCount = StringUtils.countMatches(trimmedModules, "ref_dep_user_two");
+
+        assertEquals(0, defaultRefNameCount);
+        assertEquals(2, userRefNameCount);
+    }
+
+    private void assertCorrectServiceNames(Element configCandidate, int servicesSize, String... refNames) {
+        NodeList elements = configCandidate.getElementsByTagName("provider");
+        assertEquals(servicesSize, elements.getLength());
+
+        NodeList servicesList = configCandidate.getElementsByTagName("services");
+        assertEquals(1, servicesList.getLength());
+
+        Element services = (Element) servicesList.item(0);
+        String trimmedServices = XmlUtil.toString(services).replaceAll("\\s", "");
+
+        for (String s : refNames) {
+            assertThat(trimmedServices, JUnitMatchers.containsString(s));
+        }
     }
 
     @Test
@@ -122,7 +202,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         createModule(INSTANCE_NAME);
 
         edit("netconfMessages/editConfig.xml");
-        checkBinaryLeafEdited(getConfigCandidate());
+        Element configCandidate = getConfigCandidate();
+        checkBinaryLeafEdited(configCandidate);
 
 
         // default-operation:none, should not affect binary leaf
@@ -205,6 +286,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         return executeOp(getConfigOp, "netconfMessages/getConfig.xml");
     }
 
+    @Ignore("second edit message corrupted")
     @Test(expected = NetconfDocumentedException.class)
     public void testConfigNetconfReplaceDefaultEx() throws Exception {
 
@@ -394,7 +476,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
             String name = moduleElement.getOnlyChildElement("name").getTextContent();
-            if(name.equals("test1")) {
+            if(name.equals(INSTANCE_NAME)) {
                 XmlElement enumAttr = moduleElement.getOnlyChildElement(enumName);
                 assertEquals(enumContent, enumAttr.getTextContent());
 
@@ -424,7 +506,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
             }
         }
 
-        assertEquals("configAttributeType", configAttributeType.getTextContent());
+        // TODO verify if should be default value
+        assertEquals("default-string", configAttributeType.getTextContent());
     }
 
     private Map<String, Map<String, ModuleMXBeanEntry>> getMbes() throws Exception {
@@ -480,7 +563,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private Element get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
-        Get getOp = new Get(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
+        Get getOp = new Get(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID, transactionProvider);
         return executeOp(getOp, "netconfMessages/get.xml");
     }
 
@@ -516,8 +599,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         return Lists.newArrayList(yangDependencies);
     }
 
-    private void setModule(final NetconfTestImplModuleMXBean mxBean, final ConfigTransactionJMXClient transaction)
-            throws InstanceAlreadyExistsException {
+    private void setModule(final NetconfTestImplModuleMXBean mxBean, final ConfigTransactionJMXClient transaction, String depName)
+            throws InstanceAlreadyExistsException, InstanceNotFoundException {
         mxBean.setSimpleInt((long) 44);
         mxBean.setBinaryLeaf(new byte[] { 8, 7, 9 });
         final DtoD dtob = getDtoD();
@@ -547,7 +630,15 @@ public class NetconfMappingTest extends AbstractConfigTest {
         mxBean.setComplexList(Lists.<ComplexList> newArrayList());
         mxBean.setSimpleList(Lists.<Integer> newArrayList());
 
-        final ObjectName testingDepOn = transaction.createModule(this.factory2.getImplementationName(), "dep");
+        final ObjectName testingDepOn = transaction.createModule(this.factory2.getImplementationName(), depName);
+        int i = 1;
+        for (Class<? extends AbstractServiceInterface> sInterface : factory2.getImplementedServiceIntefaces()) {
+            ServiceInterfaceAnnotation annotation = sInterface.getAnnotation(ServiceInterfaceAnnotation.class);
+            transaction.saveServiceReference(
+                    transaction.getServiceInterfaceName(annotation.namespace(), annotation.localName()), "ref_from_code_to_" + depName + "_" + i++,
+                    testingDepOn);
+
+        }
         mxBean.setTestingDep(testingDepOn);
     }
 

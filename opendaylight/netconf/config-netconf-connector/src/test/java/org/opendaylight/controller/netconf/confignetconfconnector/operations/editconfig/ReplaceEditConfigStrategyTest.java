@@ -48,7 +48,7 @@ public class ReplaceEditConfigStrategyTest {
 
         doReturn(Sets.newHashSet(mockON(), mockON())).when(ta).lookupConfigBeans();
 
-        strat.executeConfiguration("m1", "i1", map, ta);
+        strat.executeConfiguration("m1", "i1", map, ta, EditConfigTest.mockServices());
 
         verify(ta).lookupConfigBean(anyString(), anyString());
         verify(ta).setAttribute(any(ObjectName.class), anyString(), any(Attribute.class));

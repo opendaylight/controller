@@ -137,13 +137,14 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     /**
-     * Wiping means removing all module instances keeping the transaction open.
+     * Wiping means removing all module instances keeping the transaction open + service references.
      */
     synchronized void wipeInternal(ObjectName taON, boolean isTest, String moduleName) {
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON);
 
         Set<ObjectName> lookupConfigBeans = moduleName == null ? transactionClient.lookupConfigBeans()
                 : transactionClient.lookupConfigBeans(moduleName);
+        int i = lookupConfigBeans.size();
         for (ObjectName instance : lookupConfigBeans) {
             try {
                 transactionClient.destroyModule(instance);
@@ -156,7 +157,10 @@ public class TransactionProvider implements AutoCloseable {
                 throw new IllegalStateException("Unable to clean configuration in transactiom " + taON, e);
             }
         }
-        logger.debug("Transaction {} wiped clean", taON);
+        logger.debug("Transaction {} wiped clean of {} config beans", taON, i);
+
+        transactionClient.removeAllServiceReferences();
+        logger.debug("Transaction {} wiped clean of all service references", taON);
     }
 
     public void wipeTransaction() {
