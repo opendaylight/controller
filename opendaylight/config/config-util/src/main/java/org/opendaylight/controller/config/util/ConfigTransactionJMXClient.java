@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.util;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.Attribute;
@@ -26,19 +27,19 @@ import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXB
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 public class ConfigTransactionJMXClient implements ConfigTransactionClient {
-    private final ConfigRegistryMXBean configTransactionManagerProxy;
+    private final ConfigRegistryMXBean configRegistryMXBeanProxy;
     private final ObjectName configTransactionControllerON;
-    private final ConfigTransactionControllerMXBean configControllerProxy;
+    private final ConfigTransactionControllerMXBean configTransactionControllerMXBeanProxy;
     private final MBeanServer configMBeanServer;
 
     public ConfigTransactionJMXClient(
-            ConfigRegistryMXBean configTransactionManagerProxy,
+            ConfigRegistryMXBean configRegistryMXBeanProxy,
             ObjectName configTransactionControllerON,
             MBeanServer configMBeanServer) {
         this.configMBeanServer = configMBeanServer;
-        this.configTransactionManagerProxy = configTransactionManagerProxy;
+        this.configRegistryMXBeanProxy = configRegistryMXBeanProxy;
         this.configTransactionControllerON = configTransactionControllerON;
-        this.configControllerProxy = JMX.newMXBeanProxy(configMBeanServer,
+        this.configTransactionControllerMXBeanProxy = JMX.newMXBeanProxy(configMBeanServer,
                 configTransactionControllerON,
                 ConfigTransactionControllerMXBean.class);
     }
@@ -54,7 +55,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     @Override
     public CommitStatus commit() throws ConflictingVersionException,
             ValidationException {
-        return configTransactionManagerProxy
+        return configRegistryMXBeanProxy
                 .commitConfig(configTransactionControllerON);
     }
 
@@ -73,13 +74,13 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     @Override
     public ObjectName createModule(String moduleName, String instanceName)
             throws InstanceAlreadyExistsException {
-        return configControllerProxy.createModule(moduleName, instanceName);
+        return configTransactionControllerMXBeanProxy.createModule(moduleName, instanceName);
     }
 
     @Override
     public void destroyModule(ObjectName objectName)
             throws InstanceNotFoundException {
-        configControllerProxy.destroyModule(objectName);
+        configTransactionControllerMXBeanProxy.destroyModule(objectName);
     }
 
     @Override
@@ -91,12 +92,12 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     @Override
     public void abortConfig() {
-        configControllerProxy.abortConfig();
+        configTransactionControllerMXBeanProxy.abortConfig();
     }
 
     @Override
     public void validateConfig() throws ValidationException {
-        configControllerProxy.validateConfig();
+        configTransactionControllerMXBeanProxy.validateConfig();
     }
 
     @Override
@@ -121,12 +122,12 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     @Override
     public String getTransactionName() {
-        return configControllerProxy.getTransactionName();
+        return configTransactionControllerMXBeanProxy.getTransactionName();
     }
 
     @Override
     public Set<String> getAvailableModuleNames() {
-        return configControllerProxy.getAvailableModuleNames();
+        return configTransactionControllerMXBeanProxy.getAvailableModuleNames();
     }
 
     @Override
@@ -136,25 +137,75 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     @Override
     public Set<ObjectName> lookupConfigBeans() {
-        return configControllerProxy.lookupConfigBeans();
+        return configTransactionControllerMXBeanProxy.lookupConfigBeans();
     }
 
     @Override
     public Set<ObjectName> lookupConfigBeans(String moduleName) {
-        return configControllerProxy.lookupConfigBeans(moduleName);
+        return configTransactionControllerMXBeanProxy.lookupConfigBeans(moduleName);
     }
 
     @Override
     public ObjectName lookupConfigBean(String moduleName, String instanceName)
             throws InstanceNotFoundException {
-        return configControllerProxy.lookupConfigBean(moduleName, instanceName);
+        return configTransactionControllerMXBeanProxy.lookupConfigBean(moduleName, instanceName);
     }
 
     @Override
     public Set<ObjectName> lookupConfigBeans(String moduleName,
             String instanceName) {
-        return configControllerProxy
+        return configTransactionControllerMXBeanProxy
                 .lookupConfigBeans(moduleName, instanceName);
+    }
+
+    @Override
+    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+        configTransactionControllerMXBeanProxy.checkConfigBeanExists(objectName);
+    }
+
+    @Override
+    public void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName) throws InstanceNotFoundException {
+        configTransactionControllerMXBeanProxy.saveServiceReference(serviceInterfaceName,refName,objectName);
+    }
+
+    @Override
+    public boolean removeServiceReference(String serviceInterfaceName, String refName) {
+        return configTransactionControllerMXBeanProxy.removeServiceReference(serviceInterfaceName, refName);
+    }
+
+    @Override
+    public void removeAllServiceReferences() {
+        configTransactionControllerMXBeanProxy.removeAllServiceReferences();
+    }
+
+    @Override
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+        return configTransactionControllerMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    }
+
+    @Override
+    public Map<String, Map<String, ObjectName>> getServiceMapping() {
+        return configTransactionControllerMXBeanProxy.getServiceMapping();
+    }
+
+    @Override
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+        return configTransactionControllerMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    }
+
+    @Override
+    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+        return configTransactionControllerMXBeanProxy.lookupServiceInterfaceNames(objectName);
+    }
+
+    @Override
+    public String getServiceInterfaceName(String namespace, String localName) {
+        return configTransactionControllerMXBeanProxy.getServiceInterfaceName(namespace, localName);
+    }
+
+    @Override
+    public boolean removeServiceReferences(ObjectName objectName) throws InstanceNotFoundException {
+        return configTransactionControllerMXBeanProxy.removeServiceReferences(objectName);
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.opendaylight.controller.config.api.ValidationException.ExceptionMessa
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.util.AttributeEntry;
 
+
 abstract class ListableJolokiaClient {
     protected final J4pClient j4pClient;
     protected final String url;
