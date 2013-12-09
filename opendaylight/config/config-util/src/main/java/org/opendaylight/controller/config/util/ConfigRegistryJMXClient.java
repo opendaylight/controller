@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.AttributeNotFoundException;
@@ -28,7 +29,7 @@ import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 public class ConfigRegistryJMXClient implements ConfigRegistryClient {
-    private final ConfigRegistryMXBean configRegistryProxy;
+    private final ConfigRegistryMXBean configRegistryMXBeanProxy;
     private final ObjectName configRegistryON;
     private final MBeanServer configMBeanServer;
 
@@ -40,7 +41,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
         if (!(searchResult.size() == 1)) {
             throw new IllegalStateException("Config registry not found");
         }
-        configRegistryProxy = JMX.newMXBeanProxy(configMBeanServer, configRegistryON, ConfigRegistryMXBean.class,
+        configRegistryMXBeanProxy = JMX.newMXBeanProxy(configMBeanServer, configRegistryON, ConfigRegistryMXBean.class,
                 false);
     }
 
@@ -61,7 +62,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     @Override
     public ConfigTransactionJMXClient getConfigTransactionClient(
             ObjectName objectName) {
-        return new ConfigTransactionJMXClient(configRegistryProxy, objectName,
+        return new ConfigTransactionJMXClient(configRegistryMXBeanProxy, objectName,
                 configMBeanServer);
     }
 
@@ -75,18 +76,18 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
 
     @Override
     public ObjectName beginConfig() {
-        return configRegistryProxy.beginConfig();
+        return configRegistryMXBeanProxy.beginConfig();
     }
 
     @Override
     public CommitStatus commitConfig(ObjectName transactionControllerON)
             throws ConflictingVersionException, ValidationException {
-        return configRegistryProxy.commitConfig(transactionControllerON);
+        return configRegistryMXBeanProxy.commitConfig(transactionControllerON);
     }
 
     @Override
     public List<ObjectName> getOpenConfigs() {
-        return configRegistryProxy.getOpenConfigs();
+        return configRegistryMXBeanProxy.getOpenConfigs();
     }
 
     @Override
@@ -101,45 +102,75 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
 
     @Override
     public Set<String> getAvailableModuleNames() {
-        return configRegistryProxy.getAvailableModuleNames();
+        return configRegistryMXBeanProxy.getAvailableModuleNames();
     }
 
     @Override
     public boolean isHealthy() {
-        return configRegistryProxy.isHealthy();
+        return configRegistryMXBeanProxy.isHealthy();
     }
 
     @Override
     public Set<ObjectName> lookupConfigBeans() {
-        return configRegistryProxy.lookupConfigBeans();
+        return configRegistryMXBeanProxy.lookupConfigBeans();
     }
 
     @Override
     public Set<ObjectName> lookupConfigBeans(String moduleName) {
-        return configRegistryProxy.lookupConfigBeans(moduleName);
+        return configRegistryMXBeanProxy.lookupConfigBeans(moduleName);
     }
 
     @Override
     public Set<ObjectName> lookupConfigBeans(String moduleName,
             String instanceName) {
-        return configRegistryProxy.lookupConfigBeans(moduleName, instanceName);
+        return configRegistryMXBeanProxy.lookupConfigBeans(moduleName, instanceName);
     }
 
     @Override
     public ObjectName lookupConfigBean(String moduleName, String instanceName)
             throws InstanceNotFoundException {
-        return configRegistryProxy.lookupConfigBean(moduleName, instanceName);
+        return configRegistryMXBeanProxy.lookupConfigBean(moduleName, instanceName);
     }
 
     @Override
     public Set<ObjectName> lookupRuntimeBeans() {
-        return configRegistryProxy.lookupRuntimeBeans();
+        return configRegistryMXBeanProxy.lookupRuntimeBeans();
     }
 
     @Override
     public Set<ObjectName> lookupRuntimeBeans(String ifcName,
             String instanceName) {
-        return configRegistryProxy.lookupRuntimeBeans(ifcName, instanceName);
+        return configRegistryMXBeanProxy.lookupRuntimeBeans(ifcName, instanceName);
+    }
+
+    @Override
+    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+        configRegistryMXBeanProxy.checkConfigBeanExists(objectName);
+    }
+
+    @Override
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+        return configRegistryMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    }
+
+    @Override
+    public Map<String, Map<String, ObjectName>> getServiceMapping() {
+        return configRegistryMXBeanProxy.getServiceMapping();
+    }
+
+    @Override
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+        return configRegistryMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    }
+
+    @Override
+    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+        return configRegistryMXBeanProxy.lookupServiceInterfaceNames(objectName);
+    }
+
+    @Override
+    public String getServiceInterfaceName(String namespace, String localName) {
+        return configRegistryMXBeanProxy.getServiceInterfaceName(namespace, localName);
     }
 
     @Override

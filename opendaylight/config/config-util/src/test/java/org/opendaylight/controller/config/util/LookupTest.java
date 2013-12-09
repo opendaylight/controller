@@ -12,6 +12,7 @@ import static org.junit.Assert.fail;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -69,9 +70,9 @@ public class LookupTest {
                 ManagementFactory.getPlatformMBeanServer());
         jolokiaTransactionClient = new ConfigTransactionJolokiaClient(
                 jolokiaURL, testingTransactionControllerON, null);
-        lookupProvidersToClients = ImmutableMap
-                .of(testingRegistry, Sets.newHashSet(jmxRegistryClient, jolokiaRegistryClient),
-                        testingTransactionController, Sets.newHashSet(jmxTransactionClient, jolokiaTransactionClient));
+        HashSet<ConfigRegistryClient> registryClients = Sets.newHashSet(jmxRegistryClient, jolokiaRegistryClient);
+        HashSet<ConfigTransactionClient> configTransactionClients = Sets.newHashSet(jmxTransactionClient, jolokiaTransactionClient);
+        lookupProvidersToClients = ImmutableMap.of((LookupRegistry) testingRegistry, registryClients,                testingTransactionController, configTransactionClients);
     }
 
     @After

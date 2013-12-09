@@ -18,6 +18,7 @@ import org.osgi.framework.BundleContext;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.ObjectName;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,5 +69,10 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
     @Override
     public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext context) {
         return new HashSet<Module>();
+    }
+
+    @Override
+    public Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces() {
+        return Collections.emptySet();
     }
 }

@@ -9,11 +9,15 @@ package org.opendaylight.controller.config.manager.impl.util;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.management.MXBean;
 
 import org.junit.Test;
+import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingScheduledThreadPoolServiceInterface;
+import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
@@ -58,6 +62,19 @@ public class InterfacesHelperTest {
     public void testGetMXInterfaces() {
         Set<Class<?>> expected = Sets.<Class<?>> newHashSet(SuperBMXBean.class, SubA.class);
         assertEquals(expected, InterfacesHelper.getMXInterfaces(SubClass.class));
+    }
+
+    @Test
+    public void testGetAllAbstractServiceInterfaceClasses(){
+        Class<? extends AbstractServiceInterface> clazz = TestingScheduledThreadPoolServiceInterface.class;
+        Set<Class<? extends AbstractServiceInterface>> input = new HashSet<>();
+        input.add(clazz);
+        Set<Class<? extends AbstractServiceInterface>> result = InterfacesHelper.getAllAbstractServiceInterfaceClasses(input);
+
+        Set<Class<?>> expected = Sets.newHashSet((Class<?>) TestingScheduledThreadPoolServiceInterface.class,
+                TestingThreadPoolServiceInterface.class
+                );
+        assertEquals(expected, result);
     }
 
 }
