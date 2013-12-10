@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_fecbfb1b",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-10T23:44:46Z",
+      "side": 1,
+      "message": "Please do not put SDN protocol specific code in services above SAL.\nBesides, this is not needed.\n\nThe existing\n\nNodeConnector nodeConnector \u003d NodeConnectorCreator.createNodeConnector(node.getType(), nc.getID(), node);\n\nshould be good for any type of node.",
+      "revId": "a8cdf430a3314834060c688bccaeebefcf3155aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
