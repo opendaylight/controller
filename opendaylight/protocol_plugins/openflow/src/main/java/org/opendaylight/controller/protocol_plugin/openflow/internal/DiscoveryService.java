@@ -125,7 +125,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private Boolean throttling = false; // if true, no more batching.
     private volatile Boolean shuttingDown = false;
 
-    private LLDPTLV chassisIdTlv, portIdTlv, ttlTlv, customTlv;
+    private LLDPTLV chassisIdTlv, systemNameTlv, portIdTlv, ttlTlv, customTlv;
     private IPluginOutConnectionService connectionOutService;
 
     class DiscoveryTransmit implements Runnable {
@@ -217,6 +217,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         chassisIdTlv.setType(LLDPTLV.TLVType.ChassisID.getValue()).setLength((short) cidValue.length)
                 .setValue(cidValue);
 
+        // Create LLDP SystemName TLV
+        byte[] snValue = LLDPTLV.createSystemNameTLVValue(nodeId);
+        systemNameTlv.setType(LLDPTLV.TLVType.SystemName.getValue()).setLength((short) snValue.length)
+                .setValue(snValue);
+
         // Create LLDP PortID TLV
         String portId = nodeConnector.getNodeConnectorIDString();
         byte[] pidValue = LLDPTLV.createPortIDTLVValue(portId);
@@ -233,7 +238,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         // Create discovery pkt
         LLDP discoveryPkt = new LLDP();
-        discoveryPkt.setChassisId(chassisIdTlv).setPortId(portIdTlv).setTtl(ttlTlv).setOptionalTLVList(customList);
+        discoveryPkt.setChassisId(chassisIdTlv).setPortId(portIdTlv).setTtl(ttlTlv).setSystemNameId(systemNameTlv)
+                .setOptionalTLVList(customList);
 
         RawPacket rawPkt = null;
         try {
@@ -1461,6 +1467,10 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         // Create LLDP ChassisID TLV
         chassisIdTlv = new LLDPTLV();
         chassisIdTlv.setType(LLDPTLV.TLVType.ChassisID.getValue());
+
+        // Create LLDP SystemName TLV
+        systemNameTlv = new LLDPTLV();
+        systemNameTlv.setType(LLDPTLV.TLVType.SystemName.getValue());
 
         // Create LLDP PortID TLV
         portIdTlv = new LLDPTLV();
