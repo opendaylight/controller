@@ -7,9 +7,25 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowTableStatisticsUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdate;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.NodeConnectorStatisticsUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.update.FlowStatisticsUpdateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupDescStatsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupFeaturesUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupStatisticsUpdated;
@@ -42,12 +58,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsListener,
-        OpendaylightMeterStatisticsListener {
+        OpendaylightMeterStatisticsListener, 
+        OpendaylightFlowStatisticsListener{
     
+    public final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
+
     private final StatisticsProvider statisticsManager;
 
     public StatisticsUpdateCommiter(final StatisticsProvider manager){
@@ -264,9 +286,185 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         it.commit();
     }
 
+    @Override
+    public void onFlowsStatisticsUpdate(FlowsStatisticsUpdate notification) {
+        NodeKey key = new NodeKey(notification.getId());
+        sucLogger.info("Received flow stats update : {}",notification.toString());
+        final NodeBuilder nodeData = new NodeBuilder(); 
+        nodeData.setKey(key);
+        
+        for(FlowAndStatisticsMapList map: notification.getFlowAndStatisticsMapList()){
+            short tableId = map.getTableId();
+            
+            FlowBuilder flow = new FlowBuilder();
+            flow.setContainerName(map.getContainerName());
+            flow.setBufferId(map.getBufferId());
+            flow.setCookie(map.getCookie());
+            flow.setCookieMask(map.getCookieMask());
+            flow.setFlags(map.getFlags());
+            flow.setFlowName(map.getFlowName());
+            flow.setHardTimeout(map.getHardTimeout());
+            if(map.getFlowId() != null)
+                flow.setId(new FlowId(map.getFlowId().getValue()));
+            flow.setIdleTimeout(map.getIdleTimeout());
+            flow.setInstallHw(map.isInstallHw());
+            flow.setInstructions(map.getInstructions());
+            if(map.getFlowId()!= null)
+                flow.setKey(new FlowKey(new FlowId(map.getKey().getFlowId().getValue())));
+            flow.setMatch(map.getMatch());
+            flow.setOutGroup(map.getOutGroup());
+            flow.setOutPort(map.getOutPort());
+            flow.setPriority(map.getPriority());
+            flow.setStrict(map.isStrict());
+            flow.setTableId(tableId);
+            
+            Flow flowRule = flow.build();
+            
+            FlowAndStatisticsMapListBuilder stats = new FlowAndStatisticsMapListBuilder();
+            stats.setByteCount(map.getByteCount());
+            stats.setPacketCount(map.getPacketCount());
+            stats.setDuration(map.getDuration());
+            
+            GenericStatistics flowStats = stats.build();
+            
+            //Add statistics to local cache
+            ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+            if(!cache.containsKey(notification.getId())){
+                cache.put(notification.getId(), new NodeStatistics());
+            }
+            if(!cache.get(notification.getId()).getFlowAndStatsMap().containsKey(tableId)){
+                cache.get(notification.getId()).getFlowAndStatsMap().put(tableId, new HashMap<Flow,GenericStatistics>());
+            }
+            cache.get(notification.getId()).getFlowAndStatsMap().get(tableId).put(flowRule,flowStats);
+            
+            //Augment the data to the flow node
+            DataModificationTransaction it = this.statisticsManager.startChange();
+
+            FlowStatisticsUpdateBuilder statsToAugment = new FlowStatisticsUpdateBuilder();
+            statsToAugment.setByteCount(flowStats.getByteCount());
+            statsToAugment.setPacketCount(flowStats.getPacketCount());
+            statsToAugment.setDuration(flowStats.getDuration());
+            
+            sucLogger.info("Flow : {}",flowRule.toString());
+            sucLogger.info("Statistics to augment : {}",statsToAugment.build().toString());
+            
+            InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
+                    .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
+            
+            Table table= (Table)it.readConfigurationData(tableRef);
+            //TODO: This is dumb way to do it, need to figure out better way.
+            //TODO: major issue in any alternate approach is that flow key is incrementally assigned 
+            //to the flows stored in data store.
+            for(Flow existingFlow : table.getFlow()){
+                sucLogger.info("Existing flow in data store : {}",existingFlow.toString());
+                if(flowEquals(flowRule,existingFlow)){
+                    InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
+                            .augmentation(FlowCapableNode.class)
+                            .child(Table.class, new TableKey(tableId))
+                            .child(Flow.class,existingFlow.getKey()).toInstance();
+                    sucLogger.info("Found matching flow in the datastore, augmenting statistics");
+                    it.putOperationalData(flowRef, statsToAugment.build());
+                    it.commit();
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onFlowStatisticsUpdated(FlowStatisticsUpdated notification) {
+        // TODO Auto-generated method stub
+        //TODO: Depricated, will clean it up once sal-compatibility is fixed.
+        //Sal-Compatibility code usage this notification event.
+        
+    }
+
+    @Override
+    public void onFlowTableStatisticsUpdated(FlowTableStatisticsUpdated notification) {
+        // TODO Auto-generated method stub
+        //TODO: Need to implement it yet
+        
+    }
+
+    @Override
+    public void onNodeConnectorStatisticsUpdated(NodeConnectorStatisticsUpdated notification) {
+        // TODO Auto-generated method stub
+        //TODO: Need to implement it yet
+        
+    }
+
     private NodeRef getNodeRef(NodeKey nodeKey){
         InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeKey);
         return new NodeRef(builder.toInstance());
     }
-
+    
+    public boolean flowEquals(Flow statsFlow, Flow storedFlow) {
+        if (statsFlow.getClass() != storedFlow.getClass()) {
+            return false;
+        }
+        if (statsFlow.getBufferId()== null) {
+            if (storedFlow.getBufferId() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getBufferId().equals(storedFlow.getBufferId())) {
+            return false;
+        }
+        if (statsFlow.getContainerName()== null) {
+            if (storedFlow.getContainerName()!= null) {
+                return false;
+            }
+        } else if(!statsFlow.getContainerName().equals(storedFlow.getContainerName())) {
+            return false;
+        }
+        if (statsFlow.getCookie()== null) {
+            if (storedFlow.getCookie()!= null) {
+                return false;
+            }
+        } else if(!statsFlow.getCookie().equals(storedFlow.getCookie())) {
+            return false;
+        }
+        if (statsFlow.getMatch()== null) {
+            if (storedFlow.getMatch() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getMatch().equals(storedFlow.getMatch())) {
+            return false;
+        }
+        if (statsFlow.getCookie()== null) {
+            if (storedFlow.getCookie()!= null) {
+                return false;
+            }
+        } else if(!statsFlow.getCookie().equals(storedFlow.getCookie())) {
+            return false;
+        }
+        if (statsFlow.getHardTimeout() == null) {
+            if (storedFlow.getHardTimeout() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getHardTimeout().equals(storedFlow.getHardTimeout() )) {
+            return false;
+        }
+        if (statsFlow.getIdleTimeout()== null) {
+            if (storedFlow.getIdleTimeout() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getIdleTimeout().equals(storedFlow.getIdleTimeout())) {
+            return false;
+        }
+        if (statsFlow.getPriority() == null) {
+            if (storedFlow.getPriority() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getPriority().equals(storedFlow.getPriority())) {
+            return false;
+        }
+        if (statsFlow.getTableId() == null) {
+            if (storedFlow.getTableId() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getTableId().equals(storedFlow.getTableId())) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -17,6 +17,9 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllSwitchTablesInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllSwitchTablesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
@@ -49,6 +52,8 @@ public class StatisticsProvider implements AutoCloseable {
     private OpendaylightGroupStatisticsService groupStatsService;
     
     private OpendaylightMeterStatisticsService meterStatsService;
+    
+    private OpendaylightFlowStatisticsService flowStatsService;
     
     private Thread statisticsRequesterThread;
     
@@ -92,6 +97,9 @@ public class StatisticsProvider implements AutoCloseable {
         
         meterStatsService = StatisticsManagerActivator.getProviderContext().
                 getRpcService(OpendaylightMeterStatisticsService.class);
+        
+        flowStatsService = StatisticsManagerActivator.getProviderContext().
+                getRpcService(OpendaylightFlowStatisticsService.class);
 
         statisticsRequesterThread = new Thread( new Runnable(){
 
@@ -131,13 +139,21 @@ public class StatisticsProvider implements AutoCloseable {
             return;
 
         for (Node targetNode : targetNodes){
+            
+            InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
+            NodeRef targetNodeRef = new NodeRef(targetInstanceId);
+            
+            try {
+            sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
+            
+            Thread.sleep(1000);
+            }catch(Exception e){
+                spLogger.error("Exception occured while sending flow statistics request : {}",e);
+            }
 
             if(targetNode.getAugmentation(FlowCapableNode.class) != null){
 
                 spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
-                
-                InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
-                NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 
                 try{
                   sendAllGroupStatisticsRequest(targetNodeRef);
@@ -155,11 +171,21 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
     
+    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode){
+        final GetAllFlowsStatisticsFromAllSwitchTablesInputBuilder input =
+                new GetAllFlowsStatisticsFromAllSwitchTablesInputBuilder();
+        
+        input.setNode(targetNode);
+        
+        @SuppressWarnings("unused")
+        Future<RpcResult<GetAllFlowsStatisticsFromAllSwitchTablesOutput>> response = 
+                flowStatsService.getAllFlowsStatisticsFromAllSwitchTables(input.build());
+        
+    }
     private void sendAllGroupStatisticsRequest(NodeRef targetNode){
         
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         
-        input.setNode(targetNode);
         input.setNode(targetNode);
 
         @SuppressWarnings("unused")

@@ -3,28 +3,105 @@ module opendaylight-flow-statistics {
     prefix flowstat;
 
     import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}   
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-flow-types {prefix flow-types;revision-date "2013-10-26";}
-    import sal-flow {prefix flow;}
     import opendaylight-statistics-types {prefix stat-types;revision-date "2013-09-25";}
+    import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
+    import flow-capable-transaction {prefix tr;}
+    import sal-flow {prefix flow;}
+    
 
     revision "2013-08-19" {
-        description "Initial revision of flow service";
+        description "Initial revision of flow statistics service";
     }
-
-    rpc get-node-connector-statistics {
+	
+	//Augment statistics data to the flow-capable-node->table->flow
+	augment "/inv:nodes/inv:node/flow-node:table/flow-node:flow" {
+        ext:augment-identifier "flow-statistics-update";
+        uses flow-statistics-update;
+    }
+	
+	grouping flow-statistics-update {
+        container flow-statistics-update {
+            //config "false";
+	        uses stat-types:generic-statistics;
+        }
+	}    
+	
+	typedef flow-id {
+		description "flow id";
+		type yang:counter32;
+	}
+	
+	grouping flow-and-statistics-map-list {
+		description "List of flow and statistics map";
+		list flow-and-statistics-map-list {
+			key "flow-id";
+			leaf flow-id {
+				type flow-id;
+			}
+			uses flow-and-statistics-map;
+		}
+	}
+	
+	grouping flow-and-statistics-map{
+		description "Mapping between flow and its statistics";
+		uses flow-types:flow;
+		uses stat-types:generic-statistics;
+	}
+	
+    // RPC calls to fetch flow statistics
+    rpc get-all-flows-statistics-from-all-switch-tables {
+    	description "Fetch statistics of all the flow present in all the flow tables of the switch"; 
         input {
             uses inv:node-context-ref;
-            leaf node-connector {
-                type inv:node-connector-ref;
+        }
+        output {
+            uses flow-and-statistics-map-list;
+            uses tr:transaction-aware;
+        }
+    
+    }
+
+    rpc get-all-flow-statistics-from-switch-table {
+    	description "Fetch statistics of all the flow present in the specific flow table of the switch"; 
+        input {
+            uses inv:node-context-ref;
+            leaf table-id {
+            	type flow-types:table-id;
             }
         }
         output {
-            uses stat-types:node-connector-statistics;
+            uses flow-and-statistics-map-list;
+            uses tr:transaction-aware;
         }
     }
 
-    rpc get-flow-statistics {
+    rpc get-flow-statistics-from-switch-table {
+    	description "Fetch statistics of the specific flow present in the specific flow table of the switch"; 
+        input {
+            uses inv:node-context-ref;
+            uses flow-types:flow;
+        }
+        output {
+            uses flow-and-statistics-map-list;
+            uses tr:transaction-aware;
+        }
+    }
+
+    notification flows-statistics-update {
+    	description "Flows statistics sent by switch";
+		leaf moreReplies {
+            type boolean;
+        }
+        uses inv:node;
+		uses flow-and-statistics-map-list;
+		uses tr:transaction-aware;
+    }
+
+	//Keeping these RPC call for backward compatibility for sal-compatibility layer --START
+	rpc get-flow-statistics {
         input {
             uses inv:node-context-ref;
             uses flow-types:flow;
@@ -45,6 +122,24 @@ module opendaylight-flow-statistics {
         }
     }
 
+    notification flow-statistics-updated {
+        uses flow-types:flow-statistics;
+    }
+	//Keeping these RPC call for backward compatibility for sal-compatibility layer --END
+	
+	//RPC call to fetch node connector statistics
+    rpc get-node-connector-statistics {
+        input {
+            uses inv:node-context-ref;
+            leaf node-connector {
+                type inv:node-connector-ref;
+            }
+        }
+        output {
+            uses stat-types:node-connector-statistics;
+        }
+    }
+
     rpc get-all-node-connector-statistics {
         input {
             uses inv:node-context-ref;
@@ -54,10 +149,6 @@ module opendaylight-flow-statistics {
                 uses stat-types:node-connector-statistics;
             }
         }
-    }
-
-    notification flow-statistics-updated {
-        uses flow-types:flow-statistics;
     }
 
     rpc get-flow-table-statistics {
@@ -79,6 +170,4 @@ module opendaylight-flow-statistics {
     notification node-connector-statistics-updated {
         uses stat-types:node-connector-statistics;
     }
-
-
 }

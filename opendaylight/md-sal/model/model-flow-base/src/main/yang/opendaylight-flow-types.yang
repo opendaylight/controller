@@ -12,6 +12,9 @@ module opendaylight-flow-types {
         description "Initial revision of flow service";
     }
     
+    typedef table-id {
+    	type uint8;
+    }
     grouping instruction-list {
         list instruction {
             key "order";

@@ -21,12 +21,18 @@ import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter64;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsUpdatedBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromSwitchTableInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromSwitchTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllSwitchTablesInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllSwitchTablesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllNodeConnectorStatisticsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllNodeConnectorStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllNodeConnectorStatisticsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromSwitchTableInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromSwitchTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsOutputBuilder;
@@ -290,6 +296,27 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
         builder.setMatched(toCounter64(nodeTable.getMatchedCount()));
 
         return builder.build();
+    }
+
+    @Override
+    public Future<RpcResult<GetAllFlowStatisticsFromSwitchTableOutput>> getAllFlowStatisticsFromSwitchTable(
+            GetAllFlowStatisticsFromSwitchTableInput input) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Future<RpcResult<GetAllFlowsStatisticsFromAllSwitchTablesOutput>> getAllFlowsStatisticsFromAllSwitchTables(
+            GetAllFlowsStatisticsFromAllSwitchTablesInput input) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Future<RpcResult<GetFlowStatisticsFromSwitchTableOutput>> getFlowStatisticsFromSwitchTable(
+            GetFlowStatisticsFromSwitchTableInput input) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
