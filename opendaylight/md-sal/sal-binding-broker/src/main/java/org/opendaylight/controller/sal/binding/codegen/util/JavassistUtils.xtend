@@ -12,8 +12,15 @@ import javassist.LoaderClassPath
 import javassist.ClassClassPath
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+import org.slf4j.LoggerFactory
+import java.util.HashMap
+import java.util.WeakHashMap
 
 class JavassistUtils {
+
+    private static val LOG = LoggerFactory.getLogger(JavassistUtils);
+
+    private val loaderClassPaths = new WeakHashMap<ClassLoader,LoaderClassPath>();
 
     ClassPool classPool
     
@@ -95,14 +102,27 @@ class JavassistUtils {
         try {
             return pool.get(cls.name)
         } catch (NotFoundException e) {
-            pool.appendClassPath(new LoaderClassPath(cls.classLoader));
+            appendClassLoaderIfMissing(cls.classLoader)
             try {
                 return pool.get(cls.name)
-
             } catch (NotFoundException ef) {
+                LOG.warn("Appending ClassClassPath for {}",cls);
                 pool.appendClassPath(new ClassClassPath(cls));
+                
                 return pool.get(cls.name)
             }
         }
+    }
+    
+    def void appendClassLoaderIfMissing(ClassLoader loader) {
+        if(loaderClassPaths.containsKey(loader)) {
+            return;
+        }
+        val ctLoader = new LoaderClassPath(loader);
+        classPool.appendClassPath(ctLoader);
+    }
+    
+    def void ensureClassLoader(Class<?> child) {
+        appendClassLoaderIfMissing(child.classLoader);
     }
 }

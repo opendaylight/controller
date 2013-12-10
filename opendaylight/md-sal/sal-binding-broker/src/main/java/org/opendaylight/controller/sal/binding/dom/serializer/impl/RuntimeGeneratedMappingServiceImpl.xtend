@@ -170,7 +170,9 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
              */
             return;
         }
-        
+        if(registry.isCodecAvailable(class1)) {
+            return;
+        }
         val ref = Types.typeForClass(class1);
         getSchemaWithRetry(ref);
     }
@@ -240,31 +242,6 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         if (ctx !== null) {
             listenerRegistration = ctx.registerService(SchemaServiceListener, this, new Hashtable<String, String>());
         }
-    }
-
-    private def getTypeDefinition(Type type) {
-        val typeDef = typeToDefinition.get(type);
-        if (typeDef !== null) {
-            return typeDef;
-        }
-        return type.getTypeDefInFuture.get();
-    }
-
-    private def Future<GeneratedTypeBuilder> getTypeDefInFuture(Type type) {
-        val future = SettableFuture.<GeneratedTypeBuilder>create()
-        promisedTypeDefinitions.put(type, future);
-        return future;
-    }
-
-    private def void updatePromisedTypeDefinitions(GeneratedTypeBuilder builder) {
-        val futures = promisedTypeDefinitions.get(builder);
-        if (futures === null || futures.empty) {
-            return;
-        }
-        for (future : futures) {
-            future.set(builder);
-        }
-        promisedTypeDefinitions.removeAll(builder);
     }
 
     private def getSchemaWithRetry(Type type) {
