@@ -389,8 +389,10 @@ public class LazyGeneratedCodecRegistry implements //
     public void onModuleContextAdded(SchemaContext schemaContext, Module module, ModuleContext context) {
         pathToType.putAll(context.getChildNodes());
         qnamesToIdentityMap.putAll(context.getIdentities());
-        for(Entry<QName, GeneratedTOBuilder> identity : context.getIdentities().entrySet()) {
-            typeToQname.put(new ReferencedTypeImpl(identity.getValue().getPackageName(), identity.getValue().getName()),identity.getKey());
+        for (Entry<QName, GeneratedTOBuilder> identity : context.getIdentities().entrySet()) {
+            typeToQname.put(
+                    new ReferencedTypeImpl(identity.getValue().getPackageName(), identity.getValue().getName()),
+                    identity.getKey());
         }
         captureCases(context.getCases(), schemaContext);
     }
@@ -947,12 +949,12 @@ public class LazyGeneratedCodecRegistry implements //
         @Override
         public Class<?> deserialize(QName input) {
             Type type = qnamesToIdentityMap.get(input);
-            if(type == null) {
+            if (type == null) {
                 return null;
             }
             ReferencedTypeImpl typeref = new ReferencedTypeImpl(type.getPackageName(), type.getName());
             WeakReference<Class> softref = typeToClass.get(typeref);
-            if(softref == null) {
+            if (softref == null) {
                 return null;
             }
             return softref.get();
@@ -963,12 +965,12 @@ public class LazyGeneratedCodecRegistry implements //
             checkArgument(BaseIdentity.class.isAssignableFrom(input));
             bindingClassEncountered(input);
             QName qname = identityQNames.get(input);
-            if(qname != null) {
+            if (qname != null) {
                 return qname;
             }
             ConcreteType typeref = Types.typeForClass(input);
             qname = typeToQname.get(typeref);
-            if(qname != null) {
+            if (qname != null) {
                 identityQNames.put(input, qname);
             }
             return qname;
@@ -979,5 +981,27 @@ public class LazyGeneratedCodecRegistry implements //
             checkArgument(input instanceof Class);
             return serialize((Class) input);
         }
+    }
+
+    public boolean isCodecAvailable(Class<? extends DataContainer> cls) {
+        if (containerCodecs.containsKey(cls)) {
+            return true;
+        }
+        if (identifierCodecs.containsKey(cls)) {
+            return true;
+        }
+        if (choiceCodecs.containsKey(cls)) {
+            return true;
+        }
+        if (caseCodecs.containsKey(cls)) {
+            return true;
+        }
+        if (augmentableCodecs.containsKey(cls)) {
+            return true;
+        }
+        if (augmentationCodecs.containsKey(cls)) {
+            return true;
+        }
+        return false;
     }
 }
