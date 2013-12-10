@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_3b9766ee",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/FlowProgrammerService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-10T03:17:46Z",
+      "side": 1,
+      "message": "Shouldnt this be EtherTypes instead of IPProtocols ?",
+      "revId": "f844efbb0b6fec5c32106a4573e0fb10bb2eedee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
