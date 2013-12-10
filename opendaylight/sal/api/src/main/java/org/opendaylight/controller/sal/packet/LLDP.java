@@ -21,9 +21,10 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 
 public class LLDP extends Packet {
     private static final String CHASSISID = "ChassisId";
+    private static final String SYSTEMNAMEID = "SystemNameID";
     private static final String PORTID = "PortId";
     private static final String TTL = "TTL";
-    private static final int LLDPDefaultTlvs = 3;
+    private static final int LLDPDefaultTlvs = 4;
     private static LLDPTLV emptyTLV = new LLDPTLV().setLength((short) 0)
             .setType((byte) 0);
     public static final byte[] LLDPMulticastMac = { 1, (byte) 0x80,
@@ -98,6 +99,22 @@ public class LLDP extends Packet {
      */
     public LLDP setChassisId(LLDPTLV chassisId) {
         tlvList.put(getType(CHASSISID), chassisId);
+        return this;
+    }
+
+    /**
+     * @return the SystemName TLV
+     */
+    public LLDPTLV getSystemNameId() {
+        return getTLV(SYSTEMNAMEID);
+    }
+
+    /**
+     * @param LLDPTLV
+     *            - the chassisId to set
+     */
+    public LLDP setSystemNameId(LLDPTLV systemNameId) {
+        tlvList.put(getType(SYSTEMNAMEID), systemNameId);
         return this;
     }
 
