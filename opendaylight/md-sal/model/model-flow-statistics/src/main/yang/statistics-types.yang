@@ -60,4 +60,39 @@ module opendaylight-statistics-types {
             }
         }
     }
+    
+    grouping generic-statistics {
+    	description "Generic grouping for statistics";
+        leaf packet-count {
+            type yang:counter64;
+        }
+
+        leaf byte-count {
+            type yang:counter64;
+        }
+
+        container duration {
+            leaf second {
+                type yang:counter64;
+            }
+            leaf nanosecond {
+                type yang:counter64;
+            }
+        }
+    }
+    
+    grouping aggregate-flow-statistics {
+    	description "Aggregate flow statistics";
+        leaf packet-count {
+            type yang:counter64;
+        }
+
+        leaf byte-count {
+            type yang:counter64;
+        }
+        leaf flow-count {
+            type yang:counter32;
+        }
+    }
+    
 }

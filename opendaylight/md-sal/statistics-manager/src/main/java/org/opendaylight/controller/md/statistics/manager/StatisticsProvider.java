@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.eclipse.xtext.xbase.lib.Exceptions;
@@ -17,6 +19,13 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.TableId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
@@ -26,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsInputBuilder;
@@ -49,6 +59,10 @@ public class StatisticsProvider implements AutoCloseable {
     private OpendaylightGroupStatisticsService groupStatsService;
     
     private OpendaylightMeterStatisticsService meterStatsService;
+    
+    private OpendaylightFlowStatisticsService flowStatsService;
+    
+    private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
     
     private Thread statisticsRequesterThread;
     
@@ -76,6 +90,10 @@ public class StatisticsProvider implements AutoCloseable {
       this.nps = notificationService;
     }
 
+    public MultipartMessageManager getMultipartMessageManager() {
+        return multipartMessageManager;
+    }
+
     private final StatisticsUpdateCommiter updateCommiter = new StatisticsUpdateCommiter(StatisticsProvider.this);
     
     private Registration<NotificationListener> listenerRegistration;
@@ -92,6 +110,9 @@ public class StatisticsProvider implements AutoCloseable {
         
         meterStatsService = StatisticsManagerActivator.getProviderContext().
                 getRpcService(OpendaylightMeterStatisticsService.class);
+        
+        flowStatsService = StatisticsManagerActivator.getProviderContext().
+                getRpcService(OpendaylightFlowStatisticsService.class);
 
         statisticsRequesterThread = new Thread( new Runnable(){
 
@@ -131,13 +152,23 @@ public class StatisticsProvider implements AutoCloseable {
             return;
 
         for (Node targetNode : targetNodes){
+            
+            InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
+            NodeRef targetNodeRef = new NodeRef(targetInstanceId);
+            
+            try {
+                
+                sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
+
+                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
+
+            }catch(Exception e){
+                spLogger.error("Exception occured while sending flow statistics request : {}",e);
+            }
 
             if(targetNode.getAugmentation(FlowCapableNode.class) != null){
 
                 spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
-                
-                InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
-                NodeRef targetNodeRef = new NodeRef(targetInstanceId);
                 
                 try{
                   sendAllGroupStatisticsRequest(targetNodeRef);
@@ -155,11 +186,57 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
     
+    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode){
+        final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input =
+                new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
+        
+        input.setNode(targetNode);
+        
+        @SuppressWarnings("unused")
+        Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> response = 
+                flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build());
+        
+    }
+    
+    private void sendAggregateFlowsStatsFromAllTablesRequest(NodeKey targetNodeKey) throws InterruptedException, ExecutionException{
+        
+        List<Short> tablesId = getTablesFromNode(targetNodeKey);
+        
+        if(tablesId.size() != 0){
+            for(Short id : tablesId){
+                
+                spLogger.info("Send aggregate stats request for flow table {} to node {}",id,targetNodeKey);
+                GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input = 
+                        new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+                
+                input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
+                input.setTableId(new TableId(id));
+                Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response = 
+                        flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());
+                
+                multipartMessageManager.setTxIdAndTableIdMapEntry(response.get().getResult().getTransactionId(), id);
+            }
+        }
+        
+        //Note: Just for testing, because i am not able to fetch table list from datastore
+        // Bug-225 is raised for investigation.
+        
+//                spLogger.info("Send aggregate stats request for flow table {} to node {}",1,targetNodeKey);
+//                GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input = 
+//                        new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+//                
+//                input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
+//                input.setTableId(new TableId((short)1));
+//                Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response = 
+//                        flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());`
+//                
+//                multipartMessageManager.setTxIdAndTableIdMapEntry(response.get().getResult().getTransactionId(), (short)1);
+    }
+
     private void sendAllGroupStatisticsRequest(NodeRef targetNode){
         
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         
-        input.setNode(targetNode);
         input.setNode(targetNode);
 
         @SuppressWarnings("unused")
@@ -212,6 +289,20 @@ public class StatisticsProvider implements AutoCloseable {
         
         spLogger.info("Number of connected nodes : {}",nodes.getNode().size());
         return nodes.getNode();
+    }
+    
+    private List<Short> getTablesFromNode(NodeKey nodeKey){
+        InstanceIdentifier<FlowCapableNode> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class,nodeKey).augmentation(FlowCapableNode.class).toInstance();
+        
+        FlowCapableNode node = (FlowCapableNode)dps.readConfigurationData(nodesIdentifier);
+        List<Short> tablesId = new ArrayList<Short>();
+        if(node != null && node.getTable()!=null){
+            spLogger.info("Number of tables {} supported by node {}",node.getTable().size(),nodeKey);
+            for(Table table: node.getTable()){
+                tablesId.add(table.getId());
+            }
+        }
+        return tablesId;
     }
 
     @SuppressWarnings("deprecation")
