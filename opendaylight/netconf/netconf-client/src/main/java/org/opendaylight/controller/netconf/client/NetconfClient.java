@@ -88,6 +88,7 @@ public class NetconfClient implements Closeable {
     }
 
     public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) {
+        long startTime = System.currentTimeMillis();
         Preconditions.checkState(clientSession.isUp(), "Session was not up yet");
         clientSession.sendMessage(message);
         try {
@@ -96,6 +97,9 @@ public class NetconfClient implements Closeable {
             throw new RuntimeException(this + " Cannot read message from " + address, e);
         } catch (IllegalStateException e) {
             throw new IllegalStateException(this + " Cannot read message from " + address, e);
+        } finally {
+            long diffMillis = System.currentTimeMillis() - startTime;
+            logger.debug("Total time spent waiting for response {}", diffMillis);
         }
     }
 

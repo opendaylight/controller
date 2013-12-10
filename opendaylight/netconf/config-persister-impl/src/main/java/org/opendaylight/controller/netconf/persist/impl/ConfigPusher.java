@@ -169,7 +169,7 @@ public class ConfigPusher {
         NetconfMessage message = createEditConfigMessage(xmlToBePersisted, "/netconfOp/editConfig.xml");
 
         // sending message to netconf
-        NetconfMessage responseMessage = netconfClient.sendMessage(message, NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
+        NetconfMessage responseMessage = getResponse(message, netconfClient);
 
         XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
@@ -178,7 +178,7 @@ public class ConfigPusher {
         Util.checkIsOk(element, responseMessage);
         response.append(XmlUtil.toString(responseMessage.getDocument()));
         response.append("}");
-        responseMessage = netconfClient.sendMessage(getNetconfMessageFromResource("/netconfOp/commit.xml"), NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
+        responseMessage = getResponse(getNetconfMessageFromResource("/netconfOp/commit.xml"), netconfClient);
 
         element = XmlElement.fromDomDocument(responseMessage.getDocument());
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
@@ -190,6 +190,15 @@ public class ConfigPusher {
         response.append("}");
         logger.info("Last configuration loaded successfully");
         logger.trace("Detailed message {}", response);
+    }
+
+    private static NetconfMessage getResponse(NetconfMessage request, NetconfClient netconfClient) {
+        try {
+            return netconfClient.sendMessage(request, NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
+        } catch(RuntimeException e) {
+            logger.error("Error while sending message {} to {}", request, netconfClient);
+            throw e;
+        }
     }
 
     private static NetconfMessage createEditConfigMessage(Element dataElement, String editConfigResourcename) {
