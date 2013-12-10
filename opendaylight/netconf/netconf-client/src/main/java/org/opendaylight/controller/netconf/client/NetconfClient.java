@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Stopwatch;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
@@ -17,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
@@ -89,6 +91,7 @@ public class NetconfClient implements Closeable {
 
     public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) {
         Preconditions.checkState(clientSession.isUp(), "Session was not up yet");
+        Stopwatch stopwatch = new Stopwatch().start();
         clientSession.sendMessage(message);
         try {
             return sessionListener.getLastMessage(attempts, attemptMsDelay);
@@ -96,6 +99,10 @@ public class NetconfClient implements Closeable {
             throw new RuntimeException(this + " Cannot read message from " + address, e);
         } catch (IllegalStateException e) {
             throw new IllegalStateException(this + " Cannot read message from " + address, e);
+        } finally {
+            stopwatch.stop();
+            long diffMillis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.debug("Total time spent waiting for response {}", diffMillis);
         }
     }
 
