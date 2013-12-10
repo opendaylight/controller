@@ -48,6 +48,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     /**
      * {@inheritDoc}
      */
+    //TODO: check for cycles
     @Override
     public void validateDependency(
             Class<? extends AbstractServiceInterface> expectedServiceInterface,
@@ -101,6 +102,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     /**
      * {@inheritDoc}
      */
+    //TODO: check for cycles
     @Override
     public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentON,
             JmxAttribute jmxAttribute) {
