@@ -407,27 +407,33 @@ public class TopologyManagerImpl implements
     }
 
     /**
-     * A NodeConnector may have been categorized as of type Production by Discovery Service.
-     * But at the time when this determination was made, only OF nodes were known to Discovery
-     * Service. This method checks if the node of nodeConnector is known to SwitchManager. If
-     * so, then it returns a new NodeConnector with correct type.
+     * A NodeConnector may have been categorized as of type Production by
+     * respective Discovery Service protocol plugin. But at the time when this
+     * determination was made, only protocol specific nodes were known to
+     * Discovery Service. This method checks if the node of nodeConnector is
+     * known to SwitchManager. If so, then it returns a new NodeConnector with
+     * correct type.
      *
      * @param nc
-     *       NodeConnector as passed on in the edge
-     * @return
-     *       If Node of the NodeConnector is in SwitchManager, then return a new NodeConnector
-     *       with correct type, null otherwise
+     *            NodeConnector as passed on in the edge
+     * @return If Node of the NodeConnector is in SwitchManager, then return a
+     *         new NodeConnector with correct type, null otherwise
      */
 
     private NodeConnector updateNCTypeFromSwitchMgr(NodeConnector nc) {
 
         for (Node node : switchManager.getNodes()) {
             String nodeName = node.getNodeIDString();
-            log.trace("Switch Manager Node Name: {}, NodeConnector Node Name: {}", nodeName,
-                    nc.getNode().getNodeIDString());
+            log.trace("Switch Manager Node Name: {}, NodeConnector Node Name: {}", nodeName, nc.getNode()
+                    .getNodeIDString());
+            NodeConnector nodeConnector = null;
             if (nodeName.equals(nc.getNode().getNodeIDString())) {
-                NodeConnector nodeConnector = NodeConnectorCreator
-                        .createNodeConnector(node.getType(), nc.getID(), node);
+                if (node.getType().equals(Node.NodeIDType.OPENFLOW)) {
+                    nodeConnector = NodeConnectorCreator.createNodeConnector(node.getType(),
+                            Short.parseShort((String) nc.getID()), node);
+                } else {
+                    nodeConnector = NodeConnectorCreator.createNodeConnector(node.getType(), nc.getID(), node);
+                }
                 return nodeConnector;
             }
         }
