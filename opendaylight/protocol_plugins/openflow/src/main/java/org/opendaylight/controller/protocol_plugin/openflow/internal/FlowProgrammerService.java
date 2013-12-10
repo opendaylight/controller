@@ -36,9 +36,9 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
-import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -270,8 +270,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     private Status validateFlow(Flow flow) {
         Match m = flow.getMatch();
         boolean isIPEthertypeSet = m.isPresent(MatchType.DL_TYPE)
-                && (m.getField(MatchType.DL_TYPE).getValue().equals(IPProtocols.IPV4.byteValue()) || m
-                        .getField(MatchType.DL_TYPE).getValue().equals(IPProtocols.IPV6.byteValue()));
+                && (m.getField(MatchType.DL_TYPE).getValue().equals(EtherTypes.IPv4.shortValue()) || m
+                        .getField(MatchType.DL_TYPE).getValue().equals(EtherTypes.IPv6.shortValue()));
 
         // network address check
         if ((m.isPresent(MatchType.NW_SRC) || m.isPresent(MatchType.NW_DST)) && !isIPEthertypeSet) {
