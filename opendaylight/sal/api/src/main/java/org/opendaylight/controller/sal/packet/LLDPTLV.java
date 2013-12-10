@@ -188,6 +188,18 @@ public class LLDPTLV extends Packet {
     }
 
     /**
+     * Creates the SystemName TLV value
+     *
+     * @param nodeId
+     *            node identifier string
+     * @return the SystemName TLV value in byte array
+     */
+    static public byte[] createSystemNameTLVValue(String nodeId) {
+        byte[] nid = nodeId.getBytes();
+        return nid;
+    }
+
+    /**
      * Creates the ChassisID TLV value including the subtype and ChassisID
      * string
      *
