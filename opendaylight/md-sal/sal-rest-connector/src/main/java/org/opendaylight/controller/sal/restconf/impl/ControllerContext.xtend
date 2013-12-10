@@ -34,11 +34,12 @@ import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
 import static com.google.common.base.Preconditions.*
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
+import org.slf4j.LoggerFactory
+import com.google.common.collect.FluentIterable
 
 class ControllerContext implements SchemaServiceListener {
-
+    val static LOG = LoggerFactory.getLogger(ControllerContext)
     val static ControllerContext INSTANCE = new ControllerContext
-
     val static NULL_VALUE = "null"
 
     var SchemaContext schemas;
@@ -292,6 +293,7 @@ class ControllerContext implements SchemaServiceListener {
         checkArgument(node instanceof LeafSchemaNode);
         val urlDecoded = URLDecoder.decode(uriValue);
         val typedef = (node as LeafSchemaNode).type;
+        
         var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
         if(decoded == null) {
             var baseType = typedef
@@ -329,8 +331,10 @@ class ControllerContext implements SchemaServiceListener {
     private def QName toQName(String name) {
         val module = name.toModuleName;
         val node = name.toNodeName;
-        val namespace = moduleNameToUri.get(module);
-        return new QName(namespace, null, node);
+        val namespace = FluentIterable.from(schemas.modules.sort[o1,o2 | o1.revision.compareTo(o2.revision)]) //
+            .transform[QName.create(namespace,revision,it.name)].findFirst[module == localName]
+        ;
+        return QName.create(namespace,node);
     }
 
     def getRpcDefinition(String name) {
@@ -340,7 +344,7 @@ class ControllerContext implements SchemaServiceListener {
     override onGlobalContextUpdated(SchemaContext context) {
         this.schemas = context;
         for (operation : context.operations) {
-            val qname = new QName(operation.QName.namespace, null, operation.QName.localName);
+            val qname = operation.QName;
             qnameToRpc.put(qname, operation);
         }
     }
