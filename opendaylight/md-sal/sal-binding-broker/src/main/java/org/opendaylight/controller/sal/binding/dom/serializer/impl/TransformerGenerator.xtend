@@ -51,6 +51,11 @@ import org.opendaylight.yangtools.yang.model.util.ExtendedType
 import org.opendaylight.yangtools.yang.model.util.EnumerationType
 import static com.google.common.base.Preconditions.*
 import org.opendaylight.yangtools.yang.model.api.SchemaPath
+import javassist.CtMethod
+import javassist.CannotCompileException
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.Callable
+import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils
 
 class TransformerGenerator {
 
@@ -91,7 +96,7 @@ class TransformerGenerator {
 
     @Property
     var GeneratorListener listener;
-    
+
     public static val CLASS_TYPE = Types.typeForClass(Class);
 
     public new(ClassPool pool) {
@@ -276,7 +281,7 @@ class TransformerGenerator {
                 implementsType(BINDING_CODEC)
                 method(Object, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             «QName.name» _resultName;
                             if($1 != null) {
@@ -298,7 +303,7 @@ class TransformerGenerator {
                 ]
                 method(Object, "fromDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             if($2 == null){
                                 return  null;
@@ -319,7 +324,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         {
                             java.util.Map.Entry _input =  (java.util.Map.Entry) $1;
                             «QName.name» _localQName = («QName.name») _input.getKey();
@@ -329,7 +334,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         return fromDomStatic(QNAME,$1);
                     '''
                 ]
@@ -357,7 +362,7 @@ class TransformerGenerator {
                 staticField(it, IDENTITYREF_CODEC, BindingCodec)
                 method(Object, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             «QName.name» _resultName = «QName.name».create($1,QNAME.getLocalName());
                             java.util.List _childNodes = new java.util.ArrayList();
@@ -368,7 +373,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         {
                             java.util.Map.Entry _input = (java.util.Map.Entry) $1;
                             «QName.name» _localName = QNAME;
@@ -381,10 +386,10 @@ class TransformerGenerator {
                 ]
                 method(Object, "fromDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = deserializeBody(type, node)
+                    bodyChecked = deserializeBody(type, node)
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         {
                             //System.out.println("«type.name»#deserialize: " +$1);
                             java.util.Map.Entry _input = (java.util.Map.Entry) $1;
@@ -418,10 +423,10 @@ class TransformerGenerator {
                 implementsType(BINDING_CODEC)
                 method(Object, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = serializeBodyFacade(typeSpec, node)
+                    bodyChecked = serializeBodyFacade(typeSpec, node)
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         {
                             java.util.Map.Entry _input = (java.util.Map.Entry) $1;
                             «QName.name» _localName = QNAME;
@@ -434,10 +439,10 @@ class TransformerGenerator {
                 ]
                 method(Object, "fromDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = deserializeBody(typeSpec, node)
+                    bodyChecked = deserializeBody(typeSpec, node)
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         return fromDomStatic(QNAME,$1);
                     '''
                 ]
@@ -468,7 +473,7 @@ class TransformerGenerator {
                 implementsType(BINDING_CODEC)
                 method(Object, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             //System.out.println("Qname " + $1);
                             //System.out.println("Value " + $2);
@@ -485,7 +490,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         {
                         java.util.Map.Entry _input = (java.util.Map.Entry) $1;
                         «QName.name» _localName = QNAME;
@@ -498,7 +503,7 @@ class TransformerGenerator {
                 ]
                 method(Object, "fromDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             «QName.name» _localQName = QNAME;
                             
@@ -522,7 +527,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         return fromDomStatic(QNAME,$1);
                     '''
                 ]
@@ -553,7 +558,7 @@ class TransformerGenerator {
                 implementsType(BINDING_CODEC)
                 method(List, "toDomStatic", QName, Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             if($2 == null) {
                                 return null;
@@ -572,13 +577,13 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         throw new «UnsupportedOperationException.name»("Direct invocation not supported.");
                     '''
                 ]
                 method(Object, "fromDomStatic", QName, Map) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             «BINDING_CODEC.name» _codec = («BINDING_CODEC.name») «COMPOSITE_TO_CASE».get($2);
                             if(_codec != null) {
@@ -589,7 +594,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         throw new «UnsupportedOperationException.name»("Direct invocation not supported.");
                     '''
                 ]
@@ -822,17 +827,10 @@ class TransformerGenerator {
                 val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
                 return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
             }
-            var hasBinding = false;
-            try {
-                val bindingCodecClass = loadClassWithTCCL(BINDING_CODEC.name);
-                hasBinding = bindingCodecClass !== null;
-            } catch (ClassNotFoundException e) {
-                hasBinding = false;
-            }
-            val hasYangBinding = hasBinding
+
             val ctCls = createClass(typeSpec.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
-                if (hasYangBinding) {
+                if (inputType.isYangBindingAvailable) {
                     implementsType(BINDING_CODEC)
                     staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
                     staticField(it, IDENTITYREF_CODEC, BindingCodec)
@@ -840,7 +838,8 @@ class TransformerGenerator {
                 }
                 method(Object, "toDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    val ctSpec = typeSpec.asCtClass;
+                    bodyChecked = '''
                         {
                             //System.out.println("«inputType.simpleName»#toDomValue: "+$1);
                             
@@ -857,7 +856,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         {
                             return toDomValue($1);
                         }
@@ -865,7 +864,7 @@ class TransformerGenerator {
                 ]
                 method(Object, "fromDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
                             
@@ -879,7 +878,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''{
+                    bodyChecked = '''{
                             return fromDomValue($1);
                     }
                     '''
@@ -898,18 +897,37 @@ class TransformerGenerator {
 
     }
 
+    def boolean isYangBindingAvailable(Class<?> class1) {
+        try {
+            val bindingCodecClass = class1.classLoader.loadClass(BINDING_CODEC.name);
+            return bindingCodecClass !== null;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     private def createDummyImplementation(Class<?> object, GeneratedTransferObject typeSpec) {
         log.info("Generating Dummy DOM Codec for {} with {}", object, object.classLoader)
         return createClass(typeSpec.codecClassName) [
-            //staticField(Map,"AUGMENTATION_SERIALIZERS");
-            implementsType(BINDING_CODEC)
-            implementsType(BindingDeserializer.asCtClass)
+            if (object.isYangBindingAvailable) {
+                implementsType(BINDING_CODEC)
+                staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
+                implementsType(BindingDeserializer.asCtClass)
+            }
+            //implementsType(BindingDeserializer.asCtClass)
             method(Object, "toDomValue", Object) [
                 modifiers = PUBLIC + FINAL + STATIC
-                body = '''return null;'''
+                bodyChecked = '''{
+                    if($1 == null) {
+                        return null;
+                    }
+                    return $1.toString();
+                    
+                    }'''
             ]
             method(Object, "serialize", Object) [
-                body = '''
+                bodyChecked = '''
                     {
                         return toDomValue($1);
                     }
@@ -917,10 +935,10 @@ class TransformerGenerator {
             ]
             method(Object, "fromDomValue", Object) [
                 modifiers = PUBLIC + FINAL + STATIC
-                body = '''return null;'''
+                bodyChecked = '''return null;'''
             ]
             method(Object, "deserialize", Object) [
-                body = '''{
+                bodyChecked = '''{
                         return fromDomValue($1);
                     }
                     '''
@@ -952,7 +970,7 @@ class TransformerGenerator {
                 //implementsType(BINDING_CODEC)
                 method(Object, "toDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''{
+                    bodyChecked = '''{
                             if($1 == null) {
                                 return null;
                             }
@@ -967,13 +985,13 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "serialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         return toDomValue($1);
                     '''
                 ]
                 method(Object, "fromDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
-                    body = '''
+                    bodyChecked = '''
                         {
                             if($1 == null) {
                                 return null;
@@ -989,7 +1007,7 @@ class TransformerGenerator {
                     '''
                 ]
                 method(Object, "deserialize", Object) [
-                    body = '''
+                    bodyChecked = '''
                         return fromDomValue($1);
                     '''
                 ]
@@ -1200,7 +1218,7 @@ class TransformerGenerator {
     private def dispatch serializeValue(Type signature, String property) {
         if (INSTANCE_IDENTIFIER == signature) {
             return '''«INSTANCE_IDENTIFIER_CODEC».serialize(«property»)'''
-        }else if (CLASS_TYPE.equals(signature)) {
+        } else if (CLASS_TYPE.equals(signature)) {
             return '''(«QName.resolvedName») «IDENTITYREF_CODEC».serialize(«property»)'''
         }
         return '''«property»''';
@@ -1314,6 +1332,21 @@ class TransformerGenerator {
         log.error("Cannot compile DOM Codec for {}", inputType, e);
         val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType, e);
         throw exception;
+    }
+
+    private def setBodyChecked(CtMethod method, String body) {
+        try {
+            method.setBody(body);
+        } catch (CannotCompileException e) {
+            log.error("Cannot compile method: {}#{} {}, Reason: {} Body: {}", method.declaringClass, method.name,
+                method.signature, e.message, body)
+            throw e;
+        }
+    }
+
+    private def <V> V withClassLoaderAndLock(ClassLoader cls, Lock lock, Callable<V> function) throws Exception {
+        appendClassLoaderIfMissing(cls);
+        ClassLoaderUtils.withClassLoaderAndLock(cls, lock, function);
     }
 
 }
