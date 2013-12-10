@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_1edfef0e",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-12-10T20:07:45Z",
+      "side": 1,
+      "message": "Please use System.nanotime() for this this (and convert via TimeUnit), simply because currentTimeMillis() is subject to things like NTP adjustment, etc.",
+      "revId": "95a5c0a2e76dedf3fb2a86d4aefa233f4a0264f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
