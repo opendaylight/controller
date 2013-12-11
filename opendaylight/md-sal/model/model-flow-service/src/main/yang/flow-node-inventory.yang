@@ -15,7 +15,7 @@ module flow-node-inventory {
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
     }
-
+    
     grouping feature {
         leaf support-state {
             type inv:support-type;
@@ -70,7 +70,8 @@ module flow-node-inventory {
             uses meter:meter;
         }
     }
-
+    
+    
     grouping flow-node {
 
         leaf manufacturer {
@@ -122,6 +123,22 @@ module flow-node-inventory {
                 }
             }
         }
+        
+        container switch-features {
+            
+            leaf max_buffers {
+                type uint32;
+            }
+            
+            leaf max_tables {
+                type uint8;
+            }
+            
+            leaf-list capabilities {
+                type string;
+            }
+            
+        }
     }
     
     grouping flow-node-connector {
@@ -148,10 +165,12 @@ module flow-node-inventory {
         //ext:identical-augment "flow-capable-node-connector";
         ext:augment-identifier "flow-capable-node-connector-update-fields";
         uses flow-node-connector;
+        uses flow-node;        
     }
-
+    
     augment "/inv:node-connector-updated" {
         ext:augment-identifier "flow-capable-node-connector-updated";
         uses flow-node-connector;
     }
+
 }
