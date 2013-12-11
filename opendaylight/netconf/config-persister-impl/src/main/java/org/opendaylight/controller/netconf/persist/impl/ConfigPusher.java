@@ -8,9 +8,18 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import io.netty.channel.EventLoopGroup;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.concurrent.Immutable;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -25,14 +34,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.annotation.concurrent.Immutable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 @Immutable
 public class ConfigPusher {
@@ -127,10 +130,14 @@ public class ConfigPusher {
 
         long deadline = pollingStart + timeout;
 
+        String additionalHeader = "[unknow;".concat(address.getAddress().getHostAddress()).concat(":").concat(Integer.toString(address.getPort()))
+                .concat(";tcp;persister;]").concat(System.lineSeparator());
+
         Set<String> latestCapabilities = new HashSet<>();
         while (System.currentTimeMillis() < deadline) {
             attempt++;
-            NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
+            NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup,
+                    nettyThreadgroup, additionalHeader);
             NetconfClient netconfClient;
             try {
                 netconfClient = new NetconfClient(this.toString(), address, delay, netconfClientDispatcher);
