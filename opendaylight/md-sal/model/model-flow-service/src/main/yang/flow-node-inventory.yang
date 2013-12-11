@@ -15,7 +15,21 @@ module flow-node-inventory {
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
     }
-
+    
+    
+    identity features-capabilities {
+    }     
+    
+    identity features-capabilities-of13 {
+        description "OF13 switch features capabilities.";
+        base features-capabilities;
+    }
+    
+    identity features-capabilities-of10 {
+        description "OF10 switch features capabilities.";
+        base features-capabilities;
+    }
+    
     grouping feature {
         leaf support-state {
             type inv:support-type;
@@ -70,7 +84,12 @@ module flow-node-inventory {
             uses meter:meter;
         }
     }
-
+    
+    
+    container flow-node-container {
+        uses flow-node;
+    }
+    
     grouping flow-node {
 
         leaf manufacturer {
@@ -122,6 +141,34 @@ module flow-node-inventory {
                 }
             }
         }
+        
+        container switch-features {
+            
+            leaf datapath_id {
+            	type uint64;
+            }
+            
+            leaf max_buffers {
+                type uint32;
+            }
+            
+            leaf max_tables {
+                type uint8;
+            }
+            
+            leaf auxiliary_id {
+                type uint8;
+            }
+            
+            container capability {
+                leaf capability-type {
+                    type identityref {
+                        base features-capabilities;
+                    }
+                }
+            }
+            
+        }
     }
     
     grouping flow-node-connector {
@@ -148,10 +195,99 @@ module flow-node-inventory {
         //ext:identical-augment "flow-capable-node-connector";
         ext:augment-identifier "flow-capable-node-connector-update-fields";
         uses flow-node-connector;
+        uses flow-node;        
     }
-
+    
     augment "/inv:node-connector-updated" {
         ext:augment-identifier "flow-capable-node-connector-updated";
         uses flow-node-connector;
     }
+        
+    typedef capabilities-of10 {
+        type bits {
+            bit OFPC_FLOW_STATS {
+                position 0;
+                /* Flow statistics. */
+            } 
+            bit OFPC_TABLE_STATS {
+                position 1;
+                /* Table statistics. */
+            }
+            bit OFPC_PORT_STATS {
+                position 2;
+                /* Port statistics. */
+            }
+            bit OFPC_STP {
+                position 3;
+                /* 802.1d spanning tree. */
+            }
+            bit OFPC_RESERVED {
+                position 4;
+                /* Reserved, must be zero. */
+            }
+            bit OFPC_IP_REASM {
+                position 5;
+                /* Can reassemble IP fragments. */
+            }
+            bit OFPC_QUEUE_STATS {
+                position 6;
+                /* Queue statistics. */
+            }
+            bit OFPC_ARP_MATCH_IP {
+                position 8;
+                /* Match IP addresses in ARP pkts. */
+            }
+        }
+    }
+    
+    typedef capabilities-of13 {
+        type bits {
+            bit OFPC_FLOW_STATS {
+                position 0;
+                /* Flow statistics. */
+            } 
+            bit OFPC_TABLE_STATS {
+                position 1;
+                /* Table statistics. */
+            }
+            bit OFPC_PORT_STATS {
+                position 2;
+                /* Port statistics. */
+            }
+            bit OFPC_GROUP_STATS {
+                position 3;
+                /* Group statistics. */
+            }
+            bit OFPC_IP_REASM {
+                position 5;
+                /* Can reassemble IP fragments. */
+            }
+            bit OFPC_QUEUE_STATS {
+                position 6;
+                /* Queue statistics. */
+            }
+            bit OFPC_PORT_BLOCKED {
+                position 8;
+                /* Switch will block looping ports. */
+            }
+        }
+    }
+    
+    augment "/flow-node-container/switch-features/capability" {
+        ext:augment-identifier "switch-features-capabilities-of13";
+        leaf capabilities-of13 {
+            type capabilities-of13;
+        }
+    }
+    
+    augment "/flow-node-container/switch-features/capability" {
+        ext:augment-identifier "switch-features-capabilities-of10";
+        leaf capabilities-of10 {
+            type capabilities-of10;
+        }
+    }
+     
+
+
+    
 }
