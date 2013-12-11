@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_61776c3b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-11T10:24:30Z",
+      "side": 1,
+      "message": "Please add a more detailed explanation of what this fix does. It\u0027s a bit though to infer from the comment.",
+      "revId": "5c47f38bf9a71606a6d63382612d0bb6dc007add",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
