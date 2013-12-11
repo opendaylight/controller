@@ -97,7 +97,8 @@ public class AnnotationsTest {
     static final String SIMPLE = "simple";
     static final String SUBCLASS2 = "subclass2";
 
-    @ServiceInterfaceAnnotation(value = SIMPLE, osgiRegistrationType = Executor.class)
+    @ServiceInterfaceAnnotation(value = SIMPLE, osgiRegistrationType = Executor.class,
+    namespace = "ns", revision = "rev", localName = SIMPLE)
     static interface SimpleSI extends AbstractServiceInterface {
 
     }
@@ -161,7 +162,9 @@ public class AnnotationsTest {
 
     }
 
-    @ServiceInterfaceAnnotation(value = SUBCLASS2, osgiRegistrationType = ExecutorService.class)
+    @ServiceInterfaceAnnotation(value = SUBCLASS2, osgiRegistrationType = ExecutorService.class,
+    namespace = "ns", revision = "rev", localName = SUBCLASS2)
+
     static interface SubSI2 extends SubSI {
 
     }

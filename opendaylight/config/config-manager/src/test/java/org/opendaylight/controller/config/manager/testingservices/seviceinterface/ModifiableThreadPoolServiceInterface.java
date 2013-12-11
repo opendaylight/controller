@@ -10,7 +10,8 @@ package org.opendaylight.controller.config.manager.testingservices.seviceinterfa
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingModifiableThreadPoolIfc;
 
-@ServiceInterfaceAnnotation(value = "modifiable-threadpool", osgiRegistrationType = TestingModifiableThreadPoolIfc.class)
+@ServiceInterfaceAnnotation(value = "fqn:modifiable-threadpool", osgiRegistrationType = TestingModifiableThreadPoolIfc.class,
+        namespace = "foo",  revision = "bar", localName = "modifiable-threadpool")
 public interface ModifiableThreadPoolServiceInterface extends
         TestingThreadPoolServiceInterface {
 }

@@ -13,6 +13,7 @@ import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
@@ -106,5 +107,10 @@ public class ClassBasedModuleFactory implements ModuleFactory {
     @Override
     public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
         return new HashSet<Module>();
+    }
+
+    @Override
+    public Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces() {
+        return InterfacesHelper.getAllAbstractServiceClasses(configBeanClass);
     }
 }
