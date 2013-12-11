@@ -7,49 +7,38 @@
  */
 package org.opendaylight.controller.config.util;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
-import java.lang.management.ManagementFactory;
-import java.util.Set;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
+import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConfigRegistry;
-import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.util.jolokia.ConfigRegistryJolokiaClient;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class ConfigRegistryClientsTest {
-
-    private String jolokiaURL;
 
     private TestingConfigRegistry testingRegistry;
     private ObjectName testingRegistryON;
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    private ConfigRegistryClient jmxRegistryClient, jolokiaRegistryClient;
+    private ConfigRegistryClient jmxRegistryClient;
 
     @Before
     public void setUp() throws Exception {
-        jolokiaURL = JolokiaHelper.startTestingJolokia();
         testingRegistry = new TestingConfigRegistry();
         testingRegistryON = ConfigRegistry.OBJECT_NAME;
         mbs.registerMBean(testingRegistry, testingRegistryON);
         jmxRegistryClient = new ConfigRegistryJMXClient(
                 ManagementFactory.getPlatformMBeanServer());
-        jolokiaRegistryClient = new ConfigRegistryJolokiaClient(jolokiaURL);
     }
 
     @After
     public void cleanUp() throws Exception {
-        JolokiaHelper.stopJolokia();
         if (testingRegistryON != null) {
             mbs.unregisterMBean(testingRegistryON);
         }
@@ -58,8 +47,7 @@ public class ConfigRegistryClientsTest {
     @Test
     public void testLookupRuntimeBeans() throws Exception {
         Set<ObjectName> jmxLookup = lookupRuntimeBeans(jmxRegistryClient);
-        Set<ObjectName> jolokiaLookup = lookupRuntimeBeans(jolokiaRegistryClient);
-        assertEquals(jmxLookup, jolokiaLookup);
+        assertEquals(Sets.newHashSet(testingRegistry.run2, testingRegistry.run1, testingRegistry.run3), jmxLookup);
     }
 
     private Set<ObjectName> lookupRuntimeBeans(ConfigRegistryClient client)
@@ -79,28 +67,19 @@ public class ConfigRegistryClientsTest {
                 jmxRegistryClient, TestingConfigRegistry.moduleName1,
                 TestingConfigRegistry.instName1);
         assertEquals(1, jmxLookup.size());
-        Set<ObjectName> jolokiaLookup = clientLookupRuntimeBeansWithModuleAndInstance(
-                jolokiaRegistryClient, TestingConfigRegistry.moduleName1,
-                TestingConfigRegistry.instName1);
-        assertEquals(jmxLookup, jolokiaLookup);
+        assertEquals(Sets.newHashSet(testingRegistry.run2), jmxLookup);
 
         jmxLookup = clientLookupRuntimeBeansWithModuleAndInstance(
                 jmxRegistryClient, TestingConfigRegistry.moduleName2,
                 TestingConfigRegistry.instName2);
         assertEquals(1, jmxLookup.size());
-        jolokiaLookup = clientLookupRuntimeBeansWithModuleAndInstance(
-                jolokiaRegistryClient, TestingConfigRegistry.moduleName2,
-                TestingConfigRegistry.instName2);
-        assertEquals(jmxLookup, jolokiaLookup);
+        assertEquals(Sets.newHashSet(testingRegistry.run3), jmxLookup);
 
         jmxLookup = clientLookupRuntimeBeansWithModuleAndInstance(
                 jmxRegistryClient, TestingConfigRegistry.moduleName1,
                 TestingConfigRegistry.instName2);
         assertEquals(0, jmxLookup.size());
-        jolokiaLookup = clientLookupRuntimeBeansWithModuleAndInstance(
-                jolokiaRegistryClient, TestingConfigRegistry.moduleName1,
-                TestingConfigRegistry.instName2);
-        assertEquals(jmxLookup, jolokiaLookup);
+        assertEquals(Sets.newHashSet(), jmxLookup);
     }
 
     private Set<ObjectName> clientLookupRuntimeBeansWithModuleAndInstance(
@@ -112,29 +91,4 @@ public class ConfigRegistryClientsTest {
         }
         return beans;
     }
-
-    @Test
-    public void testValidationExceptionDeserialization() {
-        try {
-            jolokiaRegistryClient.commitConfig(null);
-            fail();
-        } catch (ValidationException e) {
-            String moduleName = "moduleName", instanceName = "instanceName";
-            assertThat(e.getFailedValidations().containsKey(moduleName),
-                    is(true));
-            assertThat(e.getFailedValidations().size(), is(1));
-            assertThat(e.getFailedValidations().get(moduleName).size(), is(1));
-            assertThat(
-                    e.getFailedValidations().get(moduleName)
-                            .containsKey(instanceName), is(true));
-            assertThat(
-                    e.getFailedValidations().get(moduleName).get(instanceName)
-                            .getMessage(), is("message"));
-            assertThat(
-                    e.getFailedValidations().get(moduleName).get(instanceName)
-                            .getTrace(),
-                    containsString("org.opendaylight.controller.config.util.TestingConfigRegistry.commitConfig"));
-        }
-    }
-
 }

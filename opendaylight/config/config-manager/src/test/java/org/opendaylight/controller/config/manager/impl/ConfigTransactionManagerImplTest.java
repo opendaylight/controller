@@ -7,23 +7,19 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+
+import javax.management.InstanceAlreadyExistsException;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import javax.management.InstanceAlreadyExistsException;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaClient;
-
 public class ConfigTransactionManagerImplTest extends
-        AbstractConfigWithJolokiaTest {
+        AbstractConfigTest {
 
     @Before
     public void setUp() {
@@ -55,23 +51,4 @@ public class ConfigTransactionManagerImplTest extends
         transaction.commit();
     }
 
-    @Test
-    public void testRemoteCallsUsingJolokia() throws Exception {
-
-        ConfigTransactionJolokiaClient transactionClient = configRegistryJolokiaClient
-                .createTransaction();
-
-        assertEquals("ConfigTransaction-0-1",
-                ObjectNameUtil.getTransactionName(transactionClient
-                        .getTransactionON()));
-
-        assertEquals(
-                ConfigRegistryConstants.ON_DOMAIN
-                        + ":TransactionName=ConfigTransaction-0-1,type=ConfigTransaction",
-                transactionClient.getTransactionON().getCanonicalName());
-
-        // commit
-        transactionClient.commit();
-
-    }
 }

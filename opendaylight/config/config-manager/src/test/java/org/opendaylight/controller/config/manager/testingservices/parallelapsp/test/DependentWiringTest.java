@@ -7,17 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.parallelapsp.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.internal.matchers.StringContains.containsString;
-
-import java.util.Map;
-
-import javax.management.ObjectName;
-
-import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +21,15 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaClient;
+
+import javax.management.ObjectName;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.internal.matchers.StringContains.containsString;
 
 public class DependentWiringTest extends AbstractParallelAPSPTest {
     private final String fixed1 = "fixed1";
@@ -133,46 +130,6 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
         // new reference should be copied to apsp-parallel
         assertEquals((Integer) newNumberOfThreads,
                 parallelAPSPRuntimeProxy.getMaxNumberOfThreads());
-
-    }
-
-    @Test
-    public void testUsingJolokia() throws Exception {
-
-        ConfigTransactionJolokiaClient transactionClient = configRegistryJolokiaClient
-                .createTransaction();
-        // fixed1
-        ObjectName fixed1ON = transactionClient.createModule(
-                getThreadPoolImplementationName(), fixed1);
-        transactionClient.setAttribute(fixed1ON, "ThreadCount",
-                TestingParallelAPSPImpl.MINIMAL_NUMBER_OF_THREADS);
-
-        // apsp-parallel with syntetic attrib
-        String threadPoolString = "ThreadPool";
-        ObjectName apsp1ON = transactionClient.createModule(
-                TestingParallelAPSPModuleFactory.NAME, apsp1);
-        transactionClient.setAttribute(apsp1ON, threadPoolString, fixed1ON);
-        // check
-        assertEquals(ObjectNameUtil.withoutTransactionName(fixed1ON),
-                transactionClient.getAttributeON(apsp1ON, threadPoolString));
-        transactionClient.setAttribute(apsp1ON, "SomeParam", "ahoj");
-
-        // commit
-        transactionClient.commit();
-        // check thread pool
-        assertEquals(1, TestingFixedThreadPool.allExecutors.size());
-        // check platform MBeanServer
-        ObjectName apspReadOnlyON = ObjectNameUtil
-                .withoutTransactionName(apsp1ON);
-        JSONObject threadPoolONJson = (JSONObject) configRegistryJolokiaClient
-                .getAttribute(apspReadOnlyON, threadPoolString);
-        ObjectName fixed1ReadOnlyON = ObjectNameUtil
-                .withoutTransactionName(fixed1ON);
-        assertEquals(fixed1ReadOnlyON, ObjectNameUtil.createON(threadPoolONJson
-                .get("objectName").toString()));
-        assertEquals(fixed1ReadOnlyON,
-                configRegistryJolokiaClient.getAttributeON(apspReadOnlyON,
-                        threadPoolString));
 
     }
 }

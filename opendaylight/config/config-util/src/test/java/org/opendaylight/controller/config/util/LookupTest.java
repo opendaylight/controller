@@ -7,20 +7,8 @@
  */
 package org.opendaylight.controller.config.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,35 +16,40 @@ import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.util.jolokia.ConfigRegistryJolokiaClient;
-import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaClient;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class LookupTest {
 
-    private String jolokiaURL;
     private TestingConfigRegistry testingRegistry;
     private ObjectName testingRegistryON;
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    private ConfigRegistryClient jmxRegistryClient, jolokiaRegistryClient;
+    private ConfigRegistryClient jmxRegistryClient;
     private ConfigTransactionControllerMXBean testingTransactionController;
     private ObjectName testingTransactionControllerON;
-    private ConfigTransactionClient jmxTransactionClient,
-            jolokiaTransactionClient;
+    private ConfigTransactionClient jmxTransactionClient;
 
     Map<LookupRegistry, ? extends Set<? extends LookupRegistry>> lookupProvidersToClients;
 
     @Before
     public void setUp() throws Exception {
-        jolokiaURL = JolokiaHelper.startTestingJolokia();
         testingRegistry = new TestingConfigRegistry();
         testingRegistryON = ConfigRegistry.OBJECT_NAME;
         mbs.registerMBean(testingRegistry, testingRegistryON);
         jmxRegistryClient = new ConfigRegistryJMXClient(
                 ManagementFactory.getPlatformMBeanServer());
-        jolokiaRegistryClient = new ConfigRegistryJolokiaClient(jolokiaURL);
+
 
         testingTransactionController = new TestingConfigTransactionController();
         testingTransactionControllerON = new ObjectName(
@@ -68,16 +61,15 @@ public class LookupTest {
         jmxTransactionClient = new ConfigTransactionJMXClient(null,
                 testingTransactionControllerON,
                 ManagementFactory.getPlatformMBeanServer());
-        jolokiaTransactionClient = new ConfigTransactionJolokiaClient(
-                jolokiaURL, testingTransactionControllerON, null);
-        HashSet<ConfigRegistryClient> registryClients = Sets.newHashSet(jmxRegistryClient, jolokiaRegistryClient);
-        HashSet<ConfigTransactionClient> configTransactionClients = Sets.newHashSet(jmxTransactionClient, jolokiaTransactionClient);
-        lookupProvidersToClients = ImmutableMap.of((LookupRegistry) testingRegistry, registryClients,                testingTransactionController, configTransactionClients);
+
+        HashSet<ConfigRegistryClient> registryClients = Sets.newHashSet(jmxRegistryClient);
+        HashSet<ConfigTransactionClient> configTransactionClients = Sets.newHashSet(jmxTransactionClient);
+        lookupProvidersToClients = ImmutableMap.of((LookupRegistry) testingRegistry, registryClients,
+                testingTransactionController, configTransactionClients);
     }
 
     @After
     public void cleanUp() throws Exception {
-        JolokiaHelper.stopJolokia();
         mbs.unregisterMBean(testingRegistryON);
         mbs.unregisterMBean(testingTransactionControllerON);
     }
