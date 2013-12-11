@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
+
 import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -24,11 +27,9 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 /**
  * NetconfMessageFactory for (de)serializing DOM documents.
@@ -114,7 +115,14 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
             Comment comment = netconfMessage.getDocument().createComment("clientId:" + clientId.get());
             netconfMessage.getDocument().appendChild(comment);
         }
-        final ByteBuffer msgBytes = Charsets.UTF_8.encode(xmlToString(netconfMessage.getDocument()));
+        ByteBuffer msgBytes;
+        if(netconfMessage.getAdditionalHeader().isPresent()) {
+            String header = netconfMessage.getAdditionalHeader().get();
+            logger.trace("Header of netconf message parsed \n{}", header);
+            msgBytes = Charsets.UTF_8.encode(header + xmlToString(netconfMessage.getDocument()));
+        } else {
+            msgBytes = Charsets.UTF_8.encode(xmlToString(netconfMessage.getDocument()));
+        }
         String content = xmlToString(netconfMessage.getDocument());
 
         logger.trace("Putting message \n{}", content);

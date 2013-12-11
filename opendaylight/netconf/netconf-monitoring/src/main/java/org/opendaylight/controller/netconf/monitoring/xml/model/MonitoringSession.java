@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.netconf.monitoring.xml.model;
 
-import com.google.common.base.Preconditions;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfSsh;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
+import org.opendaylight.yangtools.yang.common.QName;
 
 final class MonitoringSession {
 
@@ -67,8 +67,17 @@ final class MonitoringSession {
 
     @XmlElement(name = "transport")
     public String getTransport() {
-        Preconditions.checkState(managementSession.getTransport() == NetconfSsh.class);
-        return "netconf-ssh";
+        try {
+            QName qName = (QName) managementSession.getTransport().getField("QNAME").get(null);
+            return qName.getLocalName();
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new IllegalArgumentException("Unknown transport type " + managementSession.getTransport(), e);
+        }
+    }
+
+    @XmlElement(name= "session-identifier")
+    public String getSessionType() {
+        return managementSession.getAugmentation(Session1.class).getSessionIdentifier();
     }
 
     @XmlElement(name = "username")
