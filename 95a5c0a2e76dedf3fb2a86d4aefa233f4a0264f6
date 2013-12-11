@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_017e70e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-11T11:33:20Z",
+      "side": 1,
+      "message": "Please document better what is this patch for.",
+      "revId": "95a5c0a2e76dedf3fb2a86d4aefa233f4a0264f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_1edfef0e",
         "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClient.java",
         "patchSetId": 1
