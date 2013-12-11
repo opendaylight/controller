@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_01e2f0d4",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/config.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-11T10:54:16Z",
+      "side": 1,
+      "message": "Why are we slicing outgoing tableFeatures messages, I thought the decision was to do them one at a time for Hydrogen.  Further, if the intention is to tune on switches buffer capacity, it should not be a global config, as the controller will be managing many different types of switches.",
+      "revId": "8772bdbbe5ad5b68d4803649644c407dc25dfbfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
