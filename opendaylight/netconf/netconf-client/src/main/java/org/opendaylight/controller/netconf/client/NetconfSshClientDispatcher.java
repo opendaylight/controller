@@ -14,8 +14,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -31,6 +33,8 @@ import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
+import com.google.common.base.Optional;
+
 public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 
     private AuthenticationHandler authHandler;
@@ -42,7 +46,15 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         super(bossGroup, workerGroup);
         this.authHandler = authHandler;
         this.timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer);
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.<String>absent());
+    }
+
+    public NetconfSshClientDispatcher(AuthenticationHandler authHandler, EventLoopGroup bossGroup,
+            EventLoopGroup workerGroup, String additionalHeader) {
+        super(bossGroup, workerGroup, additionalHeader);
+        this.authHandler = authHandler;
+        this.timer = new HashedWheelTimer();
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader));
     }
 
     public Future<NetconfClientSession> createClient(InetSocketAddress address,
