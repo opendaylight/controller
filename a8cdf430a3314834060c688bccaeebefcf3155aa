@@ -34,6 +34,24 @@
       "revId": "a8cdf430a3314834060c688bccaeebefcf3155aa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c18738d6",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-11T11:34:58Z",
+      "side": 1,
+      "message": "Maurice this must be avoided here. Please fix it.",
+      "parentUuid": "da6255ed_61bf6cfc",
+      "revId": "a8cdf430a3314834060c688bccaeebefcf3155aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
