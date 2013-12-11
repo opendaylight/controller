@@ -30,6 +30,7 @@ import javax.transaction.RollbackException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -252,6 +253,23 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
      */
     ConcurrentMap getRoutingTableCache() {
         return this.routingTableCache;
+    }
+
+    /**
+     * This is used from integration test NP rest API to check out the result of the
+     * cache population
+     * <Note> For testing purpose only-- use it wisely</Note>
+     * @return
+     */
+    public String dumpRoutingTableCache(){
+       Set<Map.Entry<I, R>> cacheEntrySet = this.routingTableCache.entrySet();
+       StringBuilder sb = new StringBuilder();
+       for(Map.Entry<I,R> entry:cacheEntrySet){
+           sb.append("Key:").append(entry.getKey()).append("---->Value:")
+                   .append((entry.getValue() != null)?entry.getValue():"null")
+                   .append("\n");
+       }
+       return sb.toString();
     }
 
     /**
