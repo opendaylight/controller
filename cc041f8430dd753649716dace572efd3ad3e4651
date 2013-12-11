@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0109d094",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/queue-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-11T11:08:41Z",
+      "side": 1,
+      "message": "Please model this as identities so that it is extensible.  See the handling of set-field-match in table-types.yang",
+      "revId": "cc041f8430dd753649716dace572efd3ad3e4651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e1ffdc65",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/queue-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-11T11:08:41Z",
+      "side": 1,
+      "message": "Please model this using identities as noted above.  See opendaylight-table-types.yang.   There may one day be a need to have more than min-rate and max-rate for queues, and enums are not augmentable whereas the identities approach is.",
+      "revId": "cc041f8430dd753649716dace572efd3ad3e4651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a1f9e481",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/queue-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-11T11:08:41Z",
+      "side": 1,
+      "message": "Why isn\u0027t this a list of node-connector-refs ?",
+      "revId": "cc041f8430dd753649716dace572efd3ad3e4651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_81f4a087",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/queue-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-11T11:08:41Z",
+      "side": 1,
+      "message": "Why isn\u0027t this a node-connector-ref?",
+      "revId": "cc041f8430dd753649716dace572efd3ad3e4651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_61f3ec9e",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/queue-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-11T11:08:41Z",
+      "side": 1,
+      "message": "Please do *not* import protocolisms like \u0027packet\u0027 or message names into the NB model.  The semantics of the NB model should not be directly referencing protocol specifics.",
+      "revId": "cc041f8430dd753649716dace572efd3ad3e4651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
