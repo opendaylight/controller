@@ -26,6 +26,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +63,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     @VisibleForTesting
     Element getResponseInternal(final Document document,
             final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
+
         if (editConfigExecution.shouldTest()) {
             executeTests(configRegistryClient, editConfigExecution);
         }
@@ -91,7 +94,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     private void executeTests(ConfigRegistryClient configRegistryClient,
             EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         try {
-            test(configRegistryClient, editConfigExecution.getResolvedXmlElements(), editConfigExecution.getDefaultStrategy());
+            test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
         } catch (IllegalStateException | JmxAttributeValidationException | ValidationException e) {
             logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
@@ -103,7 +106,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void test(ConfigRegistryClient configRegistryClient,
-                      Map<String, Multimap<String, ModuleElementResolved>> resolvedModules, EditStrategyType editStrategyType) {
+                      EditConfigExecution execution, EditStrategyType editStrategyType) {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
 
@@ -111,7 +114,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             if (editStrategyType == EditStrategyType.replace) {
                 transactionProvider.wipeTestTransaction(taON);
             }
-            setOnTransaction(configRegistryClient, resolvedModules, taON);
+
+            setOnTransaction(configRegistryClient, execution.getResolvedXmlElements(), execution.getServices(), taON);
+            // TODO add service reference persistance testing here
             transactionProvider.validateTestTransaction(taON);
         } finally {
             transactionProvider.abortTestTransaction(taON);
@@ -126,11 +131,45 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         if (editConfigExecution.getDefaultStrategy() == EditStrategyType.replace) {
             transactionProvider.wipeTransaction();
         }
-        setOnTransaction(configRegistryClient, editConfigExecution.getResolvedXmlElements(), taON);
+
+        setOnTransaction(configRegistryClient, editConfigExecution.getResolvedXmlElements(),
+                editConfigExecution.getServices(), taON);
+        setServicesOnTransaction(configRegistryClient, editConfigExecution.getServices(), taON);
+    }
+
+    private void setServicesOnTransaction(ConfigRegistryClient configRegistryClient, Services services,
+                ObjectName taON) {
+        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
+
+        Map<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = services
+                .getNamespaceToServiceNameToRefNameToInstance();
+
+        for (String serviceNamespace : namespaceToServiceNameToRefNameToInstance.keySet()) {
+            for (String serviceName : namespaceToServiceNameToRefNameToInstance.get(serviceNamespace).keySet()) {
+
+                String qnameOfService = getQname(ta, serviceNamespace, serviceName);
+                Map<String, Services.ServiceInstance> refNameToInstance = namespaceToServiceNameToRefNameToInstance
+                        .get(serviceNamespace).get(serviceName);
+
+                for (String refName : refNameToInstance.keySet()) {
+                    ObjectName on = refNameToInstance.get(refName).getObjectName(ta.getTransactionName());
+                    // TODO check for duplicates
+                    try {
+                        ta.saveServiceReference(qnameOfService, refName, on);
+                    } catch (InstanceNotFoundException e) {
+                        throw new IllegalStateException("Unable to save ref name " + refName + " for instance " + on, e);
+                    }
+                }
+            }
+        }
+    }
+
+    private String getQname(ConfigTransactionClient ta, String namespace, String serviceName) {
+        return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
     private void setOnTransaction(ConfigRegistryClient configRegistryClient,
-            Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements, ObjectName taON) {
+                                  Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements, Services services, ObjectName taON) {
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
 
         for (Multimap<String, ModuleElementResolved> modulesToResolved : resolvedXmlElements.values()) {
@@ -142,7 +181,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
                 InstanceConfigElementResolved ice = moduleElementResolved.getInstanceConfigElementResolved();
                 EditConfigStrategy strategy = ice.getEditStrategy();
-                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta);
+                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta, services);
             }
         }
     }

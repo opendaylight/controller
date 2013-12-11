@@ -87,7 +87,7 @@ public class ModuleConfig {
     public ModuleElementResolved fromXml(XmlElement moduleElement, Services depTracker, String instanceName,
             String moduleNamespace, EditStrategyType defaultStrategy) {
 
-        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy);
+        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, providedServices);
         return new ModuleElementResolved(instanceName, ice);
     }
 

@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Optional;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributesConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services.ServiceInstance;
@@ -46,6 +47,8 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
 
         ServiceInstance byRefName = serviceTracker.getByServiceAndRefName(namespace, serviceName, refName);
         ObjectName on = ObjectNameUtil.createReadOnlyModuleON(byRefName.getModuleName(), byRefName.getInstanceName());
+        on = ObjectNameUtil.createON(on.toString() + "," + AttributesConstants.REF_NAME_ON_PROPERTY_KEY + "=" + refName);
+
         logger.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
         return Optional.of(on);
     }

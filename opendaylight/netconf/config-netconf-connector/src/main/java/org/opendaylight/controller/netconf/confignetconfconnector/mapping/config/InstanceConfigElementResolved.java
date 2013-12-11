@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Multimap;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser;
@@ -24,16 +25,19 @@ public class InstanceConfigElementResolved {
 
     private final EditStrategyType editStrategy;
     private final Map<String, AttributeConfigElement> configuration;
+    private final Multimap<String, String> providedServices;
 
-    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy) {
+    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
         EditStrategyType valueOf = checkStrategy(currentStrategy, defaultStrategy);
         this.editStrategy = valueOf;
         this.configuration = configuration;
+        this.providedServices = providedServices;
     }
 
-    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy) {
+    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
         editStrategy = defaultStrategy;
         this.configuration = configuration;
+        this.providedServices = providedServices;
     }
 
 
@@ -54,7 +58,7 @@ public class InstanceConfigElementResolved {
 
 
     public EditConfigStrategy getEditStrategy() {
-        return editStrategy.getFittingStrategy();
+        return editStrategy.getFittingStrategy(providedServices);
     }
 
     public Map<String, AttributeConfigElement> getConfiguration() {

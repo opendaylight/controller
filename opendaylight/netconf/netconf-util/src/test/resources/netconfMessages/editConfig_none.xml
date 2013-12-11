@@ -8,7 +8,7 @@
         <config>
             <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 <module>
-                    <name>dep</name>
+                    <name>instance-from-code_dep</name>
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-dep
                     </type>
@@ -20,6 +20,7 @@
                         test-impl:impl-dep
                     </type>
                 </module>
+
 
                 <module>
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
@@ -66,42 +67,16 @@
                         <simple-int3>456</simple-int3>
                         <core-size>44</core-size>
                     </peers>
-                    <testing-dep>
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                        <name>ref_dep</name>
-                    </testing-dep>
                 </module>
                 <module>
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-netconf
                     </type>
                     <name>test2</name>
-                    <testing-dep>
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                        <name>ref_dep</name>
-                    </testing-dep>
                 </module>
             </modules>
+
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
-                <service>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                    <instance>
-                        <name>ref_dep</name>
-                        <provider>/modules/module[type='impl-dep'][name='dep']
-                        </provider>
-                    </instance>
-                    <instance>
-                        <name>ref_dep_2</name>
-                        <provider>/modules/module[type='impl-dep'][name='dep2']
-                        </provider>
-                    </instance>
-                    <instance>
-                        <name>ref_test1</name>
-                        <provider>
-                            /modules/module[type='impl-netconf'][name='test1']
-                        </provider>
-                    </instance>
-                </service>
             </services>
         </config>
     </edit-config>

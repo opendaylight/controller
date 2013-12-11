@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
+import com.google.common.collect.Multimap;
+
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -40,14 +42,14 @@ public enum EditStrategyType {
         }
     }
 
-    public EditConfigStrategy getFittingStrategy() {
+    public EditConfigStrategy getFittingStrategy(Multimap<String, String> providedServices) {
         switch (this) {
         case merge:
-            return new MergeEditConfigStrategy();
+            return new MergeEditConfigStrategy(providedServices);
         case replace:
-            return new ReplaceEditConfigStrategy();
+            return new ReplaceEditConfigStrategy(providedServices);
         case delete:
-            return new DeleteEditConfigStrategy();
+            return new DeleteEditConfigStrategy(providedServices);
         case remove:
             return new RemoveEditConfigStrategy();
         case none:

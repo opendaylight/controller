@@ -8,6 +8,15 @@
             <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
                         nc:operation="remove">
+                    <name>instance-from-code_dep</name>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-dep
+                    </type>
+                </module>
+
+
+                <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="remove">
                     <name>dep</name>
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-dep
@@ -27,7 +36,7 @@
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-netconf
                     </type>
-                    <name>test1</name>
+                    <name>instance-from-code</name>
                 </module>
 
                 <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"

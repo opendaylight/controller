@@ -11,7 +11,7 @@
             <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
 
                 <module>
-                    <name>dep</name>
+                    <name>instance-from-code_dep</name>
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-dep
                     </type>
@@ -29,7 +29,7 @@
                         test-impl:impl-netconf
                     </type>
 
-                    <name>test1</name>
+                    <name>instance-from-code</name>
 
                     <sleep-factor>
                         2.58
@@ -91,16 +91,16 @@
                     </peers>
                     <testing-dep>
                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                        <name>ref_dep</name>
+                        <name>ref_dep_user</name>
                     </testing-dep>
 
                     <testing-deps>
                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                        <name>ref_dep</name>
+                        <name>ref_dep_user</name>
                     </testing-deps>
                     <testing-deps>
                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                        <name>ref_dep_2</name>
+                        <name>ref_dep_user_two</name>
                     </testing-deps>
                 </module>
 
@@ -113,7 +113,7 @@
 
                     <testing-dep>
                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
-                        <name>ref_dep_2</name>
+                        <name>ref_dep_user_two</name>
                     </testing-dep>
                 </module>
             </modules>
@@ -122,19 +122,19 @@
                 <service>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
                     <instance>
-                        <name>ref_dep</name>
-                        <provider>/modules/module[type='impl-dep'][name='dep']
+                        <name>ref_dep_user</name>
+                        <provider>/modules/module[type='impl-dep'][name='instance-from-code_dep']
                         </provider>
                     </instance>
                     <instance>
-                        <name>ref_dep_2</name>
+                        <name>ref_dep_user_two</name>
                         <provider>/config/modules/module[name='impl-dep']/instance[name='dep2']
                         </provider>
                     </instance>
                     <instance>
-                        <name>ref_test1</name>
+                        <name>user_to_instance_from_code</name>
                         <provider>
-                            /modules/module[type='impl-netconf'][name='test1']
+                            /modules/module[type='impl-netconf'][name='instance-from-code']
                         </provider>
                     </instance>
                 </service>
