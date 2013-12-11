@@ -7,47 +7,37 @@
  */
 package org.opendaylight.controller.config.util;
 
-import static org.junit.Assert.assertEquals;
-
-import java.lang.management.ManagementFactory;
-import java.util.Set;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
+import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaClient;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class ConfigTransactionClientsTest {
-
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    private String jolokiaURL;
-    private ConfigTransactionControllerMXBean transactionController;
+    private TestingConfigTransactionController transactionController;
     private ObjectName transactionControllerON;
-    private ConfigTransactionClient jmxTransactionClient,
-            jolokiaTransactionClient;
+    private ConfigTransactionClient jmxTransactionClient;
 
     @Before
     public void setUp() throws Exception {
-        jolokiaURL = JolokiaHelper.startTestingJolokia();
         transactionController = new TestingConfigTransactionController();
         transactionControllerON = new ObjectName(ObjectNameUtil.ON_DOMAIN + ":"
                 + ObjectNameUtil.TYPE_KEY + "=TransactionController");
         mbs.registerMBean(transactionController, transactionControllerON);
-        jmxTransactionClient = new ConfigTransactionJMXClient(null,
-                transactionControllerON,
+        jmxTransactionClient = new ConfigTransactionJMXClient(null, transactionControllerON,
                 ManagementFactory.getPlatformMBeanServer());
-        jolokiaTransactionClient = new ConfigTransactionJolokiaClient(
-                jolokiaURL, transactionControllerON, null);
     }
 
     @After
     public void cleanUp() throws Exception {
-        JolokiaHelper.stopJolokia();
         if (transactionControllerON != null) {
             mbs.unregisterMBean(transactionControllerON);
         }
@@ -56,8 +46,8 @@ public class ConfigTransactionClientsTest {
     @Test
     public void testLookupConfigBeans() throws Exception {
         Set<ObjectName> jmxLookup = testClientLookupConfigBeans(jmxTransactionClient);
-        Set<ObjectName> jolokiaLookup = testClientLookupConfigBeans(jolokiaTransactionClient);
-        assertEquals(jmxLookup, jolokiaLookup);
+        assertEquals(Sets.newHashSet(transactionController.conf1,
+                transactionController.conf2, transactionController.conf3), jmxLookup);
     }
 
     private Set<ObjectName> testClientLookupConfigBeans(
@@ -69,5 +59,4 @@ public class ConfigTransactionClientsTest {
         assertEquals(3, beans.size());
         return beans;
     }
-
 }

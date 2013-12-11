@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.parallelapsp.test;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
-import org.opendaylight.controller.config.manager.impl.AbstractConfigWithJolokiaTest;
+import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
-abstract class AbstractParallelAPSPTest extends AbstractConfigWithJolokiaTest {
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
+
+abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
     protected final String fixed1 = "fixed1";
     protected final String apsp1 = "apsp-parallel";
 

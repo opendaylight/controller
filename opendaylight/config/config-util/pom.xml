@@ -17,16 +17,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jolokia</groupId>
-            <artifactId>jolokia-client-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jolokia</groupId>
-            <artifactId>jolokia-jvm</artifactId>
-            <classifier>agent</classifier>
-        </dependency>
-
         <!-- test dependencies -->
         <dependency>
             <groupId>com.google.guava</groupId>

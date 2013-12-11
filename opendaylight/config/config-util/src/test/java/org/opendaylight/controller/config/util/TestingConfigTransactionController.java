@@ -23,7 +23,7 @@ import com.google.common.collect.Sets;
 public class TestingConfigTransactionController implements
         ConfigTransactionControllerMXBean {
 
-    private final ObjectName conf1, conf2, conf3;
+    public final ObjectName conf1, conf2, conf3;
 
     public static final String moduleName1 = "moduleA";
     public static final String moduleName2 = "moduleB";

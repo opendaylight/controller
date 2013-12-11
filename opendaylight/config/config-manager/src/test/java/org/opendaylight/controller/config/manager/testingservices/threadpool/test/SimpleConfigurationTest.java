@@ -7,28 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.threadpool.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import javax.management.DynamicMBean;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.RuntimeMBeanException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,14 +15,32 @@ import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.ValidationException.ExceptionMessageWithStackTrace;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigWithJolokiaTest;
+import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaClient;
+
+import javax.management.DynamicMBean;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests basic functionality of configuration registry:
@@ -58,7 +54,7 @@ import org.opendaylight.controller.config.util.jolokia.ConfigTransactionJolokiaC
  * Only one bean is being configured - {@link TestingThreadPoolIfc} which has no
  * dependencies.
  */
-public class SimpleConfigurationTest extends AbstractConfigWithJolokiaTest {
+public class SimpleConfigurationTest extends AbstractConfigTest {
     private final int numberOfThreads = 5;
     private final int numberOfThreads2 = 10;
     private static final String fixed1 = "fixed1";
@@ -134,12 +130,6 @@ public class SimpleConfigurationTest extends AbstractConfigWithJolokiaTest {
         testValidation(transaction);
     }
 
-    @Test
-    public void testValidationUsingJolokiaClient() throws Exception {
-        ConfigTransactionClient transaction = configRegistryJolokiaClient
-                .createTransaction();
-        testValidation(transaction);
-    }
 
     private void testValidation(ConfigTransactionClient transaction)
             throws InstanceAlreadyExistsException, ReflectionException,
@@ -393,68 +383,5 @@ public class SimpleConfigurationTest extends AbstractConfigWithJolokiaTest {
         }
     }
 
-    @Test
-    public void testOptimisticLock_ConfigTransactionJolokiaClient()
-            throws Exception {
-        ConfigTransactionJolokiaClient transaction1 = configRegistryJolokiaClient
-                .createTransaction();
-        ConfigTransactionJolokiaClient transaction2 = configRegistryJolokiaClient
-                .createTransaction();
-        transaction2.assertVersion(0, 2);
-        transaction2.commit();
-        try {
-            transaction1.commit();
-            fail();
-        } catch (ConflictingVersionException e) {
-            assertEquals(
-                    "Optimistic lock failed. Expected parent version 2, was 0",
-                    e.getMessage());
-        }
-    }
-
-    @Test
-    public void testOptimisticLock_ConfigRegistryJolokiaClient()
-            throws Exception {
-        ConfigTransactionJolokiaClient transaction1 = configRegistryJolokiaClient
-                .createTransaction();
-        ConfigTransactionJolokiaClient transaction2 = configRegistryJolokiaClient
-                .createTransaction();
-        transaction2.assertVersion(0, 2);
-        transaction2.commit();
-        try {
-            configRegistryJolokiaClient.commitConfig(transaction1
-                    .getObjectName());
-            fail();
-        } catch (ConflictingVersionException e) {
-            assertEquals(
-                    "Optimistic lock failed. Expected parent version 2, was 0",
-                    e.getMessage());
-        }
-    }
-
-    @Test
-    public void testUsingJolokia() throws Exception {
-        ConfigTransactionJolokiaClient transactionClient = configRegistryJolokiaClient
-                .createTransaction();
-
-        ObjectName name = transactionClient.createModule(
-                TestingFixedThreadPoolModuleFactory.NAME, fixed1);
-
-        try {
-            transactionClient.validateConfig();
-            fail();
-        } catch (ValidationException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("Parameter 'threadCount' must be greater than 0"));
-        }
-
-        transactionClient.setAttribute(name, "ThreadCount", numberOfThreads);
-        // commit
-        CommitStatus commitStatus = transactionClient.commit();
-        CommitStatus expected = new CommitStatus(Arrays.asList(ObjectNameUtil
-                .withoutTransactionName(name)), emptyONs, emptyONs);
-        assertEquals(expected, commitStatus);
-    }
 
 }
