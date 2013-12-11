@@ -8,7 +8,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>sal-remoterpc-connector-test-nb</artifactId>
+  <artifactId>remoterpc-routingtable-nb-it</artifactId>
   <packaging>bundle</packaging>
 
   <build>
@@ -21,6 +21,7 @@
         <configuration>
           <instructions>
             <Export-Package>
+             org.opendaylight.controller.tests.zmqroutingtable.rest
             </Export-Package>
             <Import-Package>
               com.sun.jersey.spi.container.servlet,
@@ -32,22 +33,18 @@
               org.slf4j,
               org.apache.catalina.filters,
               org.codehaus.jackson.jaxrs,
-              org.opendaylight.controller.sample.zeromq.provider,
-              org.opendaylight.controller.sample.zeromq.consumer,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.yangtools.yang.common,
               org.opendaylight.controller.sal.connector.api,
-              org.opendaylight.controller.sal.connector.remoterpc.api;version="[0.4,1)",
-              org.opendaylight.controller.sal.connector.remoterpc.impl;version="[0.4,1)",
-              org.opendaylight.controller.sal.connector.remoterpc.dto,
-              org.opendaylight.controller.sal.connector.remoterpc.util,
+              org.opendaylight.controller.sal.connector.remoterpc.api,
+              org.opendaylight.controller.sal.connector.remoterpc.impl,
               org.osgi.framework,
               com.google.common.base,
               org.opendaylight.yangtools.yang.data.api,
               !org.codehaus.enunciate.jaxrs
 
             </Import-Package>
-            <Web-ContextPath>/controller/nb/v2/zmqnb</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/zmqnbrt</Web-ContextPath>
             <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
@@ -71,21 +68,7 @@
       <artifactId>sal</artifactId>
       <version>0.5.1-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.tests</groupId>
-      <artifactId>sal-remoterpc-connector-test-provider</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.tests</groupId>
-      <artifactId>sal-remoterpc-connector-test-consumer</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-remoterpc-connector</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
+
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
