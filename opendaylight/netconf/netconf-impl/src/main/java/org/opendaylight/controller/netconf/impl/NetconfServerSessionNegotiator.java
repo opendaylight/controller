@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
+import java.net.InetSocketAddress;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
@@ -20,15 +23,13 @@ import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class NetconfServerSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession> {
 
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
-
-    private static final AdditionalHeader DEFAULT_HEADER = new AdditionalHeader();
 
     protected NetconfServerSessionNegotiator(NetconfServerSessionPreferences sessionPreferences,
             Promise<NetconfServerSession> promise, Channel channel, Timer timer, SessionListener sessionListener) {
@@ -43,7 +44,8 @@ public class NetconfServerSessionNegotiator extends
         if (additionalHeader.isPresent()) {
             parsedHeader = new AdditionalHeader(additionalHeader.get());
         } else {
-            parsedHeader = DEFAULT_HEADER;
+            parsedHeader = new AdditionalHeader("unknow", ((InetSocketAddress)channel.localAddress()).getHostString(),
+                    "tcp", "client");
         }
         logger.debug("Additional header from hello parsed as {} from {}", parsedHeader, additionalHeader);
 
@@ -54,23 +56,34 @@ public class NetconfServerSessionNegotiator extends
 
         private static final Pattern pattern = Pattern
                 .compile("\\[(?<username>[^;]+);(?<address>[0-9\\.]+)[:/](?<port>[0-9]+);(?<transport>[a-z]+)[^\\]]+\\]");
+        private static final Pattern customHeaderPattern = Pattern
+                .compile("\\[(?<username>[^;]+);(?<address>[0-9\\.]+)[:/](?<port>[0-9]+);(?<transport>[a-z]+);(?<sessionType>[a-z]+)[^\\]]+\\]");
         private final String username;
         private final String address;
         private final String transport;
+        private final String sessionIdentifier;
 
         public AdditionalHeader(String addHeaderAsString) {
             addHeaderAsString = addHeaderAsString.trim();
             Matcher matcher = pattern.matcher(addHeaderAsString);
+            Matcher matcher2 = customHeaderPattern.matcher(addHeaderAsString);
             Preconditions.checkArgument(matcher.matches(), "Additional header in wrong format %s, expected %s",
                     addHeaderAsString, pattern);
             this.username = matcher.group("username");
             this.address = matcher.group("address");
             this.transport = matcher.group("transport");
+            if(matcher2.matches()) {
+                this.sessionIdentifier = matcher2.group("sessionType");
+            } else {
+                this.sessionIdentifier = "client";
+            }
         }
 
-        private AdditionalHeader() {
-            this.username = this.address = "unknown";
-            this.transport = "ssh";
+        private AdditionalHeader(String userName, String hostAddress, String transport, String sessionType) {
+            this.address = hostAddress;
+            this.username = userName;
+            this.transport = transport;
+            this.sessionIdentifier = sessionType;
         }
 
         String getUsername() {
@@ -85,6 +98,10 @@ public class NetconfServerSessionNegotiator extends
             return transport;
         }
 
+        String getSessionType() {
+            return sessionIdentifier;
+        }
+
         @Override
         public String toString() {
             final StringBuffer sb = new StringBuffer("AdditionalHeader{");
@@ -95,4 +112,5 @@ public class NetconfServerSessionNegotiator extends
             return sb.toString();
         }
     }
+
 }
