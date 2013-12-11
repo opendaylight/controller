@@ -8,13 +8,21 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.NetconfTcp;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1Builder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfSsh;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.Transport;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
@@ -25,10 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Preconditions;
 
 public class NetconfServerSession extends NetconfSession implements NetconfManagementSession {
 
@@ -91,14 +96,18 @@ public class NetconfServerSession extends NetconfSession implements NetconfManag
         builder.setOutNotifications(new ZeroBasedCounter32(0L));
 
         builder.setKey(new SessionKey(getSessionId()));
+
+        Session1Builder builder1 = new Session1Builder();
+        builder1.setSessionIdentifier(header.getSessionType());
+        builder.addAugmentation(Session1.class, builder1.build());
+
         return builder.build();
     }
 
     private Class<? extends Transport> getTransportForString(String transport) {
         switch(transport) {
             case "ssh" : return NetconfSsh.class;
-            // TODO what about tcp
-            case "tcp" : return NetconfSsh.class;
+            case "tcp" : return NetconfTcp.class;
             default: throw new IllegalArgumentException("Unknown transport type " + transport);
         }
     }

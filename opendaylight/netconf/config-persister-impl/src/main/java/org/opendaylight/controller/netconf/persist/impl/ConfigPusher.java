@@ -8,14 +8,24 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import io.netty.channel.EventLoopGroup;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.concurrent.Immutable;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -25,14 +35,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.annotation.concurrent.Immutable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 @Immutable
 public class ConfigPusher {
@@ -127,10 +131,14 @@ public class ConfigPusher {
 
         long deadline = pollingStart + timeout;
 
+        String additionalHeader = NetconfMessageAdditionalHeader.toString("unknown", address.getAddress().getHostAddress(),
+                Integer.toString(address.getPort()), "tcp", Optional.of("persister"));
+
         Set<String> latestCapabilities = new HashSet<>();
         while (System.currentTimeMillis() < deadline) {
             attempt++;
-            NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
+            NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup,
+                    nettyThreadgroup, additionalHeader);
             NetconfClient netconfClient;
             try {
                 netconfClient = new NetconfClient(this.toString(), address, delay, netconfClientDispatcher);

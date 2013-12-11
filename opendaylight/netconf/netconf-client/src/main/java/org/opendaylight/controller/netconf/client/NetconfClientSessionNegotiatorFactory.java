@@ -8,10 +8,13 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -20,15 +23,18 @@ import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory {
 
     private final Timer timer;
 
-    public NetconfClientSessionNegotiatorFactory(Timer timer) {
+    private final Optional<String> additionalHeader;
+
+    public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<String> additionalHeader) {
         this.timer = timer;
+        this.additionalHeader = additionalHeader;
     }
 
     private static NetconfMessage loadHelloMessageTemplate() {
@@ -45,7 +51,11 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     public SessionNegotiator getSessionNegotiator(SessionListenerFactory sessionListenerFactory, Channel channel,
             Promise promise) {
         // Hello message needs to be recreated every time
-        NetconfSessionPreferences proposal = new NetconfSessionPreferences(loadHelloMessageTemplate());
+        NetconfMessage helloMessage = loadHelloMessageTemplate();
+        if(this.additionalHeader.isPresent()) {
+            helloMessage = new NetconfMessage(helloMessage.getDocument(), additionalHeader.get());
+        }
+        NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
                 sessionListenerFactory.getSessionListener());
     }
