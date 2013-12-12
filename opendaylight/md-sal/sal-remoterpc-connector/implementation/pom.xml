@@ -140,8 +140,11 @@
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.md.sal.remote.rpc,
-                            org.opendaylight.controller.sal.connector.remoterpc,
-                            org.opendaylight.controller.sal.connector.remoterpc.*
+                            org.opendaylight.controller.sal.connector.remoterpc.util,
+                            org.opendaylight.controller.sal.connector.remoterpc.dto,
+                            org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcClient,
+                            org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcServer,
+                            org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcProvider
                         </Export-Package>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                     </instructions>

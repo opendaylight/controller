@@ -13,14 +13,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.sal.connector.remoterpc.Client;
+
 import org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcClient;
-import org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcServer;
-import org.opendaylight.controller.sal.connector.remoterpc.ServerImpl;
+
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sample.zeromq.provider.ExampleProvider;
 import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
+import org.opendaylight.controller.sample.zeromq.provider.ExampleProvider;
+
 import org.opendaylight.controller.test.sal.binding.it.TestHelper;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
@@ -46,8 +46,7 @@ import java.util.Hashtable;
 
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
+
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 @RunWith(PaxExam.class)
@@ -91,8 +90,8 @@ public class RouterTest {
 
     _logger.debug("Provider sends announcement [{}]", "heartbeat");
     provider.announce(QNAME);
-    ServiceReference routerRef = ctx.getServiceReference(Client.class);
-    Client router = (Client) ctx.getService(routerRef);
+    ServiceReference routerRef = ctx.getServiceReference(RemoteRpcClient.class);
+    RemoteRpcClient router = (RemoteRpcClient) ctx.getService(routerRef);
     _logger.debug("Found router[{}]", router);
     _logger.debug("Invoking RPC [{}]", QNAME);
     for (int i = 0; i < 3; i++) {
@@ -353,6 +352,7 @@ public class RouterTest {
       }
     }
   }
+
   private String stateToString(int state) {
     switch (state) {
       case Bundle.ACTIVE:
@@ -371,85 +371,84 @@ public class RouterTest {
   @Configuration
   public Option[] config() {
     return options(systemProperty("osgi.console").value("2401"),
-        systemProperty("rpc.port").value("5555"),
-        mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(), //
-        mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
-        mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
-        mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
+            systemProperty("rpc.port").value("5555"),
+            mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(), //
+            mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
+            mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
+            mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
 
-        //mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject().update(), //
-        mavenBundle(ODL, "sal-common").versionAsInProject(), //
-        mavenBundle(ODL, "sal-common-api").versionAsInProject(),//
-        mavenBundle(ODL, "sal-common-impl").versionAsInProject(), //
-        mavenBundle(ODL, "sal-common-util").versionAsInProject(), //
-        mavenBundle(ODL, "sal-core-api").versionAsInProject().update(), //
-        mavenBundle(ODL, "sal-broker-impl").versionAsInProject(), //
-        mavenBundle(ODL, "sal-core-spi").versionAsInProject().update(), //
-        mavenBundle(ODL, "sal-connector-api").versionAsInProject(), //
-
-
-        
-        baseModelBundles(),
-        bindingAwareSalBundles(),
-        TestHelper.bindingIndependentSalBundles(),
-        TestHelper.configMinumumBundles(),
-        TestHelper.mdSalCoreBundles(),
-        
-      //Added the consumer
-        mavenBundle(SAMPLE, "sal-remoterpc-connector-test-consumer").versionAsInProject(), //
-      //**** These two bundles below are NOT successfully resolved -- some of their dependencies must be missing
-      //**** This causes the "Message" error to occur, the class cannot be found
-        mavenBundle(SAMPLE, "sal-remoterpc-connector-test-provider").versionAsInProject(), //
-        mavenBundle(ODL, "sal-remoterpc-connector").versionAsInProject(), //
-
-        mavenBundle(ODL, "zeromq-routingtable.implementation").versionAsInProject(),
-        mavenBundle(YANG, "concepts").versionAsInProject(),
-        mavenBundle(YANG, "yang-binding").versionAsInProject(), //
-        mavenBundle(YANG, "yang-common").versionAsInProject(), //
-        mavenBundle(YANG, "yang-data-api").versionAsInProject(), //
-        mavenBundle(YANG, "yang-data-impl").versionAsInProject(), //
-        mavenBundle(YANG, "yang-model-api").versionAsInProject(), //
-        mavenBundle(YANG, "yang-parser-api").versionAsInProject(), //
-        mavenBundle(YANG, "yang-parser-impl").versionAsInProject(), //
-        mavenBundle(YANG, "yang-model-util").versionAsInProject(), //
-        mavenBundle(YANG + ".thirdparty", "xtend-lib-osgi").versionAsInProject(), //
-        mavenBundle(YANG + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
-        mavenBundle("com.google.guava", "guava").versionAsInProject(), //
-        mavenBundle("org.zeromq", "jeromq").versionAsInProject(),
-        mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
-        mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
-        //routingtable dependencies
-        systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
-        // List framework bundles
-        mavenBundle("equinoxSDK381", "org.eclipse.equinox.console").versionAsInProject(),
-        mavenBundle("equinoxSDK381", "org.eclipse.equinox.util").versionAsInProject(),
-        mavenBundle("equinoxSDK381", "org.eclipse.osgi.services").versionAsInProject(),
-        mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds").versionAsInProject(),
-        mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command").versionAsInProject(),
-        mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime").versionAsInProject(),
-        mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell").versionAsInProject(),
-        // List logger bundles
-
-        mavenBundle("org.opendaylight.controller", "clustering.services")
-            .versionAsInProject(),
-        mavenBundle("org.opendaylight.controller", "clustering.stub")
-            .versionAsInProject(),
+            //mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject().update(), //
+            mavenBundle(ODL, "sal-common").versionAsInProject(), //
+            mavenBundle(ODL, "sal-common-api").versionAsInProject(),//
+            mavenBundle(ODL, "sal-common-impl").versionAsInProject(), //
+            mavenBundle(ODL, "sal-common-util").versionAsInProject(), //
+            mavenBundle(ODL, "sal-core-api").versionAsInProject().update(), //
+            mavenBundle(ODL, "sal-broker-impl").versionAsInProject(), //
+            mavenBundle(ODL, "sal-core-spi").versionAsInProject().update(), //
+            mavenBundle(ODL, "sal-connector-api").versionAsInProject(), //
 
 
-        // List all the bundles on which the test case depends
-        mavenBundle("org.opendaylight.controller", "sal")
-            .versionAsInProject(),
-        mavenBundle("org.opendaylight.controller", "sal.implementation")
-            .versionAsInProject(),
-        mavenBundle("org.jboss.spec.javax.transaction",
-            "jboss-transaction-api_1.1_spec").versionAsInProject(),
-        mavenBundle("org.apache.commons", "commons-lang3")
-            .versionAsInProject(),
-        mavenBundle("org.apache.felix",
-            "org.apache.felix.dependencymanager")
-            .versionAsInProject(),
+            baseModelBundles(),
+            bindingAwareSalBundles(),
+            TestHelper.bindingIndependentSalBundles(),
+            TestHelper.configMinumumBundles(),
+            TestHelper.mdSalCoreBundles(),
 
-        junitBundles()
+            //Added the consumer
+            mavenBundle(SAMPLE, "sal-remoterpc-connector-test-consumer").versionAsInProject(), //
+            //**** These two bundles below are NOT successfully resolved -- some of their dependencies must be missing
+            //**** This causes the "Message" error to occur, the class cannot be found
+            mavenBundle(SAMPLE, "sal-remoterpc-connector-test-provider").versionAsInProject(), //
+            mavenBundle(ODL, "sal-remoterpc-connector").versionAsInProject(), //
+
+            mavenBundle(ODL, "zeromq-routingtable.implementation").versionAsInProject(),
+            mavenBundle(YANG, "concepts").versionAsInProject(),
+            mavenBundle(YANG, "yang-binding").versionAsInProject(), //
+            mavenBundle(YANG, "yang-common").versionAsInProject(), //
+            mavenBundle(YANG, "yang-data-api").versionAsInProject(), //
+            mavenBundle(YANG, "yang-data-impl").versionAsInProject(), //
+            mavenBundle(YANG, "yang-model-api").versionAsInProject(), //
+            mavenBundle(YANG, "yang-parser-api").versionAsInProject(), //
+            mavenBundle(YANG, "yang-parser-impl").versionAsInProject(), //
+            mavenBundle(YANG, "yang-model-util").versionAsInProject(), //
+            mavenBundle(YANG + ".thirdparty", "xtend-lib-osgi").versionAsInProject(), //
+            mavenBundle(YANG + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
+            mavenBundle("com.google.guava", "guava").versionAsInProject(), //
+            mavenBundle("org.zeromq", "jeromq").versionAsInProject(),
+            mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
+            mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
+            //routingtable dependencies
+            systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
+            // List framework bundles
+            mavenBundle("equinoxSDK381", "org.eclipse.equinox.console").versionAsInProject(),
+            mavenBundle("equinoxSDK381", "org.eclipse.equinox.util").versionAsInProject(),
+            mavenBundle("equinoxSDK381", "org.eclipse.osgi.services").versionAsInProject(),
+            mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds").versionAsInProject(),
+            mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command").versionAsInProject(),
+            mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime").versionAsInProject(),
+            mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell").versionAsInProject(),
+            // List logger bundles
+
+            mavenBundle("org.opendaylight.controller", "clustering.services")
+                    .versionAsInProject(),
+            mavenBundle("org.opendaylight.controller", "clustering.stub")
+                    .versionAsInProject(),
+
+
+            // List all the bundles on which the test case depends
+            mavenBundle("org.opendaylight.controller", "sal")
+                    .versionAsInProject(),
+            mavenBundle("org.opendaylight.controller", "sal.implementation")
+                    .versionAsInProject(),
+            mavenBundle("org.jboss.spec.javax.transaction",
+                    "jboss-transaction-api_1.1_spec").versionAsInProject(),
+            mavenBundle("org.apache.commons", "commons-lang3")
+                    .versionAsInProject(),
+            mavenBundle("org.apache.felix",
+                    "org.apache.felix.dependencymanager")
+                    .versionAsInProject(),
+
+            junitBundles()
     );
   }
 
