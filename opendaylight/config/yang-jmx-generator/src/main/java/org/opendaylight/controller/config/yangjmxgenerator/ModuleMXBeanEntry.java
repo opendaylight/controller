@@ -136,11 +136,13 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private final Map<String, QName> providedServices;
 
     private Collection<RuntimeBeanEntry> runtimeBeans;
+    private final QName yangModuleQName;
 
     public ModuleMXBeanEntry(IdentitySchemaNode id,
             Map<String, AttributeIfc> yangToAttributes, String packageName,
             Map<String, QName> providedServices2, String javaNamePrefix,
-            String namespace, Collection<RuntimeBeanEntry> runtimeBeans) {
+            String namespace, Collection<RuntimeBeanEntry> runtimeBeans,
+            QName yangModuleQName) {
         this.globallyUniqueName = id.getQName().getLocalName();
         this.yangToAttributes = yangToAttributes;
         this.nullableDescription = id.getDescription();
@@ -149,6 +151,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         this.namespace = checkNotNull(namespace);
         this.providedServices = Collections.unmodifiableMap(providedServices2);
         this.runtimeBeans = runtimeBeans;
+        this.yangModuleQName = yangModuleQName;
     }
 
     public String getMXBeanInterfaceName() {
@@ -395,7 +398,8 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                                 moduleIdentity, yangToAttributes, packageName,
                                 providedServices, javaNamePrefix, currentModule
                                         .getNamespace().toString(),
-                                runtimeBeans);
+                                runtimeBeans,
+                                ModuleUtil.getQName(currentModule));
                         moduleMXBeanEntry.setYangModuleName(currentModule
                                 .getName());
                         moduleMXBeanEntry
@@ -728,6 +732,10 @@ public class ModuleMXBeanEntry extends AbstractEntry {
 
     public String getNullableDescription() {
         return nullableDescription;
+    }
+
+    public QName getYangModuleQName() {
+        return yangModuleQName;
     }
 
     @Override

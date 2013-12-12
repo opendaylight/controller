@@ -57,13 +57,14 @@ public class ServiceInterfaceEntry extends AbstractEntry {
     private final String exportedOsgiClassName;
     private final QName qName;
     private final String nullableDescription, packageName, typeName;
+    private final QName yangModuleQName;
 
-    private ServiceInterfaceEntry(IdentitySchemaNode id, String packageName) {
-        this(Optional.<ServiceInterfaceEntry> absent(), id, packageName);
+    private ServiceInterfaceEntry(IdentitySchemaNode id, String packageName, QName yangModuleQName) {
+        this(Optional.<ServiceInterfaceEntry> absent(), id, packageName, yangModuleQName);
     }
 
     private ServiceInterfaceEntry(Optional<ServiceInterfaceEntry> base,
-            IdentitySchemaNode id, String packageName) {
+            IdentitySchemaNode id, String packageName, QName yangModuleQName) {
         checkNotNull(base);
         this.maybeBaseCache = base;
         List<UnknownSchemaNode> unknownSchemaNodes = id.getUnknownSchemaNodes();
@@ -93,6 +94,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         nullableDescription = id.getDescription();
         typeName = getSimpleName(exportedOsgiClassName) + CLASS_NAME_SUFFIX;
         this.packageName = packageName;
+        this.yangModuleQName = yangModuleQName;
     }
 
     private static final String getSimpleName(String fullyQualifiedName) {
@@ -120,14 +122,14 @@ public class ServiceInterfaceEntry extends AbstractEntry {
      * @return Map of QNames as keys and ServiceInterfaceEntry instances as
      *         values
      */
-    public static Map<QName, ServiceInterfaceEntry> create(Module module,
+    public static Map<QName, ServiceInterfaceEntry> create(Module currentModule,
             String packageName) {
         logger.debug("Generating ServiceInterfaces from {} to package {}",
-                module.getNamespace(), packageName);
+                currentModule.getNamespace(), packageName);
 
         Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         Set<IdentitySchemaNode> notVisited = new HashSet<>(
-                module.getIdentities());
+                currentModule.getIdentities());
         int lastSize = notVisited.size() + 1;
         while (notVisited.size() > 0) {
             if (notVisited.size() == lastSize) {
@@ -148,18 +150,18 @@ public class ServiceInterfaceEntry extends AbstractEntry {
                 } else if (identity.getBaseIdentity().getQName()
                         .equals(SERVICE_TYPE_Q_NAME)) {
                     // this is a base type
-                    created = new ServiceInterfaceEntry(identity, packageName);
+                    created = new ServiceInterfaceEntry(identity, packageName, ModuleUtil.getQName(currentModule));
                 } else {
                     ServiceInterfaceEntry foundBase = identitiesToSIs
                             .get(identity.getBaseIdentity());
                     // derived type, did we convert the parent?
                     if (foundBase != null) {
                         created = new ServiceInterfaceEntry(
-                                Optional.of(foundBase), identity, packageName);
+                                Optional.of(foundBase), identity, packageName, ModuleUtil.getQName(currentModule));
                     }
                 }
                 if (created != null) {
-                    created.setYangModuleName(module.getName());
+                    created.setYangModuleName(currentModule.getName());
                     // TODO how to get local name
                     created.setYangModuleLocalname(identity.getQName()
                             .getLocalName());
@@ -188,6 +190,10 @@ public class ServiceInterfaceEntry extends AbstractEntry {
 
     public String getTypeName() {
         return typeName;
+    }
+
+    public QName getYangModuleQName() {
+        return yangModuleQName;
     }
 
     @Override

@@ -173,4 +173,9 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     public String getServiceInterfaceName(String namespace, String localName) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Set<String> getAvailableModuleFactoryQNames() {
+        throw new UnsupportedOperationException();
+    }
 }

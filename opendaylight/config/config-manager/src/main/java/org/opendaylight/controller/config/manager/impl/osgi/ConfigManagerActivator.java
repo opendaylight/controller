@@ -36,8 +36,7 @@ public class ConfigManagerActivator implements BundleActivator {
                 new BundleContextBackedModuleFactoriesResolver(context);
         MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
         configRegistry = new ConfigRegistryImpl(
-                bundleContextBackedModuleFactoriesResolver, context,
-                configMBeanServer);
+                bundleContextBackedModuleFactoriesResolver, configMBeanServer);
 
         // register config registry to OSGi
         configRegistryServiceRegistration = context.registerService(ConfigRegistryImpl.class, configRegistry, null);

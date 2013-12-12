@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TestingFixedThreadPoolModuleFactory implements ModuleFactory {
+public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThreadPoolModuleFactory implements ModuleFactory {
     public static final String NAME = "fixed";
 
     private static Set<Class<? extends AbstractServiceInterface>> ifc = Collections.unmodifiableSet(Sets.newHashSet(

@@ -33,13 +33,13 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.String.format;
@@ -574,6 +574,11 @@ class ConfigTransactionControllerImpl implements
 
     public TransactionIdentifier getTransactionIdentifier() {
         return txLookupRegistry.getTransactionIdentifier();
+    }
+
+    @Override
+    public Set<String> getAvailableModuleFactoryQNames() {
+        return txLookupRegistry.getAvailableModuleFactoryQNames();
     }
 
 }

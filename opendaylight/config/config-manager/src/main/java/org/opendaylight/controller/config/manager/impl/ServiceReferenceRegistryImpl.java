@@ -75,6 +75,11 @@ public class ServiceReferenceRegistryImpl implements ServiceReferenceReadableReg
             public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
                 throw new InstanceNotFoundException("Cannot find " + objectName);
             }
+
+            @Override
+            public Set<String> getAvailableModuleFactoryQNames() {
+                throw new UnsupportedOperationException();
+            }
         };
         return new ServiceReferenceRegistryImpl(Collections.<String, ModuleFactory>emptyMap(), lookupRegistry,
                 Collections.<String /* qName */, Map<String /* refName */, ModuleIdentifier>>emptyMap());
