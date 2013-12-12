@@ -1,17 +1,21 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import org.opendaylight.controller.sal.connector.remoterpc.Client;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.Provider.ProviderFunctionality;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+
+import java.util.Collection;
+import java.util.Set;
 
 public class RemoteRpcProvider implements 
     RemoteRpcServer,
@@ -19,7 +23,7 @@ public class RemoteRpcProvider implements
     Provider {
 
     private final ServerImpl server;
-    private final Client client;
+    private final ClientImpl client;
     private RoutingTableProvider provider;
 
     @Override
@@ -40,7 +44,7 @@ public class RemoteRpcProvider implements
     }
     
     
-    public RemoteRpcProvider(ServerImpl server, Client client) {
+    public RemoteRpcProvider(ServerImpl server, ClientImpl client) {
         this.server = server;
         this.client = client;
     }
@@ -48,12 +52,12 @@ public class RemoteRpcProvider implements
     public void setBrokerSession(ProviderSession session) {
         server.setBrokerSession(session);
     }
-    public void setServerPool(ExecutorService serverPool) {
-        server.setServerPool(serverPool);
-    }
+//    public void setServerPool(ExecutorService serverPool) {
+//        server.setServerPool(serverPool);
+//    }
     public void start() {
-        client.setRoutingTableProvider(provider);
-        server.setRoutingTableProvider(provider);
+        //client.setRoutingTableProvider(provider);
+        //server.setRoutingTableProvider(provider);
         server.start();
         client.start();
     }
@@ -84,9 +88,6 @@ public class RemoteRpcProvider implements
         client.close();
     }
 
-    
-    
-    
     @Override
     public void stop() {
         server.stop();

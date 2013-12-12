@@ -9,10 +9,7 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.remote.rpc;
 
-import org.opendaylight.controller.sal.connector.remoterpc.Client;
-import org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcProvider;
-import org.opendaylight.controller.sal.connector.remoterpc.RoutingTableProvider;
-import org.opendaylight.controller.sal.connector.remoterpc.ServerImpl;
+import org.opendaylight.controller.sal.connector.remoterpc.*;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.osgi.framework.BundleContext;
 
@@ -51,7 +48,7 @@ public final class ZeroMQServerModule extends org.opendaylight.controller.config
 
         ServerImpl serverImpl = new ServerImpl(port);
         
-        Client clientImpl = new Client();
+        ClientImpl clientImpl = new ClientImpl();
         RemoteRpcProvider facade = new RemoteRpcProvider(serverImpl, clientImpl);
         
         facade.setRoutingTableProvider(provider );
