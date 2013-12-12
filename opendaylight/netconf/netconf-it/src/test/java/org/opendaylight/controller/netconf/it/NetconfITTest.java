@@ -8,18 +8,14 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import static java.util.Collections.emptyList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -31,12 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
-
 import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -51,6 +44,7 @@ import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactor
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
+import org.opendaylight.controller.netconf.StubUserManager;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
@@ -68,6 +62,7 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFact
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -79,12 +74,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static java.util.Collections.emptyList;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfITTest extends AbstractConfigTest {
 
@@ -435,7 +431,9 @@ public class NetconfITTest extends AbstractConfigTest {
 
     private void startSSHServer() throws Exception{
         logger.info("Creating SSH server");
-        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830,tcpAddress));
+        StubUserManager um = new StubUserManager(USERNAME,PASSWORD);
+        AuthProvider ap = new AuthProvider(um);
+        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830,tcpAddress,ap));
         sshServerThread.setDaemon(true);
         sshServerThread.start();
         logger.info("SSH server on");
