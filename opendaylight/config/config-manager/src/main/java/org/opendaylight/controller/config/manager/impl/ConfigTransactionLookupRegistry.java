@@ -12,11 +12,16 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
+import org.opendaylight.controller.config.manager.impl.util.ModuleQNameUtil;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import java.io.Closeable;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -27,12 +32,14 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
     private final TransactionJMXRegistrator transactionJMXRegistrator;
     private final TransactionIdentifier transactionIdentifier;
     private final TransactionModuleJMXRegistrator txModuleJMXRegistrator;
+    private final Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories;
 
     ConfigTransactionLookupRegistry(TransactionIdentifier transactionIdentifier,
-                                    TransactionJMXRegistratorFactory factory) {
+                                    TransactionJMXRegistratorFactory factory, Map<String, Entry<ModuleFactory, BundleContext>> allCurrentFactories) {
         this.transactionIdentifier = transactionIdentifier;
         this.transactionJMXRegistrator = factory.create();
         this.txModuleJMXRegistrator = transactionJMXRegistrator.createTransactionModuleJMXRegistrator();
+        this.allCurrentFactories = allCurrentFactories;
     }
 
     private void checkTransactionName(ObjectName objectName) {
@@ -104,6 +111,12 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
     public void registerMBean(ConfigTransactionControllerInternal transactionController, ObjectName controllerObjectName) throws InstanceAlreadyExistsException {
         transactionJMXRegistrator.registerMBean(transactionController, controllerObjectName);
     }
+
+    @Override
+    public Set<String> getAvailableModuleFactoryQNames() {
+        return ModuleQNameUtil.getQNames(allCurrentFactories);
+    }
+
 }
 
 interface TransactionJMXRegistratorFactory {

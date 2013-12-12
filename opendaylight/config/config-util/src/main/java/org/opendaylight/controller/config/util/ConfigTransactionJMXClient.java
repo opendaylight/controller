@@ -233,4 +233,9 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
                     + attrName + " for " + on, e);
         }
     }
+
+    @Override
+    public Set<String> getAvailableModuleFactoryQNames() {
+        return configTransactionControllerMXBeanProxy.getAvailableModuleFactoryQNames();
+    }
 }

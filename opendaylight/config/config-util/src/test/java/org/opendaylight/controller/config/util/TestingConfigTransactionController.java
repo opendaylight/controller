@@ -160,4 +160,9 @@ public class TestingConfigTransactionController implements
     public boolean removeServiceReferences(ObjectName objectName) throws InstanceNotFoundException {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Set<String> getAvailableModuleFactoryQNames() {
+        throw new UnsupportedOperationException();
+    }
 }

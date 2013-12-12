@@ -62,7 +62,12 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      */
     boolean isHealthy();
 
+    /**
+     * @return module factory names available in the system
+     */
     Set<String> getAvailableModuleNames();
+
+
 
     /**
      * Find all runtime beans

@@ -13,6 +13,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
@@ -76,4 +77,7 @@ public class HierarchicalConfigMBeanFactoriesHolder {
         return moduleFactories;
     }
 
+    public Map<String, Entry<ModuleFactory, BundleContext>> getModuleNamesToConfigBeanFactories() {
+        return moduleNamesToConfigBeanFactories;
+    }
 }

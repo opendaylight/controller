@@ -210,8 +210,7 @@ public class TemplateFactory {
             sieTemplate.getAnnotations().add(
                     Annotation.createDescriptionAnnotation(sie
                             .getNullableDescription()));
-        sieTemplate.getAnnotations().add(Annotation.createSieAnnotation(sie.getQName(), sie.getExportedOsgiClassName
-                ()));
+        sieTemplate.getAnnotations().addAll(Annotation.createSieAnnotations(sie));
 
         return sieTemplate;
     }
@@ -236,7 +235,7 @@ public class TemplateFactory {
                 mbe.getPackageName(), mbe.getAbstractFactoryName(),
                 mbe.getGloballyUniqueName(), mbe.getFullyQualifiedName(mbe
                         .getStubModuleName()), attrProcessor.getFields(),
-                Lists.newArrayList(transformed));
+                Lists.newArrayList(transformed), mbe);
     }
 
     public static AbstractModuleTemplate abstractModuleTemplateFromMbe(

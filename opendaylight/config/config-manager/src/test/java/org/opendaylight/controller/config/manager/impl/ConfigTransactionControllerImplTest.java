@@ -68,7 +68,7 @@ public class ConfigTransactionControllerImplTest extends
             public TransactionJMXRegistrator create() {
                 return baseJMXRegistrator.createTransactionJMXRegistrator(transactionName123);
             }
-        });
+        }, currentlyRegisteredFactories);
 
         ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 ServiceReferenceRegistryImpl.createInitialSRLookupRegistry(), txLookupRegistry, currentlyRegisteredFactories);

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.threadpool.test;
 
+import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.junit.Assert.assertEquals;
@@ -383,5 +385,12 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         }
     }
 
+
+    @Test
+    public void testQNames() {
+        Set<String> availableModuleFactoryQNames = configRegistryClient.getAvailableModuleFactoryQNames();
+        String expected = "(namespace?revision=revision)name";
+        assertEquals(Sets.newHashSet(expected), availableModuleFactoryQNames);
+    }
 
 }

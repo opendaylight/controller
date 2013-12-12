@@ -7,13 +7,15 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
+import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.yangtools.yang.common.QName;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -42,22 +44,36 @@ public class Annotation {
                 Lists.newArrayList(new Parameter("value", q(description))));
     }
 
-    public static Annotation createSieAnnotation(QName qname,
-            String exportedClassName) {
-        Preconditions.checkNotNull(qname,
+    public static Collection<Annotation> createSieAnnotations(ServiceInterfaceEntry sie){
+
+        String exportedClassName = sie.getExportedOsgiClassName();
+        Preconditions.checkNotNull(sie.getQName(),
                 "Cannot create annotation from null qname");
         Preconditions.checkNotNull(exportedClassName,
                 "Cannot create annotation from null exportedClassName");
+        List<Annotation> result = new ArrayList<>();
+        {
+            List<Parameter> params = Lists.newArrayList(new Parameter("value", q(sie.getQName().toString())));
+            params.add(new Parameter("osgiRegistrationType", exportedClassName + ".class"));
 
-        List<Parameter> params = Lists.newArrayList(new Parameter("value", q(qname.toString())));
-        params.add(new Parameter("osgiRegistrationType", exportedClassName + ".class"));
+            params.add(new Parameter("namespace", q(sie.getQName().getNamespace().toString())));
+            params.add(new Parameter("revision", q(sie.getQName().getFormattedRevision())));
+            params.add(new Parameter("localName", q(sie.getQName().getLocalName())));
 
-        params.add(new Parameter("namespace", q(qname.getNamespace().toString())));
-        params.add(new Parameter("revision", q(qname.getFormattedRevision())));
-        params.add(new Parameter("localName", q(qname.getLocalName())));
+            Annotation sieAnnotation = new Annotation(ServiceInterfaceAnnotation.class.getCanonicalName(), params);
+            result.add(sieAnnotation);
 
-        return new Annotation(
-                ServiceInterfaceAnnotation.class.getCanonicalName(), params);
+        }
+        {
+            List<Parameter> params = new ArrayList<>();
+            params.add(new Parameter("namespace", q(sie.getYangModuleQName().getNamespace().toString())));
+            params.add(new Parameter("revision", q(sie.getYangModuleQName().getFormattedRevision())));
+            params.add(new Parameter("name", q(sie.getYangModuleQName().getLocalName())));
+
+            Annotation moduleQNameAnnotation = new Annotation(ModuleQName.class.getCanonicalName(), params);
+            result.add(moduleQNameAnnotation);
+        }
+        return result;
     }
 
     public static Annotation createRequireIfcAnnotation(

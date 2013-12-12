@@ -25,6 +25,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistr
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
+import org.opendaylight.controller.config.manager.impl.util.ModuleQNameUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
@@ -60,9 +61,6 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
-
-    @GuardedBy("this")
-    private final BundleContext bundleContext;
 
     @GuardedBy("this")
     private long version = 0;
@@ -101,6 +99,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     // internal jmx server shared by all transactions
     private final MBeanServer transactionsMBeanServer;
 
+    // Used for finding new factory instances for default module functionality
     @GuardedBy("this")
     private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
 
@@ -109,18 +108,17 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
-            BundleContext bundleContext, MBeanServer configMBeanServer) {
-        this(resolver, bundleContext, configMBeanServer,
+            MBeanServer configMBeanServer) {
+        this(resolver, configMBeanServer,
                 new BaseJMXRegistrator(configMBeanServer));
     }
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
-            BundleContext bundleContext, MBeanServer configMBeanServer,
+            MBeanServer configMBeanServer,
             BaseJMXRegistrator baseJMXRegistrator) {
         this.resolver = resolver;
         this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
-        this.bundleContext = bundleContext;
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
         this.registryMBeanServer = MBeanServerFactory
@@ -156,10 +154,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
         };
 
-        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
-                transactionName), factory);
         Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(
                 resolver.getAllFactories());
+        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
+                transactionName), factory, allCurrentFactories);
         ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 readableSRRegistry, txLookupRegistry, allCurrentFactories);
 
@@ -550,6 +548,12 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     public synchronized String getServiceInterfaceName(String namespace, String localName) {
         return readableSRRegistry.getServiceInterfaceName(namespace, localName);
     }
+
+    @Override
+    public Set<String> getAvailableModuleFactoryQNames() {
+        return ModuleQNameUtil.getQNames(resolver.getAllFactories());
+    }
+
 }
 
 /**
@@ -607,6 +611,8 @@ class ConfigHolder {
         Collections.sort(result);
         return result;
     }
+
+
 }
 
 /**

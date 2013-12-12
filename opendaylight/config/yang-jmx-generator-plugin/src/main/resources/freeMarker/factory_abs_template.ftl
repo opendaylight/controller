@@ -2,6 +2,7 @@
 package ${packageName};
 
 <@javadocD object=javadoc/>
+@org.opendaylight.yangtools.yang.binding.annotations.ModuleQName(namespace="${mbe.getYangModuleQName().getNamespace().toString()}",revision="${mbe.getYangModuleQName().getFormattedRevision()}",name="${mbe.getYangModuleQName().getLocalName()}")
 <@typeDeclarationD object=typeDeclaration/>
 {
 
