@@ -93,6 +93,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-ssh</artifactId>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
             <scope>test</scope>
             <type>test-jar</type>
