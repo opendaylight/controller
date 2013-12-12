@@ -26,6 +26,7 @@
         <module>config-util</module>
         <module>config-persister-api</module>
         <module>config-persister-file-adapter</module>
+        <module>config-persister-file-xml-adapter</module>
         <module>yang-jmx-generator</module>
         <module>yang-jmx-generator-plugin</module>
         <module>yang-store-api</module>
@@ -39,6 +40,7 @@
         <module>netty-event-executor-config</module>
         <module>netty-timer-config</module>
         <module>config-persister-directory-adapter</module>
+        <module>config-persister-directory-xml-adapter</module>
         <module>yang-test-plugin</module>
     </modules>
 

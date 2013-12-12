@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.persist.impl;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter;
+import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderBaseImpl;
 
@@ -93,7 +93,7 @@ public class PersisterAggregatorTest {
         List<PersisterWithConfiguration> persisters = persisterAggregator.getPersisterWithConfigurations();
         assertEquals(1, persisters.size());
         PersisterWithConfiguration persister = persisters.get(0);
-        assertEquals(FileStorageAdapter.class.getName() ,persister.getStorage().getClass().getName());
+        assertEquals(XmlFileStorageAdapter.class.getName() ,persister.getStorage().getClass().getName());
         assertFalse(persister.isReadOnly());
     }
 

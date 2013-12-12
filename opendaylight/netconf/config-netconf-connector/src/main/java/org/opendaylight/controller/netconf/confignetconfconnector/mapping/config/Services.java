@@ -97,7 +97,11 @@ public final class Services {
         Preconditions.checkArgument(refNameToInstance != null, "No serviceInstances mapped to " + serviceName + " , "
                 + serviceNameToRefNameToInstance.keySet());
 
-        ServiceInstance serviceInstance = ServiceInstance.fromString(refNameToInstance.get(refName));
+        String instanceId = refNameToInstance.get(refName);
+        Preconditions.checkArgument(instanceId != null, "No serviceInstances mapped to " + serviceName + ":"
+                + refName + ", " + serviceNameToRefNameToInstance.keySet());
+
+        ServiceInstance serviceInstance = ServiceInstance.fromString(instanceId);
         Preconditions.checkArgument(serviceInstance != null, "No serviceInstance mapped to " + refName
                 + " under service name " + serviceName + " , " + refNameToInstance.keySet());
         return serviceInstance;

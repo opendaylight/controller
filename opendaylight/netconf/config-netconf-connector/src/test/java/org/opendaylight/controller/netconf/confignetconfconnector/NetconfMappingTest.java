@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -75,9 +76,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -497,17 +500,20 @@ public class NetconfMappingTest extends AbstractConfigTest {
         XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
 
-        XmlElement configAttributeType = null;
+        List<String> expectedValues = Lists.newArrayList("default-string", "configAttributeType");
+        Set<String> configAttributeType = Sets.newHashSet();
+
         for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
             for (XmlElement type : moduleElement.getChildElements("type")) {
                 if (type.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY).equals("") == false) {
-                    configAttributeType = type;
+                    configAttributeType.add(type.getTextContent());
                 }
             }
         }
 
-        // TODO verify if should be default value
-        assertEquals("default-string", configAttributeType.getTextContent());
+        for (String expectedValue : expectedValues) {
+            assertTrue(configAttributeType.contains(expectedValue));
+        }
     }
 
     private Map<String, Map<String, ModuleMXBeanEntry>> getMbes() throws Exception {

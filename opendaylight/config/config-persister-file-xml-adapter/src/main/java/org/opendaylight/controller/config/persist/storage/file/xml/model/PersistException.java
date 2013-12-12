@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes;
+package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
-public class AttributesConstants {
+final class PersistException extends RuntimeException {
 
-    /**
-     * Property placed into object names for dependencies to preserve reference name
-     */
-    public static final String REF_NAME_ON_PROPERTY_KEY = "X-refName";
+    public PersistException(String s, Exception e) {
+        super(s, e);
+    }
 }
