@@ -4,7 +4,6 @@ import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.impl.RoutingTableImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
@@ -70,7 +69,7 @@ public class Router {
     _logger.info("Invoking RPC");
 
     ExampleConsumer consumer = getConsumer();
-    RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, new CompositeNodeImpl());
+    RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getValidCompositeNodeWithOneSimpleChild());
     _logger.info("Result [{}]", result.isSuccessful());
 
     return stringify(result);
@@ -111,7 +110,7 @@ public class Router {
       _logger.debug("Could not get routing table impl reference");
       return "Could not get routingtable referen ";
     }
-    RoutingTable routingTable = (RoutingTableImpl) ctx.getService(routingTableServiceReference);
+    RoutingTableImpl routingTable = (RoutingTableImpl) ctx.getService(routingTableServiceReference);
     if (routingTable == null) {
       _logger.info("Could not get routing table service");
       return "Could not get routing table service";
@@ -128,16 +127,14 @@ public class Router {
       _logger.error("error in adding routing identifier" + e.getMessage());
     }
 
-    Set<String> routes = routingTable.getRoutes(rii.toString());
+    String result = routingTable.dumpRoutingTableCache();
 
-    StringBuilder stringBuilder = new StringBuilder();
-    for (String route : routes) {
-      stringBuilder.append(route);
-    }
 
-    _logger.info("Result [{}] routes added for route" + rii + stringBuilder.toString());
 
-    return stringBuilder.toString();
+
+    _logger.info("Result [{}] routes added for route" + rii + result);
+
+    return result;
   }
 
   @GET
@@ -242,5 +239,27 @@ public class Router {
     public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier getRoute() {
       return InstanceIdentifier.of(instance);
     }
+
+      @Override
+      public boolean equals(Object o) {
+          if (this == o) return true;
+          if (o == null || getClass() != o.getClass()) return false;
+
+          RoutingIdentifierImpl that = (RoutingIdentifierImpl) o;
+
+          if (!QNAME.equals(that.QNAME)) return false;
+          if (!instance.equals(that.instance)) return false;
+          if (!namespace.equals(that.namespace)) return false;
+
+          return true;
+      }
+
+      @Override
+      public int hashCode() {
+          int result = namespace.hashCode();
+          result = 31 * result + QNAME.hashCode();
+          result = 31 * result + instance.hashCode();
+          return result;
+      }
   }
 }

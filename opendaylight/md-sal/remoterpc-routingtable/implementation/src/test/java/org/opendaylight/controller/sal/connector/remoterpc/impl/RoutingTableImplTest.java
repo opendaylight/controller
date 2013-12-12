@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import java.net.URI;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -80,8 +81,7 @@ public class RoutingTableImplTest {
 
         rti.addGlobalRoute(routeIdentifier, "172.27.12.1:5000");
 
-        Set<String> globalService = new HashSet<String>();
-        globalService.add("172.27.12.1:5000");
+        String globalService =   "172.27.12.1:5000";
 
         when(concurrentMap.get(routeIdentifier)).thenReturn(globalService);
         ConcurrentMap latestCache = rti.getRoutingTableCache();
@@ -92,9 +92,10 @@ public class RoutingTableImplTest {
 
 
         Assert.assertEquals(servicesGlobal.size(),1);
-
-        Assert.assertEquals(servicesGlobal.iterator().next(),"172.27.12.1:5000");
-
+        Iterator<String> iterator = servicesGlobal.iterator();
+        while(iterator.hasNext()){
+        Assert.assertEquals(iterator.next(),"172.27.12.1:5000");
+        }
 
 
     }
@@ -124,8 +125,7 @@ public class RoutingTableImplTest {
 
         rti.addGlobalRoute(routeIdentifier, "172.27.12.1:5000");
 
-        Set<String> globalService = new HashSet<String>();
-        globalService.add("172.27.12.1:5000");
+        String globalService =   "172.27.12.1:5000";
 
         when(concurrentMap.get(routeIdentifier)).thenReturn(globalService);
         ConcurrentMap latestCache = rti.getRoutingTableCache();
