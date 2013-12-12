@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0af0c565",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-12T21:20:57Z",
+      "side": 1,
+      "message": "We should not be reflecting OF specific, much less OF version specific things into the SAL.",
+      "revId": "9af5e29ebac04e2c19ac818ca236e8708bd2b6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_cad2add1",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-12T21:20:57Z",
+      "side": 1,
+      "message": "Why are we adding a new top level container?  We file flow-nodes under the normal inventory via augmentation.",
+      "revId": "9af5e29ebac04e2c19ac818ca236e8708bd2b6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2ae1499a",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-12T21:20:57Z",
+      "side": 1,
+      "message": "We should not be passing datapath-id up to the MD-SAL directly.  We have node-ids already.",
+      "revId": "9af5e29ebac04e2c19ac818ca236e8708bd2b6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_8adcb5e5",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-12T21:20:57Z",
+      "side": 1,
+      "message": "We should not reflect OF specific version stuff northbound, but rather semantics.  We should also not be modeling these things as bits, they show up as bits on the wire, but they are not semantically bits.",
+      "revId": "9af5e29ebac04e2c19ac818ca236e8708bd2b6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_6ad741c0",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-12T21:20:57Z",
+      "side": 1,
+      "message": "See comment above... these are not representing generic capabilities as modeled, but literally  protocol bits on the wire.",
+      "revId": "9af5e29ebac04e2c19ac818ca236e8708bd2b6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4ae6bdb5",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-12T21:20:57Z",
+      "side": 1,
+      "message": "Please role these into the existing flow-node groupings, rather then doing an additional augment.",
+      "revId": "9af5e29ebac04e2c19ac818ca236e8708bd2b6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
