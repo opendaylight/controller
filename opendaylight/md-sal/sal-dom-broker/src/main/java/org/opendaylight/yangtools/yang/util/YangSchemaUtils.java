@@ -80,10 +80,11 @@ public class YangSchemaUtils {
                 checkArgument(!iterator.hasNext(), "Path nests inside leaf node, which is not allowed.");
                 return currentNode;
             }
+            checkState(currentNode != null, "Current node should not be null for %s",path);
         }
+        checkState(previous instanceof DataSchemaNode, "Schema node for %s should be instance of DataSchemaNode. Found %s",path,previous);
         return (DataSchemaNode) previous;
     }
-    
 
     private static DataSchemaNode searchInChoices(DataNodeContainer node, QName arg) {
         Set<DataSchemaNode> children = node.getChildNodes();
