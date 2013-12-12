@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_aabad96b",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-12T22:17:40Z",
+      "side": 1,
+      "message": "In case of subnet removal, at this point subnet no longer contains the removed subnet object. This will cause the following code to notify that an empty subnet object was removed.\n\nYou need to store subnetCurr (Since you would touch this code, can you please rename it to currentSubnet or targetSubnet) before calling updateDatabase(...)",
+      "revId": "dca98296c2c94ae9b01f88c1faa6922fd03bbc5d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
