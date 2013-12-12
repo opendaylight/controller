@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_aa809946",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-12-12T15:11:48Z",
+      "side": 1,
+      "message": "please use + instead of .concat for readability, or String.format. there is a typo in \u0027unknow\u0027 . It would be best to create a util class that maintains header fields - it is not documented anywhere",
+      "revId": "16fefa003e3532dc9e142d7bf0c6722ecd2c346a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_8a971590",
+        "filename": "opendaylight/netconf/ietf-netconf-monitoring-extension/src/main/yang/ietf-netconf-monitoring-extension.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-12-12T15:11:48Z",
+      "side": 1,
+      "message": "remove trailing spaces",
+      "revId": "16fefa003e3532dc9e142d7bf0c6722ecd2c346a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_eaed7126",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/NetconfServerSessionNegotiator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2013-12-12T15:11:48Z",
+      "side": 1,
+      "message": "again - move this logic to a util header parsing/saving class",
+      "revId": "16fefa003e3532dc9e142d7bf0c6722ecd2c346a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
