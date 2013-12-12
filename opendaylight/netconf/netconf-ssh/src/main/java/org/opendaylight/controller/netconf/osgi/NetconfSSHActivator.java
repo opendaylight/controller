@@ -41,8 +41,11 @@ public class NetconfSSHActivator implements BundleActivator{
         InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,
                 EXCEPTION_MESSAGE, true);
 
+
+
+
         if (sshSocketAddressOptional.isPresent()){
-            server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress);
+            server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,null);
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);
             serverThread.start();

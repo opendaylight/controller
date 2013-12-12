@@ -8,14 +8,42 @@
 package org.opendaylight.controller.netconf.ssh.authentication;
 
 import ch.ethz.ssh2.signature.RSAPrivateKey;
-
 import java.math.BigInteger;
+import org.opendaylight.controller.sal.authorization.AuthResultEnum;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.usermanager.internal.UserManager;
 
-public class RSAKey implements KeyStoreHandler {
+public class AuthProvider implements AuthProviderInterface {
 
     private static RSAPrivateKey hostkey = null;
-    private static String user = "netconf";
-    private static String password = "netconf";
+    private static IUserManager um;
+
+    public AuthProvider(IUserManager ium) throws Exception {
+
+        IUserManager userManager = ium;
+
+        if (userManager == null){
+            userManager = (IUserManager) ServiceHelper
+                    .getGlobalInstance(IUserManager.class, this);
+        }
+
+        if (userManager instanceof UserManager) {
+            this.um = (UserManager) userManager;
+        } else {
+            throw new Exception("User manager service can't be resolved.");
+        }
+
+    }
+    @Override
+    public boolean authenticated(String username, String password) {
+        AuthResultEnum authResult = this.um.authenticate(username,password);
+        if (authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC)){
+            return true;
+        }
+        return false;
+    }
+
     static {
 
         BigInteger p = new BigInteger("2967886344240998436887630478678331145236162666668503940430852241825039192450179076148979094256007292741704260675085192441025058193581327559331546948442042987131728039318861235625879376246169858586459472691398815098207618446039");    //.BigInteger.probablePrime(N / 2, rnd);
