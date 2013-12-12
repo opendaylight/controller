@@ -12,20 +12,23 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.concurrent.ThreadSafe;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.threads.SocketThread;
+import org.opendaylight.controller.usermanager.IUserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ThreadSafe
 public class NetconfSSHServer implements Runnable {
 
-    private static boolean acceptMore = true;
     private ServerSocket ss = null;
     private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHServer.class);
     private static final AtomicLong sesssionId = new AtomicLong();
     private final InetSocketAddress clientAddress;
+    private final AuthProvider authProvider;
+    private boolean up = false;
 
-    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress) throws Exception{
+    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress, AuthProvider authProvider) throws Exception{
 
         logger.trace("Creating SSH server socket on port {}",serverPort);
         this.ss = new ServerSocket(serverPort);
@@ -34,27 +37,37 @@ public class NetconfSSHServer implements Runnable {
         }
         logger.trace("Server socket created.");
         this.clientAddress = clientAddress;
-
+        this.authProvider = authProvider;
+        this.up = true;
     }
 
-
-    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress) throws Exception {
-        return new NetconfSSHServer(serverPort, clientAddress);
+    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress,AuthProvider authProvider) throws Exception {
+        return new NetconfSSHServer(serverPort, clientAddress,authProvider);
     }
 
     public void stop() throws Exception {
-        acceptMore = false;
+        up = false;
         logger.trace("Closing SSH server socket.");
         ss.close();
         logger.trace("SSH server socket closed.");
     }
 
+    public void removeUserManagerService(){
+        this.authProvider.removeUserManagerService();
+    }
+
+    public void addUserManagerService(IUserManager userManagerService){
+        this.authProvider.addUserManagerService(userManagerService);
+    }
+    public boolean isUp(){
+        return this.up;
+    }
     @Override
     public void run() {
-        while (acceptMore) {
+        while (up) {
             logger.trace("Starting new socket thread.");
             try {
-               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet());
+               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }

@@ -33,6 +33,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>usermanager</artifactId>
+            <version>0.4.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -55,9 +60,13 @@
                             org.apache.commons.io,
                             org.opendaylight.controller.netconf.util,
                             org.opendaylight.controller.netconf.util.osgi,
+                            org.opendaylight.controller.usermanager,
+                            org.opendaylight.controller.sal.authorization,
+                            org.opendaylight.controller.sal.utils,
                             org.opendaylight.protocol.framework,
                             org.osgi.framework,
-                            org.slf4j
+                            org.osgi.util.tracker,
+                            org.slf4j,
                         </Import-Package>
                     </instructions>
                 </configuration>
