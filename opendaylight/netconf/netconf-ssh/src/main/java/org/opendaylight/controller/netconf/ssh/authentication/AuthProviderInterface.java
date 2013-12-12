@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -7,8 +8,8 @@
  */
 package org.opendaylight.controller.netconf.ssh.authentication;
 
-import ch.ethz.ssh2.signature.RSAPrivateKey;
+public interface AuthProviderInterface {
 
-public interface KeyStoreHandler {
-    public RSAPrivateKey getPrivateKey();
+    public boolean authenticated(String username, String password);
+    public char[] getPEMAsCharArray();
 }
