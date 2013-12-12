@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_2433c215",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/DiscoveryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-12T00:05:17Z",
+      "side": 1,
+      "message": "I understand this is enough to fit your need, but why don\u0027t you set the string form of the full node object, instead  of just the node id.\nI think it would be handy to have the the full node string, so that, if need be, on the receiver side we can derive the tail node by Node.fromString(\u003cstring stored in system tlv\u003e)\n\nIn my opinion, for openflow, the node id is a MAC, fine. But for other SDN switches, the node id portion itself may not be as much descriptive.",
+      "revId": "91316e0574c25661fe448440753200b4149e4900",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e43c8ae4",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/utils/NodeConnectorCreator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-12T00:05:17Z",
+      "side": 1,
+      "message": "This works, but in future we should consider of enhancing the NodeConnector constructor to perform this internal checks. It could perform this in an automated way checking its compatibleType map.\nDoing it here instead, it makes you manually check for the NodeIdType, which is not extensible.",
+      "revId": "91316e0574c25661fe448440753200b4149e4900",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
