@@ -43,7 +43,9 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-persister-file-adapter</artifactId>
+            <artifactId>config-persister-file-xml-adapter</artifactId>
+            <scope>test</scope>
+            <version>${config.version}</version>
         </dependency>
 
         <!-- test dependencies -->
@@ -60,8 +62,8 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-persister-directory-adapter</artifactId>
-            <version>${parent.version}</version>
+            <artifactId>config-persister-directory-xml-adapter</artifactId>
+            <version>${config.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

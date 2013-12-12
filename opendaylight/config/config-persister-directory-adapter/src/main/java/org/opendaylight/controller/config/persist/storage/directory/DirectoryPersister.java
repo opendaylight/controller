@@ -139,7 +139,7 @@ class MyLineProcessor implements com.google.common.io.LineProcessor<String> {
     }
 
     private void checkFileConsistency(){
-        checkState(inCapabilities, "File {} is missing delimiters in this order: {}", fileNameForReporting,
+        checkState(inCapabilities, "File %s is missing delimiters in this order: %s", fileNameForReporting,
                 Arrays.asList(DirectoryPersister.MODULES_START,
                         DirectoryPersister.SERVICES_START,
                         DirectoryPersister.CAPABILITIES_START));

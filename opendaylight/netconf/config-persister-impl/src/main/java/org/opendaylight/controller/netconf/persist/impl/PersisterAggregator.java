@@ -34,7 +34,7 @@ import java.util.ListIterator;
  * Example configuration:<pre>
  netconf.config.persister.active=2,3
  # read startup configuration
- netconf.config.persister.1.storageAdapterClass=org.opendaylight.controller.config.persist.storage.directory.DirectoryStorageAdapter
+ netconf.config.persister.1.storageAdapterClass=org.opendaylight.controller.config.persist.storage.directory.xml.XmlDirectoryStorageAdapter
  netconf.config.persister.1.properties.fileStorage=configuration/initial/
 
  netconf.config.persister.2.storageAdapterClass=org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter
