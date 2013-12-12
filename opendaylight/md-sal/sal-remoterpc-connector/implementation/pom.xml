@@ -80,7 +80,12 @@
       <groupId> org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId> ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.12</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
@@ -145,8 +150,11 @@
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.md.sal.remote.rpc,
-                            org.opendaylight.controller.sal.connector.remoterpc,
-                            org.opendaylight.controller.sal.connector.remoterpc.*
+                            org.opendaylight.controller.sal.connector.remoterpc.util,
+                            org.opendaylight.controller.sal.connector.remoterpc.dto,
+                            org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcClient,
+                            org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcServer,
+                            org.opendaylight.controller.sal.connector.remoterpc.RemoteRpcProvider
                         </Export-Package>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                     </instructions>
