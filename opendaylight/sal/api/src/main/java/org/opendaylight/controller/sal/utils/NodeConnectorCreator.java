@@ -73,7 +73,11 @@ public abstract class NodeConnectorCreator {
     public static NodeConnector createNodeConnector(
             String nodeConnectorType, Object portId, Node node) {
         try {
-            return new NodeConnector(nodeConnectorType, portId, node);
+            if (nodeConnectorType.equals(Node.NodeIDType.OPENFLOW) && (portId.getClass() == String.class)) {
+                return new NodeConnector(nodeConnectorType, Short.parseShort((String) portId), node);
+            } else {
+                return new NodeConnector(nodeConnectorType, portId, node);
+            }
         } catch (ConstructionException e1) {
             logger.error("",e1);
             return null;
