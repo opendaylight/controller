@@ -1095,31 +1095,31 @@ public class UserManager implements IUserManager, IObjectReader,
     }
 
     // Following are setters for use in unit testing
-    void setLocalUserConfigList(ConcurrentMap<String, UserConfig> ucl) {
+    private void setLocalUserConfigList(ConcurrentMap<String, UserConfig> ucl) {
         if (ucl != null) {
             this.localUserConfigList = ucl;
         }
     }
 
-    void setRemoteServerConfigList(ConcurrentMap<String, ServerConfig> scl) {
+    private void setRemoteServerConfigList(ConcurrentMap<String, ServerConfig> scl) {
         if (scl != null) {
             this.remoteServerConfigList = scl;
         }
     }
 
-    void setAuthorizationConfList(ConcurrentMap<String, AuthorizationConfig> acl) {
+    private void setAuthorizationConfList(ConcurrentMap<String, AuthorizationConfig> acl) {
         if (acl != null) {
             this.authorizationConfList = acl;
         }
     }
 
-    void setActiveUsers(ConcurrentMap<String, AuthenticatedUser> au) {
+    private void setActiveUsers(ConcurrentMap<String, AuthenticatedUser> au) {
         if (au != null) {
             this.activeUsers = au;
         }
     }
 
-    void setAuthProviders(ConcurrentMap<String, IAAAProvider> ap) {
+    private void setAuthProviders(ConcurrentMap<String, IAAAProvider> ap) {
         if (ap != null) {
             this.authProviders = ap;
         }
