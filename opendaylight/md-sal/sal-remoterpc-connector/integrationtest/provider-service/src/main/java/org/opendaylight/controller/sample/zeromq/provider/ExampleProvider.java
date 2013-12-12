@@ -2,7 +2,6 @@ package org.opendaylight.controller.sample.zeromq.provider;
 
 import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.core.api.AbstractProvider;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;

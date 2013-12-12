@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc.api;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface RoutingTable<I,R> {
@@ -64,6 +65,12 @@ public interface RoutingTable<I,R> {
    * @return
    */
   public Set<R> getRoutes(I routeId);
+
+  /**
+   * Returns all network addresses stored in the table
+   * @return
+   */
+  public Set<Map.Entry> getAllRoutes();
 
   /**
    * Returns only one address from the list of network addresses
