@@ -13,7 +13,6 @@
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
-
     <build>
         <plugins>
             <plugin>
@@ -49,6 +48,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+          <groupId>org.ops4j.pax.exam</groupId>
+          <artifactId>pax-exam-container-native</artifactId>
+          <scope>test</scope>
+          <version>${exam.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
