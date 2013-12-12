@@ -72,24 +72,14 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
                 }
                 // lets start a transaction
                 clusterGlobalServices.tbegin();
-                Set<R> routes = new HashSet<R>();
-                routes.add(route);
-                routingTableCache.put(routeId, routes);
+
+                routingTableCache.put(routeId, route);
                 clusterGlobalServices.tcommit();
             } else {
                 throw new DuplicateRouteException(" There is already existing route " + existingRoute);
             }
 
-        } catch (NotSupportedException e) {
-            throw new RoutingTableException("Transaction error - while trying to create route id="
-                    + routeId + "with route" + route, e);
-        } catch (HeuristicRollbackException e) {
-            throw new RoutingTableException("Transaction error - while trying to create route id="
-                    + routeId + "with route" + route, e);
-        } catch (RollbackException e) {
-            throw new RoutingTableException("Transaction error - while trying to create route id="
-                    + routeId + "with route" + route, e);
-        } catch (HeuristicMixedException e) {
+        } catch (NotSupportedException|HeuristicRollbackException|RollbackException|HeuristicMixedException e) {
             throw new RoutingTableException("Transaction error - while trying to create route id="
                     + routeId + "with route" + route, e);
         } catch (javax.transaction.SystemException e) {
@@ -116,16 +106,7 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
             routingTableCache.remove(routeId);
             clusterGlobalServices.tcommit();
 
-        } catch (NotSupportedException e) {
-            throw new RoutingTableException("Transaction error - while trying to remove route id="
-                    + routeId, e);
-        } catch (HeuristicRollbackException e) {
-            throw new RoutingTableException("Transaction error - while trying to remove route id="
-                    + routeId, e);
-        } catch (RollbackException e) {
-            throw new RoutingTableException("Transaction error - while trying to remove route id="
-                    + routeId, e);
-        } catch (HeuristicMixedException e) {
+        } catch (NotSupportedException|HeuristicRollbackException|RollbackException|HeuristicMixedException e) {
             throw new RoutingTableException("Transaction error - while trying to remove route id="
                     + routeId, e);
         } catch (javax.transaction.SystemException e) {
@@ -139,10 +120,22 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
         // Note: currently works for global routes only wherein there is just single
         // route
         Preconditions.checkNotNull(routeId, "getARoute: routeId cannot be null!");
-        return (Set<R>) routingTableCache.get(routeId);
+        R route = (R)routingTableCache.get(routeId);
+        Set<R>routes = null;
+        if(route !=null){
+           routes = new HashSet<R>();
+           routes.add(route);
+        }
+
+        return routes;
     }
 
-    @Override
+  @Override
+  public Set<Map.Entry> getAllRoutes() {
+    return routingTableCache.entrySet();
+  }
+
+  @Override
     public R getARoute(I routeId) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
