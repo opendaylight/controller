@@ -285,7 +285,7 @@ module opendaylight-action-types {
             case set-nw-tos-action-case {
                 container set-nw-tos-action {
                  leaf tos {
-                     type int32;
+                     type uint8;
                  }
              }
             }
@@ -333,6 +333,10 @@ module opendaylight-action-types {
              }
             }
              
+		case strip-vlan-action-case {
+                container strip-vlan-action {
+                }
+             }
 
             case sw-path-action-case {            
                 container sw-path-action {
