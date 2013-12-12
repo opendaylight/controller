@@ -41,6 +41,7 @@
               org.apache.commons.logging,
               javax.servlet,
               javax.servlet.http,
+              javax.xml.bind.annotation,
               org.springframework.security.web.context,
               org.springframework.security.core,
               org.springframework.security.core.context,
@@ -51,10 +52,8 @@
               org.opendaylight.controller.usermanager
             </Import-Package>
             <Export-Package>
-<!--
               org.opendaylight.controller.usermanager,
               org.opendaylight.controller.usermanager.internal
- -->
              </Export-Package>
             <Bundle-Activator>
               org.opendaylight.controller.usermanager.internal.Activator
