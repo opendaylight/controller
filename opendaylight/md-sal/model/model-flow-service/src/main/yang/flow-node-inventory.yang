@@ -15,7 +15,60 @@ module flow-node-inventory {
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
     }
-
+    
+    identity feature-capability {
+    }
+    
+    identity flow-feature-capability-flow-stats {
+        description "Flow statistics"; 
+        base feature-capability;      
+    }
+    
+    identity flow-feature-capability-table-stats {
+        description "Table statistics";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-port-stats {
+        description "Port statistics";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-stp {
+        description "802.1d spanning tree";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-reserved {
+        description "Reserved, must be zero";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-ip-reasm {
+        description "Can reassemble IP fragments";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-queue-stats {
+        description "Queue statistics";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-arp-match-ip {
+        description "Match IP addresses in ARP pkts";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-group-stats {
+        description "Group statistics";
+        base feature-capability;        
+    }
+    
+    identity flow-feature-capability-port-blocked {
+        description "Switch will block looping ports";
+        base feature-capability;        
+    }
+    
     grouping feature {
         leaf support-state {
             type inv:support-type;
@@ -70,7 +123,8 @@ module flow-node-inventory {
             uses meter:meter;
         }
     }
-
+    
+    
     grouping flow-node {
 
         leaf manufacturer {
@@ -122,6 +176,24 @@ module flow-node-inventory {
                 }
             }
         }
+        
+        container switch-features {
+            
+            leaf max_buffers {
+                type uint32;
+            }
+            
+            leaf max_tables {
+                type uint8;
+            }
+            
+            leaf-list capabilities {
+                type identityref {
+                    base feature-capability;
+                }
+            }
+            
+        }
     }
     
     grouping flow-node-connector {
@@ -149,9 +221,10 @@ module flow-node-inventory {
         ext:augment-identifier "flow-capable-node-connector-update-fields";
         uses flow-node-connector;
     }
-
+    
     augment "/inv:node-connector-updated" {
         ext:augment-identifier "flow-capable-node-connector-updated";
         uses flow-node-connector;
     }
+
 }
