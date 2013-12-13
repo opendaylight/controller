@@ -1,0 +1,25 @@
+module invoke-rpc-status {
+  namespace "invoke:rpc:status";  
+
+  prefix "stat";
+  	   
+  revision 2013-12-4 {
+  }
+
+  rpc testInput {
+  	input {
+  	  container cont {
+ 	    leaf imageName {
+ 	      type string;
+ 	    }
+ 	  }
+ 	}
+ 	output {
+ 	  container comt {
+ 	    leaf status {
+ 	      type string;
+ 	    }
+ 	  }  
+ 	}
+  }
+}
