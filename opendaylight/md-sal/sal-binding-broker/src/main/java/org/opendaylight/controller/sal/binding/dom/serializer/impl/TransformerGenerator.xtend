@@ -827,6 +827,11 @@ class TransformerGenerator {
                 val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
                 return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
             }
+            if (returnType.name == 'char[]') {
+                val ctCls = createUnionImplementation(inputType, typeSpec);
+                val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
+                return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+            }
 
             val ctCls = createClass(typeSpec.codecClassName) [
                 //staticField(Map,"AUGMENTATION_SERIALIZERS");
@@ -895,6 +900,73 @@ class TransformerGenerator {
             throw exception;
         }
 
+    }
+
+    def createUnionImplementation(Class<?> inputType, GeneratedTransferObject typeSpec) {
+        return createClass(typeSpec.codecClassName) [
+            val properties = typeSpec.allProperties;
+            //staticField(Map,"AUGMENTATION_SERIALIZERS");
+            if (inputType.isYangBindingAvailable) {
+                implementsType(BINDING_CODEC)
+                staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                staticField(it, IDENTITYREF_CODEC, BindingCodec)
+                implementsType(BindingDeserializer.asCtClass)
+            }
+            method(Object, "toDomValue", Object) [
+                modifiers = PUBLIC + FINAL + STATIC
+                val ctSpec = inputType.asCtClass;
+                bodyChecked = '''
+                    {
+                        //System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                        
+                        if($1 == null) {
+                            return null;
+                        }
+                        «typeSpec.resolvedName» _value = («typeSpec.resolvedName») $1;
+                        «FOR property : properties.entrySet»
+                            «IF property.key != "getValue"»
+                                «property.value.resolvedName» «property.key» = («property.value.resolvedName») _value.«property.key»();
+                                if(«property.key» != null) { 
+                                    return «serializeValue(property.value, property.key)»;
+                                }
+                            «ENDIF»
+                        «ENDFOR»
+                        
+                        return null;
+                    }
+                '''
+            ]
+            method(Object, "serialize", Object) [
+                bodyChecked = '''
+                    {
+                        return toDomValue($1);
+                    }
+                '''
+            ]
+            method(Object, "fromDomValue", Object) [
+                modifiers = PUBLIC + FINAL + STATIC
+                bodyChecked = '''
+                    {
+                        //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                        
+                        if($1 == null) {
+                            return null;
+                        }
+                        if($1 instanceof String) {
+                            String _simpleValue = (String) $1;
+                            return new «typeSpec.resolvedName»(_simpleValue.toCharArray());
+                        }
+                        return null;
+                    }
+                '''
+            ]
+            method(Object, "deserialize", Object) [
+                bodyChecked = '''{
+                            return fromDomValue($1);
+                    }
+                    '''
+            ]
+        ]
     }
 
     def boolean isYangBindingAvailable(Class<?> class1) {
@@ -1220,6 +1292,9 @@ class TransformerGenerator {
             return '''«INSTANCE_IDENTIFIER_CODEC».serialize(«property»)'''
         } else if (CLASS_TYPE.equals(signature)) {
             return '''(«QName.resolvedName») «IDENTITYREF_CODEC».serialize(«property»)'''
+        }
+        if ("char[]" == signature.name) {
+            return '''new String(«property»)''';
         }
         return '''«property»''';
     }
