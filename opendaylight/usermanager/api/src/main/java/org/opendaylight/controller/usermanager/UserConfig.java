@@ -9,10 +9,11 @@
 package org.opendaylight.controller.usermanager;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
+import org.opendaylight.controller.sal.packet.BitBufferHelper;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -46,6 +48,7 @@ public class UserConfig implements Serializable {
     protected static final String PASSWORD_REGEX = "(?=.*[^a-zA-Z0-9])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
     private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
     private static MessageDigest oneWayFunction;
+    private static SecureRandom randomGenerator;
 
     static {
         try {
@@ -54,6 +57,7 @@ public class UserConfig implements Serializable {
             log.error(String.format("Implementation of %s digest algorithm not found: %s", DIGEST_ALGORITHM,
                     e.getMessage()));
         }
+        UserConfig.randomGenerator = new SecureRandom(BitBufferHelper.toByteArray(System.currentTimeMillis()));
     }
 
     /**
@@ -81,6 +85,8 @@ public class UserConfig implements Serializable {
     @XmlElement
     private String password;
 
+    private byte[] salt;
+
 
 
     public UserConfig() {
@@ -102,11 +108,19 @@ public class UserConfig implements Serializable {
         /*
          * Password validation to be done on clear text password. If fails, mark
          * the password with a well known label, so that object validation can
-         * report the proper error. Only if password is a valid one, hash it.
+         * report the proper error. Only if password is a valid one, generate
+         * salt, concatenate it with clear text password and hash the
+         * resulting string. Hash result is going to be our stored password.
          */
-        this.password = (validatePassword(password).isSuccess()) ? hash(password) : BAD_PASSWORD;
+        if (validateClearTextPassword(password).isSuccess()) {
+            this.salt = BitBufferHelper.toByteArray(randomGenerator.nextLong());
+            this.password = hash(salt, password);
+        } else {
+            this.salt = null;
+            this.password = BAD_PASSWORD;
+        }
 
-        this.roles = (roles == null) ? new ArrayList<String>() : new ArrayList<String>(roles);
+        this.roles = (roles == null) ? Collections.<String>emptyList() : new ArrayList<String>(roles);
     }
 
     public String getUser() {
@@ -176,6 +190,7 @@ public class UserConfig implements Serializable {
     public Status validate() {
         Status validCheck = validateUsername();
         if (validCheck.isSuccess()) {
+            // Password validation was run at object construction time
             validCheck = (!password.equals(BAD_PASSWORD)) ? new Status(StatusCode.SUCCESS) : new Status(
                     StatusCode.BADREQUEST,
                     "Password should be 8 to 256 characters long, contain both upper and lower case letters, "
@@ -203,7 +218,7 @@ public class UserConfig implements Serializable {
         return new Status(StatusCode.SUCCESS);
     }
 
-    private Status validatePassword(String password) {
+    private Status validateClearTextPassword(String password) {
         if (password == null || password.isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Password cannot be empty");
         }
@@ -227,14 +242,14 @@ public class UserConfig implements Serializable {
 
         // To make any changes to a user configured profile, current password
         // must always be provided
-        if (!this.password.equals(hash(currentPassword))) {
+        if (!this.password.equals(hash(this.salt, currentPassword))) {
             return new Status(StatusCode.BADREQUEST, "Current password is incorrect");
         }
 
         // Create a new object with the proposed modifications
         UserConfig proposed = new UserConfig();
         proposed.user = this.user;
-        proposed.password = (newPassword == null)? this.password : hash(newPassword);
+        proposed.password = (newPassword == null)? this.password : hash(this.salt, newPassword);
         proposed.roles = (newRoles == null)? this.roles : newRoles;
 
         // Validate it
@@ -251,9 +266,9 @@ public class UserConfig implements Serializable {
         return status;
     }
 
-    public AuthResponse authenticate(String clearTextPass) {
+    public AuthResponse authenticate(String clearTextPassword) {
         AuthResponse locResponse = new AuthResponse();
-        if (password.equals(hash(clearTextPass))) {
+        if (password.equals(hash(this.salt, clearTextPassword))) {
             locResponse.setStatus(AuthResultEnum.AUTH_ACCEPT_LOC);
             locResponse.addData(getRolesString());
         } else {
@@ -275,12 +290,30 @@ public class UserConfig implements Serializable {
         return buffer.toString();
     }
 
-    public static String hash(String message) {
+    private static byte[] concatenate(byte[] salt, String password) {
+        byte[] messageArray = password.getBytes();
+        byte[] concatenation = new byte[salt.length + password.length()];
+        System.arraycopy(salt, 0, concatenation, 0, salt.length);
+        System.arraycopy(messageArray, 0, concatenation, salt.length, messageArray.length);
+        return concatenation;
+    }
+
+    private static String hash(byte[] salt, String message) {
         if (message == null) {
             return message;
         }
+        if (salt == null || salt.length == 0) {
+            log.warn("Password hash requested with non secure salt");
+        }
+
+        // Concatenate salt and password
+        byte[] messageArray = message.getBytes();
+        byte[] concatenation = new byte[salt.length + message.length()];
+        System.arraycopy(salt, 0, concatenation, 0, salt.length);
+        System.arraycopy(messageArray, 0, concatenation, salt.length, messageArray.length);
+
         UserConfig.oneWayFunction.reset();
-        return HexEncode.bytesToHexString(UserConfig.oneWayFunction.digest(message.getBytes(Charset.defaultCharset())));
+        return HexEncode.bytesToHexString(UserConfig.oneWayFunction.digest(concatenate(salt, message)));
     }
 
     /**
@@ -299,7 +332,8 @@ public class UserConfig implements Serializable {
     public static UserConfig getUncheckedUserConfig(String userName, String password, List<String> roles) {
         UserConfig config = new UserConfig();
         config.user = userName;
-        config.password = hash(password);
+        config.salt = BitBufferHelper.toByteArray(randomGenerator.nextLong());
+        config.password = hash(config.salt, password);
         config.roles = roles;
         return config;
     }
