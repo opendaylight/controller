@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_55fd4239",
+        "filename": "opendaylight/netconf/netconf-ssh/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "You should not have any direct dependency on the implementation, only on the API. The usermanager internals should stay hidden",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_35f88e48",
+        "filename": "opendaylight/netconf/netconf-ssh/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "You should not use this",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f599d61f",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "No this is not acceptable you are assuming on the implementation of the internal UserManager",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1597caed",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "This should only be used via services provided by Usermanager",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b5a35e4e",
+        "filename": "opendaylight/netconf/netconf-ssh/src/test/java/org/opendaylight/controller/netconf/ssh/SSHServerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "This one cannot work in non-OSGi environment, which is when UT runs. If you need you have to either run an integration test with pax-exam or you need to stub the implementation of IUserManager",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_958a9abd",
+        "filename": "opendaylight/usermanager/implementation/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "This is not needed.",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_559422e1",
+        "filename": "opendaylight/usermanager/implementation/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "Those packages must not be removed",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_358f6ece",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1098,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-13T10:58:26Z",
+      "side": 1,
+      "message": "These are only for UT of UserManager, not to be used by others.",
+      "revId": "cb8705db95552bc799fce1b66783c1a9cd6774ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
