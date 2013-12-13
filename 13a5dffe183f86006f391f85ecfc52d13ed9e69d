@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f030c49f",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-13T14:52:16Z",
+      "side": 1,
+      "message": "OK... this is absolutely right structurally.  Naming is still a bit off though.  First, please preface feature with flow- throughout.  Identities are global, so batter to have flow-feature-capbility than feature-capability (there may be other kinds of features).\n\nSecond, please do *not* stick Openflow-isms into the SAL... the OPFC_* are all Openflow-isms.  \n\nSo feature-capability-OFPC-FLOW-STATS should really be something like flow-feature-capability-flow-stats.",
+      "revId": "13a5dffe183f86006f391f85ecfc52d13ed9e69d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
