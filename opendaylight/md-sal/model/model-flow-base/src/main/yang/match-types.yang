@@ -9,7 +9,7 @@ module opendaylight-match-types {
     revision "2013-10-26" {
         description "Initial revision of macth types";
     }
-    
+
     grouping "mac-address-filter" {
         leaf address {
             mandatory true;
@@ -61,13 +61,13 @@ module opendaylight-match-types {
         container vlan-id {
             description "VLAN id.";
             presence "Match field is active and set";
-
-            leaf vlan-id-present {
-                type boolean;
-            }
-                        
+            
             leaf vlan-id {
+                mandatory true;
                 type l2t:vlan-id; 
+            }
+            leaf mask {
+                type binary;
             }
         }
         leaf vlan-pcp {
