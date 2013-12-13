@@ -129,7 +129,6 @@
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
-    <module>opendaylight/commons/controller-maven-plugin</module>
   </modules>
 
     <profiles>
@@ -150,6 +149,7 @@
                 <module>opendaylight/statisticsmanager/integrationtest</module>
                 <module>opendaylight/commons/integrationtest</module>
                 <module>opendaylight/containermanager/it.implementation</module>
+                <module>opendaylight/distribution/sanitytest/</module>
             </modules>
         </profile>
         <profile>
