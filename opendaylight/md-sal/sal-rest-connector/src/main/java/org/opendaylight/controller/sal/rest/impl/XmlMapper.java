@@ -7,6 +7,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendaylight.controller.sal.restconf.impl.RestCodec;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -92,10 +95,21 @@ public class XmlMapper {
 
         TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
 
-        if (baseType instanceof IdentityrefTypeDefinition && node.getValue() instanceof QName) {
-            QName value = (QName) node.getValue();
-            element.setAttribute("xmlns:x", value.getNamespace().toString());
-            element.setTextContent("x:" + value.getLocalName());
+        if (baseType instanceof IdentityrefTypeDefinition) {
+            if (node.getValue() instanceof QName) {
+                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(type).serialize(node.getValue());
+                IdentityValue value = valueDTO.getValuesWithNamespaces().get(0);
+                String prefix = "x";
+                if (value.getPrefix() != null && !value.getPrefix().isEmpty()) {
+                    prefix = value.getPrefix();
+                }
+                element.setAttribute("xmlns:" + prefix, value.getNamespace());
+                element.setTextContent(prefix + ":" + value.getValue());
+            } else {
+                logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
+                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is " + node.getValue().getClass());
+                element.setTextContent(String.valueOf(node.getValue()));
+            }
         } else {
             Object value = node.getValue();
             if (value != null) {

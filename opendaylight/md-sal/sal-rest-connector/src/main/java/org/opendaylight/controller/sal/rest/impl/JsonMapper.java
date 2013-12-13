@@ -3,15 +3,42 @@ package org.opendaylight.controller.sal.rest.impl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.activation.UnsupportedDataTypeException;
 
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestCodec;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.model.api.*;
-import org.opendaylight.yangtools.yang.model.api.type.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.BooleanTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.DecimalTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.EmptyTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.IntegerTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.stream.JsonWriter;
@@ -20,6 +47,7 @@ class JsonMapper {
 
     private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
     private final Set<ListSchemaNode> foundLists = new HashSet<>();
+    private final Logger logger = LoggerFactory.getLogger(JsonMapper.class); 
 
     public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
         Preconditions.checkNotNull(writer);
@@ -162,17 +190,17 @@ class JsonMapper {
         TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
 
         // TODO check InstanceIdentifierTypeDefinition,
-        // IdentityrefTypeDefinition
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
-                QName qName = (QName) node.getValue();
-
-                ControllerContext contContext = ControllerContext.getInstance();
-                String moduleName = contContext.findModuleByNamespace(qName.getNamespace());
-
-                writer.value(moduleName + ":" + qName.getLocalName());
+                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(type).serialize(node.getValue());
+                IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
+                String moduleName = ControllerContext.getInstance().findModuleByNamespace(URI.create(valueFromDTO.getNamespace()));
+                writer.value(moduleName + ":" + valueFromDTO.getValue());
+            } else {
+                logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
+                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is " + node.getValue().getClass());
+                writer.value(String.valueOf(node.getValue()));
             }
-
         } else if (baseType instanceof LeafrefTypeDefinition) {
             ControllerContext contContext = ControllerContext.getInstance();
             LeafSchemaNode lfSchemaNode = contContext.resolveTypeFromLeafref((LeafrefTypeDefinition) baseType, schema);

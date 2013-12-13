@@ -10,7 +10,6 @@ import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory
-import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
@@ -19,6 +18,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
 
@@ -150,7 +150,7 @@ class RestconfImpl implements RestconfService {
         }
         val moduleName = controllerContext.findModuleByNamespace(validQName.namespace);
         if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
-            nodeBuilder.namespace.path == moduleName) {
+            nodeBuilder.namespace.toString == moduleName) {
             nodeBuilder.qname = validQName
         } else {
             throw new ResponseException(BAD_REQUEST,
@@ -183,10 +183,17 @@ class RestconfImpl implements RestconfService {
             }
         } else if (nodeBuilder instanceof SimpleNodeWrapper) {
             val simpleNode = (nodeBuilder as SimpleNodeWrapper)
-            val stringValue = simpleNode.value as String;
-
-            val objectValue = TypeDefinitionAwareCodec.from(schema.typeDefinition)?.deserialize(stringValue);
-            simpleNode.setValue(objectValue)
+            val value = simpleNode.value
+            var inputValue = value;
+            
+            if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
+                if (value instanceof String) {
+                    inputValue = new IdentityValuesDTO(validQName.namespace.toString, value as String, null)
+                } // else value is instance of ValuesDTO
+            }
+            
+            val outputValue = RestCodec.from(schema.typeDefinition)?.deserialize(inputValue);
+            simpleNode.setValue(outputValue)
         } else if (nodeBuilder instanceof EmptyNodeWrapper) {
             val emptyNodeBuilder = nodeBuilder as EmptyNodeWrapper
             if (schema instanceof LeafSchemaNode) {
@@ -200,11 +207,19 @@ class RestconfImpl implements RestconfService {
     }
 
     private def dispatch TypeDefinition<?> typeDefinition(LeafSchemaNode node) {
-        node.type
+        var baseType = node.type
+        while (baseType.baseType !== null) {
+            baseType = baseType.baseType;
+        }
+        baseType
     }
 
     private def dispatch TypeDefinition<?> typeDefinition(LeafListSchemaNode node) {
-        node.type
+        var TypeDefinition<?> baseType = node.type
+        while (baseType.baseType !== null) {
+            baseType = baseType.baseType;
+        }
+        baseType
     }
 
     private def DataSchemaNode findFirstSchemaByLocalName(String localName, Set<DataSchemaNode> schemas) {
