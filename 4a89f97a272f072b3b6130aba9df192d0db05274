@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f01684a6",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/RestConfImplRPCStatusTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2013-12-13T17:21:49Z",
+      "side": 1,
+      "message": "formatting - you should use sun_coding_style.xml profile from opendaylight\\commons\\opendaylight\\ for java code formatter",
+      "revId": "4a89f97a272f072b3b6130aba9df192d0db05274",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
