@@ -994,7 +994,7 @@
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>
           <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
-          <excludes>**\/target\/,**\/bin\/</excludes>
+          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/</excludes>
         </configuration>
       </plugin>
       <plugin>
