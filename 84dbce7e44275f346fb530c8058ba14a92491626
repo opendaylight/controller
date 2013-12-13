@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d56ed200",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-13T11:06:02Z",
+      "side": 1,
+      "message": "Overall this is definitely moving in the right direction :)  Please model capabilities though using identities rather than strings so we can get an enumerated (but still augmentable) set of capabilities :)",
+      "revId": "84dbce7e44275f346fb530c8058ba14a92491626",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b5711ee2",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-13T11:06:02Z",
+      "side": 1,
+      "message": "Why are we suddenly attaching a flow-node to this augmentation?",
+      "revId": "84dbce7e44275f346fb530c8058ba14a92491626",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
