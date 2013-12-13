@@ -475,6 +475,16 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             status = updateConfig(conf, isAdding);
             if(!status.isSuccess()) {
                 updateDatabase(conf, (!isAdding));
+            } else {
+                // update the listeners
+                Subnet subnetCurr = subnets.get(conf.getIPAddress());
+                Subnet subnet;
+                if (subnetCurr == null) {
+                    subnet = new Subnet(conf);
+                } else {
+                    subnet = subnetCurr.clone();
+                }
+                notifySubnetChange(subnet, isAdding);
             }
         }
 
