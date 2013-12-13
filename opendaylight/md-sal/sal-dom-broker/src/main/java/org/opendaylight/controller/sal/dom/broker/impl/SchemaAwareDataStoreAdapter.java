@@ -151,19 +151,20 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         this.schema = null;
     }
 
-    protected CompositeNode mergeData(InstanceIdentifier path, CompositeNode stored, CompositeNode modified, boolean config) {
+    protected CompositeNode mergeData(InstanceIdentifier path, CompositeNode stored, CompositeNode modified,
+            boolean config) {
         long startTime = System.nanoTime();
         try {
-        DataSchemaNode node = schemaNodeFor(path);
-        return YangDataOperations.merge(node,stored,modified,config);
+            DataSchemaNode node = schemaNodeFor(path);
+            return YangDataOperations.merge(node, stored, modified, config);
         } finally {
-            //System.out.println("Merge time: " + ((System.nanoTime() - startTime) / 1000.0d));
+            // System.out.println("Merge time: " + ((System.nanoTime() -
+            // startTime) / 1000.0d));
         }
     }
-    
-    
+
     private DataSchemaNode schemaNodeFor(InstanceIdentifier path) {
-        checkState(schema != null,"YANG Schema is not available");
+        checkState(schema != null, "YANG Schema is not available");
         return YangSchemaUtils.getSchemaNode(schema, path);
     }
 
@@ -171,16 +172,16 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             DataModification<InstanceIdentifier, CompositeNode> original) {
         // NOOP for now
         NormalizedDataModification normalized = new NormalizedDataModification(original);
-        for (Entry<InstanceIdentifier,CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
+        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
             normalized.putConfigurationData(entry.getKey(), entry.getValue());
         }
-        for (Entry<InstanceIdentifier,CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
+        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
             normalized.putOperationalData(entry.getKey(), entry.getValue());
         }
         for (InstanceIdentifier entry : original.getRemovedConfigurationData()) {
             normalized.removeConfigurationData(entry);
         }
-        for(InstanceIdentifier entry : original.getRemovedOperationalData()) {
+        for (InstanceIdentifier entry : original.getRemovedOperationalData()) {
             normalized.removeOperationalData(entry);
         }
         return normalized;
@@ -284,7 +285,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
     }
-    
+
     private class NormalizedDataModification extends AbstractDataModification<InstanceIdentifier, CompositeNode> {
 
         private Object identifier;
@@ -295,12 +296,12 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             identifier = original;
             status = TransactionStatus.NEW;
         }
-        
+
         @Override
         public Object getIdentifier() {
             return this.identifier;
         }
-        
+
         @Override
         public TransactionStatus getStatus() {
             return status;
@@ -310,18 +311,19 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         public Future<RpcResult<TransactionStatus>> commit() {
             throw new UnsupportedOperationException("Commit should not be invoked on this");
         }
-        
+
         @Override
-        protected CompositeNode mergeConfigurationData(InstanceIdentifier path,CompositeNode stored, CompositeNode modified) {
-            return mergeData(path,stored, modified,true);
+        protected CompositeNode mergeConfigurationData(InstanceIdentifier path, CompositeNode stored,
+                CompositeNode modified) {
+            return mergeData(path, stored, modified, true);
         }
-        
+
         @Override
-        protected CompositeNode mergeOperationalData(InstanceIdentifier path,CompositeNode stored, CompositeNode modified) {
+        protected CompositeNode mergeOperationalData(InstanceIdentifier path, CompositeNode stored,
+                CompositeNode modified) {
             // TODO Auto-generated method stub
-            return mergeData(path,stored,modified,false);
+            return mergeData(path, stored, modified, false);
         }
-        
     }
 
 }

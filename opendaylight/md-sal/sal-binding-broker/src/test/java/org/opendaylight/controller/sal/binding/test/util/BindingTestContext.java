@@ -7,15 +7,22 @@ import java.util.Set;
 
 import javassist.ClassPool;
 
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.controller.sal.binding.impl.BindingAwareBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
+import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
+import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
+import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
+import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
+import org.opendaylight.controller.sal.dom.broker.impl.RpcRouterImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -31,7 +38,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import static com.google.common.base.Preconditions.*;
 
-public class BindingTestContext {
+public class BindingTestContext implements AutoCloseable {
     
     
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier TREE_ROOT = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
@@ -40,10 +47,15 @@ public class BindingTestContext {
     private static final Logger LOG = LoggerFactory.getLogger(BindingTestContext.class);
     
     private RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
-    private DataBrokerImpl baDataImpl;
-    private org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
     
-    private BindingIndependentDataServiceConnector connectorServiceImpl;
+    
+    private BindingAwareBrokerImpl baBrokerImpl;
+    private DataBrokerImpl baDataImpl;
+    private NotificationBrokerImpl baNotifyImpl;
+    private BindingIndependentConnector baConnectDataServiceImpl;
+
+    private org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
+    private BrokerImpl biBrokerImpl;
     private HashMapDataStore rawDataStore;
     private SchemaAwareDataStoreAdapter schemaAwareDataStore;
     private DataStoreStatsWrapper dataStoreStats;
@@ -56,6 +68,7 @@ public class BindingTestContext {
     private final ClassPool classPool;
 
     private final boolean startWithSchema;
+
     
     protected BindingTestContext(ListeningExecutorService executor, ClassPool classPool, boolean startWithSchema) {
         this.executor = executor;
@@ -93,15 +106,29 @@ public class BindingTestContext {
         baDataImpl.setExecutor(executor);
     }
     
+    public void startBindingBroker() {
+        checkState(executor != null,"Executor needs to be set");
+        checkState(baDataImpl != null,"Binding Data Broker must be started");
+        checkState(baNotifyImpl != null, "Notification Service must be started");
+        baBrokerImpl = new BindingAwareBrokerImpl(null);
+        
+        baBrokerImpl.setDataBroker(baDataImpl);
+        baBrokerImpl.setNotifyBroker(baNotifyImpl);
+        
+        baBrokerImpl.start();
+    }
+    
     public void startBindingToDomDataConnector() {
         checkState(baDataImpl != null,"Binding Data Broker needs to be started");
         checkState(biDataImpl != null,"DOM Data Broker needs to be started.");
         checkState(mappingServiceImpl != null,"DOM Mapping Service needs to be started.");
-        connectorServiceImpl = new BindingIndependentDataServiceConnector();
-        connectorServiceImpl.setBaDataService(baDataImpl);
-        connectorServiceImpl.setBiDataService(biDataImpl);
-        connectorServiceImpl.setMappingService(mappingServiceImpl);
-        connectorServiceImpl.start();
+        baConnectDataServiceImpl = new BindingIndependentConnector();
+        baConnectDataServiceImpl.setRpcRegistry(baBrokerImpl);
+        baConnectDataServiceImpl.setDomRpcRegistry(getDomRpcRegistry());
+        baConnectDataServiceImpl.setBaDataService(baDataImpl);
+        baConnectDataServiceImpl.setBiDataService(biDataImpl);
+        baConnectDataServiceImpl.setMappingService(mappingServiceImpl);
+        baConnectDataServiceImpl.start();
     }
     
     public void startBindingToDomMappingService() {
@@ -149,13 +176,29 @@ public class BindingTestContext {
     
     public void start() {
         startBindingDataBroker();
+        startBindingNotificationBroker();
+        startBindingBroker();
         startDomDataBroker();
         startDomDataStore();
+        startDomBroker();
         startBindingToDomMappingService();
         startBindingToDomDataConnector();
         if(startWithSchema) {
             loadYangSchemaFromClasspath();
         }
+    }
+
+    private void startDomBroker() {
+        checkState(executor != null);
+        biBrokerImpl = new BrokerImpl();
+        biBrokerImpl.setExecutor(executor);
+        biBrokerImpl.setRouter(new RpcRouterImpl("test"));
+    }
+
+    public void startBindingNotificationBroker() {
+        checkState(executor != null);
+        baNotifyImpl = new NotificationBrokerImpl(executor);
+        
     }
 
     public void loadYangSchemaFromClasspath() {
@@ -195,5 +238,25 @@ public class BindingTestContext {
         LOG.info("BIDataStore Statistics: Request Commit Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
                 dataStoreStats.getRequestCommitCount(), dataStoreStats.getRequestCommitTotalTime(),
                 dataStoreStats.getRequestCommitAverageTime());
+    }
+
+    public RpcProviderRegistry getBindingRpcRegistry() {
+        return baBrokerImpl;
+    }
+
+    public RpcProvisionRegistry getDomRpcRegistry() {
+        if(biBrokerImpl == null) {
+            return null;
+        }
+        return biBrokerImpl.getRouter();
+    }
+    
+    public RpcImplementation getDomRpcInvoker() {
+        return biBrokerImpl.getRouter();
+    }
+    
+    @Override
+    public void close() throws Exception {
+        
     }
 }

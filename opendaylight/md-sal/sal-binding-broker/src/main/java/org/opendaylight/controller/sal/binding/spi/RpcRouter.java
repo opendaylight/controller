@@ -9,6 +9,9 @@ package org.opendaylight.controller.sal.binding.spi;
 
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcImplementation;
@@ -26,7 +29,8 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  *            Type of RpcService for which router provides routing information
  *            and route selection.
  */
-public interface RpcRouter<T extends RpcService> extends RpcImplementation{
+public interface RpcRouter<T extends RpcService> extends //
+        RouteChangePublisher<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
 
     /**
      * Returns a type of RpcService which is served by this instance of router.
@@ -72,12 +76,11 @@ public interface RpcRouter<T extends RpcService> extends RpcImplementation{
      * @return default instance responsible for processing RPCs.
      */
     T getDefaultService();
-    
-    /**
-     * 
-     */
-    void setDefaultService(T service);
 
     Set<Class<? extends BaseIdentity>> getContexts();
+    
+    RoutedRpcRegistration<T> addRoutedRpcImplementation(T service);
+    
+    RpcRegistration<T> registerDefaultService(T service);
 
 }

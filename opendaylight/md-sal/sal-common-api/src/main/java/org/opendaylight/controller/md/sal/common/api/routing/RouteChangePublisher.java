@@ -4,5 +4,5 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 public interface RouteChangePublisher<C,P> {
 
-    ListenerRegistration<RouteChangeListener<C,P>> registerRouteChangeListener(RouteChangeListener<C,P> listener);
+    <L extends RouteChangeListener<C,P>> ListenerRegistration<L> registerRouteChangeListener(L listener);
 }

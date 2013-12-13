@@ -15,6 +15,8 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 import org.slf4j.LoggerFactory
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
+import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 
 class RpcRouterImpl implements RpcRouter, Identifiable<String> {
 
@@ -35,6 +37,20 @@ class RpcRouterImpl implements RpcRouter, Identifiable<String> {
     }
 
     override addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
+                checkNotNull(rpcType, "Rpc Type should not be null");
+        checkNotNull(implementation, "Implementation should not be null.");
+        val reg = new RoutedRpcRegistrationImpl(rpcType, implementation, this);
+        implementations.put(rpcType, reg)
+
+        for (listener : rpcRegistrationListeners.listeners) {
+            try {
+                listener.instance.onRpcImplementationAdded(rpcType);
+            } catch (Exception e) {
+                log.error("Unhandled exception during invoking listener", e);
+            }
+        }
+
+        return reg;
     }
 
     override addRpcImplementation(QName rpcType, RpcImplementation implementation) throws IllegalArgumentException {
@@ -102,5 +118,23 @@ class RpcRegistrationImpl extends AbstractObjectRegistration<RpcImplementation> 
     override protected removeRegistration() {
         router.remove(this);
     }
+}
+class RoutedRpcRegistrationImpl extends RpcRegistrationImpl implements RoutedRpcRegistration {
 
+
+    new(QName type, RpcImplementation instance, RpcRouterImpl router) {
+        super(type,instance,router)
+    }
+
+    override protected removeRegistration() {
+        router.remove(this);
+    }
+    override registerPath(QName context, InstanceIdentifier path) {
+        //
+        
+    }
+
+    override unregisterPath(QName context, InstanceIdentifier path) {
+        //
+    }
 }

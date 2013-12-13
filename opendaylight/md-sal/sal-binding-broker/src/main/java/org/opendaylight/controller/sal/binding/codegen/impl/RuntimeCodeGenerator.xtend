@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.binding.Notification
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
 import java.util.HashSet
-import static org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils.*
+import static org.opendaylight.yangtools.concepts.util.ClassLoaderUtils.*
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
 import java.util.Set
@@ -37,6 +37,8 @@ import org.opendaylight.yangtools.yang.binding.annotations.QName
 import org.opendaylight.yangtools.yang.binding.DataContainer
 import org.opendaylight.yangtools.yang.binding.RpcImplementation
 import org.opendaylight.controller.sal.binding.codegen.util.JavassistUtils
+import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils
+import javassist.LoaderClassPath
 
 class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
 
@@ -45,40 +47,70 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     val extension JavassistUtils utils;
     val Map<Class<? extends NotificationListener>, RuntimeGeneratedInvokerPrototype> invokerClasses;
 
-    public new(ClassPool pool) {
+
+    new(ClassPool pool) {
         classPool = pool;
         utils = new JavassistUtils(pool);
         invokerClasses = new WeakHashMap();
         BROKER_NOTIFICATION_LISTENER = org.opendaylight.controller.sal.binding.api.NotificationListener.asCtClass;
+        pool.appendClassPath(new LoaderClassPath(RpcService.classLoader));
     }
 
     override <T extends RpcService> getDirectProxyFor(Class<T> iface) {
-        val supertype = iface.asCtClass
-        val targetCls = createClass(iface.directProxyName, supertype) [
-            field(DELEGATE_FIELD, iface);
-            implementMethodsFrom(supertype) [
-                body = '''
-                {
-                    if(«DELEGATE_FIELD» == null) {
-                        throw new java.lang.IllegalStateException("No provider is processing supplied message");
+        val T instance =  withClassLoaderAndLock(iface.classLoader,lock) [|
+            val proxyName = iface.directProxyName;
+            val potentialClass = ClassLoaderUtils.tryToLoadClassWithTCCL(proxyName)
+            if(potentialClass != null) {
+                return potentialClass.newInstance as T;
+            }
+            val supertype = iface.asCtClass
+            val createdCls = createClass(iface.directProxyName, supertype) [
+                field(DELEGATE_FIELD, iface);
+                implementsType(RpcImplementation.asCtClass)
+                implementMethodsFrom(supertype) [
+                    body = '''
+                    {
+                        if(«DELEGATE_FIELD» == null) {
+                            throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                        }
+                        return ($r) «DELEGATE_FIELD».«it.name»($$);
                     }
-                    return ($r) «DELEGATE_FIELD».«it.name»($$);
-                }
-                '''
+                    '''
+                ]
+                implementMethodsFrom(RpcImplementation.asCtClass) [
+                    body = '''
+                    {
+                        throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                        return ($r) null;
+                    }
+                    '''
+                ]
             ]
+            return createdCls.toClass(iface.classLoader).newInstance as T
         ]
-        return targetCls.toClass(iface.classLoader).newInstance as T
+        return instance;
     }
 
     override <T extends RpcService> getRouterFor(Class<T> iface) {
-        val instance = <RpcRouterCodegenInstance<T>>withClassLoaderAndLock(iface.classLoader,lock) [ |
+        val metadata = withClassLoader(iface.classLoader) [|
             val supertype = iface.asCtClass
-            val metadata = supertype.rpcMetadata;
+            return supertype.rpcMetadata;
+        ]
+        
+        val instance = <T>withClassLoaderAndLock(iface.classLoader,lock) [ |
+            val supertype = iface.asCtClass
+            val routerName = iface.routerName;
+            val potentialClass = ClassLoaderUtils.tryToLoadClassWithTCCL(routerName)
+            if(potentialClass != null) {
+                return potentialClass.newInstance as T;
+            }
+            
             val targetCls = createClass(iface.routerName, supertype) [
-                addInterface(RpcImplementation.asCtClass)
+                
                 
                 field(DELEGATE_FIELD, iface)
                 //field(REMOTE_INVOKER_FIELD,iface);
+                implementsType(RpcImplementation.asCtClass)
                 
                 for (ctx : metadata.contexts) {
                     field(ctx.routingTableField, Map)
@@ -105,35 +137,18 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                     }
                 ]
                 implementMethodsFrom(RpcImplementation.asCtClass) [
-                    switch (name) {
-                        case "getSupportedInputs":
-                            body = '''
-                            {
-                                throw new java.lang.UnsupportedOperationException("Not implemented yet");
-                                return ($r) null;
-                            }'''
-                        case "invoke": {
-                            val tmpBody = '''
-                            {
-                                «FOR input : metadata.supportedInputs SEPARATOR " else "»
-                                «val rpcMetadata = metadata.rpcInputs.get(input)»
-                                if(«input.name».class.equals($1)) {
-                                    return ($r) this.«rpcMetadata.methodName»((«input.name») $2);
-                                }
-                                «ENDFOR»
-                                throw new java.lang.IllegalArgumentException("Not supported message type");
-                                return ($r) null;
-                            }
-                            '''
-                            body = tmpBody
-                        }
+                    body = '''
+                    {
+                        throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                        return ($r) null;
                     }
+                    '''
                 ]
             ]
-            val instance = targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance as T
-            return new RpcRouterCodegenInstance(iface, instance, metadata.contexts,metadata.supportedInputs);
+            return targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance as T
+            
         ];
-        return instance;
+        return new RpcRouterCodegenInstance(iface, instance, metadata.contexts,metadata.supportedInputs);
     }
 
     private def RpcServiceMetadata getRpcMetadata(CtClass iface) {
