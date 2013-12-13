@@ -12,6 +12,42 @@ module opendaylight-flow-types {
         description "Initial revision of flow service";
     }
     
+    typedef output-port-values {
+        type enumeration {
+            enum MAX {
+                value 1;
+            }
+            enum IN_PORT {
+                value 2;
+            }
+            enum TABLE {
+                value 3;
+            }
+            enum NORMAL {
+                value 4;
+            }
+            enum FLOOD {
+                value 5;
+            }
+            enum ALL {
+                value 6;
+            }
+            enum CONTROLLER {
+                value 7;
+            }
+            enum LOCAL {
+                value 8;
+            }
+            enum ANY {
+                value 9;
+            }
+	     enum NONE {
+                value 10;
+            }
+
+        }
+    }
+
     grouping instruction-list {
         list instruction {
             key "order";
