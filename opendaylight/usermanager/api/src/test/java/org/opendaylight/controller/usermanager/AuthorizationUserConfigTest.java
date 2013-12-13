@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.usermanager;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -71,12 +70,12 @@ public class AuthorizationUserConfigTest {
                 .isSuccess());
 
         // New Password = null, No change in password
-        assertTrue(userConfig.getPassword().equals(UserConfig.hash("ciscocisco")));
+        assertTrue(userConfig.authenticate("ciscocisco").getStatus().equals(AuthResultEnum.AUTH_ACCEPT_LOC));
 
         // Password changed successfully, no change in user role
         assertTrue(userConfig.update("ciscocisco", "cisco123", roles)
                 .isSuccess());
-        assertTrue(userConfig.getPassword().equals(UserConfig.hash("cisco123")));
+        assertTrue(userConfig.authenticate("cisco123").getStatus().equals(AuthResultEnum.AUTH_ACCEPT_LOC));
         assertTrue(userConfig.getRoles().get(0).equals(
                 UserLevel.NETWORKOPERATOR.toString()));
 
@@ -85,14 +84,14 @@ public class AuthorizationUserConfigTest {
         roles.add(UserLevel.SYSTEMADMIN.toString());
         assertTrue(userConfig.update("cisco123", "cisco123", roles)
                 .isSuccess());
-        assertTrue(userConfig.getPassword().equals(UserConfig.hash("cisco123")));
+        assertTrue(userConfig.authenticate("cisco123").getStatus().equals(AuthResultEnum.AUTH_ACCEPT_LOC));
         assertTrue(userConfig.getRoles().get(0)
                 .equals(UserLevel.SYSTEMADMIN.toString()));
 
         // Password and role changed successfully
         assertTrue(userConfig.update("cisco123", "ciscocisco", roles)
                 .isSuccess());
-        assertTrue(userConfig.getPassword().equals(UserConfig.hash("ciscocisco")));
+        assertTrue(userConfig.authenticate("ciscocisco").getStatus().equals(AuthResultEnum.AUTH_ACCEPT_LOC));
         assertTrue(userConfig.getRoles().get(0)
                 .equals(UserLevel.SYSTEMADMIN.toString()));
 
@@ -104,14 +103,6 @@ public class AuthorizationUserConfigTest {
         assertTrue(authresp.getStatus().equals(AuthResultEnum.AUTH_ACCEPT_LOC));
         authresp = userConfig.authenticate("wrongPassword");
         assertTrue(authresp.getStatus().equals(AuthResultEnum.AUTH_REJECT_LOC));
-
-        // test equals()
-        roles.clear();
-        roles.add(UserLevel.NETWORKOPERATOR.toString());
-        userConfig = new UserConfig("uname", "ciscocisco", roles);
-        assertEquals(userConfig, userConfig);
-        UserConfig userConfig2 = new UserConfig("uname", "ciscocisco", roles);
-        assertEquals(userConfig, userConfig2);
     }
 
     @Test
