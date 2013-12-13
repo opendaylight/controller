@@ -16,7 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.opendaylight.controller.config.yang.md.sal.binding.statistics.DataBrokerRuntimeMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
+import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
@@ -63,7 +63,7 @@ public final class DataBrokerImplModule extends
         BindingIndependentMappingService mappingService = getMappingServiceDependency();
         
         if (domBroker != null && mappingService != null) {
-            BindingIndependentDataServiceConnector runtimeMapping = new BindingIndependentDataServiceConnector();
+            BindingIndependentConnector runtimeMapping = new BindingIndependentConnector();
             runtimeMapping.setMappingService(mappingService);
             runtimeMapping.setBaDataService(dataBindingBroker);
             domBroker.registerProvider(runtimeMapping, getBundleContext());

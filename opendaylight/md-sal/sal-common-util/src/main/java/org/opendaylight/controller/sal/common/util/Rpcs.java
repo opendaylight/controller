@@ -11,17 +11,31 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+
+import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+import com.google.common.collect.ImmutableList;
+
 public class Rpcs {
+    
+    public static <T> RpcResult<T> getRpcResult(boolean successful) {
+        RpcResult<T> ret = new RpcResultTO<T>(successful, null, ImmutableList.<RpcError>of());
+        return ret;
+    }
+    
     public static <T> RpcResult<T> getRpcResult(boolean successful, T result,
             Collection<RpcError> errors) {
         RpcResult<T> ret = new RpcResultTO<T>(successful, result, errors);
         return ret;
     }
 
-    private static class RpcResultTO<T> implements RpcResult<T>, Serializable {
+    public static <T> RpcResult<T> getRpcResult(boolean successful, Collection<RpcError> errors) {
+        return new RpcResultTO<T>(successful, null, errors);
+    }
+    
+    private static class RpcResultTO<T> implements RpcResult<T>, Serializable, Immutable {
 
         private final Collection<RpcError> errors;
         private final T result;
@@ -31,8 +45,7 @@ public class Rpcs {
                 Collection<RpcError> errors) {
             this.successful = successful;
             this.result = result;
-            this.errors = Collections.unmodifiableList(new ArrayList<RpcError>(
-                    errors));
+            this.errors = ImmutableList.copyOf(errors);
         }
 
         @Override

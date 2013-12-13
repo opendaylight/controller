@@ -29,8 +29,10 @@ import org.slf4j.LoggerFactory
 import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter
 import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
+import org.opendaylight.controller.sal.core.api.RpcImplementation
 
-public class BrokerImpl implements Broker, AutoCloseable {
+public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BrokerImpl);
 
     // Broker Generic Context
@@ -113,6 +115,14 @@ public class BrokerImpl implements Broker, AutoCloseable {
     
     override close() throws Exception {
         deactivator?.close();
+    }
+    
+    override addRpcImplementation(QName rpcType, RpcImplementation implementation) throws IllegalArgumentException {
+        router.addRpcImplementation(rpcType,implementation);
+    }
+    
+    override addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
+        router.addRoutedRpcImplementation(rpcType,implementation);
     }
     
 }
