@@ -251,6 +251,12 @@
             <version>2010.09.24.2-SNAPSHOT</version>
         </dependency>
         <dependency>
+        <groupId>org.opendaylight.yangtools.model</groupId>
+        <artifactId>ietf-topology-l3-unicast-igp</artifactId>
+        <version>2013.10.21.0-SNAPSHOT</version>
+        <scope>test</scope>
+        </dependency>
+        <dependency>
         	<groupId>org.opendaylight.controller.model</groupId>
         	<artifactId>model-flow-base</artifactId>
         	<version>1.0-SNAPSHOT</version>
