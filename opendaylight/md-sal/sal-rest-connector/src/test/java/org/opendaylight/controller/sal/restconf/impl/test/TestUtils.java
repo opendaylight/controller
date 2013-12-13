@@ -411,5 +411,20 @@ final class TestUtils {
             }
         }
     }
+    
+    public static void prepareMockForRestconfBeforeNormalization(Set<Module> modules, DataSchemaNode dataSchemaNode,
+            RestconfImpl restconf) {
+        ControllerContext instance = ControllerContext.getInstance();
+        instance.setSchemas(TestUtils.loadSchemaContext(modules));
+        restconf.setControllerContext(ControllerContext.getInstance());
+
+        BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
+        when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+                .thenReturn(
+                        new DummyFuture.Builder().rpcResult(
+                                new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
+                                        .build()).build());
+        restconf.setBroker(mockedBrokerFacade);
+    }
 
 }
