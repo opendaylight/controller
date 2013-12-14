@@ -64,4 +64,8 @@ public class TypeProviderWrapper {
     public String getJMXParamForBaseType(TypeDefinition<?> baseType) {
         return typeProvider.getConstructorPropertyName(baseType);
     }
+
+    public String getJMXParamForUnionInnerType(TypeDefinition<?> unionInnerType) {
+        return typeProvider.getParamNameFromType(unionInnerType);
+    }
 }

@@ -74,6 +74,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
+    protected AttributeWritingStrategy caseJavaUnionAttribute(OpenType<?> openType) {
+        return new SimpleUnionAttributeWritingStrategy(document, key);
+    }
+
+    @Override
     protected AttributeWritingStrategy caseDependencyAttribute(SimpleType<?> openType) {
         return new ObjectNameAttributeWritingStrategy(document, key);
     }

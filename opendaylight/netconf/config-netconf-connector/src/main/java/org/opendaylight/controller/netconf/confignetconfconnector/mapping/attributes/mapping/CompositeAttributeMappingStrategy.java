@@ -53,17 +53,21 @@ public class CompositeAttributeMappingStrategy extends
         Map<String, Object> retVal = Maps.newHashMap();
 
         for (String jmxName : jmxToJavaNameMapping.keySet()) {
-            String innerAttrJmxName = jmxName;
-            Object innerValue = compositeData.get(innerAttrJmxName);
-
-            AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies
-                    .get(innerAttrJmxName);
-            Optional<?> mapAttribute = attributeMappingStrategy.mapAttribute(innerValue);
-            if (mapAttribute.isPresent())
-                retVal.put(jmxToJavaNameMapping.get(innerAttrJmxName), mapAttribute.get());
+            Optional<?> mapped = mapInnerAttribute(compositeData, jmxName, expectedType.getDescription(jmxName));
+            if(mapped.isPresent())
+                retVal.put(jmxToJavaNameMapping.get(jmxName), mapped.get());
         }
 
         return Optional.of(retVal);
+    }
+
+    protected Optional<?> mapInnerAttribute(CompositeDataSupport compositeData, String jmxName, String description) {
+        Object innerValue = compositeData.get(jmxName);
+
+        AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies
+                .get(jmxName);
+        Optional<?> mapAttribute = attributeMappingStrategy.mapAttribute(innerValue);
+        return mapAttribute;
     }
 
 }

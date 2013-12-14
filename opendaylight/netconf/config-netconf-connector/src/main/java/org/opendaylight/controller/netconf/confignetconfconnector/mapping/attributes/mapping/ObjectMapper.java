@@ -90,6 +90,22 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         return new CompositeAttributeMappingStrategy(openType, innerStrategies, attributeMapping);
     }
 
+    @Override
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaUnionAttribute(OpenType<?> openType) {
+        Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
+
+        Map<String, String> attributeMapping = Maps.newHashMap();
+
+        CompositeType compositeType = (CompositeType) openType;
+        for (String innerAttributeKey : compositeType.keySet()) {
+
+            innerStrategies.put(innerAttributeKey, caseJavaAttribute(compositeType.getType(innerAttributeKey)));
+            attributeMapping.put(innerAttributeKey, innerAttributeKey);
+        }
+
+        return new UnionCompositeAttributeMappingStrategy(compositeType, innerStrategies, attributeMapping);
+    }
+
     private String serviceNameOfDepAttr;
     private String namespaceOfDepAttr;
 
