@@ -81,6 +81,19 @@ module opendaylight-statistics-types {
         }
     }
     
+    grouping generic-table-statistics {
+    	description "Generic grouping holding generic statistics related to switch table";
+    	leaf active-flows {
+            type yang:counter32;
+    	}
+    	leaf packets-looked-up {
+    		type yang:counter64;
+    	}
+    	leaf packets-matched {
+    		type yang:counter64;
+    	}
+    }
+    
     grouping aggregate-flow-statistics {
     	description "Aggregate flow statistics";
         leaf packet-count {

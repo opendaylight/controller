@@ -25,7 +25,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.G
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.TableId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
@@ -41,6 +43,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllPortsStatisticsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllPortsStatisticsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
@@ -62,6 +67,10 @@ public class StatisticsProvider implements AutoCloseable {
     
     private OpendaylightFlowStatisticsService flowStatsService;
     
+    private OpendaylightPortStatisticsService portStatsService;
+
+    private OpendaylightFlowTableStatisticsService flowTableStatsService;
+
     private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
     
     private Thread statisticsRequesterThread;
@@ -114,6 +123,12 @@ public class StatisticsProvider implements AutoCloseable {
         flowStatsService = StatisticsManagerActivator.getProviderContext().
                 getRpcService(OpendaylightFlowStatisticsService.class);
 
+        portStatsService = StatisticsManagerActivator.getProviderContext().
+                getRpcService(OpendaylightPortStatisticsService.class);
+
+        flowTableStatsService = StatisticsManagerActivator.getProviderContext().
+                getRpcService(OpendaylightFlowTableStatisticsService.class);
+        
         statisticsRequesterThread = new Thread( new Runnable(){
 
             @Override
@@ -145,11 +160,11 @@ public class StatisticsProvider implements AutoCloseable {
     
     private void statsRequestSender(){
         
-        //Need to call API to receive all the nodes connected to controller.
         List<Node> targetNodes = getAllConnectedNodes();
         
         if(targetNodes == null)
             return;
+        
 
         for (Node targetNode : targetNodes){
             
@@ -162,14 +177,18 @@ public class StatisticsProvider implements AutoCloseable {
 
                 sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
 
+                sendAllPortStatisticsRequest(targetNodeRef);
+                
+                sendAllFlowTablesStatisticsRequest(targetNodeRef);
+
             }catch(Exception e){
-                spLogger.error("Exception occured while sending flow statistics request : {}",e);
+                spLogger.error("Exception occured while sending statistics requests : {}",e);
             }
 
             if(targetNode.getAugmentation(FlowCapableNode.class) != null){
 
                 spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
-                
+
                 try{
                   sendAllGroupStatisticsRequest(targetNodeRef);
                   Thread.sleep(1000);
@@ -180,12 +199,23 @@ public class StatisticsProvider implements AutoCloseable {
                   sendMeterConfigStatisticsRequest(targetNodeRef);
                   Thread.sleep(1000);
                 }catch(Exception e){
-                    spLogger.error("Exception occured while sending statistics request : {}", e);
+                    spLogger.error("Exception occured while sending statistics requests : {}", e);
                 }
             }
         }
     }
-    
+
+    private void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) {
+        final GetFlowTablesStatisticsInputBuilder input = 
+                new GetFlowTablesStatisticsInputBuilder();
+        
+        input.setNode(targetNodeRef);
+
+        @SuppressWarnings("unused")
+        Future<RpcResult<GetFlowTablesStatisticsOutput>> response = 
+                flowTableStatsService.getFlowTablesStatistics(input.build());
+    }
+
     private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode){
         final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input =
                 new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
@@ -210,7 +240,7 @@ public class StatisticsProvider implements AutoCloseable {
                         new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
                 
                 input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
-                input.setTableId(new TableId(id));
+                input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(id));
                 Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response = 
                         flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());
                 
@@ -231,6 +261,17 @@ public class StatisticsProvider implements AutoCloseable {
 //                        flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());`
 //                
 //                multipartMessageManager.setTxIdAndTableIdMapEntry(response.get().getResult().getTransactionId(), (short)1);
+    }
+
+    private void sendAllPortStatisticsRequest(NodeRef targetNode){
+        
+        final GetAllPortsStatisticsInputBuilder input = new GetAllPortsStatisticsInputBuilder();
+        
+        input.setNode(targetNode);
+
+        @SuppressWarnings("unused")
+        Future<RpcResult<GetAllPortsStatisticsOutput>> response = 
+                portStatsService.getAllPortsStatistics(input.build());
     }
 
     private void sendAllGroupStatisticsRequest(NodeRef targetNode){

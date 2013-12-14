@@ -10,17 +10,21 @@ package org.opendaylight.controller.md.statistics.manager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.aggregate.flow.statistics.AggregateFlowStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.features.GroupFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.desc.stats.reply.GroupDescStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.statistics.reply.GroupStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericTableStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.NodeConnectorStatistics;
 
 public class NodeStatistics {
 
@@ -44,8 +48,16 @@ public class NodeStatistics {
     private final Map<Short,AggregateFlowStatistics> tableAndAggregateFlowStatsMap = 
             new HashMap<Short,AggregateFlowStatistics>();
     
-    public NodeStatistics(){}     
+    private final Map<NodeConnectorId,NodeConnectorStatistics> nodeConnectorStats = 
+            new ConcurrentHashMap<NodeConnectorId,NodeConnectorStatistics>();
     
+    private final Map<Short,GenericTableStatistics> flowTableAndStatisticsMap = 
+            new HashMap<Short,GenericTableStatistics>();
+    
+    public NodeStatistics(){
+        
+    }
+
     public NodeRef getTargetNode() {
         return targetNode;
     }
@@ -106,8 +118,14 @@ public class NodeStatistics {
         return flowAndStatsMap;
     }
 
+    public Map<Short, GenericTableStatistics> getFlowTableAndStatisticsMap() {
+        return flowTableAndStatisticsMap;
+    }
+
     public Map<Short, AggregateFlowStatistics> getTableAndAggregateFlowStatsMap() {
         return tableAndAggregateFlowStatsMap;
     }
-    
+    public Map<NodeConnectorId, NodeConnectorStatistics> getNodeConnectorStats() {
+        return nodeConnectorStats;
+    }
 }

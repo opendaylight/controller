@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -33,6 +34,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.a
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsData;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdate;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupDescStatsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupFeaturesUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupStatisticsUpdated;
@@ -49,6 +56,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -66,6 +76,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.PortStatisticsUpdate;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
@@ -73,7 +89,9 @@ import org.slf4j.LoggerFactory;
 
 public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsListener,
         OpendaylightMeterStatisticsListener, 
-        OpendaylightFlowStatisticsListener{
+        OpendaylightFlowStatisticsListener,
+        OpendaylightPortStatisticsListener,
+        OpendaylightFlowTableStatisticsListener{
     
     public final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
 
@@ -429,7 +447,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
         NodeKey key = new NodeKey(notification.getId());
-        sucLogger.info("Received aggregate flow statistics update : {}",notification.toString());
+        sucLogger.debug("Received aggregate flow statistics update : {}",notification.toString());
         
         Short tableId = this.statisticsManager.getMultipartMessageManager().getTableIdForTxId(notification.getTransactionId());
         if(tableId != null){
@@ -452,7 +470,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             }
             cache.get(notification.getId()).getTableAndAggregateFlowStatsMap().put(tableId,aggregateFlowStatisticsBuilder.build());
             
-            sucLogger.info("Augment aggregate statistics: {} for table {} on Node {}",aggregateFlowStatisticsBuilder.build().toString(),tableId,key);
+            sucLogger.debug("Augment aggregate statistics: {} for table {} on Node {}",aggregateFlowStatisticsBuilder.build().toString(),tableId,key);
 
             TableBuilder tableBuilder = new TableBuilder();
             tableBuilder.setKey(new TableKey(tableId));
@@ -460,6 +478,98 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             it.putOperationalData(tableRef, tableBuilder.build());
             it.commit();
 
+        }
+    }
+
+    @Override
+    public void onPortStatisticsUpdate(PortStatisticsUpdate notification) {
+        NodeKey key = new NodeKey(notification.getId());
+        sucLogger.info("Received port stats update : {}",notification.toString());
+        
+        //Add statistics to local cache
+        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+        if(!cache.containsKey(notification.getId())){
+            cache.put(notification.getId(), new NodeStatistics());
+        }
+
+
+        List<NodeConnectorStatisticsAndPortNumberMap> portsStats = notification.getNodeConnectorStatisticsAndPortNumberMap();
+        for(NodeConnectorStatisticsAndPortNumberMap portStats : portsStats){
+            
+            DataModificationTransaction it = this.statisticsManager.startChange();
+
+            FlowCapableNodeConnectorStatisticsBuilder statisticsBuilder 
+                                            = new FlowCapableNodeConnectorStatisticsBuilder();
+            statisticsBuilder.setBytes(portStats.getBytes());
+            statisticsBuilder.setCollisionCount(portStats.getCollisionCount());
+            statisticsBuilder.setDuration(portStats.getDuration());
+            statisticsBuilder.setPackets(portStats.getPackets());
+            statisticsBuilder.setReceiveCrcError(portStats.getReceiveCrcError());
+            statisticsBuilder.setReceiveDrops(portStats.getReceiveDrops());
+            statisticsBuilder.setReceiveErrors(portStats.getReceiveErrors());
+            statisticsBuilder.setReceiveFrameError(portStats.getReceiveFrameError());
+            statisticsBuilder.setReceiveOverRunError(portStats.getReceiveOverRunError());
+            statisticsBuilder.setTransmitDrops(portStats.getTransmitDrops());
+            statisticsBuilder.setTransmitErrors(portStats.getTransmitErrors());
+            
+            //Update data in the cache
+            cache.get(notification.getId()).getNodeConnectorStats().put(portStats.getNodeConnectorId(), statisticsBuilder.build());
+            
+            //Augment data to the node-connector
+            FlowCapableNodeConnectorStatisticsDataBuilder statisticsDataBuilder = 
+                    new FlowCapableNodeConnectorStatisticsDataBuilder();
+            
+            statisticsDataBuilder.setFlowCapableNodeConnectorStatistics(statisticsBuilder.build());
+            
+            InstanceIdentifier<NodeConnector> nodeConnectorRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key).child(NodeConnector.class, new NodeConnectorKey(portStats.getNodeConnectorId())).toInstance();
+            
+            NodeConnector nodeConnector = (NodeConnector)it.readOperationalData(nodeConnectorRef);
+            
+            if(nodeConnector != null){
+                sucLogger.debug("Augmenting port statistics {} to port {}",statisticsDataBuilder.build().toString(),nodeConnectorRef.toString());
+                NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder();
+                nodeConnectorBuilder.addAugmentation(FlowCapableNodeConnectorStatisticsData.class, statisticsDataBuilder.build());
+                it.putOperationalData(nodeConnectorRef, nodeConnectorBuilder.build());
+                it.commit();
+            }
+        }
+    }
+
+    @Override
+    public void onFlowTableStatisticsUpdate(FlowTableStatisticsUpdate notification) {
+        NodeKey key = new NodeKey(notification.getId());
+        sucLogger.debug("Received flow table statistics update : {}",notification.toString());
+        
+        List<FlowTableAndStatisticsMap> flowTablesStatsList = notification.getFlowTableAndStatisticsMap();
+        for (FlowTableAndStatisticsMap ftStats : flowTablesStatsList){
+            
+            DataModificationTransaction it = this.statisticsManager.startChange();
+
+            InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
+                    .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(ftStats.getTableId().getValue())).toInstance();
+            
+            FlowTableStatisticsDataBuilder statisticsDataBuilder = new FlowTableStatisticsDataBuilder();
+            
+            FlowTableStatisticsBuilder statisticsBuilder = new FlowTableStatisticsBuilder();
+            statisticsBuilder.setActiveFlows(ftStats.getActiveFlows());
+            statisticsBuilder.setPacketsLookedUp(ftStats.getPacketsLookedUp());
+            statisticsBuilder.setPacketsMatched(ftStats.getPacketsMatched());
+            
+            statisticsDataBuilder.setFlowTableStatistics(statisticsBuilder.build());
+            
+            ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+            if(!cache.containsKey(notification.getId())){
+                cache.put(notification.getId(), new NodeStatistics());
+            }
+            cache.get(notification.getId()).getFlowTableAndStatisticsMap().put(ftStats.getTableId().getValue(),statisticsBuilder.build());
+            
+            sucLogger.debug("Augment flow table statistics: {} for table {} on Node {}",statisticsBuilder.build().toString(),ftStats.getTableId(),key);
+            
+            TableBuilder tableBuilder = new TableBuilder();
+            tableBuilder.setKey(new TableKey(ftStats.getTableId().getValue()));
+            tableBuilder.addAugmentation(FlowTableStatisticsData.class, statisticsDataBuilder.build());
+            it.putOperationalData(tableRef, tableBuilder.build());
+            it.commit();
         }
     }
 
@@ -484,8 +594,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         //TODO: Need to implement it yet
         
     }
-
-
 
     private NodeRef getNodeRef(NodeKey nodeKey){
         InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeKey);
@@ -561,5 +669,4 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         return true;
     }
-
 }

@@ -1,0 +1,78 @@
+module opendaylight-port-statistics {
+    namespace "urn:opendaylight:port:statistics";
+    prefix portstat;
+
+	import flow-capable-transaction {prefix tr;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}   
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import opendaylight-statistics-types {prefix stat-types;revision-date "2013-09-25";}
+
+    contact
+        "Anilkumar Vishnoi
+        Email: avishnoi@in.ibm.com";
+
+    revision "2013-12-14" {
+        description "Initial revision of port statistics model";
+    }
+    
+    //Augment port statistics data to the flow-capable-node-connector
+	augment "/inv:nodes/inv:node/inv:node-connector" {
+        ext:augment-identifier "flow-capable-node-connector-statistics-data";
+        uses flow-capable-node-connector-statistics;
+    }
+	
+	grouping flow-capable-node-connector-statistics {
+        container flow-capable-node-connector-statistics {
+            //config "false";
+            uses stat-types:node-connector-statistics;
+        }
+	}    
+	
+    // RPC calls
+    rpc get-all-ports-statistics {
+    	description "Get statistics for all the ports from the node";
+        input {
+            uses inv:node-context-ref;
+        }
+        output {
+            uses stat-types:node-connector-statistics;
+            uses tr:transaction-aware;
+        }
+    }
+    
+    rpc get-port-statistics {
+    	description "Get statistics for given port from the node";
+    	input {
+    		uses inv:node-context-ref;
+    		leaf node-connector-id {
+    			type inv:node-connector-id;
+    		}
+    	}
+    	output {
+            uses stat-types:node-connector-statistics;
+            uses tr:transaction-aware;
+    	}
+    }
+    
+    //Notification for port statistics update
+	grouping node-connector-statistics-and-port-number-map {
+		description "List of flow and statistics map";
+		list node-connector-statistics-and-port-number-map {
+			key "node-connector-id";
+			leaf node-connector-id {
+				type inv:node-connector-id;
+			}
+			uses stat-types:node-connector-statistics;
+		}
+	}
+
+	notification port-statistics-update {
+        leaf moreReplies {
+            type boolean;
+        }
+        uses inv:node;
+		uses node-connector-statistics-and-port-number-map;
+        uses tr:transaction-aware;
+    }
+}
