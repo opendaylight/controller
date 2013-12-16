@@ -319,7 +319,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     @Override
     public SubnetConfig getSubnetConfig(String subnet) {
         // if there are no subnets, return the default subnet
-        if(subnetsConfigList.size() == 0 && subnet == DEFAULT_SUBNET_NAME){
+        if(subnetsConfigList.size() == 0 && subnet.equalsIgnoreCase(DEFAULT_SUBNET_NAME)){
             return DEFAULT_SUBNETCONFIG;
         }else{
             return subnetsConfigList.get(subnet);
@@ -428,11 +428,11 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     private Status semanticCheck(SubnetConfig conf) {
-        Subnet newSubnet = new Subnet(conf);
         Set<InetAddress> IPs = subnets.keySet();
         if (IPs == null) {
             return new Status(StatusCode.SUCCESS);
         }
+        Subnet newSubnet = new Subnet(conf);
         for (InetAddress i : IPs) {
             Subnet existingSubnet = subnets.get(i);
             if ((existingSubnet != null) && !existingSubnet.isMutualExclusive(newSubnet)) {
@@ -462,7 +462,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 return status;
             }
         } else {
-            if (conf.getName().equals(DEFAULT_SUBNET_NAME)) {
+            if (conf.getName().equalsIgnoreCase(DEFAULT_SUBNET_NAME)) {
                 return new Status(StatusCode.NOTALLOWED, "The specified subnet gateway cannot be removed");
             }
         }
@@ -506,7 +506,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public Status removeSubnet(String name) {
-        if (name.equals(DEFAULT_SUBNET_NAME)) {
+        if (name.equalsIgnoreCase(DEFAULT_SUBNET_NAME)) {
             return new Status(StatusCode.NOTALLOWED, "The specified subnet gateway cannot be removed");
         }
         SubnetConfig conf = subnetsConfigList.get(name);
