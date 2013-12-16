@@ -1,0 +1,39 @@
+module opendaylight-arp-table {
+    namespace "urn:opendaylight:arp";
+    prefix arp;
+
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}   
+
+    revision "2013-12-16" {
+        description "Initial revision of arp table";
+    }      
+    
+    grouping arp-entry {    
+        leaf target-mac {        
+            type yang:mac-address;
+        }
+        
+        leaf target-ip {        
+            type inet:ipv4-address;
+        }
+        
+        container type {  
+            case static-type {
+                leaf static {
+                    type empty;
+                }
+            }
+            
+            case dynamic-type {
+                leaf dynamic {
+                    type empty;
+                }
+            }            
+        }
+        
+        leaf container {        
+            string name;
+        }
+    }
+}
