@@ -17,12 +17,18 @@ module opendaylight-port-types {
         }
     }
     
-    typedef port-config {
-        type bits {
-            bit PORT-DOWN;
-            bit NO-RECV;
-            bit NO-FWD;
-            bit NO-PACKET-IN;
+    grouping port-config {
+        leaf port-down {
+            type boolean;
+        }
+        leaf port-no-recv {
+            type boolean;
+        }
+        leaf port-no-fwd {
+            type boolean;
+        }
+        leaf port-no-packet-in {
+            type boolean;
         }
     }
     
@@ -67,11 +73,9 @@ module opendaylight-port-types {
             
         }
         
-        leaf configuration {
-            type port-config;
-            description "Bit map of OFPPC-* flags";          
+        container configuration {
+            uses port-config;
         }
-        
         leaf advertised-features {
             type port-features;
             description "Features being advertised by the port";            
@@ -138,9 +142,9 @@ module opendaylight-port-types {
                 
                 uses common-port;
                 
-                leaf mask {
-                    type port-config;
-                    description "Bitmap of OFPPC-* flags to be changed";
+                container config-mask {
+                    uses port-config;
+                    description "Mask";
                 }      
                 
                 leaf container-name {
