@@ -244,10 +244,7 @@ public class Subnet implements Cloneable, Serializable {
         if (p == null) {
             return false;
         }
-        if (this.isFlatLayer2()) {
-            return true;
-        }
-        return this.nodeConnectors.contains(p);
+        return isFlatLayer2() || nodeConnectors.contains(p);
     }
 
     public boolean isMutualExclusive(Subnet otherSubnet) {
