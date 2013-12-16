@@ -61,7 +61,7 @@
   <logger name="org.opendaylight.controller.sal.implementation" level="INFO"/>
   <logger name="org.opendaylight.controller.sal.implementation.internal.Inventory" level="INFO"/>
   <logger name="org.opendaylight.controller.sal.implementation.internal.Topology" level="INFO"/>
-     <!-- zeromq router and zeromq routing table -->
+     <!-- remoterpc router and remoterpc routing table -->
   <logger name="org.opendaylight.controller.sal.connector.remoterpc" level="INFO" />
   <!-- Functional Modules -->
   <logger name="org.opendaylight.controller.arphandler" level="INFO"/>
