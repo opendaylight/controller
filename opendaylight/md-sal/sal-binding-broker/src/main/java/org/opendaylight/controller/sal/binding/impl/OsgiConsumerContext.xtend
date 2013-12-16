@@ -45,8 +45,7 @@ class OsgiConsumerContext implements ConsumerContext {
                 val ref = services.iterator().next() as ServiceReference<T>;
                 return bundleContext.getService(ref) as T;
             } else {
-                broker.createDelegate(module);
-                return getRpcService(module);
+                return broker.getRpcService(module);
             }
         } catch (InvalidSyntaxException e) {
             log.error("Created filter was invalid:", e.message, e)

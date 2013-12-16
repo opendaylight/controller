@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.yangtools.concepts.Registration
 import org.opendaylight.yangtools.yang.binding.Notification
-import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactoryimport org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
 
@@ -29,6 +29,11 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
     @Property
     var ExecutorService executor;
 
+    new() {
+        listeners = HashMultimap.create()
+    }
+
+    @Deprecated
     new(ExecutorService executor) {
         listeners = HashMultimap.create()
         this.executor = executor;
@@ -100,7 +105,7 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
 
     override registerNotificationListener(
         org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        val invoker = BindingAwareBrokerImpl.generator.invokerFactory.invokerFor(listener);
+        val invoker = SingletonHolder.INVOKER_FACTORY.invokerFor(listener);
         for (notifyType : invoker.supportedNotifications) {
             listeners.put(notifyType, invoker.invocationProxy)
         }

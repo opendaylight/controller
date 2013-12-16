@@ -12,7 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentDataServiceConnector;
+import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;

@@ -65,9 +65,6 @@ public class RuntimeCodeGeneratorTest {
         assertNotNull(product);
         assertNotNull(product.getInvocationProxy());
 
-        assertNotNull(product.getSupportedInputs());
-        assertTrue(product.getSupportedInputs().contains(SimpleInput.class));
-        assertTrue(product.getSupportedInputs().contains(InheritedContextInput.class));
         assertEquals("2 fields should be generated.", 2, product.getInvocationProxy().getClass().getFields().length);
 
         verifyRouting(product);

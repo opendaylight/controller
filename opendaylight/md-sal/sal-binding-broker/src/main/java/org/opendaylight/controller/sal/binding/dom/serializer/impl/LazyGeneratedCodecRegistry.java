@@ -175,7 +175,7 @@ public class LazyGeneratedCodecRegistry implements //
                     });
             return ret;
         } catch (Exception e) {
-            LOG.error("Could not find augmentable for {}", augmentation, e);
+            LOG.debug("Could not find augmentable for {} using {}", augmentation, augmentation.getClassLoader(), e);
             return null;
         }
     }
