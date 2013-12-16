@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_384f5ebf",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-16T15:28:57Z",
+      "side": 1,
+      "message": "Much better now, but let say someone disinstall usermanager, how do you plan on addressing the deactivation of the component? This way the netconf server will hold a reference to a component that has been deinitialized. Consider in OSGi this is normal condition so it should be addressed properly.\nI would suggest you to really use dependency manager or declarative service which ever you prefer to track the service and manage the start/stop lifecycle of the NetConf-SSHServer independently from the bundle lifecycle",
+      "revId": "397003ddf3a7af490c77d719084e46570895776e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
