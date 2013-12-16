@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_189b7a73",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-12-16T13:35:12Z",
+      "side": 1,
+      "message": "Martin, if the activator starts irrespective of the availability of the IUserManager service being available you are at risk of unreliable behavior because maybe sometime the netconf-ssh service could come up before in that case you maybe in the condition where the allocated AuthProvider would have a null pointer to user manager. The best way of dealing with this issue is modifying the activator to use the dependency manager or any tracking mechanism you prefer and to delay the instantiation of the Netconf-Server till all the mandatory dependencies are met.",
+      "revId": "1326bf82d764b7c2c5dd4aa3e8a9f92e24f502ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
