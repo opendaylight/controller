@@ -48,7 +48,7 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
     }
 
     @Override
-    String getThreadPoolImplementationName() {
+    protected String getThreadPoolImplementationName() {
         return TestingFixedThreadPoolModuleFactory.NAME;
     }
 

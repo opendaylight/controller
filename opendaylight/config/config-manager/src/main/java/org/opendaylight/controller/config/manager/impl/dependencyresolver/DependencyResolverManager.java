@@ -11,6 +11,7 @@ import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.manager.impl.CommitInfo;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
@@ -35,11 +36,13 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
     private final Map<ModuleIdentifier, DependencyResolverImpl> moduleIdentifiersToDependencyResolverMap = new HashMap<>();
     private final ModulesHolder modulesHolder;
     private final TransactionStatus transactionStatus;
+    private final ServiceReferenceReadableRegistry readableRegistry;
 
     public DependencyResolverManager(String transactionName,
-            TransactionStatus transactionStatus) {
+            TransactionStatus transactionStatus, ServiceReferenceReadableRegistry readableRegistry) {
         this.modulesHolder = new ModulesHolder(transactionName);
         this.transactionStatus = transactionStatus;
+        this.readableRegistry = readableRegistry;
     }
 
     @Override
@@ -48,14 +51,11 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
     }
 
     public synchronized DependencyResolverImpl getOrCreate(ModuleIdentifier name) {
-        DependencyResolverImpl dependencyResolver = moduleIdentifiersToDependencyResolverMap
-                .get(name);
+        DependencyResolverImpl dependencyResolver = moduleIdentifiersToDependencyResolverMap.get(name);
         if (dependencyResolver == null) {
             transactionStatus.checkNotCommitted();
-            dependencyResolver = new DependencyResolverImpl(name,
-                    transactionStatus, modulesHolder);
-            moduleIdentifiersToDependencyResolverMap.put(name,
-                    dependencyResolver);
+            dependencyResolver = new DependencyResolverImpl(name, transactionStatus, modulesHolder, readableRegistry);
+            moduleIdentifiersToDependencyResolverMap.put(name, dependencyResolver);
         }
         return dependencyResolver;
     }

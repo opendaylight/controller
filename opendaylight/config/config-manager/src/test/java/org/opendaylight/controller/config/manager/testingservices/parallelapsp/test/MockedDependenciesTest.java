@@ -111,7 +111,7 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
     }
 
     @Override
-    String getThreadPoolImplementationName() {
+    protected String getThreadPoolImplementationName() {
         return threadPoolImplementationName;
     }
 

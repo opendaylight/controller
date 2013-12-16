@@ -150,7 +150,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
         throw new UnsupportedOperationException();
     }
 
@@ -160,7 +160,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
         throw new UnsupportedOperationException();
     }
 
@@ -176,6 +176,16 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
 
     @Override
     public Set<String> getAvailableModuleFactoryQNames() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
         throw new UnsupportedOperationException();
     }
 }

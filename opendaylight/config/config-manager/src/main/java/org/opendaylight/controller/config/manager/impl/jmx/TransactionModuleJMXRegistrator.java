@@ -17,14 +17,14 @@ import javax.management.QueryExp;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 
-public class TransactionModuleJMXRegistrator implements Closeable {
-    private final InternalJMXRegistrator childJMXRegistrator;
+public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRegistrator {
+    private final InternalJMXRegistrator currentJMXRegistrator;
     private final String transactionName;
 
     public TransactionModuleJMXRegistrator(
             InternalJMXRegistrator internalJMXRegistrator,
             String transactionName) {
-        this.childJMXRegistrator = internalJMXRegistrator.createChild();
+        this.currentJMXRegistrator = internalJMXRegistrator.createChild();
         this.transactionName = transactionName;
     }
 
@@ -44,21 +44,29 @@ public class TransactionModuleJMXRegistrator implements Closeable {
 
     public TransactionModuleJMXRegistration registerMBean(Object object,
             ObjectName on) throws InstanceAlreadyExistsException {
-        if (!transactionName.equals(ObjectNameUtil.getTransactionName(on)))
-            throw new IllegalArgumentException(
-                    "Transaction name mismatch between expected "
+        if (transactionName.equals(ObjectNameUtil.getTransactionName(on)) == false) {
+            throw new IllegalArgumentException("Transaction name mismatch between expected "
                             + transactionName + " " + "and " + on);
-        ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_MODULE);
+        }
+        ObjectNameUtil.checkTypeOneOf(on, ObjectNameUtil.TYPE_MODULE);
         return new TransactionModuleJMXRegistration(
-                childJMXRegistrator.registerMBean(object, on));
+                currentJMXRegistrator.registerMBean(object, on));
     }
 
     public Set<ObjectName> queryNames(ObjectName name, QueryExp query) {
-        return childJMXRegistrator.queryNames(name, query);
+        return currentJMXRegistrator.queryNames(name, query);
     }
 
     @Override
     public void close() {
-        childJMXRegistrator.close();
+        currentJMXRegistrator.close();
+    }
+
+    public String getTransactionName() {
+        return transactionName;
+    }
+
+    public InternalJMXRegistrator createChild() {
+        return currentJMXRegistrator.createChild();
     }
 }
