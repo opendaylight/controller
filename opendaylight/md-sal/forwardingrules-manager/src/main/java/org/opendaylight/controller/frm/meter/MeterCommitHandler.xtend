@@ -6,7 +6,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.Sal
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 
-class FlowCommitHandler implements DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> {
+class MeterCommitHandler implements DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> {
        
     @Property
     val SalMeterService salMeterService;
