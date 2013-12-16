@@ -95,7 +95,7 @@ class ConfigTransactionControllerImpl implements
         this.currentlyRegisteredFactories = currentlyRegisteredFactories;
         this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(currentlyRegisteredFactories);
         this.transactionStatus = new TransactionStatus();
-        this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus);
+        this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus, writableSRRegistry);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
         this.blankTransaction = blankTransaction;
@@ -165,15 +165,14 @@ class ConfigTransactionControllerImpl implements
             throws InstanceAlreadyExistsException {
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
-        ModuleIdentifier moduleIdentifier = oldConfigBeanInfo.getName();
+        ModuleIdentifier moduleIdentifier = oldConfigBeanInfo.getIdentifier();
         dependencyResolverManager.assertNotExists(moduleIdentifier);
 
         ModuleFactory moduleFactory = factoriesHolder
                 .findByModuleName(moduleIdentifier.getFactoryName());
 
         Module module;
-        DependencyResolver dependencyResolver = dependencyResolverManager
-                .getOrCreate(moduleIdentifier);
+        DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
         try {
             BundleContext bc = getModuleFactoryBundleContext(moduleFactory.getImplementationName());
             module = moduleFactory.createModule(
@@ -412,7 +411,7 @@ class ConfigTransactionControllerImpl implements
         close();
     }
 
-    private void close() {
+    public void close() {
         //FIXME: should not close object that was retrieved in constructor, a wrapper object should do that perhaps
         txLookupRegistry.close();
     }
@@ -523,8 +522,8 @@ class ConfigTransactionControllerImpl implements
 
 
     @Override
-    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
-        return writableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+        return writableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
     @Override
@@ -533,8 +532,8 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
-        return writableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+        return writableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
@@ -548,13 +547,13 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public synchronized void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName) throws InstanceNotFoundException {
-        writableSRRegistry.saveServiceReference(serviceInterfaceName, refName, objectName);
+    public synchronized ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException {
+        return writableSRRegistry.saveServiceReference(serviceInterfaceName, refName, moduleON);
     }
 
     @Override
-    public synchronized boolean removeServiceReference(String serviceInterfaceName, String refName) {
-        return writableSRRegistry.removeServiceReference(serviceInterfaceName, refName);
+    public synchronized void removeServiceReference(String serviceInterfaceName, String refName) throws InstanceNotFoundException {
+        writableSRRegistry.removeServiceReference(serviceInterfaceName, refName);
     }
 
     @Override
@@ -581,4 +580,13 @@ class ConfigTransactionControllerImpl implements
         return txLookupRegistry.getAvailableModuleFactoryQNames();
     }
 
+    @Override
+    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+        writableSRRegistry.checkServiceReferenceExists(objectName);
+    }
+
+    @Override
+    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+        return writableSRRegistry.getServiceReference(serviceInterfaceQName, refName);
+    }
 }

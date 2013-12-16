@@ -148,8 +148,8 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
-        return configRegistryMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+        return configRegistryMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
     @Override
@@ -158,8 +158,8 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
-        return configRegistryMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+        return configRegistryMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
@@ -201,4 +201,15 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     public Set<String> getAvailableModuleFactoryQNames() {
         return configRegistryMXBeanProxy.getAvailableModuleFactoryQNames();
     }
+
+    @Override
+    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+        return configRegistryMXBeanProxy.getServiceReference(serviceInterfaceQName, refName);
+    }
+
+    @Override
+    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+        configRegistryMXBeanProxy.checkServiceReferenceExists(objectName);
+    }
+
 }

@@ -114,8 +114,7 @@ public class TestingParallelAPSPModule implements Module,
 
             if (oldInstance != null) {
                 // changing thread pool is not supported
-                boolean reuse = threadPoolInstance.equals(oldInstance
-                        .getThreadPool());
+                boolean reuse = threadPoolInstance == oldInstance.getThreadPool();
                 if (reuse) {
                     logger.debug("Reusing old instance");
                     instance = oldInstance;

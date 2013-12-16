@@ -117,12 +117,12 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName) throws InstanceNotFoundException {
+    public ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeServiceReference(String serviceInterfaceName, String refName) {
+    public void removeServiceReference(String serviceInterfaceName, String refName) {
         throw new UnsupportedOperationException();
     }
 
@@ -132,7 +132,7 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
         throw new UnsupportedOperationException();
     }
 
@@ -142,7 +142,7 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
         throw new UnsupportedOperationException();
     }
 
@@ -163,6 +163,16 @@ public class TestingConfigTransactionController implements
 
     @Override
     public Set<String> getAvailableModuleFactoryQNames() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
         throw new UnsupportedOperationException();
     }
 }

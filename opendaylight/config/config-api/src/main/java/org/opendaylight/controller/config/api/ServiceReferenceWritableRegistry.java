@@ -13,17 +13,18 @@ import javax.management.ObjectName;
 public interface ServiceReferenceWritableRegistry extends ServiceReferenceReadableRegistry {
     /**
      * Create or update reference name to objectName. Reference name is unique per service interface name.
+     * @return created or updated object name containing service name and reference name
      * @throws IllegalArgumentException if there is a mismatch between serviceInterfaceName and objectName
      * @throws InstanceNotFoundException if search did not find exactly one instance
      */
-    void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName) throws InstanceNotFoundException;
+    ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException;
 
     /**
      * Remove service reference.
      * @return true iif removed
      * @throws IllegalArgumentException if service interface name is not advertised by any module
      */
-    boolean removeServiceReference(String serviceInterfaceName, String refName);
+    void removeServiceReference(String serviceInterfaceName, String refName) throws InstanceNotFoundException;
 
     /**
      * Remove all service references.

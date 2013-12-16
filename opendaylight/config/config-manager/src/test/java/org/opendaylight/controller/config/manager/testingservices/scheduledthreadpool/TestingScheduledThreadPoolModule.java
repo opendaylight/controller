@@ -36,7 +36,7 @@ public class TestingScheduledThreadPoolModule implements Module,
     @Nullable
     private final TestingScheduledThreadPoolImpl oldInstance;
 
-    private final int threadCount = 10;
+    private int threadCount = 10;
     private TestingScheduledThreadPoolImpl instance;
     private RootRuntimeBeanRegistrator runtimeBeanRegistrator;
     private boolean recreate;
@@ -66,6 +66,11 @@ public class TestingScheduledThreadPoolModule implements Module,
     @Override
     public int getThreadCount() {
         return threadCount;
+    }
+
+    @Override
+    public void setThreadCount(int threadCount) {
+        this.threadCount = threadCount;
     }
 
     @Override

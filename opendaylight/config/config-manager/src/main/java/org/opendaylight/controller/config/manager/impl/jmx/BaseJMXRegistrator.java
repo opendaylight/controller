@@ -14,7 +14,7 @@ import javax.management.ObjectName;
 import javax.management.QueryExp;
 import java.util.Set;
 
-public class BaseJMXRegistrator implements AutoCloseable {
+public class BaseJMXRegistrator implements AutoCloseable, NestableJMXRegistrator {
 
     private final InternalJMXRegistrator internalJMXRegistrator;
 
@@ -48,6 +48,11 @@ public class BaseJMXRegistrator implements AutoCloseable {
 
     public Set<ObjectName> getRegisteredObjectNames() {
         return internalJMXRegistrator.getRegisteredObjectNames();
+    }
+
+    @Override
+    public InternalJMXRegistrator createChild() {
+        return internalJMXRegistrator.createChild();
     }
 
     @Override

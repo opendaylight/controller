@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.manager.impl;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
-import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -104,7 +103,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
 
     @GuardedBy("this") // switched in every 2ndPC
-    private ServiceReferenceReadableRegistry readableSRRegistry = ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
+    private CloseableServiceReferenceReadableRegistry  readableSRRegistry = ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
@@ -298,8 +297,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             OsgiRegistration osgiRegistration = null;
             if (entry.hasOldModule()) {
                 ModuleInternalInfo oldInternalInfo = entry.getOldInternalInfo();
-                DynamicReadableWrapper oldReadableConfigBean = oldInternalInfo
-                        .getReadableModule();
+                DynamicReadableWrapper oldReadableConfigBean = oldInternalInfo.getReadableModule();
                 currentConfig.remove(entry.getIdentifier());
 
                 // test if old instance == new instance
@@ -368,7 +366,9 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         version = configTransactionController.getVersion();
 
         // switch readable Service Reference Registry
-        this.readableSRRegistry = ServiceReferenceRegistryImpl.createSRReadableRegistry(configTransactionController.getWritableRegistry(), this);
+        this.readableSRRegistry.close();
+        this.readableSRRegistry = ServiceReferenceRegistryImpl.createSRReadableRegistry(
+                configTransactionController.getWritableRegistry(), this, baseJMXRegistrator);
 
         return new CommitStatus(newInstances, reusedInstances,
                 recreatedInstances);
@@ -525,8 +525,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     // service reference functionality:
     @Override
-    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
-        return readableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+        return readableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
     @Override
@@ -535,8 +535,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     }
 
     @Override
-    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
-        return readableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+        return readableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
@@ -550,10 +550,27 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     }
 
     @Override
+    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+        readableSRRegistry.checkServiceReferenceExists(objectName);
+    }
+
+    @Override
+    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+        return readableSRRegistry.getServiceReference(serviceInterfaceQName, refName);
+    }
+
+    @Override
     public Set<String> getAvailableModuleFactoryQNames() {
         return ModuleQNameUtil.getQNames(resolver.getAllFactories());
     }
 
+    @Override
+    public String toString() {
+        return "ConfigRegistryImpl{" +
+                "versionCounter=" + versionCounter +
+                ", version=" + version +
+                '}';
+    }
 }
 
 /**
@@ -579,12 +596,12 @@ class ConfigHolder {
     }
 
     private void add(ModuleInternalInfo configInfo) {
-        ModuleInternalInfo oldValue = currentConfig.put(configInfo.getName(),
+        ModuleInternalInfo oldValue = currentConfig.put(configInfo.getIdentifier(),
                 configInfo);
         if (oldValue != null) {
             throw new IllegalStateException(
                     "Cannot overwrite module with same name:"
-                            + configInfo.getName() + ":" + configInfo);
+                            + configInfo.getIdentifier() + ":" + configInfo);
         }
     }
 
