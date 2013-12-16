@@ -5,33 +5,31 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.config.persist.storage.directory.xml;
+package org.opendaylight.controller.config.persist.storage.directory.autodetect;
 
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
+import org.opendaylight.controller.config.persist.storage.directory.DirectoryPersister;
+import org.opendaylight.controller.config.persist.storage.directory.xml.XmlDirectoryPersister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class XmlDirectoryPersister implements Persister {
-    private static final Logger logger = LoggerFactory.getLogger(XmlDirectoryPersister.class);
+public class AutodetectDirectoryPersister implements Persister {
+    private static final Logger logger = LoggerFactory.getLogger(AutodetectDirectoryPersister.class);
 
     private final File storage;
 
-    public XmlDirectoryPersister(File storage) {
+    public AutodetectDirectoryPersister(File storage) {
         checkArgument(storage.exists() && storage.isDirectory(), "Storage directory does not exist: " + storage);
         this.storage = storage;
     }
@@ -49,53 +47,38 @@ public class XmlDirectoryPersister implements Persister {
         }
         List<File> sortedFiles = new ArrayList<>(Arrays.asList(filesArray));
         Collections.sort(sortedFiles);
+
         // combine all found files
         logger.debug("Reading files in following order: {}", sortedFiles);
 
         List<ConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
-            ConfigSnapshotHolder h = fromXmlSnapshot(file);
-            result.add(h);
+
+            FileType fileType = FileType.getFileType(file);
+            logger.trace("File '{}' detected as {} storage", file, fileType);
+
+            ConfigSnapshotHolder snapshot = loadLastConfig(file, fileType);
+            result.add(snapshot);
         }
         return result;
     }
 
-    private ConfigSnapshotHolder fromXmlSnapshot(File file) {
-        try {
-            return loadLastConfig(file);
-        } catch (JAXBException e) {
-            logger.warn("Unable to restore configuration snapshot from {}", file, e);
-            throw new IllegalStateException("Unable to restore configuration snapshot from " + file, e);
+    private ConfigSnapshotHolder loadLastConfig(File file, FileType fileType) throws IOException {
+        switch (fileType) {
+        case plaintext:
+            return DirectoryPersister.loadLastConfig(file);
+        case xml:
+            try {
+                return XmlDirectoryPersister.loadLastConfig(file);
+            } catch (JAXBException e) {
+                logger.warn("Unable to restore configuration snapshot from {}", file, e);
+                throw new IllegalStateException("Unable to restore configuration snapshot from " + file, e);
+            }
+        default:
+            throw new IllegalStateException("Unknown storage type " + fileType);
         }
     }
-
-    public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
-        Unmarshaller um = jaxbContext.createUnmarshaller();
-
-        return asHolder((ConfigSnapshot) um.unmarshal(file));
-    }
-
-    private static ConfigSnapshotHolder asHolder(final ConfigSnapshot unmarshalled) {
-        return new ConfigSnapshotHolder() {
-            @Override
-            public String getConfigSnapshot() {
-                return unmarshalled.getConfigSnapshot();
-            }
-
-            @Override
-            public SortedSet<String> getCapabilities() {
-                return unmarshalled.getCapabilities();
-            }
-
-            @Override
-            public String toString() {
-                return unmarshalled.toString();
-            }
-        };
-    }
-
 
     @Override
     public void close() {
@@ -104,7 +87,7 @@ public class XmlDirectoryPersister implements Persister {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("XmlDirectoryPersister{");
+        final StringBuffer sb = new StringBuffer("AutodetectDirectoryPersister{");
         sb.append("storage=").append(storage);
         sb.append('}');
         return sb.toString();
