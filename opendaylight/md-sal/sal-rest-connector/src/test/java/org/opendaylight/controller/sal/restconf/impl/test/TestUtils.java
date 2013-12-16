@@ -1,13 +1,13 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.*;
-import java.net.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -20,21 +20,23 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.*;
 import org.opendaylight.controller.sal.restconf.impl.*;
-import org.opendaylight.yangtools.yang.common.*;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Preconditions;
 
-final class TestUtils {
+public final class TestUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
 
@@ -75,27 +77,7 @@ final class TestUtils {
         return result;
     }
 
-    public static CompositeNode loadCompositeNode(InputStream xmlInputStream) throws FileNotFoundException {
-        if (xmlInputStream == null) {
-            throw new IllegalArgumentException();
-        }
-        Node<?> dataTree;
-        try {
-            dataTree = XmlTreeBuilder.buildDataTree(xmlInputStream);
-        } catch (XMLStreamException e) {
-            logger.error("Error during building data tree from XML", e);
-            return null;
-        }
-        if (dataTree == null) {
-            logger.error("data tree is null");
-            return null;
-        }
-        if (dataTree instanceof SimpleNode) {
-            logger.error("RPC XML was resolved as SimpleNode");
-            return null;
-        }
-        return (CompositeNode) dataTree;
-    }
+
 
     public static Document loadDocumentFrom(InputStream inputStream) {
         try {
@@ -131,18 +113,17 @@ final class TestUtils {
 
     }
 
-    static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath, String outputPath) {
-        return convertCompositeNodeDataAndYangToJson(compositeNode, yangPath, outputPath, null, null);
-    }
-
-    static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath,
+    public static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath,
             String outputPath, String searchedModuleName, String searchedDataSchemaName) {
         Set<Module> modules = resolveModules(yangPath);
         Module module = resolveModule(searchedModuleName, modules);
         DataSchemaNode dataSchemaNode = resolveDataSchemaNode(module, searchedDataSchemaName);
 
+        normalizeCompositeNode(compositeNode, modules, dataSchemaNode, searchedModuleName + ":"
+                + searchedDataSchemaName);
+
         try {
-            return writeCompNodeWithSchemaContextToJson(compositeNode, outputPath, modules, dataSchemaNode);
+            return writeCompNodeWithSchemaContextToJson(compositeNode, modules, dataSchemaNode);
         } catch (WebApplicationException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -151,7 +132,16 @@ final class TestUtils {
 
     }
 
-    static Module resolveModule(String searchedModuleName, Set<Module> modules) {
+    public static void normalizeCompositeNode(CompositeNode compositeNode, Set<Module> modules,
+            DataSchemaNode dataSchemaNode, String schemaNodePath) {
+        RestconfImpl restconf = RestconfImpl.getInstance();
+        ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
+
+        TestUtils.prepareMockForRestconfBeforeNormalization(modules, dataSchemaNode, restconf);
+        restconf.createConfigurationData(schemaNodePath, compositeNode);
+    }
+
+    public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
         assertNotNull("modules can't be null.", modules);
         Module module = null;
         if (searchedModuleName != null) {
@@ -167,11 +157,11 @@ final class TestUtils {
         return module;
     }
 
-    static Set<Module> resolveModules(String yangPath) {
+    public static Set<Module> resolveModules(String yangPath) {
         Set<Module> modules = null;
 
         try {
-            modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangPath).getPath());
+            modules = TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -179,7 +169,7 @@ final class TestUtils {
         return modules;
     }
 
-    static DataSchemaNode resolveDataSchemaNode(Module module, String searchedDataSchemaName) {
+    public static DataSchemaNode resolveDataSchemaNode(Module module, String searchedDataSchemaName) {
         assertNotNull("Module is missing", module);
 
         DataSchemaNode dataSchemaNode = null;
@@ -195,39 +185,33 @@ final class TestUtils {
         return dataSchemaNode;
     }
 
-    static String writeCompNodeWithSchemaContextToJson(CompositeNode compositeNode, String outputPath,
-            Set<Module> modules, DataSchemaNode dataSchemaNode) throws IOException, WebApplicationException {
+    public static String writeCompNodeWithSchemaContextToJson(CompositeNode compositeNode, Set<Module> modules,
+            DataSchemaNode dataSchemaNode) throws IOException, WebApplicationException {
         String jsonResult;
 
         assertNotNull(dataSchemaNode);
         assertNotNull("Composite node can't be null", compositeNode);
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
 
-        ControllerContext contContext = ControllerContext.getInstance();
-        contContext.setSchemas(loadSchemaContext(modules));
+        ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
         StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
         structuredDataToJsonProvider.writeTo(new StructuredData(compositeNode, dataSchemaNode), null, null, null, null,
                 null, byteArrayOS);
 
         jsonResult = byteArrayOS.toString();
-        if (outputPath != null) {
-            try {
-                outputToFile(byteArrayOS, outputPath);
-            } catch (IOException e) {
-                System.out.println("Output file wasn't cloased sucessfuly.");
-            }
-        }
 
         return jsonResult;
     }
 
-    static CompositeNode loadCompositeNode(String xmlDataPath) {
-        InputStream xmlStream = ToJsonBasicDataTypesTest.class.getResourceAsStream(xmlDataPath);
+    public static CompositeNode loadCompositeNode(String xmlDataPath) {
+        InputStream xmlStream = TestUtils.class.getResourceAsStream(xmlDataPath);
         CompositeNode compositeNode = null;
         try {
-            compositeNode = TestUtils.loadCompositeNode(xmlStream);
-        } catch (FileNotFoundException e) {
+            XmlReader xmlReader = new XmlReader();
+            compositeNode = xmlReader.read(xmlStream);
+
+        } catch (UnsupportedFormatException | XMLStreamException e) {
             e.printStackTrace();
         }
         return compositeNode;
@@ -236,7 +220,7 @@ final class TestUtils {
     static void outputToFile(ByteArrayOutputStream outputStream, String outputDir) throws IOException {
         FileOutputStream fileOS = null;
         try {
-            String path = ToJsonBasicDataTypesTest.class.getResource(outputDir).getPath();
+            String path = TestUtils.class.getResource(outputDir).getPath();
             File outFile = new File(path + "/data.json");
             fileOS = new FileOutputStream(outFile);
             try {
@@ -285,7 +269,7 @@ final class TestUtils {
     }
 
     private static FileReader getFileReader(String path) {
-        String fullPath = ToJsonBasicDataTypesTest.class.getResource(path).getPath();
+        String fullPath = TestUtils.class.getResource(path).getPath();
         assertNotNull("Path to file can't be null.", fullPath);
         File file = new File(fullPath);
         assertNotNull("File can't be null", file);
@@ -317,7 +301,7 @@ final class TestUtils {
         return strBuilder.toString();
     }
 
-    static QName buildQName(String name, String uri, String date) {
+    public static QName buildQName(String name, String uri, String date) {
         try {
             URI u = new URI(uri);
             Date dt = null;
@@ -330,11 +314,11 @@ final class TestUtils {
         }
     }
 
-    static QName buildQName(String name) {
+    public static QName buildQName(String name) {
         return buildQName(name, "", null);
     }
 
-    static void supplementNamespace(DataSchemaNode dataSchemaNode, CompositeNode compositeNode) {
+    public static void supplementNamespace(DataSchemaNode dataSchemaNode, CompositeNode compositeNode) {
         RestconfImpl restconf = RestconfImpl.getInstance();
 
         InstanceIdWithSchemaNode instIdAndSchema = new InstanceIdWithSchemaNode(mock(InstanceIdentifier.class),
@@ -358,13 +342,14 @@ final class TestUtils {
         restconf.createConfigurationData("something", compositeNode);
     }
 
-    static DataSchemaNode obtainSchemaFromYang(String yangFolder) throws FileNotFoundException {
+    public static DataSchemaNode obtainSchemaFromYang(String yangFolder) throws FileNotFoundException {
         return obtainSchemaFromYang(yangFolder, null);
     }
 
-    static DataSchemaNode obtainSchemaFromYang(String yangFolder, String moduleName) throws FileNotFoundException {
+    public static DataSchemaNode obtainSchemaFromYang(String yangFolder, String moduleName)
+            throws FileNotFoundException {
         Set<Module> modules = null;
-        modules = TestUtils.loadModules(ToJsonBasicDataTypesTest.class.getResource(yangFolder).getPath());
+        modules = TestUtils.loadModules(TestUtils.class.getResource(yangFolder).getPath());
 
         if (modules == null) {
             return null;
@@ -403,7 +388,7 @@ final class TestUtils {
 
     }
 
-    static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
+    public static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
         wrappedNode.setNamespace(new URI(""));
         if (wrappedNode instanceof CompositeNodeWrapper) {
             for (NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
@@ -411,7 +396,7 @@ final class TestUtils {
             }
         }
     }
-    
+
     public static void prepareMockForRestconfBeforeNormalization(Set<Module> modules, DataSchemaNode dataSchemaNode,
             RestconfImpl restconf) {
         ControllerContext instance = ControllerContext.getInstance();
@@ -426,5 +411,42 @@ final class TestUtils {
                                         .build()).build());
         restconf.setBroker(mockedBrokerFacade);
     }
+    
+    static CompositeNode loadCompositeNodeWithXmlTreeBuilder(String xmlDataPath) {
+        InputStream xmlStream = TestUtils.class.getResourceAsStream(xmlDataPath);
+        CompositeNode compositeNode = null;
+        try {
+            compositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder(xmlStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return compositeNode;
+        
+        
+        
+    }
+    
+    
+    public static CompositeNode loadCompositeNodeWithXmlTreeBuilder(InputStream xmlInputStream) throws FileNotFoundException {
+        if (xmlInputStream == null) {
+            throw new IllegalArgumentException();
+        }
+        Node<?> dataTree;
+        try {
+            dataTree = XmlTreeBuilder.buildDataTree(xmlInputStream);
+        } catch (XMLStreamException e) {
+            logger.error("Error during building data tree from XML", e);
+            return null;
+        }
+        if (dataTree == null) {
+            logger.error("data tree is null");
+            return null;
+        }
+        if (dataTree instanceof SimpleNode) {
+            logger.error("RPC XML was resolved as SimpleNode");
+            return null;
+        }
+        return (CompositeNode) dataTree;
+    }        
 
 }

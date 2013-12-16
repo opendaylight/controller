@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test.structures;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class LfLst extends YangElement {
     Set<Lf> lfs;
@@ -10,11 +11,10 @@ public class LfLst extends YangElement {
         lfs = new HashSet<>();
     }
 
-    public LfLst addLf(String value) {
+    public LfLst addLf(Object value) {
         return addLf(new Lf(value));
     }
 
-    
     public LfLst addLf(Lf lf) {
         while (this.lfs.contains(lf)) {
             lf.incNumOfEqualItems();
