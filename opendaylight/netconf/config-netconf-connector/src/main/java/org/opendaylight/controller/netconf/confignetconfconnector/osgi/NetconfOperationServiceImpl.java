@@ -8,12 +8,16 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
+import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
@@ -42,10 +46,36 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
             String netconfSessionIdForReporting) throws YangStoreException {
 
         yangStoreSnapshot = yangStoreService.getYangStoreSnapshot();
+        checkConsistencyBetweenYangStoreAndConfig(jmxClient, yangStoreSnapshot);
+
         transactionProvider = new TransactionProvider(jmxClient, netconfSessionIdForReporting);
         operationProvider = new NetconfOperationProvider(yangStoreSnapshot, jmxClient, transactionProvider,
                 netconfSessionIdForReporting);
         capabilities = setupCapabilities(yangStoreSnapshot);
+    }
+
+
+    @VisibleForTesting
+    static void checkConsistencyBetweenYangStoreAndConfig(LookupRegistry jmxClient, YangStoreSnapshot yangStoreSnapshot) {
+        Set<String> missingModulesFromConfig = Sets.newHashSet();
+
+        Set<String> modulesSeenByConfig = jmxClient.getAvailableModuleFactoryQNames();
+        Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = yangStoreSnapshot.getModuleMXBeanEntryMap();
+
+        for (Map<String, ModuleMXBeanEntry> moduleNameToMBE : moduleMXBeanEntryMap.values()) {
+            for (ModuleMXBeanEntry moduleMXBeanEntry : moduleNameToMBE.values()) {
+                String moduleSeenByYangStore = moduleMXBeanEntry.getYangModuleQName().toString();
+                if(modulesSeenByConfig.contains(moduleSeenByYangStore) == false)
+                    missingModulesFromConfig.add(moduleSeenByYangStore);
+            }
+        }
+
+        Preconditions
+                .checkState(
+                        missingModulesFromConfig.isEmpty(),
+                        "There are inconsistencies between configuration subsystem and yangstore in terms of discovered yang modules, yang modules missing from config subsystem but present in yangstore: %s, %sAll modules present in config: %s",
+                        missingModulesFromConfig, System.lineSeparator(), modulesSeenByConfig);
+
     }
 
     @Override

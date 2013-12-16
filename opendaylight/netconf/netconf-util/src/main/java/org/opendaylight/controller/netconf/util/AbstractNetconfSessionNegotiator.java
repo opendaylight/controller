@@ -10,8 +10,9 @@ package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
@@ -19,9 +20,8 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
-
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
@@ -44,11 +44,14 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
 
     // TODO what time ?
     private static final long INITIAL_HOLDTIMER = 1;
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
+    public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
 
     protected final P sessionPreferences;
 
     private final SessionListener sessionListener;
+    private Timeout timeout;
 
     /**
      * Possible states for Finite State Machine
@@ -69,7 +72,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
     }
 
     @Override
-    protected void startNegotiation() throws Exception {
+    protected void startNegotiation() {
         final Optional<SslHandler> sslHandler = getSslHandler(channel);
         if (sslHandler.isPresent()) {
             Future<Channel> future = sslHandler.get().handshakeFuture();
@@ -94,10 +97,25 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         final NetconfMessage helloMessage = this.sessionPreferences.getHelloMessage();
         logger.debug("Session negotiation started with hello message {}", XmlUtil.toString(helloMessage.getDocument()));
 
-        sendMessage(helloMessage);
-        changeState(State.OPEN_WAIT);
+        channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ChannelHandler() {
+            @Override
+            public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            }
 
-        this.timer.newTimeout(new TimerTask() {
+            @Override
+            public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+            }
+
+            @Override
+            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                logger.warn("An exception occurred during negotiation on channel {}", channel.localAddress(), cause);
+                cancelTimeout();
+                negotiationFailed(cause);
+                changeState(State.FAILED);
+            }
+        });
+
+        timeout = this.timer.newTimeout(new TimerTask() {
             @Override
             public void run(final Timeout timeout) throws Exception {
                 synchronized (this) {
@@ -106,10 +124,19 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
                                 "Session was not established after " + timeout);
                         negotiationFailed(cause);
                         changeState(State.FAILED);
-                    }
+                    } else
+                        channel.pipeline().remove(NAME_OF_EXCEPTION_HANDLER);
                 }
             }
         }, INITIAL_HOLDTIMER, TimeUnit.MINUTES);
+
+        sendMessage(helloMessage);
+        changeState(State.OPEN_WAIT);
+    }
+
+    private void cancelTimeout() {
+        if(timeout!=null)
+            timeout.cancel();
     }
 
     private void sendMessage(NetconfMessage message) {
