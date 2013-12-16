@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import java.net.URI;
 
+import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -9,12 +10,14 @@ import org.opendaylight.yangtools.yang.data.api.codec.IdentityrefCodec;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestCodec {
-    
+
     @SuppressWarnings("rawtypes")
     public static final Codec IDENTITYREF_DEFAULT_CODEC = new IdentityrefCodecImpl();
-    
+
     private RestCodec() {
     }
     
@@ -24,29 +27,53 @@ public class RestCodec {
     
     public static final class ObjectCodec implements Codec<Object, Object> {
 
+        private final Logger logger = LoggerFactory.getLogger(RestCodec.class);
+
         private TypeDefinition<?> type;
-        
+
         private ObjectCodec(TypeDefinition<?> typeDefinition) {
-            type = typeDefinition;
+            type = RestUtil.resolveBaseTypeFrom(typeDefinition);
         }
         
         @SuppressWarnings("unchecked")
         @Override
         public Object deserialize(Object input) {
-            if (type instanceof IdentityrefTypeDefinition) {
-                return IDENTITYREF_DEFAULT_CODEC.deserialize(input);
-            } else {
-                return TypeDefinitionAwareCodec.from(type).deserialize(String.valueOf(input));
+            try {
+                if (type instanceof IdentityrefTypeDefinition) {
+                    return IDENTITYREF_DEFAULT_CODEC.deserialize(input);
+                } else {
+                    TypeDefinitionAwareCodec<Object,? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec.from(type);
+                    if (typeAwarecodec != null) {
+                        return typeAwarecodec.deserialize(String.valueOf(input));
+                    } else {
+                        logger.debug("Codec for type \"" + type.getQName().getLocalName() + "\" is not implemented yet.");
+                        return null;
+                    }
+                }
+            } catch (ClassCastException e) { // TODO remove this catch when everyone use codecs
+                logger.error("ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input));
+                return input;
             }
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public Object serialize(Object input) {
-            if (type instanceof IdentityrefTypeDefinition) {
-                return IDENTITYREF_DEFAULT_CODEC.serialize(input);
-            } else {
-                return TypeDefinitionAwareCodec.from(type).serialize(input);
+            try {
+                if (type instanceof IdentityrefTypeDefinition) {
+                    return IDENTITYREF_DEFAULT_CODEC.serialize(input);
+                } else {
+                    TypeDefinitionAwareCodec<Object,? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec.from(type);
+                    if (typeAwarecodec != null) {
+                        return typeAwarecodec.serialize(input);
+                    } else {
+                        logger.debug("Codec for type \"" + type.getQName().getLocalName() + "\" is not implemented yet.");
+                        return null;
+                    }
+                }
+            } catch (ClassCastException e) { // TODO remove this catch when everyone use codecs
+                logger.error("ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input));
+                return input;
             }
         }
         

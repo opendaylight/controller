@@ -1,21 +1,20 @@
 package org.opendaylight.controller.sal.restconf.impl.test.structures;
 
 public class Lf extends YangElement {
-    private String value;
+    private Object value;
     private int numOfEqualItems = 0;
 
-
-    public Lf(String name, String value) {
+    public Lf(String name, Object value) {
         super(name);
         this.value = value;
     }
 
-    public Lf(String value) {
+    public Lf(Object value) {
         super("");
         this.value = value;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -43,11 +42,10 @@ public class Lf extends YangElement {
         }
         return true;
     }
-    
+
     public void incNumOfEqualItems() {
         this.numOfEqualItems++;
     }
-    
 
     @Override
     public int hashCode() {

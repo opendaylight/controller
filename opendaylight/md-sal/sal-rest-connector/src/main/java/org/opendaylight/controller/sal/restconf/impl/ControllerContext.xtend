@@ -12,6 +12,7 @@ import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.controller.sal.rest.impl.RestUtil
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
@@ -313,10 +314,7 @@ class ControllerContext implements SchemaServiceListener {
         
         var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
         if(decoded === null) {
-            var baseType = typedef
-            while (baseType.baseType !== null) {
-                baseType = baseType.baseType;
-            }
+            var baseType = RestUtil.resolveBaseTypeFrom(typedef)
             if(baseType instanceof IdentityrefTypeDefinition) {
                 decoded = toQName(urlDecoded)
             }
