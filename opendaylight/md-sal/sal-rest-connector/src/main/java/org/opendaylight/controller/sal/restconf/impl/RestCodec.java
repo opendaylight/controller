@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import java.net.URI;
 
+import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -27,7 +28,7 @@ public class RestCodec {
         private TypeDefinition<?> type;
         
         private ObjectCodec(TypeDefinition<?> typeDefinition) {
-            type = typeDefinition;
+            type = RestUtil.resolveBaseTypeFrom(typeDefinition);
         }
         
         @SuppressWarnings("unchecked")

@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,9 +11,10 @@ import java.util.Set;
 import javax.activation.UnsupportedDataTypeException;
 
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
+import org.opendaylight.controller.sal.restconf.impl.RestCodec;
+import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -32,10 +32,8 @@ import org.opendaylight.yangtools.yang.model.api.type.BooleanTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.DecimalTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.EmptyTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,13 +184,12 @@ class JsonMapper {
     private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type,
             DataSchemaNode schema) throws IOException {
 
-        String value = String.valueOf(node.getValue());
-        TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
+        TypeDefinition<?> baseType = RestUtil.resolveBaseTypeFrom(type);
 
-        // TODO check InstanceIdentifierTypeDefinition,
+        // TODO check InstanceIdentifierTypeDefinition
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
-                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(type).serialize(node.getValue());
+                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType).serialize(node.getValue());
                 IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
                 String moduleName = ControllerContext.getInstance().findModuleByNamespace(URI.create(valueFromDTO.getNamespace()));
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
@@ -207,94 +204,33 @@ class JsonMapper {
             if (lfSchemaNode != null) {
                 writeValueOfNodeByType(writer, node, lfSchemaNode.getType(), lfSchemaNode);
             } else {
-                writer.value(value);
+                logger.debug("Reference for " + baseType.getQName().getLocalName() + " is not Leaf type");
+                writer.value(String.valueOf(node.getValue()));
             }
-        } else if (baseType instanceof InstanceIdentifierTypeDefinition) {
-            writer.value(((InstanceIdentifierTypeDefinition) baseType).getPathStatement().toString());
-        } else if (baseType instanceof UnionTypeDefinition) {
-            processTypeIsUnionType(writer, (UnionTypeDefinition) baseType, value);
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
                 || baseType instanceof UnsignedIntegerTypeDefinition) {
-            writer.value(new NumberForJsonWriter(value));
+            writer.value(new NumberForJsonWriter((String) RestCodec.from(baseType).serialize(node.getValue())));
         } else if (baseType instanceof BooleanTypeDefinition) {
-            writer.value(Boolean.parseBoolean(value));
+            writer.value(Boolean.parseBoolean((String) RestCodec.from(baseType).serialize(node.getValue())));
         } else if (baseType instanceof EmptyTypeDefinition) {
             writeEmptyDataTypeToJson(writer);
         } else {
+            Codec<Object,Object> codec = RestCodec.from(baseType);
+            String value;
+            if (codec != null) {
+                value = String.valueOf(codec.serialize(node.getValue()));
+            } else {
+                logger.debug("Type \"" + baseType + "\" is not implemented yet.");
+                value = String.valueOf(node.getValue());
+            }
             writer.value(value.equals("null") ? "" : value);
         }
-    }
-
-    private void processTypeIsUnionType(JsonWriter writer, UnionTypeDefinition unionType, String value)
-            throws IOException {
-        if (value == null) {
-            writeEmptyDataTypeToJson(writer);
-        } else if ((isNumber(value))
-                && containsType(unionType, UnsignedIntegerTypeDefinition.class, IntegerTypeDefinition.class,
-                        DecimalTypeDefinition.class)) {
-            writer.value(new NumberForJsonWriter(value));
-        } else if (isBoolean(value) && containsType(unionType, BooleanTypeDefinition.class)) {
-            writer.value(Boolean.parseBoolean(value));
-        } else {
-            writer.value(value);
-        }
-    }
-
-    private boolean isBoolean(String value) {
-        if (value.equals("true") || value.equals("false")) {
-            return true;
-        }
-        return false;
     }
 
     private void writeEmptyDataTypeToJson(JsonWriter writer) throws IOException {
         writer.beginArray();
         writer.nullValue();
         writer.endArray();
-    }
-
-    private boolean isNumber(String value) {
-        try {
-            Double.valueOf(value);
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean containsType(UnionTypeDefinition unionType, Class<?>... searchedTypes) {
-        List<TypeDefinition<?>> allUnionSubtypes = resolveAllUnionSubtypesFrom(unionType);
-
-        for (TypeDefinition<?> unionSubtype : allUnionSubtypes) {
-            for (Class<?> searchedType : searchedTypes) {
-                if (searchedType.isInstance(unionSubtype)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private List<TypeDefinition<?>> resolveAllUnionSubtypesFrom(UnionTypeDefinition inputType) {
-        List<TypeDefinition<?>> result = new ArrayList<>();
-        for (TypeDefinition<?> subtype : inputType.getTypes()) {
-            TypeDefinition<?> resolvedSubtype = subtype;
-
-            resolvedSubtype = resolveBaseTypeFrom(subtype);
-
-            if (resolvedSubtype instanceof UnionTypeDefinition) {
-                List<TypeDefinition<?>> subtypesFromRecursion = resolveAllUnionSubtypesFrom((UnionTypeDefinition) resolvedSubtype);
-                result.addAll(subtypesFromRecursion);
-            } else {
-                result.add(resolvedSubtype);
-            }
-        }
-
-        return result;
-    }
-
-    private TypeDefinition<?> resolveBaseTypeFrom(TypeDefinition<?> type) {
-        return type.getBaseType() != null ? resolveBaseTypeFrom(type.getBaseType()) : type;
     }
 
     private void writeName(Node<?> node, DataSchemaNode schema, JsonWriter writer) throws IOException {
