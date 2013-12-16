@@ -6,6 +6,7 @@ module sal-port {
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-port-types {prefix port-type;revision-date "2013-09-25";}
     import flow-capable-transaction {prefix tr;}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
 
     revision "2013-11-07" {
         description "Initial revision of port service";
@@ -17,16 +18,20 @@ module sal-port {
         uses port-type:flow-port-status;
     }
 
+    grouping port-config-update {
+        leaf node-connector-ref {
+            type "inv:node-connector-ref";
+        }
+        leaf hardware-address {
+            type yang:mac-address;
+        }
+        uses port-type:port-config;
+    }
+
     /** Base configuration structure **/
     grouping port-update {
         uses "inv:node-context-ref";
-
-        container original-port {
-            uses port-type:port-mod;
-        }
-        container updated-port {
-            uses port-type:port-mod;
-        }
+        uses port-config-update;
     }
 
     rpc update-port {
