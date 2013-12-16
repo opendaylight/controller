@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test.structures;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LstItem {
     String lstName;
@@ -42,7 +43,7 @@ public class LstItem {
         return this;
     }
 
-    public LstItem addLf(String name, String value) {
+    public LstItem addLf(String name, Object value) {
         lfs.put(name, new Lf(name, value));
         return this;
     }

@@ -11,8 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -33,12 +32,10 @@ import org.opendaylight.controller.sal.rest.api.Draft01;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -77,12 +74,29 @@ public class XmlProvidersTest extends JerseyTest {
     public void testStructuredDataToXmlProvider() throws FileNotFoundException, UnsupportedEncodingException {
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
 
-        InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode(xmlStream);
+        CompositeNode loadedCompositeNode = prepareCompositeNodeWithIetfInterfacesInterfacesData();
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE).get();
         assertEquals(200, response.getStatus());
+    }
+
+    private CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
+        CompositeNode intface;
+        try {
+            intface = new CompositeNodeWrapper(new URI("interface"), "interface");
+            List<Node<?>> childs = new ArrayList<>();
+
+            childs.add(new SimpleNodeWrapper(new URI("name"), "name", "eth0"));
+            childs.add(new SimpleNodeWrapper(new URI("type"), "type", "ethernetCsmacd"));
+            childs.add(new SimpleNodeWrapper(new URI("enabled"), "enabled", Boolean.FALSE));
+            childs.add(new SimpleNodeWrapper(new URI("description"), "description", "some interface"));
+            intface.setValue(childs);
+            return intface;
+        } catch (URISyntaxException e) {
+        }
+
+        return null;
     }
 
     @Test
