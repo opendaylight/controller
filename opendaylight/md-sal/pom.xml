@@ -43,7 +43,7 @@
         <module>sal-rest-connector</module>
         <module>sal-netconf-connector</module>
 
-        <module>zeromq-routingtable/implementation</module>
+        <module>remoterpc-routingtable/implementation</module>
         <module>sal-remoterpc-connector/implementation</module>
         <!-- Clustered Data Store -->
         <module>clustered-data-store/implementation</module>
