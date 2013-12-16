@@ -10,11 +10,13 @@ package org.opendaylight.controller.frm
 import org.opendaylight.controller.frm.flow.FlowProvider
 import org.opendaylight.controller.frm.group.GroupProvider
 import org.opendaylight.controller.frm.meter.MeterProvider
+import org.opendaylight.controller.frm.table.TableProvider
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.service.rev131026.SalTableService
 import org.osgi.framework.BundleContext
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService
 
@@ -23,6 +25,7 @@ class FRMActivator extends AbstractBindingAwareProvider {
     static var FlowProvider provider = new FlowProvider();
     static var GroupProvider groupProvider = new GroupProvider();
     static var MeterProvider meterProvider = new MeterProvider();
+    static var TableProvider tableProvider = new TableProvider();
 
     override onSessionInitiated(ProviderContext session) {
         provider.dataService = session.getSALService(DataProviderService)
@@ -36,12 +39,17 @@ class FRMActivator extends AbstractBindingAwareProvider {
         meterProvider.dataService = session.getSALService(DataProviderService)
         meterProvider.salMeterService = session.getRpcService(SalMeterService)
         meterProvider.start();
+        
+        tableProvider.dataService = session.getSALService(DataProviderService)
+        tableProvider.salTableService = session.getRpcService(SalTableService)
+        tableProvider.start();
     }
 
     override protected stopImpl(BundleContext context) {
         provider.close();
         groupProvider.close();
         meterProvider.close();
+        tableProvider.close() ;
     }
 
 }
