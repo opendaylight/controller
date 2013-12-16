@@ -7,18 +7,17 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.opendaylight.controller.config.api.annotations.Description;
+import org.opendaylight.controller.config.api.annotations.RequireInterface;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
-
-import org.opendaylight.controller.config.api.annotations.Description;
-import org.opendaylight.controller.config.api.annotations.RequireInterface;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Immutable
 class AttributeHolder {
@@ -31,6 +30,14 @@ class AttributeHolder {
     @Nullable
     private final RequireInterface requireInterfaceAnnotation;
     private final String attributeType;
+
+    public static final Set<Class<?>> PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER = new HashSet<>();
+
+    static {
+        PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(ObjectName.class);
+        PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(ObjectName[].class);
+        PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(List.class);
+    }
 
     public AttributeHolder(String name, Object object, String returnType,
             boolean writable,
@@ -114,12 +121,12 @@ class AttributeHolder {
     static RequireInterface findRequireInterfaceAnnotation(final Method setter,
             Set<Class<?>> inspectedInterfaces) {
 
-        // only allow setX(ObjectName y) or setX(ObjectName[] y) to continue
-        if (setter.getParameterTypes().length != 1
-                || (setter.getParameterTypes()[0].equals(ObjectName.class) == false && setter
-                        .getParameterTypes()[0].equals(ObjectName[].class) == false)) {
+        // only allow setX(ObjectName y) or setX(ObjectName[] y) or setX(List<ObjectName> y) to continue
+
+        if (setter.getParameterTypes().length > 1)
             return null;
-        }
+        if(PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0]) == false)
+            return null;
 
         List<RequireInterface> foundRequireInterfaces = AnnotationsHelper
                 .findMethodAnnotationInSuperClassesAndIfcs(setter, RequireInterface.class, inspectedInterfaces);

@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import static java.lang.String.format;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.annotations.Description;
+import org.opendaylight.controller.config.api.annotations.RequireInterface;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
+import org.opendaylight.controller.config.spi.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -40,15 +38,17 @@ import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.annotations.Description;
-import org.opendaylight.controller.config.api.annotations.RequireInterface;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
-import org.opendaylight.controller.config.spi.Module;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.format;
 
 /**
  * Contains common code for readable/rw dynamic mbean wrappers. Routes all
@@ -246,6 +246,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         } catch (InstanceNotFoundException e) {
             new MBeanException(e);
         }
+
         if (obj instanceof ObjectName) {
             AttributeHolder attributeHolder = attributeHolderMap
                     .get(attributeName);
@@ -254,8 +255,42 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
             }
             return obj;
         }
-        return obj;
 
+
+        if(isDependencyListAttr(attributeName, obj)) {
+            obj = fixDependencyListAttribute(obj);
+        }
+
+        return obj;
+    }
+
+    private Object fixDependencyListAttribute(Object attribute) {
+        if(attribute.getClass().isArray() == false)
+            throw new IllegalArgumentException("Unexpected attribute type, should be an array, but was " + attribute.getClass());
+
+        for (int i = 0; i < Array.getLength(attribute); i++) {
+
+            Object on = Array.get(attribute, i);
+            if(on instanceof ObjectName == false)
+                throw new IllegalArgumentException("Unexpected attribute type, should be an ObjectName, but was " + on.getClass());
+            on = fixObjectName((ObjectName) on);
+
+            Array.set(attribute, i, on);
+        }
+
+        return attribute;
+    }
+
+    private boolean isDependencyListAttr(String attributeName, Object attribute) {
+        if (attributeHolderMap.containsKey(attributeName) == false)
+            return false;
+
+        AttributeHolder attributeHolder = attributeHolderMap.get(attributeName);
+
+        boolean isDepList = true;
+        isDepList &= attributeHolder.getRequireInterfaceOrNull() != null;
+        isDepList &= attribute instanceof ObjectName[];
+        return isDepList;
     }
 
     protected ObjectName fixObjectName(ObjectName on) {

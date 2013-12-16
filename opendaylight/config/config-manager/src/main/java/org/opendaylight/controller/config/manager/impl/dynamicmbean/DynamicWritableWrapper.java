@@ -7,7 +7,13 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import java.lang.reflect.Method;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
+import org.opendaylight.controller.config.spi.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.Attribute;
@@ -20,14 +26,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
-import org.opendaylight.controller.config.spi.Module;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.reflect.Method;
 
 /**
  * Wraps {@link org.opendaylight.controller.config.spi.Module} instance in a
@@ -92,21 +91,49 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
 
         try {
             if (attribute.getValue() instanceof ObjectName) {
-                AttributeHolder attributeHolder = attributeHolderMap
-                        .get(attribute.getName());
-                if (attributeHolder.getRequireInterfaceOrNull() != null) {
-                    attribute = new Attribute(attribute.getName(),
-                            fixObjectName((ObjectName) attribute.getValue()));
-                } else {
-                    attribute = new Attribute(attribute.getName(),
-                            attribute.getValue());
-                }
+                attribute = fixDependencyAttribute(attribute);
+            } else if(attribute.getValue() instanceof ObjectName[]) {
+                attribute = fixDependencyListAttribute(attribute);
             }
+
             internalServer.setAttribute(objectNameInternal, attribute);
         } catch (InstanceNotFoundException e) {
             throw new MBeanException(e);
         }
 
+    }
+
+    private Attribute fixDependencyListAttribute(Attribute attribute) {
+        AttributeHolder attributeHolder = attributeHolderMap
+                .get(attribute.getName());
+        if (attributeHolder.getRequireInterfaceOrNull() != null) {
+            attribute = new Attribute(attribute.getName(),
+                    fixObjectNames((ObjectName[]) attribute.getValue()));
+        }
+        return attribute;
+    }
+
+    private Attribute fixDependencyAttribute(Attribute attribute) {
+        AttributeHolder attributeHolder = attributeHolderMap
+                .get(attribute.getName());
+        if (attributeHolder.getRequireInterfaceOrNull() != null) {
+            attribute = new Attribute(attribute.getName(),
+                    fixObjectName((ObjectName) attribute.getValue()));
+        } else {
+            attribute = new Attribute(attribute.getName(),
+                    attribute.getValue());
+        }
+        return attribute;
+    }
+
+    private ObjectName[] fixObjectNames(ObjectName[] dependencies) {
+        int i = 0;
+
+        for (ObjectName dependencyOn : dependencies) {
+            dependencies[i++] = fixObjectName(dependencyOn);
+        }
+
+        return dependencies;
     }
 
     @Override
