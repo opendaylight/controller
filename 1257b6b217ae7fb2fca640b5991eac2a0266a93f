@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_334c2170",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-16T20:05:39Z",
+      "side": 1,
+      "message": "It may just be me, but in this case for readability I\u0027d opt for  (!A \u0026\u0026 !B)  instead of  !(A || B).",
+      "revId": "1257b6b217ae7fb2fca640b5991eac2a0266a93f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
