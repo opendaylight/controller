@@ -7,7 +7,18 @@ module opendaylight-statistics-types {
     
     revision "2013-09-25" {
         description "Initial revision of flow service";
-    }    
+    }
+    
+    grouping duration {
+        container duration {
+            leaf second {
+                type yang:counter32;
+            }
+            leaf nanosecond {
+                type yang:counter32;
+            }
+        }
+    }
 
     grouping node-connector-statistics {
     	container packets {
@@ -50,15 +61,7 @@ module opendaylight-statistics-types {
         leaf collision-count {
             type uint64;
         }
-        
-        container duration {
-            leaf second {
-                type yang:counter32;
-            }
-            leaf nanosecond {
-                type yang:counter32;
-            }
-        }
+        uses duration;
     }
     
     grouping generic-statistics {
@@ -70,16 +73,8 @@ module opendaylight-statistics-types {
         leaf byte-count {
             type yang:counter64;
         }
-
-        container duration {
-            leaf second {
-                type yang:counter64;
-            }
-            leaf nanosecond {
-                type yang:counter64;
-            }
-        }
-    }
+	uses duration;
+	}
     
     grouping generic-table-statistics {
     	description "Generic grouping holding generic statistics related to switch table";
@@ -106,6 +101,22 @@ module opendaylight-statistics-types {
         leaf flow-count {
             type yang:counter32;
         }
+    }
+    
+    grouping generic-queue-statistics {
+    	description "Generic statistics of switch port attached queues.";
+    	leaf transmitted-bytes {
+			type yang:counter64;
+    	}
+    	
+    	leaf transmitted-packets {
+			type yang:counter64;
+    	}
+    	
+    	leaf transmission-errors {
+			type yang:counter64;
+    	}
+		uses duration;    	
     }
     
 }

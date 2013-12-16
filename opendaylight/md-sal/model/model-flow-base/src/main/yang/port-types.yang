@@ -4,6 +4,7 @@ module opendaylight-port-types {
 
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import opendaylight-queue-types {prefix queue-types; revision-date "2013-09-25";}
     
     revision "2013-09-25" {
         description "Initial revision of Port Inventory model";
@@ -86,6 +87,13 @@ module opendaylight-port-types {
         uses flow-capable-port;
     }
     
+    grouping queues {
+    	list queue {
+    		key "queue-id";
+    		uses queue-types:queue-packet;
+    	}
+    }
+    
     grouping flow-capable-port {    
                 
         uses common-port;
@@ -126,6 +134,8 @@ module opendaylight-port-types {
             units "kbps";
             description "Max port bit rate in kbps";            
         }
+        
+        uses queues;
     }    
     
     grouping port-mod {

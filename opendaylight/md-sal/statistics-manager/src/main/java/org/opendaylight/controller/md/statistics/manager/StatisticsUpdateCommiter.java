@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
@@ -40,6 +41,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupDescStatsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupFeaturesUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupStatisticsUpdated;
@@ -75,6 +80,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericQueueStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsDataBuilder;
@@ -82,6 +88,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.O
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.PortStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsData;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.QueueStatisticsUpdate;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.flow.capable.node.connector.queue.statistics.FlowCapableNodeConnectorQueueStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.queue.id.and.statistics.map.QueueIdAndStatisticsMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
@@ -91,7 +103,8 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         OpendaylightMeterStatisticsListener, 
         OpendaylightFlowStatisticsListener,
         OpendaylightPortStatisticsListener,
-        OpendaylightFlowTableStatisticsListener{
+        OpendaylightFlowTableStatisticsListener,
+        OpendaylightQueueStatisticsListener{
     
     public final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
 
@@ -395,8 +408,8 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
 
             flowStatisticsData.setFlowStatistics(flowStatistics.build());
                 
-            sucLogger.info("Flow : {}",flowRule.toString());
-            sucLogger.info("Statistics to augment : {}",flowStatistics.build().toString());
+            sucLogger.debug("Flow : {}",flowRule.toString());
+            sucLogger.debug("Statistics to augment : {}",flowStatistics.build().toString());
 
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
@@ -574,6 +587,62 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     }
 
     @Override
+    public void onQueueStatisticsUpdate(QueueStatisticsUpdate notification) {
+        NodeKey key = new NodeKey(notification.getId());
+        sucLogger.info("Received queue stats update : {}",notification.toString());
+        
+        //Add statistics to local cache
+        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+        if(!cache.containsKey(notification.getId())){
+            cache.put(notification.getId(), new NodeStatistics());
+        }
+        
+        List<QueueIdAndStatisticsMap> queuesStats = notification.getQueueIdAndStatisticsMap();
+        for(QueueIdAndStatisticsMap swQueueStats : queuesStats){
+            
+            if(!cache.get(notification.getId()).getNodeConnectorAndQueuesStatsMap().containsKey(swQueueStats.getNodeConnectorId())){
+                cache.get(notification.getId()).getNodeConnectorAndQueuesStatsMap().put(swQueueStats.getNodeConnectorId(), new HashMap<QueueId,GenericQueueStatistics>());
+            }
+            
+            FlowCapableNodeConnectorQueueStatisticsDataBuilder queueStatisticsDataBuilder = new FlowCapableNodeConnectorQueueStatisticsDataBuilder();
+            
+            FlowCapableNodeConnectorQueueStatisticsBuilder queueStatisticsBuilder = new FlowCapableNodeConnectorQueueStatisticsBuilder();
+            
+            queueStatisticsBuilder.fieldsFrom(swQueueStats);
+            
+            queueStatisticsDataBuilder.setFlowCapableNodeConnectorQueueStatistics(queueStatisticsBuilder.build());
+            
+            cache.get(notification.getId()).getNodeConnectorAndQueuesStatsMap()
+                                            .get(swQueueStats.getNodeConnectorId())
+                                            .put(swQueueStats.getQueueId(), queueStatisticsBuilder.build());
+            
+            
+            DataModificationTransaction it = this.statisticsManager.startChange();
+
+            InstanceIdentifier<Queue> queueRef 
+                    = InstanceIdentifier.builder(Nodes.class)
+                                        .child(Node.class, key)
+                                        .child(NodeConnector.class, new NodeConnectorKey(swQueueStats.getNodeConnectorId()))
+                                        .augmentation(FlowCapableNodeConnector.class)
+                                        .child(Queue.class, new QueueKey(swQueueStats.getQueueId())).toInstance();
+            
+            QueueBuilder queueBuilder = new QueueBuilder();
+            queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, queueStatisticsDataBuilder.build());
+            queueBuilder.setKey(new QueueKey(swQueueStats.getQueueId()));
+
+            sucLogger.info("Augmenting queue statistics {} of queue {} to port {}"
+                                        ,queueStatisticsDataBuilder.build().toString(),
+                                        swQueueStats.getQueueId(),
+                                        swQueueStats.getNodeConnectorId());
+            
+            it.putOperationalData(queueRef, queueBuilder.build());
+            it.commit();
+            
+        }
+        
+    }
+
+    @Override
     public void onFlowStatisticsUpdated(FlowStatisticsUpdated notification) {
         // TODO Auto-generated method stub
         //TODO: Depricated, will clean it up once sal-compatibility is fixed.
@@ -669,4 +738,5 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         return true;
     }
+
 }

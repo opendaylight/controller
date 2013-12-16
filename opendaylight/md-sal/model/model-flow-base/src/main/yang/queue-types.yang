@@ -9,6 +9,11 @@ module opendaylight-queue-types {
         description "Initial revision of Queue Inventory model";
     }
     
+    typedef queue-id {
+            type yang:counter32;
+            description "id for the specific queue.";  
+        }
+    
     typedef queue-properties {
         type enumeration {
             enum min_rate;
@@ -37,8 +42,6 @@ module opendaylight-queue-types {
         }
            
     }
-    
-    
       
     grouping queue-prop-max-rate	{
 		
@@ -54,7 +57,7 @@ module opendaylight-queue-types {
 		
 		
         leaf queue-id {
-            type uint32;
+            type queue-id;
             description "id for the specific queue.";  
         }
         

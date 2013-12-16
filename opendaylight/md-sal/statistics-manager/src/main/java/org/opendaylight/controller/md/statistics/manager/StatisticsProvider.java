@@ -46,6 +46,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllPortsStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllPortsStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
@@ -70,6 +73,8 @@ public class StatisticsProvider implements AutoCloseable {
     private OpendaylightPortStatisticsService portStatsService;
 
     private OpendaylightFlowTableStatisticsService flowTableStatsService;
+
+    private OpendaylightQueueStatisticsService queueStatsService;
 
     private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
     
@@ -129,6 +134,9 @@ public class StatisticsProvider implements AutoCloseable {
         flowTableStatsService = StatisticsManagerActivator.getProviderContext().
                 getRpcService(OpendaylightFlowTableStatisticsService.class);
         
+        queueStatsService = StatisticsManagerActivator.getProviderContext().
+                getRpcService(OpendaylightQueueStatisticsService.class);
+        
         statisticsRequesterThread = new Thread( new Runnable(){
 
             @Override
@@ -180,6 +188,8 @@ public class StatisticsProvider implements AutoCloseable {
                 sendAllPortStatisticsRequest(targetNodeRef);
                 
                 sendAllFlowTablesStatisticsRequest(targetNodeRef);
+                
+                sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
 
             }catch(Exception e){
                 spLogger.error("Exception occured while sending statistics requests : {}",e);
@@ -315,9 +325,18 @@ public class StatisticsProvider implements AutoCloseable {
         @SuppressWarnings("unused")
         Future<RpcResult<GetAllMeterConfigStatisticsOutput>> response = 
                 meterStatsService.getAllMeterConfigStatistics(input.build());
-        
     }
     
+    private void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) {
+        GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
+        
+        input.setNode(targetNode);
+        
+        @SuppressWarnings("unused")
+        Future<RpcResult<GetAllQueuesStatisticsFromAllPortsOutput>> response = 
+                queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build());
+    }
+
     public ConcurrentMap<NodeId, NodeStatistics> getStatisticsCache() {
         return statisticsCache;
     }
