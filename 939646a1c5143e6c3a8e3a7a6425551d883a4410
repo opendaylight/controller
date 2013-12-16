@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_784cb642",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-12-16T12:35:30Z",
+      "side": 1,
+      "message": "In my opinion, \u003d\u003d false is more readable than ! even if it is a bit more code. This way it is cearer that the condition should be negative.",
+      "parentUuid": "da6255ed_f838a6a1",
+      "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_786956bd",
         "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImpl.java",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_5847b21d",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-12-16T12:35:30Z",
+      "side": 1,
+      "message": "The exception is expected: @Test(expected \u003d IllegalStateException.class). This is a negative test case, the exception is caught only for message assertion.",
+      "parentUuid": "da6255ed_f8eae60d",
+      "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_d8ede226",
         "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImplTest.java",
         "patchSetId": 1
@@ -64,6 +100,24 @@
       "writtenOn": "2013-12-16T12:12:25Z",
       "side": 1,
       "message": "can you give it a more specific name? mock is too general and it doesn\u0027t indicate what it represents.",
+      "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_985c0aef",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2013-12-16T12:35:30Z",
+      "side": 1,
+      "message": "Well, the variable mock is of type YangStoreSnapshot, returned from a small utility method mockYangStoreSnapshot and is not referenced from anywhere else. I dont think it is really necessary, the method name indicates its purpose.",
+      "parentUuid": "da6255ed_d8ede226",
       "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
