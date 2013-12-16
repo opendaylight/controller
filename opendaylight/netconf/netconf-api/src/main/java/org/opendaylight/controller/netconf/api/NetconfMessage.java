@@ -8,8 +8,9 @@
 
 package org.opendaylight.controller.netconf.api;
 
-import com.google.common.base.Optional;
 import org.w3c.dom.Document;
+
+import com.google.common.base.Optional;
 
 /**
  * NetconfMessage represents a wrapper around org.w3c.dom.Document. Needed for

@@ -90,6 +90,7 @@
                             org.opendaylight.controller.netconf.client,
                             org.opendaylight.controller.netconf.util.osgi,
                             org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.messages,
                             io.netty.channel,
                             io.netty.channel.nio,
                             io.netty.util.concurrent,

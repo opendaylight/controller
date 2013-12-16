@@ -31,6 +31,7 @@
         <module>../../third-party/com.siemens.ct.exi</module>
         <module>netconf-monitoring</module>
         <module>ietf-netconf-monitoring</module>
+        <module>ietf-netconf-monitoring-extension</module>
     </modules>
 
     <profiles>

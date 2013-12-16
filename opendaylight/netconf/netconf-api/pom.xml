@@ -30,6 +30,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ietf-netconf-monitoring</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ietf-netconf-monitoring-extension</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>

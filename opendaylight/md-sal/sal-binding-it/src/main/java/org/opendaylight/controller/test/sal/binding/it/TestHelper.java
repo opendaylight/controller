@@ -54,6 +54,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "config-persister-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "ietf-netconf-monitoring").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "ietf-netconf-monitoring-extension").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-monitoring").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
