@@ -7,16 +7,19 @@
  */
 package org.opendaylight.controller.config.manager.impl.util;
 
-import java.util.Set;
-
-import javax.management.ObjectName;
-
-import org.junit.After;
-import org.junit.Before;
-import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBeanServerTest;
-
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBeanServerTest;
+
+import javax.management.ObjectName;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class ObjectNameUtilTest extends AbstractLockedPlatformMBeanServerTest {
     private Set<ObjectName> unregisterONs;
@@ -37,7 +40,26 @@ public class ObjectNameUtilTest extends AbstractLockedPlatformMBeanServerTest {
             }
         }
         if (lastException != null) {
-            Throwables.propagate(lastException);
+            throw Throwables.propagate(lastException);
         }
+    }
+
+    @Test
+    public void testQuotation() throws Exception {
+        String serviceQName = "(namespace?revision=r)qname";
+        String refName = "refName";
+        String transaction = "transaction";
+        ObjectName serviceReferenceON = ObjectNameUtil.createTransactionServiceON(transaction, serviceQName, refName);
+        assertFalse(serviceReferenceON.isPattern());
+        assertEquals(serviceQName, ObjectNameUtil.getServiceQName(serviceReferenceON));
+        assertEquals(refName, ObjectNameUtil.getReferenceName(serviceReferenceON));
+        assertEquals(transaction, ObjectNameUtil.getTransactionName(serviceReferenceON));
+
+        serviceReferenceON = ObjectNameUtil.createReadOnlyServiceON(serviceQName, refName);
+        assertFalse(serviceReferenceON.isPattern());
+        assertEquals(serviceQName, ObjectNameUtil.getServiceQName(serviceReferenceON));
+        assertEquals(refName, ObjectNameUtil.getReferenceName(serviceReferenceON));
+        assertEquals(null, ObjectNameUtil.getTransactionName(serviceReferenceON));
+
     }
 }

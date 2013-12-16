@@ -150,10 +150,7 @@ package ${packageName};
         }
         <#list moduleFields as field>
         <#if field.dependent==true>
-        if (${field.name}Dependency == null) {
-            if (other.${field.name}Dependency != null)
-                return false;
-        } else if (!${field.name}Dependency.equals(other.${field.name}Dependency)) {
+        if (${field.name}Dependency != other.${field.name}Dependency) { // reference to dependency must be same
             return false;
         }
         <#else>

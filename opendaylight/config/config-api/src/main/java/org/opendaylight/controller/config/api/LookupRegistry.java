@@ -65,8 +65,9 @@ public interface LookupRegistry {
      */
     void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException;
 
+
     /**
-     * @return qnames of all ModuleFactory instances in the system
+     * @return qNames of all ModuleFactory instances in the system
      */
     Set<String> getAvailableModuleFactoryQNames();
 

@@ -90,11 +90,6 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
         return osgiRegistration;
     }
 
-    @Deprecated
-    public ModuleIdentifier getName() {
-        return name;
-    }
-
     /**
      * Get index representing dependency ordering within a transaction.
      */
@@ -111,7 +106,7 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     }
 
     public DestroyedModule toDestroyedModule() {
-        return new DestroyedModule(getName(),
+        return new DestroyedModule(getIdentifier(),
                 getReadableModule().getInstance(), getModuleJMXRegistrator(),
                 getOsgiRegistration(), getOrderingIdx());
     }

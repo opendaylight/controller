@@ -16,12 +16,12 @@ public interface ServiceReferenceReadableRegistry {
 
     /**
      * Lookup object name by fully qualified service interface name and service reference name.
-     * @param serviceInterfaceName service interface name
+     * @param serviceInterfaceQName service interface name
      * @param refName service reference name supplied in
      * {@link org.opendaylight.controller.config.api.ConfigTransactionController#saveServiceReference(String, String, javax.management.ObjectName)}
      * @throws java.lang.IllegalArgumentException if module not found
      */
-    ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName);
+    ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName);
 
     /**
      * Get mapping of services to reference names and module object names.
@@ -30,10 +30,10 @@ public interface ServiceReferenceReadableRegistry {
 
     /**
      * Get current mapping between reference names and module object names for given service interface name.
-     * @param serviceInterfaceName service interface name
+     * @param serviceInterfaceQName service interface name
      * @throws IllegalArgumentException if there is a mismatch between serviceInterfaceName and objectName
      */
-    Map<String /* refName */, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName);
+    Map<String /* refName */, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName);
 
     /**
      * Find all available service interface names of a module.
@@ -49,5 +49,14 @@ public interface ServiceReferenceReadableRegistry {
      * @throws java.lang.IllegalArgumentException if namespace or localName is not found
      */
     String getServiceInterfaceName(String namespace, String localName);
+
+    /**
+     * @return ObjectName with type=Service that was created using
+     * {@link org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry#saveServiceReference(String, String,
+     * javax.management.ObjectName)}
+     */
+    ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException;
+
+    void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException;
 
 }

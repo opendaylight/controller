@@ -16,7 +16,7 @@ import javax.management.ObjectName;
 /**
  * Represents functionality provided by configuration transaction.
  */
-public interface ConfigTransactionController extends LookupRegistry, ServiceReferenceReadableRegistry, ServiceReferenceWritableRegistry {
+public interface ConfigTransactionController extends LookupRegistry, ServiceReferenceWritableRegistry {
 
     /**
      * Create new configuration bean.

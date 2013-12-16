@@ -164,13 +164,13 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public void saveServiceReference(String serviceInterfaceName, String refName, ObjectName objectName) throws InstanceNotFoundException {
-        configTransactionControllerMXBeanProxy.saveServiceReference(serviceInterfaceName,refName,objectName);
+    public ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException {
+        return configTransactionControllerMXBeanProxy.saveServiceReference(serviceInterfaceName,refName, moduleON);
     }
 
     @Override
-    public boolean removeServiceReference(String serviceInterfaceName, String refName) {
-        return configTransactionControllerMXBeanProxy.removeServiceReference(serviceInterfaceName, refName);
+    public void removeServiceReference(String serviceInterfaceName, String refName) throws InstanceNotFoundException{
+        configTransactionControllerMXBeanProxy.removeServiceReference(serviceInterfaceName, refName);
     }
 
     @Override
@@ -179,8 +179,8 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceName, String refName) {
-        return configTransactionControllerMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceName, refName);
+    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+        return configTransactionControllerMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
     @Override
@@ -189,8 +189,8 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceName) {
-        return configTransactionControllerMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceName);
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+        return configTransactionControllerMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
@@ -206,6 +206,16 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     @Override
     public boolean removeServiceReferences(ObjectName objectName) throws InstanceNotFoundException {
         return configTransactionControllerMXBeanProxy.removeServiceReferences(objectName);
+    }
+
+    @Override
+    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+        return configTransactionControllerMXBeanProxy.getServiceReference(serviceInterfaceQName, refName);
+    }
+
+    @Override
+    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+        configTransactionControllerMXBeanProxy.checkServiceReferenceExists(objectName);
     }
 
     @Override

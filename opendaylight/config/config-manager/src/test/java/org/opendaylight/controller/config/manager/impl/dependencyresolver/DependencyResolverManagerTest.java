@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
@@ -40,7 +41,8 @@ public class DependencyResolverManagerTest {
     @Before
     public void setUp() {
         transactionStatus = mock(TransactionStatus.class);
-        tested = new DependencyResolverManager("txName", transactionStatus);
+        ServiceReferenceReadableRegistry mockedRegistry = mock(ServiceReferenceReadableRegistry.class);
+        tested = new DependencyResolverManager("txName", transactionStatus, mockedRegistry);
         doNothing().when(transactionStatus).checkCommitStarted();
         doNothing().when(transactionStatus).checkNotCommitted();
     }

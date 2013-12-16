@@ -11,8 +11,9 @@ import org.opendaylight.controller.config.api.annotations.AbstractServiceInterfa
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
 
-@ServiceInterfaceAnnotation(value = "testing-threadpool", osgiRegistrationType = TestingThreadPoolIfc.class,
-    namespace = "ns", revision = "foo", localName = "bar")
+@ServiceInterfaceAnnotation(value = TestingThreadPoolServiceInterface.QNAME, osgiRegistrationType = TestingThreadPoolIfc.class,
+    namespace = "ns", revision = "foo", localName = "testing-threadpool")
 public interface TestingThreadPoolServiceInterface extends
         AbstractServiceInterface {
+    public static final String QNAME = "(ns?revision=foo)testing-threadpool";
 }
