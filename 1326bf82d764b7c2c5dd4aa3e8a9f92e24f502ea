@@ -16,6 +16,24 @@
       "revId": "1326bf82d764b7c2c5dd4aa3e8a9f92e24f502ea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5878d22a",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-12-16T13:46:57Z",
+      "side": 1,
+      "message": "I understand that. Will fix that.",
+      "parentUuid": "da6255ed_189b7a73",
+      "revId": "1326bf82d764b7c2c5dd4aa3e8a9f92e24f502ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
