@@ -57,7 +57,7 @@ public class DirectoryStorageAdapterTest {
 
     @Test
     public void testOneFile() throws Exception {
-        File folder = getFolder("oneFile");
+        File folder = getFolder("combined");
         tested = new XmlDirectoryPersister((folder));
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
