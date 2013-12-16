@@ -691,12 +691,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             return DEFAULT_SUBNET;
         }
 
-        Subnet sub;
-        Set<InetAddress> indices = subnets.keySet();
-        for (InetAddress i : indices) {
-            sub = subnets.get(i);
-            if (sub.isSubnetOf(networkAddress)) {
-                return sub;
+        for(Map.Entry<InetAddress,Subnet> subnetEntry : subnets.entrySet()) {
+            if(subnetEntry.getValue().isSubnetOf(networkAddress)) {
+                return subnetEntry.getValue();
             }
         }
         return null;
