@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_f838a6a1",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-16T12:12:25Z",
+      "side": 1,
+      "message": "consider changing it to !contains instead of comparing to false. it\u0027s just a bit more readable + nicer/less code.",
+      "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_786956bd",
         "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImpl.java",
         "patchSetId": 1
@@ -13,6 +30,40 @@
       "writtenOn": "2013-12-16T10:51:55Z",
       "side": 1,
       "message": "you can use %n here",
+      "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f8eae60d",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-16T12:12:25Z",
+      "side": 1,
+      "message": "It is not a good practice to throw exception from the test - why is it needed here?\nIf you would like to indicate that the test has failed, please use the fail method available in Junit framework.",
+      "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d8ede226",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-16T12:12:25Z",
+      "side": 1,
+      "message": "can you give it a more specific name? mock is too general and it doesn\u0027t indicate what it represents.",
       "revId": "939646a1c5143e6c3a8e3a7a6425551d883a4410",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
