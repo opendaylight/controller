@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_78271613",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/table/TableTransaction.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-16T15:00:48Z",
+      "side": 1,
+      "message": "You actually *do* need add.  If someone writes the TableFeatures to the config for the first time, it will go to add.\n\nI would suggest simply doing an updateTable with the UpdatedTable set to the new value.",
+      "revId": "1263575bef540d4a7be6115ac75db02258e9a948",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
