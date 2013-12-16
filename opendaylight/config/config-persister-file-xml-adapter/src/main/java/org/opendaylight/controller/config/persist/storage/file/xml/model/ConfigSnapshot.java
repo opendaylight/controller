@@ -15,8 +15,10 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.SortedSet;
 
-@XmlRootElement(name = "snapshot")
+@XmlRootElement(name = ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME)
 public class ConfigSnapshot {
+
+    public static final String SNAPSHOT_ROOT_ELEMENT_NAME = "snapshot";
 
     private String configSnapshot;
     private SortedSet<String> capabilities;
