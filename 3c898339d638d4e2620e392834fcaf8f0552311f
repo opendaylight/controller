@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b38491d4",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2941,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-17T10:41:19Z",
+      "side": 1,
+      "message": "As we discussed offline, this is a poor man\u0027s fix to handle the bug where-in the flow is incorrectly toggled to be not installed in the switch. More appropriate fix would be to actually check if the flow is infact expired due to timeout and handle that appropriately.\n\nBut given the fact that this helps alleviate most of the conditions (when the timeouts are not set), I would go ahead and merge it. Lets explore further to get the notification from the plugin to see if we can handle this in a cleaner fashion.",
+      "revId": "3c898339d638d4e2620e392834fcaf8f0552311f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
