@@ -19,6 +19,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.common.QName;
 
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +30,15 @@ import static org.mockito.Mockito.mock;
 
 public class NetconfOperationServiceImplTest {
 
-    private Date date = new Date(0);
+    private static final Date date1970_01_01;
+
+    static {
+        try {
+            date1970_01_01 = new SimpleDateFormat("yyyy-MM-dd").parse("1970-01-01");
+        } catch (ParseException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     @Test
     public void testCheckConsistencyBetweenYangStoreAndConfig_ok() throws Exception {
@@ -97,7 +107,7 @@ public class NetconfOperationServiceImplTest {
     }
 
     private QName getQName(String qname) {
-        return new QName(URI.create("namespace"), date, qname);
+        return new QName(URI.create("namespace"), date1970_01_01, qname);
     }
 
     private LookupRegistry mockJmxClient(String... visibleQNames) {
