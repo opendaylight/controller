@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.eclipse.xtext.xbase.lib.Exceptions;
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -179,6 +180,10 @@ public class StatisticsProvider implements AutoCloseable {
             InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
             NodeRef targetNodeRef = new NodeRef(targetInstanceId);
             
+            System.out.println("ANIL: Target Node object ::"+targetNode.toString());
+            
+            System.out.println("ANIL: FlowCapableNode augmentations ::"+targetNode.getAugmentation(FlowCapableNode.class));
+            
             try {
                 
                 sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
@@ -215,26 +220,31 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
 
-    private void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) {
+    private void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) throws InterruptedException, ExecutionException {
         final GetFlowTablesStatisticsInputBuilder input = 
                 new GetFlowTablesStatisticsInputBuilder();
         
         input.setNode(targetNodeRef);
 
-        @SuppressWarnings("unused")
         Future<RpcResult<GetFlowTablesStatisticsOutput>> response = 
                 flowTableStatsService.getFlowTablesStatistics(input.build());
+
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_FLOW_TABLE);
+
     }
 
-    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode){
+    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input =
                 new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
         
         input.setNode(targetNode);
         
-        @SuppressWarnings("unused")
         Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> response = 
                 flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_FLOW);
         
     }
     
@@ -255,6 +265,8 @@ public class StatisticsProvider implements AutoCloseable {
                         flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());
                 
                 multipartMessageManager.setTxIdAndTableIdMapEntry(response.get().getResult().getTransactionId(), id);
+                this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                        , StatsRequestType.AGGR_FLOW);
             }
         }
         
@@ -271,70 +283,88 @@ public class StatisticsProvider implements AutoCloseable {
 //                        flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());`
 //                
 //                multipartMessageManager.setTxIdAndTableIdMapEntry(response.get().getResult().getTransactionId(), (short)1);
+        
     }
 
-    private void sendAllPortStatisticsRequest(NodeRef targetNode){
+    private void sendAllPortStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         final GetAllPortsStatisticsInputBuilder input = new GetAllPortsStatisticsInputBuilder();
         
         input.setNode(targetNode);
 
-        @SuppressWarnings("unused")
         Future<RpcResult<GetAllPortsStatisticsOutput>> response = 
                 portStatsService.getAllPortsStatistics(input.build());
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_PORT);
+
     }
 
-    private void sendAllGroupStatisticsRequest(NodeRef targetNode){
+    private void sendAllGroupStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         
         input.setNode(targetNode);
 
-        @SuppressWarnings("unused")
         Future<RpcResult<GetAllGroupStatisticsOutput>> response = 
                 groupStatsService.getAllGroupStatistics(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_GROUP);
+
     }
     
-    private void sendGroupDescriptionRequest(NodeRef targetNode){
+    private void sendGroupDescriptionRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();
         
         input.setNode(targetNode);
 
-        @SuppressWarnings("unused")
         Future<RpcResult<GetGroupDescriptionOutput>> response = 
                 groupStatsService.getGroupDescription(input.build());
+
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.GROUP_DESC);
+
     }
     
-    private void sendAllMeterStatisticsRequest(NodeRef targetNode){
+    private void sendAllMeterStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
         
         input.setNode(targetNode);
 
-        @SuppressWarnings("unused")
         Future<RpcResult<GetAllMeterStatisticsOutput>> response = 
                 meterStatsService.getAllMeterStatistics(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_METER);;
+
     }
     
-    private void sendMeterConfigStatisticsRequest(NodeRef targetNode){
+    private void sendMeterConfigStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
         
         input.setNode(targetNode);
 
-        @SuppressWarnings("unused")
         Future<RpcResult<GetAllMeterConfigStatisticsOutput>> response = 
                 meterStatsService.getAllMeterConfigStatistics(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.METER_CONFIG);;
+
     }
     
-    private void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) {
+    private void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) throws InterruptedException, ExecutionException {
         GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
         
         input.setNode(targetNode);
         
-        @SuppressWarnings("unused")
         Future<RpcResult<GetAllQueuesStatisticsFromAllPortsOutput>> response = 
                 queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_QUEUE_STATS);;
+
     }
 
     public ConcurrentMap<NodeId, NodeStatistics> getStatisticsCache() {
