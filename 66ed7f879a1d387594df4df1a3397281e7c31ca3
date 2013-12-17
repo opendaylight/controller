@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f390c944",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-17T04:31:58Z",
+      "side": 1,
+      "message": "Why not a single return line ?\nI do not see a need for \nboolean isSubnetOf",
+      "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
