@@ -837,6 +837,35 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     }
 
     /**
+     * Check if two edges has the same Node IDs and NodeConnector IDs.
+     *
+     * @param e1
+     *            The first Edge
+     * @param e2
+     *            The second Edge
+     * @return
+     *            True if these two edges have the same Node IDs and
+     *            NodeConnector IDs, false otherwise.
+     */
+    private boolean isEqualEdgeIDs(Edge e1, Edge e2) {
+        String headNCID1 = e1.getHeadNodeConnector().getNodeConnectorIDString();
+        String tailNCID1 = e1.getTailNodeConnector().getNodeConnectorIDString();
+        String headNodeID1 = e1.getHeadNodeConnector().getNode().getNodeIDString();
+        String tailNodeID1 = e1.getTailNodeConnector().getNode().getNodeIDString();
+        String headNCID2 = e2.getHeadNodeConnector().getNodeConnectorIDString();
+        String tailNCID2 = e2.getTailNodeConnector().getNodeConnectorIDString();
+        String headNodeID2 = e2.getHeadNodeConnector().getNode().getNodeIDString();
+        String tailNodeID2 = e2.getTailNodeConnector().getNode().getNodeIDString();
+        if (headNCID1.equals(headNCID2) && tailNCID1.equals(tailNCID2) &&
+            headNodeID1.equals(headNodeID2) && tailNodeID1.equals(tailNodeID2)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
      * Update Production Edge
      *
      * @param edge
@@ -858,7 +887,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         if (oldEdge == null) {
             /* Let's add a new one */
             addEdge(edge, props);
-        } else if (!edge.equals(oldEdge)) {
+        } else if (!isEqualEdgeIDs(edge, oldEdge)) {
             /* Remove the old one first */
             removeProdEdge(oldEdge.getHeadNodeConnector());
             /* Then add the new one */
