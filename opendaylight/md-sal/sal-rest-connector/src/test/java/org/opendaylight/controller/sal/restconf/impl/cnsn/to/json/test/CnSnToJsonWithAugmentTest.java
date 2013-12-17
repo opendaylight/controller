@@ -1,12 +1,25 @@
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
+import javax.ws.rs.WebApplicationException;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
+import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-public class ToJsonWithAugmentTest {
+public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
+
+    @BeforeClass
+    public static void initialize() {
+        dataLoad("/cnsn-to-json/augmentation", 5, "yang", "cont");
+    }
 
     /**
      * Test of json output when as input are specified composite node with empty
@@ -14,10 +27,16 @@ public class ToJsonWithAugmentTest {
      */
     @Test
     public void augmentedElementsToJson() {
-
         CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/augmentation/xml/data.xml");
-        String jsonOutput = TestUtils.convertCompositeNodeDataAndYangToJson(compositeNode,
-                "/cnsn-to-json/augmentation", "/cnsn-to-json/augmentation/xml", "yang", "cont");
+        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+
+        String jsonOutput = null;
+        try {
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+                    StructuredDataToJsonProvider.INSTANCE);
+        } catch (WebApplicationException | IOException e) {
+        }
+        assertNotNull(jsonOutput);
 
         assertTrue(jsonOutput.contains("\"augment-leaf:lf2\": \"lf2\""));
         assertTrue(jsonOutput.contains("\"augment-container:cont1\": {"));

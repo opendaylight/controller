@@ -7,8 +7,13 @@ import java.io.StringReader;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ws.rs.WebApplicationException;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
+import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.controller.sal.restconf.impl.test.structures.*;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -16,7 +21,12 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
-public class ToJsonBasicYangTypesTest {
+public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
+
+    @BeforeClass
+    public static void initialize() {
+        dataLoad("/cnsn-to-json/simple-yang-types", 1, "simple-yang-types", "cont1");
+    }
 
     /**
      * Test of json output when as input are specified composite node with empty
@@ -24,9 +34,16 @@ public class ToJsonBasicYangTypesTest {
      */
     @Test
     public void compositeNodeAndYangWithJsonReaderEmptyDataTest() {
-        String jsonOutput = TestUtils.convertCompositeNodeDataAndYangToJson(prepareCompositeNodeWithEmpties(),
-                "/cnsn-to-json/simple-yang-types", "/cnsn-to-json/simple-yang-types/xml", "simple-yang-types", "cont1");
-        verifyJsonOutputForEmpty(jsonOutput);
+        CompositeNode compositeNode = prepareCompositeNodeWithEmpties();
+        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        String jsonOutput = null;
+        try {
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+                    StructuredDataToJsonProvider.INSTANCE);
+        } catch (WebApplicationException | IOException e) {
+        }
+
+        verifyJsonOutputForEmptyData(jsonOutput);
     }
 
     /**
@@ -35,13 +52,20 @@ public class ToJsonBasicYangTypesTest {
      */
     @Test
     public void xmlAndYangTypesWithJsonReaderTest() {
-        String jsonOutput = TestUtils.convertCompositeNodeDataAndYangToJson(
-                TestUtils.loadCompositeNode("/cnsn-to-json/simple-yang-types/xml/data.xml"),
-                "/cnsn-to-json/simple-yang-types", "/cnsn-to-json/simple-yang-types/xml", "simple-yang-types", "cont1");
+        CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/simple-yang-types/xml/data.xml");
+        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        String jsonOutput = null;
+        try {
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+                    StructuredDataToJsonProvider.INSTANCE);
+        } catch (WebApplicationException | IOException e) {
+        }
+
         verifyJsonOutput(jsonOutput);
     }
 
-    private void verifyJsonOutputForEmpty(String jsonOutput) {
+    private void verifyJsonOutputForEmptyData(String jsonOutput) {
+        assertNotNull(jsonOutput);
         StringReader strReader = new StringReader(jsonOutput);
         JsonReader jReader = new JsonReader(strReader);
 
@@ -60,6 +84,7 @@ public class ToJsonBasicYangTypesTest {
     }
 
     private void verifyJsonOutput(String jsonOutput) {
+        assertNotNull(jsonOutput);
         StringReader strReader = new StringReader(jsonOutput);
         JsonReader jReader = new JsonReader(strReader);
 
