@@ -16,6 +16,24 @@
       "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d3cb851c",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-17T12:04:22Z",
+      "side": 1,
+      "message": "for easier debug. this way you will get a variable with return value instead of going to evaluate a big expression.\nit\u0027s a matter of style.",
+      "parentUuid": "da6255ed_f390c944",
+      "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
