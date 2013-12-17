@@ -37,7 +37,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>zeromq-routingtable.implementation</artifactId>
+      <artifactId>remoterpc-routingtable.implementation</artifactId>
       <!-- TODO: fix the version. Why is it not MD Sal project version?-->
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
