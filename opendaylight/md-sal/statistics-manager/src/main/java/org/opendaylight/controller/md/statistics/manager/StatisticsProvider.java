@@ -179,23 +179,27 @@ public class StatisticsProvider implements AutoCloseable {
             InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
             NodeRef targetNodeRef = new NodeRef(targetInstanceId);
             
+            System.out.println("ANIL: Target Node object ::"+targetNode.toString());
+            
+            System.out.println("ANIL: FlowCapableNode augmentations ::"+targetNode.getAugmentation(FlowCapableNode.class));
+            
             try {
                 
-                sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
-
-                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
-
-                sendAllPortStatisticsRequest(targetNodeRef);
-                
-                sendAllFlowTablesStatisticsRequest(targetNodeRef);
-                
+//                sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
+//
+//                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
+//
+//                sendAllPortStatisticsRequest(targetNodeRef);
+//                
+//                sendAllFlowTablesStatisticsRequest(targetNodeRef);
+//                
                 sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
 
             }catch(Exception e){
                 spLogger.error("Exception occured while sending statistics requests : {}",e);
             }
 
-            if(targetNode.getAugmentation(FlowCapableNode.class) != null){
+            if(targetNode.getAugmentation(FlowCapableNode.class) == null){
 
                 spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
 
