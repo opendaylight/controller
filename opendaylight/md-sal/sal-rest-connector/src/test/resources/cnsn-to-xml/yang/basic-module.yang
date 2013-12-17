@@ -91,6 +91,12 @@ module basic-module {
 		  }
 		}
 		
+		leaf lfLfref {
+		  type leafref {
+		      path "/cont/lfBoolean";
+		  }    
+		}
+		
 	}
 	  
 }
