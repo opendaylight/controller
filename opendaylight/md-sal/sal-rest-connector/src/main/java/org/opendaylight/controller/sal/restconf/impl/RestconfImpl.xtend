@@ -6,18 +6,20 @@ import java.util.Set
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.rest.api.RestconfService
+import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory
+import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
-import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
-import org.opendaylight.yangtools.yang.model.api.TypeDefinition
-import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
-import org.opendaylight.yangtools.yang.common.QName
-import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition
+
 import static javax.ws.rs.core.Response.Status.*
 
 class RestconfImpl implements RestconfService {
@@ -163,6 +165,21 @@ class RestconfImpl implements RestconfService {
                 normalizeNode(child,
                     findFirstSchemaByLocalName(child.localName, (schema as DataNodeContainer).childNodes),
                     currentAugment)
+            }
+            if(schema instanceof ListSchemaNode) {
+                val listKeys = (schema as ListSchemaNode).keyDefinition
+                for (listKey : listKeys) {
+                    var foundKey = false
+                    for (child : children) {
+                        if (child.unwrap.nodeType.localName == listKey.localName) {
+                            foundKey = true;
+                        }
+                    }
+                    if (!foundKey) {
+                        throw new ResponseException(BAD_REQUEST,
+                            "Missing key \"" + listKey.localName + "\" of list \"" + schema.QName.localName + "\"")
+                    }
+                }
             }
         } else if (nodeBuilder instanceof SimpleNodeWrapper) {
             val simpleNode = (nodeBuilder as SimpleNodeWrapper)
