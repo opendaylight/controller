@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import javax.annotation.concurrent.ThreadSafe;
-import org.opendaylight.controller.netconf.ssh.authentication.RSAKey;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,27 +30,38 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
     private long sessionId;
     private String currentUser;
     private final String remoteAddressWithPort;
+    private final AuthProvider authProvider;
 
 
-    public static void start(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException{
-        Thread netconf_ssh_socket_thread = new Thread(new SocketThread(socket,clientAddress,sessionId));
+    public static void start(Socket socket,
+                             InetSocketAddress clientAddress,
+                             long sessionId,
+                             AuthProvider authProvider) throws IOException{
+        Thread netconf_ssh_socket_thread = new Thread(new SocketThread(socket,clientAddress,sessionId,authProvider));
         netconf_ssh_socket_thread.setDaemon(true);
         netconf_ssh_socket_thread.start();
     }
-    private SocketThread(Socket socket, InetSocketAddress clientAddress, long sessionId) throws IOException {
+    private SocketThread(Socket socket,
+                         InetSocketAddress clientAddress,
+                         long sessionId,
+                         AuthProvider authProvider) throws IOException {
 
         this.socket = socket;
         this.clientAddress = clientAddress;
         this.sessionId = sessionId;
         this.remoteAddressWithPort = socket.getRemoteSocketAddress().toString().replaceFirst("/","");
+        this.authProvider = authProvider;
 
     }
 
     @Override
     public void run() {
         conn = new ServerConnection(socket);
-        RSAKey keyStore = new RSAKey();
-        conn.setRsaHostKey(keyStore.getPrivateKey());
+        try {
+            conn.setPEMHostKey(authProvider.getPEMAsCharArray(),"netconf");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         conn.setAuthenticationCallback(this);
         conn.setServerConnectionCallback(this);
         try {
@@ -90,7 +101,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                 netconf_ssh_output.start();
 
                             } catch (Throwable t){
-                                logger.error(t.getMessage(),t);
+                                logger.error("SSH bridge couldn't create echo socket",t.getMessage(),t);
 
                                 try {
                                     if (netconf_ssh_input!=null){
@@ -166,13 +177,16 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
 
     public AuthenticationResult authenticateWithPassword(ServerConnection sc, String username, String password)
     {
-        if (USER.equals(username) && PASSWORD.equals(password)){
-            currentUser = username;
-            logger.trace("user {}@{} authenticated",currentUser,remoteAddressWithPort);
-            return AuthenticationResult.SUCCESS;
+
+        try {
+            if (authProvider.authenticated(username,password)){
+                currentUser = username;
+                logger.trace("user {}@{} authenticated",currentUser,remoteAddressWithPort);
+                return AuthenticationResult.SUCCESS;
+            }
+        } catch (Exception e){
+            logger.info("Authentication failed due to :" + e.getLocalizedMessage());
         }
-
-
         return AuthenticationResult.FAILURE;
     }
 

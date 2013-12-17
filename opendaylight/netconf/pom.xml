@@ -150,6 +150,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-ssh</artifactId>
+                <version>${netconf.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>netconf-mapping-api</artifactId>
                 <version>${netconf.version}</version>
             </dependency>
