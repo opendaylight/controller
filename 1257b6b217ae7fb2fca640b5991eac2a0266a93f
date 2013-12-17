@@ -16,6 +16,24 @@
       "revId": "1257b6b217ae7fb2fca640b5991eac2a0266a93f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3382e194",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-17T13:15:50Z",
+      "side": 1,
+      "message": "it\u0027s a matter of style. they both work.",
+      "parentUuid": "da6255ed_334c2170",
+      "revId": "1257b6b217ae7fb2fca640b5991eac2a0266a93f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
