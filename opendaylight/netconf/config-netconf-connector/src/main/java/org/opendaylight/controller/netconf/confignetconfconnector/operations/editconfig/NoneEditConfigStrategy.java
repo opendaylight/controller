@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import java.util.Map;
-
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class NoneEditConfigStrategy implements EditConfigStrategy {
 
@@ -22,7 +22,7 @@ public class NoneEditConfigStrategy implements EditConfigStrategy {
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
-                                     ConfigTransactionClient ta, Services services) {
+                                     ConfigTransactionClient ta, ServiceRegistryWrapper services) {
         logger.debug("Skipping configuration element for {}:{}", module, instance);
     }
 

@@ -21,7 +21,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
@@ -90,7 +90,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         ObjectName on = transactionProvider.getOrCreateTransaction();
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(on);
 
-        Services serviceTracker = new Services(ta);
+        ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(ta);
         dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
 
         logger.info("{} operation successful", GET_CONFIG);

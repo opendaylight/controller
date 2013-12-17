@@ -10,7 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runti
 
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -41,7 +41,7 @@ public class ModuleRuntime {
     }
 
     public Element toXml(String namespace, Collection<ObjectName> runtimeBeanOns,
-                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON, Services serviceTracker) {
+                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON, ServiceRegistryWrapper serviceTracker) {
 
         Element moduleElement = moduleConfig.toXml(configBeanON, serviceTracker, document, namespace);
 

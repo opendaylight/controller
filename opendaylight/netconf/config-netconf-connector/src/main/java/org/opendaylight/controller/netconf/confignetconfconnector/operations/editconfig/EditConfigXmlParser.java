@@ -14,10 +14,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementDefinition;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
@@ -26,7 +27,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.ObjectName;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -98,11 +98,7 @@ public class EditConfigXmlParser {
 
         XmlElement configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
 
-        ObjectName taON = transactionProvider.getOrCreateTransaction();
-        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
-
-        return new EditConfigXmlParser.EditConfigExecution(cfgMapping, configElement, testOption,
-                ta, editStrategyType);
+        return new EditConfigXmlParser.EditConfigExecution(cfgMapping, configElement, testOption, editStrategyType);
     }
 
     @VisibleForTesting
@@ -132,15 +128,17 @@ public class EditConfigXmlParser {
     @VisibleForTesting
     static class EditConfigExecution {
 
-        private final Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements;
         private final TestOption testOption;
         private final EditStrategyType defaultEditStrategyType;
         private final Services services;
+        private final Config configResolver;
+        private final XmlElement configElement;
 
-        EditConfigExecution(Config configResolver, XmlElement configElement, TestOption testOption, ServiceReferenceReadableRegistry ta, EditStrategyType defaultStrategy) {
-            Config.ConfigElementResolved configElementResolved = configResolver.fromXml(configElement, defaultStrategy, ta);
-            this.resolvedXmlElements = configElementResolved.getResolvedModules();
-            this.services = configElementResolved.getServices();
+        EditConfigExecution(Config configResolver, XmlElement configElement, TestOption testOption, EditStrategyType defaultStrategy) {
+            Config.checkUnrecognisedChildren(configElement);
+            this.configResolver = configResolver;
+            this.configElement = configElement;
+            this.services = configResolver.fromXmlServices(configElement);
             this.testOption = testOption;
             this.defaultEditStrategyType = defaultStrategy;
         }
@@ -153,8 +151,17 @@ public class EditConfigXmlParser {
             return testOption == TestOption.set || testOption == TestOption.testThenSet;
         }
 
-        Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements() {
-            return resolvedXmlElements;
+        Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements(ServiceReferenceReadableRegistry serviceRegistry) {
+            return configResolver.fromXmlModulesResolved(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
+        }
+
+        ServiceRegistryWrapper getServiceRegistryWrapper(ServiceReferenceReadableRegistry serviceRegistry) {
+            // TODO cache service registry
+            return new ServiceRegistryWrapper(serviceRegistry);
+        }
+
+        Map<String, Multimap<String,ModuleElementDefinition>> getModulesDefinition(ServiceReferenceReadableRegistry serviceRegistry) {
+            return configResolver.fromXmlModulesMap(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
         }
 
         EditStrategyType getDefaultStrategy() {

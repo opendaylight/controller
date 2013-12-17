@@ -52,7 +52,7 @@ public final class InstanceConfig {
         this.configRegistryClient = configRegistryClient;
     }
 
-    private Map<String, Object> getMappedConfiguration(ObjectName on, Services depTracker) {
+    private Map<String, Object> getMappedConfiguration(ObjectName on, ServiceRegistryWrapper depTracker) {
 
         // TODO make field, mappingStrategies can be instantiated only once
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> mappingStrategies = new ObjectMapper(depTracker)
@@ -84,7 +84,7 @@ public final class InstanceConfig {
         return toXml;
     }
 
-    public Element toXml(ObjectName on, Services depTracker, String namespace, Document document, Element rootElement) {
+    public Element toXml(ObjectName on, ServiceRegistryWrapper depTracker, String namespace, Document document, Element rootElement) {
 
         Element cfgElement = rootElement;
 
@@ -104,7 +104,7 @@ public final class InstanceConfig {
         return cfgElement;
     }
 
-    private void resolveConfiguration(InstanceConfigElementResolved mappedConfig, Services depTracker) {
+    private void resolveConfiguration(InstanceConfigElementResolved mappedConfig, ServiceRegistryWrapper depTracker) {
 
         // TODO make field, resolvingStrategies can be instantiated only once
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> resolvingStrategies = new ObjectResolver(
@@ -128,7 +128,7 @@ public final class InstanceConfig {
         }
     }
 
-    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, Services services, String moduleNamespace,
+    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
             EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 

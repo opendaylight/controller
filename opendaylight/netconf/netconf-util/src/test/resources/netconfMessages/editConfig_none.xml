@@ -21,12 +21,11 @@
                     </type>
                 </module>
 
-
                 <module>
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-netconf
                     </type>
-                    <name>test1</name>
+                    <name>instance-from-code</name>
                     <simple-long-2>44</simple-long-2>
                     <binaryLeaf>8ad1</binaryLeaf>
                     <dto_d>
@@ -72,7 +71,7 @@
                     <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
                         test-impl:impl-netconf
                     </type>
-                    <name>test2</name>
+                    <name>test3</name>
                 </module>
             </modules>
 
