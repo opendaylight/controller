@@ -22,7 +22,7 @@
 	<lfdecimal6>33.12345</lfdecimal6>
 	<lfenum>enum3</lfenum>
 	<lfbits>bit3</lfbits>	
-	<lfbinary>AAaacdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ%%-#^</lfbinary>
+	<lfbinary>AAaacdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</lfbinary>
 	<lfempty></lfempty>
 	<lfunion1>324</lfunion1>
 	<lfunion2>33.3</lfunion2>

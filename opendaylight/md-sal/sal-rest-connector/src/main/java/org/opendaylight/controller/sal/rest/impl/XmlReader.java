@@ -14,6 +14,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
@@ -123,11 +124,24 @@ public class XmlReader {
         return false;
     }
 
+    private CompositeNodeWrapper resolveCompositeNodeFromStartElement(final StartElement startElement) {
+        checkArgument(startElement != null, "Start Element cannot be NULL!");
+        return new CompositeNodeWrapper(getNamespaceFor(startElement), getLocalNameFor(startElement));
+    }
+
     private NodeWrapper<? extends Node<?>> resolveSimpleNodeFromStartElement(final StartElement startElement)
             throws XMLStreamException {
         checkArgument(startElement != null, "Start Element cannot be NULL!");
-        String data = null;
+        String data = getValueOf(startElement);
+        if (data == null) {
+            return new EmptyNodeWrapper(getNamespaceFor(startElement), getLocalNameFor(startElement));
+        }
+        return new SimpleNodeWrapper(getNamespaceFor(startElement), getLocalNameFor(startElement),
+                resolveValueOfElement(data, startElement));
+    }
 
+    private String getValueOf(StartElement startElement) throws XMLStreamException {
+        String data = null;
         if (eventReader.hasNext()) {
             final XMLEvent innerEvent = eventReader.peek();
             if (innerEvent.isCharacters()) {
@@ -143,24 +157,36 @@ public class XmlReader {
                 }
             }
         }
-        if(data == null) {
-            return new EmptyNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement));
-        }
-        return new SimpleNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement), data);
+        return data;
     }
 
-    private CompositeNodeWrapper resolveCompositeNodeFromStartElement(final StartElement startElement) {
-        checkArgument(startElement != null, "Start Element cannot be NULL!");
-        return new CompositeNodeWrapper(getNamespaceFrom(startElement), getLocalNameFrom(startElement));
-    }
-
-    private String getLocalNameFrom(StartElement startElement) {
+    private String getLocalNameFor(StartElement startElement) {
         return startElement.getName().getLocalPart();
     }
 
-    private URI getNamespaceFrom(StartElement startElement) {
+    private URI getNamespaceFor(StartElement startElement) {
         String namespaceURI = startElement.getName().getNamespaceURI();
         return namespaceURI.isEmpty() ? null : URI.create(namespaceURI);
+    }
+
+    /**
+     * @param value
+     *            value of startElement
+     * @param startElement
+     *            element containing value
+     * @return if value is "prefix:value" then {@link IdentityValuesDTO} else the same
+     *         string as parameter "value"
+     */
+    private Object resolveValueOfElement(String value, StartElement startElement) {
+        String[] namespaceAndValue = value.split(":");
+        if (namespaceAndValue.length != 2) { // it is not "prefix:value"
+            return value;
+        }
+        String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
+        if (namespace != null && !namespace.isEmpty()) {
+            return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0]);
+        }
+        return value;
     }
 
 }

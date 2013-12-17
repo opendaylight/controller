@@ -1,0 +1,35 @@
+module data-container-yang {
+  namespace "data:container:yang";  
+
+  prefix "dtconyg";
+  	revision 2013-11-19 {    
+  }
+  
+  container cont {
+  	leaf lf1 {
+  		type string;
+  	}
+	
+	leaf lf2 {
+		type string;
+	}
+	
+	leaf lf3 {
+		type empty;
+	}
+  	
+  	leaf-list lflst1 {
+  		type string;
+  	}
+  	list lst1 {
+  		leaf lf11 {
+  			type string;
+  		} 
+  	}
+  	container cont1 {
+  		leaf lf11 {
+  			type uint8;
+  		}
+  	}
+  }
+}

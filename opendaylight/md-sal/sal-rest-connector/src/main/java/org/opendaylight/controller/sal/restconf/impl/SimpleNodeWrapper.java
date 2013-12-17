@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 
 public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<Object> {
     
-    private SimpleNode<?> simpleNode;
+    private SimpleNode<Object> simpleNode;
     
     private String localName;
     private Object value;
@@ -25,7 +25,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
         this.value = value;
     }
     
-    public SimpleNodeWrapper(URI namespace, String localName, String value) {
+    public SimpleNodeWrapper(URI namespace, String localName, Object value) {
         this(localName, value);
         this.namespace = namespace;
     }
