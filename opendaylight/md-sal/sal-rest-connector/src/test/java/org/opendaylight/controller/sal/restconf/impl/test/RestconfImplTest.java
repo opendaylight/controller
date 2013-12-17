@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Set;
 
 import org.junit.BeforeClass;
@@ -33,8 +32,7 @@ public class RestconfImplTest {
 
     @Test
     public void testExample() throws FileNotFoundException {
-        InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder(xmlStream);
+        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode("/parts/ietf-interfaces_interfaces.xml");
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
         assertEquals(loadedCompositeNode, brokerFacade.readOperationalData(null));

@@ -12,40 +12,41 @@ import java.util.*;
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.DatatypeConverter;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
+import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
-public class ToJsonBasicDataTypesTest {
+public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader {
+
+    @BeforeClass
+    public static void initialize() {
+        dataLoad("/cnsn-to-json/simple-data-types");
+    }
 
     @Test
     public void simpleYangDataTest() {
-        String jsonOutput = "";
+
         CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/simple-data-types/xml/data.xml");
 
-        Set<Module> modules = TestUtils.resolveModules("/cnsn-to-json/simple-data-types");
-        assertEquals(1, modules.size());
-        Module module = TestUtils.resolveModule(null, modules);
-        assertNotNull(module);
-        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode(module, null);
-        assertNotNull(dataSchemaNode);
+        String jsonOutput = null;
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, dataSchemaNode, "simple-data-types:cont");
+        TestUtils.normalizeCompositeNode(compositeNode, modules, "simple-data-types:cont");
 
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(compositeNode, modules, dataSchemaNode);
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+                    StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
-            assertTrue(false); // shouldn't get here
         }
+        assertNotNull(jsonOutput);
 
-        System.out.println(jsonOutput);
         verifyJsonOutput(jsonOutput);
     }
 
