@@ -10,7 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
-                                     ConfigTransactionClient ta, Services services) {
+                                     ConfigTransactionClient ta, ServiceRegistryWrapper services) {
 
         try {
             ObjectName on = ta.lookupConfigBean(module, instance);
@@ -36,10 +36,13 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
     }
 
+    // TODO split missing instances handling strategies from edit config strategies in this hierarchy = REFACTOR
+    // edit configs should not handle missing
+
     abstract void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                                        String module, String instance, Services services);
+                                        String module, String instance, ServiceRegistryWrapper services);
 
     abstract void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                                  ObjectName objectName, Services services);
+                                  ObjectName objectName, ServiceRegistryWrapper services);
 
 }

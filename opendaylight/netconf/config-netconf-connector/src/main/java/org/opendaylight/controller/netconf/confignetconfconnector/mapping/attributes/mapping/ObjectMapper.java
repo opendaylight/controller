@@ -16,7 +16,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
@@ -27,9 +27,9 @@ import java.util.Map.Entry;
 
 public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingStrategy<?, ? extends OpenType<?>>> {
 
-    private final Services dependencyTracker;
+    private final ServiceRegistryWrapper dependencyTracker;
 
-    public ObjectMapper(Services depTracker) {
+    public ObjectMapper(ServiceRegistryWrapper depTracker) {
         this.dependencyTracker = depTracker;
     }
 

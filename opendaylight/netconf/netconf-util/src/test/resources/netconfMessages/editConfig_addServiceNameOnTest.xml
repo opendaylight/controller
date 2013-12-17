@@ -1,0 +1,38 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <test-option>
+            test-only
+        </test-option>
+        <default-operation>merge</default-operation>
+        <config>
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+
+                <module>
+                    <name>instance-from-code_dep</name>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-dep
+                    </type>
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <service>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
+                    <instance>
+                        <name>ref_dep_user_another_test1</name>
+                        <provider>/modules/module[type='impl-dep'][name='instance-from-code_dep']
+                        </provider>
+                    </instance>
+                    <instance>
+                        <name>ref_dep_user_another_test2</name>
+                        <provider>/modules/module[type='impl-dep'][name='instance-from-code_dep']
+                        </provider>
+                    </instance>
+                </service>
+            </services>
+        </config>
+    </edit-config>
+</rpc>

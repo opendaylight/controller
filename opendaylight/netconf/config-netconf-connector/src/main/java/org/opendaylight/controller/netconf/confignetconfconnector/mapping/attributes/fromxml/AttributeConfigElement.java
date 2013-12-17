@@ -43,7 +43,6 @@ public class AttributeConfigElement {
         resolvedValue = attributeResolvingStrategy.parseAttribute(attrName, value);
         Optional<?> resolvedDefault = attributeResolvingStrategy.parseAttribute(attrName, dafaultValue);
         resolvedDefaultValue = resolvedDefault.isPresent() ? resolvedDefault.get() : null;
-
     }
 
     public static AttributeConfigElement create(Object nullableDefault, Object value) {

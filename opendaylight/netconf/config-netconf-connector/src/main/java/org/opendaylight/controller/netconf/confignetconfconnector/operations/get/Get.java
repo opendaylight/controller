@@ -20,6 +20,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.ModuleRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
@@ -150,7 +151,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
         ObjectName txOn = transactionProvider.getOrCreateTransaction();
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(txOn);
-        final Element element = runtime.toXml(runtimeBeans, configBeans, document, ta);
+        final Element element = runtime.toXml(runtimeBeans, configBeans, document, new ServiceRegistryWrapper(ta));
 
         logger.info("{} operation successful", XmlNetconfConstants.GET);
 

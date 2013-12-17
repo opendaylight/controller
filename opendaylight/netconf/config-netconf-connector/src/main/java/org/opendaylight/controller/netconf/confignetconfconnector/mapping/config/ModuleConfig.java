@@ -53,7 +53,7 @@ public class ModuleConfig {
         return providedServices;
     }
 
-    public Element toXml(ObjectName instanceON, Services depTracker, Document document, String namespace) {
+    public Element toXml(ObjectName instanceON, ServiceRegistryWrapper depTracker, Document document, String namespace) {
         Element root = document.createElement(XmlNetconfConstants.MODULE_KEY);
         // Xml.addNamespaceAttr(document, root, namespace);
 
@@ -84,7 +84,7 @@ public class ModuleConfig {
 
     }
 
-    public ModuleElementResolved fromXml(XmlElement moduleElement, Services depTracker, String instanceName,
+    public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
             String moduleNamespace, EditStrategyType defaultStrategy) {
 
         InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, providedServices);

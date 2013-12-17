@@ -25,6 +25,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementDefinition;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
@@ -105,8 +106,8 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         logger.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
-    private void test(ConfigRegistryClient configRegistryClient,
-                      EditConfigExecution execution, EditStrategyType editStrategyType) {
+    private void test(ConfigRegistryClient configRegistryClient, EditConfigExecution execution,
+            EditStrategyType editStrategyType) {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
 
@@ -115,8 +116,11 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                 transactionProvider.wipeTestTransaction(taON);
             }
 
-            setOnTransaction(configRegistryClient, execution.getResolvedXmlElements(), execution.getServices(), taON);
-            // TODO add service reference persistance testing here
+            ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
+
+            handleMisssingInstancesOnTransaction(ta, execution);
+            setServicesOnTransaction(ta, execution);
+            setOnTransaction(ta, execution);
             transactionProvider.validateTestTransaction(taON);
         } finally {
             transactionProvider.abortTestTransaction(taON);
@@ -132,14 +136,16 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             transactionProvider.wipeTransaction();
         }
 
-        setOnTransaction(configRegistryClient, editConfigExecution.getResolvedXmlElements(),
-                editConfigExecution.getServices(), taON);
-        setServicesOnTransaction(configRegistryClient, editConfigExecution.getServices(), taON);
+        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
+
+        handleMisssingInstancesOnTransaction(ta, editConfigExecution);
+        setServicesOnTransaction(ta, editConfigExecution);
+        setOnTransaction(ta, editConfigExecution);
     }
 
-    private void setServicesOnTransaction(ConfigRegistryClient configRegistryClient, Services services,
-                ObjectName taON) {
-        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
+    private void setServicesOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) {
+
+        Services services = execution.getServices();
 
         Map<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = services
                 .getNamespaceToServiceNameToRefNameToInstance();
@@ -153,9 +159,10 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
                 for (String refName : refNameToInstance.keySet()) {
                     ObjectName on = refNameToInstance.get(refName).getObjectName(ta.getTransactionName());
-                    // TODO check for duplicates
                     try {
-                        ta.saveServiceReference(qnameOfService, refName, on);
+                        ObjectName saved = ta.saveServiceReference(qnameOfService, refName, on);
+                        logger.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
+                                on, refName, saved);
                     } catch (InstanceNotFoundException e) {
                         throw new IllegalStateException("Unable to save ref name " + refName + " for instance " + on, e);
                     }
@@ -168,11 +175,10 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
-    private void setOnTransaction(ConfigRegistryClient configRegistryClient,
-                                  Map<String, Multimap<String, ModuleElementResolved>> resolvedXmlElements, Services services, ObjectName taON) {
-        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
+    private void setOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) {
 
-        for (Multimap<String, ModuleElementResolved> modulesToResolved : resolvedXmlElements.values()) {
+        for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta).values()) {
+
             for (Entry<String, ModuleElementResolved> moduleToResolved : modulesToResolved.entries()) {
                 String moduleName = moduleToResolved.getKey();
 
@@ -181,7 +187,22 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
                 InstanceConfigElementResolved ice = moduleElementResolved.getInstanceConfigElementResolved();
                 EditConfigStrategy strategy = ice.getEditStrategy();
-                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta, services);
+                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta, execution.getServiceRegistryWrapper(ta));
+            }
+        }
+    }
+
+    private void handleMisssingInstancesOnTransaction(ConfigTransactionClient ta,
+            EditConfigExecution execution) {
+
+        for (Multimap<String,ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta).values()) {
+            for (Entry<String, ModuleElementDefinition> moduleToResolved : modulesToResolved.entries()) {
+                String moduleName = moduleToResolved.getKey();
+
+                ModuleElementDefinition moduleElementDefinition = moduleToResolved.getValue();
+
+                EditConfigStrategy strategy = moduleElementDefinition.getEditStrategy();
+                strategy.executeConfiguration(moduleName, moduleElementDefinition.getInstanceName(), null, ta, execution.getServiceRegistryWrapper(ta));
             }
         }
     }

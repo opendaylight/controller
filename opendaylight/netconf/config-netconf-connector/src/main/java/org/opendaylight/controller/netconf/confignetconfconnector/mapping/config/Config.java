@@ -14,7 +14,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -99,7 +98,7 @@ public class Config {
     // }
 
     public Element toXml(Set<ObjectName> instancesToMap, Optional<String> maybeNamespace, Document document,
-            Element dataElement, Services serviceTracker) {
+            Element dataElement, ServiceRegistryWrapper serviceTracker) {
 
         Map<String, Map<String, Collection<ObjectName>>> moduleToInstances = getMappedInstances(instancesToMap,
                 moduleConfigs);
@@ -131,7 +130,7 @@ public class Config {
             }
         }
 
-        root.appendChild(serviceTracker.toXml(serviceTracker.getMappedServices(), document));
+        root.appendChild(Services.toXml(serviceTracker, document));
 
         return root;
     }
@@ -151,50 +150,66 @@ public class Config {
     // TODO refactor, replace string representing namespace with namespace class
     // TODO refactor, replace Map->Multimap with e.g. ConfigElementResolved
     // class
-    public ConfigElementResolved fromXml(XmlElement xml,
-                                         EditStrategyType defaultEditStrategyType, ServiceReferenceReadableRegistry taClient) {
+
+    public Map<String, Multimap<String, ModuleElementResolved>> fromXmlModulesResolved(XmlElement xml, EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) {
+        Optional<XmlElement> modulesElement = getModulesElement(xml);
+        List<XmlElement> moduleElements = getModulesElementList(modulesElement);
+
         Map<String, Multimap<String, ModuleElementResolved>> retVal = Maps.newHashMap();
 
-        List<XmlElement> recognisedChildren = Lists.newArrayList();
+        for (XmlElement moduleElement : moduleElements) {
+            ResolvingStrategy<ModuleElementResolved> resolvingStrategy = new ResolvingStrategy<ModuleElementResolved>() {
+                @Override
+                public ModuleElementResolved resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker, String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) {
+                    return moduleMapping.fromXml(moduleElement, serviceTracker,
+                            instanceName, moduleNamespace, defaultStrategy);
+                }
+            };
 
-        Services serviceTracker = fromXmlServices(xml, recognisedChildren, taClient);
-        List<XmlElement> moduleElements = fromXmlModules(xml, recognisedChildren);
+            resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType, resolvingStrategy);
+        }
+        return retVal;
+    }
 
-        xml.checkUnrecognisedElements(recognisedChildren);
+    /**
+     * return a map containing namespace -> moduleName -> instanceName map. Attribute parsing is omitted.
+     */
+    public Map<String, Multimap<String, ModuleElementDefinition>> fromXmlModulesMap(XmlElement xml,
+            EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) {
+        Optional<XmlElement> modulesElement = getModulesElement(xml);
+        List<XmlElement> moduleElements = getModulesElementList(modulesElement);
+
+        Map<String, Multimap<String, ModuleElementDefinition>> retVal = Maps.newHashMap();
 
         for (XmlElement moduleElement : moduleElements) {
-            resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType);
-        }
+            ResolvingStrategy<ModuleElementDefinition> resolvingStrategy = new ResolvingStrategy<ModuleElementDefinition>() {
+                @Override
+                public ModuleElementDefinition resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement,
+                        ServiceRegistryWrapper serviceTracker, String instanceName, String moduleNamespace,
+                        EditStrategyType defaultStrategy) {
+                    // TODO: add check for conflicts between global and local
+                    // edit strategy
+                    String perInstanceEditStrategy = moduleElement.getAttribute(XmlNetconfConstants.OPERATION_ATTR_KEY,
+                            XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+                    return new ModuleElementDefinition(instanceName, perInstanceEditStrategy, defaultStrategy);
+                }
+            };
 
-        return new ConfigElementResolved(retVal, serviceTracker);
+            resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType, resolvingStrategy);
+        }
+        return retVal;
     }
 
-    public static class ConfigElementResolved {
-
-        private final Map<String, Multimap<String, ModuleElementResolved>> resolvedModules;
-        private final Services services;
-
-        public ConfigElementResolved(Map<String, Multimap<String, ModuleElementResolved>> retVal, Services serviceTracker) {
-            this.resolvedModules = retVal;
-            this.services = serviceTracker;
-        }
-
-        public Map<String, Multimap<String, ModuleElementResolved>> getResolvedModules() {
-            return resolvedModules;
-        }
-
-        public Services getServices() {
-            return services;
-        }
+    private static Optional<XmlElement> getModulesElement(XmlElement xml) {
+        return xml.getOnlyChildElementOptionally(XmlNetconfConstants.MODULES_KEY,
+                    XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
     }
 
-    private List<XmlElement> fromXmlModules(XmlElement xml, List<XmlElement> recognisedChildren) {
-        Optional<XmlElement> modulesElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.MODULES_KEY,
-                XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+    private List<XmlElement> getModulesElementList(Optional<XmlElement> modulesElement) {
         List<XmlElement> moduleElements;
+
         if (modulesElement.isPresent()) {
             moduleElements = modulesElement.get().getChildElementsWithSameNamespace(XmlNetconfConstants.MODULE_KEY);
-            recognisedChildren.add(modulesElement.get());
             modulesElement.get().checkUnrecognisedElements(moduleElements);
         } else {
             moduleElements = Lists.newArrayList();
@@ -202,8 +217,8 @@ public class Config {
         return moduleElements;
     }
 
-    private void resolveModule(Map<String, Multimap<String, ModuleElementResolved>> retVal, Services serviceTracker,
-            XmlElement moduleElement, EditStrategyType defaultStrategy) {
+    private <T> void resolveModule(Map<String, Multimap<String, T>> retVal, ServiceRegistryWrapper serviceTracker,
+            XmlElement moduleElement, EditStrategyType defaultStrategy, ResolvingStrategy<T> resolvingStrategy) {
         XmlElement typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
         Entry<String, String> prefixToNamespace = typeElement.findNamespaceOfTextContent();
         String moduleNamespace = prefixToNamespace.getValue();
@@ -215,33 +230,47 @@ public class Config {
 
         ModuleConfig moduleMapping = getModuleMapping(moduleNamespace, instanceName, factoryName);
 
-        Multimap<String, ModuleElementResolved> innerMap = retVal.get(moduleNamespace);
+        Multimap<String, T> innerMap = retVal.get(moduleNamespace);
         if (innerMap == null) {
             innerMap = HashMultimap.create();
             retVal.put(moduleNamespace, innerMap);
         }
 
-        ModuleElementResolved moduleElementResolved = moduleMapping.fromXml(moduleElement, serviceTracker,
+        T resolvedElement = resolvingStrategy.resolveElement(moduleMapping, moduleElement, serviceTracker,
                 instanceName, moduleNamespace, defaultStrategy);
 
-        innerMap.put(factoryName, moduleElementResolved);
+        innerMap.put(factoryName, resolvedElement);
     }
 
-    private Services fromXmlServices(XmlElement xml, List<XmlElement> recognisedChildren,
-                                     ServiceReferenceReadableRegistry taClient) {
-        Optional<XmlElement> servicesElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.SERVICES_KEY,
-                XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+    public Services fromXmlServices(XmlElement xml) {
+        Optional<XmlElement> servicesElement = getServicesElement(xml);
 
-        Map<String, Map<String, Map<String, String>>> mappedServices;
+        Services services;
         if (servicesElement.isPresent()) {
-            mappedServices = Services.fromXml(servicesElement.get());
-            recognisedChildren.add(servicesElement.get());
+            services = Services.fromXml(servicesElement.get());
         } else {
-            mappedServices = new HashMap<>();
+            services = new Services();
         }
-        Services services = Services.resolveServices(mappedServices, taClient);
 
         return services;
+    }
+
+    private static Optional<XmlElement> getServicesElement(XmlElement xml) {
+        return xml.getOnlyChildElementOptionally(XmlNetconfConstants.SERVICES_KEY,
+                    XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+    }
+
+    public static void checkUnrecognisedChildren(XmlElement parent) {
+        Optional<XmlElement> servicesOpt = getServicesElement(parent);
+        Optional<XmlElement> modulesOpt = getModulesElement(parent);
+
+        List<XmlElement> recognised = Lists.newArrayList();
+        if(servicesOpt.isPresent())
+            recognised.add(servicesOpt.get());
+        if(modulesOpt.isPresent())
+            recognised.add(modulesOpt.get());
+
+        parent.checkUnrecognisedElements(recognised);
     }
 
     private String getFactoryName(String factoryNameWithPrefix, String prefixOrEmptyString) {
@@ -271,4 +300,8 @@ public class Config {
         return moduleMapping;
     }
 
+    private interface ResolvingStrategy<T> {
+        public T resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker,
+                String instanceName, String moduleNamespace, EditStrategyType defaultStrategy);
+    }
 }
