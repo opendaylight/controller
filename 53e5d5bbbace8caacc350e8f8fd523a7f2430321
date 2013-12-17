@@ -16,6 +16,24 @@
       "revId": "53e5d5bbbace8caacc350e8f8fd523a7f2430321",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3307811e",
+        "filename": "opendaylight/netconf/netconf-ssh/src/test/java/org/opendaylight/controller/netconf/SSHServerTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-12-17T14:07:40Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_d31ca579",
+      "revId": "53e5d5bbbace8caacc350e8f8fd523a7f2430321",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
