@@ -34,6 +34,24 @@
       "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2ee8340f",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-17T16:47:43Z",
+      "side": 1,
+      "message": "So why didn\u0027t you follow the same in https://git.opendaylight.org/gerrit/#/c/3758/ ?\n\nBTW, the if is testing on the value of two local variable + one expression. You would debug this with a breakpoint on an ide, and the value of the two local variables is known even before getting into the if statement.\nSo during debugging there is no big expression evaluation, there is only one expression evaluation...",
+      "parentUuid": "da6255ed_d3cb851c",
+      "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
