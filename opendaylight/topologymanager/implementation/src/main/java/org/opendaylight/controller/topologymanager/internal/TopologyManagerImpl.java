@@ -49,7 +49,6 @@ import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
@@ -426,8 +425,8 @@ public class TopologyManagerImpl implements
             log.trace("Switch Manager Node Name: {}, NodeConnector Node Name: {}", nodeName,
                     nc.getNode().getNodeIDString());
             if (nodeName.equals(nc.getNode().getNodeIDString())) {
-                NodeConnector nodeConnector = NodeConnectorCreator
-                        .createNodeConnector(node.getType(), nc.getID(), node);
+                NodeConnector nodeConnector = NodeConnector.
+                        fromStringNoNode(node.getType(), nc.getID().toString(), node);
                 return nodeConnector;
             }
         }
@@ -569,6 +568,26 @@ public class TopologyManagerImpl implements
         return (switchManager.doesNodeConnectorExist(head));
     }
 
+    private Edge getReverseEdge(Edge e) {
+        /*
+         * Return the reverse edge having the same Node ID and NodeConnector ID
+         * if it exists in the local DB, null otherwise.
+         */
+        String headNCID = e.getHeadNodeConnector().getNodeConnectorIDString();
+        String tailNCID = e.getTailNodeConnector().getNodeConnectorIDString();
+        String headNodeID = e.getHeadNodeConnector().getNode().getNodeIDString();
+        String tailNodeID = e.getTailNodeConnector().getNode().getNodeIDString();
+        for (Edge edge : this.edgesDB.keySet()) {
+            if (edge.getHeadNodeConnector().getNode().getNodeIDString().equals(tailNodeID) &&
+                edge.getTailNodeConnector().getNode().getNodeIDString().equals(headNodeID) &&
+                edge.getHeadNodeConnector().getNodeConnectorIDString().equals(tailNCID) &&
+                edge.getTailNodeConnector().getNodeConnectorIDString().equals(headNCID)) {
+                return edge;
+            }
+        }
+        return null;
+    }
+
     private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
         switch (type) {
         case ADDED:
@@ -582,6 +601,17 @@ public class TopologyManagerImpl implements
             if (!headNodeConnectorExist(e)) {
                 log.warn("Ignore edge that contains invalid node connector: {}", e);
                 return null;
+            }
+
+            // Check if the reverse edge exists and whether its nodeConnectors were correctly
+            // categorized
+            Edge revEdge = getReverseEdge(e);
+            if (revEdge != null) {
+                if (isProductionLink(revEdge)) {
+                    Set<Property> currentRevEdgeProps = this.edgesDB.remove(revEdge);
+                    crossCheckNodeConnectors(revEdge);
+                    this.edgesDB.put(revEdge, currentRevEdgeProps);
+                }
             }
 
             // Check if nodeConnectors of the edge were correctly categorized
