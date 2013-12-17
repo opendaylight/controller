@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -51,7 +52,7 @@ public class NetconfOperationServiceImplTest {
                 mockYangStoreSnapshot());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testCheckConsistencyBetweenYangStoreAndConfig_yangStoreMore() throws Exception {
         try {
             NetconfOperationServiceImpl.checkConsistencyBetweenYangStoreAndConfig(mockJmxClient("qname1"),
@@ -61,13 +62,15 @@ public class NetconfOperationServiceImplTest {
             Assert.assertThat(
                     message,
                     JUnitMatchers
-                            .containsString(" missing from config subsystem but present in yangstore: [(namespace?revision=1970-01-01)qname2]"));
+                            .containsString("missing from config subsystem but present in yangstore: [(namespace?revision=1970-01-01)qname2]"));
             Assert.assertThat(
                     message,
                     JUnitMatchers
                             .containsString("All modules present in config: [(namespace?revision=1970-01-01)qname1]"));
-            throw e;
+            return;
         }
+
+        fail("An exception of type " + IllegalArgumentException.class + " was expected");
     }
 
     private YangStoreSnapshot mockYangStoreSnapshot(String... qnames) {
