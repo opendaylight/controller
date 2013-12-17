@@ -7,9 +7,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
+import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -64,9 +64,9 @@ public class XmlMapper {
         Element itemEl = doc.createElementNS(dataType.getNamespace().toString(), dataType.getLocalName());
         if (data instanceof SimpleNode<?>) {
             if (schema instanceof LeafListSchemaNode) {
-                writeValueOfNodeByType(itemEl, (SimpleNode<?>) data, ((LeafListSchemaNode) schema).getType());
+                writeValueOfNodeByType(itemEl, (SimpleNode<?>) data, ((LeafListSchemaNode) schema).getType(), (DataSchemaNode) schema);
             } else if (schema instanceof LeafSchemaNode) {
-                writeValueOfNodeByType(itemEl, (SimpleNode<?>) data, ((LeafSchemaNode) schema).getType());
+                writeValueOfNodeByType(itemEl, (SimpleNode<?>) data, ((LeafSchemaNode) schema).getType(), (DataSchemaNode) schema);
             } else {
                 Object value = data.getValue();
                 if (value != null) {
@@ -91,9 +91,9 @@ public class XmlMapper {
         return itemEl;
     }
 
-    private void writeValueOfNodeByType(Element element, SimpleNode<?> node, TypeDefinition<?> type) {
+    private void writeValueOfNodeByType(Element element, SimpleNode<?> node, TypeDefinition<?> type, DataSchemaNode schema) {
 
-        TypeDefinition<?> baseType = resolveBaseTypeFrom(type);
+        TypeDefinition<?> baseType = RestUtil.resolveBaseTypeFrom(type);
 
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
@@ -111,9 +111,12 @@ public class XmlMapper {
                 element.setTextContent(String.valueOf(node.getValue()));
             }
         } else {
-            Object value = node.getValue();
-            if (value != null) {
-                element.setTextContent(String.valueOf(value));
+            if (node.getValue() != null) {
+                String value = String.valueOf(RestCodec.from(baseType).serialize(node.getValue()));
+                if (value.equals("null")) {
+                    value = String.valueOf(node.getValue());
+                }
+                element.setTextContent(value);
             }
         }
     }
@@ -134,10 +137,6 @@ public class XmlMapper {
             }
         }
         return null;
-    }
-
-    private TypeDefinition<?> resolveBaseTypeFrom(TypeDefinition<?> type) {
-        return type.getBaseType() != null ? resolveBaseTypeFrom(type.getBaseType()) : type;
     }
 
 }
