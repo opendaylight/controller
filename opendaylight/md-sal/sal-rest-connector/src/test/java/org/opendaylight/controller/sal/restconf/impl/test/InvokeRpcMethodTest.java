@@ -33,7 +33,7 @@ public class InvokeRpcMethodTest {
 
     @BeforeClass
     public static void initialization() {
-        modules = TestUtils.resolveModules("/invoke-rpc");
+        modules = TestUtils.resolveModulesFrom("/invoke-rpc");
         assertEquals(1, modules.size());
         Module module = TestUtils.resolveModule("invoke-rpc-module", modules);
         assertNotNull(module);

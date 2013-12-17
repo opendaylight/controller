@@ -1,0 +1,19 @@
+module leafref-module {
+  namespace "leafref:module";  
+
+  prefix "lfrfmo";
+  revision 2013-11-18 {    
+  }
+
+    container cont {
+        leaf lf1 {
+            type int32;
+        }
+        leaf lf2 {
+            type leafref {
+                path "/cont/lf1"; 
+            }
+        }
+    }
+  
+}

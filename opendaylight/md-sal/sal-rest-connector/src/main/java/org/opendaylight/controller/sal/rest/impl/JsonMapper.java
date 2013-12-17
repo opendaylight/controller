@@ -4,35 +4,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.activation.UnsupportedDataTypeException;
 
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
+import org.opendaylight.controller.sal.restconf.impl.*;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
-import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
-import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.BooleanTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.DecimalTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.EmptyTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.IntegerTypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinition;
+import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.model.api.*;
+import org.opendaylight.yangtools.yang.model.api.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +24,7 @@ class JsonMapper {
 
     private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
     private final Set<ListSchemaNode> foundLists = new HashSet<>();
-    private final Logger logger = LoggerFactory.getLogger(JsonMapper.class); 
+    private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
     public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
         Preconditions.checkNotNull(writer);
@@ -189,11 +170,13 @@ class JsonMapper {
             if (node.getValue() instanceof QName) {
                 IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType).serialize(node.getValue());
                 IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
-                String moduleName = ControllerContext.getInstance().findModuleByNamespace(URI.create(valueFromDTO.getNamespace()));
+                String moduleName = ControllerContext.getInstance().findModuleByNamespace(
+                        URI.create(valueFromDTO.getNamespace()));
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
             } else {
                 logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
-                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is " + node.getValue().getClass());
+                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is "
+                        + node.getValue().getClass());
                 writer.value(String.valueOf(node.getValue()));
             }
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
