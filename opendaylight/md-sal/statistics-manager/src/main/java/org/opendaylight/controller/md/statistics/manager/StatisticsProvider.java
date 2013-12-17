@@ -179,6 +179,10 @@ public class StatisticsProvider implements AutoCloseable {
             InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
             NodeRef targetNodeRef = new NodeRef(targetInstanceId);
             
+            System.out.println("ANIL: Target Node object ::"+targetNode.toString());
+            
+            System.out.println("ANIL: FlowCapableNode augmentations ::"+targetNode.getAugmentation(FlowCapableNode.class));
+            
             try {
                 
                 sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
