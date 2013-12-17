@@ -2930,8 +2930,16 @@ public class ForwardingRulesManager implements
         }
         if (target != null) {
             // Update Configuration database
-            target.toggleInstallation();
-            target.setStatus(StatusCode.SUCCESS.toString());
+            if (target.getHardTimeout() != null || target.getIdleTimeout() != null) {
+                /*
+                 * No need for checking if actual values: these strings were
+                 * validated at configuration creation. Also, after a switch
+                 * down scenario, no use to reinstall a timed flow. Mark it as
+                 * "do not install". User can manually toggle it.
+                 */
+                target.toggleInstallation();
+            }
+            target.setStatus(StatusCode.GONE.toString());
             staticFlows.put(key, target);
         }
 
