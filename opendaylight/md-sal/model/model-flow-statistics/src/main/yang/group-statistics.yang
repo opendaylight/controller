@@ -18,11 +18,11 @@ module opendaylight-group-statistics {
 	grouping group-statistics {
         container group-statistics {
             //config "false";
-            uses group-types:group-statistics-reply;
+            uses group-types:group-statistics;
         }
 	}    
     
-    augment "/inv:nodes/inv:node" {
+    augment "/inv:nodes/inv:node/group-types:group" {
         ext:augment-identifier "node-group-statistics";
         uses group-statistics;
     }
@@ -30,11 +30,11 @@ module opendaylight-group-statistics {
 	grouping group-desc {
         container group-desc {
             //config "false";
-            uses group-types:group-desc-stats-reply;
+            uses group-types:group;
         }
 	}
     
-    augment "/inv:nodes/inv:node" {
+    augment "/inv:nodes/inv:node/group-types:group" {
         ext:augment-identifier "node-group-desc-stats";
         uses group-desc;
     }
