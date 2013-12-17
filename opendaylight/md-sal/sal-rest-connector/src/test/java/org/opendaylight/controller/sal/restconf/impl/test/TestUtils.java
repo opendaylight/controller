@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,9 +11,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Date;
 import java.util.*;
-import java.util.concurrent.Future;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
 import javax.xml.parsers.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.*;
@@ -20,12 +22,13 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.rest.impl.*;
+import org.opendaylight.controller.sal.rest.impl.UnsupportedFormatException;
+import org.opendaylight.controller.sal.rest.impl.XmlReader;
 import org.opendaylight.controller.sal.restconf.impl.*;
+import org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test.JsonToCnSnTest;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -38,7 +41,7 @@ import com.google.common.base.Preconditions;
 
 public final class TestUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
     private final static YangModelParser parser = new YangParserImpl();
 
@@ -77,15 +80,13 @@ public final class TestUtils {
         return result;
     }
 
-
-
     public static Document loadDocumentFrom(InputStream inputStream) {
         try {
             DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
             return docBuilder.parse(inputStream);
         } catch (SAXException | IOException | ParserConfigurationException e) {
-            logger.error("Error during loading Document from XML", e);
+            LOG.error("Error during loading Document from XML", e);
             return null;
         }
     }
@@ -107,239 +108,108 @@ public final class TestUtils {
             return new String(charData, "UTF-8");
         } catch (IOException | TransformerException e) {
             String msg = "Error during transformation of Document into String";
-            logger.error(msg, e);
+            LOG.error(msg, e);
             return msg;
         }
 
     }
 
-    public static String convertCompositeNodeDataAndYangToJson(CompositeNode compositeNode, String yangPath,
-            String outputPath, String searchedModuleName, String searchedDataSchemaName) {
-        Set<Module> modules = resolveModules(yangPath);
-        Module module = resolveModule(searchedModuleName, modules);
-        DataSchemaNode dataSchemaNode = resolveDataSchemaNode(module, searchedDataSchemaName);
-
-        normalizeCompositeNode(compositeNode, modules, dataSchemaNode, searchedModuleName + ":"
-                + searchedDataSchemaName);
-
-        try {
-            return writeCompNodeWithSchemaContextToJson(compositeNode, modules, dataSchemaNode);
-        } catch (WebApplicationException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-
-    }
-
-    public static void normalizeCompositeNode(CompositeNode compositeNode, Set<Module> modules,
-            DataSchemaNode dataSchemaNode, String schemaNodePath) {
+    /**
+     * 
+     * Fill missing data (namespaces) and build correct data type in
+     * {@code compositeNode} according to {@code dataSchemaNode}. The method
+     * {@link RestconfImpl#createConfigurationData createConfigurationData} is
+     * used because it contains calling of method {code normalizeNode}
+     */
+    public static void normalizeCompositeNode(CompositeNode compositeNode, Set<Module> modules, String schemaNodePath) {
         RestconfImpl restconf = RestconfImpl.getInstance();
         ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
 
-        TestUtils.prepareMockForRestconfBeforeNormalization(modules, dataSchemaNode, restconf);
+        prepareMockForRestconfBeforeNormalization(modules, restconf);
         restconf.createConfigurationData(schemaNodePath, compositeNode);
     }
 
     public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
         assertNotNull("modules can't be null.", modules);
-        Module module = null;
         if (searchedModuleName != null) {
             for (Module m : modules) {
                 if (m.getName().equals(searchedModuleName)) {
-                    module = m;
-                    break;
+                    return m;
                 }
             }
         } else if (modules.size() == 1) {
-            module = modules.iterator().next();
+            return modules.iterator().next();
         }
-        return module;
+        return null;
     }
 
-    public static Set<Module> resolveModules(String yangPath) {
-        Set<Module> modules = null;
-
+    public static Set<Module> resolveModulesFrom(String yangPath) {
         try {
-            modules = TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
+            return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
         }
 
-        return modules;
+        return null;
     }
 
-    public static DataSchemaNode resolveDataSchemaNode(Module module, String searchedDataSchemaName) {
-        assertNotNull("Module is missing", module);
+    public static DataSchemaNode resolveDataSchemaNode(String searchedDataSchemaName, Module module) {
+        assertNotNull("Module can't be null", module);
 
-        DataSchemaNode dataSchemaNode = null;
         if (searchedDataSchemaName != null) {
             for (DataSchemaNode dsn : module.getChildNodes()) {
                 if (dsn.getQName().getLocalName().equals(searchedDataSchemaName)) {
-                    dataSchemaNode = dsn;
+                    return dsn;
                 }
             }
         } else if (module.getChildNodes().size() == 1) {
-            dataSchemaNode = module.getChildNodes().iterator().next();
+            return module.getChildNodes().iterator().next();
         }
-        return dataSchemaNode;
-    }
-
-    public static String writeCompNodeWithSchemaContextToJson(CompositeNode compositeNode, Set<Module> modules,
-            DataSchemaNode dataSchemaNode) throws IOException, WebApplicationException {
-        String jsonResult;
-
-        assertNotNull(dataSchemaNode);
-        assertNotNull("Composite node can't be null", compositeNode);
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-
-        ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
-
-        StructuredDataToJsonProvider structuredDataToJsonProvider = StructuredDataToJsonProvider.INSTANCE;
-        structuredDataToJsonProvider.writeTo(new StructuredData(compositeNode, dataSchemaNode), null, null, null, null,
-                null, byteArrayOS);
-
-        jsonResult = byteArrayOS.toString();
-
-        return jsonResult;
+        return null;
     }
 
     public static CompositeNode loadCompositeNode(String xmlDataPath) {
+        return loadCompositeNode(xmlDataPath, false);
+    }
+
+    public static CompositeNode loadCompositeNode(String xmlDataPath, boolean addDumyNamespace) {
         InputStream xmlStream = TestUtils.class.getResourceAsStream(xmlDataPath);
         CompositeNode compositeNode = null;
         try {
             XmlReader xmlReader = new XmlReader();
             compositeNode = xmlReader.read(xmlStream);
-
         } catch (UnsupportedFormatException | XMLStreamException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
+        }
+        if (addDumyNamespace) {
+            try {
+                addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
+            } catch (URISyntaxException e) {
+                LOG.error(e.getMessage());
+            }
         }
         return compositeNode;
     }
 
-    static void outputToFile(ByteArrayOutputStream outputStream, String outputDir) throws IOException {
-        FileOutputStream fileOS = null;
-        try {
-            String path = TestUtils.class.getResource(outputDir).getPath();
-            File outFile = new File(path + "/data.json");
-            fileOS = new FileOutputStream(outFile);
-            try {
-                fileOS.write(outputStream.toByteArray());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            fileOS.close();
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        }
-    }
-
-    static String readJsonFromFile(String path, boolean removeWhiteChars) {
-        FileReader fileReader = getFileReader(path);
-
-        StringBuilder strBuilder = new StringBuilder();
-        char[] buffer = new char[1000];
-
-        while (true) {
-            int loadedCharNum;
-            try {
-                loadedCharNum = fileReader.read(buffer);
-            } catch (IOException e) {
-                break;
-            }
-            if (loadedCharNum == -1) {
-                break;
-            }
-            strBuilder.append(buffer, 0, loadedCharNum);
-        }
-        try {
-            fileReader.close();
-        } catch (IOException e) {
-            System.out.println("The file wasn't closed");
-        }
-        String rawStr = strBuilder.toString();
-        if (removeWhiteChars) {
-            rawStr = rawStr.replace("\n", "");
-            rawStr = rawStr.replace("\r", "");
-            rawStr = rawStr.replace("\t", "");
-            rawStr = removeSpaces(rawStr);
-        }
-
-        return rawStr;
-    }
-
-    private static FileReader getFileReader(String path) {
-        String fullPath = TestUtils.class.getResource(path).getPath();
-        assertNotNull("Path to file can't be null.", fullPath);
-        File file = new File(fullPath);
-        assertNotNull("File can't be null", file);
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        assertNotNull("File reader can't be null.", fileReader);
-        return fileReader;
-    }
-
-    private static String removeSpaces(String rawStr) {
-        StringBuilder strBuilder = new StringBuilder();
-        int i = 0;
-        int quoteCount = 0;
-        while (i < rawStr.length()) {
-            if (rawStr.substring(i, i + 1).equals("\"")) {
-                quoteCount++;
-            }
-
-            if (!rawStr.substring(i, i + 1).equals(" ") || (quoteCount % 2 == 1)) {
-                strBuilder.append(rawStr.charAt(i));
-            }
-            i++;
-        }
-
-        return strBuilder.toString();
-    }
-
-    public static QName buildQName(String name, String uri, String date) {
+    public static QName buildQName(String name, String uri, String date, String prefix) {
         try {
             URI u = new URI(uri);
             Date dt = null;
             if (date != null) {
                 dt = Date.valueOf(date);
             }
-            return new QName(u, dt, name);
+            return new QName(u, dt, prefix, name);
         } catch (URISyntaxException e) {
             return null;
         }
     }
 
-    public static QName buildQName(String name) {
-        return buildQName(name, "", null);
+    public static QName buildQName(String name, String uri, String date) {
+        return buildQName(name, uri, date, null);
     }
 
-    public static void supplementNamespace(DataSchemaNode dataSchemaNode, CompositeNode compositeNode) {
-        RestconfImpl restconf = RestconfImpl.getInstance();
-
-        InstanceIdWithSchemaNode instIdAndSchema = new InstanceIdWithSchemaNode(mock(InstanceIdentifier.class),
-                dataSchemaNode);
-
-        ControllerContext controllerContext = mock(ControllerContext.class);
-        BrokerFacade broker = mock(BrokerFacade.class);
-
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
-                TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> future = DummyFuture.builder().rpcResult(rpcResult).build();
-        when(controllerContext.toInstanceIdentifier(any(String.class))).thenReturn(instIdAndSchema);
-        when(broker.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(
-                future);
-
-        restconf.setControllerContext(controllerContext);
-        restconf.setBroker(broker);
-
-        // method is called only because it contains call of method which
-        // supplement namespaces to compositeNode
-        restconf.createConfigurationData("something", compositeNode);
+    public static QName buildQName(String name) {
+        return buildQName(name, "", null);
     }
 
     public static DataSchemaNode obtainSchemaFromYang(String yangFolder) throws FileNotFoundException {
@@ -385,7 +255,6 @@ public final class TestUtils {
         }
         DataSchemaNode dataSchemaNode = moduleRes.getChildNodes().iterator().next();
         return dataSchemaNode;
-
     }
 
     public static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
@@ -397,56 +266,62 @@ public final class TestUtils {
         }
     }
 
-    public static void prepareMockForRestconfBeforeNormalization(Set<Module> modules, DataSchemaNode dataSchemaNode,
-            RestconfImpl restconf) {
-        ControllerContext instance = ControllerContext.getInstance();
-        instance.setSchemas(TestUtils.loadSchemaContext(modules));
-        restconf.setControllerContext(ControllerContext.getInstance());
+    private static void prepareMockForRestconfBeforeNormalization(Set<Module> modules, RestconfImpl restconf) {
 
+        ControllerContext controllerContext = ControllerContext.getInstance();
         BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
+
+        controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
+
         when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(
                         new DummyFuture.Builder().rpcResult(
                                 new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
                                         .build()).build());
+
+        restconf.setControllerContext(ControllerContext.getInstance());
         restconf.setBroker(mockedBrokerFacade);
     }
-    
-    static CompositeNode loadCompositeNodeWithXmlTreeBuilder(String xmlDataPath) {
-        InputStream xmlStream = TestUtils.class.getResourceAsStream(xmlDataPath);
-        CompositeNode compositeNode = null;
+
+    public static CompositeNode readInputToCnSn(String jsonPath, boolean dummyNamespaces,
+            MessageBodyReader<CompositeNode> reader) throws WebApplicationException {
+
+        InputStream jsonStream = JsonToCnSnTest.class.getResourceAsStream(jsonPath);
         try {
-            compositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder(xmlStream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            CompositeNode compositeNode = reader.readFrom(null, null, null, null, null, jsonStream);
+            assertTrue(compositeNode instanceof CompositeNodeWrapper);
+            if (dummyNamespaces) {
+                try {
+                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
+                    return ((CompositeNodeWrapper) compositeNode).unwrap();
+                } catch (URISyntaxException e) {
+                    LOG.error(e.getMessage());
+                    assertTrue(e.getMessage(), false);
+                }
+            }
+            return compositeNode;
+        } catch (IOException e) {
+            LOG.error(e.getMessage());
+            assertTrue(e.getMessage(), false);
         }
-        return compositeNode;
-        
-        
-        
+        return null;
     }
-    
-    
-    public static CompositeNode loadCompositeNodeWithXmlTreeBuilder(InputStream xmlInputStream) throws FileNotFoundException {
-        if (xmlInputStream == null) {
-            throw new IllegalArgumentException();
-        }
-        Node<?> dataTree;
-        try {
-            dataTree = XmlTreeBuilder.buildDataTree(xmlInputStream);
-        } catch (XMLStreamException e) {
-            logger.error("Error during building data tree from XML", e);
-            return null;
-        }
-        if (dataTree == null) {
-            logger.error("data tree is null");
-            return null;
-        }
-        if (dataTree instanceof SimpleNode) {
-            logger.error("RPC XML was resolved as SimpleNode");
-            return null;
-        }
-        return (CompositeNode) dataTree;
-    }        
+
+    public static String writeCompNodeWithSchemaContextToOutput(CompositeNode compositeNode, Set<Module> modules,
+            DataSchemaNode dataSchemaNode, MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
+            WebApplicationException {
+
+        assertNotNull(dataSchemaNode);
+        assertNotNull("Composite node can't be null", compositeNode);
+        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+
+        ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
+
+        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode), null, null, null, null, null,
+                byteArrayOS);
+
+        return byteArrayOS.toString();
+
+    }
 
 }

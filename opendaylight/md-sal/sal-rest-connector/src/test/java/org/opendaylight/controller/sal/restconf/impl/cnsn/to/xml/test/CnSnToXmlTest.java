@@ -1,24 +1,21 @@
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.xml.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.StringWriter;
-import java.util.Set;
+import java.io.IOException;
 
-import javax.activation.UnsupportedDataTypeException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.ws.rs.WebApplicationException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.XmlMapper;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
+import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
-import org.opendaylight.yangtools.yang.model.api.*;
-import org.w3c.dom.Document;
 
 /**
  * 
@@ -27,25 +24,31 @@ import org.w3c.dom.Document;
  * XML file
  * 
  */
-public class CnSnToXmlTest {
-
-    private static Set<Module> modules;
-    private static DataSchemaNode dataSchemaNode;
-
+public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
     @BeforeClass
     public static void initialization() {
-        modules = TestUtils.resolveModules("/cnsn-to-xml/yang");
-        assertEquals(2, modules.size());
-        Module module = TestUtils.resolveModule("basic-module", modules);
-        assertNotNull(module);
-        dataSchemaNode = TestUtils.resolveDataSchemaNode(module, "cont");
-        assertNotNull(dataSchemaNode);
-
+        dataLoad("/cnsn-to-xml/yang", 2, "basic-module", "cont");
     }
 
     @Test
     public void snAsYangIdentityrefToXMLTest() {
-        serializeToXml(prepareIdentityrefData(), "<lf11 xmlns:x=\"referenced:module\">x:iden</lf11>");
+        serializeToXml(prepareIdentityrefData(null, true), "<lf11 xmlns:x=\"referenced:module\">x:iden</lf11>");
+    }
+
+    @Test
+    public void snAsYangIdentityrefWithQNamePrefixToXMLTest() {
+        serializeToXml(prepareIdentityrefData("prefix", true),
+                "<lf11 xmlns:prefix=\"referenced:module\">prefix:iden</lf11>");
+    }
+
+    @Test
+    public void snAsYangIdentityrefWithPrefixToXMLTest() {
+        serializeToXml(prepareIdentityrefData("prefix", false), "<lf11>no qname value</lf11>");
+    }
+
+    @Test
+    public void snAsYangLeafrefWithPrefixToXMLTest() {
+        serializeToXml(prepareLeafrefData(), "<lfBoolean>true</lfBoolean>", "<lfLfref>true</lfLfref>");
     }
 
     @Test
@@ -186,22 +189,13 @@ public class CnSnToXmlTest {
 
     private void serializeToXml(CompositeNode compositeNode, String... xmlRepresentation)
             throws TransformerFactoryConfigurationError {
-        XmlMapper xmlMapper = new XmlMapper();
-        String xmlString = null;
-        if (dataSchemaNode instanceof DataNodeContainer) {
-            try {
-                Document doc = xmlMapper.write(compositeNode, (DataNodeContainer) dataSchemaNode);
-                DOMSource domSource = new DOMSource(doc);
-                StringWriter writer = new StringWriter();
-                StreamResult result = new StreamResult(writer);
-                TransformerFactory tf = TransformerFactory.newInstance();
-                Transformer transformer = tf.newTransformer();
-                transformer.transform(domSource, result);
-                xmlString = writer.toString();
-            } catch (UnsupportedDataTypeException | TransformerException e) {
-            }
+        String xmlString = "";
+        try {
+            xmlString = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+                    StructuredDataToXmlProvider.INSTANCE);
+        } catch (WebApplicationException | IOException e) {
         }
-        assertNotNull(xmlMapper);
+        assertNotNull(xmlString);
         boolean containSearchedStr = false;
         String strRepresentation = "";
         for (String searchedStr : xmlRepresentation) {
@@ -215,16 +209,21 @@ public class CnSnToXmlTest {
 
     }
 
-    private CompositeNode prepareIdentityrefData() {
+    private CompositeNode prepareIdentityrefData(String prefix, boolean valueAsQName) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont", "basic:module", "2013-12-2"), null, null, ModifyAction.CREATE, null);
         MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont1", "basic:module", "2013-12-2"), cont, null, ModifyAction.CREATE, null);
         cont.getChildren().add(cont1);
 
+        Object value = null;
+        if (valueAsQName) {
+            value = TestUtils.buildQName("iden", "referenced:module", "2013-12-2", prefix);
+        } else {
+            value = "no qname value";
+        }
         MutableSimpleNode<Object> lf11 = NodeFactory.createMutableSimpleNode(
-                TestUtils.buildQName("lf11", "basic:module", "2013-12-2"), cont1,
-                TestUtils.buildQName("iden", "referenced:module", "2013-12-2"), ModifyAction.CREATE, null);
+                TestUtils.buildQName("lf11", "basic:module", "2013-12-2"), cont1, value, ModifyAction.CREATE, null);
         cont1.getChildren().add(lf11);
         cont1.init();
         cont.init();
@@ -239,6 +238,21 @@ public class CnSnToXmlTest {
         MutableSimpleNode<Object> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName(leafName), cont, data,
                 ModifyAction.CREATE, null);
         cont.getChildren().add(lf1);
+        cont.init();
+
+        return cont;
+    }
+
+    private CompositeNode prepareLeafrefData() {
+        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
+                ModifyAction.CREATE, null);
+
+        MutableSimpleNode<Object> lfBoolean = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfBoolean"),
+                cont, Boolean.TRUE, ModifyAction.CREATE, null);
+        MutableSimpleNode<Object> lfLfref = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfLfref"), cont,
+                "true", ModifyAction.CREATE, null);
+        cont.getChildren().add(lfBoolean);
+        cont.getChildren().add(lfLfref);
         cont.init();
 
         return cont;

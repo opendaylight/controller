@@ -8,11 +8,12 @@ import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-public class ToJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
+public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialization() {
@@ -112,9 +113,10 @@ public class ToJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
 
     private void testWrapper(String xmlPath, String pathToSchemaNode) {
         CompositeNode compNode = TestUtils.loadCompositeNode(xmlPath);
-        TestUtils.normalizeCompositeNode(compNode, modules, dataSchemaNode, pathToSchemaNode);
+        TestUtils.normalizeCompositeNode(compNode, modules, pathToSchemaNode);
         try {
-            TestUtils.writeCompNodeWithSchemaContextToJson(compNode, modules, dataSchemaNode);
+            TestUtils.writeCompNodeWithSchemaContextToOutput(compNode, modules, dataSchemaNode,
+                    StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here
             assertTrue(false);

@@ -19,16 +19,16 @@ public class RestCodec {
 
     private RestCodec() {
     }
-    
+
     public static final Codec<Object, Object> from(TypeDefinition<?> typeDefinition) {
         return new ObjectCodec(typeDefinition);
     }
-    
+
     @SuppressWarnings("rawtypes")
     public static final class ObjectCodec implements Codec<Object, Object> {
 
         private final Logger logger = LoggerFactory.getLogger(RestCodec.class);
-        
+
         public static final Codec IDENTITYREF_DEFAULT_CODEC = new IdentityrefCodecImpl();
         public static final Codec LEAFREF_DEFAULT_CODEC = new LeafrefCodecImpl();
 
@@ -37,7 +37,7 @@ public class RestCodec {
         private ObjectCodec(TypeDefinition<?> typeDefinition) {
             type = RestUtil.resolveBaseTypeFrom(typeDefinition);
         }
-        
+
         @SuppressWarnings("unchecked")
         @Override
         public Object deserialize(Object input) {
@@ -47,16 +47,21 @@ public class RestCodec {
                 } else if (type instanceof LeafrefTypeDefinition) {
                     return LEAFREF_DEFAULT_CODEC.deserialize(input);
                 } else {
-                    TypeDefinitionAwareCodec<Object,? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec.from(type);
+                    TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
+                            .from(type);
                     if (typeAwarecodec != null) {
                         return typeAwarecodec.deserialize(String.valueOf(input));
                     } else {
-                        logger.debug("Codec for type \"" + type.getQName().getLocalName() + "\" is not implemented yet.");
+                        logger.debug("Codec for type \"" + type.getQName().getLocalName()
+                                + "\" is not implemented yet.");
                         return null;
                     }
                 }
-            } catch (ClassCastException e) { // TODO remove this catch when everyone use codecs
-                logger.error("ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input), e);
+            } catch (ClassCastException e) { // TODO remove this catch when
+                                             // everyone use codecs
+                logger.error(
+                        "ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input),
+                        e);
                 return input;
             }
         }
@@ -70,22 +75,27 @@ public class RestCodec {
                 } else if (type instanceof LeafrefTypeDefinition) {
                     return LEAFREF_DEFAULT_CODEC.serialize(input);
                 } else {
-                    TypeDefinitionAwareCodec<Object,? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec.from(type);
+                    TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
+                            .from(type);
                     if (typeAwarecodec != null) {
                         return typeAwarecodec.serialize(input);
                     } else {
-                        logger.debug("Codec for type \"" + type.getQName().getLocalName() + "\" is not implemented yet.");
+                        logger.debug("Codec for type \"" + type.getQName().getLocalName()
+                                + "\" is not implemented yet.");
                         return null;
                     }
                 }
-            } catch (ClassCastException e) { // TODO remove this catch when everyone use codecs
-                logger.error("ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input), e);
+            } catch (ClassCastException e) { // TODO remove this catch when
+                                             // everyone use codecs
+                logger.error(
+                        "ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input),
+                        e);
                 return input;
             }
         }
-        
+
     }
-    
+
     public static class IdentityrefCodecImpl implements IdentityrefCodec<IdentityValuesDTO> {
 
         @Override
@@ -105,7 +115,7 @@ public class RestCodec {
         }
 
     }
-    
+
     public static class LeafrefCodecImpl implements LeafrefCodec<String> {
 
         @Override
@@ -117,7 +127,7 @@ public class RestCodec {
         public Object deserialize(String data) {
             return data;
         }
-        
+
     }
-    
+
 }
