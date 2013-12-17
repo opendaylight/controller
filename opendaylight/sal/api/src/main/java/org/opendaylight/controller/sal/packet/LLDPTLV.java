@@ -291,10 +291,17 @@ public class LLDPTLV extends Packet {
      * @return the string
      */
     static public String getStringValue(byte[] tlvValue, int tlvLen) {
+        byte[] pidSubType = new byte[portIDSubType.length];
         byte[] pidBytes = new byte[tlvLen - portIDSubType.length];
+        System.arraycopy(tlvValue, 0, pidSubType, 0,
+                pidSubType.length);
         System.arraycopy(tlvValue, portIDSubType.length, pidBytes, 0,
                 pidBytes.length);
-        return (new String(pidBytes, Charset.defaultCharset()));
+        if (pidSubType[0] == (byte) 0x3) {
+            return HexEncode.bytesToHexStringFormat(pidBytes);
+        } else {
+            return (new String(pidBytes, Charset.defaultCharset()));
+        }
     }
 
     /**
