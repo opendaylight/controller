@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends NetconfSession>
         extends AbstractSessionNegotiator<NetconfMessage, S> {
 
-    // TODO what time ?
+    // TODO Adjust wait time for negotiation, now is 1 minute ?
     private static final long INITIAL_HOLDTIMER = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);

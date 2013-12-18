@@ -13,7 +13,6 @@ import com.google.common.collect.Multimap;
 import java.util.EnumSet;
 import java.util.Set;
 
-//FIXME: make thread safe
 public enum EditStrategyType {
     // can be default
     merge, replace, none,

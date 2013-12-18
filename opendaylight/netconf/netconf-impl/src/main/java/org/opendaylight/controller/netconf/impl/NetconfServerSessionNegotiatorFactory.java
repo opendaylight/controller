@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
@@ -28,8 +29,11 @@ import org.w3c.dom.Node;
 
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import java.io.InputStream;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory {
+
+    public static final String SERVER_HELLO_XML_LOCATION = "/server_hello.xml";
 
     private final Timer timer;
 
@@ -45,8 +49,11 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     private static Document loadHelloMessageTemplate() {
-        return NetconfUtil.createMessage(
-                NetconfServerSessionNegotiatorFactory.class.getResourceAsStream("/server_hello.xml")).getDocument();
+        InputStream resourceAsStream = NetconfServerSessionNegotiatorFactory.class
+                .getResourceAsStream(SERVER_HELLO_XML_LOCATION);
+        Preconditions.checkNotNull(resourceAsStream, "Unable to load server hello message blueprint from %s",
+                SERVER_HELLO_XML_LOCATION);
+        return NetconfUtil.createMessage(resourceAsStream).getDocument();
     }
 
     @Override

@@ -210,32 +210,38 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     public static Config getConfigMapping(ConfigRegistryClient configRegistryClient,
             Map<String/* Namespace from yang file */,
                     Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
-        Map<String, Map<String, ModuleConfig>> factories = transform(configRegistryClient, mBeanEntries);
+        Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(configRegistryClient, mBeanEntries);
 
         return new Config(factories);
     }
 
-    // TODO refactor
-    private static Map<String/* Namespace from yang file */,
-            Map<String /* Name of module entry from yang file */, ModuleConfig>> transform
-    (final ConfigRegistryClient configRegistryClient, Map<String/* Namespace from yang file */,
+    public static Map<String/* Namespace from yang file */,
+            Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs
+            (final ConfigRegistryClient configRegistryClient, Map<String/* Namespace from yang file */,
                     Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
-        return Maps.transformEntries(mBeanEntries,
-                new Maps.EntryTransformer<String, Map<String, ModuleMXBeanEntry>, Map<String, ModuleConfig>>() {
 
-                    @Override
-                    public Map<String, ModuleConfig> transformEntry(String arg0, Map<String, ModuleMXBeanEntry> arg1) {
-                        return Maps.transformEntries(arg1,
-                                new Maps.EntryTransformer<String, ModuleMXBeanEntry, ModuleConfig>() {
+        Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = Maps.newHashMap();
 
-                                    @Override
-                                    public ModuleConfig transformEntry(String key, ModuleMXBeanEntry moduleMXBeanEntry) {
-                                        return new ModuleConfig(key, new InstanceConfig(configRegistryClient, moduleMXBeanEntry
-                                                .getAttributes()), moduleMXBeanEntry.getProvidedServices().values());
-                                    }
-                                });
-                    }
-                });
+        for (String namespace : mBeanEntries.keySet()) {
+            for (Entry<String, ModuleMXBeanEntry> moduleNameToMbe : mBeanEntries.get(namespace).entrySet()) {
+                String moduleName = moduleNameToMbe.getKey();
+                ModuleMXBeanEntry moduleMXBeanEntry = moduleNameToMbe.getValue();
+
+                ModuleConfig moduleConfig = new ModuleConfig(moduleName, new InstanceConfig(configRegistryClient,
+                        moduleMXBeanEntry.getAttributes()), moduleMXBeanEntry
+                        .getProvidedServices().values());
+
+                Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespace);
+                if(moduleNameToModuleConfig == null) {
+                    moduleNameToModuleConfig = Maps.newHashMap();
+                    namespaceToModuleNameToModuleConfig.put(namespace, moduleNameToModuleConfig);
+                }
+
+                moduleNameToModuleConfig.put(moduleName, moduleConfig);
+            }
+        }
+
+        return namespaceToModuleNameToModuleConfig;
     }
 
     @Override

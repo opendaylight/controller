@@ -68,6 +68,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
     @Override
     public Schemas getSchemas() {
         // FIXME, session ID
+        // capabilities should be split from operations (it will allow to move getSchema operation to monitoring module)
         return transformSchemas(factoriesListener.getSnapshot(0));
     }
 
@@ -78,6 +79,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
 
         for (NetconfOperationService netconfOperationService : snapshot.getServices()) {
             // TODO check for duplicates ? move capability merging to snapshot
+            // Split capabilities from operations first and delete this duplicate code
             caps.addAll(netconfOperationService.getCapabilities());
         }
 
@@ -115,8 +117,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
         monitoringLocations.add(new Schema.Location(Schema.Location.Enumeration.NETCONF));
 
         for (String location : locations) {
-            // TODO how to create enumerration from string location ?
-            // monitoringLocations.add(new Schema.Location(Schema.Location.Enumeration.valueOf(location)));
+            monitoringLocations.add(new Schema.Location(new Uri(location)));
         }
 
         return monitoringLocations;

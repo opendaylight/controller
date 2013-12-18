@@ -26,7 +26,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtim
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -144,8 +144,8 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap());
-        final Map<String, Map<String, ModuleConfig>> moduleConfigs = GetConfig.transform(configRegistryClient,
-                yangStoreSnapshot.getModuleMXBeanEntryMap());
+        final Map<String, Map<String, ModuleConfig>> moduleConfigs = EditConfig.transformMbeToModuleConfigs(
+                configRegistryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
 
         final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 

@@ -12,11 +12,12 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
-import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
+
+import java.net.InetSocketAddress;
 
 public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, NetconfServerSessionListener> {
 
@@ -28,7 +29,6 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         this.initializer = serverChannelInitializer;
     }
 
-    // TODO test create server with same address twice
     public ChannelFuture createServer(InetSocketAddress address) {
 
         return super.createServer(address, new PipelineInitializer<NetconfSession>() {

@@ -119,12 +119,11 @@ public class Config {
                 ModuleConfig mapping = moduleConfigs.get(moduleNamespace).get(moduleMappingEntry.getKey());
 
                 if (moduleMappingEntry.getValue().isEmpty()) {
-                    addEmptyModulesCommented(document, modulesElement, moduleNamespace, moduleMappingEntry);
-                } else {
-                    for (ObjectName objectName : moduleMappingEntry.getValue()) {
-                        modulesElement
-                                .appendChild(mapping.toXml(objectName, serviceTracker, document, moduleNamespace));
-                    }
+                    continue;
+                }
+
+                for (ObjectName objectName : moduleMappingEntry.getValue()) {
+                    modulesElement.appendChild(mapping.toXml(objectName, serviceTracker, document, moduleNamespace));
                 }
 
             }
@@ -133,18 +132,6 @@ public class Config {
         root.appendChild(Services.toXml(serviceTracker, document));
 
         return root;
-    }
-
-    // TODO remove commented modules from output
-    private void addEmptyModulesCommented(Document document, Element root, String moduleNamespace,
-            Entry<String, Collection<ObjectName>> moduleMappingEntry) {
-        Element emptyModule = document.createElement(XmlNetconfConstants.MODULE_KEY);
-
-        Element typeElement = XmlUtil.createTextElement(document, XmlNetconfConstants.TYPE_KEY,
-                moduleMappingEntry.getKey());
-        emptyModule.appendChild(typeElement);
-
-        root.appendChild(document.createComment(XmlUtil.toString(emptyModule, false)));
     }
 
     // TODO refactor, replace string representing namespace with namespace class
