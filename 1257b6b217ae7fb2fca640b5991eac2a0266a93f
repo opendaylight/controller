@@ -52,6 +52,24 @@
       "revId": "1257b6b217ae7fb2fca640b5991eac2a0266a93f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ae5b0486",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T07:38:23Z",
+      "side": 1,
+      "message": "I don\u0027t think it\u0027s any different from the previous implementation with completely 2 different \u0027if\u0027 methods that didn\u0027t use the not operator and checked for positive condition to return false.\nFor me, adding 2 \"not\" operators is less readable.\nBoth your proposal and the current patch implementations are correct and whether it\u0027s readable it\u0027s a matter of taste.",
+      "parentUuid": "da6255ed_2ebf14fd",
+      "revId": "1257b6b217ae7fb2fca640b5991eac2a0266a93f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
