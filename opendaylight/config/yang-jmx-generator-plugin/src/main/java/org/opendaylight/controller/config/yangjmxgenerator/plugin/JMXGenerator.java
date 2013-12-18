@@ -12,23 +12,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
-import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
-import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang2sources.spi.CodeGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.impl.StaticLoggerBinder;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -39,6 +22,24 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
+import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
+import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.util.ModuleDependencySort;
+import org.opendaylight.yangtools.yang2sources.spi.CodeGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.impl.StaticLoggerBinder;
 
 /**
  * This class interfaces with yang-maven-plugin. Gets parsed yang modules in
@@ -70,7 +71,7 @@ public class JMXGenerator implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<Module> yangModulesInCurrentMavenModule) {
+                                            File outputBaseDir, Set<Module> yangModulesInCurrentMavenModule) {
 
         Preconditions.checkArgument(context != null, "Null context received");
         Preconditions.checkArgument(outputBaseDir != null,
@@ -86,24 +87,26 @@ public class JMXGenerator implements CodeGenerator {
             outputBaseDir.mkdirs();
 
         GeneratedFilesTracker generatedFiles = new GeneratedFilesTracker();
+        // create SIE structure qNamesToSIEs
         Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
 
-        // create SIE structure qNamesToSIEs
-        for (Module module : context.getModules()) {
+        List<Module> modulesSortedByDependencies = ModuleDependencySort.sort(context.getModules().toArray(new Module[ context.getModules().size()]));
+
+        Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
+        for (Module module : modulesSortedByDependencies) {
             String packageName = packageTranslator.getPackageName(module);
             Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
-                    .create(module, packageName);
+                    .create(module, packageName, knownSEITracker);
 
             for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries
                     .entrySet()) {
-
                 // merge value into qNamesToSIEs
                 if (qNamesToSIEs.containsKey(sieEntry.getKey()) == false) {
                     qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
                 } else {
                     throw new IllegalStateException(
-                            "Cannot add two SIE with same qname "
-                                    + sieEntry.getValue());
+                        "Cannot add two SIE  with same qname "
+                                + sieEntry.getValue());
                 }
             }
             if (yangModulesInCurrentMavenModule.contains(module)) {

@@ -7,27 +7,26 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
+import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
-
-import com.google.common.collect.Sets;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 public class ServiceInterfaceEntryTest extends AbstractYangTest {
     public static final String PACKAGE_NAME = "packages.sis";
@@ -38,6 +37,7 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
 
     private static final URI THREADS_NAMESPACE;
     private static final Date THREADS_REVISION_DATE;
+
     static {
         try {
             THREADS_NAMESPACE = new URI(ConfigConstants.CONFIG_NAMESPACE
@@ -77,8 +77,9 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
     @Test
     public void testCreateFromIdentities() {
         // each identity has to have a base that leads to service-type
+        Map<IdentitySchemaNode, ServiceInterfaceEntry> definedIdentities = new HashMap<>();
         Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
-                .create(threadsModule, PACKAGE_NAME);
+                .create(threadsModule, PACKAGE_NAME,definedIdentities);
         // expected eventbus, threadfactory, threadpool,
         // scheduled-threadpool,thread-rpc-context
         assertThat(namesToSIEntries.size(), is(expectedSIEFileNames.size()));

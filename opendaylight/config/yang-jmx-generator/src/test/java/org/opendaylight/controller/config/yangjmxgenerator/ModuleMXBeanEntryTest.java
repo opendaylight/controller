@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.yangjmxgenerator;
 
 import com.google.common.collect.Sets;
+import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -22,6 +23,7 @@ import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
 
 import javax.management.openmbean.ArrayType;
@@ -94,16 +96,18 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
     @Before
     public void setUp() {
+        Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         modulesToSIEs = ServiceInterfaceEntry.create(threadsModule,
-                "packages.sis");
+                "packages.sis",identitiesToSIs);
     }
 
     @Test
     public void test_jmxImplModule() {
+        Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         Map<QName, ServiceInterfaceEntry> modulesToSIEs = ServiceInterfaceEntry
-                .create(threadsModule, PACKAGE_NAME);
+                .create(threadsModule, PACKAGE_NAME,identitiesToSIs);
         modulesToSIEs.putAll(ServiceInterfaceEntry.create(jmxModule,
-                PACKAGE_NAME));
+                PACKAGE_NAME,identitiesToSIs));
         Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                 .create(jmxImplModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl(context))
                         , PACKAGE_NAME);
