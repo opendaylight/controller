@@ -15,7 +15,13 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
@@ -38,11 +44,11 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
         ObjectName on = createInstance(transaction, instanceName, 4);
         transaction.validateConfig();
-        CommitStatus status = transaction.commit();
+        CommitStatus status1 = transaction.commit();
 
         assertBeanCount(1, factory.getImplementationName());
         assertBeanCount(4 + 1, DepTestImplModuleFactory.NAME);
-        assertStatus(status, 1 + 4 + 1, 0, 0);
+        assertStatus(status1, 1 + 4 + 1, 0, 0);
 
         transaction = configRegistryClient.createTransaction();
 
@@ -56,6 +62,29 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
         assertTestingDeps(testingDeps, 4);
 
         transaction.abortConfig();
+
+        // check that reuse logic works - equals on list of dependencies. TODO: add dependency
+        transaction = configRegistryClient.createTransaction();
+        CommitStatus status2 = transaction.commit();
+        assertStatus(status1, 0, 0, 6);//FIXME
+    }
+
+    @Test
+    public void testNullCheckInListOfDependencies() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+
+        ObjectName on = createInstance(transaction, instanceName, 4);
+        NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(on, NetconfTestImplModuleMXBean.class);
+        try{
+            proxy.setTestingDeps(null);
+            fail();
+        }catch(RuntimeException e) {
+            Throwable cause = e.getCause();
+            assertNotNull(cause);
+            assertTrue("Invalid type " + cause, cause instanceof IllegalArgumentException);
+            assertEquals("Null not supported", cause.getMessage());
+        }
+        proxy.setTestingDeps(Collections.<ObjectName>emptyList());
     }
 
     private void assertTestingDeps(List<ObjectName> testingDeps, int i) {
