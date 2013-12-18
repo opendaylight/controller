@@ -15,6 +15,8 @@ import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
@@ -23,6 +25,8 @@ import java.util.Set;
 public class CapabilityProviderImpl implements CapabilityProvider {
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private final Set<String> capabilityURIs;
+
+    private static final Logger logger = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
 
     public CapabilityProviderImpl(NetconfOperationServiceSnapshot netconfOperationServiceSnapshot) {
         this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
@@ -38,7 +42,11 @@ public class CapabilityProviderImpl implements CapabilityProvider {
             final Set<Capability> caps = netconfOperationService.getCapabilities();
 
             for (Capability cap : caps) {
-                // TODO check for duplicates ?
+
+                if(capabilityMap.containsKey(cap.getCapabilityUri())) {
+                    logger.debug("Duplicate capability {} from service {}", cap.getCapabilityUri(), netconfOperationService);
+                }
+
                 capabilityMap.put(cap.getCapabilityUri(), cap);
             }
         }

@@ -16,19 +16,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -74,6 +61,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import static java.util.Collections.emptyList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -213,20 +215,6 @@ public class NetconfITTest extends AbstractConfigTest {
             try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 10000, clientDispatcher)) {
             }
         }
-    }
-
-
-    //TODO: test persister actually
-    @Ignore
-    @Test(timeout = 10000)
-    public void testPersister() throws Exception {
-//        Persister persister = mock(Persister.class);
-//        doReturn("mockPersister").when(persister).toString();
-//        doReturn(Collections.emptyList()).when(persister).loadLastConfigs();
-//        ConfigPersisterNotificationHandler h =
-//                new ConfigPersisterNotificationHandler(persister, tcpAddress, ManagementFactory.getPlatformMBeanServer(),
-//                        Pattern.compile(ConfigPersisterActivator.DEFAULT_IGNORED_REGEX));
-//        h.init();
     }
 
     @Ignore

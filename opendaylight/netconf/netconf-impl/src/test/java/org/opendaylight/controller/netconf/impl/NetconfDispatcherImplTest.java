@@ -24,21 +24,14 @@ import java.net.InetSocketAddress;
 public class NetconfDispatcherImplTest {
 
     private EventLoopGroup nettyGroup;
+    private NetconfServerDispatcher dispatch;
+    private DefaultCommitNotificationProducer commitNot;
 
     @Before
     public void setUp() throws Exception {
         nettyGroup = new NioEventLoopGroup();
-    }
 
-    @After
-    public void tearDown() throws Exception {
-        nettyGroup.shutdownGracefully();
-    }
-
-    @Test
-    public void test() throws Exception {
-
-        DefaultCommitNotificationProducer commitNot = new DefaultCommitNotificationProducer(
+        commitNot = new DefaultCommitNotificationProducer(
                 ManagementFactory.getPlatformMBeanServer());
         NetconfOperationServiceFactoryListener factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
 
@@ -50,13 +43,20 @@ public class NetconfDispatcherImplTest {
                 factoriesListener, commitNot, idProvider, null);
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory, listenerFactory);
 
-
-        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(
+        dispatch = new NetconfServerDispatcher(
                 serverChannelInitializer, nettyGroup, nettyGroup);
+    }
 
+    @After
+    public void tearDown() throws Exception {
+        commitNot.close();
+        nettyGroup.shutdownGracefully();
+    }
+
+    @Test
+    public void test() throws Exception {
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 8333);
         ChannelFuture s = dispatch.createServer(addr);
-
-        commitNot.close();
+        s.get();
     }
 }

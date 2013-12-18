@@ -88,7 +88,6 @@ public class InstanceRuntime {
 
     public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, String instanceIndex,
                          Element parentElement, String namespace) {
-        // TODO namespace
         Element xml = instanceMapping.toXml(rootOn, null, namespace, document, parentElement);
 
         if (instanceIndex != null) {

@@ -185,7 +185,6 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     private NetconfOperationExecution getNetconfOperationWithHighestPriority(
             Document message, NetconfSession session) {
 
-        // TODO test
         TreeMap<HandlingPriority, Set<NetconfOperation>> sortedPriority = getSortedNetconfOperationsWithCanHandle(
                 message, session);
 

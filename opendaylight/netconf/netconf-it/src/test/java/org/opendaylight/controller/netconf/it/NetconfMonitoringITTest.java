@@ -7,27 +7,14 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
@@ -61,9 +48,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfMonitoringITTest extends AbstractConfigTest {
 
@@ -197,7 +195,7 @@ public class NetconfMonitoringITTest extends AbstractConfigTest {
         return XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/get.xml");
     }
 
-    public NetconfOperationServiceFactoryListener getFactoriesListener() {
+    public static NetconfOperationServiceFactoryListener getFactoriesListener() {
         NetconfOperationServiceFactoryListener factoriesListener = mock(NetconfOperationServiceFactoryListener.class);
         NetconfOperationServiceSnapshot snap = mock(NetconfOperationServiceSnapshot.class);
         NetconfOperationService service = mock(NetconfOperationService.class);
