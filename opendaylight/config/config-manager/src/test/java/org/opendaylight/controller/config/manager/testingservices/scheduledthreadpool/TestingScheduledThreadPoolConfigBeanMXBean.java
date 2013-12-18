@@ -15,4 +15,7 @@ public interface TestingScheduledThreadPoolConfigBeanMXBean extends
     public boolean isRecreate();
 
     public void setRecreate(boolean recreate);
+
+    public void setThreadCount(int threadCount);
+
 }

@@ -11,6 +11,7 @@ import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
@@ -37,12 +38,16 @@ final class DependencyResolverImpl implements DependencyResolver,
     private final TransactionStatus transactionStatus;
     @GuardedBy("this")
     private final Set<ModuleIdentifier> dependencies = new HashSet<>();
+    private final ServiceReferenceReadableRegistry readableRegistry;
 
     DependencyResolverImpl(ModuleIdentifier currentModule,
-            TransactionStatus transactionStatus, ModulesHolder modulesHolder) {
+            TransactionStatus transactionStatus, ModulesHolder modulesHolder,
+            ServiceReferenceReadableRegistry readableRegistry) {
+
         this.name = currentModule;
         this.transactionStatus = transactionStatus;
         this.modulesHolder = modulesHolder;
+        this.readableRegistry = readableRegistry;
     }
 
     /**
@@ -52,7 +57,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     @Override
     public void validateDependency(
             Class<? extends AbstractServiceInterface> expectedServiceInterface,
-            ObjectName dependentModuleReadOnlyON, JmxAttribute jmxAttribute) {
+            ObjectName dependentReadOnlyON, JmxAttribute jmxAttribute) {
 
         transactionStatus.checkNotCommitted();
         if (expectedServiceInterface == null) {
@@ -62,22 +67,26 @@ final class DependencyResolverImpl implements DependencyResolver,
         if (jmxAttribute == null)
             throw new NullPointerException("Parameter 'jmxAttribute' is null");
 
-        JmxAttributeValidationException.checkNotNull(dependentModuleReadOnlyON,
+        JmxAttributeValidationException.checkNotNull(dependentReadOnlyON,
                 "is null, " + "expected dependency implementing "
                         + expectedServiceInterface, jmxAttribute);
+
+
 
         // check that objectName belongs to this transaction - this should be
         // stripped
         // in DynamicWritableWrapper
         boolean hasTransaction = ObjectNameUtil
-                .getTransactionName(dependentModuleReadOnlyON) != null;
+                .getTransactionName(dependentReadOnlyON) != null;
         JmxAttributeValidationException.checkCondition(
                 hasTransaction == false,
                 format("ObjectName should not contain "
                         + "transaction name. %s set to %s. ", jmxAttribute,
-                        dependentModuleReadOnlyON), jmxAttribute);
+                        dependentReadOnlyON), jmxAttribute);
 
-        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(dependentModuleReadOnlyON, ObjectNameUtil
+        dependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
+
+        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(dependentReadOnlyON, ObjectNameUtil
                 .TYPE_MODULE);
 
         ModuleFactory foundFactory = modulesHolder.findModuleFactory(moduleIdentifier, jmxAttribute);
@@ -90,7 +99,7 @@ final class DependencyResolverImpl implements DependencyResolver,
                             + "Module name is %s : %s, expected service interface %s, dependent module ON %s , "
                             + "attribute %s",
                     foundFactory.getImplementationName(), foundFactory,
-                    expectedServiceInterface, dependentModuleReadOnlyON,
+                    expectedServiceInterface, dependentReadOnlyON,
                     jmxAttribute);
             throw new JmxAttributeValidationException(message, jmxAttribute);
         }
@@ -99,24 +108,35 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
     }
 
+    // transalate from serviceref to module ON
+    private ObjectName translateServiceRefIfPossible(ObjectName dependentReadOnlyON) {
+        if (ObjectNameUtil.isServiceReference(dependentReadOnlyON)) {
+            String serviceQName = ObjectNameUtil.getServiceQName(dependentReadOnlyON);
+            String refName = ObjectNameUtil.getReferenceName(dependentReadOnlyON);
+            dependentReadOnlyON = ObjectNameUtil.withoutTransactionName( // strip again of transaction name
+                    readableRegistry.lookupConfigBeanByServiceInterfaceName(serviceQName, refName));
+        }
+        return dependentReadOnlyON;
+    }
+
     /**
      * {@inheritDoc}
      */
     //TODO: check for cycles
     @Override
-    public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentON,
+    public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentReadOnlyON,
             JmxAttribute jmxAttribute) {
-        if (expectedType == null || dependentON == null || jmxAttribute == null) {
+        if (expectedType == null || dependentReadOnlyON == null || jmxAttribute == null) {
             throw new IllegalArgumentException(format(
                     "Null parameters not allowed, got {} {} {}", expectedType,
-                    dependentON, jmxAttribute));
+                    dependentReadOnlyON, jmxAttribute));
         }
-
+        dependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
         transactionStatus.checkCommitStarted();
         transactionStatus.checkNotCommitted();
 
         ModuleIdentifier dependentModuleIdentifier = ObjectNameUtil.fromON(
-                dependentON, ObjectNameUtil.TYPE_MODULE);
+                dependentReadOnlyON, ObjectNameUtil.TYPE_MODULE);
         Module module = modulesHolder.findModule(dependentModuleIdentifier,
                 jmxAttribute);
         synchronized (this) {

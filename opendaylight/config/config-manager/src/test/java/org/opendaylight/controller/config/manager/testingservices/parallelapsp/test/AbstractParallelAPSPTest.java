@@ -16,11 +16,11 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 
-abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
+public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
     protected final String fixed1 = "fixed1";
     protected final String apsp1 = "apsp-parallel";
 
-    abstract String getThreadPoolImplementationName();
+    protected abstract String getThreadPoolImplementationName();
 
     protected ObjectName createParallelAPSP(
             ConfigTransactionJMXClient transaction, ObjectName threadPoolON)
@@ -36,6 +36,7 @@ abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
 
     protected ObjectName createFixed1(ConfigTransactionJMXClient transaction,
             int numberOfThreads) throws InstanceAlreadyExistsException {
+
         ObjectName name = transaction.createModule(
                 getThreadPoolImplementationName(), fixed1);
 

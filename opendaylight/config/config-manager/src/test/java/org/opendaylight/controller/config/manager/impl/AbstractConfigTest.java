@@ -14,6 +14,8 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleF
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolImpl;
+import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
@@ -84,6 +86,8 @@ public abstract class AbstractConfigTest extends
     public final void cleanUpConfigTransactionManagerImpl() {
         configRegistryJMXRegistrator.close();
         configRegistry.close();
+        TestingFixedThreadPool.cleanUp();
+        TestingScheduledThreadPoolImpl.cleanUp();
     }
 
     /**

@@ -117,6 +117,13 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         return ModuleQNameUtil.getQNames(allCurrentFactories);
     }
 
+
+    @Override
+    public String toString() {
+        return "ConfigTransactionLookupRegistry{" +
+                "transactionIdentifier=" + transactionIdentifier +
+                '}';
+    }
 }
 
 interface TransactionJMXRegistratorFactory {
