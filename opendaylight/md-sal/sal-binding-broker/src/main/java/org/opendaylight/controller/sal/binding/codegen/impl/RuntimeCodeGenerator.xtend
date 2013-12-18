@@ -71,7 +71,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                     body = '''
                     {
                         if(«DELEGATE_FIELD» == null) {
-                            throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                            throw new java.lang.IllegalStateException("No default provider is available");
                         }
                         return ($r) «DELEGATE_FIELD».«it.name»($$);
                     }
@@ -127,7 +127,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                                instance = «DELEGATE_FIELD»;
                             }
                             if(instance == null) {
-                                throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                                throw new java.lang.IllegalStateException("No routable provider is processing routed message for " + String.valueOf(identifier));
                             }
                             return ($r) instance.«it.name»($$);
                         }'''

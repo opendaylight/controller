@@ -56,6 +56,14 @@ import javassist.CannotCompileException
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.Callable
 import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition
+import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition
+import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition
+import java.util.HashSet
+import java.util.Collections
+import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition.Bit
+import java.util.Set
+import org.opendaylight.controller.sal.binding.codegen.impl.XtendHelper
 
 class TransformerGenerator {
 
@@ -243,19 +251,24 @@ class TransformerGenerator {
         transformerFor(cls, node);
     }
 
-    private def Class<?> getValueSerializer(GeneratedTransferObject type) {
+    private def Class<?> valueSerializer(GeneratedTransferObject type, TypeDefinition<?> typeDefinition) {
         val cls = loadClassWithTCCL(type.resolvedName);
         val transformer = cls.generatedClass;
         if (transformer !== null) {
             return transformer;
         }
+        var baseType = typeDefinition;
+        while (baseType.baseType != null) {
+            baseType = baseType.baseType;
+        }
+        val finalType = baseType;
         return withClassLoaderAndLock(cls.classLoader, lock) [ |
-            val valueTransformer = generateValueTransformer(cls, type);
+            val valueTransformer = generateValueTransformer(cls, type, finalType);
             return valueTransformer;
         ]
     }
 
-    private def Class<?> getValueSerializer(Enumeration type) {
+    private def Class<?> valueSerializer(Enumeration type, TypeDefinition<?> typeDefinition) {
         val cls = loadClassWithTCCL(type.resolvedName);
         val transformer = cls.generatedClass;
         if (transformer !== null) {
@@ -340,7 +353,7 @@ class TransformerGenerator {
                 ]
             ]
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-            log.info("DOM Codec for {} was generated {}", inputType, ret)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, ?>>;
         } catch (Exception e) {
             processException(inputType, e);
@@ -391,7 +404,7 @@ class TransformerGenerator {
                 method(Object, "deserialize", Object) [
                     bodyChecked = '''
                         {
-                            //System.out.println("«type.name»#deserialize: " +$1);
+                            ////System.out.println("«type.name»#deserialize: " +$1);
                             java.util.Map.Entry _input = (java.util.Map.Entry) $1;
                             return fromDomStatic((«QName.name»)_input.getKey(),_input.getValue());
                         }
@@ -401,7 +414,7 @@ class TransformerGenerator {
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)  as Class<? extends BindingCodec<Object, Object>>
             listener?.onDataContainerCodecCreated(inputType, ret);
-            log.info("DOM Codec for {} was generated {}", inputType, ret)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
             return ret;
         } catch (Exception e) {
             processException(inputType, e);
@@ -450,7 +463,7 @@ class TransformerGenerator {
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain) as Class<? extends BindingCodec<Map<QName,Object>, Object>>
             listener?.onDataContainerCodecCreated(inputType, ret);
-            log.info("DOM Codec for {} was generated {}", inputType, ret)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
             return ret;
         } catch (Exception e) {
             processException(inputType, e);
@@ -475,14 +488,14 @@ class TransformerGenerator {
                     modifiers = PUBLIC + FINAL + STATIC
                     bodyChecked = '''
                         {
-                            //System.out.println("Qname " + $1);
-                            //System.out.println("Value " + $2);
+                            ////System.out.println("Qname " + $1);
+                            ////System.out.println("Value " + $2);
                             «QName.name» _resultName = «QName.name».create(QNAME,QNAME.getLocalName());
                             java.util.List _childNodes = new java.util.ArrayList();
                             «type.resolvedName» value = («type.resolvedName») $2;
                             «FOR child : node.childNodes»
                                 «var signature = properties.getFor(child)»
-                                //System.out.println("«signature.key»" + value.«signature.key»());
+                                ////System.out.println("«signature.key»" + value.«signature.key»());
                                 «serializeProperty(child, signature.value, signature.key)»
                             «ENDFOR»
                             return ($r) _childNodes;
@@ -511,7 +524,7 @@ class TransformerGenerator {
                             return null;
                             }
                             java.util.Map _compositeNode = (java.util.Map) $2;
-                            //System.out.println(_localQName + " " + _compositeNode);
+                            ////System.out.println(_localQName + " " + _compositeNode);
                             «type.builderName» _builder = new «type.builderName»();
                             boolean _is_empty = true;
                             «FOR child : node.childNodes»
@@ -571,7 +584,7 @@ class TransformerGenerator {
                             }
                             java.util.Map.Entry _input = new «SimpleEntry.name»($1,_baValue);
                             Object _ret =  _codec.serialize(_input);
-                            //System.out.println("«typeSpec.name»#toDomStatic: " + _ret);
+                            ////System.out.println("«typeSpec.name»#toDomStatic: " + _ret);
                             return («List.name») _ret;
                         }
                     '''
@@ -603,7 +616,7 @@ class TransformerGenerator {
             val rawRet = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
             val ret = rawRet as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
             listener?.onChoiceCodecCreated(inputType, ret, node);
-            log.info("DOM Codec for {} was generated {}", inputType, ret)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
             return ret;
         } catch (Exception e) {
             processException(inputType, e);
@@ -689,7 +702,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            //System.out.println(_localQName + " " + _compositeNode);
+            ////System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»
@@ -722,7 +735,7 @@ class TransformerGenerator {
             «Iterator.name» _entries = _augmentation.entrySet().iterator();
             while(_entries.hasNext()) {
                 java.util.Map.Entry _entry = (java.util.Map.Entry) _entries.next();
-                //System.out.println("Aug. key:" + _entry.getKey());
+                ////System.out.println("Aug. key:" + _entry.getKey());
                 Class _type = (Class) _entry.getKey();
                 «Augmentation.resolvedName» _value = («Augmentation.name») _entry.getValue();
                 if(_value != null) {
@@ -736,7 +749,7 @@ class TransformerGenerator {
         String propertyName) '''
         java.util.List _dom_«propertyName» = _compositeNode.get(«QName.name».create(_localQName,"«schema.QName.
             localName»"));
-        //System.out.println("«propertyName»#deCode"+_dom_«propertyName»);
+        ////System.out.println("«propertyName»#deCode"+_dom_«propertyName»);
         java.util.List «propertyName» = new java.util.ArrayList();
         if(_dom_«propertyName» != null) {
             java.util.List _serialized = new java.util.ArrayList();
@@ -745,15 +758,15 @@ class TransformerGenerator {
             while(_hasNext) {
                 Object _listItem = _iterator.next();
                 _is_empty = false;
-                //System.out.println("  item" + _listItem);
+                ////System.out.println("  item" + _listItem);
                 Object _value = «type.actualTypeArguments.get(0).serializer(schema).resolvedName».fromDomStatic(_localQName,_listItem);
-                //System.out.println("  value" + _value);
+                ////System.out.println("  value" + _value);
                 «propertyName».add(_value);
                 _hasNext = _iterator.hasNext();
             }
         }
         
-        //System.out.println(" list" + «propertyName»);
+        ////System.out.println(" list" + «propertyName»);
     '''
 
     private def dispatch CharSequence deserializeProperty(LeafListSchemaNode schema, ParameterizedType type,
@@ -770,7 +783,7 @@ class TransformerGenerator {
                 Object _listItem = _iterator.next();
                 if(_listItem instanceof java.util.Map.Entry) {
                     Object _innerValue = ((java.util.Map.Entry) _listItem).getValue();
-                    Object _value = «deserializeValue(type.actualTypeArguments.get(0), "_innerValue")»;
+                    Object _value = «deserializeValue(type.actualTypeArguments.get(0), "_innerValue", schema.type)»;
                     «propertyName».add(_value);
                 }
                 _hasNext = _iterator.hasNext();
@@ -786,7 +799,7 @@ class TransformerGenerator {
             _is_empty = false;
             java.util.Map.Entry _dom_«propertyName» = (java.util.Map.Entry) _dom_«propertyName»_list.get(0);
             Object _inner_value = _dom_«propertyName».getValue();
-            «propertyName» = «deserializeValue(type, "_inner_value")»;
+            «propertyName» = «deserializeValue(type, "_inner_value", schema.type)»;
         }
     '''
 
@@ -809,26 +822,22 @@ class TransformerGenerator {
         }
     '''
 
-    private def dispatch String deserializeValue(GeneratedTransferObject type, String domParameter) '''
-        («type.resolvedName») «type.valueSerializer.resolvedName».fromDomValue(«domParameter»)
+    private def dispatch String deserializeValue(GeneratedTransferObject type, String domParameter,
+        TypeDefinition<?> typeDefinition) '''
+        («type.resolvedName») «type.valueSerializer(typeDefinition).resolvedName».fromDomValue(«domParameter»)
     '''
 
-    private def dispatch String deserializeValue(Enumeration type, String domParameter) '''
-        («type.resolvedName») «type.valueSerializer.resolvedName».fromDomValue(«domParameter»)
+    private def dispatch String deserializeValue(Enumeration type, String domParameter, TypeDefinition<?> typeDefinition) '''
+        («type.resolvedName») «type.valueSerializer(typeDefinition).resolvedName».fromDomValue(«domParameter»)
     '''
 
     private def dispatch Class<? extends BindingCodec<Map<QName, Object>, Object>> generateValueTransformer(
-        Class<?> inputType, GeneratedTransferObject typeSpec) {
+        Class<?> inputType, GeneratedTransferObject typeSpec, TypeDefinition<?> typeDef) {
         try {
 
             val returnType = typeSpec.valueReturnType;
             if (returnType == null) {
                 val ctCls = createDummyImplementation(inputType, typeSpec);
-                val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-                return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
-            }
-            if (returnType.name == 'char[]') {
-                val ctCls = createUnionImplementation(inputType, typeSpec);
                 val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
                 return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
             }
@@ -846,16 +855,16 @@ class TransformerGenerator {
                     val ctSpec = typeSpec.asCtClass;
                     bodyChecked = '''
                         {
-                            //System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                            ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
                             
                             if($1 == null) {
                                 return null;
                             }
                             «typeSpec.resolvedName» _encapsulatedValue = («typeSpec.resolvedName») $1;
-                            //System.out.println("«inputType.simpleName»#toDomValue:Enc: "+_encapsulatedValue);
+                            ////System.out.println("«inputType.simpleName»#toDomValue:Enc: "+_encapsulatedValue);
                             «returnType.resolvedName» _value =  _encapsulatedValue.getValue();
-                            //System.out.println("«inputType.simpleName»#toDomValue:DeEnc: "+_value);
-                            Object _domValue = «serializeValue(returnType, "_value")»;
+                            ////System.out.println("«inputType.simpleName»#toDomValue:DeEnc: "+_value);
+                            Object _domValue = «serializeValue(returnType, "_value", null)»;
                             return _domValue;
                         }
                     '''
@@ -871,12 +880,12 @@ class TransformerGenerator {
                     modifiers = PUBLIC + FINAL + STATIC
                     bodyChecked = '''
                         {
-                            //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                            ////System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
                             
                             if($1 == null) {
                                 return null;
                             }
-                            «returnType.resolvedName» _simpleValue = «deserializeValue(returnType, "$1")»;
+                            «returnType.resolvedName» _simpleValue = «deserializeValue(returnType, "$1", null)»;
                             «typeSpec.resolvedName» _value = new «typeSpec.resolvedName»(_simpleValue);
                             return _value;
                         }
@@ -891,7 +900,7 @@ class TransformerGenerator {
             ]
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-            log.info("DOM Codec for {} was generated {}", inputType, ret)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
             return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         } catch (Exception e) {
             log.error("Cannot compile DOM Codec for {}", inputType, e);
@@ -899,74 +908,182 @@ class TransformerGenerator {
             exception.addSuppressed(e);
             throw exception;
         }
-
     }
 
-    def createUnionImplementation(Class<?> inputType, GeneratedTransferObject typeSpec) {
-        return createClass(typeSpec.codecClassName) [
-            val properties = typeSpec.allProperties;
-            //staticField(Map,"AUGMENTATION_SERIALIZERS");
-            if (inputType.isYangBindingAvailable) {
-                implementsType(BINDING_CODEC)
-                staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
-                staticField(it, IDENTITYREF_CODEC, BindingCodec)
-                implementsType(BindingDeserializer.asCtClass)
-            }
-            method(Object, "toDomValue", Object) [
-                modifiers = PUBLIC + FINAL + STATIC
-                val ctSpec = inputType.asCtClass;
-                bodyChecked = '''
-                    {
-                        //System.out.println("«inputType.simpleName»#toDomValue: "+$1);
-                        
-                        if($1 == null) {
+    private def dispatch Class<? extends BindingCodec<Map<QName, Object>, Object>> generateValueTransformer(
+        Class<?> inputType, GeneratedTransferObject typeSpec, UnionTypeDefinition typeDef) {
+        try {
+            val ctCls = createClass(typeSpec.codecClassName) [
+                val properties = typeSpec.allProperties;
+                val getterToTypeDefinition = XtendHelper.getTypes(typeDef).toMap[type | type.QName.getterName];
+                //staticField(Map,"AUGMENTATION_SERIALIZERS");
+                if (inputType.isYangBindingAvailable) {
+                    implementsType(BINDING_CODEC)
+                    staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                    staticField(it, IDENTITYREF_CODEC, BindingCodec)
+                    implementsType(BindingDeserializer.asCtClass)
+                }
+                method(Object, "toDomValue", Object) [
+                    modifiers = PUBLIC + FINAL + STATIC
+                    val ctSpec = inputType.asCtClass;
+                    
+                    bodyChecked = '''
+                        {
+                            ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                            
+                            if($1 == null) {
+                                return null;
+                            }
+                            «typeSpec.resolvedName» _value = («typeSpec.resolvedName») $1;
+                            «FOR property : properties.entrySet»
+                                «IF property.key != "getValue"»
+                                    «property.value.resolvedName» «property.key» = («property.value.resolvedName») _value.«property.
+                            key»();
+                                    if(«property.key» != null) { 
+                                        return «serializeValue(property.value, property.key, getterToTypeDefinition.get(property.key))»;
+                                    }
+                                «ENDIF»
+                            «ENDFOR»
+                            
                             return null;
                         }
-                        «typeSpec.resolvedName» _value = («typeSpec.resolvedName») $1;
-                        «FOR property : properties.entrySet»
-                            «IF property.key != "getValue"»
-                                «property.value.resolvedName» «property.key» = («property.value.resolvedName») _value.«property.key»();
-                                if(«property.key» != null) { 
-                                    return «serializeValue(property.value, property.key)»;
-                                }
-                            «ENDIF»
-                        «ENDFOR»
-                        
-                        return null;
-                    }
-                '''
-            ]
-            method(Object, "serialize", Object) [
-                bodyChecked = '''
-                    {
-                        return toDomValue($1);
-                    }
-                '''
-            ]
-            method(Object, "fromDomValue", Object) [
-                modifiers = PUBLIC + FINAL + STATIC
-                bodyChecked = '''
-                    {
-                        //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
-                        
-                        if($1 == null) {
+                    '''
+                ]
+                method(Object, "serialize", Object) [
+                    bodyChecked = '''
+                        {
+                            return toDomValue($1);
+                        }
+                    '''
+                ]
+                method(Object, "fromDomValue", Object) [
+                    modifiers = PUBLIC + FINAL + STATIC
+                    bodyChecked = '''
+                        {
+                            ////System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                            
+                            if($1 == null) {
+                                return null;
+                            }
+                            if($1 instanceof String) {
+                                String _simpleValue = (String) $1;
+                                return new «typeSpec.resolvedName»(_simpleValue.toCharArray());
+                            }
                             return null;
                         }
-                        if($1 instanceof String) {
-                            String _simpleValue = (String) $1;
-                            return new «typeSpec.resolvedName»(_simpleValue.toCharArray());
-                        }
-                        return null;
-                    }
-                '''
-            ]
-            method(Object, "deserialize", Object) [
-                bodyChecked = '''{
+                    '''
+                ]
+                method(Object, "deserialize", Object) [
+                    bodyChecked = '''{
                             return fromDomValue($1);
                     }
                     '''
+                ]
             ]
-        ]
+
+            val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
+            return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+        } catch (Exception e) {
+            log.error("Cannot compile DOM Codec for {}", inputType, e);
+            val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType);
+            exception.addSuppressed(e);
+            throw exception;
+        }
+    }
+
+
+    private def dispatch Class<? extends BindingCodec<Map<QName, Object>, Object>> generateValueTransformer(
+        Class<?> inputType, GeneratedTransferObject typeSpec, BitsTypeDefinition typeDef) {
+        try {
+            val ctCls = createClass(typeSpec.codecClassName) [
+                //staticField(Map,"AUGMENTATION_SERIALIZERS");
+                if (inputType.isYangBindingAvailable) {
+                    implementsType(BINDING_CODEC)
+                    staticField(it, INSTANCE_IDENTIFIER_CODEC, BindingCodec)
+                    staticField(it, IDENTITYREF_CODEC, BindingCodec)
+                    implementsType(BindingDeserializer.asCtClass)
+                }
+                method(Object, "toDomValue", Object) [
+                    modifiers = PUBLIC + FINAL + STATIC
+                    val ctSpec = typeSpec.asCtClass;
+                    bodyChecked = '''
+                        {
+                            ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                            
+                            if($1 == null) {
+                                return null;
+                            }
+                            «typeSpec.resolvedName» _encapsulatedValue = («typeSpec.resolvedName») $1;
+                            «HashSet.resolvedName» _value = new «HashSet.resolvedName»();
+                            //System.out.println("«inputType.simpleName»#toDomValue:Enc: "+_encapsulatedValue);
+                            
+                            «FOR bit : typeDef.bits»
+                                «val getter = bit.getterName()»
+                                if(Boolean.TRUE.equals(_encapsulatedValue.«getter»())) {
+                                    _value.add("«bit.name»");
+                                }
+                            «ENDFOR»
+                            «Set.resolvedName» _domValue =  «Collections.resolvedName».unmodifiableSet(_value);
+                            //System.out.println("«inputType.simpleName»#toDomValue:DeEnc: "+_domValue);
+                            
+                            return _domValue;
+                        }
+                    '''
+                ]
+                method(Object, "serialize", Object) [
+                    bodyChecked = '''
+                        {
+                            return toDomValue($1);
+                        }
+                    '''
+                ]
+                method(Object, "fromDomValue", Object) [
+                    modifiers = PUBLIC + FINAL + STATIC
+                    val sortedBits = typeDef.bits.sort[o1, o2|o1.propertyName.compareTo(o2.propertyName)]
+                    bodyChecked = '''
+                        {
+                            //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                            
+                            if($1 == null) {
+                                return null;
+                            }
+                            «Set.resolvedName» _domValue = («Set.resolvedName») $1;
+                            «FOR bit : sortedBits»
+                                Boolean «bit.propertyName» = Boolean.valueOf(_domValue.contains("«bit.name»"));
+                            «ENDFOR»
+                            
+                            return new «inputType.resolvedName»(«FOR bit : sortedBits SEPARATOR ","»«bit.propertyName»«ENDFOR»);
+                        }
+                    '''
+                ]
+                method(Object, "deserialize", Object) [
+                    bodyChecked = '''{
+                            return fromDomValue($1);
+                    }
+                    '''
+                ]
+            ]
+
+            val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
+            return ret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
+        } catch (Exception e) {
+            log.error("Cannot compile DOM Codec for {}", inputType, e);
+            val exception = new CodeGenerationException("Cannot compile Transformator for " + inputType);
+            exception.addSuppressed(e);
+            throw exception;
+        }
+    }
+
+    def String getPropertyName(Bit bit) {
+        '''_«BindingGeneratorUtil.parseToValidParamName(bit.name)»'''
+    }
+
+    def String getterName(Bit bit) {
+
+        val paramName = BindingGeneratorUtil.parseToValidParamName(bit.name);
+        return '''is«paramName.toFirstUpper»''';
     }
 
     def boolean isYangBindingAvailable(Class<?> class1) {
@@ -1030,7 +1147,7 @@ class TransformerGenerator {
         return null;
     }
 
-    private def dispatch Class<?> generateValueTransformer(Class<?> inputType, Enumeration typeSpec) {
+    private def Class<?> generateValueTransformer(Class<?> inputType, Enumeration typeSpec) {
         try {
             val typeRef = new ReferencedTypeImpl(typeSpec.packageName, typeSpec.name);
             val schema = typeToSchemaNode.get(typeRef) as ExtendedType;
@@ -1086,7 +1203,7 @@ class TransformerGenerator {
             ]
 
             val ret = ctCls.toClassImpl(inputType.classLoader, inputType.protectionDomain)
-            log.info("DOM Codec for {} was generated {}", inputType, ret)
+            log.debug("DOM Codec for {} was generated {}", inputType, ret)
             return ret;
         } catch (CodeGenerationException e) {
             throw new CodeGenerationException("Cannot compile Transformator for " + inputType, e);
@@ -1116,7 +1233,7 @@ class TransformerGenerator {
 
     }
 
-    private def dispatch String deserializeValue(Type type, String domParameter) {
+    private def dispatch String deserializeValue(Type type, String domParameter, TypeDefinition<?> typeDef) {
         if (INSTANCE_IDENTIFIER.equals(type)) {
             return '''(«InstanceIdentifier.name») «INSTANCE_IDENTIFIER_CODEC».deserialize(«domParameter»)'''
         } else if (CLASS_TYPE.equals(type)) {
@@ -1214,7 +1331,7 @@ class TransformerGenerator {
             «FOR child : node.childNodes»
                 «val signature = properties.getFor(child)»
                 «IF signature !== null»
-                    //System.out.println("«type.name»#«signature.key»" + value.«signature.key»());
+                    ////System.out.println("«type.name»#«signature.key»" + value.«signature.key»());
                     «serializeProperty(child, signature.value, signature.key)»
                 «ENDIF»
             «ENDFOR»
@@ -1256,7 +1373,7 @@ class TransformerGenerator {
     private def dispatch CharSequence serializeProperty(ListSchemaNode schema, ParameterizedType type,
         String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();
-        //System.out.println("«propertyName»:" + «propertyName»);
+        ////System.out.println("«propertyName»:" + «propertyName»);
         if(«propertyName» != null) {
             java.util.Iterator _iterator = «propertyName».iterator();
             boolean _hasNext = _iterator.hasNext();
@@ -1274,7 +1391,7 @@ class TransformerGenerator {
         
         if(«propertyName» != null) {
             «QName.name» _qname = «QName.name».create(_resultName,"«schema.QName.localName»");
-            Object _propValue = «serializeValue(type, propertyName)»;
+            Object _propValue = «serializeValue(type, propertyName, schema.type)»;
             if(_propValue != null) {
                 Object _domValue = java.util.Collections.singletonMap(_qname,_propValue);
                 _childNodes.add(_domValue);
@@ -1282,12 +1399,15 @@ class TransformerGenerator {
         }
     '''
 
-    private def dispatch serializeValue(GeneratedTransferObject type, String parameter) '''«type.valueSerializer.
-        resolvedName».toDomValue(«parameter»)'''
+    private def dispatch serializeValue(GeneratedTransferObject type, String parameter, TypeDefinition<?> typeDefinition) {
+        '''«type.valueSerializer(typeDefinition).resolvedName».toDomValue(«parameter»)'''
+    }
 
-    private def dispatch serializeValue(Enumeration type, String parameter) '''«type.valueSerializer.resolvedName».toDomValue(«parameter»)'''
+    private def dispatch serializeValue(Enumeration type, String parameter, TypeDefinition<?> typeDefinition) {
+        '''«type.valueSerializer(typeDefinition).resolvedName».toDomValue(«parameter»)'''
+    }
 
-    private def dispatch serializeValue(Type signature, String property) {
+    private def dispatch serializeValue(Type signature, String property, TypeDefinition<?> typeDefinition) {
         if (INSTANCE_IDENTIFIER == signature) {
             return '''«INSTANCE_IDENTIFIER_CODEC».serialize(«property»)'''
         } else if (CLASS_TYPE.equals(signature)) {
@@ -1308,7 +1428,7 @@ class TransformerGenerator {
             boolean _hasNext = _iterator.hasNext();
             while(_hasNext) {
                 Object _listItem = _iterator.next();
-                Object _propValue = «serializeValue(type.actualTypeArguments.get(0), "_listItem")»;
+                Object _propValue = «serializeValue(type.actualTypeArguments.get(0), "_listItem", schema.type)»;
                 Object _domValue = java.util.Collections.singletonMap(_qname,_propValue);
                 _childNodes.add(_domValue);
                 _hasNext = _iterator.hasNext();
