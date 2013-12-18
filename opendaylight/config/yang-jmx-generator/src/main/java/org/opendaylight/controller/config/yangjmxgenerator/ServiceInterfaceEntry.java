@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
-
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,15 +15,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
 
 /**
  * Represents identity derived from {@link ConfigConstants#SERVICE_TYPE_Q_NAME}.
@@ -123,7 +120,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
      *         values
      */
     public static Map<QName, ServiceInterfaceEntry> create(Module currentModule,
-            String packageName) {
+            String packageName,Map<IdentitySchemaNode, ServiceInterfaceEntry> definedSEItracker) {
         logger.debug("Generating ServiceInterfaces from {} to package {}",
                 currentModule.getNamespace(), packageName);
 
@@ -152,7 +149,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
                     // this is a base type
                     created = new ServiceInterfaceEntry(identity, packageName, ModuleUtil.getQName(currentModule));
                 } else {
-                    ServiceInterfaceEntry foundBase = identitiesToSIs
+                    ServiceInterfaceEntry foundBase = definedSEItracker
                             .get(identity.getBaseIdentity());
                     // derived type, did we convert the parent?
                     if (foundBase != null) {
@@ -160,12 +157,15 @@ public class ServiceInterfaceEntry extends AbstractEntry {
                                 Optional.of(foundBase), identity, packageName, ModuleUtil.getQName(currentModule));
                     }
                 }
+
+
                 if (created != null) {
                     created.setYangModuleName(currentModule.getName());
                     // TODO how to get local name
                     created.setYangModuleLocalname(identity.getQName()
                             .getLocalName());
                     identitiesToSIs.put(identity, created);
+                    definedSEItracker.put(identity, created);
                     iterator.remove();
                 }
             }
