@@ -52,6 +52,24 @@
       "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_6e550c4f",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Subnet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T07:39:46Z",
+      "side": 1,
+      "message": "because the expression in the previous patch was shorter (just 2 conditions). but if it really bothers you here, I can remove the local variable.",
+      "parentUuid": "da6255ed_2ee8340f",
+      "revId": "66ed7f879a1d387594df4df1a3397281e7c31ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
