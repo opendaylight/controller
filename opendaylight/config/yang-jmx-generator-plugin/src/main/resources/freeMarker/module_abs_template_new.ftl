@@ -149,9 +149,18 @@ package ${packageName};
             throw new IllegalArgumentException("Parameter 'other' is null");
         }
         <#list moduleFields as field>
-        <#if field.dependent==true>
+        <#if field.dependent==true && field.listOfDependencies == false>
         if (${field.name}Dependency != other.${field.name}Dependency) { // reference to dependency must be same
             return false;
+        }
+        <#elseif field.listOfDependencies>
+        if (${field.name}Dependency.equals(other.${field.name}Dependency) == false) {
+            return false;
+        }
+        for (int idx = 0; idx < ${field.name}Dependency.size(); idx++) {
+            if (${field.name}Dependency.get(idx) != other.${field.name}Dependency.get(idx)) {
+                return false;
+            }
         }
         <#else>
         if (${field.name} == null) {

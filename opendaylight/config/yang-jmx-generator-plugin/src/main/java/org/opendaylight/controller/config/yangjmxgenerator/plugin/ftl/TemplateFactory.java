@@ -26,6 +26,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIf
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.Dependency;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
@@ -623,6 +624,7 @@ public class TemplateFactory {
                 }
 
                 boolean isDependency = false;
+                boolean isListOfDependencies = false;
                 Dependency dependency = null;
                 Annotation overrideAnnotation = new Annotation("Override",
                         Collections.<Parameter> emptyList());
@@ -635,12 +637,15 @@ public class TemplateFactory {
                             .getDependency();
                     annotations.add(Annotation
                             .createRequireIfcAnnotation(dependency.getSie()));
+                    if (attributeIfc instanceof ListDependenciesAttribute) {
+                        isListOfDependencies = true;
+                    }
                 }
 
                 String varName = BindingGeneratorUtil
                         .parseToValidParamName(attrEntry.getKey());
                 moduleFields.add(new ModuleField(type, varName, attributeIfc
-                        .getUpperCaseCammelCase(), nullableDefaultWrapped, isDependency, dependency));
+                        .getUpperCaseCammelCase(), nullableDefaultWrapped, isDependency, dependency, isListOfDependencies));
 
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();
@@ -657,10 +662,16 @@ public class TemplateFactory {
                             .createDescriptionAnnotation(attributeIfc.getNullableDescription()));
                 }
 
+                String setterBody = "this." + varName + " = " + varName + ";";
+                if (isListOfDependencies) {
+                    String nullCheck = String.format("if (%s == null) throw new IllegalArgumentException(\"Null not supported\");%n",
+                            varName);
+                    setterBody = nullCheck + setterBody;
+                }
                 MethodDefinition setter = new MethodDefinition("void",
                         setterName,
                         Lists.newArrayList(new Field(type, varName)),
-                        annotations, "this." + varName + " = " + varName + ";");
+                        annotations, setterBody);
                 setter.setJavadoc(attributeIfc.getNullableDescription());
 
                 methods.add(getter);

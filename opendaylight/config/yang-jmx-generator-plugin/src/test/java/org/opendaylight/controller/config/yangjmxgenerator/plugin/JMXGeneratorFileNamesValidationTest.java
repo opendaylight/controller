@@ -42,7 +42,7 @@ public class JMXGeneratorFileNamesValidationTest extends JMXGeneratorTest {
         } catch (RuntimeException e) {
             final Throwable cause = e.getCause();
             assertNotNull(cause);
-            assertTrue(cause instanceof IllegalStateException);
+            assertTrue(cause.toString() + " is unexpected", cause instanceof IllegalStateException);
             assertThat(cause.getMessage(),
                     containsString("Name conflict in generated files"));
             assertThat(cause.getMessage(), containsString("DtoA.java"));

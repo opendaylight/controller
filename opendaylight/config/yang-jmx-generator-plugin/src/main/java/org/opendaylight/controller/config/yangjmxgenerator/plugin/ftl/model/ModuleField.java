@@ -17,12 +17,12 @@ import java.util.List;
 public class ModuleField extends Field {
 
     private final String nullableDefault, attributeName;
-    private final boolean dependent;
+    private final boolean dependent, isListOfDependencies;
     private final Dependency dependency;
 
-    public ModuleField(List<String> modifiers, String type, String name,
+    private ModuleField(List<String> modifiers, String type, String name,
             String attributeName, String nullableDefault, boolean isDependency,
-            Dependency dependency) {
+            Dependency dependency, boolean isListOfDependencies) {
         super(modifiers, type, name);
         this.dependent = isDependency;
         this.dependency = dependency;
@@ -32,12 +32,13 @@ public class ModuleField extends Field {
             nullableDefault = "new " + ArrayList.class.getName() + generics + "()";
         }
         this.nullableDefault = nullableDefault;
+        this.isListOfDependencies = isListOfDependencies;
     }
 
     public ModuleField(String type, String name, String attributeName,
-            String nullableDefault, boolean isDependency, Dependency dependency) {
+            String nullableDefault, boolean isDependency, Dependency dependency, boolean isListOfDependencies) {
         this(Collections.<String> emptyList(), type, name, attributeName,
-                nullableDefault, isDependency, dependency);
+                nullableDefault, isDependency, dependency, isListOfDependencies);
     }
 
     public Dependency getDependency() {
@@ -50,6 +51,10 @@ public class ModuleField extends Field {
 
     public boolean isDependent() {
         return dependent;
+    }
+
+    public boolean isListOfDependencies() {
+        return isListOfDependencies;
     }
 
     public String getAttributeName() {

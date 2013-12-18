@@ -115,10 +115,10 @@ public abstract class AbstractConfigTest extends
 
     protected void assertStatus(CommitStatus status, int expectedNewInstances,
             int expectedRecreatedInstances, int expectedReusedInstances) {
-        assertEquals(expectedNewInstances, status.getNewInstances().size());
-        assertEquals(expectedRecreatedInstances, status.getRecreatedInstances()
+        assertEquals("New instances mismatch in " + status, expectedNewInstances, status.getNewInstances().size());
+        assertEquals("Recreated instances mismatch in " + status, expectedRecreatedInstances, status.getRecreatedInstances()
                 .size());
-        assertEquals(expectedReusedInstances, status.getReusedInstances()
+        assertEquals("Reused instances mismatch in " + status, expectedReusedInstances, status.getReusedInstances()
                 .size());
     }
 
