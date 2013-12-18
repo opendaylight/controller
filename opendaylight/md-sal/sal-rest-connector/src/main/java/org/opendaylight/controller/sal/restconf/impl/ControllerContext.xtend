@@ -12,6 +12,7 @@ import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.controller.sal.rest.impl.RestUtil
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
@@ -29,10 +30,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
-import org.opendaylight.yangtools.yang.model.api.SchemaNode
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
-import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition
-import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
 import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
@@ -313,10 +311,7 @@ class ControllerContext implements SchemaServiceListener {
         
         var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
         if(decoded === null) {
-            var baseType = typedef
-            while (baseType.baseType !== null) {
-                baseType = baseType.baseType;
-            }
+            var baseType = RestUtil.resolveBaseTypeFrom(typedef)
             if(baseType instanceof IdentityrefTypeDefinition) {
                 decoded = toQName(urlDecoded)
             }
@@ -366,35 +361,4 @@ class ControllerContext implements SchemaServiceListener {
         }
     }
 
-    /**
-     * Resolve target type from leafref type.
-     * 
-     * According to RFC 6020 referenced element has to be leaf (chapter 9.9).
-     * Therefore if other element is referenced then null value is returned.
-     * 
-     * Currently only cases without path-predicate are supported.
-     * 
-     * @param leafRef
-     * @param schemaNode
-     *            data schema node which contains reference
-     * @return type if leaf is referenced and it is possible to find referenced
-     *         node in schema context. In other cases null value is returned
-     */
-    def LeafSchemaNode resolveTypeFromLeafref(LeafrefTypeDefinition leafRef, DataSchemaNode schemaNode) {
-        val xPath = leafRef.getPathStatement();
-        val module = SchemaContextUtil.findParentModule(schemas, schemaNode);
-
-        var SchemaNode foundSchemaNode
-        if (xPath.isAbsolute()) {
-            foundSchemaNode = SchemaContextUtil.findDataSchemaNode(schemas, module, xPath);
-        } else {
-            foundSchemaNode = SchemaContextUtil.findDataSchemaNodeForRelativeXPath(schemas, module, schemaNode, xPath);
-        }
-
-        if (foundSchemaNode instanceof LeafSchemaNode) {
-            return foundSchemaNode as LeafSchemaNode;
-        }
-
-        return null;
-    }
 }
