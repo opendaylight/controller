@@ -233,7 +233,7 @@ public class LazyGeneratedCodecRegistry implements //
         if (typeToClass.containsKey(typeRef)) {
             return;
         }
-        LOG.info("Binding Class {} encountered.", cls);
+        LOG.trace("Binding Class {} encountered.", cls);
         WeakReference<Class> weakRef = new WeakReference<>(cls);
         typeToClass.put(typeRef, weakRef);
         if (Augmentation.class.isAssignableFrom(cls)) {
@@ -250,7 +250,7 @@ public class LazyGeneratedCodecRegistry implements //
         if (typeToClass.containsKey(typeRef)) {
             return;
         }
-        LOG.info("Binding Class {} encountered.", cls);
+        LOG.trace("Binding Class {} encountered.", cls);
         WeakReference<Class> weakRef = new WeakReference<>((Class) cls);
         typeToClass.put(typeRef, weakRef);
     }
