@@ -46,9 +46,12 @@ public class NorthboundApplication extends Application {
     public NorthboundApplication() {
         _singletons = new HashSet<Object>();
         _singletons.add(new ContextResolver<JAXBContext>() {
-            JAXBContext jaxbContext = newJAXBContext();
+            JAXBContext jaxbContext;
             @Override
-            public JAXBContext getContext(Class<?> type) {
+            public synchronized JAXBContext getContext(Class<?> type) {
+                if (jaxbContext == null) {
+                    jaxbContext = newJAXBContext();
+                }
                 return jaxbContext;
             }
 
