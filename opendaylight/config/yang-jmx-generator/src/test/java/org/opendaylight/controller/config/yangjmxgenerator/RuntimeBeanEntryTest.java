@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import java.util.HashMap;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
@@ -41,6 +43,7 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
     public static final String SLEEP_RPC_OUTPUT = "ThreadState";
     public static final String SLEEP_RPC_INPUT_NAME = "millis";
     public static final String SLEEP_RPC_INPUT_TYPE = "Long";
+    private static final Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
 
     @Test
     public void createRuntimeBean() {
@@ -61,7 +64,7 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
     public void runtimeBeanRPCTest() {
         // create service interfaces
         Map<QName, ServiceInterfaceEntry> modulesToSIEs = ServiceInterfaceEntry
-                .create(threadsModule, "packages.sis");
+                .create(threadsModule, "packages.sis",identitiesToSIs);
         assertNotNull(modulesToSIEs);
 
         // create MXBeans map
