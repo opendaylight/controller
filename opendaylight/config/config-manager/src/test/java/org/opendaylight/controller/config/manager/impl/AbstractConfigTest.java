@@ -23,8 +23,13 @@ import org.osgi.framework.ServiceRegistration;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.RuntimeMBeanException;
 import java.io.Closeable;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 import java.util.Set;
 
@@ -150,4 +155,30 @@ public abstract class AbstractConfigTest extends
             Class<? extends Module> configBeanClass, String implementationName) {
         return new ClassBasedModuleFactory(implementationName, configBeanClass);
     }
+
+    /**
+     * Expand inner exception wrapped by JMX
+     *
+     * @param innerObject jmx proxy which will be wrapped and returned
+     */
+    protected <T> T rethrowCause(final T innerObject) {
+
+        Object proxy = Proxy.newProxyInstance(innerObject.getClass().getClassLoader(),
+                innerObject.getClass().getInterfaces(), new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                try {
+                    return method.invoke(innerObject, args);
+                } catch (InvocationTargetException e) {
+                    try {
+                        throw e.getTargetException();
+                    } catch (RuntimeMBeanException e2) {
+                        throw e2.getTargetException();
+                    }
+                }
+            }
+        });
+        return (T) proxy;
+    }
+
 }
