@@ -20,3 +20,4 @@ opendaylight/northbound/integrationtest/logs/*
 .idea
 xtend-gen
 classes
+out/

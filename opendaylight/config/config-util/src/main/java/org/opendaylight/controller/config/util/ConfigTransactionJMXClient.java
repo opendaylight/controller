@@ -84,7 +84,18 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
+    @Deprecated
+    /**
+     * {@inheritDoc}
+     */
     public void destroyConfigBean(String moduleName, String instanceName)
+            throws InstanceNotFoundException {
+        destroyModule(ObjectNameUtil.createTransactionModuleON(
+                getTransactionName(), moduleName, instanceName));
+    }
+
+    @Override
+    public void destroyModule(String moduleName, String instanceName)
             throws InstanceNotFoundException {
         destroyModule(ObjectNameUtil.createTransactionModuleON(
                 getTransactionName(), moduleName, instanceName));
