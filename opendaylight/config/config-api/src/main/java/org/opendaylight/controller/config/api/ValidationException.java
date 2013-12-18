@@ -21,7 +21,7 @@ import java.util.Map.Entry;
 public class ValidationException extends RuntimeException {
     private static final long serialVersionUID = -6072893219820274247L;
 
-    private final Map<String, Map<String, ExceptionMessageWithStackTrace>> failedValidations;
+    private final Map<String/* module name */, Map<String/* instance name */, ExceptionMessageWithStackTrace>> failedValidations;
 
     public ValidationException(
             Map<String /* module name */, Map<String /* instance name */, ExceptionMessageWithStackTrace>> failedValidations) {
@@ -70,7 +70,7 @@ public class ValidationException extends RuntimeException {
         return new ValidationException(failedValidations);
     }
 
-    public Map<String, Map<String, ExceptionMessageWithStackTrace>> getFailedValidations() {
+    public Map<String/* module name */, Map<String/* instance name */, ExceptionMessageWithStackTrace>> getFailedValidations() {
         return failedValidations;
     }
 
