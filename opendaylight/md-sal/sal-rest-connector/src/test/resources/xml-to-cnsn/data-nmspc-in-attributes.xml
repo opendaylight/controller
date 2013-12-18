@@ -1,0 +1,5 @@
+<cont xmlns:x="x:namespace" xmlns:y="y:namespace">
+    <cont1 xmlns:z="z:namespace" xmlns:a="a:namespace" xmlns:b="b:namespace">
+        <lf11 xmlns:c="identity:module">c:iden</lf11>
+    </cont1>
+</cont>

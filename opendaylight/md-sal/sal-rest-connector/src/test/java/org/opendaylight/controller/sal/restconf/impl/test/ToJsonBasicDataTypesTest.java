@@ -137,7 +137,7 @@ public class ToJsonBasicDataTypesTest {
                 assertEquals("bit3", jReader.nextString());
                 bitsChecked = true;
             } else if (keyName.equals("lfbinary")) {
-                assertEquals("AAaacdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ%%-#^", jReader.nextString());
+                assertEquals("AAaacdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", jReader.nextString());
                 lfbinaryChecked = true;
             } else if (keyName.equals("lfempty")) {
                 jReader.beginArray();

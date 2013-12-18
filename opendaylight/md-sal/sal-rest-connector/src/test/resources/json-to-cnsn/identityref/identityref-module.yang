@@ -1,0 +1,39 @@
+module identityref-module {
+  namespace "identityref:module";  
+
+  prefix "iderefmod";
+  
+  import identity-module {prefix idemo; revision-date 2013-12-2;}
+   
+  revision 2013-12-2 {    
+  }
+  
+  identity iden_local {
+  }
+  
+	container cont {
+	   container cont1 {
+    		leaf lf11 {
+    			type identityref {
+    				base "idemo:iden";
+    			}
+    		}
+    		leaf lf12 {
+    			type identityref {
+    				base "iden_local";
+    			}
+    		}
+    		leaf lf13 {
+    			type identityref {
+    				base "iden_local";
+    			}
+    		}
+    		leaf lf14 {
+    			type identityref {
+    				base "iden_local";
+    			}
+    		}
+		}
+	}
+	  
+}

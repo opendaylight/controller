@@ -9,6 +9,7 @@ import java.util.Set;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -52,8 +53,8 @@ class JsonReader {
     }
 
     private CompositeNodeWrapper createStructureWithRoot(String rootObjectName, JsonObject rootObject) {
-        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFrom(rootObjectName),
-                getLocalNameFrom(rootObjectName));
+        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFor(rootObjectName),
+                getLocalNameFor(rootObjectName));
         for (Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
             addChildToParent(childOfFirstNode.getKey(), childOfFirstNode.getValue(), firstNode);
         }
@@ -62,15 +63,15 @@ class JsonReader {
 
     private void addChildToParent(String childName, JsonElement childType, CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFrom(childName),
-                    getLocalNameFrom(childName));
+            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
+                    getLocalNameFor(childName));
             parent.addValue(child);
             for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
             }
         } else if (childType.isJsonArray()) {
             if (childType.getAsJsonArray().size() == 1 && childType.getAsJsonArray().get(0).isJsonNull()) {
-                parent.addValue(new EmptyNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName)));
+                parent.addValue(new EmptyNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName)));
 
             } else {
                 for (JsonElement childOfChildType : childType.getAsJsonArray()) {
@@ -80,24 +81,36 @@ class JsonReader {
         } else if (childType.isJsonPrimitive()) {
             JsonPrimitive childPrimitive = childType.getAsJsonPrimitive();
             String value = childPrimitive.getAsString();
-            parent.addValue(new SimpleNodeWrapper(getNamespaceFrom(childName), getLocalNameFrom(childName), value));
+            parent.addValue(new SimpleNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName),
+                    resolveValueOfElement(value)));
         }
     }
 
-    private URI getNamespaceFrom(String jsonElementName) {
-        int indexOfDelimeter = jsonElementName.lastIndexOf(':');
-        if (indexOfDelimeter == -1) {
+    private URI getNamespaceFor(String jsonElementName) {
+        String[] moduleNameAndLocalName = jsonElementName.split(":");
+        if (moduleNameAndLocalName.length != 2) { // it is not "moduleName:localName"
             return null;
         }
-        return URI.create(jsonElementName.substring(0, indexOfDelimeter));
+        return URI.create(moduleNameAndLocalName[0]);
     }
 
-    private String getLocalNameFrom(String jsonElementName) {
-        int indexOfDelimeter = jsonElementName.lastIndexOf(':');
-        if (indexOfDelimeter == -1) {
+    private String getLocalNameFor(String jsonElementName) {
+        String[] moduleNameAndLocalName = jsonElementName.split(":");
+        if (moduleNameAndLocalName.length != 2) { // it is not "moduleName:localName"
             return jsonElementName;
         }
-        return jsonElementName.substring(indexOfDelimeter + 1, jsonElementName.length());
+        return moduleNameAndLocalName[1];
+    }
+
+    /**
+     * @param value
+     *            value of json element
+     * @return if value is "moduleName:localName" then {@link IdentityValuesDTO} else
+     *         the same string as parameter "value"
+     */
+    private Object resolveValueOfElement(String value) {
+        URI namespace = getNamespaceFor(value);
+        return namespace == null ? value : new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null);
     }
 
 }

@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import com.google.common.collect.BiMap
+import com.google.common.collect.FluentIterable
 import com.google.common.collect.HashBiMap
 import java.net.URI
 import java.net.URLDecoder
@@ -18,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdent
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
+import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
@@ -28,14 +30,12 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.model.api.SchemaNode
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil
+import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
-import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec
-import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
-import org.slf4j.LoggerFactory
-import com.google.common.collect.FluentIterable
 
 class ControllerContext implements SchemaServiceListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
@@ -96,7 +96,7 @@ class ControllerContext implements SchemaServiceListener {
         return getLatestModule(startModule)
     }
 
-    private def getLatestModule(String moduleName) {
+    def getLatestModule(String moduleName) {
         checkPreconditions
         checkArgument(moduleName !== null && !moduleName.empty)
         val modules = schemas.modules.filter[m|m.name == moduleName]
@@ -142,18 +142,35 @@ class ControllerContext implements SchemaServiceListener {
         var module = uriToModuleName.get(namespace)
         if (module === null) {
             val moduleSchemas = schemas.findModuleByNamespace(namespace);
-            if(moduleSchemas === null) throw new IllegalArgumentException()
+            if(moduleSchemas === null) return null
             var latestModule = moduleSchemas.head
             for (m : moduleSchemas) {
                 if (m.revision.after(latestModule.revision)) {
                     latestModule = m
                 }
             }
-            if(latestModule === null) throw new IllegalArgumentException()
+            if(latestModule === null) return null
             uriToModuleName.put(namespace, latestModule.name)
             module = latestModule.name;
         }
         return module
+    }
+
+    def findNamespaceByModule(String module) {
+        var namespace = moduleNameToUri.get(module)
+        if (namespace === null) {
+            val moduleSchemas = schemas.modules.filter[it|it.name.equals(module)]
+            var latestModule = moduleSchemas.head
+            for (m : moduleSchemas) {
+                if (m.revision.after(latestModule.revision)) {
+                    latestModule = m
+                }
+            }
+            if(latestModule === null) return null
+            namespace = latestModule.namespace
+            uriToModuleName.put(namespace, latestModule.name)
+        }
+        return namespace
     }
 
     def CharSequence toRestconfIdentifier(QName qname) {
@@ -295,9 +312,9 @@ class ControllerContext implements SchemaServiceListener {
         val typedef = (node as LeafSchemaNode).type;
         
         var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
-        if(decoded == null) {
+        if(decoded === null) {
             var baseType = typedef
-            while (baseType.baseType != null) {
+            while (baseType.baseType !== null) {
                 baseType = baseType.baseType;
             }
             if(baseType instanceof IdentityrefTypeDefinition) {
