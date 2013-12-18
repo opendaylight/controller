@@ -32,8 +32,13 @@ public interface ConfigTransactionClient extends
 
     void validateBean(ObjectName configBeanON) throws ValidationException;
 
-    void destroyConfigBean(String moduleName, String instanceName)
-            throws InstanceNotFoundException;
+    @Deprecated
+    /**
+     * Use {@link #destroyModule(String, String)}
+     */
+    void destroyConfigBean(String moduleName, String instanceName) throws InstanceNotFoundException;
+
+    void destroyModule(String moduleName, String instanceName) throws InstanceNotFoundException;
 
     void setAttribute(ObjectName on, String jmxName, Attribute attribute);
 }
