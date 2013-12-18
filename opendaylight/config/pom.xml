@@ -42,6 +42,8 @@
         <module>config-persister-directory-adapter</module>
         <module>config-persister-directory-xml-adapter</module>
         <module>yang-test-plugin</module>
+        <module>shutdown-api</module>
+        <module>shutdown-impl</module>
     </modules>
 
     <profiles>
@@ -68,6 +70,7 @@
         <opendaylight.yang.version>0.5.9-SNAPSHOT</opendaylight.yang.version>
         <opendaylight.binding.version>0.6.0-SNAPSHOT</opendaylight.binding.version>
         <opendaylight.yangtools.version>0.1.1-SNAPSHOT</opendaylight.yangtools.version>
+        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
     </properties>
 
     <dependencies>
@@ -212,6 +215,12 @@
                 <version>${config.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>shutdown-api</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+
             <!-- MD-SAL -->
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
@@ -269,10 +278,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
+
+
         </plugins>
 
         <pluginManagement>
@@ -295,7 +302,7 @@
                                             org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
                                         </codeGeneratorClass>
                                         <outputBaseDir>
-                                            target/generated-sources/sal
+                                            ${salGeneratorPath}
                                         </outputBaseDir>
                                     </generator>
                                     <generator>
@@ -315,6 +322,26 @@
                             <type>jar</type>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <!-- tell eclipse about generated source folders -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.8</version>
+                    <executions>
+                        <execution>
+                            <id>add-source</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${salGeneratorPath}</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
