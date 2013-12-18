@@ -6,17 +6,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,13 +24,11 @@ import org.glassfish.jersey.test.TestProperties;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -74,8 +69,7 @@ public class ReadConfAndOperDataTest extends JerseyTest {
 
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
 
-        InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode(xmlStream);
+        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder("/parts/ietf-interfaces_interfaces.xml");
         when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
@@ -92,8 +86,7 @@ public class ReadConfAndOperDataTest extends JerseyTest {
     public void testReadOperationalData() throws UnsupportedEncodingException, FileNotFoundException {
         String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
 
-        InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode(xmlStream);
+        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder("/parts/ietf-interfaces_interfaces.xml");
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
