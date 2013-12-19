@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_2994aee0",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/JMXGenerator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-12-19T11:04:15Z",
+      "side": 1,
+      "message": "Let\u0027s give it a try then.",
+      "parentUuid": "da6255ed_29fdce3a",
+      "revId": "12dea96953f3bef583645fc11135afbb9127475a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_c9cbd21c",
         "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/JMXGenerator.java",
         "patchSetId": 3
