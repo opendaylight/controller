@@ -86,7 +86,7 @@ public interface RuntimeCodeGenerator {
      * @return Instance of RpcService of provided serviceType which implements
      *         also {@link RpcRouter}<T> and {@link DelegateProxy}
      */
-    <T extends RpcService> RpcRouter<T> getRouterFor(Class<T> serviceType) throws IllegalArgumentException;
+    <T extends RpcService> RpcRouter<T> getRouterFor(Class<T> serviceType,String name) throws IllegalArgumentException;
 
     NotificationInvokerFactory getInvokerFactory();
 }
