@@ -161,13 +161,32 @@ class InventoryAndReadAdapter implements IPluginInTopologyService, IPluginInRead
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated update) {
-        val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        inventoryPublisher.updateNodeConnector(update.nodeConnectorRef.toADNodeConnector, UpdateType.CHANGED, properties);
+        val properties = new java.util.HashSet<org.opendaylight.controller.sal.core.Property>();
+
+
+        val org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> identifier = update.nodeConnectorRef.value as org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>;
+        var updateType = UpdateType.CHANGED;
+        if ( this._dataService.readOperationalData(identifier) == null ){
+            updateType = UpdateType.ADDED;
+        }
+
+        var nodeConnector = update.nodeConnectorRef.toADNodeConnector
+
+
+        properties.add(new org.opendaylight.controller.sal.core.Name(nodeConnector.ID.toString()));
+
+        inventoryPublisher.updateNodeConnector(nodeConnector , updateType , properties);
     }
 
     override onNodeUpdated(NodeUpdated notification) {
         val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        inventoryPublisher.updateNode(notification.nodeRef.toADNode, UpdateType.CHANGED, properties);
+        val org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> identifier = notification.nodeRef.value  as org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>;
+
+        var updateType = UpdateType.CHANGED;
+        if ( this._dataService.readOperationalData(identifier) == null ){
+            updateType = UpdateType.ADDED;
+        }
+        inventoryPublisher.updateNode(notification.nodeRef.toADNode, updateType, properties);
     }
 
     override getNodeProps() {
