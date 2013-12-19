@@ -110,7 +110,7 @@ public class BindingTestContext implements AutoCloseable {
         checkState(executor != null,"Executor needs to be set");
         checkState(baDataImpl != null,"Binding Data Broker must be started");
         checkState(baNotifyImpl != null, "Notification Service must be started");
-        baBrokerImpl = new BindingAwareBrokerImpl(null);
+        baBrokerImpl = new BindingAwareBrokerImpl("test",null);
         
         baBrokerImpl.setDataBroker(baDataImpl);
         baBrokerImpl.setNotifyBroker(baNotifyImpl);

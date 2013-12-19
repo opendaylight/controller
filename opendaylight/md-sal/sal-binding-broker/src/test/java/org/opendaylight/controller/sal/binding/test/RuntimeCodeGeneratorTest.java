@@ -61,7 +61,7 @@ public class RuntimeCodeGeneratorTest {
 
     @Test
     public void testGenerateRouter() throws Exception {
-        RpcRouter<FooService> product = codeGenerator.getRouterFor(FooService.class);
+        RpcRouter<FooService> product = codeGenerator.getRouterFor(FooService.class,"test");
         assertNotNull(product);
         assertNotNull(product.getInvocationProxy());
 

@@ -15,8 +15,11 @@ import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublishe
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.impl.routing.RoutingUtils;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Mutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class RpcRoutingTableImpl<C extends BaseIdentity, S extends RpcService> //
 implements //
@@ -24,16 +27,22 @@ implements //
         RpcRoutingTable<C, S>, //
         RouteChangePublisher<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
 
-    private final Class<C> identifier;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RpcRoutingTableImpl.class);
+    private final String routerName;
+    private final Class<S> serviceType;
+
+    private final Class<C> contextType;
     private final ConcurrentMap<InstanceIdentifier<?>, S> routes;
     private final Map<InstanceIdentifier<?>, S> unmodifiableRoutes;
 
     private RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> listener;
     private S defaultRoute;
-
-    public RpcRoutingTableImpl(Class<C> identifier) {
+    
+    public RpcRoutingTableImpl(String routerName,Class<C> contextType, Class<S> serviceType) {
         super();
-        this.identifier = identifier;
+        this.routerName = routerName;
+        this.serviceType = serviceType;
+        this.contextType = contextType;
         this.routes = new ConcurrentHashMap<>();
         this.unmodifiableRoutes = Collections.unmodifiableMap(routes);
     }
@@ -56,17 +65,19 @@ implements //
         
     @Override
     public Class<C> getIdentifier() {
-        return identifier;
+        return contextType;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void updateRoute(InstanceIdentifier<?> path, S service) {
         S previous = this.routes.put(path, service);
+        
+        LOGGER.debug("Route {} updated to {} in routing table {}",path,service,this);
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
         if (previous == null && listenerCapture != null) {
-            listenerCapture.onRouteChange(RoutingUtils.announcementChange(identifier, path));
+            listenerCapture.onRouteChange(RoutingUtils.announcementChange(contextType, path));
         }
     }
 
@@ -75,10 +86,11 @@ implements //
     @SuppressWarnings("unchecked")
     public void removeRoute(InstanceIdentifier<?> path) {
         S previous = this.routes.remove(path);
+        LOGGER.debug("Route {} to {} removed in routing table {}",path,previous,this);
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
         if (previous != null && listenerCapture != null) {
-            listenerCapture.onRouteChange(RoutingUtils.removalChange(identifier, path));
+            listenerCapture.onRouteChange(RoutingUtils.removalChange(contextType, path));
         }
     }
     
@@ -86,7 +98,8 @@ implements //
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
         if (routes.remove(path, service) && listenerCapture != null) {
-            listenerCapture.onRouteChange(RoutingUtils.removalChange(identifier, path));
+            LOGGER.debug("Route {} to {} removed in routing table {}",path,service,this);
+            listenerCapture.onRouteChange(RoutingUtils.removalChange(contextType, path));
         }
     }
 
@@ -107,6 +120,16 @@ implements //
     protected void removeAllReferences(S service) {
         
     }
+    
+    
+
+    @Override
+    public String toString() {
+        return "RpcRoutingTableImpl [router=" + routerName + ", service=" + serviceType.getSimpleName() + ", context="
+                + contextType.getSimpleName() + "]";
+    }
+
+
 
     private class SingletonListenerRegistration<L extends RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>>> extends
             AbstractObjectRegistration<L>

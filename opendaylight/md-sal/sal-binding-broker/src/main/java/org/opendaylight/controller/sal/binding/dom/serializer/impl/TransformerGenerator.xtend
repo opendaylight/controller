@@ -145,9 +145,13 @@ class TransformerGenerator {
             if (typeSpecBuilder == null) {
                 typeSpecBuilder = pathToType.get(node.path);
             }
+            var schemaNode = typeToSchemaNode.get(ref);
+            if(schemaNode === null) {
+                schemaNode = node;
+            }
             checkState(typeSpecBuilder !== null, "Could not find TypeDefinition for %s, $s", inputType.name, node);
             val typeSpec = typeSpecBuilder.toInstance();
-            val newret = generateTransformerFor(inputType, typeSpec, node);
+            val newret = generateTransformerFor(inputType, typeSpec, schemaNode);
             listener.onClassProcessed(inputType);
             return newret as Class<? extends BindingCodec<Map<QName,Object>, Object>>;
         ]
@@ -524,7 +528,7 @@ class TransformerGenerator {
                             return null;
                             }
                             java.util.Map _compositeNode = (java.util.Map) $2;
-                            ////System.out.println(_localQName + " " + _compositeNode);
+                            System.out.println(_localQName + " " + _compositeNode);
                             «type.builderName» _builder = new «type.builderName»();
                             boolean _is_empty = true;
                             «FOR child : node.childNodes»
@@ -672,6 +676,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
+            System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeKey(type, node)»
             «deserializeDataNodeContainerBody(type, node)»
@@ -687,6 +692,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
+            System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»
@@ -702,7 +708,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            ////System.out.println(_localQName + " " + _compositeNode);
+            System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»

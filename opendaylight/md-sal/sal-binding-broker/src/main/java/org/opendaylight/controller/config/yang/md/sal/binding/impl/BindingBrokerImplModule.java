@@ -36,7 +36,7 @@ public final class BindingBrokerImplModule extends org.opendaylight.controller.c
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        BindingAwareBrokerImpl broker = new BindingAwareBrokerImpl(getBundleContext());
+        BindingAwareBrokerImpl broker = new BindingAwareBrokerImpl(getIdentifier().getInstanceName(),getBundleContext());
         broker.setDataBroker(getDataBrokerDependency());
         broker.setNotifyBroker(getNotificationServiceDependency());
         broker.start();

@@ -91,7 +91,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         return instance;
     }
 
-    override <T extends RpcService> getRouterFor(Class<T> iface) {
+    override <T extends RpcService> getRouterFor(Class<T> iface,String routerInstanceName) {
         val metadata = withClassLoader(iface.classLoader) [|
             val supertype = iface.asCtClass
             return supertype.rpcMetadata;
@@ -148,7 +148,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             return targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance as T
             
         ];
-        return new RpcRouterCodegenInstance(iface, instance, metadata.contexts,metadata.supportedInputs);
+        return new RpcRouterCodegenInstance(routerInstanceName,iface, instance, metadata.contexts,metadata.supportedInputs);
     }
 
     private def RpcServiceMetadata getRpcMetadata(CtClass iface) {

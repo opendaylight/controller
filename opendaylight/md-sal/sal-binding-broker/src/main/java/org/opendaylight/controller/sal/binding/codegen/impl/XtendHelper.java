@@ -9,11 +9,6 @@ import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 
 public class XtendHelper {
 
-    public static <C extends BaseIdentity> RpcRoutingTableImpl createRoutingTable(
-            Class<C> cls) {
-        return new RpcRoutingTableImpl<>(cls);
-    }
-
     @SuppressWarnings({"rawtypes","unchecked"})
     public static Iterable<TypeDefinition> getTypes(UnionTypeDefinition definition) {
         return (Iterable<TypeDefinition>) (List) definition.getTypes();
