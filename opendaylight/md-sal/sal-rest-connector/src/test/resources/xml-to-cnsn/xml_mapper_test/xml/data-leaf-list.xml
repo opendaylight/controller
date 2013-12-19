@@ -1,0 +1,5 @@
+<cont>
+    <allow-user>fred</allow-user>
+    <allow-user>admin</allow-user>
+    <allow-user>Fred Flintstone</allow-user>
+</cont>
