@@ -7,8 +7,13 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import junit.framework.Assert;
 import org.junit.After;
 import org.mockito.Matchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver;
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
@@ -26,14 +31,20 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.io.Closeable;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -55,6 +66,10 @@ public abstract class AbstractConfigTest extends
     protected BundleContext mockedContext = mock(BundleContext.class);
     protected ServiceRegistration<?> mockedServiceRegistration;
 
+    protected  Map<Class, BundleContextServiceRegistrationHandler> getBundleContextServiceRegistrationHandlers() {
+        return Maps.newHashMap();
+    }
+
     // this method should be called in @Before
     protected void initConfigTransactionManagerImpl(
             ModuleFactoriesResolver resolver) {
@@ -63,23 +78,49 @@ public abstract class AbstractConfigTest extends
 
         configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(
                 platformMBeanServer);
-        this.mockedServiceRegistration = mock(ServiceRegistration.class);
-        doNothing().when(mockedServiceRegistration).unregister();
-        doReturn(mockedServiceRegistration).when(mockedContext).registerService(
-                Matchers.any(String[].class), any(Closeable.class),
-                any(Dictionary.class));
+        initBundleContext();
 
         internalJmxRegistrator = new InternalJMXRegistrator(platformMBeanServer);
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
         configRegistry = new ConfigRegistryImpl(resolver,
                 platformMBeanServer, baseJmxRegistrator);
+
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
         } catch (InstanceAlreadyExistsException e) {
             throw new RuntimeException(e);
         }
         configRegistryClient = new ConfigRegistryJMXClient(platformMBeanServer);
+    }
+
+    private void initBundleContext() {
+        this.mockedServiceRegistration = mock(ServiceRegistration.class);
+        doNothing().when(mockedServiceRegistration).unregister();
+
+        RegisterServiceAnswer answer = new RegisterServiceAnswer();
+
+        doAnswer(answer).when(mockedContext).registerService(Matchers.any(String[].class),
+                any(Closeable.class), Matchers.<Dictionary<String, ?>>any());
+        doAnswer(answer).when(mockedContext).registerService(Matchers.<Class<Closeable>>any(), any(Closeable.class),
+                Matchers.<Dictionary<String, ?>>any());
+    }
+
+
+    public Collection<InputStream> getFilesAsInputStreams(List<String> paths) {
+        final Collection<InputStream> resources = new ArrayList<>();
+        List<String> failedToFind = new ArrayList<>();
+        for (String path : paths) {
+            InputStream resourceAsStream = getClass().getResourceAsStream(path);
+            if (resourceAsStream == null) {
+                failedToFind.add(path);
+            } else {
+                resources.add(resourceAsStream);
+            }
+        }
+        Assert.assertEquals("Some files were not found", Collections.<String>emptyList(), failedToFind);
+
+        return resources;
     }
 
     @After
@@ -153,5 +194,36 @@ public abstract class AbstractConfigTest extends
     protected ClassBasedModuleFactory createClassBasedCBF(
             Class<? extends Module> configBeanClass, String implementationName) {
         return new ClassBasedModuleFactory(implementationName, configBeanClass);
+    }
+
+
+    public static interface BundleContextServiceRegistrationHandler {
+
+       void handleServiceRegistration(Object serviceInstance);
+
+    }
+
+    private class RegisterServiceAnswer implements Answer {
+        @Override
+        public Object answer(InvocationOnMock invocation) throws Throwable {
+            Object[] args = invocation.getArguments();
+
+            Preconditions.checkArgument(args.length == 3);
+
+            Preconditions.checkArgument(args[0] instanceof Class);
+            Class<?> serviceType = (Class<?>) args[0];
+            Object serviceInstance = args[1];
+
+            BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandlers()
+                    .get(serviceType);
+
+            Preconditions.checkArgument(serviceType.isAssignableFrom(serviceInstance.getClass()));
+
+            if (serviceRegistrationHandler != null) {
+                serviceRegistrationHandler.handleServiceRegistration(serviceType.cast(serviceInstance));
+            }
+
+            return mockedServiceRegistration;
+        }
     }
 }
