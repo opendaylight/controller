@@ -162,10 +162,8 @@ public final class TestUtils {
                     return dsn;
                 }
             }
-        } else if (module.getChildNodes().size() == 1) {
-            return module.getChildNodes().iterator().next();
         }
-        return null;
+        return module.getChildNodes().size() == 1 ? module.getChildNodes().iterator().next() : null;
     }
 
     public static CompositeNode loadCompositeNode(String xmlDataPath) {
@@ -212,52 +210,7 @@ public final class TestUtils {
         return buildQName(name, "", null);
     }
 
-    public static DataSchemaNode obtainSchemaFromYang(String yangFolder) throws FileNotFoundException {
-        return obtainSchemaFromYang(yangFolder, null);
-    }
-
-    public static DataSchemaNode obtainSchemaFromYang(String yangFolder, String moduleName)
-            throws FileNotFoundException {
-        Set<Module> modules = null;
-        modules = TestUtils.loadModules(TestUtils.class.getResource(yangFolder).getPath());
-
-        if (modules == null) {
-            return null;
-        }
-        if (modules.size() < 1) {
-            return null;
-        }
-
-        Module moduleRes = null;
-        if (modules.size() > 1) {
-            if (moduleName == null) {
-                return null;
-            } else {
-                for (Module module : modules) {
-                    if (module.getName().equals(moduleName)) {
-                        moduleRes = module;
-                    }
-                }
-                if (moduleRes == null) {
-                    return null;
-                }
-            }
-        } else {
-            moduleRes = modules.iterator().next();
-        }
-
-        if (moduleRes.getChildNodes() == null) {
-            return null;
-        }
-
-        if (moduleRes.getChildNodes().size() != 1) {
-            return null;
-        }
-        DataSchemaNode dataSchemaNode = moduleRes.getChildNodes().iterator().next();
-        return dataSchemaNode;
-    }
-
-    public static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
+    private static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
         wrappedNode.setNamespace(new URI(""));
         if (wrappedNode instanceof CompositeNodeWrapper) {
             for (NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
