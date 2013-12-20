@@ -61,13 +61,16 @@ module sal-group {
 
     notification group-added {
         uses node-group;
+        uses tr:transaction-aware;
     }
 
     notification group-updated {
         uses node-group;
+        uses tr:transaction-aware;
     }
 
     notification group-removed {
         uses node-group;
+        uses tr:transaction-aware;
     }    
 }

@@ -43,9 +43,14 @@ module sal-port {
         output {
             uses port-type:flow-capable-port;
         }
-    }  
+    }
+    
+    notification port-updated {
+        uses port-update;
+        uses tr:transaction-aware;
+    }
     
     notification port-removed {
-        uses node-port;
+        uses node-port;       
     }
 }

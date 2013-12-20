@@ -81,14 +81,17 @@ module sal-flow {
 
     notification flow-added {
         uses node-flow;
+        uses tr:transaction-aware;
     }
 
     notification flow-updated {
         uses node-flow;
+        uses tr:transaction-aware;
     }
 
     notification flow-removed {
         uses node-flow;
+        uses tr:transaction-aware;
     }
     
     notification switch-flow-removed {

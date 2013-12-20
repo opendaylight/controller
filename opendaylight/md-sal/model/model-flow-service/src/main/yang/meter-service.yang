@@ -61,13 +61,16 @@ module sal-meter {
         
     notification meter-added {
         uses node-meter;
+        uses tr:transaction-aware;
     }
 
     notification meter-updated {
         uses node-meter;
+        uses tr:transaction-aware;
     }
 
     notification meter-removed {
         uses node-meter;
+        uses tr:transaction-aware;
     }
 }
