@@ -298,18 +298,18 @@ public class TopologyServiceShim implements IDiscoveryListener,
             // Compare bandwidth usage
             Long switchId = (Long) connector.getNode().getID();
             Short port = (Short) connector.getID();
-            float rate = statsMgr.getTransmitRate(switchId, port);
-            if (rate > bwThresholdFactor * bw) {
-                if (!connectorsOverUtilized.contains(connector)) {
-                    connectorsOverUtilized.add(connector);
-                    this.bwUtilNotifyQ.add(new UtilizationUpdate(connector,
-                            UpdateType.ADDED));
-                }
-            } else {
-                if (connectorsOverUtilized.contains(connector)) {
-                    connectorsOverUtilized.remove(connector);
-                    this.bwUtilNotifyQ.add(new UtilizationUpdate(connector,
-                            UpdateType.REMOVED));
+            if (statsMgr != null) {
+                float rate = statsMgr.getTransmitRate(switchId, port);
+                if (rate > bwThresholdFactor * bw) {
+                    if (!connectorsOverUtilized.contains(connector)) {
+                        connectorsOverUtilized.add(connector);
+                        this.bwUtilNotifyQ.add(new UtilizationUpdate(connector, UpdateType.ADDED));
+                    }
+                } else {
+                    if (connectorsOverUtilized.contains(connector)) {
+                        connectorsOverUtilized.remove(connector);
+                        this.bwUtilNotifyQ.add(new UtilizationUpdate(connector, UpdateType.REMOVED));
+                    }
                 }
             }
         }
