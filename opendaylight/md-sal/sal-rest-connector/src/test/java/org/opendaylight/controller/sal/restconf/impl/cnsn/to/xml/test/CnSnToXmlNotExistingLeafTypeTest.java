@@ -31,15 +31,16 @@ public class CnSnToXmlNotExistingLeafTypeTest {
     @Test
     public void incorrectTopLevelElementTest() {
 
-        String xmlOutput = null;
+        boolean nullPointerExceptionRaised = false;
         try {
-            xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
+            TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
                     (Set<Module>) Collections.EMPTY_SET, prepareDataSchemaNode(), StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             LOG.error("WebApplicationException or IOException was raised");
+        } catch (NullPointerException e) {
+            nullPointerExceptionRaised = true;
         }
-        assertNotNull(xmlOutput);
-        assertTrue(xmlOutput.contains("<lf1>any value</lf1>"));
+        assertTrue(nullPointerExceptionRaised);
 
     }
 
