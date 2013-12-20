@@ -95,12 +95,21 @@
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
     <netty.version>4.0.10.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>
-    <!-- Sonar properties using jacoco to retrieve integration test results -->
-    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-    <sonar.language>java</sonar.language>
+    <bundlescanner.version>0.4.1-SNAPSHOT</bundlescanner.version>
+    <usermanager.version>0.4.1-SNAPSHOT</usermanager.version>
     <forwardingrulesmanager.version>0.5.0-SNAPSHOT</forwardingrulesmanager.version>
     <statisticsmanager.version>0.5.0-SNAPSHOT</statisticsmanager.version>
     <clustering.services.version>0.5.0-SNAPSHOT</clustering.services.version>
+    <configuration.version>0.4.1-SNAPSHOT</configuration.version>
+    <topologymanager.version>0.4.1-SNAPSHOT</topologymanager.version>
+    <!-- Third party version -->
+    <jersey-servlet.version>1.18-SNAPSHOT</jersey-servlet.version>
+    <corsfilter.version>7.0.43-SNAPSHOT</corsfilter.version>
+    <!-- Northbound API version -->
+    <commons.northbound.version>0.4.1-SNAPSHOT</commons.northbound.version>
+    <!-- Sonar properties using jacoco to retrieve integration test results -->
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.language>java</sonar.language>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
     <java.version.source>1.7</java.version.source>
     <java.version.target>1.7</java.version.target>
@@ -621,12 +630,12 @@
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>com.sun.jersey.jersey-servlet</artifactId>
-        <version>1.17</version>
+        <version>${jersey-servlet.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-        <version>7.0.42</version>
+        <version>${corsfilter.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -726,7 +735,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>switchmanager</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>${switchmanager.api.version}</version>
       </dependency>
 
       <!-- equinox http service bridge -->

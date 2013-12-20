@@ -27,7 +27,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>${sal.version}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -75,30 +75,30 @@
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>com.sun.jersey.jersey-servlet</artifactId>
-      <version>1.18-SNAPSHOT</version>
+      <version>${jersey-servlet.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>${containermanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
+      <version>${switchmanager.api.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>${sal.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.northbound</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${commons.northbound.version}</version>
     </dependency>
 
     <dependency>
@@ -120,7 +120,7 @@
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-      <version>7.0.43-SNAPSHOT</version>
+      <version>${corsfilter.version}</version>
     </dependency>
   </dependencies>
 </project>
