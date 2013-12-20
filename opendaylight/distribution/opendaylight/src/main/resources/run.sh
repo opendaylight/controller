@@ -21,15 +21,15 @@ if [[ $platform == 'linux' ]]; then
     fi
 elif [[ $platform == 'osx' ]]; then
    TARGET_FILE=$0
-   cd `dirname $TARGET_FILE`
+   cd `dirname "$TARGET_FILE"`
    TARGET_FILE=`basename $TARGET_FILE`
 
    # Iterate down a (possible) chain of symlinks
    while [ -L "$TARGET_FILE" ]
    do
-       TARGET_FILE=`readlink $TARGET_FILE`
-       cd `dirname $TARGET_FILE`
-       TARGET_FILE=`basename $TARGET_FILE`
+       TARGET_FILE=`readlink "$TARGET_FILE"`
+       cd `dirname "$TARGET_FILE"`
+       TARGET_FILE=`basename "$TARGET_FILE"`
    done
 
    # Compute the canonicalized name by finding the physical path
@@ -47,13 +47,13 @@ fi
 JVM at path ${JAVA_HOME}/bin/java check your JAVA_HOME" && exit -1;
 
 if [ -z ${ODL_BASEDIR} ]; then
-    basedir=`dirname ${fullpath}`
+    basedir=`dirname "${fullpath}"`
 else
     basedir=${ODL_BASEDIR}
 fi
 
 if [ -z ${ODL_DATADIR} ]; then
-    datadir=`dirname ${fullpath}`
+    datadir=`dirname "${fullpath}"`
 else
     datadir=${ODL_DATADIR}
 fi
@@ -145,8 +145,8 @@ fi
 ########################################
 # Now add to classpath the OSGi JAR
 ########################################
-CLASSPATH=${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
-FWCLASSPATH=file:${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
+CLASSPATH="${basedir}"/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
+FWCLASSPATH=file:"${basedir}"/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
 
 ########################################
 # Now add the extensions
@@ -196,19 +196,24 @@ if [ "${statusdaemon}" -eq 1 ]; then
     fi
 fi
 
+iotmpdir=`echo "${datadir}" | sed 's/ /\\ /g'`
+bdir=`echo "${basedir}" | sed 's/ /\\ /g'`
+confarea=`echo "${datadir}" | sed 's/ /\\ /g'`
+fwclasspath=`echo "${FWCLASSPATH}" | sed 's/ /\\ /g'`
+
 if [ "${startdaemon}" -eq 1 ]; then
     if [ -e "${pidfile}" ]; then
         echo "Another instance of controller running, check with $0 -status"
         exit -1
     fi
     $JAVA_HOME/bin/java ${extraJVMOpts} \
-        -Djava.io.tmpdir=${datadir}/work/tmp \
-        -Dosgi.install.area=${basedir} \
-        -Dosgi.configuration.area=${datadir}/configuration \
-        -Dosgi.frameworkClassPath=${FWCLASSPATH} \
-        -Dosgi.framework=file:${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar \
+        -Djava.io.tmpdir="${iotmpdir}/work/tmp" \
+        -Dosgi.install.area="${bdir}" \
+        -Dosgi.configuration.area="${confarea}/configuration" \
+        -Dosgi.frameworkClassPath="${fwclasspath}" \
+        -Dosgi.framework=file:"${bdir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar" \
         -Djava.awt.headless=true \
-        -classpath ${CLASSPATH} \
+        -classpath "${CLASSPATH}" \
         org.eclipse.equinox.launcher.Main \
         -console ${daemonport} \
         -consoleLog &
@@ -220,13 +225,13 @@ elif [ "${consolestart}" -eq 1 ]; then
         exit -1
     fi
     $JAVA_HOME/bin/java ${extraJVMOpts} \
-        -Djava.io.tmpdir=${datadir}/work/tmp \
-        -Dosgi.install.area=${basedir} \
-        -Dosgi.configuration.area=${datadir}/configuration \
-        -Dosgi.frameworkClassPath=${FWCLASSPATH} \
-        -Dosgi.framework=file:${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar \
+        -Djava.io.tmpdir="${iotmpdir}/work/tmp" \
+        -Dosgi.install.area="${bdir}" \
+        -Dosgi.configuration.area="${confarea}/configuration" \
+        -Dosgi.frameworkClassPath="${fwclasspath}" \
+        -Dosgi.framework=file:"${bdir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar" \
         -Djava.awt.headless=true \
-        -classpath ${CLASSPATH} \
+        -classpath "${CLASSPATH}" \
         org.eclipse.equinox.launcher.Main \
         -console \
         -consoleLog
