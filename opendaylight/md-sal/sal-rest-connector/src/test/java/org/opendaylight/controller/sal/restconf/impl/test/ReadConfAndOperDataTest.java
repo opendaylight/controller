@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,15 +15,21 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.*;
+import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -39,8 +46,8 @@ public class ReadConfAndOperDataTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs")
-                .getPath());
+        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        assertNotNull(allModules);
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
@@ -63,7 +70,8 @@ public class ReadConfAndOperDataTest extends JerseyTest {
 
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
 
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode("/parts/ietf-interfaces_interfaces.xml", true);
+        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml", true,
+                XmlToCompositeNodeProvider.INSTANCE);
         when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
@@ -76,12 +84,13 @@ public class ReadConfAndOperDataTest extends JerseyTest {
         assertEquals(404, response.getStatus());
     }
 
-    @Ignore
     @Test
     public void testReadOperationalData() throws UnsupportedEncodingException, FileNotFoundException {
         String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
 
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode("/parts/ietf-interfaces_interfaces.xml");
+        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml", true,
+                XmlToCompositeNodeProvider.INSTANCE);
+
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();

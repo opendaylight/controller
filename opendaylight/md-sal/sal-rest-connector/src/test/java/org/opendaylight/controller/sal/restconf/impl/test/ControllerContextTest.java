@@ -1,21 +1,22 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mock;
-
-import static org.mockito.Mockito.*;
-
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -26,8 +27,8 @@ public class ControllerContextTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModules(ControllerContextTest.class.getResource("/full-versions/yangs")
-                .getPath());
+        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        assertNotNull(allModules);
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext.setSchemas(schemaContext);
     }

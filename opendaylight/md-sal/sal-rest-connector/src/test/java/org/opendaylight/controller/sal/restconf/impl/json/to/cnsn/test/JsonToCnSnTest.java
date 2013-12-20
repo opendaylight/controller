@@ -1,9 +1,12 @@
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -13,8 +16,9 @@ import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,11 +194,8 @@ public class JsonToCnSnTest {
         // "simple:data:types1"
         Set<Module> modules1 = new HashSet<>();
         Set<Module> modules2 = new HashSet<>();
-        try {
-            modules1 = TestUtils.loadModules(TestUtils.class.getResource("/json-to-cnsn/simple-list-yang/1").getPath());
-            modules2 = TestUtils.loadModules(TestUtils.class.getResource("/json-to-cnsn/simple-list-yang/2").getPath());
-        } catch (FileNotFoundException e) {
-        }
+        modules1 = TestUtils.loadModulesFrom("/json-to-cnsn/simple-list-yang/1");
+        modules2 = TestUtils.loadModulesFrom("/json-to-cnsn/simple-list-yang/2");
         assertNotNull(modules1);
         assertNotNull(modules2);
 
@@ -223,12 +224,8 @@ public class JsonToCnSnTest {
                 JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
-        Set<Module> modules = TestUtils.resolveModulesFrom("/json-to-cnsn/identityref");
+        Set<Module> modules = TestUtils.loadModulesFrom("/json-to-cnsn/identityref");
         assertEquals(2, modules.size());
-        Module module = TestUtils.resolveModule("identityref-module", modules);
-        assertNotNull(module);
-        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode(null, module);
-        assertNotNull(dataSchemaNode);
 
         TestUtils.normalizeCompositeNode(compositeNode, modules, "identityref-module:cont");
 
@@ -282,16 +279,10 @@ public class JsonToCnSnTest {
         assertNotNull(compositeNode);
 
         Set<Module> modules = null;
-        try {
-            modules = TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage());
-            assertTrue(false);
-        }
+        modules = TestUtils.loadModulesFrom(yangPath);
         assertNotNull(modules);
 
         TestUtils.normalizeCompositeNode(compositeNode, modules, moduleName + ":" + topLevelElementName);
-        // TestUtils.supplementNamespace(dataSchemaNode, compositeNode);
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
