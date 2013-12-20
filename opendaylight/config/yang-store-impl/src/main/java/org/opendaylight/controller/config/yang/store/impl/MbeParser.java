@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yang.store.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -22,13 +21,10 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -37,26 +33,11 @@ public class MbeParser {
     public YangStoreSnapshotImpl parseYangFiles(
             Collection<? extends InputStream> allInput)
             throws YangStoreException {
-        YangParserImpl parser = new YangParserImpl();
+        YangParserImpl parser = YangParserWrapper.getYangParserInstance();
 
-        List<InputStream> bufferedInputStreams = new ArrayList<>();
-        for (InputStream is : allInput) {
-            String content;
-            try {
-                content = IOUtils.toString(is);
-            } catch (IOException e) {
-                throw new YangStoreException("Can not get yang as String from "
-                        + is, e);
-            }
-            InputStream buf = new ByteArrayInputStream(content.getBytes());
-            bufferedInputStreams.add(buf);
-        }
+        Map<InputStream, Module> allYangModules = YangParserWrapper.parseYangFiles(parser, allInput);
 
-        Map<InputStream, Module> allYangModules = parser
-                .parseYangModelsFromStreamsMapped(bufferedInputStreams);
-
-        SchemaContext resolveSchemaContext = parser.resolveSchemaContext(Sets
-                .newHashSet(allYangModules.values()));
+        SchemaContext resolveSchemaContext = YangParserWrapper.getSchemaContextFromModules(parser, allYangModules);
 
         // JMX generator
 
@@ -115,7 +96,7 @@ public class MbeParser {
 
     public Map<Module, String> parseYangFilesToString(
             Collection<? extends InputStream> allYangs) {
-        YangParserImpl parser = new YangParserImpl();
+        YangParserImpl parser = YangParserWrapper.getYangParserInstance();
 
         Map<InputStream, Module> allYangModules = parser
                 .parseYangModelsFromStreamsMapped(Lists.newArrayList(allYangs));
