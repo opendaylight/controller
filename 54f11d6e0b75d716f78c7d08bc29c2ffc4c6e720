@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7c15c53e",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/group-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-20T20:17:13Z",
+      "side": 1,
+      "message": "Could we call this leaf group-ref to be in line with the convention elsewhere?",
+      "revId": "54f11d6e0b75d716f78c7d08bc29c2ffc4c6e720",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5c120158",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/meter-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-20T20:17:13Z",
+      "side": 1,
+      "message": "Could we call this leaf meter-ref to be inline with the convention elsewhere?",
+      "revId": "54f11d6e0b75d716f78c7d08bc29c2ffc4c6e720",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3c1bcd74",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-flow-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-12-20T20:17:13Z",
+      "side": 1,
+      "message": "Could we call this leaf flow-ref to be in line with the convention elsewhere?",
+      "revId": "54f11d6e0b75d716f78c7d08bc29c2ffc4c6e720",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
