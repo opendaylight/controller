@@ -44,6 +44,9 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     @Property
     DataPacketAdapter dataPacket = new DataPacketAdapter;
 
+    @Property
+    org.opendaylight.controller.sal.utils.INodeFactory nodeFactory = new MDSalNodeFactory
+
     override protected init() {
         Node.NodeIDType.registerIDType(MD_SAL_TYPE, NodeKey);
         NodeConnector.NodeConnectorIDType.registerIDType(MD_SAL_TYPE, NodeConnectorKey, MD_SAL_TYPE);
@@ -78,11 +81,15 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     }
 
     override protected getGlobalImplementations() {
-        return Arrays.asList(this, flow, inventory, dataPacket)
+        return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory)
     }
 
     override protected configureGlobalInstance(Component c, Object imp) {
         configure(imp, c);
+    }
+
+    private def dispatch configure(MDSalNodeFactory imp, Component it) {
+        setInterface(org.opendaylight.controller.sal.utils.INodeFactory.name, properties);
     }
 
     private def dispatch configure(ComponentActivator imp, Component it) {
@@ -90,6 +97,8 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             createServiceDependency().setService(BindingAwareBroker) //
             .setCallbacks("setBroker", "setBroker") //
             .setRequired(true))
+
+
     }
 
     private def dispatch configure(DataPacketAdapter imp, Component it) {
@@ -137,6 +146,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     private def Dictionary<String, Object> properties() {
         val props = new Hashtable<String, Object>();
         props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString, MD_SAL_TYPE)
+        props.put("protocolName", MD_SAL_TYPE);
         return props;
     }
 }
