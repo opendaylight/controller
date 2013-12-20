@@ -6,30 +6,45 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
-import javax.xml.parsers.*;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.rest.impl.UnsupportedFormatException;
-import org.opendaylight.controller.sal.rest.impl.XmlReader;
-import org.opendaylight.controller.sal.restconf.impl.*;
-import org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test.JsonToCnSnTest;
+import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.*;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
@@ -45,7 +60,7 @@ public final class TestUtils {
 
     private final static YangModelParser parser = new YangParserImpl();
 
-    public static Set<Module> loadModules(String resourceDirectory) throws FileNotFoundException {
+    private static Set<Module> loadModules(String resourceDirectory) throws FileNotFoundException {
         final File testDir = new File(resourceDirectory);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<File>();
@@ -61,23 +76,31 @@ public final class TestUtils {
         return parser.parseYangModels(testFiles);
     }
 
+    public static Set<Module> loadModulesFrom(String yangPath) {
+        try {
+            return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
+        } catch (FileNotFoundException e) {
+            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
+        }
+
+        return null;
+    }
+
     public static SchemaContext loadSchemaContext(Set<Module> modules) {
         return parser.resolveSchemaContext(modules);
     }
 
     public static SchemaContext loadSchemaContext(String resourceDirectory) throws FileNotFoundException {
-        return parser.resolveSchemaContext(loadModules(resourceDirectory));
+        return parser.resolveSchemaContext(loadModulesFrom(resourceDirectory));
     }
 
     public static Module findModule(Set<Module> modules, String moduleName) {
-        Module result = null;
         for (Module module : modules) {
             if (module.getName().equals(moduleName)) {
-                result = module;
-                break;
+                return module;
             }
         }
-        return result;
+        return null;
     }
 
     public static Document loadDocumentFrom(InputStream inputStream) {
@@ -125,12 +148,18 @@ public final class TestUtils {
         RestconfImpl restconf = RestconfImpl.getInstance();
         ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
 
-        prepareMockForRestconfBeforeNormalization(modules, restconf);
+        prepareMocksForRestconf(modules, restconf);
         restconf.createConfigurationData(schemaNodePath, compositeNode);
     }
 
+    /**
+     * Searches module with name {@code searchedModuleName} in {@code modules}.
+     * If module name isn't specified and module set has only one element then
+     * this element is returned.
+     * 
+     */
     public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
-        assertNotNull("modules can't be null.", modules);
+        assertNotNull("Modules can't be null.", modules);
         if (searchedModuleName != null) {
             for (Module m : modules) {
                 if (m.getName().equals(searchedModuleName)) {
@@ -140,16 +169,6 @@ public final class TestUtils {
         } else if (modules.size() == 1) {
             return modules.iterator().next();
         }
-        return null;
-    }
-
-    public static Set<Module> resolveModulesFrom(String yangPath) {
-        try {
-            return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
-        } catch (FileNotFoundException e) {
-            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
-        }
-
         return null;
     }
 
@@ -166,29 +185,6 @@ public final class TestUtils {
             return module.getChildNodes().iterator().next();
         }
         return null;
-    }
-
-    public static CompositeNode loadCompositeNode(String xmlDataPath) {
-        return loadCompositeNode(xmlDataPath, false);
-    }
-
-    public static CompositeNode loadCompositeNode(String xmlDataPath, boolean addDumyNamespace) {
-        InputStream xmlStream = TestUtils.class.getResourceAsStream(xmlDataPath);
-        CompositeNode compositeNode = null;
-        try {
-            XmlReader xmlReader = new XmlReader();
-            compositeNode = xmlReader.read(xmlStream);
-        } catch (UnsupportedFormatException | XMLStreamException e) {
-            LOG.error(e.getMessage());
-        }
-        if (addDumyNamespace) {
-            try {
-                addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-            } catch (URISyntaxException e) {
-                LOG.error(e.getMessage());
-            }
-        }
-        return compositeNode;
     }
 
     public static QName buildQName(String name, String uri, String date, String prefix) {
@@ -212,52 +208,7 @@ public final class TestUtils {
         return buildQName(name, "", null);
     }
 
-    public static DataSchemaNode obtainSchemaFromYang(String yangFolder) throws FileNotFoundException {
-        return obtainSchemaFromYang(yangFolder, null);
-    }
-
-    public static DataSchemaNode obtainSchemaFromYang(String yangFolder, String moduleName)
-            throws FileNotFoundException {
-        Set<Module> modules = null;
-        modules = TestUtils.loadModules(TestUtils.class.getResource(yangFolder).getPath());
-
-        if (modules == null) {
-            return null;
-        }
-        if (modules.size() < 1) {
-            return null;
-        }
-
-        Module moduleRes = null;
-        if (modules.size() > 1) {
-            if (moduleName == null) {
-                return null;
-            } else {
-                for (Module module : modules) {
-                    if (module.getName().equals(moduleName)) {
-                        moduleRes = module;
-                    }
-                }
-                if (moduleRes == null) {
-                    return null;
-                }
-            }
-        } else {
-            moduleRes = modules.iterator().next();
-        }
-
-        if (moduleRes.getChildNodes() == null) {
-            return null;
-        }
-
-        if (moduleRes.getChildNodes().size() != 1) {
-            return null;
-        }
-        DataSchemaNode dataSchemaNode = moduleRes.getChildNodes().iterator().next();
-        return dataSchemaNode;
-    }
-
-    public static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
+    private static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
         wrappedNode.setNamespace(new URI(""));
         if (wrappedNode instanceof CompositeNodeWrapper) {
             for (NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
@@ -266,8 +217,7 @@ public final class TestUtils {
         }
     }
 
-    private static void prepareMockForRestconfBeforeNormalization(Set<Module> modules, RestconfImpl restconf) {
-
+    private static void prepareMocksForRestconf(Set<Module> modules, RestconfImpl restconf) {
         ControllerContext controllerContext = ControllerContext.getInstance();
         BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
 
@@ -279,16 +229,16 @@ public final class TestUtils {
                                 new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
                                         .build()).build());
 
-        restconf.setControllerContext(ControllerContext.getInstance());
+        restconf.setControllerContext(controllerContext);
         restconf.setBroker(mockedBrokerFacade);
     }
 
-    public static CompositeNode readInputToCnSn(String jsonPath, boolean dummyNamespaces,
+    public static CompositeNode readInputToCnSn(String path, boolean dummyNamespaces,
             MessageBodyReader<CompositeNode> reader) throws WebApplicationException {
 
-        InputStream jsonStream = JsonToCnSnTest.class.getResourceAsStream(jsonPath);
+        InputStream inputStream = TestUtils.class.getResourceAsStream(path);
         try {
-            CompositeNode compositeNode = reader.readFrom(null, null, null, null, null, jsonStream);
+            CompositeNode compositeNode = reader.readFrom(null, null, null, null, null, inputStream);
             assertTrue(compositeNode instanceof CompositeNodeWrapper);
             if (dummyNamespaces) {
                 try {
@@ -307,6 +257,10 @@ public final class TestUtils {
         return null;
     }
 
+    public static CompositeNode readInputToCnSn(String path, MessageBodyReader<CompositeNode> reader) {
+        return readInputToCnSn(path, false, reader);
+    }
+
     public static String writeCompNodeWithSchemaContextToOutput(CompositeNode compositeNode, Set<Module> modules,
             DataSchemaNode dataSchemaNode, MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
             WebApplicationException {
@@ -321,7 +275,5 @@ public final class TestUtils {
                 byteArrayOS);
 
         return byteArrayOS.toString();
-
     }
-
 }

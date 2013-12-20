@@ -12,6 +12,7 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -90,7 +91,7 @@ public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
 
     private String toJson(String xmlDataPath) {
         try {
-            CompositeNode compositeNode = TestUtils.loadCompositeNode(xmlDataPath);
+            CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlDataPath, XmlToCompositeNodeProvider.INSTANCE);
             TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
             return TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);

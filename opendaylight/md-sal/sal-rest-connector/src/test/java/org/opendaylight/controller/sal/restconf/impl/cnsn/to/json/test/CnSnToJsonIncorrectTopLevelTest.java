@@ -12,11 +12,21 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.*;
+import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.Status;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.UsesNode;
+import org.opendaylight.yangtools.yang.model.api.YangNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +148,7 @@ public class CnSnToJsonIncorrectTopLevelTest extends YangAndXmlAndDataSchemaLoad
     @Test
     public void incorrectTopLevelElementTest() {
 
-        CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/simple-data-types/xml/data.xml");
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml", XmlToCompositeNodeProvider.INSTANCE);
         DataSchemaNode incorrectDataSchema = null;
         incorrectDataSchema = new IncorrectDataSchema();
 

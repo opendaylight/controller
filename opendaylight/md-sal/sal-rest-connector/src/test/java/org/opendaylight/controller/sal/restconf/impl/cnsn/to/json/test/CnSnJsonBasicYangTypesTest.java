@@ -1,6 +1,10 @@
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -12,10 +16,18 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.controller.sal.restconf.impl.test.structures.*;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.controller.sal.restconf.impl.test.structures.Cont;
+import org.opendaylight.controller.sal.restconf.impl.test.structures.Lf;
+import org.opendaylight.controller.sal.restconf.impl.test.structures.LfLst;
+import org.opendaylight.controller.sal.restconf.impl.test.structures.Lst;
+import org.opendaylight.controller.sal.restconf.impl.test.structures.LstItem;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 import com.google.gson.stream.JsonReader;
@@ -52,7 +64,8 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
      */
     @Test
     public void xmlAndYangTypesWithJsonReaderTest() {
-        CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/simple-yang-types/xml/data.xml");
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-yang-types/xml/data.xml",
+                XmlToCompositeNodeProvider.INSTANCE);
         TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
         String jsonOutput = null;
         try {

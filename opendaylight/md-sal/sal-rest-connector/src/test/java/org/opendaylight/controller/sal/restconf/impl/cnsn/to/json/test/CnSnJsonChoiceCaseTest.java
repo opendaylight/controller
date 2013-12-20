@@ -9,6 +9,7 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -112,7 +113,7 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     private void testWrapper(String xmlPath, String pathToSchemaNode) {
-        CompositeNode compNode = TestUtils.loadCompositeNode(xmlPath);
+        CompositeNode compNode = TestUtils.readInputToCnSn(xmlPath, XmlToCompositeNodeProvider.INSTANCE);
         TestUtils.normalizeCompositeNode(compNode, modules, pathToSchemaNode);
         try {
             TestUtils.writeCompNodeWithSchemaContextToOutput(compNode, modules, dataSchemaNode,

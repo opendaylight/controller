@@ -2,20 +2,14 @@ package org.opendaylight.controller.sal.restconf.impl.xml.to.cnsn.test;
 
 import static org.junit.Assert.*;
 
-import java.io.*;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +23,10 @@ public class XmlLeafrefToCnSnTest {
      */
     @Test
     public void testXmlDataContainer() {
-        CompositeNode compNode = compositeNodeFromXml("/xml-to-cnsn/data-container.xml", false);
+        CompositeNode compNode = TestUtils.readInputToCnSn("/xml-to-cnsn/data-container.xml", false,
+                XmlToCompositeNodeProvider.INSTANCE);
         assertNotNull(compNode);
-        Set<Module> modules = null;
-        try {
-            modules = TestUtils.loadModules(TestUtils.class.getResource("/xml-to-cnsn/data-container-yang").getPath());
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage());
-            assertTrue(false);
-        }
+        Set<Module> modules = TestUtils.loadModulesFrom("/xml-to-cnsn/data-container-yang");
 
         assertNotNull(modules);
         TestUtils.normalizeCompositeNode(compNode, modules, "data-container-yang:cont");
@@ -77,14 +66,11 @@ public class XmlLeafrefToCnSnTest {
 
     @Test
     public void testXmlDataList() {
-        CompositeNode compNode = compositeNodeFromXml("/xml-to-cnsn/data-list.xml", false);
+        CompositeNode compNode = TestUtils.readInputToCnSn("/xml-to-cnsn/data-list.xml", false,
+                XmlToCompositeNodeProvider.INSTANCE);
         assertNotNull(compNode);
 
-        Set<Module> modules = null;
-        try {
-            modules = TestUtils.loadModules(TestUtils.class.getResource("/xml-to-cnsn/data-list-yang").getPath());
-        } catch (FileNotFoundException e) {
-        }
+        Set<Module> modules = TestUtils.loadModulesFrom("/xml-to-cnsn/data-list-yang");
         assertNotNull(modules);
 
         TestUtils.normalizeCompositeNode(compNode, modules, "data-container-yang:cont");
@@ -148,7 +134,8 @@ public class XmlLeafrefToCnSnTest {
 
     @Test
     public void testXmlEmptyData() {
-        CompositeNode compNode = compositeNodeFromXml("/xml-to-cnsn/empty-data.xml", true);
+        CompositeNode compNode = TestUtils.readInputToCnSn("/xml-to-cnsn/empty-data.xml", true,
+                XmlToCompositeNodeProvider.INSTANCE);
         assertEquals("cont", compNode.getNodeType().getLocalName());
         SimpleNode<?> lf1 = null;
         SimpleNode<?> lflst1_1 = null;
@@ -323,40 +310,13 @@ public class XmlLeafrefToCnSnTest {
         assertEquals((short) 100, cont1_lf11.getValue());
     }
 
-    private CompositeNode compositeNodeFromXml(String xmlPath, boolean dummyNamespaces) {
-        XmlToCompositeNodeProvider xmlToCompositeNodeProvider = XmlToCompositeNodeProvider.INSTANCE;
-        try {
-            InputStream xmlStream = XmlLeafrefToCnSnTest.class.getResourceAsStream(xmlPath);
-            CompositeNode compositeNode = xmlToCompositeNodeProvider.readFrom(null, null, null, null, null, xmlStream);
-            if (dummyNamespaces) {
-                try {
-                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-                    return ((CompositeNodeWrapper) compositeNode).unwrap();
-                } catch (URISyntaxException e) {
-                    LOG.error(e.getMessage());
-                    assertTrue(e.getMessage(), false);
-                }
-            }
-            return compositeNode;
-
-        } catch (WebApplicationException | IOException e) {
-            LOG.error(e.getMessage());
-            assertTrue(false);
-        }
-        return null;
-    }
-
     private void testIdentityrefToCnSn(String xmlPath, String yangPath, String moduleName, String schemaName,
             int moduleCount, String resultLocalName, String resultNamespace) {
-        CompositeNode compositeNode = compositeNodeFromXml(xmlPath, false);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlPath, false, XmlToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
-        Set<Module> modules = TestUtils.resolveModulesFrom(yangPath);
+        Set<Module> modules = TestUtils.loadModulesFrom(yangPath);
         assertEquals(moduleCount, modules.size());
-        Module module = TestUtils.resolveModule(moduleName, modules);
-        assertNotNull(module);
-        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode(null, module);
-        assertNotNull(dataSchemaNode);
 
         TestUtils.normalizeCompositeNode(compositeNode, modules, moduleName + ":" + schemaName);
 
@@ -365,7 +325,6 @@ public class XmlLeafrefToCnSnTest {
         QName qName = (QName) lf11.getValue();
         assertEquals(resultLocalName, qName.getLocalName());
         assertEquals(resultNamespace, qName.getNamespace().toString());
-
     }
 
     private SimpleNode<?> getLf11(CompositeNode compositeNode) {

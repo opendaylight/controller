@@ -10,6 +10,7 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -27,7 +28,8 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
      */
     @Test
     public void augmentedElementsToJson() {
-        CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/augmentation/xml/data.xml");
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/augmentation/xml/data.xml",
+                XmlToCompositeNodeProvider.INSTANCE);
         TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
 
         String jsonOutput = null;
