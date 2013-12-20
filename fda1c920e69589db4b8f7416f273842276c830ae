@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_790ef73c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-12-20T19:03:09Z",
+      "side": 1,
+      "message": "Can you change description to \"Fixed northbound references to sal.\"",
+      "revId": "fda1c920e69589db4b8f7416f273842276c830ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
