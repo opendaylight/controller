@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.packet.BitBufferHelper;
 import org.opendaylight.controller.sal.utils.GUIField;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.Status;
@@ -96,7 +95,13 @@ public class SubnetConfig implements Cloneable, Serializable {
     public Short getIPMaskLen() {
         Short maskLen = 0;
         String[] s = subnet.split("/");
+
+        try{
         maskLen = (s.length == 2) ? Short.valueOf(s[1]) : 32;
+        }
+        catch(NumberFormatException e){
+            maskLen = 32;
+        }
         return maskLen;
     }
 
@@ -107,11 +112,74 @@ public class SubnetConfig implements Cloneable, Serializable {
         if((this.getIPMaskLen() == 0) || (this.getIPMaskLen() == 32)) {
             return new Status(StatusCode.BADREQUEST, String.format("Invalid Subnet configuration: Invalid mask: /%s", this.getIPMaskLen()));
         }
-        byte[] bytePrefix = NetUtils.getSubnetPrefix(this.getIPAddress(), this.getIPMaskLen()).getAddress();
-        long prefix = BitBufferHelper.getLong(bytePrefix);
-        if (prefix == 0) {
-            return new Status(StatusCode.BADREQUEST, "Invalid network source address: subnet zero");
+
+        int networkBytes = this.getIPMaskLen() / 8;
+        int bits = this.getIPMaskLen() % 8;
+        byte checkFor0sByte;
+        byte checkFor1sByte;
+        boolean allZeros = true;
+        boolean allOnes = true;
+        boolean networkBytesSame = true;
+        boolean hostBytesSame = true;
+        byte[] ip = this.getIPAddress()
+                .getAddress();
+
+        int byteCounter = 0;
+
+        // Check the full bytes before network address ends
+        for (; byteCounter < networkBytes && networkBytesSame; byteCounter++) {
+            if (ip[byteCounter] == 0) {
+                allOnes = false;
+            }
+            if (~ip[byteCounter] == 0) {
+                allZeros = false;
+            }
+            if ((ip[byteCounter] != 0 && ~ip[byteCounter] != 0) || (allZeros && allOnes)) {
+                networkBytesSame = false;
+            }
         }
+        // Check the byte where the network address ends
+        if (bits > 0) {
+            if (networkBytesSame) {
+                checkFor0sByte = (byte) (ip[networkBytes] >> (8 - bits));
+                checkFor1sByte = (byte) ((~ip[networkBytes]) >> (8 - bits));
+                if (checkFor0sByte == 0 && allZeros || checkFor1sByte == 0 && allOnes) {
+                    return new Status(StatusCode.BADREQUEST, "Invalid network source address: Subnet can't be all 0's or all 1's");
+                }
+            }
+
+            // Checking the start of the host address
+            allZeros = true;
+            allOnes = true;
+            checkFor0sByte = (byte) (ip[networkBytes] << (bits));
+            checkFor1sByte = (byte) ((~ip[networkBytes] * 0xFF) << (bits));
+
+            if (checkFor0sByte == 0) {
+                allOnes = false;
+            } else if (checkFor1sByte == 0) {
+                allZeros = false;
+            } else {
+                hostBytesSame = false;
+            }
+
+        }
+        // Check the full bytes for host address after network address ends
+        if (hostBytesSame) {
+            for (byteCounter = (bits > 0) ? networkBytes + 1 : networkBytes; byteCounter < ip.length; byteCounter++) {
+                if (ip[byteCounter] == 0) {
+                    allOnes = false;
+                } else if (~ip[byteCounter] == 0) {
+                    allZeros = false;
+                } else {
+                    return new Status(StatusCode.SUCCESS);
+                }
+                if (!allZeros && !allOnes) {
+                    return new Status(StatusCode.SUCCESS);
+                }
+            }
+            return new Status(StatusCode.BADREQUEST, "Invalid network source address: Host can't be all 0's or all 1's");
+        }
+
         return new Status(StatusCode.SUCCESS);
     }
 
