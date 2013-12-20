@@ -124,8 +124,9 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
                                 "Session was not established after " + timeout);
                         negotiationFailed(cause);
                         changeState(State.FAILED);
-                    } else
+                    } else if(channel.isOpen()) {
                         channel.pipeline().remove(NAME_OF_EXCEPTION_HANDLER);
+                    }
                 }
             }
         }, INITIAL_HOLDTIMER, TimeUnit.MINUTES);
