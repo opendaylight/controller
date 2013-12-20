@@ -27,7 +27,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>${sal.version}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -75,22 +75,22 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>${sal.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.connection</artifactId>
-      <version>0.1.1-SNAPSHOT</version>
+      <version>${sal.connection.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>connectionmanager</artifactId>
-      <version>0.1.1-SNAPSHOT</version>
+      <version>${connectionmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>${containermanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.northbound</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${commons.northbound.version}</version>
     </dependency>
   </dependencies>
 </project>

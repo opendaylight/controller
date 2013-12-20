@@ -35,10 +35,10 @@ import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.SpanConfig;
 import org.opendaylight.controller.switchmanager.Subnet;
@@ -55,7 +55,7 @@ public class TopologyManagerImplTest {
     private final class TestSwitchManager implements ISwitchManager {
         private final Set<Node>  nodeSet = new HashSet<Node>();
         private final Set<NodeConnector> nodeConnectorSet =
-            new HashSet<NodeConnector>();
+                new HashSet<NodeConnector>();
 
         private void addNodeConnectors(NodeConnector ... connectors) {
             for (NodeConnector nc: connectors) {
@@ -69,9 +69,9 @@ public class TopologyManagerImplTest {
         private void addNodeConnectors(TopologyUserLinkConfig ... links) {
             for (TopologyUserLinkConfig link: links) {
                 NodeConnector src =
-                    NodeConnector.fromString(link.getSrcNodeConnector());
+                        NodeConnector.fromString(link.getSrcNodeConnector());
                 NodeConnector dst =
-                    NodeConnector.fromString(link.getDstNodeConnector());
+                        NodeConnector.fromString(link.getDstNodeConnector());
                 addNodeConnectors(src, dst);
             }
         }
@@ -292,6 +292,35 @@ public class TopologyManagerImplTest {
         public String getNodeDescription(Node node) {
             return null;
         }
+
+        @Override
+        public Status removeControllerProperty(String propertyName){
+            return null;
+        }
+
+        @Override
+        public Set<Switch> getConfiguredNotConnectedSwitches() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Map<String, Property> getControllerProperties() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Property getControllerProperty(String propertyName) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Status setControllerProperty(Property property) {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     /*
@@ -485,13 +514,13 @@ public class TopologyManagerImplTest {
         Assert.assertTrue(topoManagerImpl.getUserLinks().isEmpty());
 
         TopologyUserLinkConfig badlink1 =
-            new TopologyUserLinkConfig("bad1", "OF|1@OF|4", "OF|1@OF|5");
+                new TopologyUserLinkConfig("bad1", "OF|1@OF|4", "OF|1@OF|5");
         TopologyUserLinkConfig badlink2 =
-            new TopologyUserLinkConfig("bad2", "OF|10@OF|7", "OF|7@OF|13");
+                new TopologyUserLinkConfig("bad2", "OF|10@OF|7", "OF|7@OF|13");
         Assert.assertEquals(StatusCode.NOTFOUND,
-                            topoManagerImpl.addUserLink(badlink1).getCode());
+                topoManagerImpl.addUserLink(badlink1).getCode());
         Assert.assertEquals(StatusCode.NOTFOUND,
-                            topoManagerImpl.addUserLink(badlink2).getCode());
+                topoManagerImpl.addUserLink(badlink2).getCode());
     }
 
     @Test
@@ -559,7 +588,7 @@ public class TopologyManagerImplTest {
             reverseLink[i] = new TopologyUserLinkConfig(name, dstNodeConnector, srcNodeConnector);
 
             Assert.assertEquals(StatusCode.NOTFOUND,
-                                topoManagerImpl.addUserLink(link[i]).getCode());
+                    topoManagerImpl.addUserLink(link[i]).getCode());
             swMgr.addNodeConnectors(link[i]);
             Assert.assertTrue(topoManagerImpl.addUserLink(link[i]).isSuccess());
         }
