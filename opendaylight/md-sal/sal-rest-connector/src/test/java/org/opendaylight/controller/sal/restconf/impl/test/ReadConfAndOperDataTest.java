@@ -80,7 +80,7 @@ public class ReadConfAndOperDataTest extends JerseyTest {
     public void testReadOperationalData() throws UnsupportedEncodingException, FileNotFoundException {
         String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
 
-        
+        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNode("/parts/ietf-interfaces_interfaces.xml", true);        
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();

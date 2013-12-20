@@ -14,7 +14,6 @@ import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,10 +224,6 @@ public class JsonToCnSnTest {
 
         Set<Module> modules = TestUtils.resolveModulesFrom("/json-to-cnsn/identityref");
         assertEquals(2, modules.size());
-        Module module = TestUtils.resolveModule("identityref-module", modules);
-        assertNotNull(module);
-        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode(null, module);
-        assertNotNull(dataSchemaNode);
 
         TestUtils.normalizeCompositeNode(compositeNode, modules, "identityref-module:cont");
 
