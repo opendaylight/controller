@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,7 +11,9 @@ import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.restconf.impl.*;
+import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -22,8 +25,8 @@ public class RestconfImplTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs")
-                .getPath());
+        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        assertNotNull(allModules);
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);

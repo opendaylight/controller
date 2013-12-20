@@ -8,7 +8,8 @@ import java.io.IOException;
 import javax.ws.rs.WebApplicationException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
-import org.junit.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
@@ -40,13 +41,11 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
                 "<lf11 xmlns:prefix=\"referenced:module\">prefix:iden</lf11>");
     }
 
-    @Ignore
     @Test
     public void snAsYangIdentityrefWithPrefixToXMLTest() {
         serializeToXml(prepareIdentityrefData("prefix", false), "<lf11>no qname value</lf11>");
     }
 
-    @Ignore
     @Test
     public void snAsYangLeafrefWithPrefixToXMLTest() {
         serializeToXml(prepareLeafrefData(), "<lfBoolean>true</lfBoolean>", "<lfLfref>true</lfLfref>");
