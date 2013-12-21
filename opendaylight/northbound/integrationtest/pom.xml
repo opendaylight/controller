@@ -266,26 +266,52 @@
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>${jackson.version}</version>
+    <!--<dependency>-->
+      <!--<groupId>org.codehaus.jackson</groupId>-->
+      <!--<artifactId>jackson-mapper-asl</artifactId>-->
+      <!--<version>${jackson.version}</version>-->
+    <!--</dependency>-->
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+         <version>2.0.0</version>
+       </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>org.codehaus.jackson</groupId>-->
+      <!--<artifactId>jackson-core-asl</artifactId>-->
+      <!--<version>${jackson.version}</version>-->
+    <!--</dependency>-->
+      <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
-      <version>${jackson.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.0.0</version>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-xc</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>org.codehaus.jackson</groupId>-->
+      <!--<artifactId>jackson-jaxrs</artifactId>-->
+      <!--<version>${jackson.version}</version>-->
+    <!--</dependency>-->
+      <dependency>
+                  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                  <artifactId>jackson-jaxrs-json-provider</artifactId>
+              </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>org.codehaus.jackson</groupId>-->
+      <!--<artifactId>jackson-xc</artifactId>-->
+      <!--<version>${jackson.version}</version>-->
+    <!--</dependency>-->
+      <dependency>
+               <groupId>com.fasterxml.jackson.module</groupId>
+               <artifactId>jackson-module-jaxb-annotations</artifactId>
+           </dependency>
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
@@ -672,11 +698,11 @@
       <artifactId>jersey-client</artifactId>
       <version>${jersey.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-      <version>${jersey.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>com.sun.jersey</groupId>-->
+      <!--<artifactId>jersey-json</artifactId>-->
+      <!--<version>${jersey.version}</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>eclipselink</groupId>
       <artifactId>javax.resource</artifactId>

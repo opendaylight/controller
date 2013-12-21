@@ -24,7 +24,7 @@
         <exclude>ch.qos.logback:logback-core</exclude>
         <exclude>ch.qos.logback:logback-classic</exclude>
         <exclude>com.sun.jersey:jersey-core</exclude>
-        <exclude>com.sun.jersey:jersey-json</exclude>
+        <!--<exclude>com.sun.jersey:jersey-json</exclude>-->
         <exclude>com.sun.jersey:jersey-server</exclude>
         <exclude>org.opendaylight.controller:logging.bridge</exclude>
         <exclude>org.opendaylight.controller:sanitytest</exclude>
@@ -52,7 +52,7 @@
         <include>ch.qos.logback:logback-core</include>
         <include>ch.qos.logback:logback-classic</include>
         <include>com.sun.jersey:jersey-core</include>
-        <include>com.sun.jersey:jersey-json</include>
+        <!--<include>com.sun.jersey:jersey-json</include>-->
         <include>com.sun.jersey:jersey-server</include>
         <include>org.opendaylight.controller:logging.bridge</include>
       </includes>
