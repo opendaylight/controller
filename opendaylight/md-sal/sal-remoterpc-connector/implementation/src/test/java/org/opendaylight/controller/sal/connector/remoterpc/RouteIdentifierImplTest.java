@@ -1,14 +1,14 @@
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import org.codehaus.jackson.JsonParseException;
+import java.net.URI;
+
+import com.fasterxml.jackson.core.JsonParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
 
 public class RouteIdentifierImplTest {
 

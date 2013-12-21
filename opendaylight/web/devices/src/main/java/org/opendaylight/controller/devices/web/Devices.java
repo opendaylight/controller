@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRouting;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
