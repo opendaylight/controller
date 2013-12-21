@@ -17,12 +17,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
 
+
 public class NodeMapping {
 
     public static val MD_SAL_TYPE = "MD_SAL";
     private static val NODE_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-    private static val NODECONNECTOR_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.
-        NodeConnector;
+    private static val NODECONNECTOR_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 
     private new() {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
@@ -48,7 +48,7 @@ public class NodeMapping {
         val connectorKey = item.getKey().checkInstanceOf(NodeConnectorKey);
         return new NodeConnector(MD_SAL_TYPE, connectorKey.getId().getValue().toString(), node);
     }
-
+    
     public static def toNodeRef(Node node) {
         checkArgument(MD_SAL_TYPE.equals(node.getType()));
         var nodeId = node.ID.checkInstanceOf(String)
@@ -56,7 +56,7 @@ public class NodeMapping {
         val nodePath = InstanceIdentifier.builder().node(Nodes).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
-
+    
     public static def toNodeConnectorRef(NodeConnector nodeConnector) {
         val node = nodeConnector.node.toNodeRef();
         val nodePath = node.getValue() as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
@@ -69,5 +69,5 @@ public class NodeMapping {
     public static def toADNode(NodeRef node) throws ConstructionException {
         return toADNode(node.getValue());
     }
-
+    
 }

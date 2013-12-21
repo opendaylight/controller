@@ -1,6 +1,25 @@
 package org.opendaylight.controller.sal.compatibility;
 
-import com.google.common.net.InetAddresses;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
+import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
+import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
+import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
+import static org.opendaylight.controller.sal.match.MatchType.DL_VLAN;
+import static org.opendaylight.controller.sal.match.MatchType.DL_VLAN_PR;
+import static org.opendaylight.controller.sal.match.MatchType.NW_DST;
+import static org.opendaylight.controller.sal.match.MatchType.NW_PROTO;
+import static org.opendaylight.controller.sal.match.MatchType.NW_SRC;
+import static org.opendaylight.controller.sal.match.MatchType.NW_TOS;
+import static org.opendaylight.controller.sal.match.MatchType.TP_DST;
+import static org.opendaylight.controller.sal.match.MatchType.TP_SRC;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
@@ -33,7 +52,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.ActionList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.VlanCfi;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionCase;
@@ -88,26 +106,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanId;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
-import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
-import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
-import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
-import static org.opendaylight.controller.sal.match.MatchType.DL_VLAN;
-import static org.opendaylight.controller.sal.match.MatchType.DL_VLAN_PR;
-import static org.opendaylight.controller.sal.match.MatchType.NW_DST;
-import static org.opendaylight.controller.sal.match.MatchType.NW_PROTO;
-import static org.opendaylight.controller.sal.match.MatchType.NW_SRC;
-import static org.opendaylight.controller.sal.match.MatchType.NW_TOS;
-import static org.opendaylight.controller.sal.match.MatchType.TP_DST;
-import static org.opendaylight.controller.sal.match.MatchType.TP_SRC;
+import com.google.common.net.InetAddresses;
 
 public class ToSalConversionsUtils {
 
@@ -484,11 +483,11 @@ public class ToSalConversionsUtils {
     private static void fillFromArp(Match target, ArpMatch source) {
         Ipv4Prefix sourceAddress = source.getArpSourceTransportAddress();
         if (sourceAddress != null) {
-            target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
+            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
         Ipv4Prefix destAddress = source.getArpTargetTransportAddress();
         if (destAddress != null) {
-            target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
+            target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
         ArpSourceHardwareAddress sourceHwAddress = source.getArpSourceHardwareAddress();
         if (sourceHwAddress != null) {
@@ -506,22 +505,22 @@ public class ToSalConversionsUtils {
     private static void fillFromIpv6(Match target, Ipv6Match source) {
         Ipv6Prefix sourceAddress = source.getIpv6Source();
         if (sourceAddress != null) {
-            target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
+            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
         Ipv6Prefix destAddress = source.getIpv6Destination();
         if (destAddress != null) {
-            target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
+            target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
     }
 
     private static void fillFromIpv4(Match target, Ipv4Match source) {
         Ipv4Prefix sourceAddress = source.getIpv4Source();
         if (sourceAddress != null) {
-            target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
+            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
         Ipv4Prefix destAddress = source.getIpv4Destination();
         if (destAddress != null) {
-            target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
+            target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
     }
 

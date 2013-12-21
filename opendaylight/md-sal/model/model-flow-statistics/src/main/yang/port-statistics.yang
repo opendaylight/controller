@@ -30,19 +30,19 @@ module opendaylight-port-statistics {
 	}    
 	
     // RPC calls
-    rpc get-all-ports-statistics {
-    	description "Get statistics for all the ports from the node";
+    rpc get-all-node-connectors-statistics {
+    	description "Get statistics for all node connectors from the node";
         input {
             uses inv:node-context-ref;
         }
         output {
-            uses stat-types:node-connector-statistics;
+			uses node-connector-statistics-and-port-number-map;
             uses tr:transaction-aware;
         }
     }
     
-    rpc get-port-statistics {
-    	description "Get statistics for given port from the node";
+    rpc get-node-connector-statistics {
+    	description "Get statistics for given node connector from the node";
     	input {
     		uses inv:node-context-ref;
     		leaf node-connector-id {
@@ -55,9 +55,9 @@ module opendaylight-port-statistics {
     	}
     }
     
-    //Notification for port statistics update
+    //Notification for node connector statistics update
 	grouping node-connector-statistics-and-port-number-map {
-		description "List of flow and statistics map";
+		description "List of map - node connectors and their statistics";
 		list node-connector-statistics-and-port-number-map {
 			key "node-connector-id";
 			leaf node-connector-id {
@@ -67,7 +67,7 @@ module opendaylight-port-statistics {
 		}
 	}
 
-	notification port-statistics-update {
+	notification node-connector-statistics-update {
         leaf moreReplies {
             type boolean;
         }

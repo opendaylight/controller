@@ -1,7 +1,17 @@
 package org.opendaylight.controller.sal.compatibility;
 
-import com.google.common.net.InetAddresses;
-import org.opendaylight.controller.sal.core.NodeConnector;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
+import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
+import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
+import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
+
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -14,11 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
@@ -43,19 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-
-import static org.opendaylight.controller.sal.compatibility.NodeMapping.toNodeConnectorRef;
-import static org.opendaylight.controller.sal.compatibility.NodeMapping.toNodeRef;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
-import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
-import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
-import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
+import com.google.common.net.InetAddresses;
 
 public class FromSalConversionsUtils {
 
@@ -63,19 +58,7 @@ public class FromSalConversionsUtils {
 
     }
 
-    public static GetNodeConnectorStatisticsInput nodeConnectorStatistics(
-            NodeConnector connector) {
-        GetNodeConnectorStatisticsInputBuilder target = new GetNodeConnectorStatisticsInputBuilder();
-
-        NodeRef nodeRef = toNodeRef(connector.getNode());
-        target.setNode(nodeRef);
-
-        NodeConnectorRef nodeConnectorRef = toNodeConnectorRef(connector);
-        target.setNodeConnector(nodeConnectorRef);
-
-        return target.build();
-    }
-
+    @SuppressWarnings("unused")
     private static Address addressFromAction(InetAddress inetAddress) {
         String strInetAddresss = InetAddresses.toAddrString(inetAddress);
         if (inetAddress instanceof Inet4Address) {
@@ -196,7 +179,7 @@ public class FromSalConversionsUtils {
         MatchField vlan = sourceMatch.getField(MatchType.DL_VLAN);
         if (vlan != null && vlan.getValue() != null) {
             VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
-            vlanIDBuilder.setVlanId(new VlanId((int) (NetUtils
+            vlanIDBuilder.setVlanId(new VlanId((NetUtils
                     .getUnsignedShort((short) vlan.getValue()))));
             vlanMatchBuild.setVlanId(vlanIDBuilder.build());
         }
@@ -371,5 +354,76 @@ public class FromSalConversionsUtils {
                 .setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
         return layer6MatchBuild.build();
     }
+    
+    public static boolean flowEquals(Flow statsFlow, Flow storedFlow) {
+        if (statsFlow.getClass() != storedFlow.getClass()) {
+            return false;
+        }
+        if (statsFlow.getBufferId()== null) {
+            if (storedFlow.getBufferId() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getBufferId().equals(storedFlow.getBufferId())) {
+            return false;
+        }
+        if (statsFlow.getContainerName()== null) {
+            if (storedFlow.getContainerName()!= null) {
+                return false;
+            }
+        } else if(!statsFlow.getContainerName().equals(storedFlow.getContainerName())) {
+            return false;
+        }
+        if (statsFlow.getCookie()== null) {
+            if (storedFlow.getCookie()!= null) {
+                return false;
+            }
+        } else if(!statsFlow.getCookie().equals(storedFlow.getCookie())) {
+            return false;
+        }
+        if (statsFlow.getMatch()== null) {
+            if (storedFlow.getMatch() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getMatch().equals(storedFlow.getMatch())) {
+            return false;
+        }
+        if (statsFlow.getCookie()== null) {
+            if (storedFlow.getCookie()!= null) {
+                return false;
+            }
+        } else if(!statsFlow.getCookie().equals(storedFlow.getCookie())) {
+            return false;
+        }
+        if (statsFlow.getHardTimeout() == null) {
+            if (storedFlow.getHardTimeout() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getHardTimeout().equals(storedFlow.getHardTimeout() )) {
+            return false;
+        }
+        if (statsFlow.getIdleTimeout()== null) {
+            if (storedFlow.getIdleTimeout() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getIdleTimeout().equals(storedFlow.getIdleTimeout())) {
+            return false;
+        }
+        if (statsFlow.getPriority() == null) {
+            if (storedFlow.getPriority() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getPriority().equals(storedFlow.getPriority())) {
+            return false;
+        }
+        if (statsFlow.getTableId() == null) {
+            if (storedFlow.getTableId() != null) {
+                return false;
+            }
+        } else if(!statsFlow.getTableId().equals(storedFlow.getTableId())) {
+            return false;
+        }
+        return true;
+    }
+
 
 }

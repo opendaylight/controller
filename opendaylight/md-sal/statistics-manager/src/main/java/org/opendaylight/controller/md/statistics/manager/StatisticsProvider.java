@@ -44,8 +44,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllPortsStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllPortsStatisticsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsOutput;
@@ -180,17 +180,13 @@ public class StatisticsProvider implements AutoCloseable {
             InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
             NodeRef targetNodeRef = new NodeRef(targetInstanceId);
             
-            System.out.println("ANIL: Target Node object ::"+targetNode.toString());
-            
-            System.out.println("ANIL: FlowCapableNode augmentations ::"+targetNode.getAugmentation(FlowCapableNode.class));
-            
             try {
                 
                 sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
 
                 sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
 
-                sendAllPortStatisticsRequest(targetNodeRef);
+                sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
                 
                 sendAllFlowTablesStatisticsRequest(targetNodeRef);
                 
@@ -206,13 +202,9 @@ public class StatisticsProvider implements AutoCloseable {
 
                 try{
                   sendAllGroupStatisticsRequest(targetNodeRef);
-                  Thread.sleep(1000);
                   sendAllMeterStatisticsRequest(targetNodeRef);
-                  Thread.sleep(1000);
                   sendGroupDescriptionRequest(targetNodeRef);
-                  Thread.sleep(1000);
                   sendMeterConfigStatisticsRequest(targetNodeRef);
-                  Thread.sleep(1000);
                 }catch(Exception e){
                     spLogger.error("Exception occured while sending statistics requests : {}", e);
                 }
@@ -286,14 +278,14 @@ public class StatisticsProvider implements AutoCloseable {
         
     }
 
-    private void sendAllPortStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
-        final GetAllPortsStatisticsInputBuilder input = new GetAllPortsStatisticsInputBuilder();
+        final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
         
         input.setNode(targetNode);
 
-        Future<RpcResult<GetAllPortsStatisticsOutput>> response = 
-                portStatsService.getAllPortsStatistics(input.build());
+        Future<RpcResult<GetAllNodeConnectorsStatisticsOutput>> response = 
+                portStatsService.getAllNodeConnectorsStatistics(input.build());
         this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_PORT);
 

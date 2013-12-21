@@ -29,10 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.A
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsDataBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsUpdated;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowTableStatisticsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdate;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.NodeConnectorStatisticsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.aggregate.flow.statistics.AggregateFlowStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
@@ -94,8 +91,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev1
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.NodeConnectorStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.PortStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsData;
@@ -554,7 +551,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     }
 
     @Override
-    public void onPortStatisticsUpdate(PortStatisticsUpdate notification) {
+    public void onNodeConnectorStatisticsUpdate(NodeConnectorStatisticsUpdate notification) {
         //Check if response is for the request statistics-manager sent.
         if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
             return;
@@ -711,28 +708,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             it.commit();
             
         }
-        
-    }
-
-    @Override
-    public void onFlowStatisticsUpdated(FlowStatisticsUpdated notification) {
-        // TODO Auto-generated method stub
-        //TODO: Depricated, will clean it up once sal-compatibility is fixed.
-        //Sal-Compatibility code usage this notification event.
-        
-    }
-
-    @Override
-    public void onFlowTableStatisticsUpdated(FlowTableStatisticsUpdated notification) {
-        // TODO Auto-generated method stub
-        //TODO: Need to implement it yet
-        
-    }
-
-    @Override
-    public void onNodeConnectorStatisticsUpdated(NodeConnectorStatisticsUpdated notification) {
-        // TODO Auto-generated method stub
-        //TODO: Need to implement it yet
         
     }
 

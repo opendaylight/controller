@@ -8,6 +8,8 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.common.util.Futures;
 import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.compatibility.FromSalConversionsUtils;
+import org.opendaylight.controller.sal.compatibility.InventoryMapping;
 import org.opendaylight.controller.sal.compatibility.NodeMapping;
 import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -19,66 +21,78 @@ import org.opendaylight.controller.sal.reader.IReadServiceListener;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter32;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter64;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsUpdatedBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForGivenMatchInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromFlowTableInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromFlowTableOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromFlowTableOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllNodeConnectorStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllNodeConnectorStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllNodeConnectorStatisticsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowTableStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowTableStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowTableStatisticsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.NodeConnectorStatisticsUpdatedBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.flow.statistics.output.FlowStatistics;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.flow.statistics.output.FlowStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.statistics.Duration;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.statistics.DurationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdateBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMapBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.duration.DurationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.node.connector.statistics.Bytes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.node.connector.statistics.BytesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.node.connector.statistics.Packets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.node.connector.statistics.PacketsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.NodeConnectorStatisticsUpdateBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMapBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService, IReadServiceListener {
+public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService, IReadServiceListener{
 
     private static final Logger LOG = LoggerFactory.getLogger(FlowStatisticsAdapter.class);
     private IReadService readDelegate;
     private NotificationProviderService notifier;
 
     @Override
-    public Future<RpcResult<GetAllFlowStatisticsOutput>> getAllFlowStatistics(GetAllFlowStatisticsInput input) {
-        GetAllFlowStatisticsOutput rpcResultType = null;
+    public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> getAggregateFlowStatisticsFromFlowTableForAllFlows(
+            GetAggregateFlowStatisticsFromFlowTableForAllFlowsInput input) {
+        //TODO: No supported API exist in AD-SAL, it can either be implemented by fetching all the stats of the flows and 
+        // generating aggregate flow statistics out of those individual flow stats.
+        return null;
+    }
+
+    @Override
+    public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutput>> getAggregateFlowStatisticsFromFlowTableForGivenMatch(
+            GetAggregateFlowStatisticsFromFlowTableForGivenMatchInput input) {
+        //TODO: No supported API exist in AD-SAL, it can either be implemented by fetching all the stats of the flows and 
+        // generating aggregate flow statistics out of those individual flow stats.
+        return null;
+    }
+
+    @Override
+    public Future<RpcResult<GetAllFlowStatisticsFromFlowTableOutput>> getAllFlowStatisticsFromFlowTable(
+            GetAllFlowStatisticsFromFlowTableInput input) {
+        GetAllFlowStatisticsFromFlowTableOutput rpcResultType = null;
         boolean rpcResultBool = false;
 
         try {
             Node adNode = NodeMapping.toADNode(input.getNode());
             List<FlowOnNode> flowsOnNode = readDelegate.readAllFlows(adNode);
-            List<FlowStatistics> flowsStatistics = toOdFlowsStatistics(flowsOnNode);
-            GetAllFlowStatisticsOutputBuilder builder = new GetAllFlowStatisticsOutputBuilder();
-            rpcResultType = builder.setFlowStatistics(flowsStatistics).build();
+            List<FlowAndStatisticsMapList> flowsStatistics = toOdFlowsStatistics(flowsOnNode);
+            GetAllFlowStatisticsFromFlowTableOutputBuilder builder = new GetAllFlowStatisticsFromFlowTableOutputBuilder();
+            builder.setTransactionId(new TransactionId(new BigInteger("0")));
+            rpcResultType = builder.setFlowAndStatisticsMapList(flowsStatistics).build();
+            
             rpcResultBool = true;
         } catch (ConstructionException e) {
             LOG.error(e.getMessage());
@@ -87,19 +101,24 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
         return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
     }
 
+    /**
+     * Essentially this API will return the same result as getAllFlowStatisticsFromFlowTable
+     */
     @Override
-    public Future<RpcResult<GetAllNodeConnectorStatisticsOutput>> getAllNodeConnectorStatistics(
-            GetAllNodeConnectorStatisticsInput input) {
-        GetAllNodeConnectorStatisticsOutput rpcResultType = null;
+    public Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> getAllFlowsStatisticsFromAllFlowTables(
+            GetAllFlowsStatisticsFromAllFlowTablesInput input) {
+        
+        GetAllFlowsStatisticsFromAllFlowTablesOutput rpcResultType = null;
         boolean rpcResultBool = false;
 
         try {
             Node adNode = NodeMapping.toADNode(input.getNode());
-            List<NodeConnectorStatistics> nodesConnectorStatistics = readDelegate.readNodeConnectors(adNode);
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatistics> odNodesConnectorStatistics;
-            odNodesConnectorStatistics = toOdNodesConnectorStatistics(nodesConnectorStatistics);
-            GetAllNodeConnectorStatisticsOutputBuilder builder = new GetAllNodeConnectorStatisticsOutputBuilder();
-            rpcResultType = builder.setNodeConnectorStatistics(odNodesConnectorStatistics).build();
+            List<FlowOnNode> flowsOnNode = readDelegate.readAllFlows(adNode);
+            List<FlowAndStatisticsMapList> flowsStatistics = toOdFlowsStatistics(flowsOnNode);
+            GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder builder = new GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder();
+            builder.setTransactionId(new TransactionId(new BigInteger("0")));
+            rpcResultType = builder.setFlowAndStatisticsMapList(flowsStatistics).build();
+            
             rpcResultBool = true;
         } catch (ConstructionException e) {
             LOG.error(e.getMessage());
@@ -109,119 +128,95 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
     }
 
     @Override
-    public Future<RpcResult<GetFlowStatisticsOutput>> getFlowStatistics(GetFlowStatisticsInput input) {
-        GetFlowStatisticsOutput rpcResultType = null;
+    public Future<RpcResult<GetFlowStatisticsFromFlowTableOutput>> getFlowStatisticsFromFlowTable(
+            GetFlowStatisticsFromFlowTableInput input) {
+        GetFlowStatisticsFromFlowTableOutput rpcResultType = null;
         boolean rpcResultBool = false;
 
         try {
             Node node = NodeMapping.toADNode(input.getNode());
             Flow flow = ToSalConversionsUtils.toFlow(input);
             FlowOnNode readFlow = readDelegate.readFlow(node, flow);
-            FlowStatistics flowOnNodeToFlowStatistics = toOdFlowStatistics(readFlow);
-            rpcResultType = new GetFlowStatisticsOutputBuilder(flowOnNodeToFlowStatistics).build();
+            List<FlowAndStatisticsMapList> flowOnNodeToFlowStatistics = new ArrayList<FlowAndStatisticsMapList>();
+            flowOnNodeToFlowStatistics.add(toOdFlowStatistics(readFlow));
+            rpcResultType = new GetFlowStatisticsFromFlowTableOutputBuilder().setFlowAndStatisticsMapList(flowOnNodeToFlowStatistics).build();
             rpcResultBool = true;
         } catch (ConstructionException e) {
             LOG.error(e.getMessage());
         }
 
         return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
-    }
-
-    @Override
-    public Future<RpcResult<GetFlowTableStatisticsOutput>> getFlowTableStatistics(GetFlowTableStatisticsInput input) {
-        GetFlowTableStatisticsOutput rpcResultType = null;
-        boolean rpcResultBool = false;
-
-        try {
-            Node node = NodeMapping.toADNode(input.getNode());
-            List<NodeTableStatistics> nodesTable = readDelegate.readNodeTable(node);
-            NodeTableStatistics nodeTable = null;
-            if (!nodesTable.isEmpty()) {
-                nodeTable = nodesTable.get(0);
-                rpcResultType = toOdTableStatistics(nodeTable);
-                rpcResultBool = true;
-            }
-        } catch (ConstructionException e) {
-            LOG.error(e.getMessage());
-        }
-
-        return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
-    }
-
-    @Override
-    public Future<RpcResult<GetNodeConnectorStatisticsOutput>> getNodeConnectorStatistics(
-            GetNodeConnectorStatisticsInput input) {
-        GetNodeConnectorStatisticsOutput rpcResultType = null;
-        boolean rpcResultBool = false;
-
-        NodeConnectorRef nodeConnector = input.getNodeConnector();
-        try {
-            NodeConnectorStatistics nodeConnectorStats = readDelegate.readNodeConnector(NodeMapping
-                    .toADNodeConnector(nodeConnector));
-            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatistics odNodeConnectorStatistics = toOdNodeConnectorStatistics(nodeConnectorStats);
-            rpcResultType = new GetNodeConnectorStatisticsOutputBuilder(odNodeConnectorStatistics).build();
-            rpcResultBool = true;
-        } catch (ConstructionException e) {
-            LOG.error(e.getMessage());
-        }
-
-        return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
-    }
-
-    @Override
-    public void descriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
-
-        // TODO which *StatisticsUpdated interface should be used?
-
-    }
-
-    @Override
-    public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
-        for (NodeConnectorStatistics ndConStats : ncStatsList) {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatistics odNodeConnectorStatistics;
-            odNodeConnectorStatistics = toOdNodeConnectorStatistics(ndConStats);
-            NodeConnectorStatisticsUpdatedBuilder statisticsBuilder = new NodeConnectorStatisticsUpdatedBuilder(
-                    odNodeConnectorStatistics);
-            notifier.publish(statisticsBuilder.build());
-        }
     }
 
     @Override
     public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList) {
-        for (FlowOnNode flowOnNode : flowStatsList) {
-            FlowStatistics flowStatistics = toOdFlowStatistics(flowOnNode);
-            FlowStatisticsUpdatedBuilder statisticsBuilder = new FlowStatisticsUpdatedBuilder(flowStatistics);
-            notifier.publish(statisticsBuilder.build());
-        }
+        List<FlowAndStatisticsMapList> flowStatistics = toOdFlowsStatistics(flowStatsList);
+        FlowsStatisticsUpdateBuilder flowsStatisticsUpdateBuilder = new FlowsStatisticsUpdateBuilder();
+        flowsStatisticsUpdateBuilder.setFlowAndStatisticsMapList(flowStatistics);
+        flowsStatisticsUpdateBuilder.setMoreReplies(false);
+        flowsStatisticsUpdateBuilder.setTransactionId(null);
+        flowsStatisticsUpdateBuilder.setId(InventoryMapping.toNodeKey(node).getId());
+        notifier.publish(flowsStatisticsUpdateBuilder.build());
+    }
+
+    @Override
+    public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
+        NodeConnectorStatisticsUpdateBuilder nodeConnectorStatisticsUpdateBuilder = new NodeConnectorStatisticsUpdateBuilder();
+        List<NodeConnectorStatisticsAndPortNumberMap> nodeConnectorStatistics = toOdNodeConnectorStatistics(ncStatsList);
+        
+        nodeConnectorStatisticsUpdateBuilder.setNodeConnectorStatisticsAndPortNumberMap(nodeConnectorStatistics);
+        nodeConnectorStatisticsUpdateBuilder.setMoreReplies(false);
+        nodeConnectorStatisticsUpdateBuilder.setTransactionId(null);
+        nodeConnectorStatisticsUpdateBuilder.setId(InventoryMapping.toNodeKey(node).getId());
+        notifier.publish(nodeConnectorStatisticsUpdateBuilder.build());
     }
 
     @Override
     public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList) {
-        // TODO : Not implemented by AD-SAL.
+        
+        FlowTableStatisticsUpdateBuilder flowTableStatisticsUpdateBuilder = new FlowTableStatisticsUpdateBuilder();  
+        
+        List<FlowTableAndStatisticsMap>  flowTableStatistics = toOdFlowTableStatistics(tableStatsList);
+        flowTableStatisticsUpdateBuilder.setFlowTableAndStatisticsMap(flowTableStatistics);
+        flowTableStatisticsUpdateBuilder.setMoreReplies(false);
+        flowTableStatisticsUpdateBuilder.setTransactionId(null);
+        flowTableStatisticsUpdateBuilder.setId(InventoryMapping.toNodeKey(node).getId());
+        notifier.publish(flowTableStatisticsUpdateBuilder.build());
+}
+
+        @Override
+    public void descriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
+            // TODO which *StatisticsUpdated interface should be used?
+        
     }
 
-    private List<FlowStatistics> toOdFlowsStatistics(List<FlowOnNode> flowsOnNode) {
-        List<FlowStatistics> flowsStatistics = new ArrayList<>();
+    private List<FlowAndStatisticsMapList> toOdFlowsStatistics(List<FlowOnNode> flowsOnNode) {
+        List<FlowAndStatisticsMapList> flowsStatistics = new ArrayList<>();
         for (FlowOnNode flowOnNode : flowsOnNode) {
             flowsStatistics.add(toOdFlowStatistics(flowOnNode));
         }
         return flowsStatistics;
     }
 
-    private FlowStatistics toOdFlowStatistics(FlowOnNode flowOnNode) {
-        FlowStatisticsBuilder builder = new FlowStatisticsBuilder();
+    private FlowAndStatisticsMapList toOdFlowStatistics(FlowOnNode flowOnNode) {
+        FlowAndStatisticsMapListBuilder builder = new FlowAndStatisticsMapListBuilder();
 
         builder.setByteCount(toCounter64(flowOnNode.getByteCount()));
         builder.setPacketCount(toCounter64(flowOnNode.getPacketCount()));
         builder.setDuration(extractDuration(flowOnNode));
-
+        builder.setMatch(FromSalConversionsUtils.toMatch(flowOnNode.getFlow().getMatch()));
+        builder.setPriority((int)flowOnNode.getFlow().getPriority());
+        builder.setHardTimeout((int)flowOnNode.getFlow().getHardTimeout());
+        builder.setIdleTimeout((int)flowOnNode.getFlow().getIdleTimeout());
+        //TODO: actions to instruction conversion
+        builder.setInstructions(null);
         return builder.build();
     }
 
-    private Duration extractDuration(FlowOnNode flowOnNode) {
+    private org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.duration.Duration extractDuration(FlowOnNode flowOnNode) {
         DurationBuilder builder = new DurationBuilder();
-        builder.setNanosecond(toCounter64(flowOnNode.getDurationNanoseconds()));
-        builder.setSecond(toCounter64(flowOnNode.getDurationSeconds()));
+        builder.setNanosecond(new Counter32((long)flowOnNode.getDurationNanoseconds()));
+        builder.setSecond(new Counter32((long)flowOnNode.getDurationSeconds()));
         return builder.build();
     }
 
@@ -231,38 +226,43 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
         return new Counter64(byteCountBigInt);
     }
 
-    private Counter64 toCounter64(int num) {
-        String byteCountStr = String.valueOf(num);
-        BigInteger byteCountBigInt = new BigInteger(byteCountStr);
-        return new Counter64(byteCountBigInt);
-    }
-
-    private List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatistics> toOdNodesConnectorStatistics(
-            List<NodeConnectorStatistics> nodesConnectorStatistics) {
-        List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatistics> odNodesConnectorStatistics = new ArrayList<>();
-        for (NodeConnectorStatistics nodeConnectorStatistics : nodesConnectorStatistics) {
-            odNodesConnectorStatistics.add(toOdNodeConnectorStatistics(nodeConnectorStatistics));
+    private List<FlowTableAndStatisticsMap> toOdFlowTableStatistics(List<NodeTableStatistics> tableStatsList) {
+        
+        List<FlowTableAndStatisticsMap> flowTableStatsMap = new ArrayList<FlowTableAndStatisticsMap>();
+        for (NodeTableStatistics nodeTableStatistics : tableStatsList) {
+            FlowTableAndStatisticsMapBuilder flowTableAndStatisticsMapBuilder = new FlowTableAndStatisticsMapBuilder();
+            flowTableAndStatisticsMapBuilder.setActiveFlows(new Counter32((long) nodeTableStatistics.getActiveCount()));
+            flowTableAndStatisticsMapBuilder.setPacketsLookedUp(toCounter64(nodeTableStatistics.getLookupCount()));
+            flowTableAndStatisticsMapBuilder.setPacketsMatched(toCounter64(nodeTableStatistics.getMatchedCount()));
+            flowTableAndStatisticsMapBuilder.setActiveFlows(new Counter32((long) nodeTableStatistics.getActiveCount()));
+            flowTableAndStatisticsMapBuilder.setTableId(new TableId((short)nodeTableStatistics.getNodeTable().getID()));
+            flowTableStatsMap.add(flowTableAndStatisticsMapBuilder.build());
         }
-        return odNodesConnectorStatistics;
+        
+        return flowTableStatsMap;
     }
 
-    private org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.get.all.node.connector.statistics.output.NodeConnectorStatistics toOdNodeConnectorStatistics(
-            NodeConnectorStatistics ndConStats) {
-        NodeConnectorStatisticsBuilder builder = new NodeConnectorStatisticsBuilder();
-
-        builder.setBytes(extractBytes(ndConStats));
-        builder.setCollisionCount(toBI(ndConStats.getCollisionCount()));
-        builder.setDuration(null);
-        builder.setPackets(extractPackets(ndConStats));
-        builder.setReceiveCrcError(toBI(ndConStats.getReceiveCRCErrorCount()));
-        builder.setReceiveDrops(toBI(ndConStats.getReceiveDropCount()));
-        builder.setReceiveErrors(toBI(ndConStats.getReceiveErrorCount()));
-        builder.setReceiveFrameError(toBI(ndConStats.getReceiveFrameErrorCount()));
-        builder.setReceiveOverRunError(toBI(ndConStats.getReceiveOverRunErrorCount()));
-        builder.setTransmitDrops(toBI(ndConStats.getTransmitDropCount()));
-        builder.setTransmitErrors(toBI(ndConStats.getTransmitErrorCount()));
-
-        return builder.build();
+    private List<NodeConnectorStatisticsAndPortNumberMap> toOdNodeConnectorStatistics(
+            List<NodeConnectorStatistics> ncStatsList) {
+        List<NodeConnectorStatisticsAndPortNumberMap> nodeConnectorStatisticsList = new ArrayList<NodeConnectorStatisticsAndPortNumberMap>();
+        for(NodeConnectorStatistics ofNodeConnectorStatistics : ncStatsList){
+            NodeConnectorStatisticsAndPortNumberMapBuilder nodeConnectorStatisticsAndPortNumberMapBuilder = new NodeConnectorStatisticsAndPortNumberMapBuilder();
+            
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setBytes(extractBytes(ofNodeConnectorStatistics));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setCollisionCount(toBI(ofNodeConnectorStatistics.getCollisionCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setDuration(null);
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setPackets(extractPackets(ofNodeConnectorStatistics));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setReceiveCrcError(toBI(ofNodeConnectorStatistics.getReceiveCRCErrorCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setReceiveDrops(toBI(ofNodeConnectorStatistics.getReceiveDropCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setReceiveErrors(toBI(ofNodeConnectorStatistics.getReceiveErrorCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setReceiveFrameError(toBI(ofNodeConnectorStatistics.getReceiveFrameErrorCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setReceiveOverRunError(toBI(ofNodeConnectorStatistics.getReceiveOverRunErrorCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setTransmitDrops(toBI(ofNodeConnectorStatistics.getTransmitDropCount()));
+            nodeConnectorStatisticsAndPortNumberMapBuilder.setTransmitErrors(toBI(ofNodeConnectorStatistics.getTransmitErrorCount()));
+            nodeConnectorStatisticsList.add(nodeConnectorStatisticsAndPortNumberMapBuilder.build());
+        }
+        
+        return nodeConnectorStatisticsList;
     }
 
     private BigInteger toBI(long num) {
@@ -290,51 +290,6 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
         builder.setTransmitted(toBI(transmitByteCount));
 
         return builder.build();
-    }
-
-    private GetFlowTableStatisticsOutput toOdTableStatistics(NodeTableStatistics nodeTable) {
-        GetFlowTableStatisticsOutputBuilder builder = new GetFlowTableStatisticsOutputBuilder();
-
-        builder.setActive(toCounter64(nodeTable.getActiveCount()));
-        builder.setLookup(toCounter64(nodeTable.getLookupCount()));
-        builder.setMatched(toCounter64(nodeTable.getMatchedCount()));
-
-        return builder.build();
-    }
-
-    @Override
-    public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> getAggregateFlowStatisticsFromFlowTableForAllFlows(
-            GetAggregateFlowStatisticsFromFlowTableForAllFlowsInput input) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutput>> getAggregateFlowStatisticsFromFlowTableForGivenMatch(
-            GetAggregateFlowStatisticsFromFlowTableForGivenMatchInput input) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Future<RpcResult<GetAllFlowStatisticsFromFlowTableOutput>> getAllFlowStatisticsFromFlowTable(
-            GetAllFlowStatisticsFromFlowTableInput input) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> getAllFlowsStatisticsFromAllFlowTables(
-            GetAllFlowsStatisticsFromAllFlowTablesInput input) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Future<RpcResult<GetFlowStatisticsFromFlowTableOutput>> getFlowStatisticsFromFlowTable(
-            GetFlowStatisticsFromFlowTableInput input) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

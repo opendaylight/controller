@@ -8,7 +8,6 @@ import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
 import org.apache.felix.dm.Component
 import java.util.Arrays
-import org.opendaylight.yangtools.yang.binding.NotificationListener
 import java.util.Dictionary
 import java.util.Hashtable
 import org.opendaylight.controller.sal.utils.GlobalConstants
@@ -30,6 +29,9 @@ import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
 import org.opendaylight.controller.sal.discovery.IDiscoveryService
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 
 class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareConsumer {
 
@@ -78,7 +80,10 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         // Inventory Service
         inventory.dataService = session.getSALService(DataBrokerService);
         inventory.flowStatisticsService = session.getRpcService(OpendaylightFlowStatisticsService);
+        inventory.flowTableStatisticsService = session.getRpcService(OpendaylightFlowTableStatisticsService);
+        inventory.nodeConnectorStatisticsService = session.getRpcService(OpendaylightPortStatisticsService);
         inventory.topologyDiscovery = session.getRpcService(FlowTopologyDiscoveryService);
+		inventory.dataProviderService = session.getSALService(DataProviderService)
 
         subscribe.registerNotificationListener(dataPacket)
 
@@ -131,7 +136,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         add(
             createServiceDependency() //
             .setService(IPluginOutReadService) //
-            .setCallbacks("setReadPublisher", "setReadPublisher") //
+            .setCallbacks("setReadPublisher", "unsetReadPublisher") //
             .setRequired(false))
         add(
             createServiceDependency() //

@@ -5,7 +5,6 @@ import java.math.BigInteger
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.util.ArrayList
-import java.util.List
 import org.opendaylight.controller.sal.action.Controller
 import org.opendaylight.controller.sal.action.Drop
 import org.opendaylight.controller.sal.action.Flood
@@ -40,7 +39,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddF
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsInputBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.VlanCfi
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder
@@ -67,7 +65,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.hw.path.action._case.HwPathActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.loopback.action._case.LoopbackActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.src.action._case.SetDlSrcActionBuilder
@@ -107,6 +104,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder
 
 public class MDFlowMapping {
 
@@ -141,13 +139,6 @@ public class MDFlowMapping {
         applyActions.instruction = new ApplyActionsCaseBuilder().setApplyActions(new ApplyActionsBuilder().setAction(actions).build()).build()
         instruction = Collections.<Instruction>singletonList(applyActions.build)
         return it.build;
-    }
-
-    public static def flowStatisticsInput(Node sourceNode, Flow sourceFlow) {
-        val source = flowAdded(sourceFlow);
-        val it = new GetFlowStatisticsInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
-        node = sourceNode.toNodeRef();
-        return it.build();
     }
 
     public static def removeFlowInput(Node sourceNode, Flow sourceFlow) {
@@ -368,4 +359,25 @@ public class MDFlowMapping {
         }
         return new MacAddress(sb.toString());
     }
+	
+	public static def toMDSalflow(Flow sourceFlow) {
+        if (sourceFlow == null)
+            throw new IllegalArgumentException();
+        val it = new FlowBuilder();
+
+        hardTimeout = sourceFlow.hardTimeout as int
+        idleTimeout = sourceFlow.idleTimeout as int
+        cookie = BigInteger.valueOf(sourceFlow.id)
+        priority = sourceFlow.priority as int
+
+        val sourceActions = sourceFlow.actions;
+        val targetActions = new ArrayList<Action>();
+        for (sourceAction : sourceActions) {
+            targetActions.add(sourceAction.toAction());
+        }
+        instructions = targetActions.toApplyInstruction();
+        match = sourceFlow.match.toMatch();
+        return it.build();
+	}
+	
 }
