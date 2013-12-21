@@ -416,8 +416,9 @@ public class RouterTest {
         mavenBundle(YANG + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), //
         mavenBundle("com.google.guava", "guava").versionAsInProject(), //
         mavenBundle("org.zeromq", "jeromq").versionAsInProject(),
-        mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
-        mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
+        mavenBundle("com.fasterxml.jackson.core", "jackson-annotations").versionAsInProject(),
+        mavenBundle("com.fasterxml.jackson.core", "jackson-core").versionAsInProject(),
+        mavenBundle("com.fasterxml.jackson.core", "jackson-databind").versionAsInProject(),
         //routingtable dependencies
         systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
         // List framework bundles
