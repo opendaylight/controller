@@ -106,6 +106,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathActionCaseBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
 
 public class MDFlowMapping {
 
@@ -355,7 +356,7 @@ public class MDFlowMapping {
     }
 
     public static def Uri toUri(NodeConnector connector) {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        return new NodeConnectorId(connector.ID as String);
     }
 
     public static def MacAddress toMacAddress(byte[] bytes) {
