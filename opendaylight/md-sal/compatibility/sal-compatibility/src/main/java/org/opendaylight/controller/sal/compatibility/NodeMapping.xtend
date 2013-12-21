@@ -10,10 +10,12 @@ import static extension org.opendaylight.controller.sal.common.util.Arguments.*;
 
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
 import org.opendaylight.controller.sal.core.ConstructionException
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
 
 public class NodeMapping {
 
@@ -33,7 +35,7 @@ public class NodeMapping {
         val arg = node.getPath().get(1);
         val item = arg.checkInstanceOf(IdentifiableItem);
         val nodeKey = item.getKey().checkInstanceOf(NodeKey);
-        return new Node(MD_SAL_TYPE, nodeKey);
+        return new Node(MD_SAL_TYPE, nodeKey.getId().getValue().toString());
     }
 
     public static def toADNodeConnector(NodeConnectorRef source) throws ConstructionException {
@@ -44,12 +46,13 @@ public class NodeMapping {
         val arg = path.getPath().get(2);
         val item = arg.checkInstanceOf(IdentifiableItem);
         val connectorKey = item.getKey().checkInstanceOf(NodeConnectorKey);
-        return new NodeConnector(MD_SAL_TYPE, connectorKey, node);
+        return new NodeConnector(MD_SAL_TYPE, connectorKey.getId().getValue().toString(), node);
     }
 
     public static def toNodeRef(Node node) {
         checkArgument(MD_SAL_TYPE.equals(node.getType()));
-        val nodeKey = node.ID.checkInstanceOf(NodeKey);
+        var nodeId = node.ID.checkInstanceOf(String)
+        val nodeKey = new NodeKey(new NodeId(nodeId));
         val nodePath = InstanceIdentifier.builder().node(Nodes).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
@@ -57,7 +60,8 @@ public class NodeMapping {
     public static def toNodeConnectorRef(NodeConnector nodeConnector) {
         val node = nodeConnector.node.toNodeRef();
         val nodePath = node.getValue() as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
-        val connectorKey = nodeConnector.ID.checkInstanceOf(NodeConnectorKey);
+        var nodeConnectorId = nodeConnector.ID.checkInstanceOf(String)
+        val connectorKey = new NodeConnectorKey(new NodeConnectorId(nodeConnectorId));
         val path = InstanceIdentifier.builder(nodePath).child(NODECONNECTOR_CLASS, connectorKey).toInstance();
         return new NodeConnectorRef(path);
     }
