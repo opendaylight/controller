@@ -1,18 +1,7 @@
 package org.opendaylight.controller.sal.compatibility;
 
-import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
-import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
-import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
-
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-
-
+import com.google.common.net.InetAddresses;
 import org.opendaylight.controller.sal.core.NodeConnector;
-
-
-
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -22,11 +11,11 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetNodeConnectorStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -53,9 +42,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
-import com.google.common.net.InetAddresses;
-import static org.opendaylight.controller.sal.compatibility.NodeMapping.*;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.*;
+
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+
+import static org.opendaylight.controller.sal.compatibility.NodeMapping.toNodeConnectorRef;
+import static org.opendaylight.controller.sal.compatibility.NodeMapping.toNodeRef;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
+import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
+import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
+import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
 
 public class FromSalConversionsUtils {
 
@@ -270,7 +270,7 @@ public class FromSalConversionsUtils {
 
         InetAddress inetDestAddress = null;
         MatchField netDest = sourceMatch.getField(MatchType.NW_DST);
-        if (netSource != null && netSource.getValue() != null) {
+        if (netDest != null && netDest.getValue() != null) {
             inetDestAddress = (InetAddress) (netDest.getValue());
         }
 
