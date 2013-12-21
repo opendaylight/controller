@@ -84,6 +84,10 @@ module opendaylight-group-types {
     	description "Check chaining for loops and delete";
     }
     
+    typedef group-ref {
+        type instance-identifier;
+    }
+    
     grouping group {
         
         leaf group-type {

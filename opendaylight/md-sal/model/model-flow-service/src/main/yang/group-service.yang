@@ -31,6 +31,9 @@ module sal-group {
 
     rpc add-group {
         input {
+            leaf group-ref {
+                type group-type:group-ref;
+            }
             uses node-group;
             uses tr:transaction-aware;
         }
@@ -41,6 +44,9 @@ module sal-group {
 
     rpc remove-group {
         input {
+            leaf group-ref {
+                type group-type:group-ref;
+            }
             uses node-group;
             uses tr:transaction-aware;
         }
@@ -51,6 +57,9 @@ module sal-group {
 
     rpc update-group {
         input {
+            leaf group-ref {
+                type group-type:group-ref;
+            }
             uses group-update;
             uses tr:transaction-aware;
         }

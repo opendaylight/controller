@@ -31,6 +31,9 @@ module sal-meter {
 
     rpc add-meter {
         input {
+            leaf meter-ref {
+                type meter-type:meter-ref;
+            }
             uses node-meter;
             uses tr:transaction-aware;            
         }
@@ -41,6 +44,10 @@ module sal-meter {
 
     rpc remove-meter {
         input {
+            leaf meter-ref {
+                type meter-type:meter-ref;
+            }
+            
             uses node-meter;
             uses tr:transaction-aware;            
         }
@@ -51,6 +58,10 @@ module sal-meter {
 
     rpc update-meter {
         input {
+            leaf meter-ref {
+                type meter-type:meter-ref;
+            }
+            
             uses meter-update;
             uses tr:transaction-aware;            
         }

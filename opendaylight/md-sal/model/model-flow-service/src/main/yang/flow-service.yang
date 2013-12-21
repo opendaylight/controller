@@ -51,6 +51,9 @@ module sal-flow {
 
     rpc add-flow {
         input {
+            leaf flow-ref {
+                type types:flow-ref;
+            }
             uses node-flow;
             uses tr:transaction-aware;
         }
@@ -61,6 +64,9 @@ module sal-flow {
 
     rpc remove-flow {
         input {
+            leaf flow-ref {
+                type types:flow-ref;
+            }
             uses node-flow;
             uses tr:transaction-aware;
         }
@@ -71,6 +77,9 @@ module sal-flow {
 
     rpc update-flow {
         input {
+            leaf flow-ref {
+                type types:flow-ref;
+            }
             uses flow-update;
             uses tr:transaction-aware;
         }
@@ -87,6 +96,7 @@ module sal-flow {
     notification flow-updated {
         uses node-flow;
         uses tr:transaction-aware;
+        
     }
 
     notification flow-removed {
