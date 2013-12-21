@@ -25,7 +25,7 @@
             </Export-Package>
             <Import-Package>
               com.sun.jersey.spi.container.servlet,
-              org.codehaus.jackson.annotate,
+              com.fasterxml.jackson.annotation,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind,
