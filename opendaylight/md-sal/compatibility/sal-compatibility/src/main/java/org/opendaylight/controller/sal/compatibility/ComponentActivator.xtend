@@ -47,9 +47,13 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     @Property
     org.opendaylight.controller.sal.utils.INodeFactory nodeFactory = new MDSalNodeFactory
 
+    @Property
+    org.opendaylight.controller.sal.utils.INodeConnectorFactory nodeConnectorFactory = new MDSalNodeConnectorFactory
+
+
     override protected init() {
-        Node.NodeIDType.registerIDType(MD_SAL_TYPE, NodeKey);
-        NodeConnector.NodeConnectorIDType.registerIDType(MD_SAL_TYPE, NodeConnectorKey, MD_SAL_TYPE);
+        Node.NodeIDType.registerIDType(MD_SAL_TYPE, String);
+        NodeConnector.NodeConnectorIDType.registerIDType(MD_SAL_TYPE, String, MD_SAL_TYPE);
     }
 
     override start(BundleContext context) {
@@ -81,7 +85,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     }
 
     override protected getGlobalImplementations() {
-        return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory)
+        return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory, nodeConnectorFactory)
     }
 
     override protected configureGlobalInstance(Component c, Object imp) {
@@ -90,6 +94,10 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
 
     private def dispatch configure(MDSalNodeFactory imp, Component it) {
         setInterface(org.opendaylight.controller.sal.utils.INodeFactory.name, properties);
+    }
+
+    private def dispatch configure(MDSalNodeConnectorFactory imp, Component it) {
+        setInterface(org.opendaylight.controller.sal.utils.INodeConnectorFactory.name, properties);
     }
 
     private def dispatch configure(ComponentActivator imp, Component it) {
