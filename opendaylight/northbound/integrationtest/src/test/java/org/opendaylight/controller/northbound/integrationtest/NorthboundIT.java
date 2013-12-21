@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
@@ -44,8 +43,8 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.usermanager.IUserManager;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.Bundle;
@@ -187,7 +186,6 @@ public class NorthboundIT {
                 System.out.println("HTTP response code: " + response.getStatus());
                 System.out.println("HTTP response message: " + response.getEntity());
             }
-
             return response.getEntity();
         } catch (Exception e) {
             if (debugMsg) {
@@ -863,7 +861,7 @@ public class NorthboundIT {
         // code
         fc = "{\"name\":\"test1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"LOOPBACK\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "PUT", fc);
-        Assert.assertTrue(result.equals("Success"));
+        Assert.assertTrue(result.contains("Success"));
 
         fc = "{\"name\":\"test2\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test2", "PUT", fc);
@@ -1391,10 +1389,17 @@ public class NorthboundIT {
                 mavenBundle("org.opendaylight.controller", "flowprogrammer.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "subnets.northbound").versionAsInProject(),
 
-                mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
-                mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
-                mavenBundle("org.codehaus.jackson", "jackson-jaxrs").versionAsInProject(),
-                mavenBundle("org.codehaus.jackson", "jackson-xc").versionAsInProject(),
+//                mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
+//                mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
+//                mavenBundle("org.codehaus.jackson", "jackson-jaxrs").versionAsInProject(),
+//                mavenBundle("org.codehaus.jackson", "jackson-xc").versionAsInProject(),
+
+                mavenBundle("com.fasterxml.jackson.core", "jackson-annotations").versionAsInProject(),
+                mavenBundle("com.fasterxml.jackson.core", "jackson-core").versionAsInProject(),
+                mavenBundle("com.fasterxml.jackson.core", "jackson-databind").versionAsInProject(),
+                mavenBundle("com.fasterxml.jackson.jaxrs", "jackson-jaxrs-json-provider").versionAsInProject(),
+                mavenBundle("com.fasterxml.jackson.module", "jackson-module-jaxb-annotations").versionAsInProject(),
+
                 mavenBundle("org.codehaus.jettison", "jettison").versionAsInProject(),
 
                 mavenBundle("commons-io", "commons-io").versionAsInProject(),
@@ -1493,7 +1498,8 @@ public class NorthboundIT {
                 mavenBundle("com.sun.jersey", "jersey-client").versionAsInProject(),
                 mavenBundle("com.sun.jersey", "jersey-server").versionAsInProject().startLevel(2),
                 mavenBundle("com.sun.jersey", "jersey-core").versionAsInProject().startLevel(2),
-                mavenBundle("com.sun.jersey", "jersey-json").versionAsInProject().startLevel(2), junitBundles());
+//               mavenBundle("com.sun.jersey", "jersey-json").versionAsInProject().startLevel(2),
+                junitBundles());
     }
 
 }

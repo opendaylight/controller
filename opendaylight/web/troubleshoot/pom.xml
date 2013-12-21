@@ -65,10 +65,9 @@
               org.apache.taglibs.standard.tag.rt.fmt,
               org.apache.taglibs.standard.tei,
               org.apache.taglibs.standard.tlv,
-              org.codehaus.jackson,
-              org.codehaus.jackson.annotate,
-              org.codehaus.jackson.map,
-              org.codehaus.jackson.map.annotate,
+              com.fasterxml.jackson.core,
+              com.fasterxml.jackson.databind,
+              com.fasterxml.jackson.annotation,
               org.osgi.framework,
               org.slf4j,
               org.springframework.beans,
@@ -120,9 +119,14 @@
       <artifactId>web</artifactId>
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.codehaus.jackson</groupId>-->
+      <!--<artifactId>jackson-mapper-asl</artifactId>-->
+    <!--</dependency>-->
+      <dependency>
+             <groupId>com.fasterxml.jackson.core</groupId>
+             <artifactId>jackson-databind</artifactId>
+             <version>2.0.0</version>
+      </dependency>
   </dependencies>
 </project>

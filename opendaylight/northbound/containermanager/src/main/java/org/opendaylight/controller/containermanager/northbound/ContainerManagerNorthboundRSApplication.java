@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.Application;
 
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 /**
  * Instance of javax.ws.rs.core.Application used to return the classes
