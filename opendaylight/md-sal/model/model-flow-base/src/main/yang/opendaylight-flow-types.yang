@@ -12,6 +12,10 @@ module opendaylight-flow-types {
         description "Initial revision of flow service";
     }
     
+    typedef flow-ref {
+        type instance-identifier;
+    }
+    
     typedef output-port-values {
         type enumeration {
             enum MAX {
@@ -151,6 +155,10 @@ module opendaylight-flow-types {
     grouping flow {
         container match {
             uses match:match;
+        }
+        
+        leaf flow-ref {
+            type flow-ref;
         }
         
         container instructions {

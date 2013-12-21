@@ -112,10 +112,18 @@ module opendaylight-meter-types {
         }
     }
     
+    typedef meter-ref {
+        type instance-identifier;
+    }
+    
     grouping meter {
         
         leaf flags {
            type meter-flags;        
+        }
+        
+        leaf meter-ref {
+            type meter-ref;
         }
         
         leaf meter-id {
