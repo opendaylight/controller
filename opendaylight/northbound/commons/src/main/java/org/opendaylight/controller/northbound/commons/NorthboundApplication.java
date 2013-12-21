@@ -12,15 +12,14 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.ext.ContextResolver;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
-import org.codehaus.jackson.map.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.opendaylight.controller.northbound.bundlescanner.IBundleScanService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -78,7 +77,7 @@ public class NorthboundApplication extends Application {
 
     private static final JacksonJaxbJsonProvider getJsonProvider() {
         JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
-        jsonProvider.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,
+        jsonProvider.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                 false);
         return jsonProvider;
     }
