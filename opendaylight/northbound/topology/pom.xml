@@ -56,14 +56,14 @@
               org.opendaylight.controller.usermanager,
               org.opendaylight.controller.topologymanager,
               com.sun.jersey.spi.container.servlet,
-              org.codehaus.jackson.annotate,
+              com.fasterxml.jackson.annotation,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
               org.apache.catalina.filters,
-              org.codehaus.jackson.jaxrs,
+              com.fasterxml.jackson.jaxrs.json,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/topology</Web-ContextPath>

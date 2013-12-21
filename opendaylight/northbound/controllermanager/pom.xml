@@ -59,8 +59,7 @@
               javax.xml.bind,
               org.slf4j,
               org.apache.catalina.filters,
-              org.codehaus.jackson.jaxrs,
-              org.codehaus.jackson.annotate,
+              com.fasterxml.jackson.annotation,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/controllermanager</Web-ContextPath>
