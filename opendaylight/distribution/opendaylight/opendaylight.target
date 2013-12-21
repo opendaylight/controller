@@ -51,7 +51,6 @@
 <unit id="org.eclipse.virgo.kernel.equinox.extensions" version="3.6.0.RELEASE"/>
 <unit id="org.eclipse.osgi.services" version="3.3.100.v20120522-1822"/>
 <unit id="org.eclipse.virgo.util.common" version="3.6.0.RELEASE"/>
-<unit id="com.sun.jersey.json" version="1.17.0"/>
 <unit id="org.eclipse.equinox.util" version="1.0.400.v20120522-2049"/>
 <unit id="org.springframework.core" version="3.1.3.RELEASE"/>
 <unit id="org.apache.commons.fileupload" version="1.2.2"/>

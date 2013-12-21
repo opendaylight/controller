@@ -72,7 +72,7 @@
               javax.xml.bind.annotation,
               org.slf4j,
               org.apache.catalina.filters,
-              org.codehaus.jackson.jaxrs,
+              com.fasterxml.jackson.jaxrs.json,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Export-Package>
