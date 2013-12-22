@@ -15,6 +15,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowRef
 
 class FlowTransaction extends AbstractTransaction {
     
@@ -32,6 +33,7 @@ class FlowTransaction extends AbstractTransaction {
             val tableInstanceId = instanceId.firstIdentifierOf(Table);
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new RemoveFlowInputBuilder(flow);
+            builder.setFlowRef(new FlowRef(instanceId));
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setFlowTable(new FlowTableRef(tableInstanceId));
             _salFlowService.removeFlow(builder.build());            
@@ -45,6 +47,7 @@ class FlowTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new UpdateFlowInputBuilder();
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setFlowRef(new FlowRef(instanceId));
             val ufb = new UpdatedFlowBuilder(updatedFlow);
             builder.setUpdatedFlow((ufb.build()));
             val ofb = new OriginalFlowBuilder(originalFlow);
@@ -61,6 +64,7 @@ class FlowTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new AddFlowInputBuilder(flow);
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setFlowRef(new FlowRef(instanceId));
             builder.setFlowTable(new FlowTableRef(tableInstanceId));
             _salFlowService.addFlow(builder.build());            
         }
