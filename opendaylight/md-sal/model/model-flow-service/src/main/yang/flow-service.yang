@@ -89,17 +89,26 @@ module sal-flow {
     }
 
     notification flow-added {
+        leaf flow-ref {
+            type types:flow-ref;
+        }
         uses node-flow;
         uses tr:transaction-aware;
     }
 
     notification flow-updated {
+        leaf flow-ref {
+            type types:flow-ref;
+        }
         uses node-flow;
         uses tr:transaction-aware;
         
     }
 
     notification flow-removed {
+        leaf flow-ref {
+            type types:flow-ref;
+        }
         uses node-flow;
         uses tr:transaction-aware;
     }
