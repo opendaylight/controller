@@ -69,16 +69,25 @@ module sal-group {
     } 
 
     notification group-added {
+        leaf group-ref {
+            type group-type:group-ref;
+        }
         uses node-group;
         uses tr:transaction-aware;
     }
 
     notification group-updated {
+        leaf group-ref {
+            type group-type:group-ref;
+        }
         uses node-group;
         uses tr:transaction-aware;
     }
 
     notification group-removed {
+        leaf group-ref {
+            type group-type:group-ref;
+        }
         uses node-group;
         uses tr:transaction-aware;
     }    

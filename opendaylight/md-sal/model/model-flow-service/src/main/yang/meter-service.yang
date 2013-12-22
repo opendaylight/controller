@@ -71,16 +71,25 @@ module sal-meter {
     }
         
     notification meter-added {
+        leaf meter-ref {
+            type meter-type:meter-ref;
+        }
         uses node-meter;
         uses tr:transaction-aware;
     }
 
     notification meter-updated {
+        leaf meter-ref {
+            type meter-type:meter-ref;
+        }
         uses node-meter;
         uses tr:transaction-aware;
     }
 
     notification meter-removed {
+        leaf meter-ref {
+            type meter-type:meter-ref;
+        }
         uses node-meter;
         uses tr:transaction-aware;
     }
