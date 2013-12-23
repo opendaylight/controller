@@ -106,10 +106,6 @@ module opendaylight-group-types {
             type string; 
         }
         
-        leaf install {
-            type boolean; 
-        } 
-        
         leaf barrier {
             type boolean; 
         }       

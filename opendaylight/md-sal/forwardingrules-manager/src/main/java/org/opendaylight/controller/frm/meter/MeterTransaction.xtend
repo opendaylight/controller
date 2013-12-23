@@ -13,6 +13,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.met
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.Meter
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterRef
 
 class MeterTransaction extends AbstractTransaction {
     
@@ -30,6 +31,7 @@ class MeterTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new RemoveMeterInputBuilder(meter);
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setMeterRef(new MeterRef(instanceId));
             _salMeterService.removeMeter(builder.build());            
         }
     }
@@ -41,6 +43,7 @@ class MeterTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new UpdateMeterInputBuilder();
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setMeterRef(new MeterRef(instanceId));
             val ufb = new UpdatedMeterBuilder(updatedMeter);
             builder.setUpdatedMeter((ufb.build()));
             val ofb = new OriginalMeterBuilder(originalMeter);
@@ -56,6 +59,7 @@ class MeterTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new AddMeterInputBuilder(meter);
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setMeterRef(new MeterRef(instanceId));
             _salMeterService.addMeter(builder.build());            
         }
     }

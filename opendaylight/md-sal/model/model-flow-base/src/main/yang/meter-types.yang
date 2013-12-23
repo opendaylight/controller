@@ -124,11 +124,12 @@ module opendaylight-meter-types {
         
         leaf meter-id {
             type meter-id;
-        }
+        }       
         
-        leaf install {
+        leaf barrier {
             type boolean; 
         }
+        
         leaf meter-name {
             type string;
         }
