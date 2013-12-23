@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_ad7f8565",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/SubnetConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-23T19:49:41Z",
+      "side": 1,
+      "message": "Can you move this check above the prefix computation.",
+      "revId": "e5f0cee21c8f8b9c4b6eb42d9e908caa62e3b25a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_8d9841c1",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/SubnetConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-12-23T19:49:41Z",
+      "side": 1,
+      "message": "\"Invalid subnet gateway address [...]\"",
+      "revId": "e5f0cee21c8f8b9c4b6eb42d9e908caa62e3b25a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
