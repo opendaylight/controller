@@ -244,17 +244,7 @@ public class Subnet implements Cloneable, Serializable {
     }
 
     public boolean isMutualExclusive(Subnet otherSubnet) {
-        if (this.networkAddress.getClass() != otherSubnet.networkAddress
-                .getClass()) {
-            return true;
-        }
-        if (this.isSubnetOf(otherSubnet.getNetworkAddress())) {
-            return false;
-        }
-        if (otherSubnet.isSubnetOf(this.getNetworkAddress())) {
-            return false;
-        }
-        return true;
+        return !(isSubnetOf(otherSubnet.getNetworkAddress()) || otherSubnet.isSubnetOf(getNetworkAddress()));
     }
 
     /**
