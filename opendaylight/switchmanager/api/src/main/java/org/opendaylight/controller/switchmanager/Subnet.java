@@ -161,15 +161,11 @@ public class Subnet implements Cloneable, Serializable {
         }
         InetAddress thisPrefix = getPrefixForAddress(this.networkAddress);
         InetAddress otherPrefix = getPrefixForAddress(ip);
-        if ((thisPrefix == null) || (otherPrefix == null)) {
-            return false;
+        boolean isSubnetOf = true;
+        if (((thisPrefix == null) || (otherPrefix == null)) || (!thisPrefix.equals(otherPrefix)) ) {
+            isSubnetOf = false;
         }
-        if (thisPrefix.equals(otherPrefix)) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return isSubnetOf;
     }
 
     public short getVlan() {

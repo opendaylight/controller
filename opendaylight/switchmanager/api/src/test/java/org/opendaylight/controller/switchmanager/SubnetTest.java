@@ -8,8 +8,13 @@
 
 package org.opendaylight.controller.switchmanager;
 
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,19 +31,19 @@ public class SubnetTest {
     public void testSubnet() throws Exception {
         InetAddress ipaddr = InetAddress.getByName("100.0.0.1");
         Subnet subnet = new Subnet(ipaddr, (short) 24, (short) 5);
-        Assert.assertTrue(subnet.equals(subnet));
-        Assert.assertFalse(subnet.equals(null));
-        Assert.assertFalse(subnet.equals(ipaddr));
+        assertTrue(subnet.equals(subnet));
+        assertFalse(subnet.equals(null));
+        assertFalse(subnet.equals(ipaddr));
         Subnet subnet2 = new Subnet(ipaddr, (short) 24, (short) 5);
         Inet6Address ipv6 = (Inet6Address) Inet6Address
                 .getByName("1111::2222:3333:4444:5555:6666");
         Subnet subnet3 = new Subnet(ipv6, (short) 24, (short) 5);
-        Assert.assertTrue(subnet.equals(subnet2));
-        Assert.assertFalse(subnet.isMutualExclusive(subnet2));
-        Assert.assertTrue(subnet.isMutualExclusive(subnet3));
+        assertTrue(subnet.equals(subnet2));
+        assertFalse(subnet.isMutualExclusive(subnet2));
+        assertTrue(subnet.isMutualExclusive(subnet3));
         InetAddress subnetAddr = InetAddress.getByName("200.0.0.100");
 
-        Assert.assertTrue(subnet.isFlatLayer2() == true);
+        assertTrue(subnet.isFlatLayer2() == true);
 
         Set<NodeConnector> ncSet = new HashSet<NodeConnector>();
         Node node = NodeCreator.createOFNode(((long) 10));
@@ -53,10 +58,10 @@ public class SubnetTest {
         ncSet.add(nc1);
         ncSet.add(nc2);
 
-        Assert.assertTrue(subnet.hasNodeConnector(nc0));
-        Assert.assertFalse(subnet.hasNodeConnector(null));
+        assertTrue(subnet.hasNodeConnector(nc0));
+        assertFalse(subnet.hasNodeConnector(null));
         subnet.addNodeConnectors(ncSet);
-        Assert.assertTrue(subnet.hasNodeConnector(nc0));
+        assertTrue(subnet.hasNodeConnector(nc0));
 
         Set<NodeConnector> resultncSet = subnet.getNodeConnectors();
         Assert.assertEquals(resultncSet, ncSet);
@@ -69,24 +74,61 @@ public class SubnetTest {
         Set<NodeConnector> ncSet2 = new HashSet<NodeConnector>();
         ncSet2.add(nc0);
         subnet.deleteNodeConnectors(ncSet2);
-        Assert.assertFalse(subnet.getNodeConnectors().contains(nc0));
-        Assert.assertFalse(subnet.hasNodeConnector(nc0));
-        Assert.assertTrue(subnet.getNodeConnectors().contains(nc1));
-        Assert.assertTrue(subnet.getNodeConnectors().contains(nc2));
+        assertFalse(subnet.getNodeConnectors().contains(nc0));
+        assertFalse(subnet.hasNodeConnector(nc0));
+        assertTrue(subnet.getNodeConnectors().contains(nc1));
+        assertTrue(subnet.getNodeConnectors().contains(nc2));
 
         subnet.deleteNodeConnectors(ncSet2);
 
         subnet.setNetworkAddress(subnetAddr);
-        Assert.assertTrue(subnet.isMutualExclusive(subnet2));
-        Assert.assertTrue(subnet.getNetworkAddress().equals(subnetAddr));
+        assertTrue(subnet.isMutualExclusive(subnet2));
+        assertTrue(subnet.getNetworkAddress().equals(subnetAddr));
 
         subnet.setSubnetMaskLength((short) 16);
-        Assert.assertTrue(subnet.getSubnetMaskLength() == 16);
+        assertTrue(subnet.getSubnetMaskLength() == 16);
 
         subnet.setVlan((short) 100);
-        Assert.assertTrue(subnet.getVlan() == 100);
+        assertTrue(subnet.getVlan() == 100);
 
-        Assert.assertTrue(subnet.isFlatLayer2() == false);
+        assertTrue(subnet.isFlatLayer2() == false);
     }
+
+    @Test
+    public void checkIsSubnetOfComparisonMatch() {
+        String host = "10.0.0.1";
+        InetAddress ipAddrForSubnetComparison = null;
+        try {
+            ipAddrForSubnetComparison = InetAddress.getByName(host);
+        } catch (UnknownHostException e) {
+            fail("Failed to create InetAddress object for" + host);
+        }
+        SubnetConfig subnetConf = new SubnetConfig("subnet", "10.0.0.254/24",null);
+        Subnet subnet = new Subnet(subnetConf);
+        assertTrue(subnet.isSubnetOf(ipAddrForSubnetComparison));
+    }
+
+    @Test
+    public void checkIsSubnetOfComparisonNoMatch() {
+        String host = "100.0.0.1";
+        InetAddress ipAddrForSubnetComparison = null;
+        try {
+            ipAddrForSubnetComparison = InetAddress.getByName(host);
+        } catch (UnknownHostException e) {
+            fail("Failed to create InetAddress object for" + host);
+        }
+        SubnetConfig subnetConf = new SubnetConfig("subnet", "10.0.0.254/24",null);
+        Subnet subnet = new Subnet(subnetConf);
+        assertFalse(subnet.isSubnetOf(ipAddrForSubnetComparison));
+    }
+
+    @Test
+    public void checkIsSubnetOfComparisonIpEmpty() {
+        SubnetConfig subnetConf = new SubnetConfig("subnet", "10.0.0.254/24",null);
+        Subnet subnet = new Subnet(subnetConf);
+        assertFalse(subnet.isSubnetOf(null));
+    }
+
+
 
 }
