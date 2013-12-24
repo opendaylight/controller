@@ -277,6 +277,12 @@ public abstract class AbstractScheme {
 
     public Status addNode (Node node, InetAddress controller) {
         if (node == null || controller == null) {
+            if (node == null) {
+                log.warn("addNode: node is null");
+            }
+            if (controller == null) {
+                log.error("Failed to add node {}. The controller address retrieved from clusterServices is null.", node);
+            }
             return new Status(StatusCode.BADREQUEST);
         }
         if (isLocal(node))  {
