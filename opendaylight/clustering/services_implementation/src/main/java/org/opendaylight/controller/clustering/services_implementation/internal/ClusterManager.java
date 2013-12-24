@@ -68,7 +68,7 @@ public class ClusterManager implements IClusterServices {
     private HashSet<IListenRoleChange> roleChangeListeners;
     private ViewChangedListener cacheManagerListener;
 
-    private static String loopbackAddress = "127.0.0.1";
+    private static String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
 
     // defaultTransactionTimeout is 60 seconds
     private static int DEFAULT_TRANSACTION_TIMEOUT = 60;
