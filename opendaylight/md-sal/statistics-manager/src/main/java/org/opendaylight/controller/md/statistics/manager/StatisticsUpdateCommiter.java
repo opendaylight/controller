@@ -492,9 +492,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             }
             
             if(!foundOriginalFlow){
-                sucLogger.info("Associated original flow is not found in data store. Augmenting flow in operational data st");
-                //TODO: Temporary fix: format [ 0+tableid+0+unaccounted flow counter]
-                long flowKey = Long.getLong(new String("0"+Short.toString(tableId)+"0"+Integer.toString(this.unaccountedFlowsCounter)));
+                sucLogger.info("Associated original flow is not found in data store. Augmenting flow in operational data store");
+                //TODO: Temporary fix: format [ 1+tableid+1+unaccounted flow counter]
+                long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"1"+Integer.toString(this.unaccountedFlowsCounter)));
                 FlowKey newFlowKey = new FlowKey(new FlowId(flowKey));
                 InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                         .augmentation(FlowCapableNode.class)
