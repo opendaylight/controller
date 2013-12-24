@@ -45,6 +45,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.q
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupDescStatsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupFeaturesUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupStatisticsUpdated;
@@ -87,6 +88,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericQueueStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
@@ -482,7 +487,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                                 .child(Flow.class,existingFlow.getKey()).toInstance();
                         flowBuilder.setKey(existingFlow.getKey());
                         flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                        sucLogger.debug("Found matching flow in the datastore, augmenting statistics");
+                        sucLogger.info("Found matching flow in the datastore, augmenting statistics");
                         foundOriginalFlow = true;
                         it.putOperationalData(flowRef, flowBuilder.build());
                         it.commit();
@@ -492,9 +497,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             }
             
             if(!foundOriginalFlow){
-                sucLogger.info("Associated original flow is not found in data store. Augmenting flow in operational data st");
-                //TODO: Temporary fix: format [ 0+tableid+0+unaccounted flow counter]
-                long flowKey = Long.getLong(new String("0"+Short.toString(tableId)+"0"+Integer.toString(this.unaccountedFlowsCounter)));
+                sucLogger.debug("Associated original flow is not found in data store. Augmenting flow in operational data store");
+                //TODO: Temporary fix: format [ 1+tableid+1+unaccounted flow counter]
+                long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"1"+Integer.toString(this.unaccountedFlowsCounter)));
                 FlowKey newFlowKey = new FlowKey(new FlowId(flowKey));
                 InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                         .augmentation(FlowCapableNode.class)
@@ -745,14 +750,8 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             if (storedFlow.getMatch() != null) {
                 return false;
             }
-        } else if(!statsFlow.getMatch().equals(storedFlow.getMatch())) {
-            return false;
-        }
-        if (statsFlow.getCookie()== null) {
-            if (storedFlow.getCookie()!= null) {
-                return false;
-            }
-        } else if(!statsFlow.getCookie().equals(storedFlow.getCookie())) {
+        } //else if(!statsFlow.getMatch().equals(storedFlow.getMatch())) {
+        else if(!matchEquals(statsFlow.getMatch(), storedFlow.getMatch())) {
             return false;
         }
         if (statsFlow.getHardTimeout() == null) {
@@ -785,5 +784,171 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         return true;
     }
+    
+    /**
+     * Explicit equals method to compare the 'match' for flows stored in the data-stores and flow fetched from the switch.
+     * Usecase: e.g If user don't set any ethernet source and destination address for match,data store will store null for 
+     * these address.
+     * e.g [_ethernetMatch=EthernetMatch [_ethernetDestination=null, _ethernetSource=null, _ethernetType=
+     * EthernetType [_type=EtherType [_value=2048], _mask=null, augmentation=[]]
+     * 
+     * But when you fetch the flows from switch, openflow driver library converts all zero bytes of mac address in the 
+     * message stream to 00:00:00:00:00:00. Following string shows how library interpret the zero mac address bytes and 
+     * eventually when translator convert it to MD-SAL match, this is how it looks 
+     * [_ethernetDestination=EthernetDestination [_address=MacAddress [_value=00:00:00:00:00:00], _mask=null, augmentation=[]], 
+     * _ethernetSource=EthernetSource [_address=MacAddress [_value=00:00:00:00:00:00], _mask=null, augmentation=[]], 
+     * _ethernetType=EthernetType [_type=EtherType [_value=2048], _mask=null, augmentation=[]]
+     * 
+     * So this custom equals method add additional check, in case any match element is null in data-store-flow, but not
+     * in the flow fetched from switch.
+     * 
+     * @param statsFlow
+     * @param storedFlow
+     * @return
+     */
+    public boolean matchEquals(Match statsFlow, Match storedFlow) {
+        if (statsFlow == storedFlow) {
+            return true;
+        }
+        if (storedFlow.getClass() != statsFlow.getClass()) {
+            return false;
+        }
+        if (storedFlow.getEthernetMatch() == null) {
+            if (statsFlow.getEthernetMatch() != null) {
+                if(!statsFlow.getEthernetMatch().getEthernetDestination().getAddress().getValue().equals("00:00:00:00:00:00") ||
+                        !statsFlow.getEthernetMatch().getEthernetSource().getAddress().getValue().equals("00:00:00:00:00:00")){
+                    return false;
+                }
+            }
+        } //else if(!storedFlow.getEthernetMatch().equals(statsFlow.getEthernetMatch())) {
+        else if(!EthernetMatchEquals(statsFlow.getEthernetMatch(),storedFlow.getEthernetMatch())) {
+            return false;
+        }
+        if (storedFlow.getIcmpv4Match()== null) {
+            if (statsFlow.getIcmpv4Match() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getIcmpv4Match().equals(statsFlow.getIcmpv4Match())) {
+            return false;
+        }
+        if (storedFlow.getIcmpv6Match() == null) {
+            if (statsFlow.getIcmpv6Match() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getIcmpv6Match().equals(statsFlow.getIcmpv6Match())) {
+            return false;
+        }
+        if (storedFlow.getInPhyPort() == null) {
+            if (statsFlow.getInPhyPort() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getInPhyPort().equals(statsFlow.getInPhyPort())) {
+            return false;
+        }
+        if (storedFlow.getInPort()== null) {
+            if (statsFlow.getInPort() != null) {
+                if(statsFlow.getInPort()!= 0){
+                    return false;
+                }
+            }
+        } else if(!storedFlow.getInPort().equals(statsFlow.getInPort())) {
+            return false;
+        }
+        if (storedFlow.getIpMatch()== null) {
+            if (statsFlow.getIpMatch() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getIpMatch().equals(statsFlow.getIpMatch())) {
+            return false;
+        }
+        if (storedFlow.getLayer3Match()== null) {
+            if (statsFlow.getLayer3Match() != null) {
+                Ipv4Match ipv4Match = (Ipv4Match)statsFlow.getLayer3Match();
+                if(!ipv4Match.getIpv4Source().getValue().equals("0.0.0.0/0") ||
+                        !ipv4Match.getIpv4Destination().getValue().equals("0.0.0.0/0")){
+                    return false;
+                }
+            }
+        } else if(!storedFlow.getLayer3Match().equals(statsFlow.getLayer3Match())) {
+            return false;
+        }
+        if (storedFlow.getLayer4Match()== null) {
+            if (statsFlow.getLayer4Match() != null) {
+                TcpMatch tcpMatch = (TcpMatch)statsFlow.getLayer4Match();
+                if(!tcpMatch.getTcpDestinationPort().getValue().equals(0) ||
+                    !tcpMatch.getTcpSourcePort().getValue().equals(0)){
+                        return false;
+                }
+            }
+        } else if(!storedFlow.getLayer4Match().equals(statsFlow.getLayer4Match())) {
+            return false;
+        }
+        if (storedFlow.getMetadata() == null) {
+            if (statsFlow.getMetadata() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getMetadata().equals(statsFlow.getMetadata())) {
+            return false;
+        }
+        if (storedFlow.getProtocolMatchFields() == null) {
+            if (statsFlow.getProtocolMatchFields() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getProtocolMatchFields().equals(statsFlow.getProtocolMatchFields())) {
+            return false;
+        }
+        if (storedFlow.getTunnel()== null) {
+            if (statsFlow.getTunnel() != null) {
+                return false;
+            }
+        } else if(!storedFlow.getTunnel().equals(statsFlow.getTunnel())) {
+            return false;
+        }
+        if (storedFlow.getVlanMatch()== null) {
+            if (statsFlow.getVlanMatch() != null) {
+                VlanMatch vlanMatch = statsFlow.getVlanMatch();
+                if(!vlanMatch.getVlanId().getVlanId().getValue().equals(0) ||
+                        !vlanMatch.getVlanPcp().getValue().equals((short)0)){
+                    return false;
+                }
+            }
+        } else if(!storedFlow.getVlanMatch().equals(statsFlow.getVlanMatch())) {
+            return false;
+        }
+        return true;
+    }
 
+    public boolean EthernetMatchEquals(EthernetMatch statsEtherMatch, EthernetMatch storedEtherMatch) {
+        if (statsEtherMatch == storedEtherMatch) {
+            return true;
+        }
+        if (storedEtherMatch.getEthernetDestination()== null) {
+            if (statsEtherMatch.getEthernetDestination() != null) {
+                if(!statsEtherMatch.getEthernetDestination().getAddress().getValue().equals("00:00:00:00:00:00")){
+                    return false;
+                }
+            }
+        } else if(!storedEtherMatch.getEthernetDestination().equals(statsEtherMatch.getEthernetDestination())) {
+            return false;
+        }
+        if (storedEtherMatch.getEthernetSource() == null) {
+            if (statsEtherMatch.getEthernetSource() != null) {
+                if(!statsEtherMatch.getEthernetSource().getAddress().getValue().equals("00:00:00:00:00:00")){
+                    return false;
+                }
+            }
+        } else if(!storedEtherMatch.getEthernetSource().equals(statsEtherMatch.getEthernetSource())) {
+            return false;
+        }
+        if (storedEtherMatch.getEthernetType() == null) {
+            if (statsEtherMatch.getEthernetType() != null) {
+                if(!statsEtherMatch.getEthernetType().getType().getValue().equals(0)){
+                    return false;
+                }
+            }
+        } else if(!storedEtherMatch.getEthernetType().equals(statsEtherMatch.getEthernetType())) {
+            return false;
+        }
+        return true;
+    }
 }
