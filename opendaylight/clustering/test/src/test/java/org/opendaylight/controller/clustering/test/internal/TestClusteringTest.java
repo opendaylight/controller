@@ -13,9 +13,7 @@ package org.opendaylight.controller.clustering.test.internal;
 import org.junit.Assert;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class TestClusteringTest extends TestCase {
+public class TestClusteringTest {
 
         @Test
         public void testComplexClass() {

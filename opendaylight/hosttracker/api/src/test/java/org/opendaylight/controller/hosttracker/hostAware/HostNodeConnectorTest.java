@@ -13,19 +13,14 @@ import java.net.UnknownHostException;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
-
-import junit.framework.TestCase;
-
-import org.opendaylight.controller.sal.packet.address.EthernetAddress;
-
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.packet.address.EthernetAddress;
+import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
-public class HostNodeConnectorTest extends TestCase {
+public class HostNodeConnectorTest {
 
     @Test
     public void testHostNodeConnector() throws UnknownHostException {
