@@ -136,6 +136,11 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>topology-lldp-discovery</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>statistics-manager</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
