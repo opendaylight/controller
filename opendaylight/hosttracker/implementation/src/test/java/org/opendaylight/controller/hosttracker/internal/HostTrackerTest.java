@@ -11,14 +11,12 @@ package org.opendaylight.controller.hosttracker.internal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.hosttracker.IHostId;
 import org.opendaylight.controller.hosttracker.IPHostId;
 
-public class HostTrackerTest extends TestCase {
+public class HostTrackerTest {
 
     @Test
     public void testHostTrackerCallable() throws UnknownHostException {
