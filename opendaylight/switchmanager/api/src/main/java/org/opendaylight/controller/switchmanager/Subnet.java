@@ -25,6 +25,7 @@ public class Subnet implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
     // Key fields
     private InetAddress networkAddress;
+    private transient InetAddress subnetPrefix;
     private short subnetMaskLength;
     // Property fields
     private short vlan;
@@ -114,6 +115,7 @@ public class Subnet implements Cloneable, Serializable {
      */
     public Subnet setNetworkAddress(InetAddress networkAddress) {
         this.networkAddress = networkAddress;
+        this.subnetPrefix = null;
         return this;
     }
 
@@ -159,10 +161,12 @@ public class Subnet implements Cloneable, Serializable {
         if (ip == null) {
             return false;
         }
-        InetAddress thisPrefix = getPrefixForAddress(this.networkAddress);
+        if(subnetPrefix == null) {
+            subnetPrefix = getPrefixForAddress(this.networkAddress);
+        }
         InetAddress otherPrefix = getPrefixForAddress(ip);
         boolean isSubnetOf = true;
-        if (((thisPrefix == null) || (otherPrefix == null)) || (!thisPrefix.equals(otherPrefix)) ) {
+        if (((subnetPrefix == null) || (otherPrefix == null)) || (!subnetPrefix.equals(otherPrefix)) ) {
             isSubnetOf = false;
         }
         return isSubnetOf;
