@@ -7,7 +7,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public final class TypeSafeDataReader {
 
     
-    private final DataReader<InstanceIdentifier<?>,DataObject> delegate;
+    private final DataReader<InstanceIdentifier<? extends DataObject>,DataObject> delegate;
     
     
     
@@ -16,7 +16,7 @@ public final class TypeSafeDataReader {
     }
 
 
-    public TypeSafeDataReader(DataReader<InstanceIdentifier<?>, DataObject> delegate) {
+    public TypeSafeDataReader(DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
         this.delegate = delegate;
     }
 
@@ -32,7 +32,7 @@ public final class TypeSafeDataReader {
         return (D) delegate.readOperationalData(path);
     }
     
-    public static TypeSafeDataReader forReader(DataReader<InstanceIdentifier<?>, DataObject> delegate) {
+    public static TypeSafeDataReader forReader(DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
         return new TypeSafeDataReader(delegate);
     }
 }

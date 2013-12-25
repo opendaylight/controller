@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-topology-view</artifactId>
+            <artifactId>model-topology</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -58,8 +58,8 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.opendaylight.controller.md.inventory.manager.InventoryActivator</Bundle-Activator>
-                        <Private-Package>org.opendaylight.controller.md.inventory.manager</Private-Package>
+                        <Bundle-Activator>org.opendaylight.md.controller.topology.manager.FlowCapableTopologyProvider</Bundle-Activator>
+                        <Private-Package>org.opendaylight.md.controller.topology.manager</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
