@@ -21,12 +21,14 @@ module opendaylight-topology-inventory {
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         ext:augment-identifier "inventory-node";
-        uses inv:node-context-ref;
+        leaf inventory-node-ref {
+            type inv:node-ref;
+        }
     }
 
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
         ext:augment-identifier "inventory-node-connector";
-        leaf node-connector {
+        leaf inventory-node-connector-ref {
             ext:context-reference "inv:node-connector-context";
             type inv:node-connector-ref;
         }
