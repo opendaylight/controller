@@ -105,9 +105,6 @@ class InventoryAndReadAdapter implements IPluginInTopologyService,
 
     @Property
     IPluginOutTopologyService topologyPublisher;
-    
-    @Property
-    IDiscoveryService discoveryPublisher;
 
     @Property
     FlowTopologyDiscoveryService topologyDiscovery;
@@ -470,7 +467,6 @@ class InventoryAndReadAdapter implements IPluginInTopologyService,
     
     override onLinkDiscovered(LinkDiscovered notification) {
         val update = new TopoEdgeUpdate(notification.toADEdge,Collections.emptySet(),UpdateType.ADDED);
-        discoveryPublisher.notifyEdge(notification.toADEdge,UpdateType.ADDED,Collections.emptySet());
         topologyPublisher.edgeUpdate(Collections.singletonList(update))
     }
     
