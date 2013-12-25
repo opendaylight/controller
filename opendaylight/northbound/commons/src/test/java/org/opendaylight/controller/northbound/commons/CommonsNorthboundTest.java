@@ -3,9 +3,7 @@ package org.opendaylight.controller.northbound.commons;
 import org.junit.Assert;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class CommonsNorthboundTest extends TestCase {
+public class CommonsNorthboundTest {
 
     @Test
     public void testRestMessages() {

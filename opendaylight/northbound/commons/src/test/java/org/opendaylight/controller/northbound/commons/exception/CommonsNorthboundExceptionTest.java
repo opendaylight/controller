@@ -5,9 +5,7 @@ import javax.ws.rs.core.Response;
 import org.junit.Assert;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class CommonsNorthboundExceptionTest extends TestCase {
+public class CommonsNorthboundExceptionTest {
 
     @Test
     public void testMethodNotAllowed() {
