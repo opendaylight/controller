@@ -23,7 +23,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new InternalServerErrorException("Internal Server Exception");
         } catch (InternalServerErrorException e) {
-            Assert.assertTrue(e instanceof InternalServerErrorException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Internal Server Exception"));
         }
@@ -34,7 +33,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new MethodNotAllowedException("Method Not Allowed Exception");
         } catch (MethodNotAllowedException e) {
-            Assert.assertTrue(e instanceof MethodNotAllowedException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Method Not Allowed Exception"));
         }
@@ -45,7 +43,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new NotAcceptableException("Not Acceptable Exception");
         } catch (NotAcceptableException e) {
-            Assert.assertTrue(e instanceof NotAcceptableException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Not Acceptable Exception"));
         }
@@ -56,7 +53,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new ResourceConflictException("Resource Conflict Exception");
         } catch (ResourceConflictException e) {
-            Assert.assertTrue(e instanceof ResourceConflictException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Resource Conflict Exception"));
         }
@@ -67,7 +63,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new ResourceForbiddenException("Resource Forbidden Exception");
         } catch (ResourceForbiddenException e) {
-            Assert.assertTrue(e instanceof ResourceForbiddenException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Resource Forbidden Exception"));
         }
@@ -78,7 +73,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new ResourceGoneException("Resource Gone Exception");
         } catch (ResourceGoneException e) {
-            Assert.assertTrue(e instanceof ResourceGoneException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Resource Gone Exception"));
         }
@@ -89,7 +83,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new ResourceNotFoundException("Resource Not Found Exception");
         } catch (ResourceNotFoundException e) {
-            Assert.assertTrue(e instanceof ResourceNotFoundException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Resource Not Found Exception"));
         }
@@ -101,7 +94,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
             throw new ServiceUnavailableException(
                     "Service Unavailable Exception");
         } catch (ServiceUnavailableException e) {
-            Assert.assertTrue(e instanceof ServiceUnavailableException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Service Unavailable Exception"));
         }
@@ -112,7 +104,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
         try {
             throw new UnauthorizedException("Unauthorized Exception");
         } catch (UnauthorizedException e) {
-            Assert.assertTrue(e instanceof UnauthorizedException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Unauthorized Exception"));
         }
@@ -124,7 +115,6 @@ public class CommonsNorthboundExceptionTest extends TestCase {
             throw new UnsupportedMediaTypeException(
                     "Unsupported Media Type Exception");
         } catch (UnsupportedMediaTypeException e) {
-            Assert.assertTrue(e instanceof UnsupportedMediaTypeException);
             Assert.assertTrue(e.getResponse().getEntity()
                     .equals("Unsupported Media Type Exception"));
         }
