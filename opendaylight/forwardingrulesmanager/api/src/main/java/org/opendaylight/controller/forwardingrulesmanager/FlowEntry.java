@@ -122,7 +122,7 @@ public class FlowEntry implements Cloneable, Serializable {
         }
 
         if (flow == null) {
-            return (other.flow == null) ? true : false;
+            return other.flow == null;
         } else if (other.flow == null) {
             return false;
         }
