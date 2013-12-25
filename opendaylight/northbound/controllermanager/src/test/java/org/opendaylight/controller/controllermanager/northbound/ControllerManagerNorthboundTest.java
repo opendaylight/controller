@@ -3,13 +3,11 @@ package org.opendaylight.controller.controllermanager.northbound;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Property;
 
-public class ControllerManagerNorthboundTest extends TestCase {
+public class ControllerManagerNorthboundTest {
 
     @Test
     public void testControllerProperties() {

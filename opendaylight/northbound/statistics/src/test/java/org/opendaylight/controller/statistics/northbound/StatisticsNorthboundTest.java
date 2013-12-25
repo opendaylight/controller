@@ -12,8 +12,6 @@ package org.opendaylight.controller.statistics.northbound;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
@@ -22,7 +20,7 @@ import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
-public class StatisticsNorthboundTest extends TestCase {
+public class StatisticsNorthboundTest {
 
     @Test
     public void testFlowStatistics() {

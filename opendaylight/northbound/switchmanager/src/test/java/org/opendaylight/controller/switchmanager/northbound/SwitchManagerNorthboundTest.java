@@ -1,22 +1,20 @@
 package org.opendaylight.controller.switchmanager.northbound;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
-import junit.framework.TestCase;
-
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
-public class SwitchManagerNorthboundTest extends TestCase {
+public class SwitchManagerNorthboundTest {
 
         @Test
         public void testNodes() {

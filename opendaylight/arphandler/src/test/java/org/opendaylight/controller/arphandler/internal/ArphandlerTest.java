@@ -10,12 +10,10 @@
 package org.opendaylight.controller.arphandler.internal;
 
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ArphandlerTest extends TestCase {
+public class ArphandlerTest  {
 
         @Test
         public void testArphandlerCreation() {
