@@ -225,7 +225,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
         val ret = new HashSet<NodeConnector>();
         for (nc : data.nodeConnector) {
             val flowConn = nc.getAugmentation(FlowCapableNodeConnector);
-            if (flowConn != null && flowConn.state == PortState.Live) {
+            if (flowConn != null && flowConn.state != null && !flowConn.state.linkDown) {
                 ret.add(new NodeConnector(MD_SAL_TYPE, nc.key, node));
             }
         }
