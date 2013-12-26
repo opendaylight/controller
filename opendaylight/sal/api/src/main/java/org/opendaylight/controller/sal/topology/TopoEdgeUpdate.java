@@ -8,16 +8,21 @@
 
 package org.opendaylight.controller.sal.topology;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class represents an Edge, the Edge's Property Set and its UpdateType.
  */
 public class TopoEdgeUpdate {
+    private static final Logger log = LoggerFactory.getLogger(TopoEdgeUpdate.class);
     private Edge edge;
     private Set<Property> props;
     private UpdateType type;
@@ -36,8 +41,13 @@ public class TopoEdgeUpdate {
      *            Type of update
      */
     public TopoEdgeUpdate(Edge e, Set<Property> p, UpdateType t) {
-        edge = e;
-        props = p;
+        try {
+            edge = new Edge(e);
+        } catch (ConstructionException ce) {
+            log.error("Failed to make a copy of the edge {}: {}", e, ce.getMessage());
+            log.debug("", ce);
+        }
+        props = (p == null) ? null : new HashSet<Property>(p);
         type = t;
         setLocal(true);
     }
