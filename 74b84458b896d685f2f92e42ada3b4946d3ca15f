@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0d15719b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-26T14:03:26Z",
+      "side": 1,
+      "message": "This is a very detailed and informative commit message :)",
+      "revId": "74b84458b896d685f2f92e42ada3b4946d3ca15f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ed19fdd7",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/topology/TopoEdgeUpdate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-26T14:03:26Z",
+      "side": 1,
+      "message": "It\u0027s very non standard to log exeption in debug mode. \nException \u003d error, and hence should be logged in error mode.\nBecause most of production systems are never on debug level, this extra info will never be logged in debug.\nAlso, there are 2 log statements here logging the same information - once in error mode with exception message, and another time in debug level with exception stacktrace.\nIt will sufficient to log it once in error level with the exception stacktrace and avoid this separation and duplication.",
+      "revId": "74b84458b896d685f2f92e42ada3b4946d3ca15f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
