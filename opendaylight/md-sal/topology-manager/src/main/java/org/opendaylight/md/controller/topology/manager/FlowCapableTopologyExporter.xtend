@@ -95,6 +95,9 @@ OpendaylightInventoryListener //
     
             val it = dataService.beginTransaction
             putOperationalData(path, point);
+            if((fcncu.state != null && fcncu.state.linkDown) || (fcncu.configuration != null && fcncu.configuration.PORTDOWN)) {
+                removeAffectedLinks(it,point.tpId)
+            }
             commit()     
        }
     }
