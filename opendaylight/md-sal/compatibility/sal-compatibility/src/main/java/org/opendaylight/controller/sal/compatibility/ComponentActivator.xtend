@@ -1,37 +1,41 @@
 package org.opendaylight.controller.sal.compatibility
 
-import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-import org.opendaylight.controller.sal.core.Node
-import org.opendaylight.controller.sal.core.NodeConnector
-import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
-import org.apache.felix.dm.Component
 import java.util.Arrays
 import java.util.Dictionary
 import java.util.Hashtable
-import org.opendaylight.controller.sal.utils.GlobalConstants
+import org.apache.felix.dm.Component
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker
-import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService
-import org.opendaylight.controller.sal.inventory.IPluginInInventoryService
-import org.opendaylight.controller.sal.reader.IPluginInReadService
-import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService
-import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
+import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer
 import org.opendaylight.controller.sal.binding.api.NotificationService
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
-import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService
-import org.osgi.framework.BundleContext
-import org.opendaylight.controller.sal.reader.IPluginOutReadService
-import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
-import org.opendaylight.controller.sal.discovery.IDiscoveryService
-import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
+import org.opendaylight.controller.sal.compatibility.topology.TopologyAdapter
+import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase
+import org.opendaylight.controller.sal.core.Node
+import org.opendaylight.controller.sal.core.NodeConnector
+import org.opendaylight.controller.sal.discovery.IDiscoveryService
+import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService
+import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService
+import org.opendaylight.controller.sal.inventory.IPluginInInventoryService
+import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
+import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService
+import org.opendaylight.controller.sal.reader.IPluginInReadService
+import org.opendaylight.controller.sal.reader.IPluginOutReadService
+import org.opendaylight.controller.sal.topology.IPluginInTopologyService
+import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
+import org.opendaylight.controller.sal.utils.GlobalConstants
+import org.opendaylight.controller.sal.utils.INodeConnectorFactory
+import org.opendaylight.controller.sal.utils.INodeFactory
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
+import org.osgi.framework.BundleContext
+
+import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
+import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
 
 class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareConsumer {
 
@@ -47,10 +51,16 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     DataPacketAdapter dataPacket = new DataPacketAdapter;
 
     @Property
-    org.opendaylight.controller.sal.utils.INodeFactory nodeFactory = new MDSalNodeFactory
+    INodeFactory nodeFactory = new MDSalNodeFactory
 
     @Property
-    org.opendaylight.controller.sal.utils.INodeConnectorFactory nodeConnectorFactory = new MDSalNodeConnectorFactory
+    INodeConnectorFactory nodeConnectorFactory = new MDSalNodeConnectorFactory
+    
+    @Property
+    TopologyAdapter topology = new TopologyAdapter
+    
+    @Property
+    TopologyProvider tpProvider = new TopologyProvider()
 
 
     override protected init() {
@@ -84,13 +94,16 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         inventory.nodeConnectorStatisticsService = session.getRpcService(OpendaylightPortStatisticsService);
         inventory.topologyDiscovery = session.getRpcService(FlowTopologyDiscoveryService);
 		inventory.dataProviderService = session.getSALService(DataProviderService)
+		topology.dataService = session.getSALService(DataProviderService)
+		tpProvider.dataService = session.getSALService(DataProviderService)
+		tpProvider.start();
 
         subscribe.registerNotificationListener(dataPacket)
 
     }
 
     override protected getGlobalImplementations() {
-        return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory, nodeConnectorFactory)
+        return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory, nodeConnectorFactory,topology,tpProvider)
     }
 
     override protected configureGlobalInstance(Component c, Object imp) {
@@ -98,11 +111,11 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     }
 
     private def dispatch configure(MDSalNodeFactory imp, Component it) {
-        setInterface(org.opendaylight.controller.sal.utils.INodeFactory.name, properties);
+        setInterface(INodeFactory.name, properties);
     }
 
     private def dispatch configure(MDSalNodeConnectorFactory imp, Component it) {
-        setInterface(org.opendaylight.controller.sal.utils.INodeConnectorFactory.name, properties);
+        setInterface(INodeConnectorFactory.name, properties);
     }
 
     private def dispatch configure(ComponentActivator imp, Component it) {
@@ -145,15 +158,27 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             .setRequired(false))
         add(
             createServiceDependency() //
-            .setService(IPluginOutTopologyService) //
-            .setCallbacks("setTopologyPublisher", "setTopologyPublisher") //
-            .setRequired(false))
-        add(
-            createServiceDependency() //
             .setService(IDiscoveryService) //
             .setCallbacks("setDiscoveryPublisher", "setDiscoveryPublisher") //
             .setRequired(false))
         
+    }
+    
+    private def dispatch configure (TopologyAdapter imp, Component it) {
+        setInterface(Arrays.asList(IPluginInTopologyService.name), properties)
+        add(
+            createServiceDependency() //
+            .setService(IPluginOutTopologyService) //
+            .setCallbacks("setTopologyPublisher", "setTopologyPublisher") //
+            .setRequired(false))
+    }
+    
+    private def dispatch configure (TopologyProvider imp, Component it) {
+        add(
+            createServiceDependency() //
+            .setService(IPluginOutTopologyService) //
+            .setCallbacks("setTopologyPublisher", "setTopologyPublisher") //
+            .setRequired(false))
     }
 
     private def Dictionary<String, Object> properties() {

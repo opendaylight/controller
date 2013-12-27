@@ -73,11 +73,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.NodeConnectorStatisticsUpdate
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder
 
-class InventoryAndReadAdapter implements IPluginInTopologyService,
-											 IPluginInReadService,
+class InventoryAndReadAdapter implements IPluginInReadService,
 											 IPluginInInventoryService,
 											 OpendaylightInventoryListener,
-											 FlowTopologyDiscoveryListener,
 											 OpendaylightFlowStatisticsListener,
 											 OpendaylightFlowTableStatisticsListener,
 											 OpendaylightPortStatisticsListener {
@@ -102,9 +100,6 @@ class InventoryAndReadAdapter implements IPluginInTopologyService,
 
     @Property
     IPluginOutInventoryService inventoryPublisher;
-
-    @Property
-    IPluginOutTopologyService topologyPublisher;
 
     @Property
     FlowTopologyDiscoveryService topologyDiscovery;
@@ -460,28 +455,6 @@ class InventoryAndReadAdapter implements IPluginInTopologyService,
         
         return it;
 	}
-
-    override sollicitRefresh() {
-        topologyDiscovery.solicitRefresh
-    }
-    
-    override onLinkDiscovered(LinkDiscovered notification) {
-        val update = new TopoEdgeUpdate(notification.toADEdge,Collections.emptySet(),UpdateType.ADDED);
-        topologyPublisher.edgeUpdate(Collections.singletonList(update))
-    }
-    
-    override onLinkOverutilized(LinkOverutilized notification) {
-        topologyPublisher.edgeOverUtilized(notification.toADEdge)
-    }
-    
-    override onLinkRemoved(LinkRemoved notification) {
-        val update = new TopoEdgeUpdate(notification.toADEdge,Collections.emptySet(),UpdateType.REMOVED);
-        topologyPublisher.edgeUpdate(Collections.singletonList(update))
-    }
-    
-    override onLinkUtilizationNormal(LinkUtilizationNormal notification) {
-        topologyPublisher.edgeUtilBackToNormal(notification.toADEdge)
-    }
     
     
     def Edge toADEdge(Link link) {

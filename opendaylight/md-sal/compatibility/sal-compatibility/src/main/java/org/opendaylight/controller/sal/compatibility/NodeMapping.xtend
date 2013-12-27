@@ -17,7 +17,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
 
-
 public class NodeMapping {
 
     public static val MD_SAL_TYPE = "MD_SAL";
@@ -35,8 +34,14 @@ public class NodeMapping {
         val arg = node.getPath().get(1);
         val item = arg.checkInstanceOf(IdentifiableItem);
         val nodeKey = item.getKey().checkInstanceOf(NodeKey);
-        return new Node(MD_SAL_TYPE, nodeKey.getId().getValue().toString());
+        return new Node(MD_SAL_TYPE, nodeKey.id.toADNodeId);
     }
+    
+    public static def toADNodeId(NodeId nodeId) {
+        checkNotNull(nodeId);
+        return nodeId.value
+    }
+
 
     public static def toADNodeConnector(NodeConnectorRef source) throws ConstructionException {
         checkNotNull(source);
@@ -46,7 +51,11 @@ public class NodeMapping {
         val arg = path.getPath().get(2);
         val item = arg.checkInstanceOf(IdentifiableItem);
         val connectorKey = item.getKey().checkInstanceOf(NodeConnectorKey);
-        return new NodeConnector(MD_SAL_TYPE, connectorKey.getId().getValue().toString(), node);
+        return new NodeConnector(MD_SAL_TYPE, connectorKey.id.toADNodeConnectorId, node);
+    }
+    
+    public static def toADNodeConnectorId(NodeConnectorId nodeConnectorId) {
+        return nodeConnectorId.value
     }
     
     public static def toNodeRef(Node node) {
