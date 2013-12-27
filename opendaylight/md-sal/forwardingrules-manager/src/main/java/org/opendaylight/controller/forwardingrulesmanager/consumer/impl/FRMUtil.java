@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -23,8 +22,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpActionCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ClearActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTableCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.MeterCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.WriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterId;
@@ -37,13 +43,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ClearActionsCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTableCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.MeterCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.WriteActionsCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 
 public class FRMUtil {
     protected static final Logger logger = LoggerFactory.getLogger(FRMUtil.class);
@@ -71,7 +70,6 @@ public class FRMUtil {
         EtherIPType etype = EtherIPType.ANY;
         EtherIPType ipsrctype = EtherIPType.ANY;
         EtherIPType ipdsttype = EtherIPType.ANY;
-
         Match match = flow.getMatch();
         if (match != null) {
             EthernetMatch ethernetmatch = match.getEthernetMatch();
@@ -217,28 +215,13 @@ public class FRMUtil {
             } else if (action instanceof OutputActionCase) {
                 Integer length = ((OutputActionCase) action).getOutputAction().getMaxLength();
                 Uri outputnodeconnector = ((OutputActionCase) action).getOutputAction().getOutputNodeConnector();
-                if (length < 0 || length > 65294) {
+                if ((length != null) && (length < 0 || length > 65294)) {
                     logger.error("OutputAction: MaxLength is not valid");
                     return false;
                 }
-                if (outputnodeconnector != null) {
-                    if (!outputnodeconnector.getValue().equals(NodeConnectorIDType.ALL)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.CONTROLLER)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.HWPATH)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.ONEPK)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.ONEPK2OPENFLOW)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.ONEPK2PCEP)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.OPENFLOW)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.OPENFLOW2ONEPK)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.OPENFLOW2PCEP)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PCEP)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PCEP2ONEPK)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PCEP2OPENFLOW)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.PRODUCTION)
-                            || !outputnodeconnector.getValue().equals(NodeConnectorIDType.SWSTACK)) {
-                        logger.error("Output Action: NodeConnector Type is not valid");
-                        return false;
-                    }
+                if (outputnodeconnector == null) {
+                    logger.error("Output Action: Port is null");
+                    return false;
 
                 }
             } else if (action instanceof PushMplsActionCase) {
