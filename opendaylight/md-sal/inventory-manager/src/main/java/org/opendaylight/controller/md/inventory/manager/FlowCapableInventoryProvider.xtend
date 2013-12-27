@@ -76,7 +76,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         // Check path
         val it = manager.startChange()
-        removeRuntimeData(ref.value as InstanceIdentifier<? extends DataObject>);
+        readOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
     }
 
@@ -93,7 +93,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
             data.addAugmentation(FlowCapableNodeConnector, augment)
         }
 
-        putRuntimeData(ref.value as InstanceIdentifier<NodeConnector>, data.build());
+        putOperationalData(ref.value as InstanceIdentifier<NodeConnector>, data.build());
         commit()
     }
 
@@ -101,7 +101,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
         val ref = node.nodeRef;
         val it = manager.startChange()
 
-        removeRuntimeData(ref.value as InstanceIdentifier<? extends DataObject>);
+        readOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
     }
 
@@ -117,7 +117,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
             data.addAugmentation(FlowCapableNode, augment)
         }
 
-        putRuntimeData(ref.value as InstanceIdentifier<Node>, data.build())
+        putOperationalData(ref.value as InstanceIdentifier<Node>, data.build())
         commit()
     }
 }
