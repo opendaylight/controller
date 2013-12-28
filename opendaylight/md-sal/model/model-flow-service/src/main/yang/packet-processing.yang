@@ -6,6 +6,8 @@ module packet-processing {
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import ietf-yang-types {prefix yang;revision-date "2010-09-24";} 
     import opendaylight-l2-types {prefix types;revision-date "2013-08-27";}
+    import opendaylight-match-types {prefix match-type;revision-date "2013-10-26";}
+    
     
     revision "2013-07-09" {
         description "";
@@ -14,7 +16,7 @@ module packet-processing {
     typedef cookie {
         type uint32;
     }
-
+    
     grouping raw-packet {
     	leaf ingress {
     		type inv:node-connector-ref;
@@ -34,11 +36,27 @@ module packet-processing {
     	}
     }
 
-
     notification packet-received {
     	leaf cookie {
                 type cookie;
         }
+        
+        leaf bufferId {
+        	type uint32;
+        }
+        
+        leaf tableId {
+        	type uint8;
+        }
+        
+        leaf packet-in-reason {
+        	type uint8;
+        }
+        
+        container match {
+        		uses match-type:match;
+        }
+        
         uses raw-packet;
     }
 
