@@ -25,7 +25,7 @@
     <dependency>
         <groupId>org.opendaylight.yangtools.model</groupId>
         <artifactId>ietf-topology</artifactId>
-        <version>2013.07.12.2-SNAPSHOT</version>
+        <version>2013.10.21.0-SNAPSHOT</version>
     </dependency>
     </dependencies>
 </project>
