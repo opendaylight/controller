@@ -34,18 +34,23 @@ public class NodeMapping {
     private static val NODE_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
     private static val NODECONNECTOR_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 
+
     private new() {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
     }
 
     public static def toADNode(InstanceIdentifier<?> node) throws ConstructionException {
+        return new Node(MD_SAL_TYPE, node.toNodeId.toADNodeId);
+    }
+    
+    public static def toNodeId(InstanceIdentifier<?> node) {
         checkNotNull(node);
         checkNotNull(node.getPath());
         checkArgument(node.getPath().size() >= 2);
         val arg = node.getPath().get(1);
         val item = arg.checkInstanceOf(IdentifiableItem);
         val nodeKey = item.getKey().checkInstanceOf(NodeKey);
-        return new Node(MD_SAL_TYPE, nodeKey.id.toADNodeId);
+        return nodeKey.id
     }
     
     public static def toADNodeId(NodeId nodeId) {
@@ -62,11 +67,38 @@ public class NodeMapping {
         val arg = path.getPath().get(2);
         val item = arg.checkInstanceOf(IdentifiableItem);
         val connectorKey = item.getKey().checkInstanceOf(NodeConnectorKey);
-        return new NodeConnector(MD_SAL_TYPE, connectorKey.id.toADNodeConnectorId, node);
+        return new NodeConnector(connectorKey.id.toNodeConnectorType(path.toNodeId), connectorKey.id.toADNodeConnectorId(path.toNodeId), node);
     }
     
-    public static def toADNodeConnectorId(NodeConnectorId nodeConnectorId) {
+    public static def toNodeConnectorType(NodeConnectorId ncId,NodeId nodeId) {
+        if (ncId.equals(nodeId.toLocalNodeConnectorId)) {
+            return NodeConnector.NodeConnectorIDType.SWSTACK
+        } else if (ncId.equals(nodeId.toNormalNodeConnectorId)) {
+            return NodeConnector.NodeConnectorIDType.HWPATH
+        } else if (ncId.equals(nodeId.toControllerNodeConnectorId)){
+            return NodeConnector.NodeConnectorIDType.CONTROLLER
+        }
+        return MD_SAL_TYPE
+    }
+    
+    public static def toADNodeConnectorId(NodeConnectorId nodeConnectorId,NodeId nodeId) {
+        if(nodeConnectorId.equals(nodeId.toLocalNodeConnectorId) ||
+            nodeConnectorId.equals(nodeId.toNormalNodeConnectorId) || 
+            nodeConnectorId.equals(nodeId.toControllerNodeConnectorId)
+        ) {
+            return NodeConnector.SPECIALNODECONNECTORID
+        }
         return nodeConnectorId.value
+    }
+    
+    public static def  toControllerNodeConnectorId(NodeId node) {
+        return new NodeConnectorId(node.value + ":" + 4294967293L)
+    }
+    public static def  toLocalNodeConnectorId(NodeId node) {
+        return new NodeConnectorId(node.value + ":" + 4294967294L)
+    }
+    public static def  toNormalNodeConnectorId(NodeId node) {
+        return new NodeConnectorId(node.value + ":" + 4294967290L)
     }
     
     public static def toNodeRef(Node node) {
@@ -80,8 +112,19 @@ public class NodeMapping {
     public static def toNodeConnectorRef(NodeConnector nodeConnector) {
         val node = nodeConnector.node.toNodeRef();
         val nodePath = node.getValue() as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
-        var nodeConnectorId = nodeConnector.ID.checkInstanceOf(String)
-        val connectorKey = new NodeConnectorKey(new NodeConnectorId(nodeConnectorId));
+        var NodeConnectorId nodeConnectorId
+        if(nodeConnector.ID.equals(NodeConnector.SPECIALNODECONNECTORID)){
+            if(nodeConnector.type.equals(NodeConnector.NodeConnectorIDType.SWSTACK)) {
+                nodeConnectorId = nodePath.toNodeId.toLocalNodeConnectorId
+            } else if (nodeConnector.type.equals(NodeConnector.NodeConnectorIDType.HWPATH)) {
+                nodeConnectorId = nodePath.toNodeId.toNormalNodeConnectorId
+            } else if (nodeConnector.type.equals(NodeConnector.NodeConnectorIDType.CONTROLLER)) {
+                nodeConnectorId = nodePath.toNodeId.toControllerNodeConnectorId
+            }            
+        } else {
+            nodeConnectorId = new NodeConnectorId(nodeConnector.ID.checkInstanceOf(String))       
+        }
+        val connectorKey = new NodeConnectorKey(nodeConnectorId);
         val path = InstanceIdentifier.builder(nodePath).child(NODECONNECTOR_CLASS, connectorKey).toInstance();
         return new NodeConnectorRef(path);
     }
