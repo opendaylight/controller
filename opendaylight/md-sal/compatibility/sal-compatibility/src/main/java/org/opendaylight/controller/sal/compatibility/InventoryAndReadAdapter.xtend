@@ -1,77 +1,69 @@
 package org.opendaylight.controller.sal.compatibility
 
-import org.opendaylight.controller.sal.reader.IPluginInReadService
-import org.opendaylight.controller.sal.core.NodeConnector
-import org.opendaylight.controller.sal.core.Node
-import org.opendaylight.controller.sal.flowprogrammer.Flow
-import org.opendaylight.controller.sal.core.NodeTable
+import java.util.ArrayList
+import java.util.Collections
+import java.util.List
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService
+import org.opendaylight.controller.sal.core.Edge
+import org.opendaylight.controller.sal.core.Node
+import org.opendaylight.controller.sal.core.NodeTable
+import org.opendaylight.controller.sal.core.UpdateType
+import org.opendaylight.controller.sal.flowprogrammer.Flow
+import org.opendaylight.controller.sal.inventory.IPluginInInventoryService
+import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
+import org.opendaylight.controller.sal.reader.FlowOnNode
+import org.opendaylight.controller.sal.reader.IPluginInReadService
+import org.opendaylight.controller.sal.reader.IPluginOutReadService
+import org.opendaylight.controller.sal.reader.NodeConnectorStatistics
+import org.opendaylight.controller.sal.reader.NodeDescription
+import org.opendaylight.controller.sal.reader.NodeTableStatistics
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsUpdate
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdate
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsData
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdate
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInputBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatistics
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.Link
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRemoved
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.OpendaylightInventoryListener
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatistics
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsInputBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetNodeConnectorStatisticsInputBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.NodeConnectorStatisticsUpdate
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
+import org.opendaylight.yangtools.yang.binding.DataObject
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.slf4j.LoggerFactory
 
 import static extension org.opendaylight.controller.sal.common.util.Arguments.*
 import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
-import org.opendaylight.controller.sal.reader.NodeConnectorStatistics
-import org.opendaylight.controller.sal.reader.FlowOnNode
-import org.opendaylight.controller.sal.reader.NodeDescription
-import org.slf4j.LoggerFactory
-import java.util.ArrayList
-import org.opendaylight.controller.sal.inventory.IPluginInInventoryService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.OpendaylightInventoryListener
-import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRemoved
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated
-import java.util.Collections
-import org.opendaylight.controller.sal.core.UpdateType
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
-import org.opendaylight.yangtools.yang.binding.DataObject
-import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
-import org.opendaylight.controller.sal.topology.IPluginInTopologyService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryListener
-import org.opendaylight.controller.sal.core.Edge
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.Link
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkDiscovered
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkOverutilized
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkRemoved
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkUtilizationNormal
-import org.opendaylight.controller.sal.topology.TopoEdgeUpdate
-import org.opendaylight.controller.sal.discovery.IDiscoveryService
-import org.opendaylight.controller.sal.reader.IPluginOutReadService
-import java.util.List
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsUpdate
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdate
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdate
-import org.opendaylight.controller.sal.reader.NodeTableStatistics
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsInputBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatistics
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsData
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInputBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetNodeConnectorStatisticsInputBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.NodeConnectorStatisticsUpdate
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder
 
 class InventoryAndReadAdapter implements IPluginInReadService,
 											 IPluginInInventoryService,
@@ -120,7 +112,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         return dataProviderService.beginTransaction;
     }
 
-    override getTransmitRate(NodeConnector connector) {
+    override getTransmitRate(org.opendaylight.controller.sal.core.NodeConnector connector) {
         val nodeConnector = readFlowCapableNodeConnector(connector.toNodeConnectorRef);
         return nodeConnector.currentSpeed
     }
@@ -183,10 +175,10 @@ class InventoryAndReadAdapter implements IPluginInReadService,
  			for (dsNodeConnector : dsNode.nodeConnector){
 				val nodeConnectorRef = InstanceIdentifier.builder(Nodes)
 									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(node))
-									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector, dsNodeConnector.key)
+									.child(NodeConnector, dsNodeConnector.key)
 									.toInstance();
  				
- 				val nodeConnectorFromDS = provider.readConfigurationData(nodeConnectorRef) as org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
+ 				val nodeConnectorFromDS = provider.readConfigurationData(nodeConnectorRef) as NodeConnector;
  				
  				if(nodeConnectorFromDS != null){
  					val nodeConnectorStatsFromDs = nodeConnectorFromDS.getAugmentation(FlowCapableNodeConnectorStatisticsData) as FlowCapableNodeConnectorStatistics;
@@ -273,16 +265,16 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     	
     }
 
-    override readNodeConnector(NodeConnector connector, boolean cached) {
+    override readNodeConnector(org.opendaylight.controller.sal.core.NodeConnector connector, boolean cached) {
     	var NodeConnectorStatistics  nodeConnectorStatistics = null;
 	
 		val nodeConnectorRef = InstanceIdentifier.builder(Nodes)
 									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(connector.node))
-									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector, InventoryMapping.toNodeConnectorKey(connector))
+									.child(NodeConnector, InventoryMapping.toNodeConnectorKey(connector))
 									.toInstance();
  		val provider = this.startChange();
  				
- 		val nodeConnectorFromDS = provider.readConfigurationData(nodeConnectorRef) as org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
+ 		val nodeConnectorFromDS = provider.readConfigurationData(nodeConnectorRef) as NodeConnector;
  				
  		if(nodeConnectorFromDS != null){
 			val nodeConnectorStatsFromDs = nodeConnectorFromDS.getAugmentation(FlowCapableNodeConnectorStatisticsData) as FlowCapableNodeConnectorStatistics;
@@ -339,26 +331,19 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated update) {
-        val properties = new java.util.HashSet<org.opendaylight.controller.sal.core.Property>();
-
-
-        val org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> identifier = update.nodeConnectorRef.value as org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>;
         var updateType = UpdateType.CHANGED;
-        if ( this._dataService.readOperationalData(identifier) == null ){
+        if ( this._dataService.readOperationalData(update.nodeConnectorRef.value as InstanceIdentifier<? extends DataObject>) == null ){
             updateType = UpdateType.ADDED;
         }
 
         var nodeConnector = update.nodeConnectorRef.toADNodeConnector
 
-
-        properties.add(new org.opendaylight.controller.sal.core.Name(nodeConnector.ID.toString()));
-
-        inventoryPublisher.updateNodeConnector(nodeConnector , updateType , properties);
+        inventoryPublisher.updateNodeConnector(nodeConnector , updateType , update.toADNodeConnectorProperties);
     }
 
     override onNodeUpdated(NodeUpdated notification) {
         val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        val org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> identifier = notification.nodeRef.value  as org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>;
+        val InstanceIdentifier<? extends DataObject> identifier = notification.nodeRef.value  as InstanceIdentifier<? extends DataObject>;
 
         var updateType = UpdateType.CHANGED;
         if ( this._dataService.readOperationalData(identifier) == null ){
@@ -396,7 +381,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     private def FlowCapableNodeConnector readFlowCapableNodeConnector(NodeConnectorRef ref) {
         val dataObject = dataService.readOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         val node = dataObject.checkInstanceOf(
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector);
+            NodeConnector);
         return node.getAugmentation(FlowCapableNodeConnector);
     }
 
@@ -424,7 +409,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 			
 			val nodeConnectorRef = InstanceIdentifier.builder(Nodes)
 								.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(nodeId))
-								.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector,new NodeConnectorKey(nodeConnectorId)).toInstance;
+								.child(NodeConnector,new NodeConnectorKey(nodeConnectorId)).toInstance;
 			
 			nodeConnector = NodeMapping.toADNodeConnector(new NodeConnectorRef(nodeConnectorRef));
 			
@@ -432,7 +417,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     }
 
 	private def toNodeTableStatistics(
-		org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatistics tableStats,
+		FlowTableStatistics tableStats,
 		Short tableId,Node node){
 		var it = new NodeTableStatistics();
 		

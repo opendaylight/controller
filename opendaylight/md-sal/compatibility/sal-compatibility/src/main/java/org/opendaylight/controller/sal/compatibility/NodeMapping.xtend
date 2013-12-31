@@ -16,6 +16,17 @@ import org.opendaylight.controller.sal.core.ConstructionException
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorUpdated
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortFeatures
+import org.opendaylight.controller.sal.core.Bandwidth
+import org.opendaylight.controller.sal.core.AdvertisedBandwidth
+import org.opendaylight.controller.sal.core.SupportedBandwidth
+import org.opendaylight.controller.sal.core.PeerBandwidth
+import org.opendaylight.controller.sal.core.Name
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortConfig
+import org.opendaylight.controller.sal.core.Config
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.flow.capable.port.State
 
 public class NodeMapping {
 
@@ -78,5 +89,108 @@ public class NodeMapping {
     public static def toADNode(NodeRef node) throws ConstructionException {
         return toADNode(node.getValue());
     }
+    
+    public static def toADNodeConnectorProperties(NodeConnectorUpdated nc) {
+        val props = new java.util.HashSet<org.opendaylight.controller.sal.core.Property>();
+        val fcncu = nc.getAugmentation(FlowCapableNodeConnectorUpdated)
+        if(fcncu != null) {
+            if(fcncu.currentFeature != null && fcncu.currentFeature.toAdBandwidth != null) {
+                props.add(fcncu.currentFeature.toAdBandwidth)
+            }
+            if(fcncu.advertisedFeatures != null && fcncu.advertisedFeatures.toAdAdvertizedBandwidth != null) {
+                props.add(fcncu.advertisedFeatures.toAdAdvertizedBandwidth)
+            }
+            if(fcncu.supported != null && fcncu.supported.toAdSupportedBandwidth != null) {
+                props.add(fcncu.supported.toAdSupportedBandwidth)
+            }
+            if(fcncu.peerFeatures != null && fcncu.peerFeatures.toAdPeerBandwidth != null) {
+                props.add(fcncu.peerFeatures.toAdPeerBandwidth)
+            }
+            if(fcncu.name != null && fcncu.name.toAdName != null) {
+                props.add(fcncu.name.toAdName)
+            }
+            if(fcncu.configuration != null && fcncu.configuration.toAdConfig != null) {
+                props.add(fcncu.configuration.toAdConfig)
+            }
+            if(fcncu.state != null && fcncu.state.toAdState != null) {
+                props.add(fcncu.state.toAdState)
+            }
+        }
+        return props
+    }
+    
+    public static def toAdName(String name) {
+        return new Name(name)
+    } 
+    
+    public static def toAdConfig(PortConfig pc) {
+        var Config config;
+        if(pc.PORTDOWN){
+            config = new Config(Config.ADMIN_DOWN)
+        } else {
+            config = new Config(Config.ADMIN_UP)
+        }
+        return config
+    }
+    
+    public static def toAdState(State s) {
+        var org.opendaylight.controller.sal.core.State state
+        if(s.linkDown) {
+            state = new org.opendaylight.controller.sal.core.State(org.opendaylight.controller.sal.core.State.EDGE_DOWN)
+        } else {
+            state = new org.opendaylight.controller.sal.core.State(org.opendaylight.controller.sal.core.State.EDGE_UP)
+        }
+        return state
+    }
+    
+    public static def toAdBandwidth(PortFeatures pf) {
+        var Bandwidth bw = null
+        if (pf.is_10mbHd || pf.is_10mbFd ) {
+            bw= new Bandwidth(Bandwidth.BW10Mbps)
+        } else if (pf.is_100mbHd || pf.is_100mbFd ) {
+            bw= new Bandwidth(Bandwidth.BW100Mbps)
+        } else if (pf.is_1gbHd || pf.is_1gbFd ) {
+            bw= new Bandwidth(Bandwidth.BW1Gbps)
+        } else if (pf.is_1gbFd ) {
+            bw= new Bandwidth(Bandwidth.BW10Gbps)
+        } else if ( pf.is_10gbFd ) {
+            bw= new Bandwidth(Bandwidth.BW10Gbps)
+        } else if ( pf.is_40gbFd ) {
+            bw= new Bandwidth(Bandwidth.BW40Gbps)
+        } else if ( pf.is_100gbFd ) {
+            bw= new Bandwidth(Bandwidth.BW100Gbps)
+        } else if ( pf.is_1tbFd ) {
+            bw= new Bandwidth(Bandwidth.BW1Tbps)
+        } 
+        return bw;
+    }
+    
+    public static def toAdAdvertizedBandwidth(PortFeatures pf) {
+        var AdvertisedBandwidth abw
+        val bw = pf.toAdBandwidth
+        if(bw != null) {
+            abw = new AdvertisedBandwidth(bw.value)
+        }
+        return abw
+    }
+    
+    public static def toAdSupportedBandwidth(PortFeatures pf) {
+        var SupportedBandwidth sbw
+        val bw = pf.toAdBandwidth
+        if(bw != null ) {
+            sbw = new SupportedBandwidth(bw.value)
+        }
+        return sbw
+    }
+    
+    public static def toAdPeerBandwidth(PortFeatures pf) {
+        var PeerBandwidth pbw
+        val bw = pf.toAdBandwidth
+        if(bw != null) {
+            pbw = new PeerBandwidth(bw.value)
+        }
+        return pbw
+    }
+    
     
 }
