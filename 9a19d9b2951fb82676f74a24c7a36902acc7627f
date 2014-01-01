@@ -16,6 +16,24 @@
       "revId": "9a19d9b2951fb82676f74a24c7a36902acc7627f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_33e2d82f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-01T13:12:05Z",
+      "side": 1,
+      "message": "Its a fairly straight forward LLDP listener.  It listens for LLDP packets and fires LinkDiscovered events when it hears them, and ages out Links when it stops hearing them.\n\nAs to unit tests, no, there are no accompanying unit tests with this patch, however it has been tested against OVS.",
+      "parentUuid": "da6255ed_538e6c7a",
+      "revId": "9a19d9b2951fb82676f74a24c7a36902acc7627f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
