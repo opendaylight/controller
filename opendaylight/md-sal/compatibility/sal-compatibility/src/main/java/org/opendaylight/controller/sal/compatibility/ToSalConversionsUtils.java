@@ -43,6 +43,7 @@ import org.opendaylight.controller.sal.action.SetVlanCfi;
 import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.action.SetVlanPcp;
 import org.opendaylight.controller.sal.action.SwPath;
+import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
@@ -85,6 +86,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FeatureCapability;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
@@ -563,12 +565,23 @@ public class ToSalConversionsUtils {
         }
     }
 
-    private static byte[] bytesFrom(MacAddress address) {
+    public static byte[] bytesFrom(MacAddress address) {
         String[] mac = address.getValue().split(":");
         byte[] macAddress = new byte[6]; // mac.length == 6 bytes
         for (int i = 0; i < mac.length; i++) {
             macAddress[i] = Integer.decode("0x" + mac[i]).byteValue();
         }
         return macAddress;
+    }
+    
+    public static byte[] bytesFromDpid(long dpid) {
+        byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+        for (short i = 0; i < 6; i++) {
+            mac[5 - i] = (byte) dpid;
+            dpid >>= 8;
+        }
+
+        return mac;
     }
 }
