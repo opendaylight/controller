@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_538e6c7a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-01T09:44:33Z",
+      "side": 1,
+      "message": "Hi Ed,\n\nIs there any additional information about this change? \nFeature/design page?\nAre there unitests to cover the newly added code? Didn\u0027t see any tests as part of this patch.\nThanks",
+      "revId": "9a19d9b2951fb82676f74a24c7a36902acc7627f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
