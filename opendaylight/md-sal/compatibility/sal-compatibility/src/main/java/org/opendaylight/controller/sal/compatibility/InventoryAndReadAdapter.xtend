@@ -349,7 +349,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         if ( this._dataService.readOperationalData(identifier) == null ){
             updateType = UpdateType.ADDED;
         }
-        inventoryPublisher.updateNode(notification.nodeRef.toADNode, updateType, properties);
+        inventoryPublisher.updateNode(notification.nodeRef.toADNode, updateType, notification.toADNodeProperties);
         
 		//Notify the listeners of IPluginOutReadService
         
