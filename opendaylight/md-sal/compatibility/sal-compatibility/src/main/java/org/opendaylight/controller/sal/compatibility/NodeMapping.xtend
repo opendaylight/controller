@@ -7,6 +7,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableIt
 
 import static com.google.common.base.Preconditions.*;
 import static extension org.opendaylight.controller.sal.common.util.Arguments.*;
+import static extension org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils.*;
 
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef
@@ -27,6 +28,23 @@ import org.opendaylight.controller.sal.core.Name
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortConfig
 import org.opendaylight.controller.sal.core.Config
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.flow.capable.port.State
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated
+import java.util.HashSet
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeUpdated
+import org.opendaylight.controller.sal.core.Tables
+import java.util.List
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FeatureCapability
+import org.opendaylight.controller.sal.core.Buffers
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SupportedActions
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityFlowStats
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityTableStats
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityIpReasm
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityPortStats
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityStp
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityQueueStats
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowFeatureCapabilityArpMatchIp
+import org.opendaylight.controller.sal.core.Capabilities
+import org.opendaylight.controller.sal.core.MacAddress
 
 public class NodeMapping {
 
@@ -134,7 +152,7 @@ public class NodeMapping {
     }
     
     public static def toADNodeConnectorProperties(NodeConnectorUpdated nc) {
-        val props = new java.util.HashSet<org.opendaylight.controller.sal.core.Property>();
+        val props = new HashSet<org.opendaylight.controller.sal.core.Property>();
         val fcncu = nc.getAugmentation(FlowCapableNodeConnectorUpdated)
         if(fcncu != null) {
             if(fcncu.currentFeature != null && fcncu.currentFeature.toAdBandwidth != null) {
@@ -235,5 +253,70 @@ public class NodeMapping {
         return pbw
     }
     
+    public static def toADNodeProperties(NodeUpdated nu) {
+        val props = new HashSet<org.opendaylight.controller.sal.core.Property>();
+        val fcnu = nu.getAugmentation(FlowCapableNodeUpdated) 
+        if(fcnu != null) {
+             // props.add(fcnu.toADTimestamp) - TODO
+             // props.add(fcnu.supportedActions.toADActions) - TODO
+             if(nu.id != null) {
+                props.add(nu.id.toADMacAddress)
+             }
+             if(fcnu.switchFeatures != null) {
+                 if(fcnu.switchFeatures.maxTables != null) {
+                    props.add(fcnu.switchFeatures.maxTables.toADTables) 
+                 }
+                 if(fcnu.switchFeatures.capabilities != null) {
+                    props.add(fcnu.switchFeatures.capabilities.toADCapabiliities)
+                 } 
+                 if(fcnu.switchFeatures.maxBuffers != null) {
+                    props.add(fcnu.switchFeatures.maxBuffers.toADBuffers)
+                 }   
+             }
+        } 
+        return props;   
+        
+    }
+    
+    public static def toADMacAddress(NodeId id) {
+        return new MacAddress(Long.parseLong(id.value.replaceAll("openflow:","")).longValue.bytesFromDpid)
+    }
+    
+    public static def toADTables(Short tables) {
+        return new Tables(tables.byteValue)
+    }
+    
+    public static def toADCapabiliities(List<Class<? extends FeatureCapability>> capabilities) {
+        var int b
+        for(capability : capabilities) {
+            if(capability.equals(FlowFeatureCapabilityFlowStats)) {
+                b = Capabilities.CapabilitiesType.FLOW_STATS_CAPABILITY.value.bitwiseOr(b)
+            } else if (capability.equals(FlowFeatureCapabilityTableStats)) {
+                b = Capabilities.CapabilitiesType.TABLE_STATS_CAPABILITY.value.bitwiseOr(b)
+            } else if (capability.equals(FlowFeatureCapabilityPortStats)) {
+                b = Capabilities.CapabilitiesType.PORT_STATS_CAPABILITY.value.bitwiseOr(b)
+            } else if (capability.equals(FlowFeatureCapabilityStp)) {
+                b = Capabilities.CapabilitiesType.STP_CAPABILITY.value.bitwiseOr(b)
+            } else if (capability.equals(FlowFeatureCapabilityIpReasm)) {
+                b = Capabilities.CapabilitiesType.IP_REASSEM_CAPABILITY.value.bitwiseOr(b)
+            } else if (capability.equals(FlowFeatureCapabilityQueueStats)) {
+                b = Capabilities.CapabilitiesType.QUEUE_STATS_CAPABILITY.value.bitwiseOr(b)
+            } else if (capability.equals(FlowFeatureCapabilityArpMatchIp)) {
+                b = Capabilities.CapabilitiesType.ARP_MATCH_IP_CAPABILITY.value.bitwiseOr(b)
+            }
+        }
+        return new Capabilities(b)
+    }
+    
+    public static def toADActions(SupportedActions sa) {
+        for (at : sa.actionType ) {
+            at.action
+        }
+        
+    }
+    
+    public static def toADBuffers(Long buffers) {
+        return new Buffers(buffers.intValue)
+    }
     
 }
