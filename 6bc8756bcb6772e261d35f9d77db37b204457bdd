@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_93d06420",
+        "filename": "opendaylight/containermanager/api/src/main/java/org/opendaylight/controller/containermanager/ContainerFlowConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-02T22:35:57Z",
+      "side": 1,
+      "message": "Isn\u0027t it more efficient to just test that limit[0] \u003e 0 \u0026\u0026 (limit[0] \u003c limit[1]) \u0026\u0026 limit[1] \u003c 0xfff ?\n\nThis way you would also catch bad requests like  32-20",
+      "revId": "6bc8756bcb6772e261d35f9d77db37b204457bdd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
