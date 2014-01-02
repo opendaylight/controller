@@ -34,6 +34,23 @@
       "revId": "9a19d9b2951fb82676f74a24c7a36902acc7627f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_13a474b8",
+        "filename": "opendaylight/md-sal/topology-lldp-discovery/src/main/java/org/opendaylight/md/controller/topology/lldp/utils/LLDPDiscoveryUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-02T23:04:09Z",
+      "side": 1,
+      "message": "LLDP.getOptionalTLVList() never returns null.\n\nAs a result, when the controller receives a LLDP from a non openflow (legacy) switch, it will always assume it contains an optional LLDPTLV and enter the loop.\n\nsrcNodeId will be null at the end of the loop.\n\nYou need to check for empty tlv list.",
+      "revId": "9a19d9b2951fb82676f74a24c7a36902acc7627f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
