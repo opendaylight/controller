@@ -15,7 +15,9 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -308,9 +310,10 @@ public class ContainerFlowConfig implements Serializable {
     }
 
     /**
-     * Match Source IP Address.
+     * Match the set of these vlans with that of flowSpec's vlans.
      *
-     * @param flowSpec Flow Specification
+     * @param flowSpec
+     *            Flow Specification
      * @return true, if successful
      */
     private boolean matchDlVlan(ContainerFlowConfig flowSpec) {
@@ -320,7 +323,8 @@ public class ContainerFlowConfig implements Serializable {
         if (dlVlan == null || flowSpec.dlVlan == null) {
             return false;
         }
-        return dlVlan.equals(flowSpec.dlVlan);
+
+        return this.getVlanList().equals(flowSpec.getVlanList());
     }
 
     /**
@@ -404,18 +408,34 @@ public class ContainerFlowConfig implements Serializable {
     }
 
     /**
-     * Returns the vlan id number
+     * Returns the vlan id number for all vlans specified
      *
-     * @return the vlan id number
+     * @return the vlan id number for all vlans specified
      */
-    public Short getVlanId() {
-        Short vlan = 0;
+    public Set<Short> getVlanList() {
+        /*
+         * example: Vlan = "1,3,5-12"
+         * elemArray = ["1" "3" "5-12"]
+         * elem[2] = "5-12" --> limits = ["5" "12"]
+         * vlanList = [1 3 5 6 7 8 9 10 11 12]
+         */
+        Set<Short> vlanList = new HashSet<Short>();
         try {
-            vlan = Short.parseShort(dlVlan);
+            String[] elemArray = dlVlan.split(",");
+            for (String elem : elemArray) {
+                if (elem.contains("-")) {
+                    String[] limits = elem.split("-");
+                    for (short j = Short.valueOf(limits[0]); j <= Short.valueOf(limits[1]); j++) {
+                        vlanList.add(Short.valueOf(j));
+                    }
+                } else {
+                    vlanList.add(Short.valueOf(elem));
+                }
+            }
         } catch (NumberFormatException e) {
 
         }
-        return vlan;
+        return vlanList;
     }
 
     /**
@@ -617,11 +637,23 @@ public class ContainerFlowConfig implements Serializable {
         if (dlVlan != null) {
             short vlanId = 0;
             try {
-                vlanId = Short.parseShort(dlVlan);
+                String[] elemArray = dlVlan.split(",");
+                for (String elem : elemArray) {
+                    if (elem.contains("-")) {
+                        String[] limits = elem.split("-");
+                        for (vlanId = Short.parseShort(limits[0]); vlanId <= Short.parseShort(limits[1]); vlanId++) {
+                            if (vlanId < 0 || vlanId > 0xfff) {
+                                return new Status(StatusCode.BADREQUEST, "Invalid vlan id");
+                            }
+                        }
+                    } else {
+                        vlanId = Short.parseShort(elem);
+                        if (vlanId < 0 || vlanId > 0xfff) {
+                            return new Status(StatusCode.BADREQUEST, "Invalid vlan id");
+                        }
+                    }
+                }
             } catch (NumberFormatException e) {
-                return new Status(StatusCode.BADREQUEST, "Invalid vlan id");
-            }
-            if (vlanId < 0 || vlanId > 0xfff) {
                 return new Status(StatusCode.BADREQUEST, "Invalid vlan id");
             }
         }
@@ -706,20 +738,46 @@ public class ContainerFlowConfig implements Serializable {
 
     /**
      * Returns the matches.
-     * If unidirectional flag is set, there will be only one match in the list
-     * If unidirectional flag is unset there will be two matches in the list,
+     * If unidirectional flag is set, there will be only one match per vlan in the list
+     * If unidirectional flag is unset there will be two matches per vlan in the list,
      * only if the specified flow has an intrinsic direction.
      * For Ex. if the cFlow only has the protocol field configured, no matter
-     * if unidirectional flag is set or not, only one match will be returned
+     * if unidirectional flag is set or not, only one match per vlan will be returned
      * The client just has to iterate over the returned list
      * @return the matches
      */
     public List<Match> getMatches() {
         List<Match> matches = new ArrayList<Match>();
-        Match match = new Match();
 
         if (this.dlVlan != null && !this.dlVlan.isEmpty()) {
-            match.setField(MatchType.DL_VLAN, this.getVlanId());
+            for(Short vlan:getVlanList()){
+                Match match = getMatch(vlan);
+                matches.add(match);
+            }
+        }
+        else{
+            Match match = getMatch(null);
+            matches.add(match);
+        }
+
+        if (!ContainerFlowConfig.unidirectional) {
+            List<Match> forwardMatches = new ArrayList<Match>(matches);
+            for (Match match : forwardMatches) {
+                Match reverse = match.reverse();
+                if (!match.equals(reverse)) {
+                    matches.add(reverse);
+                }
+            }
+        }
+
+        return matches;
+    }
+
+    private Match getMatch(Short vlan){
+        Match match = new Match();
+
+        if (vlan != null) {
+            match.setField(MatchType.DL_VLAN, vlan);
         }
         if (this.nwSrc != null && !this.nwSrc.trim().isEmpty()) {
             String parts[] = this.nwSrc.split("/");
@@ -756,15 +814,7 @@ public class ContainerFlowConfig implements Serializable {
         if (this.tpDst != null && !this.tpDst.trim().isEmpty()) {
             match.setField(MatchType.TP_DST, Integer.valueOf(tpDst).shortValue());
         }
-
-        matches.add(match);
-        if(!ContainerFlowConfig.unidirectional) {
-            Match reverse = match.reverse();
-            if (!match.equals(reverse)) {
-                matches.add(reverse);
-            }
-        }
-        return matches;
+        return match;
     }
 
     /*
