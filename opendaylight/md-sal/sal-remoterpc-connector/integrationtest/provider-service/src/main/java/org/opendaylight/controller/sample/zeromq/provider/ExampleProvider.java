@@ -2,7 +2,6 @@ package org.opendaylight.controller.sample.zeromq.provider;
 
 import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.core.api.AbstractProvider;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
@@ -29,8 +28,8 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
   private RpcRegistration reg;
 
   private ServiceRegistration thisReg;
-
   private ProviderSession session;
+  private Set<QName> supportedRpcs;
   private Logger _logger = LoggerFactory.getLogger(ExampleProvider.class);
 
   @Override
@@ -40,8 +39,6 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
 
   @Override
   public Set<QName> getSupportedRpcs() {
-    Set<QName> supportedRpcs = new HashSet<QName>();
-    supportedRpcs.add(QNAME);
     return supportedRpcs;
   }
 
@@ -62,7 +59,7 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
         }
         else {
           success = true;
-          output = addSuccessNode(input);
+          output = addSuccessNode(rpc, input);
         }
       }
     }
@@ -87,16 +84,17 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
   }
   
   // Adds a child SimpleNode containing the value "success" to the input CompositeNode
-  private CompositeNode addSuccessNode(CompositeNode input) {
+  private CompositeNode addSuccessNode(final QName rpc, CompositeNode input) {
     List<Node<?>> list = new ArrayList<Node<?>>(input.getChildren());
-    SimpleNodeTOImpl<String> simpleNode = new SimpleNodeTOImpl<String>(QNAME, input, "success");
+    SimpleNodeTOImpl<String> simpleNode = new SimpleNodeTOImpl<String>(rpc, input, "success");
     list.add(simpleNode);
-    return new CompositeNodeTOImpl(QNAME, null, list);
+    return new CompositeNodeTOImpl(rpc, null, list);
   }
 
   @Override
   protected void startImpl(BundleContext context) {
     thisReg = context.registerService(ExampleProvider.class, this, new Hashtable<String, String>());
+    supportedRpcs = new HashSet<QName>();
   }
 
   @Override
@@ -114,6 +112,7 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
 
   public void announce(QName name) {
     _logger.debug("Announcing [{}]\n\n\n", name);
+    supportedRpcs.add(name);
     reg = this.session.addRpcImplementation(name, this);
   }
 

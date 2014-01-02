@@ -4,7 +4,6 @@ import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.CompositeNodeImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.impl.RoutingTableImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sample.zeromq.consumer.ExampleConsumer;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.Serializable;
@@ -60,7 +60,29 @@ public class Router {
 
     provider.announce(QNAME);
     return "Announcement sent ";
+  }
 
+  @GET
+  @Path("/announce/{name}")
+  @Produces(MediaType.TEXT_PLAIN)
+  public String announce(@PathParam("name") String name) {
+    _logger.info("Announce request received for " + name);
+
+    BundleContext ctx = getBundleContext();
+    ServiceReference providerRef = ctx.getServiceReference(ExampleProvider.class);
+    if (providerRef == null) {
+      _logger.debug("Could not get provider reference");
+      return "Could not get provider reference";
+    }
+
+    ExampleProvider provider = (ExampleProvider) ctx.getService(providerRef);
+    if (provider == null) {
+      _logger.info("Could not get provider service");
+      return "Could not get provider service";
+    }
+
+    provider.announce(new QName(namespace, name));
+    return "Announcement sent for " + name;
   }
 
   @GET
@@ -70,7 +92,20 @@ public class Router {
     _logger.info("Invoking RPC");
 
     ExampleConsumer consumer = getConsumer();
-    RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, new CompositeNodeImpl());
+    RpcResult<CompositeNode> result = consumer.invokeRpc(QNAME, consumer.getValidCompositeNodeWithOneSimpleChild());
+    _logger.info("Result [{}]", result.isSuccessful());
+
+    return stringify(result);
+  }
+
+  @GET
+  @Path("/rpc/{name}")
+  @Produces(MediaType.TEXT_PLAIN)
+  public String invokeRpc(@PathParam("name") String name) throws Exception {
+    _logger.info("Invoking RPC");
+
+    ExampleConsumer consumer = getConsumer();
+    RpcResult<CompositeNode> result = consumer.invokeRpc(new QName(namespace, name), consumer.getValidCompositeNodeWithOneSimpleChild());
     _logger.info("Result [{}]", result.isSuccessful());
 
     return stringify(result);
