@@ -72,6 +72,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
 
         // Registration of Flow Service
         flow.delegate = session.getRpcService(SalFlowService)
+        flow.dataBrokerService = session.getSALService(DataBrokerService);
         subscribe.registerNotificationListener(flow);
 
         // Data Packet Service

@@ -18,6 +18,23 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Node
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.slf4j.LoggerFactory
 
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus
+import org.opendaylight.controller.md.sal.common.api.data.DataModification
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
+import org.opendaylight.yangtools.yang.binding.DataObject
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId
+
+
 import static org.opendaylight.controller.sal.compatibility.MDFlowMapping.*
 
 import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
@@ -29,19 +46,17 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
 
     @Property
     private SalFlowService delegate;
+
+    @Property
+    private DataBrokerService dataBrokerService;
     
     @Property
     private IPluginOutFlowProgrammerService flowProgrammerPublisher;
 
     override addFlow(Node node, Flow flow) {
         val input = addFlowInput(node, flow);
-        val future = delegate.addFlow(input);
-        try {
-            val result = future.get();
-            return toStatus(result); // how get status from result? conversion?
-        } catch (Exception e) {
-            return processException(e);
-        }
+        writeFlow(input, new NodeKey(new NodeId(node.getNodeIDString())), new FlowKey(new FlowId(flow.getId())));
+        return toStatus(true);
     }
 
     override modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
@@ -101,12 +116,35 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
         return null;
     }
 
-    public static def toStatus(RpcResult<?> result) {
-        if (result.isSuccessful()) {
+    private static def toStatus(boolean successful) {
+        if (successful) {
             return new Status(StatusCode.SUCCESS);
         } else {
             return new Status(StatusCode.INTERNALERROR);
         }
+    }
+
+
+    private def writeFlow(AddFlowInput flow, NodeKey nodeKey, FlowKey flowKey) {
+        val modification = this._dataBrokerService.beginTransaction();
+        val flowPath = InstanceIdentifier.builder(Nodes)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, nodeKey).augmentation(FlowCapableNode)
+                .child(Table, new TableKey(flow.getTableId())).child(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow, flowKey).build();
+        modification.putOperationalData(flowPath, flow);
+        modification.putConfigurationData(flowPath, flow);
+        val commitFuture = modification.commit();
+        try {
+            val result = commitFuture.get();
+            val status = result.getResult();
+        } catch (InterruptedException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public static def toStatus(RpcResult<?> result) {
+        return toStatus(result.isSuccessful());
     }
     
     private static dispatch def Status processException(InterruptedException e) {
