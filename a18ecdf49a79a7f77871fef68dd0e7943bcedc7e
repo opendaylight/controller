@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_e2246761",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/MDFlowMapping.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-01-03T18:14:18Z",
+      "side": 1,
+      "message": "This does not seem right.\n\nI think we need to do this the way FlowTransaction does it.\n\nfinal InstanceIdentifier\u003cTable\u003e tableInstanceId \u003d instanceId.\u003cTable\u003efirstIdentifierOf(Table.class);",
+      "revId": "a18ecdf49a79a7f77871fef68dd0e7943bcedc7e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
