@@ -258,7 +258,7 @@ public class FromSalConversionsUtils {
         }
 
         if ((inetSourceAddress instanceof Inet4Address)
-                && (inetDestAddress instanceof Inet4Address)) {
+                || (inetDestAddress instanceof Inet4Address)) {
             MatchField dataLinkType = sourceMatch.getField(DL_TYPE);
             Short dLType = null;
             if (dataLinkType != null && dataLinkType.getValue() != null) {
@@ -273,7 +273,7 @@ public class FromSalConversionsUtils {
                         (Inet4Address) inetDestAddress);
             }
         } else if ((inetSourceAddress instanceof Inet6Address)
-                && (inetDestAddress instanceof Inet6Address)) {
+                || (inetDestAddress instanceof Inet6Address)) {
             return setLayer3MatchAsIpv6((Inet6Address) inetSourceAddress,
                     (Inet6Address) inetDestAddress);
         }
@@ -327,15 +327,18 @@ public class FromSalConversionsUtils {
     private static Layer3Match setLayer3MatchAsIpv4(
             final Inet4Address inetSourceAddress,
             final Inet4Address inetDestAddress) {
-        String inetSrcAddressString = InetAddresses
-                .toAddrString(inetSourceAddress);
-        String inetDstAddressString = InetAddresses
-                .toAddrString(inetDestAddress);
-
         Ipv4MatchBuilder layer4MatchBuild = new Ipv4MatchBuilder();
-        layer4MatchBuild.setIpv4Source(new Ipv4Prefix(inetSrcAddressString));
-        layer4MatchBuild
-                .setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
+        if(inetSourceAddress != null) {
+            String inetSrcAddressString = InetAddresses
+                    .toAddrString(inetSourceAddress);
+            layer4MatchBuild.setIpv4Source(new Ipv4Prefix(inetSrcAddressString));
+        }
+        if(inetDestAddress != null) {
+            String inetDstAddressString = InetAddresses
+                    .toAddrString(inetDestAddress);
+            layer4MatchBuild
+            .setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
+        }       
         return layer4MatchBuild.build();
 
     }
@@ -343,15 +346,18 @@ public class FromSalConversionsUtils {
     private static Layer3Match setLayer3MatchAsIpv6(
             final Inet6Address inetSourceAddress,
             final Inet6Address inetDestAddress) {
-        String inetSrcAddressString = InetAddresses
-                .toAddrString(inetSourceAddress);
-        String inetDstAddressString = InetAddresses
-                .toAddrString(inetDestAddress);
         Ipv6MatchBuilder layer6MatchBuild = new Ipv6MatchBuilder();
-
-        layer6MatchBuild.setIpv6Source(new Ipv6Prefix(inetSrcAddressString));
-        layer6MatchBuild
-                .setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
+        if(inetSourceAddress != null) {
+            String inetSrcAddressString = InetAddresses
+                    .toAddrString(inetSourceAddress);
+            layer6MatchBuild.setIpv6Source(new Ipv6Prefix(inetSrcAddressString));
+        }
+        if(inetDestAddress != null) {
+            String inetDstAddressString = InetAddresses
+                    .toAddrString(inetDestAddress);    
+            layer6MatchBuild
+                    .setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
+        }
         return layer6MatchBuild.build();
     }
     
