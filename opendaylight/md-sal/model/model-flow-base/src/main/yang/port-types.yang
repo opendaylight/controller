@@ -27,11 +27,15 @@ module opendaylight-port-types {
         }
     }
     
-    typedef port-state {
-        type enumeration {
-            enum link-down;
-            enum blocked;
-            enum live;
+    grouping port-state {
+        leaf link-down {
+            type boolean;
+        }
+        leaf blocked {
+            type boolean;
+        }   
+        leaf live {
+            type boolean;
         }
     }
     
@@ -103,9 +107,9 @@ module opendaylight-port-types {
             description "Human readable name of the port";                    
         }
         
-        leaf state {
-            type port-state;
-            description "Bit map of OFPPS-* flags";            
+        container state {
+            uses port-state;
+            description "Description of state of port";            
         }
         
         leaf current-feature {
