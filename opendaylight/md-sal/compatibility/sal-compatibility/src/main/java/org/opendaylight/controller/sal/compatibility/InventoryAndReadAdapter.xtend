@@ -64,6 +64,9 @@ import org.slf4j.LoggerFactory
 
 import static extension org.opendaylight.controller.sal.common.util.Arguments.*
 import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
+import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader
+import java.util.concurrent.ConcurrentHashMap
+import java.util.Map
 
 class InventoryAndReadAdapter implements IPluginInReadService,
 											 IPluginInInventoryService,
@@ -360,15 +363,64 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     }
 
     override getNodeProps() {
-
-        // FIXME: Read from MD-SAL inventory service
-        return null;
+        val props = new ConcurrentHashMap<Node, Map<String, org.opendaylight.controller.sal.core.Property>>()
+        
+        val nodes = readAllMDNodes()
+        for (node : nodes.node ) {
+            val fcn = node.getAugmentation(FlowCapableNode)
+            if(fcn != null) {
+                val perNodeProps = fcn.toADNodeProperties(node.id)
+                val perNodePropMap = new ConcurrentHashMap<String, org.opendaylight.controller.sal.core.Property>
+                if(perNodeProps != null ) {
+                    for(perNodeProp : perNodeProps) {
+                        perNodePropMap.put(perNodeProp.name,perNodeProp)
+                    }
+                }
+                props.put(new Node(MD_SAL_TYPE, node.id.toADNodeId),perNodePropMap)
+            }
+        }
+        return props;
+    }
+    
+    private def readAllMDNodes() {
+        val nodesRef = InstanceIdentifier.builder(Nodes)
+            .toInstance
+        val reader = TypeSafeDataReader.forReader(dataService)
+        return reader.readOperationalData(nodesRef)
+    }
+    
+    private def readAllMDNodeConnectors(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node) {
+        val nodeRef = InstanceIdentifier.builder(Nodes)
+            .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(node.id))
+            .toInstance
+        val reader = TypeSafeDataReader.forReader(dataService)
+        return reader.readOperationalData(nodeRef).nodeConnector
     }
 
     override getNodeConnectorProps(Boolean refresh) {
-
-        // FIXME: Read from MD-SAL Invcentory Service
-        return null;
+        // Note, because the MD-SAL has a unified data store, we can ignore the Boolean refresh, as we have no secondary 
+        // data store to refresh from
+        val props = new ConcurrentHashMap<org.opendaylight.controller.sal.core.NodeConnector, Map<String, org.opendaylight.controller.sal.core.Property>>()
+        val nodes = readAllMDNodes()
+        for (node : nodes.node) {
+            val ncs = node.readAllMDNodeConnectors
+            if(ncs != null) {
+                for( nc : ncs ) {
+                    val fcnc = nc.getAugmentation(FlowCapableNodeConnector)
+                    if(fcnc != null) {
+                        val ncps = fcnc.toADNodeConnectorProperties
+                        val ncpsm = new ConcurrentHashMap<String, org.opendaylight.controller.sal.core.Property>
+                        if(ncps != null) {
+                            for(p : ncps) {
+                                ncpsm.put(p.name,p)
+                            }
+                        }  
+                        props.put(nc.id.toADNodeConnector(node.id),ncpsm)
+                    }
+                }
+            }
+        }
+        return props
     }
 
     private def FlowCapableNode readFlowCapableNode(NodeRef ref) {
