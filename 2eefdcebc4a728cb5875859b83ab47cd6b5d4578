@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_2215df9b",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-03T23:06:23Z",
+      "side": 1,
+      "message": "In AD-SAL also NodeConnectorIDType.ALL is special.",
+      "revId": "2eefdcebc4a728cb5875859b83ab47cd6b5d4578",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
