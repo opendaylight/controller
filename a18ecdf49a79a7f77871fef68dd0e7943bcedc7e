@@ -16,6 +16,24 @@
       "revId": "a18ecdf49a79a7f77871fef68dd0e7943bcedc7e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e297c738",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/MDFlowMapping.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-03T20:45:44Z",
+      "side": 1,
+      "message": "Actually... this is the way we project the model of OF1.0 (which semantically is what the AD-SAL has) into OF 1.3... but assuming a single table (table 0)",
+      "parentUuid": "da6255ed_e2246761",
+      "revId": "a18ecdf49a79a7f77871fef68dd0e7943bcedc7e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
