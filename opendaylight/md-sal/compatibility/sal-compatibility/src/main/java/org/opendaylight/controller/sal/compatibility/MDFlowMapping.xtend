@@ -129,6 +129,7 @@ public class MDFlowMapping {
         }
         instructions = targetActions.toApplyInstruction();
         match = sourceFlow.match.toMatch();
+        tableId = new Integer(0).shortValue
         return it.build();
 
     }
@@ -137,6 +138,7 @@ public class MDFlowMapping {
         val it = new InstructionsBuilder;
         val applyActions = new InstructionBuilder;
         applyActions.instruction = new ApplyActionsCaseBuilder().setApplyActions(new ApplyActionsBuilder().setAction(actions).build()).build()
+        applyActions.setOrder(new Integer(0))
         instruction = Collections.<Instruction>singletonList(applyActions.build)
         return it.build;
     }
@@ -150,6 +152,7 @@ public class MDFlowMapping {
     public static def addFlowInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
         val it = new AddFlowInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
+        it.setNode(sourceNode.toNodeRef)
         return it.build();
     }
 
