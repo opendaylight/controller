@@ -1,7 +1,6 @@
 package org.opendaylight.md.controller.topology.lldp.utils;
 
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.LLDP;
@@ -46,10 +45,6 @@ public class LLDPDiscoveryUtils {
             LLDP lldp = (LLDP) ethPkt.getPayload();
     
             try {
-                List<LLDPTLV> optionalTLVList = lldp.getOptionalTLVList();
-                if (optionalTLVList == null) {
-                    return null;
-                }
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
                 for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
