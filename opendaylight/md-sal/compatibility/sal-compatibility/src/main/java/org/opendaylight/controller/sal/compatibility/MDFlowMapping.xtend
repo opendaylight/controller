@@ -146,6 +146,7 @@ public class MDFlowMapping {
     public static def removeFlowInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
         val it = new RemoveFlowInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
+        node = sourceNode.toNodeRef()
         return it.build();
     }
 
