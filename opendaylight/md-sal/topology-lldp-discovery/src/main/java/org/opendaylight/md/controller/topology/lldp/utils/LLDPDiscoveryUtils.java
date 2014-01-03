@@ -61,12 +61,13 @@ public class LLDPDiscoveryUtils {
                         srcNodeId = new NodeId(srcNodeIdString);
                     }
                 }
-                
-                InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
-                        .child(Node.class,new NodeKey(srcNodeId))
-                        .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
-                        .toInstance();
-                return new NodeConnectorRef(srcInstanceId);
+                if(srcNodeId != null && srcNodeConnectorId != null) {
+                    InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
+                            .child(Node.class,new NodeKey(srcNodeId))
+                            .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
+                            .toInstance();
+                    return new NodeConnectorRef(srcInstanceId);
+                }
             } catch (Exception e) {
                 LOG.warn("Caught exception ", e);
             }
