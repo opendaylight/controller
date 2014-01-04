@@ -14,6 +14,7 @@
     </scm>
 
     <properties>
+        <jackson.version>2.3.0</jackson.version>
         <exam.version>3.0.0</exam.version>
         <url.version>1.5.0</url.version>
         <config.version>0.2.3-SNAPSHOT</config.version>
@@ -389,20 +390,29 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.2</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
+
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.2</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.zeromq</groupId>
             <artifactId>jeromq</artifactId>
             <version>0.3.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>xtend-lib-osgi</artifactId>

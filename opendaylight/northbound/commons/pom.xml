@@ -52,9 +52,10 @@
               org.osgi.service.packageadmin,
               org.osgi.util.tracker,
               javax.servlet.http,
-              org.codehaus.jackson,
-              org.codehaus.jackson.jaxrs,
-              org.codehaus.jackson.map,
+              com.fasterxml.jackson.core,
+              com.fasterxml.jackson.databind,
+              com.fasterxml.jackson.jaxrs.base,
+              com.fasterxml.jackson.jaxrs.json,
               org.slf4j
             </Import-Package>
           </instructions>
@@ -83,18 +84,32 @@
       <artifactId>bundlescanner</artifactId>
       <version>${bundlescanner.version}</version>
     </dependency>
+
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
+       <groupId>com.fasterxml.jackson.core</groupId>
+       <artifactId>jackson-annotations</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
+       <groupId>com.fasterxml.jackson.core</groupId>
+       <artifactId>jackson-core</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
+
+    <dependency>
+       <groupId>com.fasterxml.jackson.jaxrs</groupId>
+       <artifactId>jackson-jaxrs-json-provider</artifactId>
+    </dependency>
+
+      <dependency>
+         <groupId>com.fasterxml.jackson.jaxrs</groupId>
+         <artifactId>jackson-jaxrs-base</artifactId>
+      </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -114,10 +129,6 @@
       <artifactId>jersey-client</artifactId>
       <version>${jersey.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-      <version>${jersey.version}</version>
-    </dependency>
+
   </dependencies>
 </project>

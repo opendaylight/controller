@@ -57,7 +57,8 @@
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.slf4j,
-              org.codehaus.jackson.jaxrs,
+              com.fasterxml.jackson.jaxrs.base,
+              com.fasterxml.jackson.jaxrs.json,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Export-Package>
