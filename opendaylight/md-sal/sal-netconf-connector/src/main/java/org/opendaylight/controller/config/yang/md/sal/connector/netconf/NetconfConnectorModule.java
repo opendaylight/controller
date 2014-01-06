@@ -12,8 +12,12 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.io.File;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLContext;
 
@@ -24,6 +28,10 @@ import org.opendaylight.controller.netconf.util.handler.ssh.authentication.Login
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
+import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
+import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingProvider;
+import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
+import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders;
 import org.osgi.framework.BundleContext;
 
 import static com.google.common.base.Preconditions.*;
@@ -37,6 +45,8 @@ import com.google.common.net.InetAddresses;
 public final class NetconfConnectorModule extends org.opendaylight.controller.config.yang.md.sal.connector.netconf.AbstractNetconfConnectorModule
 {
 
+    private static ExecutorService GLOBAL_PROCESSING_EXECUTOR = null;
+    private static AbstractCachingSchemaSourceProvider<String, InputStream> GLOBAL_NETCONF_SOURCE_PROVIDER = null;
     private BundleContext bundleContext;
 
     public NetconfConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -74,31 +84,56 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         } else {
             addressValue = getAddress().getIpv6Address().getValue();
         }
-        
         */
         ReconnectStrategy strategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, attemptMsTimeout, 1000, 1.0, null,
                 Long.valueOf(connectionAttempts), null);
         
-        
-        device.setStrategy(strategy);
+        device.setReconnectStrategy(strategy);
         
         InetAddress addr = InetAddresses.forString(addressValue);
         InetSocketAddress socketAddress = new InetSocketAddress(addr , getPort().intValue());
-        device.setSocketAddress(socketAddress);
+
         
+        device.setProcessingExecutor(getGlobalProcessingExecutor());
+        
+        device.setSocketAddress(socketAddress);
+        device.setEventExecutor(getEventExecutorDependency());
+        device.setDispatcher(createDispatcher());
+        device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
+        
+        getDomRegistryDependency().registerProvider(device, bundleContext);
+        device.start();
+        return device;
+    }
+
+    private ExecutorService getGlobalProcessingExecutor() {
+        if(GLOBAL_PROCESSING_EXECUTOR == null) {
+            
+            GLOBAL_PROCESSING_EXECUTOR = Executors.newCachedThreadPool();
+            
+        }
+        return GLOBAL_PROCESSING_EXECUTOR;
+    }
+
+    private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider(BundleContext bundleContext) {
+        if(GLOBAL_NETCONF_SOURCE_PROVIDER == null) {
+            String storageFile = "cache/schema";
+            File directory = bundleContext.getDataFile(storageFile);
+            SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
+            GLOBAL_NETCONF_SOURCE_PROVIDER = FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
+        }
+        return GLOBAL_NETCONF_SOURCE_PROVIDER;
+    }
+
+    private NetconfClientDispatcher createDispatcher() {
         EventLoopGroup bossGroup = getBossThreadGroupDependency();
         EventLoopGroup workerGroup = getWorkerThreadGroupDependency();
-        NetconfClientDispatcher dispatcher = null;
         if(getTcpOnly()) {
-            dispatcher = new NetconfClientDispatcher( bossGroup, workerGroup);
+            return new NetconfClientDispatcher( bossGroup, workerGroup);
         } else {
             AuthenticationHandler authHandler = new LoginPassword(getUsername(),getPassword());
-            dispatcher = new NetconfSshClientDispatcher(authHandler , bossGroup, workerGroup);
+            return new NetconfSshClientDispatcher(authHandler , bossGroup, workerGroup);
         }
-        getDomRegistryDependency().registerProvider(device, bundleContext);
-        
-        device.start(dispatcher);
-        return device;
     }
 
     public void setBundleContext(BundleContext bundleContext) {
