@@ -68,6 +68,10 @@
                                     <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
                                     <outputBaseDir>target/site/models</outputBaseDir>
                                 </generator>
+                                <generator>
+                                    <codeGeneratorClass>org.opendaylight.yangtools.yang.wadl.generator.maven.WadlGenerator</codeGeneratorClass>
+                                    <outputBaseDir>target/site/models</outputBaseDir>
+                                </generator>
                             </codeGenerators>
                             <inspectDependencies>true</inspectDependencies>
                         </configuration>
