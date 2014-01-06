@@ -16,7 +16,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev130712.network.topology.topology.Link
 
 import static com.google.common.base.Preconditions.*
-import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
+import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
+import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
 
 class TopologyMapping {
     
@@ -24,9 +27,9 @@ class TopologyMapping {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
     }
     
-    public static def toADEdgeUpdates(Topology topology) {
+    public static def toADEdgeUpdates(Topology topology,TypeSafeDataReader reader) {
         val List<TopoEdgeUpdate> result = new CopyOnWriteArrayList<TopoEdgeUpdate>()
-        return FluentIterable.from(topology.link).transform[toAdEdge(topology).toTopoEdgeUpdate].copyInto(result)
+        return FluentIterable.from(topology.link).transform[toAdEdge(topology).toTopoEdgeUpdate(reader)].copyInto(result)
     }
     
     public static def toAdEdge(Link link,Topology topology) {
@@ -35,12 +38,17 @@ class TopologyMapping {
         return new Edge(adSrc,adDst); 
     }
     
-    public static def toTopoEdgeUpdate(Edge e) {
-        return toTopoEdgeUpdate(e,UpdateType.ADDED)
+    public static def toTopoEdgeUpdate(Edge e,TypeSafeDataReader reader) {
+        return toTopoEdgeUpdate(e,UpdateType.ADDED,reader)
     }
     
-    public static def toTopoEdgeUpdate(Edge e,UpdateType type) {
-        return new TopoEdgeUpdate(e,Collections.emptySet,type)
+    public static def toTopoEdgeUpdate(Edge e,UpdateType type,TypeSafeDataReader reader) {
+        return new TopoEdgeUpdate(e,e.toAdEdgeProperties(reader),type)
+    }
+    
+    public static def toAdEdgeProperties(Edge e,TypeSafeDataReader reader) {
+        val nc = reader.readOperationalData(e.tailNodeConnector.toNodeConnectorRef.value as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector>)
+        return nc.toADNodeConnectorProperties     
     }
     
     public static def toADNodeId(NodeId nodeId) {

@@ -48,6 +48,7 @@ import java.util.Date
 import org.opendaylight.controller.sal.core.TimeStamp
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowNodeConnector
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowNode
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
 
 public class NodeMapping {
 
@@ -167,6 +168,14 @@ public class NodeMapping {
         val fcncu = nc.getAugmentation(FlowCapableNodeConnectorUpdated)
         if (fcncu != null) {
             return fcncu.toADNodeConnectorProperties
+        }
+        return new HashSet<org.opendaylight.controller.sal.core.Property>();
+    }
+
+    public static def toADNodeConnectorProperties(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector nc) {
+        val fcnc = nc.getAugmentation(FlowCapableNodeConnector)
+        if (fcnc != null) {
+            return fcnc.toADNodeConnectorProperties
         }
         return new HashSet<org.opendaylight.controller.sal.core.Property>();
     }
