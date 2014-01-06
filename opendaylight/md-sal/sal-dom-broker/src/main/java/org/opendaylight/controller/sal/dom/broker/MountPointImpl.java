@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class MountPointImpl implements MountProvisionInstance {
 
@@ -41,6 +42,8 @@ public class MountPointImpl implements MountProvisionInstance {
     
     
     private final InstanceIdentifier mountPath;
+
+    private SchemaContext schemaContext;
 
     public MountPointImpl(InstanceIdentifier path) {
         this.mountPath = path;
@@ -163,6 +166,14 @@ public class MountPointImpl implements MountProvisionInstance {
         // NOOP
     }
     
+    public SchemaContext getSchemaContext() {
+        return schemaContext;
+    }
+
+    public void setSchemaContext(SchemaContext schemaContext) {
+        this.schemaContext = schemaContext;
+    }
+
     class ReadWrapper implements DataReader<InstanceIdentifier, CompositeNode> {
         
         
