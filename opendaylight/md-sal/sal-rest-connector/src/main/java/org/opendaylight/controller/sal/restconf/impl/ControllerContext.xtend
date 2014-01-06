@@ -34,13 +34,19 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
+import org.opendaylight.controller.sal.core.api.mount.MountService
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
 
 class ControllerContext implements SchemaServiceListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
     val static ControllerContext INSTANCE = new ControllerContext
     val static NULL_VALUE = "null"
 
-    var SchemaContext schemas;
+    @Property
+    var SchemaContext globalSchema;
+    
+    @Property
+    var MountService mountService;
 
     private val BiMap<URI, String> uriToModuleName = HashBiMap.create();
     private val Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
@@ -57,7 +63,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     private def void checkPreconditions() {
-        if (schemas === null) {
+        if (globalSchema === null) {
             throw new ResponseException(Response.Status.SERVICE_UNAVAILABLE, RestconfProvider::NOT_INITALIZED_MSG)
         }
     }
@@ -75,29 +81,24 @@ class ControllerContext implements SchemaServiceListener {
         if (pathArgs.head.empty) {
             pathArgs.remove(0)
         }
-        val schemaNode = ret.collectPathArguments(pathArgs, restconfInstance.findModule);
+        val schemaNode = ret.collectPathArguments(pathArgs, globalSchema.findModule(pathArgs.head));
         if (schemaNode === null) {
             return null
         }
         return new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
     }
 
-    private def findModule(String restconfInstance) {
-        checkPreconditions
-        checkNotNull(restconfInstance);
-        val pathArgs = restconfInstance.split("/");
-        if (pathArgs.empty) {
-            return null;
-        }
-        val modulWithFirstYangStatement = pathArgs.filter[s|s.contains(":")].head
-        val startModule = modulWithFirstYangStatement.toModuleName();
-        return getLatestModule(startModule)
+    private static def findModule(SchemaContext context,String argument) {
+        //checkPreconditions
+        checkNotNull(argument);
+        val startModule = argument.toModuleName();
+        return context.getLatestModule(startModule)
     }
 
-    def getLatestModule(String moduleName) {
-        checkPreconditions
+    static def getLatestModule(SchemaContext schema,String moduleName) {
+        checkArgument(schema != null);
         checkArgument(moduleName !== null && !moduleName.empty)
-        val modules = schemas.modules.filter[m|m.name == moduleName]
+        val modules = schema.modules.filter[m|m.name == moduleName]
         var latestModule = modules.head
         for (module : modules) {
             if (module.revision.after(latestModule.revision)) {
@@ -112,7 +113,7 @@ class ControllerContext implements SchemaServiceListener {
         val elements = path.path;
         val ret = new StringBuilder();
         val startQName = elements.get(0).nodeType;
-        val initialModule = schemas.findModuleByNamespaceAndRevision(startQName.namespace, startQName.revision)
+        val initialModule = globalSchema.findModuleByNamespaceAndRevision(startQName.namespace, startQName.revision)
         var node = initialModule as DataSchemaNode;
         for (element : elements) {
             node = node.childByQName(element.nodeType);
@@ -139,7 +140,7 @@ class ControllerContext implements SchemaServiceListener {
         checkPreconditions
         var module = uriToModuleName.get(namespace)
         if (module === null) {
-            val moduleSchemas = schemas.findModuleByNamespace(namespace);
+            val moduleSchemas = globalSchema.findModuleByNamespace(namespace);
             if(moduleSchemas === null) return null
             var latestModule = moduleSchemas.head
             for (m : moduleSchemas) {
@@ -157,7 +158,7 @@ class ControllerContext implements SchemaServiceListener {
     def findNamespaceByModule(String module) {
         var namespace = moduleNameToUri.get(module)
         if (namespace === null) {
-            val moduleSchemas = schemas.modules.filter[it|it.name.equals(module)]
+            val moduleSchemas = globalSchema.modules.filter[it|it.name.equals(module)]
             var latestModule = moduleSchemas.head
             for (m : moduleSchemas) {
                 if (m.revision.after(latestModule.revision)) {
@@ -175,7 +176,7 @@ class ControllerContext implements SchemaServiceListener {
         checkPreconditions
         var module = uriToModuleName.get(qname.namespace)
         if (module === null) {
-            val moduleSchema = schemas.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
+            val moduleSchema = globalSchema.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
             if(moduleSchema === null) throw new IllegalArgumentException()
             uriToModuleName.put(qname.namespace, moduleSchema.name)
             module = moduleSchema.name;
@@ -244,25 +245,22 @@ class ControllerContext implements SchemaServiceListener {
         }
         val nodeRef = strings.head;
 
-        val nodeName = nodeRef.toNodeName();
-        val targetNode = parentNode.getDataChildByName(nodeName);
-        if (targetNode === null) {
-            val children = parentNode.childNodes
-            for (child : children) {
-                if (child instanceof ChoiceNode) {
-                    val choice = child as ChoiceNode
-                    for (caze : choice.cases) {
-                        val result = builder.collectPathArguments(strings, caze as DataNodeContainer);
-                        if (result !== null)
-                            return result
-                    }
-                }
-            }
-            return null
-        }
+        val nodeName = nodeRef.toNodeName;
+        var targetNode = parentNode.findInstanceDataChild(nodeName);
         if (targetNode instanceof ChoiceNode) {
             return null
         }
+        
+        if (targetNode === null) {
+            // Node is possibly in other mount point
+            val partialPath = builder.toInstance;
+            val mountPointSchema = mountService?.getMountPoint(partialPath)?.schemaContext;
+            if(mountPointSchema != null) {
+                return builder.collectPathArguments(strings, mountPointSchema.findModule(strings.head));
+            }
+            return null
+        }
+        
 
         // Number of consumed elements
         var consumed = 1;
@@ -302,6 +300,32 @@ class ControllerContext implements SchemaServiceListener {
 
         return targetNode
     }
+    
+    static def DataSchemaNode findInstanceDataChild(DataNodeContainer container, String name) {
+        // FIXME: Add namespace comparison
+        var potentialNode = container.getDataChildByName(name);
+        if(potentialNode.instantiatedDataSchema) {
+            return potentialNode;
+        }
+        val allCases = container.childNodes.filter(ChoiceNode).map[cases].flatten
+        for (caze : allCases) {
+            potentialNode = caze.findInstanceDataChild(name);
+            if(potentialNode != null) {
+                return potentialNode;
+            }
+        }
+        return null;
+    }
+    
+    static def boolean isInstantiatedDataSchema(DataSchemaNode node) {
+        switch node {
+            LeafSchemaNode: return true
+            LeafListSchemaNode: return true
+            ContainerSchemaNode: return true
+            ListSchemaNode: return true
+            default: return false
+        }
+    }
 
     private def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {
         checkNotNull(uriValue);
@@ -319,7 +343,7 @@ class ControllerContext implements SchemaServiceListener {
         map.put(node.QName, decoded);
     }
 
-    private def String toModuleName(String str) {
+    private static def String toModuleName(String str) {
         checkNotNull(str)
         if (str.contains(":")) {
             val args = str.split(":");
@@ -343,7 +367,7 @@ class ControllerContext implements SchemaServiceListener {
     private def QName toQName(String name) {
         val module = name.toModuleName;
         val node = name.toNodeName;
-        val namespace = FluentIterable.from(schemas.modules.sort[o1,o2 | o1.revision.compareTo(o2.revision)]) //
+        val namespace = FluentIterable.from(globalSchema.modules.sort[o1,o2 | o1.revision.compareTo(o2.revision)]) //
             .transform[QName.create(namespace,revision,it.name)].findFirst[module == localName]
         ;
         return QName.create(namespace,node);
@@ -354,7 +378,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     override onGlobalContextUpdated(SchemaContext context) {
-        this.schemas = context;
+        this.globalSchema = context;
         for (operation : context.operations) {
             val qname = operation.QName;
             qnameToRpc.put(qname, operation);
