@@ -8,8 +8,10 @@
 
 package org.opendaylight.controller.web;
 
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -52,6 +55,23 @@ public class DaylightWeb {
         return "main";
     }
 
+    /**
+     * Read the version.properties file for the property
+     *
+     * @param request
+     * @return String value configured in the version.properties file
+     */
+    @RequestMapping(value="/versionProperty/{property}", method = RequestMethod.GET)
+    @ResponseBody
+    public String getVersion(HttpServletRequest request, @PathVariable("property") String property) {
+        Properties prop = new Properties();
+        try {
+            prop.load(new FileInputStream("version.properties"));
+            return prop.getProperty(property+".version");
+        } catch (Exception e) {
+            return null;
+        }
+    }
     @RequestMapping(value = "web.json")
     @ResponseBody
     public Map<String, Map<String, Object>> bundles(HttpServletRequest request) {

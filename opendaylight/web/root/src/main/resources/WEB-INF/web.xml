@@ -46,6 +46,7 @@
              <url-pattern>/images/*</url-pattern>
              <url-pattern>/css/*</url-pattern>
              <url-pattern>/favicon.ico</url-pattern>
+             <url-pattern>/versionProperty/*</url-pattern>
           </web-resource-collection>
         </security-constraint>
 
