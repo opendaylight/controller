@@ -71,6 +71,10 @@ public class NetconfClient implements Closeable {
         return new NetconfClient(clientLabelForLogging,address,strat,netconfClientDispatcher);
     }
 
+    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher,NetconfClientSessionListener listener) throws InterruptedException {
+        return new NetconfClient(clientLabelForLogging,address,strat,netconfClientDispatcher,listener);
+    }
+
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
             NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this(clientLabelForLogging, address,
@@ -83,6 +87,17 @@ public class NetconfClient implements Closeable {
                 DEFAULT_CONNECT_TIMEOUT), netconfClientDispatcher);
     }
 
+    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat,
+            NetconfClientDispatcher netconfClientDispatcher, NetconfClientSessionListener listener) throws InterruptedException{
+        this.label = clientLabelForLogging;
+        dispatch = netconfClientDispatcher;
+        sessionListener = listener;
+        Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strat);
+        this.address = address;
+        clientSession = get(clientFuture);
+        this.sessionId = clientSession.getSessionId();
+    }
+
     public NetconfMessage sendMessage(NetconfMessage message) {
         return sendMessage(message, 5, 1000);
     }
@@ -90,6 +105,7 @@ public class NetconfClient implements Closeable {
     public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) {
         long startTime = System.currentTimeMillis();
         Preconditions.checkState(clientSession.isUp(), "Session was not up yet");
+        //logger.debug("Sending message: {}",XmlUtil.toString(message.getDocument()));
         clientSession.sendMessage(message);
         try {
             return sessionListener.getLastMessage(attempts, attemptMsDelay);
