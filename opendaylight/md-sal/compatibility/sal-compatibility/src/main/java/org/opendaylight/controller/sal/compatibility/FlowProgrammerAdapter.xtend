@@ -35,7 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId
 
 
-import static org.opendaylight.controller.sal.compatibility.MDFlowMapping.*
+import static extension org.opendaylight.controller.sal.compatibility.MDFlowMapping.*
 
 import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
 import static extension org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils.*
@@ -54,54 +54,44 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     private IPluginOutFlowProgrammerService flowProgrammerPublisher;
 
     override addFlow(Node node, Flow flow) {
-        val input = addFlowInput(node, flow);
-        writeFlow(input, new NodeKey(new NodeId(node.getNodeIDString())), new FlowKey(new FlowId(flow.getId())));
-        return toStatus(true);
+        return addFlowAsync(node,flow,0)
     }
 
     override modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
-        val input = updateFlowInput(node, oldFlow, newFlow);
-        val future = delegate.updateFlow(input);
-        try {
-            val result = future.get();
-            return toStatus(result);
-        } catch (Exception e) {
-            return processException(e);
-        }
+        return modifyFlowAsync(node, oldFlow,newFlow,0)
     }
 
     override removeFlow(Node node, Flow flow) {
-        val input = removeFlowInput(node, flow);
-        val future = delegate.removeFlow(input);
-
-        try {
-            val result = future.get();
-            return toStatus(result);
-        } catch (Exception e) {
-            return processException(e);
-        }
+        return removeFlowAsync(node, flow,0);
     }
 
     override addFlowAsync(Node node, Flow flow, long rid) {
-        val input = addFlowInput(node, flow);
-        delegate.addFlow(input);
-        return new Status(StatusCode.SUCCESS);
+        writeFlow(flow.toMDFlow, new NodeKey(new NodeId(node.getNodeIDString())));
+        return toStatus(true);
     }
 
     override modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
-        val input = updateFlowInput(node, oldFlow, newFlow);
-        delegate.updateFlow(input);
-        return new Status(StatusCode.SUCCESS);
+        writeFlow(newFlow.toMDFlow, new NodeKey(new NodeId(node.getNodeIDString())));
+        return toStatus(true);
     }
 
-    override removeFlowAsync(Node node, Flow flow, long rid) {
-        val input = removeFlowInput(node, flow);
-        delegate.removeFlow(input);
-        return new Status(StatusCode.SUCCESS);
+    override removeFlowAsync(Node node, Flow adflow, long rid) {
+        val flow = adflow.toMDFlow;
+        val modification = this._dataBrokerService.beginTransaction();
+        val flowPath = InstanceIdentifier.builder(Nodes)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, new NodeKey(new NodeId(node.getNodeIDString())))
+                .augmentation(FlowCapableNode)
+                .child(Table, new TableKey(flow.getTableId()))
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow, new FlowKey(flow.id))
+                .build;
+        modification.removeConfigurationData(flowPath);
+        val commitFuture = modification.commit();
+        return toStatus(true);
     }
 
     override removeAllFlows(Node node) {
-        throw new UnsupportedOperationException("Not present in MD-SAL");
+        // I know this looks like a copout... but its exactly what the legacy OFplugin did
+        return new Status(StatusCode.SUCCESS);
     }
 
     override syncSendBarrierMessage(Node node) {
@@ -125,12 +115,14 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     }
 
 
-    private def writeFlow(AddFlowInput flow, NodeKey nodeKey, FlowKey flowKey) {
+    private def writeFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow flow, NodeKey nodeKey) {
         val modification = this._dataBrokerService.beginTransaction();
         val flowPath = InstanceIdentifier.builder(Nodes)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, nodeKey).augmentation(FlowCapableNode)
-                .child(Table, new TableKey(flow.getTableId())).child(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow, flowKey).build();
-        modification.putOperationalData(flowPath, flow);
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, nodeKey)
+                .augmentation(FlowCapableNode)
+                .child(Table, new TableKey(flow.getTableId()))
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow, new FlowKey(flow.id))
+                .build;
         modification.putConfigurationData(flowPath, flow);
         val commitFuture = modification.commit();
         try {

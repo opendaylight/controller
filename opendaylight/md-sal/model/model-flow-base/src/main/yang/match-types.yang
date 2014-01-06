@@ -5,6 +5,7 @@ module opendaylight-match-types {
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-l2-types {prefix l2t;revision-date "2013-08-27";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
 
     revision "2013-10-26" {
         description "Initial revision of macth types";
@@ -270,11 +271,11 @@ module opendaylight-match-types {
     
     grouping match {
         leaf in-port {
-            type uint32;
+            type inv:node-connector-id;
         }
         
         leaf in-phy-port {
-            type uint32;
+            type inv:node-connector-id;
         }
         
         container "metadata" {
