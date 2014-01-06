@@ -81,6 +81,14 @@ module odl-sal-netconf-connector-cfg {
                     }
                 }
             }
+
+            container event-executor {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity netty:netty-event-executor;
+                    }
+                }
+            }
         }
     }
 }

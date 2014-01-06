@@ -13,10 +13,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.google.common.base.Strings;
+
 public class XmlDocumentUtils {
 
-    public static CompositeNode toCompositeNode(Document doc) {
-        return (CompositeNode) toCompositeNode(doc.getDocumentElement());
+    public static Node<?> toNode(Document doc) {
+        return toCompositeNode(doc.getDocumentElement());
     }
 
     private static Node<?> toCompositeNode(Element element) {
@@ -29,7 +31,7 @@ public class XmlDocumentUtils {
 
         List<Node<?>> values = new ArrayList<>();
         NodeList nodes = element.getChildNodes();
-        boolean isSimpleObject = false;
+        boolean isSimpleObject = true;
         String value = null;
         for (int i = 0; i < nodes.getLength(); i++) {
             org.w3c.dom.Node child = nodes.item(i);
@@ -37,11 +39,10 @@ public class XmlDocumentUtils {
                 isSimpleObject = false;
                 values.add(toCompositeNode((Element) child));
             }
-            if (!isSimpleObject && child instanceof org.w3c.dom.Text) {
+            if (isSimpleObject && child instanceof org.w3c.dom.Text) {
                 value = element.getTextContent();
-                if (value.matches(".*\\w.*")) {
+                if (!Strings.isNullOrEmpty(value)) {
                     isSimpleObject = true;
-                    break;
                 }
             }
         }
