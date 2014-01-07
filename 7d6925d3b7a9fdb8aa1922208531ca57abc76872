@@ -34,6 +34,24 @@
       "revId": "7d6925d3b7a9fdb8aa1922208531ca57abc76872",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5c49cbb5",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.xtend",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-07T22:50:03Z",
+      "side": 1,
+      "message": "Fair enough, it is indeed minor for now.\nThanks.",
+      "parentUuid": "da6255ed_1c07d31a",
+      "revId": "7d6925d3b7a9fdb8aa1922208531ca57abc76872",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
