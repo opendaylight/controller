@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
@@ -110,6 +106,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Class implement statistics manager related listener interface and augment all the 
@@ -500,7 +500,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                 sucLogger.debug("Associated original flow is not found in data store. Augmenting flow in operational data store");
                 //TODO: Temporary fix: format [ 1+tableid+1+unaccounted flow counter]
                 long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"1"+Integer.toString(this.unaccountedFlowsCounter)));
-                FlowKey newFlowKey = new FlowKey(new FlowId(flowKey));
+                FlowKey newFlowKey = new FlowKey(new FlowId(Long.toString(flowKey)));
                 InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                         .augmentation(FlowCapableNode.class)
                         .child(Table.class, new TableKey(tableId))

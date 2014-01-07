@@ -27,6 +27,8 @@ import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
 import org.opendaylight.controller.sal.utils.GlobalConstants
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory
 import org.opendaylight.controller.sal.utils.INodeFactory
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
@@ -143,6 +145,13 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             .setService(IPluginOutFlowProgrammerService) //
             .setCallbacks("setFlowProgrammerPublisher", "setFlowProgrammerPublisher") //
             .setRequired(false))
+
+        add(
+            createServiceDependency() //
+            .setService(IClusterGlobalServices) //
+            .setCallbacks("setClusterGlobalServices", "unsetClusterGlobalServices") //
+            .setRequired(false))
+
     }
 
     private def dispatch configure(InventoryAndReadAdapter imp, Component it) {
@@ -162,6 +171,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             .setService(IDiscoveryService) //
             .setCallbacks("setDiscoveryPublisher", "setDiscoveryPublisher") //
             .setRequired(false))
+
         
     }
     

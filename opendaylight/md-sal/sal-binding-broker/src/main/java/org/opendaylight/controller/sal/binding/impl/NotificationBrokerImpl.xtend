@@ -20,7 +20,8 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.yangtools.concepts.Registration
 import org.opendaylight.yangtools.yang.binding.Notification
-import org.slf4j.LoggerFactoryimport org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
+import org.slf4j.LoggerFactory
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
 
@@ -178,10 +179,19 @@ class NotifyTask implements Callable<Object> {
     val Notification notification;
 
     override call() {
+        //Only logging the complete notification in debug mode
         try {
-            log.info("Delivering notification {} to {}",notification,listener);
+            if(log.isDebugEnabled){
+                log.debug("Delivering notification {} to {}",notification,listener);
+            } else {
+                log.info("Delivering notification {} to {}",notification.class.name,listener);
+            }
             listener.onNotification(notification);
-            log.info("Notification delivered {} to {}",notification,listener);
+            if(log.isDebugEnabled){
+                log.debug("Notification delivered {} to {}",notification,listener);
+            } else {
+                log.info("Notification delivered {} to {}",notification.class.name,listener);
+            }
         } catch (Exception e) {
             log.error("Unhandled exception thrown by listener: {}", listener, e);
         }

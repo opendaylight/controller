@@ -8,19 +8,6 @@
 
 package org.opendaylight.controller.forwardingrulesmanager;
 
-import java.io.Serializable;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -61,6 +48,18 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Configuration Java Object which represents a flow configuration information
@@ -1044,6 +1043,7 @@ public class FlowConfig implements Serializable {
         }
 
         Flow flow = new Flow(match, getActionList());
+
         if (this.cookie != null) {
             flow.setId(Long.parseLong(cookie));
         }
@@ -1056,6 +1056,8 @@ public class FlowConfig implements Serializable {
         if (this.priority != null) {
             flow.setPriority(Integer.decode(this.priority).shortValue());
         }
+
+
         return flow;
     }
 
