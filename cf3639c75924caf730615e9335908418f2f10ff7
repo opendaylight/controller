@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_7c912ff0",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/flowprogrammer/Flow.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-01-07T23:49:24Z",
+      "side": 1,
+      "message": "Alessandro, in the MD-SAL a uri is to be used as a flow-id. One logical uri would be the flow name (as I understood it). So I wanted to be able to pass this name on to the AD-SAL to MD-SAL adapter layer and that is why I added this field.\n\nI did not change the type of the id because I wasn\u0027t sure if this would have an impact on backward compatibility. In the current FlowConfig cookie value is set as the id of the flow. If I changed that it would impact anyone who has programmed flows before.",
+      "parentUuid": "da6255ed_7cf00f91",
+      "revId": "cf3639c75924caf730615e9335908418f2f10ff7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_7cfa4f44",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/flowprogrammer/Flow.java",
         "patchSetId": 1
