@@ -115,24 +115,24 @@ public class BindingIndependentConnector implements //
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
         try {
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
-
             CompositeNode result = biDataService.readOperationalData(biPath);
-            Class<? extends DataObject> targetType = path.getTargetType();
-
-            if (Augmentation.class.isAssignableFrom(targetType)) {
-                path = mappingService.fromDataDom(biPath);
-                Class<? extends Augmentation<?>> augmentType = (Class<? extends Augmentation<?>>) targetType;
-                DataObject parentTo = mappingService.dataObjectFromDataDom(path, result);
-                if (parentTo instanceof Augmentable<?>) {
-                    return (DataObject) ((Augmentable) parentTo).getAugmentation(augmentType);
-                }
-
-            }
-            return mappingService.dataObjectFromDataDom(path, result);
-
+            return potentialAugmentationRead(path,biPath,result);
         } catch (DeserializationException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private DataObject potentialAugmentationRead(InstanceIdentifier<? extends DataObject> path, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath, CompositeNode result) throws DeserializationException {
+        Class<? extends DataObject> targetType = path.getTargetType();
+        if (Augmentation.class.isAssignableFrom(targetType)) {
+            path = mappingService.fromDataDom(biPath);
+            Class<? extends Augmentation<?>> augmentType = (Class<? extends Augmentation<?>>) targetType;
+            DataObject parentTo = mappingService.dataObjectFromDataDom(path, result);
+            if (parentTo instanceof Augmentable<?>) {
+                return (DataObject) ((Augmentable) parentTo).getAugmentation(augmentType);
+            }
+        }
+        return mappingService.dataObjectFromDataDom(path, result);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class BindingIndependentConnector implements //
         try {
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
             CompositeNode result = biDataService.readConfigurationData(biPath);
-            return mappingService.dataObjectFromDataDom(path, result);
+            return potentialAugmentationRead(path,biPath,result);
         } catch (DeserializationException e) {
             throw new IllegalStateException(e);
         }
