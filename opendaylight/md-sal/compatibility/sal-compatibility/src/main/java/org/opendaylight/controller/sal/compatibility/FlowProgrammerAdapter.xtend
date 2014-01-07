@@ -1,6 +1,9 @@
 package org.opendaylight.controller.sal.compatibility
 
+import java.util.Map
+import java.util.UUID
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.ConcurrentHashMap
 import org.opendaylight.controller.sal.core.Node
 import org.opendaylight.controller.sal.flowprogrammer.Flow
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService
@@ -53,6 +56,10 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     @Property
     private IPluginOutFlowProgrammerService flowProgrammerPublisher;
 
+    @Property
+    private Map<Flow, UUID> flowToFlowId = new ConcurrentHashMap<Flow, UUID>();
+
+
     override addFlow(Node node, Flow flow) {
         return addFlowAsync(node,flow,0)
     }
@@ -66,17 +73,26 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     }
 
     override addFlowAsync(Node node, Flow flow, long rid) {
-        writeFlow(flow.toMDFlow, new NodeKey(new NodeId(node.getNodeIDString())));
+        var flowId = flowToFlowId.get(flow);
+        if(flowId == null){
+            flowId = UUID.randomUUID();
+        }
+        flowToFlowId.put(flow, flowId);
+
+        writeFlow(flow.toMDFlow(flowId.toString()), new NodeKey(new NodeId(node.getNodeIDString())));
         return toStatus(true);
     }
 
     override modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
-        writeFlow(newFlow.toMDFlow, new NodeKey(new NodeId(node.getNodeIDString())));
+        val flowId = flowToFlowId.remove(oldFlow);
+        flowToFlowId.put(newFlow, flowId);
+        writeFlow(newFlow.toMDFlow(flowId.toString()), new NodeKey(new NodeId(node.getNodeIDString())));
         return toStatus(true);
     }
 
     override removeFlowAsync(Node node, Flow adflow, long rid) {
-        val flow = adflow.toMDFlow;
+        val flowId = flowToFlowId.remove(adflow);
+        val flow = adflow.toMDFlow(flowId.toString());
         val modification = this._dataBrokerService.beginTransaction();
         val flowPath = InstanceIdentifier.builder(Nodes)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, new NodeKey(new NodeId(node.getNodeIDString())))

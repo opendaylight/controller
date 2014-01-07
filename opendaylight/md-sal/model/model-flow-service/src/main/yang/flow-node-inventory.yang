@@ -92,7 +92,7 @@ module flow-node-inventory {
     }
 
     typedef flow-id {
-        type uint32; // Note: This doesn't really belong here, and not sure if unint32 is right
+        type inet:uri;
     }
 
     grouping tables {

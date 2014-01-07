@@ -571,4 +571,8 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		
 		return it;
 	}
+
+	override  getConfiguredNotConnectedNodes() {
+        return Collections.emptySet();
+	}
 }

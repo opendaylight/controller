@@ -11,6 +11,7 @@ module opendaylight-flow-statistics {
     import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
     import flow-capable-transaction {prefix tr;}
     import sal-flow {prefix flow;}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     
 
     revision "2013-08-19" {
@@ -33,7 +34,7 @@ module opendaylight-flow-statistics {
 	
 	typedef flow-id {
 		description "flow id";
-		type yang:counter32;
+		type inet:uri;
 	}
 	
 	grouping flow-and-statistics-map-list {
