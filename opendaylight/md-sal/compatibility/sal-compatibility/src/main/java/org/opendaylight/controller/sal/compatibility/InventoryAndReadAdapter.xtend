@@ -571,4 +571,8 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		
 		return it;
 	}
+
+	override  getConfiguredNotConnectedNodes() {
+        throw new UnsupportedOperationException("Not supported");
+	}
 }

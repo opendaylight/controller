@@ -143,7 +143,7 @@ public class MDFlowMapping {
        idleTimeout = sourceFlow.idleTimeout as int
        cookie = BigInteger.valueOf(sourceFlow.id)
        priority = sourceFlow.priority as int
-       id = new FlowId(sourceFlow.id)
+       id = new FlowId(sourceFlow.name)
     
        val sourceActions = sourceFlow.actions;
        val targetActions = new ArrayList<Action>();
