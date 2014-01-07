@@ -12,6 +12,8 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SupportedActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SupportedActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.supported.actions.ActionType;
@@ -130,8 +132,60 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
         testNodeRemove();
     }
+    
+    @Test
+    public void putNodeWithAugmentation() throws Exception {
+        
+        NodeBuilder nodeBuilder = new NodeBuilder();
+        nodeBuilder.setId(new NodeId(NODE_ID));
+        nodeBuilder.setKey(NODE_KEY);
+        FlowCapableNodeBuilder fnub = new FlowCapableNodeBuilder();
+        fnub.setHardware("Hardware Foo");
+        fnub.setManufacturer("Manufacturer Foo");
+        fnub.setSerialNumber("Serial Foo");
+        fnub.setDescription("Description Foo");
+        fnub.setSoftware("JUnit emulated");
+        FlowCapableNode fnu = fnub.build();
+        
+        nodeBuilder.addAugmentation(FlowCapableNode.class, fnu);
+        DataModificationTransaction baseTransaction = baDataService.beginTransaction();
+        baseTransaction.putOperationalData(NODE_INSTANCE_ID_BA, nodeBuilder.build());
+        RpcResult<TransactionStatus> result = baseTransaction.commit().get();
+        assertEquals(TransactionStatus.COMMITED, result.getResult());
+        
+        FlowCapableNode readedAugmentation = (FlowCapableNode) baDataService.readOperationalData(InstanceIdentifier.builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class).toInstance());
+        assertNotNull(readedAugmentation);
+        assertEquals(fnu.getHardware(), readedAugmentation.getHardware());
+        
+        testPutNodeConnectorWithAugmentation();
+        testNodeRemove();
+    }
 
     
+    private void testPutNodeConnectorWithAugmentation() throws Exception {
+        NodeConnectorKey ncKey = new NodeConnectorKey(new NodeConnectorId("test:0:0"));
+        InstanceIdentifier<NodeConnector> ncPath = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA)
+        .child(NodeConnector.class, ncKey).toInstance();
+        InstanceIdentifier<FlowCapableNodeConnector> ncAugmentPath = InstanceIdentifier.builder(ncPath)
+        .augmentation(FlowCapableNodeConnector.class).toInstance();
+        
+        NodeConnectorBuilder nc = new NodeConnectorBuilder();
+        nc.setKey(ncKey);
+        
+        FlowCapableNodeConnectorBuilder fncb = new FlowCapableNodeConnectorBuilder();
+        fncb.setName("Baz");
+        nc.addAugmentation(FlowCapableNodeConnector.class, fncb.build());
+        
+        DataModificationTransaction baseTransaction = baDataService.beginTransaction();
+        baseTransaction.putOperationalData(ncPath, nc.build());
+        RpcResult<TransactionStatus> result = baseTransaction.commit().get();
+        assertEquals(TransactionStatus.COMMITED, result.getResult());
+        
+        FlowCapableNodeConnector readedAugmentation = (FlowCapableNodeConnector) baDataService.readOperationalData(ncAugmentPath);
+        assertNotNull(readedAugmentation);
+        assertEquals(fncb.getName(), readedAugmentation.getName());
+    }
+
     private void testNodeRemove() throws Exception {
         DataModificationTransaction transaction = baDataService.beginTransaction();
         transaction.removeOperationalData(NODE_INSTANCE_ID_BA);
