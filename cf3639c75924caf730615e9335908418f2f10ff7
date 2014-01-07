@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7cf00f91",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/flowprogrammer/Flow.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-07T22:35:53Z",
+      "side": 1,
+      "message": "Hi Moiz, why is this needed ?\n\nWe associate a name to a FlowEntry request, which a application module ask FRM to install. The flow entry name is unique in the application context. And it is meant for the application use.\n\nThe Flow class is the bare representation (and supposed to be the closest minimal representation) of the Flow which will be installed on the hardware and which the switch will return to us when we query for flow statistics.\n\nThere is no concept of flow name in openflow.\n\nIf another SDN protocol expects a string identifier for the flow, then agree we could add it.\n\nI understand this field is not taken into account into hashcode and equals, neither for marshalling. But I would like to understand the need for this to see if there is another viable solution.\n\nThanks,\nAlessandro",
+      "revId": "cf3639c75924caf730615e9335908418f2f10ff7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
