@@ -31,11 +31,13 @@ module sal-group {
 
     rpc add-group {
         input {
+            leaf transaction-ref {
+                type string;
+            }
             leaf group-ref {
                 type group-type:group-ref;
             }
-            uses node-group;
-            uses tr:transaction-aware;
+            uses node-group;            
         }
         output {
             uses tr:transaction-aware;
@@ -44,11 +46,13 @@ module sal-group {
 
     rpc remove-group {
         input {
+            leaf transaction-ref {
+                type string;
+            }
             leaf group-ref {
                 type group-type:group-ref;
             }
-            uses node-group;
-            uses tr:transaction-aware;
+            uses node-group;            
         }
         output {
             uses tr:transaction-aware;
@@ -57,11 +61,13 @@ module sal-group {
 
     rpc update-group {
         input {
+            leaf transaction-ref {
+                type string;
+            }
             leaf group-ref {
                 type group-type:group-ref;
             }
-            uses group-update;
-            uses tr:transaction-aware;
+            uses group-update;            
         }
         output {
             uses tr:transaction-aware;
@@ -69,6 +75,9 @@ module sal-group {
     } 
 
     notification group-added {
+        leaf transaction-ref {
+            type string;
+        }
         leaf group-ref {
             type group-type:group-ref;
         }
@@ -77,6 +86,9 @@ module sal-group {
     }
 
     notification group-updated {
+        leaf transaction-ref {
+            type string;
+        }
         leaf group-ref {
             type group-type:group-ref;
         }
@@ -85,6 +97,9 @@ module sal-group {
     }
 
     notification group-removed {
+        leaf transaction-ref {
+            type string;
+        }
         leaf group-ref {
             type group-type:group-ref;
         }
