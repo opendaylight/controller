@@ -16,6 +16,23 @@
       "revId": "cf3639c75924caf730615e9335908418f2f10ff7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7cfa4f44",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/flowprogrammer/Flow.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-07T23:00:50Z",
+      "side": 1,
+      "message": "Hi Moiz, I seem to understand you only need a place to store the URI format id for the node and needs to be of string type.\n\nWhat about to modify the Flow.id field from long to String ?\nI think that would fit your need.\n\nAt the end I believe it is preferable to have that id as string so that is more generic and can be of better use for different SDN protocols. Having it as long is probably too openflow specific.\n\nMoreover as of now I doubt is being used/set by anybody.",
+      "revId": "cf3639c75924caf730615e9335908418f2f10ff7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
