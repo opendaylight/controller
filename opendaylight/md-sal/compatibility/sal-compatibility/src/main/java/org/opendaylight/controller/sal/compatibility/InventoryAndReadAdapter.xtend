@@ -137,7 +137,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 			for(flow : table.flow){
 				
 				val adsalFlow = ToSalConversionsUtils.toFlow(flow);
-				val statsFromDataStore = flow.getAugmentation(FlowStatisticsData) as FlowStatisticsData;
+				val statsFromDataStore = flow.getAugmentation(FlowStatisticsData);
 				
 				if(statsFromDataStore != null){
 					val it = new FlowOnNode(adsalFlow);
@@ -207,7 +207,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
  			
  			for (table : dsFlowCapableNode.table){
  				
- 				val tableStats = table.getAugmentation(FlowTableStatisticsData) as FlowTableStatisticsData;
+ 				val tableStats = table.getAugmentation(FlowTableStatisticsData);
  				
  				if(tableStats != null){
  					ret.add(toNodeTableStatistics(tableStats.flowTableStatistics,table.id,node));
@@ -242,7 +242,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 			
 			for(mdsalFlow : table.flow){
 				if(FromSalConversionsUtils.flowEquals(mdsalFlow, MDFlowMapping.toMDSalflow(targetFlow))){
-					val statsFromDataStore = mdsalFlow.getAugmentation(FlowStatisticsData) as FlowStatisticsData;
+					val statsFromDataStore = mdsalFlow.getAugmentation(FlowStatisticsData);
 					
 					if(statsFromDataStore != null){
 						LOG.debug("Found matching flow in the data store flow table ");
@@ -308,7 +308,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		val table= it.readConfigurationData(tableRef) as Table;
 		
 		if(table != null){
-			val tableStats = table.getAugmentation(FlowTableStatisticsData) as FlowTableStatisticsData;
+			val tableStats = table.getAugmentation(FlowTableStatisticsData);
  				
  			if(tableStats != null){
  				nodeStats =  toNodeTableStatistics(tableStats.flowTableStatistics,table.id,nodeTable.node);
@@ -345,7 +345,6 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     }
 
     override onNodeUpdated(NodeUpdated notification) {
-        val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
         val InstanceIdentifier<? extends DataObject> identifier = notification.nodeRef.value  as InstanceIdentifier<? extends DataObject>;
 
         var updateType = UpdateType.CHANGED;
@@ -502,7 +501,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 	 * OpendaylightFlowStatisticsListener interface implementation
 	 */
 	override onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
-		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        //Ignoring this notification as there does not seem to be a way to bubble this up to AD-SAL
 	}
 	
 	override onFlowsStatisticsUpdate(FlowsStatisticsUpdate notification) {
@@ -570,5 +569,9 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		durationNanoseconds = flowAndStatsMap.duration.nanosecond.value.intValue;
 		
 		return it;
+	}
+
+	override  getConfiguredNotConnectedNodes() {
+        return Collections.emptySet();
 	}
 }

@@ -135,7 +135,7 @@ public class MDFlowMapping {
 
     }
     
-    public static def toMDFlow(Flow sourceFlow) {
+    public static def toMDFlow(Flow sourceFlow, String flowId) {
        if (sourceFlow == null)
             throw new IllegalArgumentException();
        val it = new FlowBuilder();
@@ -143,7 +143,7 @@ public class MDFlowMapping {
        idleTimeout = sourceFlow.idleTimeout as int
        cookie = BigInteger.valueOf(sourceFlow.id)
        priority = sourceFlow.priority as int
-       id = new FlowId(sourceFlow.id)
+       id = new FlowId(flowId)
     
        val sourceActions = sourceFlow.actions;
        val targetActions = new ArrayList<Action>();

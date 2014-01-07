@@ -8,17 +8,6 @@
 
 package org.opendaylight.controller.sal.flowprogrammer;
 
-import java.io.Serializable;
-import java.net.Inet6Address;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.SetDlType;
@@ -28,6 +17,16 @@ import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.net.Inet6Address;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Represent a flow: match + actions + flow specific properties
@@ -305,4 +304,5 @@ public class Flow implements Cloneable, Serializable {
         }
         return true;
     }
+
 }
