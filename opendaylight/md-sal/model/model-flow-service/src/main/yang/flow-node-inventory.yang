@@ -11,6 +11,8 @@ module flow-node-inventory {
     import opendaylight-flow-types {prefix flow;revision-date "2013-10-26";}
     import opendaylight-group-types {prefix group;revision-date "2013-10-18";}
     import opendaylight-meter-types {prefix meter;revision-date "2013-09-18";}
+    import flow-errors {prefix error;}
+    import flow-capable-transaction {prefix tr;}
     
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
@@ -194,6 +196,15 @@ module flow-node-inventory {
             }
             
         }
+    }
+    
+    notification node-error-notification {
+        uses "inv:node-context-ref";
+        leaf transaction-ref {
+            type string;
+        }
+        uses error:error-message;
+        uses tr:transaction-aware;
     }
     
     grouping flow-node-connector {
