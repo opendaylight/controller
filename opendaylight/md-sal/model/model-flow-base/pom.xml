@@ -21,6 +21,11 @@
             <artifactId>opendaylight-l2-types</artifactId>
             <version>2013.08.27.0</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>model-inventory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <packaging>bundle</packaging>
 </project>

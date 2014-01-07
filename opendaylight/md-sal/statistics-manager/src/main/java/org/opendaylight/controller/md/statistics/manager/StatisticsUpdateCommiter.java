@@ -847,9 +847,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         if (storedFlow.getInPort()== null) {
             if (statsFlow.getInPort() != null) {
-                if(statsFlow.getInPort()!= 0){
-                    return false;
-                }
+                return false;
             }
         } else if(!storedFlow.getInPort().equals(statsFlow.getInPort())) {
             return false;

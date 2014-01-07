@@ -105,6 +105,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId
 
 public class MDFlowMapping {
 
@@ -129,14 +130,37 @@ public class MDFlowMapping {
         }
         instructions = targetActions.toApplyInstruction();
         match = sourceFlow.match.toMatch();
+        tableId = new Integer(0).shortValue
         return it.build();
 
+    }
+    
+    public static def toMDFlow(Flow sourceFlow) {
+       if (sourceFlow == null)
+            throw new IllegalArgumentException();
+       val it = new FlowBuilder();
+       hardTimeout = sourceFlow.hardTimeout as int
+       idleTimeout = sourceFlow.idleTimeout as int
+       cookie = BigInteger.valueOf(sourceFlow.id)
+       priority = sourceFlow.priority as int
+       id = new FlowId(sourceFlow.id)
+    
+       val sourceActions = sourceFlow.actions;
+       val targetActions = new ArrayList<Action>();
+       for (sourceAction : sourceActions) {
+           targetActions.add(sourceAction.toAction());
+       }
+       instructions = targetActions.toApplyInstruction();
+       match = sourceFlow.match.toMatch();
+       tableId = new Integer(0).shortValue
+       return it.build();
     }
     
     public static def Instructions toApplyInstruction(ArrayList<Action> actions) {
         val it = new InstructionsBuilder;
         val applyActions = new InstructionBuilder;
         applyActions.instruction = new ApplyActionsCaseBuilder().setApplyActions(new ApplyActionsBuilder().setAction(actions).build()).build()
+        applyActions.setOrder(new Integer(0))
         instruction = Collections.<Instruction>singletonList(applyActions.build)
         return it.build;
     }
@@ -144,12 +168,14 @@ public class MDFlowMapping {
     public static def removeFlowInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
         val it = new RemoveFlowInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
+        node = sourceNode.toNodeRef()
         return it.build();
     }
 
     public static def addFlowInput(Node sourceNode, Flow sourceFlow) {
         val source = flowAdded(sourceFlow);
         val it = new AddFlowInputBuilder(source as org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow);
+        it.setNode(sourceNode.toNodeRef)
         return it.build();
     }
 

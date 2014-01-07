@@ -40,16 +40,16 @@ class TopologyCommitHandler implements DataCommitHandler<InstanceIdentifier<? ex
             val topology = reader.readOperationalData(topologyPath)
             val adds = FluentIterable.from(modification.createdOperationalData.entrySet)
                 .filter[value instanceof Link]
-                .transform[(value as Link).toAdEdge(topology).toTopoEdgeUpdate(UpdateType.ADDED)]
+                .transform[(value as Link).toAdEdge(topology).toTopoEdgeUpdate(UpdateType.ADDED,reader)]
                 .toList
             val updates = FluentIterable.from(modification.updatedOperationalData.entrySet)
                 .filter[!modification.createdOperationalData.containsKey(key) && (value instanceof Link)]
-                .transform[(value as Link).toAdEdge(topology).toTopoEdgeUpdate(UpdateType.ADDED)] // Evidently the ADSAL does not expect edge 'CHANGED"
+                .transform[(value as Link).toAdEdge(topology).toTopoEdgeUpdate(UpdateType.ADDED,reader)] // Evidently the ADSAL does not expect edge 'CHANGED"
                 .toList
             val removes = FluentIterable.from(modification.removedOperationalData)
                 .transform[reader.readOperationalData(it as InstanceIdentifier<DataObject>)]
                 .filter[it instanceof Link]
-                .transform[(it as Link).toAdEdge(topology).toTopoEdgeUpdate(UpdateType.REMOVED)]
+                .transform[(it as Link).toAdEdge(topology).toTopoEdgeUpdate(UpdateType.REMOVED,reader)]
                 .toList
             msg.addAll(adds)
             msg.addAll(updates)

@@ -1,7 +1,6 @@
 package org.opendaylight.md.controller.topology.lldp.utils;
 
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.LLDP;
@@ -46,10 +45,6 @@ public class LLDPDiscoveryUtils {
             LLDP lldp = (LLDP) ethPkt.getPayload();
     
             try {
-                List<LLDPTLV> optionalTLVList = lldp.getOptionalTLVList();
-                if (optionalTLVList == null) {
-                    return null;
-                }
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
                 for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
@@ -61,12 +56,13 @@ public class LLDPDiscoveryUtils {
                         srcNodeId = new NodeId(srcNodeIdString);
                     }
                 }
-                
-                InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
-                        .child(Node.class,new NodeKey(srcNodeId))
-                        .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
-                        .toInstance();
-                return new NodeConnectorRef(srcInstanceId);
+                if(srcNodeId != null && srcNodeConnectorId != null) {
+                    InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
+                            .child(Node.class,new NodeKey(srcNodeId))
+                            .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
+                            .toInstance();
+                    return new NodeConnectorRef(srcInstanceId);
+                }
             } catch (Exception e) {
                 LOG.warn("Caught exception ", e);
             }
