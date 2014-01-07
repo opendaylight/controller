@@ -9,6 +9,7 @@ import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
+import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -37,6 +38,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaServiceListener(ControllerContext.getInstance());
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
+        ControllerContext.getInstance().setMountService(session.getService(MountService.class));
     }
 
     @Override
