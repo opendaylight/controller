@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_702ef3fc",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/packet-processing.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-08T17:39:57Z",
+      "side": 1,
+      "message": "these need to be semantic types, not uint8 values.  This is coded far to close to the protocol for the NSF.",
+      "revId": "084765b8c46036ff80cd3dbe6ae283b1dff02e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
