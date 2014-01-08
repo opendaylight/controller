@@ -2639,6 +2639,10 @@ public class ForwardingRulesManager implements
         }
     }
 
+    public void containerDelete() {
+        log.info("CONTAINER is being deleted");
+        uninstallAllFlowEntries(false);
+    }
     /**
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
@@ -2646,7 +2650,6 @@ public class ForwardingRulesManager implements
      */
     void stop() {
         stopping = true;
-        uninstallAllFlowEntries(false);
         // Shutdown executor
         this.executor.shutdownNow();
         // Now walk all the workMonitor and wake up the one sleeping because
