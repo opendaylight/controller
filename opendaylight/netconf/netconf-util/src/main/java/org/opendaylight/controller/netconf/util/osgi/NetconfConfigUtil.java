@@ -23,6 +23,7 @@ public class NetconfConfigUtil {
     private static final String PORT_SUFFIX_PROP = ".port";
     private static final String ADDRESS_SUFFIX_PROP = ".address";
     private static final String CLIENT_PROP = ".client";
+    private static final String PRIVATE_KEY_PATH_PROP = ".pk.path";
 
     public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound, boolean forClient) {
 
@@ -38,6 +39,16 @@ public class NetconfConfigUtil {
         return extractSomeNetconfAddress(context, InfixProp.ssh, exceptionMessage, false);
     }
 
+    public static String getPrivateKeyPath(BundleContext context){
+        return getPropertyValue(context,PREFIX_PROP + InfixProp.ssh +PRIVATE_KEY_PATH_PROP);
+    }
+    private static String getPropertyValue(BundleContext context, String propertyName){
+        String propertyValue = context.getProperty(propertyName);
+        if (propertyValue == null){
+            throw new IllegalStateException("Cannot find initial property with name '"+propertyName+"'");
+        }
+        return propertyValue;
+    }
     /**
      * @param context
      *            from which properties are being read.
