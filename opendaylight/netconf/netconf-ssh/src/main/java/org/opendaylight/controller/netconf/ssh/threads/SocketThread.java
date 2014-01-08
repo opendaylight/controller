@@ -59,8 +59,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         conn = new ServerConnection(socket);
         try {
             conn.setPEMHostKey(authProvider.getPEMAsCharArray(),"netconf");
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.debug("Server authentication setup failed.");
         }
         conn.setAuthenticationCallback(this);
         conn.setServerConnectionCallback(this);

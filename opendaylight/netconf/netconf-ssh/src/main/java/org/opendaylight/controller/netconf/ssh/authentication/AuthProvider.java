@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.netconf.ssh.authentication;
 
-import ch.ethz.ssh2.signature.RSAPrivateKey;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,26 +15,30 @@ import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.UserConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AuthProvider implements AuthProviderInterface {
 
-    private static RSAPrivateKey hostkey = null;
     private static IUserManager um;
-    private static final String DEAFULT_USER = "netconf";
-    private static final String DEAFULT_PASSWORD = "netconf";
+    private static final String DEFAULT_USER = "netconf";
+    private static final String DEFAULT_PASSWORD = "netconf";
+    private static InputStream privateKeyFileInputStream;
 
+    private static final Logger logger =  LoggerFactory.getLogger(AuthProvider.class);
 
-    public AuthProvider(IUserManager ium) throws Exception {
+    public AuthProvider(IUserManager ium,InputStream privateKeyFileInputStream) throws Exception {
 
         this.um = ium;
-
         if (this.um  == null){
             throw new Exception("No usermanager service available.");
         }
 
+        this.privateKeyFileInputStream = privateKeyFileInputStream;
+
         List<String> roles = new ArrayList<String>(1);
         roles.add(UserLevel.SYSTEMADMIN.toString());
-        this.um.addLocalUser(new UserConfig(DEAFULT_USER, DEAFULT_PASSWORD, roles));
+        this.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles));
     }
     @Override
     public boolean authenticated(String username, String password)  throws Exception {
@@ -51,15 +53,10 @@ public class AuthProvider implements AuthProviderInterface {
     }
 
     @Override
-    public char[] getPEMAsCharArray() {
-
-        InputStream is = getClass().getResourceAsStream("/RSA.pk");
-        try {
-            return IOUtils.toCharArray(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public char[] getPEMAsCharArray() throws Exception {
+        char [] PEM  = IOUtils.toCharArray(privateKeyFileInputStream);
+        privateKeyFileInputStream.close();
+        return PEM;
     }
 
     @Override
