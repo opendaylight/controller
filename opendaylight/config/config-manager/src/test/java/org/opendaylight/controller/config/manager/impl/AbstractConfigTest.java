@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import junit.framework.Assert;
 import org.junit.After;
 import org.mockito.Matchers;
@@ -26,6 +25,8 @@ import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -38,7 +39,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -66,8 +66,16 @@ public abstract class AbstractConfigTest extends
     protected BundleContext mockedContext = mock(BundleContext.class);
     protected ServiceRegistration<?> mockedServiceRegistration;
 
-    protected  Map<Class, BundleContextServiceRegistrationHandler> getBundleContextServiceRegistrationHandlers() {
-        return Maps.newHashMap();
+    private static final Logger logger = LoggerFactory.getLogger(AbstractConfigTest.class);
+
+    // Default handler for OSGi service registration
+    private static final BundleContextServiceRegistrationHandler noopServiceRegHandler = new BundleContextServiceRegistrationHandler() {
+        @Override
+        public void handleServiceRegistration(Object serviceInstance) {}
+    };
+
+    protected BundleContextServiceRegistrationHandler getBundleContextServiceRegistrationHandler(Class<?> serviceType) {
+        return noopServiceRegHandler;
     }
 
     // this method should be called in @Before
@@ -166,9 +174,8 @@ public abstract class AbstractConfigTest extends
     protected ObjectName createTestConfigBean(
             ConfigTransactionJMXClient transaction, String implementationName,
             String name) throws InstanceAlreadyExistsException {
-        ObjectName nameCreated = transaction.createModule(implementationName,
+        return transaction.createModule(implementationName,
                 name);
-        return nameCreated;
     }
 
     protected void assertBeanCount(int i, String configMXBeanName) {
@@ -204,26 +211,42 @@ public abstract class AbstractConfigTest extends
     }
 
     private class RegisterServiceAnswer implements Answer {
+
         @Override
         public Object answer(InvocationOnMock invocation) throws Throwable {
             Object[] args = invocation.getArguments();
 
-            Preconditions.checkArgument(args.length == 3);
+            Preconditions.checkArgument(args.length == 3, "Unexpected arguments size (expected 3 was %s)", args.length);
 
-            Preconditions.checkArgument(args[0] instanceof Class);
-            Class<?> serviceType = (Class<?>) args[0];
+            Object serviceTypeRaw = args[0];
             Object serviceInstance = args[1];
 
-            BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandlers()
-                    .get(serviceType);
+            if (serviceTypeRaw instanceof Class) {
+                Class<?> serviceType = (Class<?>) serviceTypeRaw;
+                invokeServiceHandler(serviceInstance, serviceType);
 
-            Preconditions.checkArgument(serviceType.isAssignableFrom(serviceInstance.getClass()));
+            } else if(serviceTypeRaw instanceof String[]) {
+                for (String className : (String[]) serviceTypeRaw) {
+                    try {
+                        Class<?> serviceType = Class.forName(className);
+                        invokeServiceHandler(serviceInstance, serviceType);
+                    } catch (ClassNotFoundException e) {
+                        logger.warn("Not handling service registration of type {} ", className, e);
+                    }
+                }
+
+            } else
+                logger.debug("Not handling service registration of type {}, Unknown type", serviceTypeRaw);
+
+            return mockedServiceRegistration;
+        }
+
+        private void invokeServiceHandler(Object serviceInstance, Class<?> serviceType) {
+            BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandler(serviceType);
 
             if (serviceRegistrationHandler != null) {
                 serviceRegistrationHandler.handleServiceRegistration(serviceType.cast(serviceInstance));
             }
-
-            return mockedServiceRegistration;
         }
     }
 }
