@@ -19,7 +19,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bundle.plugin.version>2.3.7</bundle.plugin.version>
+        <bundle.plugin.version>2.4.0</bundle.plugin.version>
     </properties>
 
     <modules>
@@ -40,7 +40,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        <Import-Package>*,org.opendaylight.yangtools.yang.binding.annotations</Import-Package>
+                        <Import-Package>org.opendaylight.yangtools.yang.binding.annotations, *</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
