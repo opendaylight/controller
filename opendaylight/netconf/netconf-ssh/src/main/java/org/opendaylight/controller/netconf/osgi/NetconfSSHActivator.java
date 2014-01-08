@@ -85,7 +85,7 @@ public class NetconfSSHActivator implements BundleActivator{
                 EXCEPTION_MESSAGE, true);
 
         if (sshSocketAddressOptional.isPresent()){
-            AuthProvider authProvider = new AuthProvider(iUserManager);
+            AuthProvider authProvider = new AuthProvider(iUserManager,NetconfConfigUtil.getPrivateKey(context));
             this.server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);
