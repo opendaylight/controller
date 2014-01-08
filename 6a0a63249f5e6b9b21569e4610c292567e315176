@@ -16,6 +16,24 @@
       "revId": "6a0a63249f5e6b9b21569e4610c292567e315176",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d0aebfe5",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/CapabilityProviderImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-01-08T10:38:13Z",
+      "side": 1,
+      "message": "Duplicate capability just signals that there might be multiple operations able to handle the same operation or rpc (from different netconf \"plugins\"). Those plugins might not be aware of one another and could provide the same capability. Which plugin will handle a request at runtime is determined by the priority of their operations or if their operations are implemented as filters, both of them will participate on the response. \n\nBasically, duplicate capabilities do not necessarily produce an error.",
+      "parentUuid": "da6255ed_50a3ef00",
+      "revId": "6a0a63249f5e6b9b21569e4610c292567e315176",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
