@@ -1,6 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>commons.opendaylight</artifactId>
+        <version>1.4.1-SNAPSHOT</version>
+        <relativePath>../commons/opendaylight</relativePath>
+    </parent>
+
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -470,6 +478,17 @@
                         </goals>
                         <phase>site</phase>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- FIXME: BUG-272: remove this configuration override -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.version}</version>
+                <executions>
+                  <execution>
+                    <phase>none</phase>
+                  </execution>
                 </executions>
             </plugin>
         </plugins>
