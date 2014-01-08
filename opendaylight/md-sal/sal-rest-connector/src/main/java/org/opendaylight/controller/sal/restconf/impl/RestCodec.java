@@ -107,7 +107,7 @@ public class RestCodec {
         public QName deserialize(IdentityValuesDTO data) {
             IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
             String namespace = valueWithNamespace.getNamespace();
-            URI validNamespace = ControllerContext.getInstance().findNamespaceByModule(namespace);
+            URI validNamespace = ControllerContext.getInstance().findNamespaceByModuleName(namespace);
             if (validNamespace == null) {
                 validNamespace = URI.create(namespace);
             }

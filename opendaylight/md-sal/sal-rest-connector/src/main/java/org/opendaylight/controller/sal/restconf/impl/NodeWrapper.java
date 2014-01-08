@@ -11,6 +11,8 @@ public interface NodeWrapper<T extends Node<?>> {
     
     T unwrap();
     
+    boolean isChangeAllowed();
+    
     URI getNamespace();
 
     void setNamespace(URI namespace);
