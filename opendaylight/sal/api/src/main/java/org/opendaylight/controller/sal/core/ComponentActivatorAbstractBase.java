@@ -45,8 +45,8 @@ abstract public class ComponentActivatorAbstractBase implements
     Logger logger = LoggerFactory
             .getLogger(ComponentActivatorAbstractBase.class);
     private DependencyManager dm;
-    private ConcurrentMap<ImmutablePair<String, Object>, Component> dbInstances = (ConcurrentMap<ImmutablePair<String, Object>, Component>) new ConcurrentHashMap<ImmutablePair<String, Object>, Component>();
-    private ConcurrentMap<Object, Component> dbGlobalInstances = (ConcurrentMap<Object, Component>) new ConcurrentHashMap<Object, Component>();
+    private ConcurrentMap<ImmutablePair<String, Object>, Component> dbInstances = new ConcurrentHashMap<ImmutablePair<String, Object>, Component>();
+    private ConcurrentMap<Object, Component> dbGlobalInstances = new ConcurrentHashMap<Object, Component>();
 
     /**
      * Method that should be overriden by the derived class for customization
@@ -253,6 +253,11 @@ abstract public class ComponentActivatorAbstractBase implements
                             containerName, imps[i]);
                     Component c = this.dbInstances.get(key);
                     if (c != null) {
+                        if (c.getService() != null) {
+                            c.invokeCallbackMethod(new Object[] { c.getService() }, "containerStop",
+                                                   new Class[][] {{ Component.class}, {} },
+                                                   new Object[][] { {c}, {} });
+                        }
                         // Now remove the component from dependency manager,
                         // which will implicitely stop it first
                         this.dm.remove(c);

@@ -800,8 +800,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         log.debug("Host Facing Port in a container came up, install the rules for all hosts from this port !");
         Set<HostNodeConnector> allHosts = this.hostTracker.getAllHosts();
         for (HostNodeConnector host : allHosts) {
-            if (node.equals(host.getnodeconnectorNode())
-                    && swPort.equals(host.getnodeConnector())) {
+            if (node.equals(host.getnodeconnectorNode())) {
                 /*
                  * This host resides behind the same switch and port for which a port up
                  * message is received. Ideally this should not happen, but if it does,

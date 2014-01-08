@@ -2640,13 +2640,19 @@ public class ForwardingRulesManager implements
     }
 
     /**
+     * Function called by the dependency manager before Container is Stopped and Destroyed.
+     */
+    public void containerStop() {
+        uninstallAllFlowEntries(false);
+    }
+
+    /**
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
      */
     void stop() {
         stopping = true;
-        uninstallAllFlowEntries(false);
         // Shutdown executor
         this.executor.shutdownNow();
         // Now walk all the workMonitor and wake up the one sleeping because
