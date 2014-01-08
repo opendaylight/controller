@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.osgi;
 
 import com.google.common.base.Optional;
+import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
@@ -85,7 +86,7 @@ public class NetconfSSHActivator implements BundleActivator{
                 EXCEPTION_MESSAGE, true);
 
         if (sshSocketAddressOptional.isPresent()){
-            AuthProvider authProvider = new AuthProvider(iUserManager);
+            AuthProvider authProvider = new AuthProvider(iUserManager,new FileInputStream(NetconfConfigUtil.getPrivateKeyPath(context)));
             this.server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);
