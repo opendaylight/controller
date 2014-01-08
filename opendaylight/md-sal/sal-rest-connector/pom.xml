@@ -42,7 +42,7 @@
       <artifactId>yang-data-impl</artifactId>
       <version>${yang.version}</version>
     </dependency>
-        <dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-util</artifactId>
       <version>${yang.version}</version>
@@ -81,11 +81,6 @@
       <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
       <version>2.4</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.opendaylight.yangtools</groupId>
-    	<artifactId>yang-model-util</artifactId>
-    	<version>0.5.9-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
