@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_50a3ef00",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/CapabilityProviderImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-01-08T10:28:25Z",
+      "side": 1,
+      "message": "Duplicate capability should be logged and used anyway ?",
+      "revId": "6a0a63249f5e6b9b21569e4610c292567e315176",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
