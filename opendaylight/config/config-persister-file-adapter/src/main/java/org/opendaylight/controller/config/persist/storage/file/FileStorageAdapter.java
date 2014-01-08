@@ -13,15 +13,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
-import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolderImpl;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.api.PropertiesProvider;
-import org.opendaylight.controller.config.persist.api.StorageAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -31,9 +22,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolderImpl;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.StorageAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * StorageAdapter that stores configuration in a plan file.
+ * StorageAdapter that stores configuration in a plain file.
  */
 public class FileStorageAdapter implements StorageAdapter, Persister {
     private static final Logger logger = LoggerFactory.getLogger(FileStorageAdapter.class);

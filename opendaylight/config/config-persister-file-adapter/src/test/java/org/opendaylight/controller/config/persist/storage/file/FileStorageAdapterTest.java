@@ -11,18 +11,18 @@ package org.opendaylight.controller.config.persist.storage.file;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import static junit.framework.Assert.assertFalse;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +42,49 @@ public class FileStorageAdapterTest {
         i = 1;
     }
 
+
+    @Test
+    public void testFileAdapterAsPersister() throws Exception {
+        FileStorageAdapter storage = new FileStorageAdapter();
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("fileStorage",file.getPath());
+        pp.addProperty("numberOfBackups",Integer.toString(Integer.MAX_VALUE));
+
+        Persister configPersister = storage.instantiate(pp);
+        final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
+            @Override
+            public String getConfigSnapshot() {
+                return createConfig();
+            }
+
+            @Override
+            public SortedSet<String> getCapabilities() {
+                return createCaps();
+            }
+        };
+        configPersister.persistConfig(holder);
+
+        configPersister.persistConfig(holder);
+
+        Collection<String> readLines = Collections2.filter(com.google.common.io.Files.readLines(file, Charsets.UTF_8),
+                new Predicate<String>() {
+
+                    @Override
+                    public boolean apply(String input) {
+                        if (input.equals(""))
+                            return false;
+                        return true;
+                    }
+                });
+        assertEquals(14, readLines.size());
+
+        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        assertEquals(1, lastConf.size());
+        ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
+        assertEquals("<config>2</config>",
+                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
+        assertEquals(createCaps(), configSnapshotHolder.getCapabilities());
+    }
     @Test
     public void testFileAdapter() throws Exception {
         FileStorageAdapter storage = new FileStorageAdapter();
