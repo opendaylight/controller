@@ -48,7 +48,7 @@ public class Flow implements Cloneable, Serializable {
     @XmlElement
     private short hardTimeout;
     @XmlElement
-    private long id; // unique identifier for this flow
+    private String id; // opaque identifier for this flow
 
     public Flow() {
         match = null;
@@ -178,7 +178,7 @@ public class Flow implements Cloneable, Serializable {
         int result = 1;
         result = prime * result + ((actions == null) ? 0 : actions.hashCode());
         result = prime * result + hardTimeout;
-        result = prime * result + (int) (id ^ (id >>> 32));
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + idleTimeout;
         result = prime * result + ((match == null) ? 0 : match.hashCode());
         result = prime * result + priority;
@@ -256,11 +256,11 @@ public class Flow implements Cloneable, Serializable {
         this.hardTimeout = hardTimeout;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -442,7 +442,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 new ArrayList<OFAction>(0)).getFlow(node);
         flow.setPriority(msg.getPriority());
         flow.setIdleTimeout(msg.getIdleTimeout());
-        flow.setId(msg.getCookie());
+        flow.setId(String.valueOf(msg.getCookie()));
 
         Match match = flow.getMatch();
         NodeConnector inPort = match.isPresent(MatchType.IN_PORT) ? (NodeConnector) match

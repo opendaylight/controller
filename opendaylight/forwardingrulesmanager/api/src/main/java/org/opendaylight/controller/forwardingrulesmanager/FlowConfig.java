@@ -1045,7 +1045,7 @@ public class FlowConfig implements Serializable {
 
         Flow flow = new Flow(match, getActionList());
         if (this.cookie != null) {
-            flow.setId(Long.parseLong(cookie));
+            flow.setId(cookie);
         }
         if (this.hardTimeout != null) {
             flow.setHardTimeout(Short.parseShort(this.hardTimeout));

@@ -59,7 +59,7 @@ public class FlowStatisticsConverter {
                     flow.setPriority(ofFlowStat.getPriority());
                     flow.setIdleTimeout(ofFlowStat.getIdleTimeout());
                     flow.setHardTimeout(ofFlowStat.getHardTimeout());
-                    flow.setId(ofFlowStat.getCookie());
+                    flow.setId(String.valueOf(ofFlowStat.getCookie()));
                     flowOnNode = new FlowOnNode(flow);
                     flowOnNode.setByteCount(ofFlowStat.getByteCount());
                     flowOnNode.setPacketCount(ofFlowStat.getPacketCount());
@@ -75,7 +75,7 @@ public class FlowStatisticsConverter {
                     flow.setPriority(v6StatsReply.getPriority());
                     flow.setIdleTimeout(v6StatsReply.getIdleTimeout());
                     flow.setHardTimeout(v6StatsReply.getHardTimeout());
-                    flow.setId(v6StatsReply.getCookie());
+                    flow.setId(String.valueOf(v6StatsReply.getCookie()));
                     flowOnNode = new FlowOnNode(flow);
                     flowOnNode.setByteCount(v6StatsReply.getByteCount());
                     flowOnNode.setPacketCount(v6StatsReply.getPacketCount());
