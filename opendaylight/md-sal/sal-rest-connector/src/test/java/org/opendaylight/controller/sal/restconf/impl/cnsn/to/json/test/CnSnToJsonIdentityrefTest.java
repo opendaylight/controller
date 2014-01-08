@@ -11,12 +11,14 @@ import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
-public class ToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
+public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialization() {
@@ -27,7 +29,9 @@ public class ToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
     public void identityrefToJsonTest() {
         String json = null;
         try {
-            json = TestUtils.writeCompNodeWithSchemaContextToJson(prepareCompositeNode(), modules, dataSchemaNode);
+            QName valueAsQname = TestUtils.buildQName("name_test", "identityref:module", "2013-12-2");
+            json = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(valueAsQname), modules,
+                    dataSchemaNode, StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here
             assertTrue(false);
@@ -40,15 +44,35 @@ public class ToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         assertTrue(mtch.matches());
     }
 
-    private CompositeNode prepareCompositeNode() {
+    @Test
+    public void identityrefToJsonWithoutQNameTest() {
+        String json = null;
+        try {
+            String value = "not q name value";
+            json = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(value), modules,
+                    dataSchemaNode, StructuredDataToJsonProvider.INSTANCE);
+        } catch (WebApplicationException | IOException e) {
+            // shouldn't end here
+            assertTrue(false);
+        }
+        System.out.println(json);
+        assertNotNull(json);
+        Pattern ptrn = Pattern.compile(".*\"lf1\"\\p{Space}*:\\p{Space}*\"not q name value\".*", Pattern.DOTALL);
+        Matcher mtch = ptrn.matcher(json);
+
+        assertTrue(mtch.matches());
+    }
+
+    private CompositeNode prepareCompositeNode(Object value) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
                 ModifyAction.CREATE, null);
         MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont1"), cont, null,
                 ModifyAction.CREATE, null);
         cont.getChildren().add(cont1);
 
-        MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1"), cont1,
-                TestUtils.buildQName("name_test", "identityref:module", "2013-12-2"), ModifyAction.CREATE, null);
+        MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1"), cont1, value,
+                ModifyAction.CREATE, null);
+
         cont1.getChildren().add(lf1);
         cont1.init();
         cont.init();

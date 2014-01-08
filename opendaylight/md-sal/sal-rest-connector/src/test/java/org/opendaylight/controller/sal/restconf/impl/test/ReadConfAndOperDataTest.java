@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,8 +46,8 @@ public class ReadConfAndOperDataTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs")
-                .getPath());
+        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        assertNotNull(allModules);
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
@@ -69,15 +70,16 @@ public class ReadConfAndOperDataTest extends JerseyTest {
 
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
 
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder("/parts/ietf-interfaces_interfaces.xml");
+        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml", true,
+                XmlToCompositeNodeProvider.INSTANCE);
         when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
         assertEquals(200, response.getStatus());
-        
+
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/example");
         when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(null);
-        
+
         response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
         assertEquals(404, response.getStatus());
     }
@@ -86,16 +88,17 @@ public class ReadConfAndOperDataTest extends JerseyTest {
     public void testReadOperationalData() throws UnsupportedEncodingException, FileNotFoundException {
         String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
 
-        
-        CompositeNode loadedCompositeNode = TestUtils.loadCompositeNodeWithXmlTreeBuilder("/parts/ietf-interfaces_interfaces.xml");
+        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml", true,
+                XmlToCompositeNodeProvider.INSTANCE);
+
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
 
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
         assertEquals(200, response.getStatus());
-        
+
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/example");
         when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(null);
-        
+
         response = target(uri).request(MEDIA_TYPE_DRAFT02).get();
         assertEquals(404, response.getStatus());
     }

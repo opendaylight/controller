@@ -1,151 +1,55 @@
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.math.BigDecimal;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.bind.DatatypeConverter;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
-public class ToJsonBasicDataTypesTest {
+public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader {
+
+    @BeforeClass
+    public static void initialize() {
+        dataLoad("/cnsn-to-json/simple-data-types");
+    }
 
     @Test
     public void simpleYangDataTest() {
-        String jsonOutput = "";
-        CompositeNode compositeNode = TestUtils.loadCompositeNode("/cnsn-to-json/simple-data-types/xml/data.xml");
 
-        Set<Module> modules = TestUtils.resolveModules("/cnsn-to-json/simple-data-types");
-        assertEquals(1, modules.size());
-        Module module = TestUtils.resolveModule(null, modules);
-        assertNotNull(module);
-        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode(module, null);
-        assertNotNull(dataSchemaNode);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml",
+                XmlToCompositeNodeProvider.INSTANCE);
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, dataSchemaNode, "simple-data-types:cont");
+        String jsonOutput = null;
+
+        TestUtils.normalizeCompositeNode(compositeNode, modules, "simple-data-types:cont");
 
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToJson(compositeNode, modules, dataSchemaNode);
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+                    StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
-            assertTrue(false); // shouldn't get here
         }
+        assertNotNull(jsonOutput);
 
-        System.out.println(jsonOutput);
         verifyJsonOutput(jsonOutput);
-    }
-
-    private CompositeNode prepareData() {
-        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
-                ModifyAction.CREATE, null);
-
-        List<Node<?>> childNodes = new ArrayList<>();
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint8Min"), cont, (byte) -128,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint8Max"), cont, (byte) 127,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint16Min"), cont, (short) -32768,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint16Max"), cont, (short) 32767,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint32Min"), cont,
-                (int) -2147483648, ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint32Max"), cont, (int) 2147483647,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint64Min"), cont, new Long(
-                "-9223372036854775807"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnint64Max"), cont, new Long(
-                "9223372036854775807"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnuint8Max"), cont, (short) 255,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnuint16Max"), cont, (int) 65535,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfnuint32Max"), cont, new Long(
-                "4294967295"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfstr"), cont, "lfstr",
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfstr1"), cont, "",
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfbool1"), cont, Boolean.TRUE,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfbool2"), cont, Boolean.FALSE,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfdecimal1"), cont, new BigDecimal(
-                "43.32"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfdecimal2"), cont, new BigDecimal(
-                "-0.43"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfdecimal3"), cont, new BigDecimal(
-                "43"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfdecimal4"), cont, new BigDecimal(
-                "43E3"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfdecimal6"), cont, new BigDecimal(
-                "33.12345"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfenum"), cont, "enum3",
-                ModifyAction.CREATE, null));
-
-        HashSet<String> bits = new HashSet<String>();
-        bits.add("bit3");
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfbits"), cont, bits,
-                ModifyAction.CREATE, null));
-
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfbinary"), cont, DatatypeConverter
-                .parseBase64Binary("AAaacdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfempty"), cont, null,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion1"), cont, (int) 324,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion2"), cont, new BigDecimal(
-                "33.3"), ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion3"), cont, "55",
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion4"), cont, Boolean.TRUE,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion5"), cont, "true",
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion6"), cont, "false",
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion7"), cont, null,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion8"), cont, "",
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion9"), cont, "",
-                ModifyAction.CREATE, null));
-
-        HashSet<String> bits2 = new HashSet<String>();
-        bits2.add("bt1");
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion10"), cont, bits2,
-                ModifyAction.CREATE, null));
-
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion11"), cont, (short) 33,
-                ModifyAction.CREATE, null));
-        childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfunion12"), cont, Boolean.FALSE,
-                ModifyAction.CREATE, null));
-        try {
-            childNodes.add(NodeFactory.createMutableSimpleNode(TestUtils.buildQName("identityref1"), cont, new QName(
-                    new URI("simple:data:types"), "iden"), ModifyAction.CREATE, null));
-        } catch (URISyntaxException e) {
-        }
-
-        cont.getChildren().addAll(childNodes);
-
-        cont.init();
-
-        return cont;
     }
 
     private void verifyJsonOutput(String jsonOutput) {
@@ -178,7 +82,6 @@ public class ToJsonBasicDataTypesTest {
     private void jsonReadContElements(JsonReader jReader) throws IOException {
         jReader.beginObject();
         List<String> loadedLfs = new ArrayList<>();
-        boolean exceptForDecimal5Raised = false;
         boolean enumChecked = false;
         boolean bitsChecked = false;
         boolean lfdecimal6Checked = false;
@@ -190,7 +93,6 @@ public class ToJsonBasicDataTypesTest {
         boolean lfbool2Checked = false;
         boolean lfstrChecked = false;
         boolean lfbinaryChecked = false;
-        // boolean lfref1Checked = false;
         boolean lfemptyChecked = false;
         boolean lfstr1Checked = false;
         boolean lfidentityrefChecked = false;
@@ -201,11 +103,7 @@ public class ToJsonBasicDataTypesTest {
             try {
                 peek = jReader.peek();
             } catch (IOException e) {
-                if (keyName.equals("lfdecimal5")) {
-                    exceptForDecimal5Raised = true;
-                } else {
-                    assertTrue("Key " + keyName + " has incorrect value for specifed type", false);
-                }
+                assertTrue("Key " + keyName + " has incorrect value for specifed type", false);
             }
 
             if (keyName.startsWith("lfnint") || keyName.startsWith("lfnuint")) {

@@ -1,9 +1,10 @@
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.*;
-import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,10 +13,12 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +31,7 @@ public class JsonToCnSnTest {
 
     @Test
     public void simpleListTest() {
-        simpleTest("/json-to-cnsn/simple-list.json", "/json-to-cnsn/simple-list-yang", "lst", "simple:list:yang1",
+        simpleTest("/json-to-cnsn/simple-list.json", "/json-to-cnsn/simple-list-yang/1", "lst", "simple:list:yang1",
                 "simple-list-yang1");
     }
 
@@ -43,7 +46,8 @@ public class JsonToCnSnTest {
      */
     @Test
     public void multipleItemsInLeafList() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-cnsn/multiple-leaflist-items.json", true);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-leaflist-items.json", true,
+                JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
         assertEquals(3, compositeNode.getChildren().size());
 
@@ -76,9 +80,10 @@ public class JsonToCnSnTest {
      */
     @Test
     public void multipleItemsInListTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-cnsn/multiple-items-in-list.json", true);
-        assertNotNull(compositeNode);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-items-in-list.json", true,
+                JsonToCompositeNodeProvider.INSTANCE);
 
+        assertNotNull(compositeNode);
         assertEquals("lst", compositeNode.getNodeType().getLocalName());
 
         verityMultipleItemsInList(compositeNode);
@@ -86,7 +91,8 @@ public class JsonToCnSnTest {
 
     @Test
     public void nullArrayToSimpleNodeWithNullValueTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-cnsn/array-with-null.json", true);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/array-with-null.json", true,
+                JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
@@ -103,7 +109,8 @@ public class JsonToCnSnTest {
     public void incorrectTopLevelElementsTest() {
         Throwable cause1 = null;
         try {
-            compositeContainerFromJson("/json-to-cnsn/wrong-top-level1.json", true);
+            TestUtils
+                    .readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (WebApplicationException e) {
             cause1 = e;
         }
@@ -117,7 +124,8 @@ public class JsonToCnSnTest {
 
         Throwable cause2 = null;
         try {
-            compositeContainerFromJson("/json-to-cnsn/wrong-top-level2.json", true);
+            TestUtils
+                    .readInputToCnSn("/json-to-cnsn/wrong-top-level2.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (WebApplicationException e) {
             cause2 = e;
         }
@@ -126,7 +134,8 @@ public class JsonToCnSnTest {
 
         Throwable cause3 = null;
         try {
-            compositeContainerFromJson("/json-to-cnsn/wrong-top-level3.json", true);
+            TestUtils
+                    .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (WebApplicationException e) {
             cause3 = e;
         }
@@ -145,7 +154,8 @@ public class JsonToCnSnTest {
      */
     @Test
     public void emptyDataReadTest() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-cnsn/empty-data.json", true);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/empty-data.json", true,
+                JsonToCompositeNodeProvider.INSTANCE);
 
         assertNotNull(compositeNode);
 
@@ -158,7 +168,7 @@ public class JsonToCnSnTest {
 
         String reason = null;
         try {
-            compositeContainerFromJson("/json-to-cnsn/empty-data1.json", true);
+            TestUtils.readInputToCnSn("/json-to-cnsn/empty-data1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (JsonSyntaxException e) {
             reason = e.getMessage();
         }
@@ -176,24 +186,20 @@ public class JsonToCnSnTest {
     @Test
     public void notSupplyNamespaceIfAlreadySupplied() {
 
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-cnsn/simple-list.json");
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/simple-list.json", false,
+                JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
-
-        DataSchemaNode dataSchemaNode1 = null;
-        DataSchemaNode dataSchemaNode2 = null;
-        try {
-            dataSchemaNode1 = TestUtils.obtainSchemaFromYang("/json-to-cnsn/simple-list-yang", "simple-list-yang1");
-            dataSchemaNode2 = TestUtils.obtainSchemaFromYang("/json-to-cnsn/simple-list-yang", "simple-list-yang2");
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage());
-            assertTrue(false);
-        }
-        assertNotNull(dataSchemaNode1);
-        assertNotNull(dataSchemaNode2);
 
         // supplement namespaces according to first data schema -
         // "simple:data:types1"
-        TestUtils.supplementNamespace(dataSchemaNode1, compositeNode);
+        Set<Module> modules1 = new HashSet<>();
+        Set<Module> modules2 = new HashSet<>();
+        modules1 = TestUtils.loadModulesFrom("/json-to-cnsn/simple-list-yang/1");
+        modules2 = TestUtils.loadModulesFrom("/json-to-cnsn/simple-list-yang/2");
+        assertNotNull(modules1);
+        assertNotNull(modules2);
+
+        TestUtils.normalizeCompositeNode(compositeNode, modules1, "simple-list-yang1:lst");
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
@@ -201,26 +207,27 @@ public class JsonToCnSnTest {
         assertEquals("lst", compNode.getNodeType().getLocalName());
         verifyCompositeNode(compNode, "simple:list:yang1");
 
-        // dataSchemaNode2 should't be taken into account, because compNode
-        // isn't CompositeNodeWrapper
-        TestUtils.supplementNamespace(dataSchemaNode2, compNode);
-        verifyCompositeNode(compNode, "simple:list:yang1");
+        String exceptionMessage = "";
+        try {
+            TestUtils.normalizeCompositeNode(compositeNode, modules2, "simple-list-yang2:lst");
+        } catch (ResponseException e) {
+            exceptionMessage = String.valueOf(e.getResponse().getEntity());
+        }
+        assertTrue(exceptionMessage
+                .contains("Data has bad format\nIf data is in XML format then namespace for lst should be simple:list:yang2.\n If data is in Json format then module name for lst should be simple-list-yang2."));
 
     }
 
     @Test
     public void jsonIdentityrefToCompositeNode() {
-        CompositeNode compositeNode = compositeContainerFromJson("/json-to-cnsn/identityref/json/data.json");
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/identityref/json/data.json", false,
+                JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
-        Set<Module> modules = TestUtils.resolveModules("/json-to-cnsn/identityref");
+        Set<Module> modules = TestUtils.loadModulesFrom("/json-to-cnsn/identityref");
         assertEquals(2, modules.size());
-        Module module = TestUtils.resolveModule("identityref-module", modules);
-        assertNotNull(module);
-        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode(module, null);
-        assertNotNull(dataSchemaNode);
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, dataSchemaNode, "identityref-module:cont");
+        TestUtils.normalizeCompositeNode(compositeNode, modules, "identityref-module:cont");
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
@@ -268,19 +275,14 @@ public class JsonToCnSnTest {
 
     private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace,
             String moduleName) {
-        CompositeNode compositeNode = compositeContainerFromJson(jsonPath);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn(jsonPath, false, JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
-        DataSchemaNode dataSchemaNode = null;
-        try {
-            dataSchemaNode = TestUtils.obtainSchemaFromYang(yangPath, moduleName);
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage());
-            assertTrue(false);
-        }
-        assertNotNull(dataSchemaNode);
+        Set<Module> modules = null;
+        modules = TestUtils.loadModulesFrom(yangPath);
+        assertNotNull(modules);
 
-        TestUtils.supplementNamespace(dataSchemaNode, compositeNode);
+        TestUtils.normalizeCompositeNode(compositeNode, modules, moduleName + ":" + topLevelElementName);
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
@@ -331,7 +333,8 @@ public class JsonToCnSnTest {
         boolean lflst1_2Found = false;
         boolean lf1Found = false;
 
-        assertEquals(namespace, compositeNode.getNodeType().getNamespace().toString());
+        // assertEquals(namespace,
+        // compositeNode.getNodeType().getNamespace().toString());
 
         for (Node<?> node : compositeNode.getChildren()) {
             if (node.getNodeType().getLocalName().equals("cont1")) {
@@ -369,34 +372,16 @@ public class JsonToCnSnTest {
         assertTrue(lf1Found);
     }
 
-    private CompositeNode compositeContainerFromJson(String jsonPath) {
-        return compositeContainerFromJson(jsonPath, false);
-    }
-
-    private CompositeNode compositeContainerFromJson(String jsonPath, boolean dummyNamespaces)
-            throws WebApplicationException {
-
-        JsonToCompositeNodeProvider jsonToCompositeNodeProvider = JsonToCompositeNodeProvider.INSTANCE;
-        InputStream jsonStream = JsonToCnSnTest.class.getResourceAsStream(jsonPath);
+    @Test
+    public void unsupportedDataFormatTest() {
+        String exceptionMessage = "";
         try {
-            CompositeNode compositeNode = jsonToCompositeNodeProvider
-                    .readFrom(null, null, null, null, null, jsonStream);
-            assertTrue(compositeNode instanceof CompositeNodeWrapper);
-            if (dummyNamespaces) {
-                try {
-                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-                    return ((CompositeNodeWrapper) compositeNode).unwrap();
-                } catch (URISyntaxException e) {
-                    LOG.error(e.getMessage());
-                    assertTrue(e.getMessage(), false);
-                }
-            }
-            return compositeNode;
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-            assertTrue(e.getMessage(), false);
+            TestUtils.readInputToCnSn("/json-to-cnsn/unsupported-json-format.json", true,
+                    JsonToCompositeNodeProvider.INSTANCE);
+        } catch (WebApplicationException e) {
+            exceptionMessage = e.getCause().getMessage();
         }
-        return null;
+        assertTrue(exceptionMessage.contains("Root element of Json has to be Object"));
     }
 
 }

@@ -7,15 +7,25 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.net.*;
-import java.util.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Set;
 
-import org.junit.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.sal.restconf.impl.*;
-import org.opendaylight.yangtools.yang.common.*;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.StructuredData;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
@@ -33,7 +43,7 @@ public class InvokeRpcMethodTest {
 
     @BeforeClass
     public static void initialization() {
-        modules = TestUtils.resolveModules("/invoke-rpc");
+        modules = TestUtils.loadModulesFrom("/invoke-rpc");
         assertEquals(1, modules.size());
         Module module = TestUtils.resolveModule("invoke-rpc-module", modules);
         assertNotNull(module);

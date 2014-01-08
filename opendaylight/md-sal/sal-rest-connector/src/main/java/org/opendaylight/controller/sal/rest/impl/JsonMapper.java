@@ -43,7 +43,7 @@ class JsonMapper {
 
     private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
     private final Set<ListSchemaNode> foundLists = new HashSet<>();
-    private final Logger logger = LoggerFactory.getLogger(JsonMapper.class); 
+    private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
     public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
         Preconditions.checkNotNull(writer);
@@ -184,16 +184,23 @@ class JsonMapper {
 
         TypeDefinition<?> baseType = RestUtil.resolveBaseTypeFrom(type);
 
+        if (node.getValue() == null && !(baseType instanceof EmptyTypeDefinition)) {
+            logger.debug("While generationg JSON output null value was found for type "
+                    + baseType.getClass().getSimpleName() + ".");
+        }
+
         // TODO check InstanceIdentifierTypeDefinition
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
                 IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType).serialize(node.getValue());
                 IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
-                String moduleName = ControllerContext.getInstance().findModuleByNamespace(URI.create(valueFromDTO.getNamespace()));
+                String moduleName = ControllerContext.getInstance().findModuleByNamespace(
+                        URI.create(valueFromDTO.getNamespace()));
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
             } else {
                 logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
-                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is " + node.getValue().getClass());
+                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is "
+                        + node.getValue().getClass());
                 writer.value(String.valueOf(node.getValue()));
             }
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
