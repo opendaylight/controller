@@ -100,12 +100,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yang-test</artifactId>
-            <scope>test</scope>
-            <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>config-manager</artifactId>
             <scope>test</scope>
             <version>${netconf.version}</version>
