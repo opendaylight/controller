@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b060ebcf",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/api/ValidationException.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-01-08T10:35:33Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it improve code readability if something like \"marker class\" was used ? Something like Map\u003cModuleName,Map\u003cInstanceName,ExceptionMessageWithStackTrace\u003e\u003e  where ModuleName and IntanceName would provide getName method.",
+      "revId": "dfda25096db8a2ee3978dcd5c20240eef74aa514",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_10a9f7de",
+        "filename": "opendaylight/config/shutdown-impl/src/main/java/org/opendaylight/controller/config/yang/shutdown/impl/ShutdownServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-01-08T10:35:33Z",
+      "side": 1,
+      "message": "Is this the only way how to be sure, that JMX response is received ?",
+      "revId": "dfda25096db8a2ee3978dcd5c20240eef74aa514",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
