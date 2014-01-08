@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_90c3a756",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/osgi/NetconfSSHActivator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-01-08T15:32:07Z",
+      "side": 1,
+      "message": "Is this stream closed ? \nWhat if the file does not exist or is not readable ?",
+      "revId": "a75d80156811624e8b04a08a287f17faf5f9db26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_f0d0a320",
         "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
         "patchSetId": 3
