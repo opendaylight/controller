@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_9c7623d6",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/FlowProgrammerService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-08T01:19:28Z",
+      "side": 1,
+      "message": "In this file there will be a check on the cookie value validity for when configuring a flow (missing for now) to avoid parsing exception during Flow-\u003eFlowMod conversion",
+      "revId": "99bb4a2bc59177bff0156cb9154136d0bafb8bc5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
