@@ -31,11 +31,11 @@ module sal-meter {
 
     rpc add-meter {
         input {
+            uses tr:transaction-metadata;            
             leaf meter-ref {
                 type meter-type:meter-ref;
             }
-            uses node-meter;
-            uses tr:transaction-aware;            
+            uses node-meter;            
         }
         output {
             uses tr:transaction-aware;
@@ -44,12 +44,12 @@ module sal-meter {
 
     rpc remove-meter {
         input {
+            uses tr:transaction-metadata;            
             leaf meter-ref {
                 type meter-type:meter-ref;
             }
             
-            uses node-meter;
-            uses tr:transaction-aware;            
+            uses node-meter;                       
         }
         output {
             uses tr:transaction-aware;
@@ -58,12 +58,12 @@ module sal-meter {
 
     rpc update-meter {
         input {
+            uses tr:transaction-metadata;            
             leaf meter-ref {
                 type meter-type:meter-ref;
             }
             
-            uses meter-update;
-            uses tr:transaction-aware;            
+            uses meter-update;                       
         }
         output {
             uses tr:transaction-aware;
@@ -71,6 +71,7 @@ module sal-meter {
     }
         
     notification meter-added {
+        uses tr:transaction-metadata;
         leaf meter-ref {
             type meter-type:meter-ref;
         }
@@ -79,6 +80,7 @@ module sal-meter {
     }
 
     notification meter-updated {
+        uses tr:transaction-metadata;
         leaf meter-ref {
             type meter-type:meter-ref;
         }
@@ -87,6 +89,7 @@ module sal-meter {
     }
 
     notification meter-removed {
+        uses tr:transaction-metadata;
         leaf meter-ref {
             type meter-type:meter-ref;
         }
