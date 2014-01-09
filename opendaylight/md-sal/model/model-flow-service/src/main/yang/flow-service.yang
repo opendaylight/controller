@@ -51,9 +51,7 @@ module sal-flow {
 
     rpc add-flow {
         input {
-            leaf transaction-ref {
-                type string;
-            }
+            uses tr:transaction-metadata;
             leaf flow-ref {
                 type types:flow-ref;
             }
@@ -66,9 +64,7 @@ module sal-flow {
 
     rpc remove-flow {
         input {
-            leaf transaction-ref {
-                type string;
-            }
+            uses tr:transaction-metadata;
             leaf flow-ref {
                 type types:flow-ref;
             }
@@ -81,9 +77,7 @@ module sal-flow {
 
     rpc update-flow {
         input {
-            leaf transaction-ref {
-                type string;
-            }
+            uses tr:transaction-metadata;
             leaf flow-ref {
                 type types:flow-ref;
             }
@@ -95,9 +89,7 @@ module sal-flow {
     }
 
     notification flow-added {
-        leaf transaction-ref {
-            type string;
-        }
+        uses tr:transaction-metadata;
         leaf flow-ref {
             type types:flow-ref;
         }
@@ -106,21 +98,16 @@ module sal-flow {
     }
 
     notification flow-updated {
-        leaf transaction-ref {
-            type string;
-        }
+        uses tr:transaction-metadata;
         leaf flow-ref {
             type types:flow-ref;
         }
         uses node-flow;
-        uses tr:transaction-aware;
-        
+        uses tr:transaction-aware;        
     }
 
     notification flow-removed {
-        leaf transaction-ref {
-            type string;
-        }
+        uses tr:transaction-metadata;
         leaf flow-ref {
             type types:flow-ref;
         }
