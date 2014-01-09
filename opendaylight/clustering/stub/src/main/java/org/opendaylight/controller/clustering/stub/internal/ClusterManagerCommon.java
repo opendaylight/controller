@@ -43,7 +43,7 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     private ConcurrentMap<String, ConcurrentMap<?, ?>> caches = new ConcurrentHashMap<String, ConcurrentMap<?, ?>>();
 
     protected ClusterManagerCommon() throws UnknownHostException {
-        loopbackAddress = InetAddress.getByName("127.0.0.1");
+        loopbackAddress = InetAddress.getLoopbackAddress();
     }
 
     /**
