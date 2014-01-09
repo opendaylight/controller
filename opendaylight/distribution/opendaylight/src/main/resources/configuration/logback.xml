@@ -41,7 +41,7 @@
   <logger name="org.opendaylight.controller" level="INFO"/>
 
   <!-- OSGi logging bridge -->
-  <logger name="org.opendaylight.controller.logging.bridge" level="WARN"/>
+  <logger name="org.opendaylight.controller.logging.bridge" level="INFO"/>
 
   <!-- Netty -->
   <logger name="io.netty" level="WARN"/>
