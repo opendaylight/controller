@@ -60,7 +60,7 @@ public class InvokeRpcMethodTest {
         ControllerContext contContext = ControllerContext.getInstance();
         contContext.onGlobalContextUpdated(TestUtils.loadSchemaContext(modules));
         try {
-            contContext.findModuleByNamespace(new URI("invoke:rpc:module"));
+            contContext.findModuleNameByNamespace(new URI("invoke:rpc:module"));
         } catch (URISyntaxException e) {
             assertTrue("Uri wasn't created sucessfuly", false);
         }

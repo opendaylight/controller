@@ -12,6 +12,7 @@ import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.controller.sal.core.api.mount.MountService
 import org.opendaylight.controller.sal.rest.impl.RestUtil
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider
 import org.opendaylight.yangtools.yang.common.QName
@@ -26,16 +27,17 @@ import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
+import org.opendaylight.yangtools.yang.model.api.Module
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
-import org.opendaylight.controller.sal.core.api.mount.MountService
-import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
+import java.util.ArrayList
 
 class ControllerContext implements SchemaServiceListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
@@ -73,6 +75,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
+        checkPreconditions
         val ret = InstanceIdentifier.builder();
         val pathArgs = restconfInstance.split("/");
         if (pathArgs.empty) {
@@ -81,24 +84,28 @@ class ControllerContext implements SchemaServiceListener {
         if (pathArgs.head.empty) {
             pathArgs.remove(0)
         }
-        val schemaNode = ret.collectPathArguments(pathArgs, globalSchema.findModule(pathArgs.head));
+        val mountPoints = new ArrayList
+        val schemaNode = ret.collectPathArguments(pathArgs, globalSchema.findModule(pathArgs.head), mountPoints);
         if (schemaNode === null) {
             return null
         }
-        return new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
+        return new InstanceIdWithSchemaNode(ret.toInstance, schemaNode, mountPoints.last)
     }
 
-    private static def findModule(SchemaContext context,String argument) {
-        //checkPreconditions
+    private def findModule(SchemaContext context,String argument) {
         checkNotNull(argument);
         val startModule = argument.toModuleName();
         return context.getLatestModule(startModule)
     }
-
-    static def getLatestModule(SchemaContext schema,String moduleName) {
-        checkArgument(schema != null);
+    
+    private def getLatestModule(SchemaContext schema,String moduleName) {
+        checkArgument(schema !== null);
         checkArgument(moduleName !== null && !moduleName.empty)
         val modules = schema.modules.filter[m|m.name == moduleName]
+        return modules.filterLatestModule
+    }
+    
+    private def filterLatestModule(Iterable<Module> modules) {
         var latestModule = modules.head
         for (module : modules) {
             if (module.revision.after(latestModule.revision)) {
@@ -106,6 +113,31 @@ class ControllerContext implements SchemaServiceListener {
             }
         }
         return latestModule
+    }
+    
+    def findModuleByName(String moduleName) {
+        checkPreconditions
+        checkArgument(moduleName !== null && !moduleName.empty)
+        return globalSchema.getLatestModule(moduleName)
+    }
+    
+    def findModuleByName(String moduleName, InstanceIdentifier partialPath) {
+        checkArgument(moduleName !== null && !moduleName.empty && partialPath !== null && !partialPath.path.empty)
+        val mountPointSchema = mountService?.getMountPoint(partialPath)?.schemaContext;
+        return mountPointSchema?.getLatestModule(moduleName);
+    }
+    
+    def findModuleByNamespace(URI namespace) {
+        checkPreconditions
+        val moduleSchemas = globalSchema.findModuleByNamespace(namespace)
+        return moduleSchemas?.filterLatestModule
+    }
+    
+    def findModuleByNamespace(URI namespace, InstanceIdentifier partialPath) {
+        checkArgument(namespace !== null && !namespace.toString.empty && partialPath !== null && !partialPath.path.empty)
+        val mountPointSchema = mountService?.getMountPoint(partialPath)?.schemaContext;
+        val moduleSchemas = mountPointSchema?.findModuleByNamespace(namespace)
+        return moduleSchemas?.filterLatestModule
     }
 
     def String toFullRestconfIdentifier(InstanceIdentifier path) {
@@ -136,18 +168,13 @@ class ControllerContext implements SchemaServiceListener {
         throw new IllegalArgumentException("Conversion of generic path argument is not supported");
     }
 
-    def findModuleByNamespace(URI namespace) {
+    def findModuleNameByNamespace(URI namespace) {
         checkPreconditions
         var module = uriToModuleName.get(namespace)
         if (module === null) {
             val moduleSchemas = globalSchema.findModuleByNamespace(namespace);
             if(moduleSchemas === null) return null
-            var latestModule = moduleSchemas.head
-            for (m : moduleSchemas) {
-                if (m.revision.after(latestModule.revision)) {
-                    latestModule = m
-                }
-            }
+            var latestModule = moduleSchemas.filterLatestModule
             if(latestModule === null) return null
             uriToModuleName.put(namespace, latestModule.name)
             module = latestModule.name;
@@ -155,16 +182,10 @@ class ControllerContext implements SchemaServiceListener {
         return module
     }
 
-    def findNamespaceByModule(String module) {
+    def findNamespaceByModuleName(String module) {
         var namespace = moduleNameToUri.get(module)
         if (namespace === null) {
-            val moduleSchemas = globalSchema.modules.filter[it|it.name.equals(module)]
-            var latestModule = moduleSchemas.head
-            for (m : moduleSchemas) {
-                if (m.revision.after(latestModule.revision)) {
-                    latestModule = m
-                }
-            }
+            var latestModule = globalSchema.getLatestModule(module)
             if(latestModule === null) return null
             namespace = latestModule.namespace
             uriToModuleName.put(namespace, latestModule.name)
@@ -235,7 +256,7 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     private def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
-        DataNodeContainer parentNode) {
+        DataNodeContainer parentNode, List<InstanceIdentifier> mountPoints) {
         checkNotNull(strings)
         if (parentNode === null) {
             return null;
@@ -255,8 +276,12 @@ class ControllerContext implements SchemaServiceListener {
             // Node is possibly in other mount point
             val partialPath = builder.toInstance;
             val mountPointSchema = mountService?.getMountPoint(partialPath)?.schemaContext;
-            if(mountPointSchema != null) {
-                return builder.collectPathArguments(strings, mountPointSchema.findModule(strings.head));
+            if(mountPointSchema !== null) {
+                val module = mountPointSchema.findModule(strings.head)
+                if (module !== null) {
+                    mountPoints.add(partialPath)
+                }
+                return builder.collectPathArguments(strings, module, mountPoints);
             }
             return null
         }
@@ -294,7 +319,7 @@ class ControllerContext implements SchemaServiceListener {
         }
         if (targetNode instanceof DataNodeContainer) {
             val remaining = strings.subList(consumed, strings.length);
-            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer);
+            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer, mountPoints);
             return result
         }
 
@@ -310,7 +335,7 @@ class ControllerContext implements SchemaServiceListener {
         val allCases = container.childNodes.filter(ChoiceNode).map[cases].flatten
         for (caze : allCases) {
             potentialNode = caze.findInstanceDataChild(name);
-            if(potentialNode != null) {
+            if(potentialNode !== null) {
                 return potentialNode;
             }
         }
