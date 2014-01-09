@@ -260,22 +260,9 @@ public class StatisticsProvider implements AutoCloseable {
                 this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
                         , StatsRequestType.AGGR_FLOW);
             }
+        }else{
+            spLogger.debug("No details found in data store for flow tables associated with Node {}",targetNodeKey);
         }
-        
-        //Note: Just for testing, because i am not able to fetch table list from datastore
-        // Bug-225 is raised for investigation.
-        
-//                spLogger.info("Send aggregate stats request for flow table {} to node {}",1,targetNodeKey);
-//                GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input = 
-//                        new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
-//                
-//                input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
-//                input.setTableId(new TableId((short)1));
-//                Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response = 
-//                        flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());`
-//                
-//                multipartMessageManager.setTxIdAndTableIdMapEntry(response.get().getResult().getTransactionId(), (short)1);
-        
     }
 
     private void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
@@ -376,7 +363,7 @@ public class StatisticsProvider implements AutoCloseable {
     private List<Short> getTablesFromNode(NodeKey nodeKey){
         InstanceIdentifier<FlowCapableNode> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class,nodeKey).augmentation(FlowCapableNode.class).toInstance();
         
-        FlowCapableNode node = (FlowCapableNode)dps.readConfigurationData(nodesIdentifier);
+        FlowCapableNode node = (FlowCapableNode)dps.readOperationalData(nodesIdentifier);
         List<Short> tablesId = new ArrayList<Short>();
         if(node != null && node.getTable()!=null){
             spLogger.info("Number of tables {} supported by node {}",node.getTable().size(),nodeKey);
