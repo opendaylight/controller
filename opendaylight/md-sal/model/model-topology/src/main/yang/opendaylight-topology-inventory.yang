@@ -8,7 +8,7 @@ module opendaylight-topology-inventory {
     import ietf-inet-types { prefix "inet"; }
     import opendaylight-inventory {prefix "inv";}
     import opendaylight-topology {prefix "odt";}
-    import network-topology {prefix "topo";}
+    import network-topology {prefix "topo"; revision-date "2013-07-12"; }
 
     organization "TBD";
 
