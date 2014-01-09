@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f36f8d29",
+        "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-09T13:36:54Z",
+      "side": 1,
+      "message": "here the doExit will be set to true every time unless an explicit logging.bridge.ignoreUncaughtException is set to \u0027true\" which is the oppsite of the behavior present till now, can we enable the different behavior only if the property is set instead to change the default?\nI\u0027m ok to introduce this behavior but would like to keep the default as it\u0027s.",
+      "revId": "99e034009c5c6a7aea3b37b01976acac2a31050d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
