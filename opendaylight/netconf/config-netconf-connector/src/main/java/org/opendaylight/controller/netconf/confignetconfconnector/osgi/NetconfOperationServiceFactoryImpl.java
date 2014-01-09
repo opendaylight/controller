@@ -45,6 +45,7 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
                 try {
                     Thread.sleep(ATTEMPT_TIMEOUT_MS);
                 } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
                     throw new RuntimeException(e1);
                 }
                 continue;

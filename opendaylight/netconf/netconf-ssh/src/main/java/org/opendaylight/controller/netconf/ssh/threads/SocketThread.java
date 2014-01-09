@@ -108,6 +108,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                         netconf_ssh_input.join();
                                     }
                                 } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
                                    logger.error("netconf_ssh_input join error ",e);
                                 }
 
@@ -116,6 +117,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                         netconf_ssh_output.join();
                                     }
                                 } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
                                     logger.error("netconf_ssh_output join error ",e);
                                 }
 
