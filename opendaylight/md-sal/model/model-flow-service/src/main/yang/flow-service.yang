@@ -51,11 +51,11 @@ module sal-flow {
 
     rpc add-flow {
         input {
+            uses tr:transaction-metadata;
             leaf flow-ref {
                 type types:flow-ref;
             }
-            uses node-flow;
-            uses tr:transaction-aware;
+            uses node-flow;            
         }
         output {
             uses tr:transaction-aware;
@@ -64,11 +64,11 @@ module sal-flow {
 
     rpc remove-flow {
         input {
+            uses tr:transaction-metadata;
             leaf flow-ref {
                 type types:flow-ref;
             }
-            uses node-flow;
-            uses tr:transaction-aware;
+            uses node-flow;            
         }
         output {
             uses tr:transaction-aware;
@@ -77,11 +77,11 @@ module sal-flow {
 
     rpc update-flow {
         input {
+            uses tr:transaction-metadata;
             leaf flow-ref {
                 type types:flow-ref;
             }
-            uses flow-update;
-            uses tr:transaction-aware;
+            uses flow-update;           
         }
         output {
             uses tr:transaction-aware;
@@ -89,6 +89,7 @@ module sal-flow {
     }
 
     notification flow-added {
+        uses tr:transaction-metadata;
         leaf flow-ref {
             type types:flow-ref;
         }
@@ -97,15 +98,16 @@ module sal-flow {
     }
 
     notification flow-updated {
+        uses tr:transaction-metadata;
         leaf flow-ref {
             type types:flow-ref;
         }
         uses node-flow;
-        uses tr:transaction-aware;
-        
+        uses tr:transaction-aware;        
     }
 
     notification flow-removed {
+        uses tr:transaction-metadata;
         leaf flow-ref {
             type types:flow-ref;
         }
@@ -120,6 +122,7 @@ module sal-flow {
     notification node-error-notification {
         uses error:error-message;
         uses tr:transaction-aware;
+        uses tr:transaction-metadata;
     }
     
     notification node-experimenter-error-notification {

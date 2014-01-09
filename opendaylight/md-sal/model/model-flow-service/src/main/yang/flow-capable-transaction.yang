@@ -3,6 +3,7 @@ module flow-capable-transaction {
     prefix type;
 
     import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     
     revision "2013-11-03" {
@@ -11,6 +12,12 @@ module flow-capable-transaction {
 
     typedef transaction-id {
     	type uint64;
+    }
+    // This refers to MD-SAL transaction reference.
+    grouping transaction-metadata {
+        leaf transaction-uri {
+            type inet:uri;
+        }
     }
     
     grouping transaction-aware {
