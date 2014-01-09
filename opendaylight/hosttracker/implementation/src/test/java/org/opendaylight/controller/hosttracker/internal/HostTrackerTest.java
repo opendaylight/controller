@@ -25,7 +25,6 @@ public class HostTrackerTest extends TestCase {
 
         HostTracker hostTracker = null;
         hostTracker = new HostTracker();
-        Assert.assertFalse(hostTracker == null);
 
         InetAddress hostIP = InetAddress.getByName("192.168.0.8");
         IHostId id  = IPHostId.fromIP(hostIP);
@@ -44,7 +43,6 @@ public class HostTrackerTest extends TestCase {
     public void testHostTracker() throws UnknownHostException {
         HostTracker hostTracker = null;
         hostTracker = new HostTracker();
-        Assert.assertFalse(hostTracker == null);
 
         InetAddress hostIP_1 = InetAddress.getByName("192.168.0.8");
         IHostId id1 = IPHostId.fromIP(hostIP_1);

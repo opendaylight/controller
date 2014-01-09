@@ -29,7 +29,6 @@ public class LoadBalancerTest extends TestCase {
     public void testRoundRobinPolicy() {
         ConfigManager cm = null;
         cm = new ConfigManager();
-        Assert.assertFalse(cm== null);
 
         Pool pool = cm.createPool("TestPool","roundrobin");
         VIP vip = cm.createVIP("TestVIP","10.0.0.9","TCP",(short)5550,"TestPool");
