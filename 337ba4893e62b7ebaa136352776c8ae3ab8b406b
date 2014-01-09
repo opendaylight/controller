@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_50208fab",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/table/TableProvider.xtend",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-09T07:20:45Z",
+      "side": 1,
+      "message": "This will gather any table mods that occur to config.  I am a little concerned about this, because when the first flow is programmed, the table it is written to will be created.  This will (I think) cause this to participate in that transaction, and call the RPC.  I\u0027m pretty sure that we don\u0027t want that.  Thoughts?",
+      "revId": "337ba4893e62b7ebaa136352776c8ae3ab8b406b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
