@@ -164,6 +164,8 @@ FWCLASSPATH=${FWCLASSPATH},file:${basedir}/lib/org.eclipse.virgo.kernel.equinox.
 CLASSPATH=${CLASSPATH}:${basedir}/lib/org.eclipse.equinox.launcher-1.3.0.v20120522-1813.jar
 FWCLASSPATH=${FWCLASSPATH},file:${basedir}/lib/org.eclipse.equinox.launcher-1.3.0.v20120522-1813.jar
 
+cd $basedir
+
 if [ "${stopdaemon}" -eq 1 ]; then
     if [ -e "${pidfile}" ]; then
         daemonpid=`cat "${pidfile}"`
