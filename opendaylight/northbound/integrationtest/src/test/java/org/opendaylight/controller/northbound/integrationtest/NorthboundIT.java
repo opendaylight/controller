@@ -1126,7 +1126,7 @@ public class NorthboundIT {
         } else {
             JSONObject ja = json.getJSONObject("hostConfig");
             String na = ja.getString("networkAddress");
-            return (na.equalsIgnoreCase(hostIp)) ? true : false;
+            return na.equalsIgnoreCase(hostIp);
         }
     }
 
