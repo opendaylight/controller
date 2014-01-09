@@ -57,6 +57,7 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 }
             }

@@ -110,6 +110,7 @@ public class NetconfClient implements Closeable {
         try {
             return sessionListener.getLastMessage(attempts, attemptMsDelay);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(this + " Cannot read message from " + address, e);
         } catch (IllegalStateException e) {
             throw new IllegalStateException(this + " Cannot read message from " + address, e);

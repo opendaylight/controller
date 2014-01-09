@@ -78,7 +78,10 @@ public class ConfigPersisterActivator implements BundleActivator {
                             ignoredMissingCapabilityRegex);
                     jmxNotificationHandler.init();
                 } catch (InterruptedException e) {
-                    logger.info("Interrupted while waiting for netconf connection");
+                    Thread.currentThread().interrupt();
+                    logger.error("Interrupted while waiting for netconf connection");
+                    // uncaught exception handler will deal with this failure
+                    throw new RuntimeException("Interrupted while waiting for netconf connection", e);
                 }
             }
         };
