@@ -9,11 +9,8 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributesConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services.ServiceInstance;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +20,10 @@ import javax.management.openmbean.SimpleType;
 
 public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<ObjectName, SimpleType<?>> {
 
-    private final Services serviceTracker;
+    private final ServiceRegistryWrapper serviceTracker;
     private static final Logger logger = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
 
-    ObjectNameAttributeResolvingStrategy(Services serviceTracker) {
+    ObjectNameAttributeResolvingStrategy(ServiceRegistryWrapper serviceTracker) {
         super(SimpleType.OBJECTNAME);
         this.serviceTracker = serviceTracker;
     }
@@ -45,9 +42,7 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
         String namespace = mappedDep.getNamespace();
         logger.trace("Getting service instance by service name {} : {} and ref name {}", namespace, serviceName, refName);
 
-        ServiceInstance byRefName = serviceTracker.getByServiceAndRefName(namespace, serviceName, refName);
-        ObjectName on = ObjectNameUtil.createReadOnlyModuleON(byRefName.getModuleName(), byRefName.getInstanceName());
-        on = ObjectNameUtil.createON(on.toString() + "," + AttributesConstants.REF_NAME_ON_PROPERTY_KEY + "=" + refName);
+        ObjectName on = serviceTracker.getByServiceAndRefName(namespace, serviceName, refName);
 
         logger.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
         return Optional.of(on);

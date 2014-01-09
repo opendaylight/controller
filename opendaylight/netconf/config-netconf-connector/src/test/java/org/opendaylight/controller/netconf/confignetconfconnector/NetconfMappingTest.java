@@ -143,7 +143,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1");
 
+
         edit("netconfMessages/editConfig_addServiceName.xml");
+        config = getConfigCandidate();
+        assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+                "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
+                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
+
+        edit("netconfMessages/editConfig_addServiceNameOnTest.xml");
         config = getConfigCandidate();
         assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
@@ -229,6 +236,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         Element configCandidate = getConfigCandidate();
+        System.err.println(XmlUtil.toString(configCandidate));
         checkBinaryLeafEdited(configCandidate);
 
 

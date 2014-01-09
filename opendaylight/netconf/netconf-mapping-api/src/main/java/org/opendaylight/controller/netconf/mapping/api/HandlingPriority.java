@@ -36,8 +36,6 @@ public class HandlingPriority implements Comparable<HandlingPriority> {
         return Optional.of(priority).or(Optional.<Integer> absent());
     }
 
-    // TODO test
-
     @Override
     public int compareTo(HandlingPriority o) {
         if (this == o)

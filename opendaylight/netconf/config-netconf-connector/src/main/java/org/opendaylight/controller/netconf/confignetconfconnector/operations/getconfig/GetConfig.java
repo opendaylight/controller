@@ -9,21 +9,18 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -83,40 +80,19 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
                 .queryInstances(configRegistryClient);
 
-        final Config configMapping = new Config(transform(configRegistryClient,
+        final Config configMapping = new Config(EditConfig.transformMbeToModuleConfigs(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap()));
 
 
         ObjectName on = transactionProvider.getOrCreateTransaction();
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(on);
 
-        Services serviceTracker = new Services(ta);
+        ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(ta);
         dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
 
         logger.info("{} operation successful", GET_CONFIG);
 
         return dataElement;
-    }
-
-    // TODO refactor ... duplicate code
-    public static Map<String, Map<String, ModuleConfig>> transform(final ConfigRegistryClient configRegistryClient,
-            Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
-        return Maps.transformEntries(mBeanEntries,
-                new Maps.EntryTransformer<String, Map<String, ModuleMXBeanEntry>, Map<String, ModuleConfig>>() {
-
-                    @Override
-                    public Map<String, ModuleConfig> transformEntry(String arg0, Map<String, ModuleMXBeanEntry> arg1) {
-                        return Maps.transformEntries(arg1,
-                                new Maps.EntryTransformer<String, ModuleMXBeanEntry, ModuleConfig>() {
-
-                                    @Override
-                                    public ModuleConfig transformEntry(String key, ModuleMXBeanEntry value) {
-                                        return new ModuleConfig(key, new InstanceConfig(configRegistryClient, value
-                                                .getAttributes()), value.getProvidedServices().values());
-                                    }
-                                });
-                    }
-                });
     }
 
     @Override

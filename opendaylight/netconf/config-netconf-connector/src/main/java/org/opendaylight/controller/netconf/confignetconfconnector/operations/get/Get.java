@@ -20,12 +20,13 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.ModuleRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -143,14 +144,14 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap());
-        final Map<String, Map<String, ModuleConfig>> moduleConfigs = GetConfig.transform(configRegistryClient,
-                yangStoreSnapshot.getModuleMXBeanEntryMap());
+        final Map<String, Map<String, ModuleConfig>> moduleConfigs = EditConfig.transformMbeToModuleConfigs(
+                configRegistryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
 
         final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 
         ObjectName txOn = transactionProvider.getOrCreateTransaction();
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(txOn);
-        final Element element = runtime.toXml(runtimeBeans, configBeans, document, ta);
+        final Element element = runtime.toXml(runtimeBeans, configBeans, document, new ServiceRegistryWrapper(ta));
 
         logger.info("{} operation successful", XmlNetconfConstants.GET);
 

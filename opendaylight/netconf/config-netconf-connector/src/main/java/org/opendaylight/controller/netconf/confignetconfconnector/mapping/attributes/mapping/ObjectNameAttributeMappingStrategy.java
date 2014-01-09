@@ -10,8 +10,8 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributesConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 
 import javax.management.ObjectName;
@@ -20,11 +20,11 @@ import javax.management.openmbean.SimpleType;
 public class ObjectNameAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
 
-    private final Services tracker;
+    private final ServiceRegistryWrapper tracker;
     private final String serviceName;
     private final String namespace;
 
-    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, Services dependencyTracker, String serviceName, String namespace) {
+    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, ServiceRegistryWrapper dependencyTracker, String serviceName, String namespace) {
         super(openType);
         this.tracker = dependencyTracker;
         this.serviceName = serviceName;
@@ -44,10 +44,7 @@ public class ObjectNameAttributeMappingStrategy extends
 
         ObjectName on = (ObjectName) value;
 
-        String expectedRefName = on.getKeyProperty(AttributesConstants.REF_NAME_ON_PROPERTY_KEY);
-
-        String refName = expectedRefName == null ? tracker.getRefName(namespace, serviceName, on, Optional.<String> absent())
-                : tracker.getRefName(namespace, serviceName, on, Optional.of(expectedRefName));
+        String refName = ObjectNameUtil.getReferenceName(on);
 
         return Optional.of(new MappedDependency(namespace, serviceName, refName));
     }

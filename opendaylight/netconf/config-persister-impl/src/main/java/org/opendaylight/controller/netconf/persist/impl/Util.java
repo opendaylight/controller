@@ -40,8 +40,6 @@ public final class Util {
         return true;
     }
 
-
-    // TODO: check if closing in correct order
     public static void closeClientAndDispatcher(NetconfClient client) {
         NetconfClientDispatcher dispatcher = client.getNetconfClientDispatcher();
         Exception fromClient = null;

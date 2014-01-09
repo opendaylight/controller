@@ -9,13 +9,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.util;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.api.YangStoreService;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,17 +32,6 @@ public final class Util {
     public static void checkType(final Object value, final Class<?> clazz) {
         Preconditions.checkArgument(clazz.isAssignableFrom(value.getClass()), "Unexpected type " + value.getClass()
                 + " should be " + clazz + " of " + value);
-    }
-
-    // TODO: add message and proper error types
-    public static YangStoreSnapshot getYangStore(final YangStoreService yangStoreService)
-            throws NetconfDocumentedException {
-        try {
-            return yangStoreService.getYangStoreSnapshot();
-        } catch (final YangStoreException e) {
-            throw new NetconfDocumentedException("TODO", e, ErrorType.application, ErrorTag.bad_attribute,
-                    ErrorSeverity.error);
-        }
     }
 
 }

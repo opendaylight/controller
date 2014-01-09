@@ -28,7 +28,7 @@ public class InstanceConfigElementResolved {
     private final Multimap<String, String> providedServices;
 
     public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
-        EditStrategyType valueOf = checkStrategy(currentStrategy, defaultStrategy);
+        EditStrategyType valueOf = parseStrategy(currentStrategy, defaultStrategy);
         this.editStrategy = valueOf;
         this.configuration = configuration;
         this.providedServices = providedServices;
@@ -41,19 +41,19 @@ public class InstanceConfigElementResolved {
     }
 
 
-    EditStrategyType checkStrategy(String currentStrategy, EditStrategyType defaultStrategy) {
-        EditStrategyType valueOf = EditStrategyType.valueOf(currentStrategy);
+    static EditStrategyType parseStrategy(String currentStrategy, EditStrategyType defaultStrategy) {
+        EditStrategyType parsedStrategy = EditStrategyType.valueOf(currentStrategy);
         if (defaultStrategy.isEnforcing()) {
             Preconditions
                     .checkArgument(
-                            valueOf == defaultStrategy,
+                            parsedStrategy == defaultStrategy,
                             "With "
                                     + defaultStrategy
                                     + " as "
                                     + EditConfigXmlParser.DEFAULT_OPERATION_KEY
                                     + " operations on module elements are not permitted since the default option is restrictive");
         }
-        return valueOf;
+        return parsedStrategy;
     }
 
 

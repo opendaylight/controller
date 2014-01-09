@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
 import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
@@ -36,11 +37,11 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
     private final MBeanServerConnection mBeanServerConnection;
     private final NetconfClient netconfClient;
-    private final PersisterAggregator persisterAggregator;
+    private final Persister persisterAggregator;
     private final Pattern ignoredMissingCapabilityRegex;
 
     public ConfigPersisterNotificationHandler(MBeanServerConnection mBeanServerConnection, NetconfClient netconfClient,
-                                              PersisterAggregator persisterAggregator, Pattern ignoredMissingCapabilityRegex) {
+                                              Persister persisterAggregator, Pattern ignoredMissingCapabilityRegex) {
         this.mBeanServerConnection = mBeanServerConnection;
         this.netconfClient = netconfClient;
         this.persisterAggregator = persisterAggregator;
@@ -72,8 +73,9 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         if (notification instanceof CommitJMXNotification) {
             try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
-            } catch (Exception e) {
-                // TODO: notificationBroadcast support logs only DEBUG
+            } catch (Throwable e) {
+                // log exceptions from notification Handler here since
+                // notificationBroadcastSupport logs only DEBUG level
                 logger.warn("Exception occured during notification handling: ", e);
                 throw e;
             }

@@ -10,14 +10,14 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.Attribute;
-import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import java.util.Map;
@@ -38,22 +38,13 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                               String module, String instance, Services services) {
-        ObjectName on = null;
-        try {
-            on = ta.createModule(module, instance);
-            logger.info("New instance for {} {} created under name {}", module, instance, on);
-            addRefNames(services, providedServices, module, instance, ta, on);
-            executeStrategy(configuration, ta, on, services);
-        } catch (InstanceAlreadyExistsException e1) {
-            throw new IllegalStateException("Unable to create instance for " + module + " : " + instance);
-        } catch (InstanceNotFoundException e) {
-            throw new IllegalStateException("Unable to save default ref name for instance " + on, e);
-        }
+            String module, String instance, ServiceRegistryWrapper services) {
+        throw new IllegalStateException(
+                "Unable to handle missing instance, no missing instances should appear at this point, missing: "
+                        + module + ":" + instance);
     }
 
-    private void addRefNames(Services services, Multimap<String, String> providedServices, String module,
-            String instance, ConfigTransactionClient ta, ObjectName on) throws InstanceNotFoundException {
+    private void addRefNames(ServiceRegistryWrapper services, Multimap<String, String> providedServices, ConfigTransactionClient ta, ObjectName on) throws InstanceNotFoundException {
         for (Entry<String, String> namespaceToService : providedServices.entries()) {
 
             if(services.hasRefName(namespaceToService.getKey(),
@@ -61,14 +52,20 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 continue;
 
             String refName = services.getNewDefaultRefName(namespaceToService.getKey(), namespaceToService.getValue(),
-                    module, instance);
+                    ObjectNameUtil.getFactoryName(on), ObjectNameUtil.getInstanceName(on));
             ta.saveServiceReference(
                     ta.getServiceInterfaceName(namespaceToService.getKey(), namespaceToService.getValue()), refName, on);
         }
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, Services services) {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) {
+        try {
+            addRefNames(services, providedServices, ta, on);
+        } catch (InstanceNotFoundException e) {
+            throw new IllegalStateException("Unable to save default ref name for instance " + on, e);
+        }
+
         for (Entry<String, AttributeConfigElement> configAttributeEntry : configuration.entrySet()) {
             try {
                 AttributeConfigElement ace = configAttributeEntry.getValue();

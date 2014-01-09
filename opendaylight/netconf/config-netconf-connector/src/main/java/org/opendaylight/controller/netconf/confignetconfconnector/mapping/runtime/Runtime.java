@@ -11,11 +11,10 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runti
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -61,9 +60,7 @@ public class Runtime {
         return retVal;
     }
 
-    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document, ServiceReferenceReadableRegistry serviceRegistry) {
-        Services serviceTracker = new Services(serviceRegistry);
-
+    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document, ServiceRegistryWrapper serviceRegistry) {
         Element root = document.createElement(XmlNetconfConstants.DATA_KEY);
 
         Element modulesElement = document.createElement(XmlNetconfConstants.MODULES_KEY);
@@ -88,11 +85,11 @@ public class Runtime {
                     Element runtimeXml;
                     ModuleConfig moduleConfig = moduleConfigs.get(localNamespace).get(moduleName);
                     if(instanceToRbe==null || instanceToRbe.containsKey(instanceName) == false) {
-                        runtimeXml = moduleConfig.toXml(instanceON, serviceTracker, document, localNamespace);
+                        runtimeXml = moduleConfig.toXml(instanceON, serviceRegistry, document, localNamespace);
                     } else {
                         ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
                         runtimeXml = moduleRuntime.toXml(localNamespace, instanceToRbe.get(instanceName), document,
-                                moduleConfig, instanceON, serviceTracker);
+                                moduleConfig, instanceON, serviceRegistry);
                     }
                     modulesElement.appendChild(runtimeXml);
                 }
