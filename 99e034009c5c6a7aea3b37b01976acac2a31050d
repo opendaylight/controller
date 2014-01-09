@@ -16,6 +16,41 @@
       "revId": "99e034009c5c6a7aea3b37b01976acac2a31050d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f3042d4b",
+        "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-09T14:38:07Z",
+      "side": 1,
+      "message": "I think the current behaviour is unsafe -- losing a thread to an uncaught exception means that some random state is lost, which may result in a different part of the controller to fail. Imagine a worker thread dequeing a piece of work and dying while that piece of work is on its stack only. If there is a different thread waiting for that piece to get processed it will never complete.\n\nAnother example would be modifying two collections guarded by a lock -- if an exception is thrown in-between the modification will be incomplete and internal state will be left inconsistent with no real way of ever recovering.",
+      "parentUuid": "da6255ed_f36f8d29",
+      "revId": "99e034009c5c6a7aea3b37b01976acac2a31050d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d3afe928",
+        "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/UncaughtExceptionHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-09T14:38:07Z",
+      "side": 1,
+      "message": "I think a more verbose message (\"Terminating JVM\" or similar) would be more appropriate here",
+      "revId": "99e034009c5c6a7aea3b37b01976acac2a31050d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
