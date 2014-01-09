@@ -799,7 +799,11 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
      * _ethernetSource=EthernetSource [_address=MacAddress [_value=00:00:00:00:00:00], _mask=null, augmentation=[]], 
      * _ethernetType=EthernetType [_type=EtherType [_value=2048], _mask=null, augmentation=[]]
      * 
-     * So this custom equals method add additional check, in case any match element is null in data-store-flow, but not
+     * Similarly for inPort, if user/application don't set any value for it, FRM will store null value for it in data store. 
+     * When we fetch the same flow (with its statistics) from switch, plugin converts its value to openflow:X:0.
+     *  e.g _inPort=Uri [_value=openflow:1:0]  
+     * 
+     * So this custom equals method add additional check to take care of these scenario, in case any match element is null in data-store-flow, but not
      * in the flow fetched from switch.
      * 
      * @param statsFlow
@@ -820,8 +824,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                     return false;
                 }
             }
-        } //else if(!storedFlow.getEthernetMatch().equals(statsFlow.getEthernetMatch())) {
-        else if(!EthernetMatchEquals(statsFlow.getEthernetMatch(),storedFlow.getEthernetMatch())) {
+        } else if(!EthernetMatchEquals(statsFlow.getEthernetMatch(),storedFlow.getEthernetMatch())) {
             return false;
         }
         if (storedFlow.getIcmpv4Match()== null) {
@@ -847,7 +850,12 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         if (storedFlow.getInPort()== null) {
             if (statsFlow.getInPort() != null) {
-                return false;
+                String[] portArr = statsFlow.getInPort().getValue().split(":");
+                if(portArr.length >= 3){
+                    if(Integer.parseInt(portArr[2]) != 0){
+                        return false;
+                    }
+                }
             }
         } else if(!storedFlow.getInPort().equals(statsFlow.getInPort())) {
             return false;
