@@ -186,7 +186,15 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
                     yangStoreSnapshot.countModuleMXBeanEntries(), multimap.values().size());
             return yangStoreSnapshot;
         } catch (RuntimeException e) {
-            throw new YangStoreException("Unable to parse yang files from following URLs: " + multimap, e);
+            StringBuffer causeStr = new StringBuffer();
+            Throwable cause = e;
+            while (cause != null) {
+                causeStr.append(e.getMessage());
+                causeStr.append("\n");
+                cause = e.getCause();
+            }
+            throw new YangStoreException("Unable to parse yang files. \n" + causeStr.toString() +
+                    "URLs: " + multimap, e);
         }
     }
 
