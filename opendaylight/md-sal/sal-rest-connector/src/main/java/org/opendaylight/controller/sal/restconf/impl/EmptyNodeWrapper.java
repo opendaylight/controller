@@ -65,6 +65,11 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
     }
 
     @Override
+    public boolean isChangeAllowed() {
+        return unwrapped == null ? true : false;
+    }
+
+    @Override
     public Node<?> unwrap() {
         if (unwrapped == null) {
             if (name == null) {

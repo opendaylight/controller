@@ -7,10 +7,12 @@ public class InstanceIdWithSchemaNode {
 
     private final InstanceIdentifier instanceIdentifier;
     private final DataSchemaNode schemaNode;
+    private final InstanceIdentifier mountPoint;
 
-    public InstanceIdWithSchemaNode(InstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode) {
+    public InstanceIdWithSchemaNode(InstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode, InstanceIdentifier mountPoint) {
         this.instanceIdentifier = instanceIdentifier;
         this.schemaNode = schemaNode;
+        this.mountPoint = mountPoint;
     }
 
     public InstanceIdentifier getInstanceIdentifier() {
@@ -19,6 +21,10 @@ public class InstanceIdWithSchemaNode {
 
     public DataSchemaNode getSchemaNode() {
         return schemaNode;
+    }
+
+    public InstanceIdentifier getMountPoint() {
+        return mountPoint;
     }
 
 }
