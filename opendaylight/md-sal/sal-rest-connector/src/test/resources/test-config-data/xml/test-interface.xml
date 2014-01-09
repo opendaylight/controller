@@ -1,0 +1,8 @@
+<interfaces xmlns="urn:ietf:params:xml:ns:yang:test-interface">
+    <interface>
+        <name>eth0</name>
+        <type>ethernetCsmacd</type>
+        <enabled>false</enabled>
+    </interface>
+</interfaces>
+

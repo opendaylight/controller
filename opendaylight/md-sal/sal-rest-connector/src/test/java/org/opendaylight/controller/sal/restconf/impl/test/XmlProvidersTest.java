@@ -12,7 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -33,9 +35,15 @@ import org.opendaylight.controller.sal.rest.api.Draft01;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.*;
+import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -140,26 +148,32 @@ public class XmlProvidersTest extends JerseyTest {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
-        when(brokerFacade.commitOperationalDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
-                .thenReturn(dummyFuture);
         when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+                .thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
 
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         Response response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
         assertEquals(200, response.getStatus());
+
+        uri = createUri("/config/", "ietf-interfaces:interfaces");
         response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(204, response.getStatus());
 
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE_DRAFT02).put(entity);
         assertEquals(200, response.getStatus());
+
+        uri = createUri("/config/", "ietf-interfaces:interfaces");
         response = target(uri).request(MEDIA_TYPE_DRAFT02).post(entity);
         assertEquals(204, response.getStatus());
 
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         response = target(uri).request(MEDIA_TYPE).put(entity);
         assertEquals(200, response.getStatus());
+
+        uri = createUri("/datastore/", "ietf-interfaces:interfaces");
         response = target(uri).request(MEDIA_TYPE).post(entity);
         assertEquals(204, response.getStatus());
     }
@@ -172,8 +186,6 @@ public class XmlProvidersTest extends JerseyTest {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.FAILED).build();
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
-        when(brokerFacade.commitOperationalDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
-                .thenReturn(dummyFuture);
         when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
 
