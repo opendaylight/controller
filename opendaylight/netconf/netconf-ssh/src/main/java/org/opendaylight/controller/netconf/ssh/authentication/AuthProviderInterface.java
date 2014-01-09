@@ -13,7 +13,7 @@ import org.opendaylight.controller.usermanager.IUserManager;
 public interface AuthProviderInterface {
 
     public boolean authenticated(String username, String password) throws Exception;
-    public char[] getPEMAsCharArray();
+    public char[] getPEMAsCharArray() throws Exception;
     public void removeUserManagerService();
     public void addUserManagerService(IUserManager userManagerService);
 }

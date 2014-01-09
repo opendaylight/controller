@@ -420,7 +420,8 @@ public class NetconfITTest extends AbstractConfigTest {
     private void startSSHServer() throws Exception{
         logger.info("Creating SSH server");
         StubUserManager um = new StubUserManager(USERNAME,PASSWORD);
-        AuthProvider ap = new AuthProvider(um);
+        InputStream is = getClass().getResourceAsStream("/RSA.pk");
+        AuthProvider ap = new AuthProvider(um, is);
         Thread sshServerThread = new Thread(NetconfSSHServer.start(10830,tcpAddress,ap));
         sshServerThread.setDaemon(true);
         sshServerThread.start();

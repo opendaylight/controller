@@ -8,6 +8,8 @@
 package org.opendaylight.controller.netconf.osgi;
 
 import com.google.common.base.Optional;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
@@ -85,7 +87,28 @@ public class NetconfSSHActivator implements BundleActivator{
                 EXCEPTION_MESSAGE, true);
 
         if (sshSocketAddressOptional.isPresent()){
-            AuthProvider authProvider = new AuthProvider(iUserManager);
+            String path = NetconfConfigUtil.getPrivateKeyPath(context);
+            path = path.replace("\\", "/");
+            if (path.equals("")){
+                throw new Exception("Missing netconf.ssh.pk.path key in configuration file.");
+            }
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(path);
+            } catch (FileNotFoundException e){
+                throw new Exception("Missing file described by netconf.ssh.pk.path key in configuration file.");
+            } catch (SecurityException e){
+                throw new Exception("Read access denied to file described by netconf.ssh.pk.path key in configuration file.");
+            }
+            AuthProvider authProvider = null;
+            try {
+                authProvider = new AuthProvider(iUserManager,fis);
+            } catch (Exception e){
+                if (fis!=null){
+                    fis.close();
+                }
+                throw (e);
+            }
             this.server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);

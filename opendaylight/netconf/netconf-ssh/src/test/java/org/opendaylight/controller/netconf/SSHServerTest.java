@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf;
 
 import ch.ethz.ssh2.Connection;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -33,7 +34,8 @@ public class SSHServerTest {
     public void startSSHServer() throws Exception{
         logger.info("Creating SSH server");
         StubUserManager um = new StubUserManager(USER,PASSWORD);
-        AuthProvider ap = new AuthProvider(um);
+        InputStream is = getClass().getResourceAsStream("/RSA.pk");
+        AuthProvider ap = new AuthProvider(um, is);
         NetconfSSHServer server = NetconfSSHServer.start(PORT,tcpAddress,ap);
         sshServerThread = new Thread(server);
         sshServerThread.setDaemon(true);
