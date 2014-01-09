@@ -22,6 +22,7 @@ import org.osgi.service.log.LogReaderService;
 
 public class Activator implements BundleActivator {
     private LogListenerImpl listener = null;
+    private ShutdownHandler shutdownHandler = null;
     private Logger log = null;
 
     @Override
@@ -61,9 +62,13 @@ public class Activator implements BundleActivator {
                  * exceptions are handled by our customized handler. This new
                  * handler will display the exceptions to OSGI console as well
                  * as log to file.
+                 * Shut down the java process by default as uncaught
+                 * exception indicates lost state and possible resource leak.
                  */
+                String ignoreUncaughtEx = context.getProperty("logging.bridge.ignoreUncaughtException");
+                boolean doExit = !Boolean.parseBoolean(ignoreUncaughtEx); // true if property not set
                 Thread.setDefaultUncaughtExceptionHandler(new org.opendaylight.
-                        controller.logging.bridge.internal.UncaughtExceptionHandler());
+                        controller.logging.bridge.internal.UncaughtExceptionHandler(doExit));
 
                 /*
                  * Install the Shutdown handler. This will intercept SIGTERM signal and
@@ -71,7 +76,8 @@ public class Activator implements BundleActivator {
                  * framework.
                  */
 
-                Runtime.getRuntime().addShutdownHook(new shutdownHandler(context));
+                shutdownHandler = new ShutdownHandler(context);
+                Runtime.getRuntime().addShutdownHook(shutdownHandler);
             } else {
                 this.log.error("Cannot register the LogListener because "
                         + "cannot retrieve LogReaderService");
@@ -90,14 +96,17 @@ public class Activator implements BundleActivator {
             LogReaderService reader = (LogReaderService) service;
             reader.removeLogListener(this.listener);
         }
-
+        if (this.shutdownHandler != null) {
+            Runtime.getRuntime().removeShutdownHook(this.shutdownHandler);
+        }
         this.listener = null;
         this.log = null;
+        this.shutdownHandler = null;
     }
 
-    private class shutdownHandler extends Thread {
+    private class ShutdownHandler extends Thread {
         BundleContext bundlecontext;
-        public shutdownHandler(BundleContext ctxt) {
+        public ShutdownHandler(BundleContext ctxt) {
                 this.bundlecontext = ctxt;
         }
 
