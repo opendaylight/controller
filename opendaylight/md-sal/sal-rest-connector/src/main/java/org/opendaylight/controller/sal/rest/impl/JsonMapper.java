@@ -194,7 +194,7 @@ class JsonMapper {
             if (node.getValue() instanceof QName) {
                 IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType).serialize(node.getValue());
                 IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
-                String moduleName = ControllerContext.getInstance().findModuleByNamespace(
+                String moduleName = ControllerContext.getInstance().findModuleNameByNamespace(
                         URI.create(valueFromDTO.getNamespace()));
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
             } else {

@@ -149,7 +149,7 @@ public final class TestUtils {
         ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
 
         prepareMocksForRestconf(modules, restconf);
-        restconf.createConfigurationData(schemaNodePath, compositeNode);
+        restconf.updateConfigurationData(schemaNodePath, compositeNode);
     }
 
     /**
