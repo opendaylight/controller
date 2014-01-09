@@ -62,7 +62,7 @@ public class NorthboundIT {
     private IUserManager userManager = null;
     private IInventoryListener invtoryListener = null;
     private IListenTopoUpdates topoUpdates = null;
-
+    private static final String baseUrlPrefix = "http://127.0.0.1:8080/controller/nb/v2/";
     private final Boolean debugMsg = false;
 
     private String stateToString(int state) {
@@ -267,7 +267,7 @@ public class NorthboundIT {
     @Test
     public void testSubnetsNorthbound() throws JSONException, ConstructionException {
         System.out.println("Starting Subnets JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/subnetservice/";
+        String baseURL = baseUrlPrefix + "subnetservice/";
 
         String name1 = "testSubnet1";
         String subnet1 = "1.1.1.1/24";
@@ -410,7 +410,7 @@ public class NorthboundIT {
     @Test
     public void testStaticRoutingNorthbound() throws JSONException {
         System.out.println("Starting StaticRouting JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/staticroute/";
+        String baseURL = baseUrlPrefix + "staticroute/";
 
         String name1 = "testRoute1";
         String prefix1 = "192.168.1.1/24";
@@ -491,7 +491,7 @@ public class NorthboundIT {
     @Test
     public void testSwitchManager() throws JSONException {
         System.out.println("Starting SwitchManager JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/switchmanager/default/";
+        String baseURL = baseUrlPrefix + "switchmanager/default/";
 
         // define Node/NodeConnector attributes for test
         int nodeId_1 = 51966;
@@ -642,7 +642,7 @@ public class NorthboundIT {
                 "SET_NW_SRC", "SET_NW_DST", "SET_NW_TOS", "SET_TP_SRC", "SET_TP_DST" };
         System.out.println("Starting Statistics JAXB client.");
 
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
+        String baseURL = baseUrlPrefix + "statistics/default/";
 
         String result = getJsonResult(baseURL + "flow");
         JSONTokener jt = new JSONTokener(result);
@@ -833,7 +833,7 @@ public class NorthboundIT {
     @Test
     public void testFlowProgrammer() throws JSONException {
         System.out.println("Starting FlowProgrammer JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flowprogrammer/default/";
+        String baseURL = baseUrlPrefix + "flowprogrammer/default/";
         // Attempt to get a flow that doesn't exit. Should return 404
         // status.
         String result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "GET");
@@ -972,7 +972,7 @@ public class NorthboundIT {
         Integer nodeConnectorId_2 = 34;
         String vlan_2 = "123";
 
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/hosttracker/default";
+        String baseURL = baseUrlPrefix + "hosttracker/default";
 
         // test PUT method: addHost()
         JSONObject fc_json = new JSONObject();
@@ -1133,7 +1133,7 @@ public class NorthboundIT {
     @Test
     public void testTopology() throws JSONException, ConstructionException {
         System.out.println("Starting Topology JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/topology/default";
+        String baseURL = baseUrlPrefix + "topology/default";
 
         // === test GET method for getTopology()
         short state_1 = State.EDGE_UP, state_2 = State.EDGE_DOWN;
