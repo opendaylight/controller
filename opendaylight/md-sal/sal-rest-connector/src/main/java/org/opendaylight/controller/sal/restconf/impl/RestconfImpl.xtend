@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import java.util.ArrayList
+import java.util.HashMap
 import java.util.List
 import java.util.Set
 import javax.ws.rs.core.Response
@@ -8,6 +9,8 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.rest.api.RestconfService
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode
@@ -17,6 +20,7 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
+import org.opendaylight.yangtools.yang.model.api.Module
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
@@ -55,32 +59,6 @@ class RestconfImpl implements RestconfService {
         return null;
     }
 
-    override readData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
-        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
-    }
-
-    override createConfigurationData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val value = normalizeNode(payload, identifierWithSchemaNode.schemaNode)
-        val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier, value).get();
-        switch status.result {
-            case TransactionStatus.COMMITED: Response.status(NO_CONTENT).build
-            default: Response.status(INTERNAL_SERVER_ERROR).build
-        }
-    }
-
-    override updateConfigurationData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val value = normalizeNode(payload, identifierWithSchemaNode.schemaNode)
-        val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier, value).get();
-        switch status.result {
-            case TransactionStatus.COMMITED: Response.status(OK).build
-            default: Response.status(INTERNAL_SERVER_ERROR).build
-        }
-    }
-
     override invokeRpc(String identifier, CompositeNode payload) {
         val rpc = identifier.rpcDefinition
         if (rpc === null) {
@@ -100,6 +78,12 @@ class RestconfImpl implements RestconfService {
         return new StructuredData(rpcResult.result, rpc.output)
     }
 
+    override readData(String identifier) {
+        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
+    }
+
     override readConfigurationData(String identifier) {
         val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
         val data = broker.readConfigurationData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
@@ -116,8 +100,50 @@ class RestconfImpl implements RestconfService {
         updateConfigurationData(identifier, payload);
     }
 
+    override updateConfigurationData(String identifier, CompositeNode payload) {
+        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val value = normalizeNode(payload, identifierWithSchemaNode.schemaNode)
+        val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier, value).get();
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(OK).build
+            default: Response.status(INTERNAL_SERVER_ERROR).build
+        }
+    }
+
     override createConfigurationDataLegacy(String identifier, CompositeNode payload) {
         createConfigurationData(identifier, payload);
+    }
+
+    override createConfigurationData(String identifier, CompositeNode payload) {
+        val uncompleteIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        var schemaNode = (uncompleteIdentifierWithSchemaNode.schemaNode as DataNodeContainer).getSchemaChildNode(payload)
+        if (schemaNode === null) {
+            schemaNode = payload.findModule(uncompleteIdentifierWithSchemaNode.instanceIdentifier)?.getSchemaChildNode(payload)
+        }
+        val value = normalizeNode(payload, schemaNode)
+        val completeIdentifierWithSchemaNode = uncompleteIdentifierWithSchemaNode.addLastIdentifierFromData(value, schemaNode)
+        val status = broker.commitConfigurationDataPost(completeIdentifierWithSchemaNode.instanceIdentifier, value).get();
+        if (status === null) {
+            return Response.status(ACCEPTED).build
+        }
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(NO_CONTENT).build
+            default: Response.status(INTERNAL_SERVER_ERROR).build
+        }
+    }
+    
+    override createConfigurationData(CompositeNode payload) {
+        val schemaNode = payload.findModule(null)?.getSchemaChildNode(payload)
+        val value = normalizeNode(payload, schemaNode)
+        val identifierWithSchemaNode = addLastIdentifierFromData(null, value, schemaNode)
+        val status = broker.commitConfigurationDataPost(identifierWithSchemaNode.instanceIdentifier, value).get();
+        if (status === null) {
+            return Response.status(ACCEPTED).build
+        }
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(NO_CONTENT).build
+            default: Response.status(INTERNAL_SERVER_ERROR).build
+        }
     }
 
     private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
@@ -128,12 +154,87 @@ class RestconfImpl implements RestconfService {
         return identifierWithSchemaNode
     }
 
+    private def dispatch Module findModule(CompositeNode data, InstanceIdentifier partialPath) {
+        if (partialPath !== null && !partialPath.path.empty) {
+            return data.nodeType.namespace.findModuleByNamespace(partialPath)
+        } else {
+            return data.nodeType.namespace.findModuleByNamespace
+        }
+    }
+
+    private def dispatch Module findModule(CompositeNodeWrapper data, InstanceIdentifier partialPath) {
+        var Module module = null;
+        if (partialPath !== null && !partialPath.path.empty) {
+            module = data.namespace.findModuleByNamespace(partialPath) // namespace from XML
+            if (module === null) {
+                module = data.namespace.toString.findModuleByName(partialPath) // namespace (module name) from JSON
+            }
+        } else {
+            module = data.namespace.findModuleByNamespace // namespace from XML
+            if (module === null) {
+                module = data.namespace.toString.findModuleByName // namespace (module name) from JSON
+            }
+        }
+        return module
+    }
+    
+    private def dispatch DataSchemaNode getSchemaChildNode(DataNodeContainer parentSchemaNode, CompositeNode data) {
+        return parentSchemaNode?.getDataChildByName(data.nodeType.localName)
+    }
+    
+    private def dispatch DataSchemaNode getSchemaChildNode(DataNodeContainer parentSchemaNode, CompositeNodeWrapper data) {
+        return parentSchemaNode?.getDataChildByName(data.localName)
+    }
+
+    private def InstanceIdWithSchemaNode addLastIdentifierFromData(InstanceIdWithSchemaNode identifierWithSchemaNode, CompositeNode data, DataSchemaNode schemaOfData) {
+        val iiOriginal = identifierWithSchemaNode?.instanceIdentifier
+        var  InstanceIdentifierBuilder iiBuilder = null
+        if (iiOriginal === null) { 
+            iiBuilder = InstanceIdentifier.builder
+        } else {
+            iiBuilder = InstanceIdentifier.builder(iiOriginal)
+        }
+
+        if (schemaOfData instanceof ListSchemaNode) {
+            iiBuilder.nodeWithKey(schemaOfData.QName, (schemaOfData as ListSchemaNode).resolveKeysFromData(data))
+        } else {
+            iiBuilder.node(schemaOfData.QName)
+        }
+        return new InstanceIdWithSchemaNode(iiBuilder.toInstance, schemaOfData)
+    }
+
+    private def resolveKeysFromData(ListSchemaNode listNode, CompositeNode dataNode) {
+        val keyValues = new HashMap<QName, Object>();
+        for (key : listNode.keyDefinition) {
+            val dataNodeKeyValueObject = dataNode.getSimpleNodesByName(key.localName)?.head?.value
+            if (dataNodeKeyValueObject === null) {
+                throw new ResponseException(BAD_REQUEST, "List " + dataNode.nodeType.localName + " does not contain key: " + key.localName)
+            }
+            val dataNodeKeyValue = String.valueOf(dataNodeKeyValueObject)
+            // key value cannot be NULL
+            if (dataNodeKeyValue.equals("null")) {
+                throw new ResponseException(BAD_REQUEST, "List " + dataNode.nodeType.localName + " has key with null value.")
+            }
+            keyValues.put(key, dataNodeKeyValue);
+        }
+        return keyValues
+    }
+
     private def CompositeNode normalizeNode(CompositeNode node, DataSchemaNode schema) {
+        if (schema !== null && !schema.containerOrList) {
+            throw new ResponseException(BAD_REQUEST, "Root element has to be container or list yang datatype.");
+        }
         if (node instanceof CompositeNodeWrapper) {
-            normalizeNode(node as CompositeNodeWrapper, schema, null)
+            if ((node  as CompositeNodeWrapper).changeAllowed) {
+                normalizeNode(node as CompositeNodeWrapper, schema, null)
+            }
             return (node as CompositeNodeWrapper).unwrap()
         }
         return node
+    }
+
+    private def isContainerOrList(DataSchemaNode schemaNode) {
+        return (schemaNode instanceof ContainerSchemaNode) || (schemaNode instanceof ListSchemaNode)
     }
 
     private def void normalizeNode(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment) {
@@ -150,7 +251,7 @@ class RestconfImpl implements RestconfService {
         }
         val moduleName = controllerContext.findModuleByNamespace(validQName.namespace);
         if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
-            nodeBuilder.namespace.toString == moduleName) {
+            nodeBuilder.namespace.toString == moduleName.name) {
             nodeBuilder.qname = validQName
         } else {
             throw new ResponseException(BAD_REQUEST,
