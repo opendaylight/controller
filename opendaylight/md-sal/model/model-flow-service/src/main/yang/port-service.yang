@@ -17,21 +17,15 @@ module sal-port {
         uses port-type:flow-port-status;
     }
 
-    /** Base configuration structure **/
-    grouping port-update {
-        uses "inv:node-context-ref";
-
-        container original-port {
-            uses port-type:port-mod;
-        }
-        container updated-port {
-            uses port-type:port-mod;
-        }
-    }
-
-    rpc update-port {
-        input {
-            uses port-update;
+   grouping port-config {
+   		 uses "inv:node-context-ref";
+         
+         uses port-type:port;
+     }
+     
+   rpc update-port {
+         input {
+            uses port-config;
             uses tr:transaction-aware;
         }
         output {
@@ -46,7 +40,7 @@ module sal-port {
     }
     
     notification port-updated {
-        uses port-update;
+        uses port-config;
         uses tr:transaction-aware;
     }
     

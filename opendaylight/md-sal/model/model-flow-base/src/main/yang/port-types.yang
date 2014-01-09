@@ -5,10 +5,12 @@ module opendaylight-port-types {
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-queue-types {prefix queue-types; revision-date "2013-09-25";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     
     revision "2013-09-25" {
         description "Initial revision of Port Inventory model";
     }
+    
     
     typedef port-reason {
         type enumeration {
@@ -17,6 +19,8 @@ module opendaylight-port-types {
             enum update;
         }
     }
+    
+   
     
     typedef port-config {
         type bits {
@@ -27,7 +31,7 @@ module opendaylight-port-types {
         }
     }
     
-    grouping port-state {
+   grouping port-state {
         leaf link-down {
             type boolean;
         }
@@ -58,6 +62,10 @@ module opendaylight-port-types {
             bit pause;
             bit pause-asym;
         }
+    }
+    
+    typedef port-ref {
+        type instance-identifier;
     }
     
     grouping common-port {
@@ -142,12 +150,9 @@ module opendaylight-port-types {
         uses queues;
     }    
     
-    grouping port-mod {
-        container port {
-            list port {
-                key "port-mod-order";
+    grouping port {
                 leaf port-mod-order {
-                    type uint32;
+                    type inv:node-connector-id;
                 }    
                 
                 uses common-port;
@@ -167,8 +172,14 @@ module opendaylight-port-types {
 
                 leaf barrier {
                     type boolean; 
-                } 
-            }            
-        }    
+                }       
     }
+    
+    grouping port-mod {
+    				list port {
+    				       key "port-mod-order";
+    				       uses port;
+    				      }
+     }
+    				      
 }

@@ -17,12 +17,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalF
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService
 import org.osgi.framework.BundleContext
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService
+import org.opendaylight.controller.frm.port.PortProvider
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.service.rev131107.SalPortService
 
 class FRMActivator extends AbstractBindingAwareProvider {
 
     static var FlowProvider provider = new FlowProvider();
     static var GroupProvider groupProvider = new GroupProvider();
     static var MeterProvider meterProvider = new MeterProvider();
+    static var PortProvider portProvider = new PortProvider();
 
     override onSessionInitiated(ProviderContext session) {
         provider.dataService = session.getSALService(DataProviderService)
@@ -36,6 +39,10 @@ class FRMActivator extends AbstractBindingAwareProvider {
         meterProvider.dataService = session.getSALService(DataProviderService)
         meterProvider.salMeterService = session.getRpcService(SalMeterService)
         meterProvider.start();
+        
+        portProvider.dataService = session.getSALService(DataProviderService)
+        portProvider.salPortService = session.getRpcService(SalPortService)
+        portProvider.start();
     }
 
     override protected stopImpl(BundleContext context) {
