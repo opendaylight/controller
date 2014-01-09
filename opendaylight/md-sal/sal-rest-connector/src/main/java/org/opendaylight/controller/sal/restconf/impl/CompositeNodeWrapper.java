@@ -78,6 +78,11 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
         Preconditions.checkState(compositeNode == null, "Data can be inconsistent.");
         return Collections.unmodifiableList(values);
     }
+    
+    @Override
+    public boolean isChangeAllowed() {
+        return compositeNode == null ? true : false;
+    }
 
     @Override
     public CompositeNode unwrap() {
@@ -230,4 +235,5 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     public Set<java.util.Map.Entry<QName, List<Node<?>>>> entrySet() {
         return unwrap().entrySet();
     }
+
 }

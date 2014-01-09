@@ -73,12 +73,12 @@ public interface RestconfService extends RestconfServiceLegacy {
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData readConfigurationData(@PathParam("identifier") String identifier);
-    
-    @POST
-    @Path("/config/{identifier:.+}")
+
+    @GET
+    @Path("/operational/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+    public StructuredData readOperationalData(@PathParam("identifier") String identifier);
 
     @PUT
     @Path("/config/{identifier:.+}")
@@ -86,10 +86,16 @@ public interface RestconfService extends RestconfServiceLegacy {
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Response updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
-    @GET
-    @Path("/operational/{identifier:.+}")
+    @POST
+    @Path("/config/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public StructuredData readOperationalData(@PathParam("identifier") String identifier);
+    public Response createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @POST
+    @Path("/config")
+    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public Response createConfigurationData(CompositeNode payload);
 
 }

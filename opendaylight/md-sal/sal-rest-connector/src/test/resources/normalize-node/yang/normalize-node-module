@@ -1,0 +1,14 @@
+module normalize-node-module {
+  namespace "normalize:node:module";  
+
+  prefix "nonomo";
+  revision 2014-01-09 {    
+  }
+
+    container cont {
+        leaf lf1 {
+            type int32;
+        }
+    }
+  
+}

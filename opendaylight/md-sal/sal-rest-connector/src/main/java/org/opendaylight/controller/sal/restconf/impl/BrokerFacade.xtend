@@ -70,5 +70,15 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         transaction.putOperationalData(path, payload);
         return transaction.commit()
     }
-    
+
+    def commitConfigurationDataPost(InstanceIdentifier path, CompositeNode payload) {
+        checkPreconditions
+        val transaction = dataService.beginTransaction;
+        transaction.putConfigurationData(path, payload);
+        if (payload == transaction.createdConfigurationData.get(path)) {
+            return transaction.commit()
+        }
+        return null;
+    }
+
 }
