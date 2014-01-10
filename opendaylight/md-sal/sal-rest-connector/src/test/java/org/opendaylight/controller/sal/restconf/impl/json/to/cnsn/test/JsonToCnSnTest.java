@@ -13,7 +13,6 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -207,15 +206,8 @@ public class JsonToCnSnTest {
         assertEquals("lst", compNode.getNodeType().getLocalName());
         verifyCompositeNode(compNode, "simple:list:yang1");
 
-        String exceptionMessage = "";
-        try {
-            TestUtils.normalizeCompositeNode(compositeNode, modules2, "simple-list-yang2:lst");
-        } catch (ResponseException e) {
-            exceptionMessage = String.valueOf(e.getResponse().getEntity());
-        }
-        assertTrue(exceptionMessage
-                .contains("Data has bad format\nIf data is in XML format then namespace for lst should be simple:list:yang2.\n If data is in Json format then module name for lst should be simple-list-yang2."));
-
+        TestUtils.normalizeCompositeNode(compositeNode, modules2, "simple-list-yang2:lst");
+        verifyCompositeNode(compNode, "simple:list:yang1");
     }
 
     @Test

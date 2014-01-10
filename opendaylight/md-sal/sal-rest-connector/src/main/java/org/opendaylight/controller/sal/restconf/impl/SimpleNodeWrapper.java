@@ -59,6 +59,11 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
+    public boolean isChangeAllowed() {
+        return simpleNode == null ? true : false;
+    }
+
+    @Override
     public SimpleNode<Object> unwrap() {
         if (simpleNode == null) {
             if (name == null) {
