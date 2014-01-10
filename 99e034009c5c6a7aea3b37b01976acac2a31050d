@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_66f1996a",
+        "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-10T11:14:34Z",
+      "side": 1,
+      "message": "Robert, considering that the controller is not a monolith i don\u0027t think it\u0027s a good practice that on a failure of a component the whole controller kill itself is like if your windows or linux or mac on a failure of your mailer program restart ... that won\u0027t be acceptable. In that case it\u0027s good practice that resilience if spread over the different components. This is on the phylosophical side of the argument. In practice my comment is just not to change the default behavior and i\u0027m ok if a distribution want to use this behavior by setting the system property that is very much acceptable by me just lets not make it default.",
+      "parentUuid": "da6255ed_f3042d4b",
+      "revId": "99e034009c5c6a7aea3b37b01976acac2a31050d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_d3afe928",
         "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/UncaughtExceptionHandler.java",
         "patchSetId": 1
