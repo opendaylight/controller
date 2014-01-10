@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_49d8e67a",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/packet-processing.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-10T19:44:43Z",
+      "side": 1,
+      "message": "As noted in previous comment.  packet-in-reason should use indentifers to enumerate semantic reasons, not use a uint8 to just represent bits up from OpenFlow.",
+      "revId": "a7ec606d663d9b43c07f7f427bb13a1a38c00bc3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
