@@ -25,6 +25,7 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 
 class RestconfImpl implements RestconfService {
 
@@ -60,14 +61,26 @@ class RestconfImpl implements RestconfService {
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
-        val rpc = identifier.rpcDefinition
+        return callRpc(identifier.rpcDefinition, payload)
+    }
+    
+    override invokeRpc(String identifier) {
+        return callRpc(identifier.rpcDefinition, null)
+    }
+    
+    private def StructuredData callRpc(RpcDefinition rpc, CompositeNode payload) {
         if (rpc === null) {
             throw new ResponseException(NOT_FOUND, "RPC does not exist.");
         }
-        val value = normalizeNode(payload, rpc.input, null)
-        val List<Node<?>> input = new ArrayList
-        input.add(value)
-        val rpcRequest = NodeFactory.createMutableCompositeNode(rpc.QName, null, input, null, null)
+        var CompositeNode rpcRequest;
+        if (payload === null) {
+            rpcRequest = NodeFactory.createMutableCompositeNode(rpc.QName, null, null, null, null)
+        } else {
+            val value = normalizeNode(payload, rpc.input, null)
+            val List<Node<?>> input = new ArrayList
+            input.add(value)
+            rpcRequest = NodeFactory.createMutableCompositeNode(rpc.QName, null, input, null, null)
+        }
         val rpcResult = broker.invokeRpc(rpc.QName, rpcRequest);
         if (!rpcResult.successful) {
             throw new ResponseException(INTERNAL_SERVER_ERROR, "Operation failed")
@@ -145,6 +158,15 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
+    
+    override deleteConfigurationData(String identifier) {
+        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val status = broker.commitConfigurationDataDelete(instanceIdentifierWithSchemaNode.getInstanceIdentifier).get;
+        switch status.result {
+            case TransactionStatus.COMMITED: Response.status(OK).build
+            default: Response.status(INTERNAL_SERVER_ERROR).build
+        }
+    }
 
     private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
         val identifierWithSchemaNode = identifier.toInstanceIdentifier
@@ -208,7 +230,7 @@ class RestconfImpl implements RestconfService {
         for (key : listNode.keyDefinition) {
             val dataNodeKeyValueObject = dataNode.getSimpleNodesByName(key.localName)?.head?.value
             if (dataNodeKeyValueObject === null) {
-                throw new ResponseException(BAD_REQUEST, "List " + dataNode.nodeType.localName + " does not contain key: " + key.localName)
+                throw new ResponseException(BAD_REQUEST, "Data contains list \"" + dataNode.nodeType.localName + "\" which does not contain key: \"" + key.localName + "\"")
             }
             keyValues.put(key, dataNodeKeyValueObject);
         }
@@ -236,7 +258,7 @@ class RestconfImpl implements RestconfService {
         InstanceIdentifier mountPoint) {
         if (schema === null) {
             throw new ResponseException(BAD_REQUEST,
-                "Data has bad format\n" + nodeBuilder.localName + " does not exist in yang schema.");
+                "Data has bad format.\n\"" + nodeBuilder.localName + "\" does not exist in yang schema.");
         }
         var validQName = schema.QName
         var currentAugment = previousAugment;
@@ -254,9 +276,9 @@ class RestconfImpl implements RestconfService {
             nodeBuilder.qname = validQName
         } else {
             throw new ResponseException(BAD_REQUEST,
-                "Data has bad format.\nIf data is in XML format then namespace for " + nodeBuilder.localName +
-                    " should be " + schema.QName.namespace + ".\nIf data is in Json format then module name for " +
-                    nodeBuilder.localName + " should be " + moduleName + ".");
+                "Data has bad format.\nIf data is in XML format then namespace for \"" + nodeBuilder.localName +
+                    "\" should be \"" + schema.QName.namespace + "\".\nIf data is in Json format then module name for \"" +
+                    nodeBuilder.localName + "\" should be \"" + moduleName + "\".");
         }
 
         if (nodeBuilder instanceof CompositeNodeWrapper) {
@@ -277,7 +299,7 @@ class RestconfImpl implements RestconfService {
                     }
                     if (!foundKey) {
                         throw new ResponseException(BAD_REQUEST,
-                            "Missing key \"" + listKey.localName + "\" of list \"" + schema.QName.localName + "\"")
+                            "Missing key in URI \"" + listKey.localName + "\" of list \"" + schema.QName.localName + "\"")
                     }
                 }
             }

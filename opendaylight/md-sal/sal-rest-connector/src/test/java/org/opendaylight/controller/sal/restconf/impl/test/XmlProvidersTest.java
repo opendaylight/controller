@@ -170,10 +170,12 @@ public class XmlProvidersTest extends JerseyTest {
         assertEquals(204, response.getStatus());
 
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
+        entity = Entity.entity(xml, MEDIA_TYPE);
         response = target(uri).request(MEDIA_TYPE).put(entity);
         assertEquals(200, response.getStatus());
 
         uri = createUri("/datastore/", "ietf-interfaces:interfaces");
+        entity = Entity.entity(xml, MEDIA_TYPE);
         response = target(uri).request(MEDIA_TYPE).post(entity);
         assertEquals(204, response.getStatus());
     }
@@ -202,9 +204,10 @@ public class XmlProvidersTest extends JerseyTest {
         assertEquals(500, response.getStatus());
 
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
-        response = target(uri).request(MEDIA_TYPE).put(entity);
+        entity = Entity.entity(xml, MEDIA_TYPE);
+        response = target(uri).request().put(entity);
         assertEquals(500, response.getStatus());
-        response = target(uri).request(MEDIA_TYPE).post(entity);
+        response = target(uri).request().accept(MEDIA_TYPE).post(entity);
         assertEquals(500, response.getStatus());
     }
 

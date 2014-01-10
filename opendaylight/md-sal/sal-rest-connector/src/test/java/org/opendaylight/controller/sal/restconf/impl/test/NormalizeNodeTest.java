@@ -1,8 +1,6 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,15 +21,13 @@ public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
 
     @Test
     public void namespaceNotNullAndInvalidNamespaceAndNoModuleNameTest() {
-        String exceptionMessage = null;
+        boolean exceptionReised = false;
         try {
             TestUtils.normalizeCompositeNode(prepareCnSn("wrongnamespace"), modules, schemaNodePath);
         } catch (ResponseException e) {
-            exceptionMessage = String.valueOf(e.getResponse().getEntity());
+            exceptionReised = true;
         }
-        assertEquals(
-                exceptionMessage,
-                "Data has bad format.\nIf data is in XML format then namespace for cont should be normalize:node:module.\nIf data is in Json format then module name for cont should be normalize-node-module.");
+        assertTrue(exceptionReised);
     }
 
     @Test

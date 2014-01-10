@@ -62,7 +62,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         val transaction = dataService.beginTransaction;
         LOG.info("Put Configuration via Restconf: {}", path)
         transaction.putConfigurationData(path, payload);
-        return transaction.commit()
+        return transaction.commit
     }
 
     def commitConfigurationDataPost(InstanceIdentifier path, CompositeNode payload) {
@@ -71,10 +71,17 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         transaction.putConfigurationData(path, payload);
         if (payload == transaction.createdConfigurationData.get(path)) {
             LOG.info("Post Configuration via Restconf: {}", path)
-            return transaction.commit()
+            return transaction.commit
         }
         LOG.info("Post Configuration via Restconf was not executed because data already exists: {}", path)
         return null;
+    }
+
+    def commitConfigurationDataDelete(InstanceIdentifier path) {
+        checkPreconditions
+        val transaction = dataService.beginTransaction;
+        transaction.removeConfigurationData(path)
+        return transaction.commit
     }
 
 }
