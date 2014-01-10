@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.config.api.ConflictingVersionException;
-import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
@@ -15,7 +13,13 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
@@ -32,17 +36,16 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
     }
 
     @Test
-    public void testDependencyList() throws InstanceAlreadyExistsException, ValidationException,
-            ConflictingVersionException {
+    public void testDependencyList() throws Exception {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
 
         ObjectName on = createInstance(transaction, instanceName, 4);
         transaction.validateConfig();
-        CommitStatus status = transaction.commit();
+        CommitStatus status1 = transaction.commit();
 
         assertBeanCount(1, factory.getImplementationName());
         assertBeanCount(4 + 1, DepTestImplModuleFactory.NAME);
-        assertStatus(status, 1 + 4 + 1, 0, 0);
+        assertStatus(status1, 1 + 4 + 1, 0, 0);
 
         transaction = configRegistryClient.createTransaction();
 
@@ -56,6 +59,38 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
         assertTestingDeps(testingDeps, 4);
 
         transaction.abortConfig();
+
+        // check that reuse logic works - equals on list of dependencies.
+        transaction = configRegistryClient.createTransaction();
+        CommitStatus status2 = transaction.commit();
+        assertStatus(status2, 0, 0, 6);
+
+        // replace single dependency
+        transaction = configRegistryClient.createTransaction();
+        String instanceName1 = TESTING_DEP_PREFIX + 1;
+        transaction.destroyModule(DepTestImplModuleFactory.NAME, instanceName1);
+        transaction.createModule(DepTestImplModuleFactory.NAME, instanceName1);
+        CommitStatus status3 = transaction.commit();
+        assertStatus(status3, 1, 1, 4);
+
+    }
+
+    @Test
+    public void testNullCheckInListOfDependencies() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+
+        ObjectName on = createInstance(transaction, instanceName, 4);
+        NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(on, NetconfTestImplModuleMXBean.class);
+        try{
+            proxy.setTestingDeps(null);
+            fail();
+        }catch(RuntimeException e) {
+            Throwable cause = e.getCause();
+            assertNotNull(cause);
+            assertTrue("Invalid type " + cause, cause instanceof IllegalArgumentException);
+            assertEquals("Null not supported", cause.getMessage());
+        }
+        proxy.setTestingDeps(Collections.<ObjectName>emptyList());
     }
 
     private void assertTestingDeps(List<ObjectName> testingDeps, int i) {
