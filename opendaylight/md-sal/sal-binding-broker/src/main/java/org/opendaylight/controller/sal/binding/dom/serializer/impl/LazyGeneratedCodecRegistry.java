@@ -44,6 +44,7 @@ import org.opendaylight.yangtools.yang.binding.BindingCodec;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -152,6 +153,12 @@ public class LazyGeneratedCodecRegistry implements //
             LOG.warn("Could not find augmentation target for augmentation {}", object);
         }
         return codec;
+    }
+    
+    @Override
+    public QName getQNameForAugmentation(Class<?> cls) {
+        checkArgument(Augmentation.class.isAssignableFrom(cls));
+        return getCodecForAugmentation((Class<? extends Augmentation>)cls).getAugmentationQName();
     }
 
     private static Class<? extends Augmentable<?>> getAugmentableArgumentFrom(
@@ -909,9 +916,11 @@ public class LazyGeneratedCodecRegistry implements //
             Delegator<BindingCodec> {
 
         private BindingCodec delegate;
+        private QName augmentationQName;
 
         public AugmentationCodecWrapper(BindingCodec<Map<QName, Object>, Object> rawCodec) {
             this.delegate = rawCodec;
+            this.augmentationQName = BindingReflections.findQName(rawCodec.getClass());
         }
 
         @Override
@@ -935,6 +944,11 @@ public class LazyGeneratedCodecRegistry implements //
         public ValueWithQName<T> deserialize(Node<?> input) {
             Object rawCodecValue = getDelegate().deserialize((Map<QName, Object>) input);
             return new ValueWithQName<T>(input.getNodeType(), (T) rawCodecValue);
+        }
+        
+        @Override
+        public QName getAugmentationQName() {
+            return augmentationQName;
         }
     }
 
