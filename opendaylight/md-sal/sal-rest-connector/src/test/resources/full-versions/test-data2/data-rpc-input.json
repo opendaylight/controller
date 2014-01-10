@@ -1,0 +1,10 @@
+{
+    "test-module:input":{
+        "cont":{
+            "cont1":{
+                "lf11":"lf1 data",
+                "lf12":"lf2 data"
+            }
+        }
+    }
+}
