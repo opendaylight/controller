@@ -6,9 +6,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -275,5 +277,19 @@ public final class TestUtils {
                 byteArrayOS);
 
         return byteArrayOS.toString();
+    }
+
+    public static String loadTextFile(String filePath) throws IOException {
+        FileReader fileReader = new FileReader(filePath);
+        BufferedReader bufReader = new BufferedReader(fileReader);
+
+        String line = null;
+        StringBuilder result = new StringBuilder();
+        while ((line = bufReader.readLine()) != null) {
+            result.append(line);
+        }
+        bufReader.close();
+        return result.toString();
+
     }
 }
