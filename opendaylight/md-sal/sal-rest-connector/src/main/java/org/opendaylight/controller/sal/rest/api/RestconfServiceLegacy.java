@@ -1,5 +1,6 @@
 package org.opendaylight.controller.sal.rest.api;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -33,14 +34,14 @@ public interface RestconfServiceLegacy {
     @Deprecated
     @POST
     @Path("/datastore/{identifier:.+}")
-    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
+    @Consumes({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Response createConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @Deprecated
     @PUT
     @Path("/datastore/{identifier:.+}")
-    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
+    @Consumes({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public Response updateConfigurationDataLegacy(@PathParam("identifier") String identifier, CompositeNode payload);
 

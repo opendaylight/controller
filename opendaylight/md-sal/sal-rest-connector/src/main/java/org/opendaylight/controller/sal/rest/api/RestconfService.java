@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.rest.api;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -66,30 +68,50 @@ public interface RestconfService extends RestconfServiceLegacy {
     @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
                Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    @Consumes({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
+               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
+    
+    @POST
+    @Path("/operations/{identifier}")
+    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
+               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData invokeRpc(@PathParam("identifier") String identifier);
     
     @GET
     @Path("/config/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData readConfigurationData(@PathParam("identifier") String identifier);
-    
-    @POST
-    @Path("/config/{identifier:.+}")
-    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
-               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
-
-    @PUT
-    @Path("/config/{identifier:.+}")
-    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
-               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
 
     @GET
     @Path("/operational/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData readOperationalData(@PathParam("identifier") String identifier);
+
+    @PUT
+    @Path("/config/{identifier:.+}")
+    @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public Response updateConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @POST
+    @Path("/config/{identifier:.+}")
+    @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public Response createConfigurationData(@PathParam("identifier") String identifier, CompositeNode payload);
+
+    @POST
+    @Path("/config")
+    @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public Response createConfigurationData(CompositeNode payload);
+
+    @DELETE
+    @Path("/config/{identifier:.+}")
+    public Response deleteConfigurationData(@PathParam("identifier") String identifier);
 
 }

@@ -1,0 +1,6 @@
+<class xmlns="urn:ietf:params:xml:ns:yang:test-interface2">
+    <student>
+        <name>Thomas</name>
+        <age>23</age>
+    </student>
+</class>

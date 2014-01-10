@@ -1,0 +1,5 @@
+<interface>
+    <name>eth0</name>
+    <type>ethernetCsmacd</type>
+    <enabled>false</enabled>
+</interface>
