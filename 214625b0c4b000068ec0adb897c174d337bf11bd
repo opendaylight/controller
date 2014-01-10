@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_26e721ae",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-10T11:16:14Z",
+      "side": 1,
+      "message": "Would you mind to use the {} to pass his arguments to slf4j that will remove the unnecessary string concatenation if the log is not active.",
+      "revId": "214625b0c4b000068ec0adb897c174d337bf11bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
