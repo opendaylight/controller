@@ -461,6 +461,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             log.debug("Can't find subnet matching {}, drop packet", dIP);
             return;
         }
+        // If packet is sent to the default gw (us), ignore it for now
+        if (subnet.getNetworkAddress().equals(dIP)) {
+            log.trace("Ignore IP packet destined to default gw");
+            return;
+        }
 
         // see if we know about the host
         // Hosttracker hosts db key implementation
