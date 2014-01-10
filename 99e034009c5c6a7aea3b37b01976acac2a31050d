@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_e627c9c8",
+        "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-10T15:37:47Z",
+      "side": 1,
+      "message": "I see your point. Let\u0027s turn this property into a policy thing, e.g.:\n\ncontroller.uncaughtExceptionPolicy \u003d {IGNORE, SHUTDOWN}\n\nand define a field DEFAULT_UNCAUGHT_EXCEPTION_POLICY \u003d IGNORE. \n\nThat way we have a simple way of changing the default in future without breaking the installed base.",
+      "parentUuid": "da6255ed_66f1996a",
+      "revId": "99e034009c5c6a7aea3b37b01976acac2a31050d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_d3afe928",
         "filename": "opendaylight/logging/bridge/src/main/java/org/opendaylight/controller/logging/bridge/internal/UncaughtExceptionHandler.java",
         "patchSetId": 1
