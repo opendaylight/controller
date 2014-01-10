@@ -26,13 +26,13 @@ import org.opendaylight.yangtools.yang.binding.Augmentable
 import com.google.common.collect.ImmutableList
 import org.opendaylight.yangtools.yang.binding.Augmentation
 import java.util.concurrent.ConcurrentHashMap
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections
 
 class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
     
     private static val LOG = LoggerFactory.getLogger(InstanceIdentifierCodecImpl);
     val CodecRegistry codecRegistry;
     
-    val Map<Class<?>,QName> classToQName = new WeakHashMap;
     val Map<Class<?>, Map<List<QName>, Class<?>>> classToPreviousAugment = new WeakHashMap;
     
     public new(CodecRegistry registry) {
@@ -106,7 +106,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
                 
                 previousAugmentation = null;
             } else {
-                previousQName = resolveQname(baArg.type);
+                previousQName = codecRegistry.getQNameForAugmentation(baArg.type as Class);
                 previousAugmentation = baArg.type;
             }
         }
@@ -122,7 +122,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
     
     private def dispatch PathArgument serializePathArgument(Item argument, QName previousQname) {
         val type = argument.type;
-        val qname = resolveQname(type);
+        val qname = BindingReflections.findQName(type);
         if(previousQname == null) {
             return new NodeIdentifier(qname);
         }
@@ -134,7 +134,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
         val Map<QName,Object> predicates = new HashMap();
         val type = argument.type;
         val keyCodec = codecRegistry.getIdentifierCodecForIdentifiable(type);
-        val qname = resolveQname(type);
+        val qname = BindingReflections.findQName(type);
         val combinedInput =  new ValueWithQName(previousQname,argument.key)
         val compositeOutput = keyCodec.serialize(combinedInput as ValueWithQName);
         for(outputValue :compositeOutput.value) {
@@ -144,16 +144,5 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
             return new NodeIdentifierWithPredicates(qname,predicates);
         }
         return new NodeIdentifierWithPredicates(QName.create(previousQname,qname.localName),predicates);
-    }
-    
-    def resolveQname(Class<?> class1) {
-        val qname = classToQName.get(class1);
-        if(qname !== null) {
-            return qname;
-        }
-        val qnameField = class1.getField("QNAME");
-        val qnameValue = qnameField.get(null) as QName;
-        classToQName.put(class1,qnameValue);
-        return qnameValue;
     }
 }

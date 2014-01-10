@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.controller.sal.binding.dom.serializer.api.IdentifierCodec;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 
 public interface CodecRegistry {
@@ -36,4 +37,6 @@ public interface CodecRegistry {
     void bindingClassEncountered(Class<?> cls);
 
     void putPathToClass(List<QName> names, Class<?> cls);
+
+    public abstract QName getQNameForAugmentation(Class<?> cls);
 }
