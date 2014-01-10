@@ -119,12 +119,6 @@ public class CnSnToJsonIncorrectTopLevelTest extends YangAndXmlAndDataSchemaLoad
             return null;
         }
 
-        public YangNode getParent() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
         public boolean isAddedByUses() {
             // TODO Auto-generated method stub
             return false;
