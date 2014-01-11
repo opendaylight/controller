@@ -64,7 +64,7 @@
     <ietf-topology.version>2013.10.21.0-SNAPSHOT</ietf-topology.version>
     <opendaylight-l2-types.version>2013.08.27.2-SNAPSHOT</opendaylight-l2-types.version>
     <yang-ext.version>2013.09.07.2-SNAPSHOT</yang-ext.version>
-    <javassist.version>3.17.1-GA</javassist.version>
+    <javassist.version>3.18.1-GA</javassist.version>
     <sample-toaster.version>1.0-SNAPSHOT</sample-toaster.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
