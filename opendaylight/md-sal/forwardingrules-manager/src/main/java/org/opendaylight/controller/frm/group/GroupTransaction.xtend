@@ -14,14 +14,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
 
 class GroupTransaction extends AbstractTransaction {
     
     @Property
     val SalGroupService groupService;
     
+    @Property
+    DataModification<InstanceIdentifier<? extends DataObject>,DataObject> modification;
+    
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,SalGroupService groupService) {
         super(modification)
+        _modification = modification;
         _groupService = groupService;
     }
     
@@ -31,6 +36,7 @@ class GroupTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new RemoveGroupInputBuilder(group);
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setTransactionUri(new Uri(_modification.getIdentifier() as String));
             builder.setGroupRef(new GroupRef(instanceId));
             _groupService.removeGroup(builder.build());            
         }
@@ -46,6 +52,7 @@ class GroupTransaction extends AbstractTransaction {
             builder.setGroupRef(new GroupRef(instanceId));
             val ufb = new UpdatedGroupBuilder(updatedGroup);
             builder.setUpdatedGroup((ufb.build()));
+            builder.setTransactionUri(new Uri(_modification.getIdentifier() as String));
             val ofb = new OriginalGroupBuilder(originalGroup);
             builder.setOriginalGroup(ofb.build());      
             _groupService.updateGroup(builder.build());
@@ -60,6 +67,7 @@ class GroupTransaction extends AbstractTransaction {
             val builder = new AddGroupInputBuilder(group);
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setGroupRef(new GroupRef(instanceId));
+            builder.setTransactionUri(new Uri(_modification.getIdentifier() as String));
             _groupService.addGroup(builder.build());            
         }
     }

@@ -14,14 +14,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.Meter
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterRef
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
 
 class MeterTransaction extends AbstractTransaction {
     
     @Property
     val SalMeterService salMeterService;
     
+    @Property
+    DataModification<InstanceIdentifier<? extends DataObject>,DataObject> modification;
+    
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,SalMeterService salMeterService) {
         super(modification)
+        _modification = modification;
         _salMeterService = salMeterService;
     }
     
@@ -32,6 +37,7 @@ class MeterTransaction extends AbstractTransaction {
             val builder = new RemoveMeterInputBuilder(meter);
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(instanceId));
+            builder.setTransactionUri(new Uri(_modification.getIdentifier() as String));
             _salMeterService.removeMeter(builder.build());            
         }
     }
@@ -46,6 +52,7 @@ class MeterTransaction extends AbstractTransaction {
             builder.setMeterRef(new MeterRef(instanceId));
             val ufb = new UpdatedMeterBuilder(updatedMeter);
             builder.setUpdatedMeter((ufb.build()));
+            builder.setTransactionUri(new Uri(_modification.getIdentifier() as String));
             val ofb = new OriginalMeterBuilder(originalMeter);
             builder.setOriginalMeter(ofb.build());      
             _salMeterService.updateMeter(builder.build());
@@ -60,6 +67,7 @@ class MeterTransaction extends AbstractTransaction {
             val builder = new AddMeterInputBuilder(meter);
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(instanceId));
+            builder.setTransactionUri(new Uri(_modification.getIdentifier() as String));
             _salMeterService.addMeter(builder.build());            
         }
     }
