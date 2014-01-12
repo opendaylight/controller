@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c994d644",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/flow/FlowTransaction.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-12T21:03:58Z",
+      "side": 1,
+      "message": "AbstractTransaction already captures the modification, and it is set by the super() call in the constructor.  It does not need to be set here or in the {Group,Meter}Transactions",
+      "revId": "4d59e6af49e6143a6c681cc3d79388e81d5bf97e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
