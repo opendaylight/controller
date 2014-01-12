@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_09af8e95",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/packet-processing.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-12T20:59:51Z",
+      "side": 1,
+      "message": "Enums are non-extensible.  Additionally we should not be using OpenFlow specific labels in the generic NB flow models.  Please remodel using identifiers (which are extensible) and using names that are not openflow tied (like table-miss, action, or invalid-ttl).",
+      "revId": "77ec1875225690620e46e1d6c210bbf14feb98e2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
