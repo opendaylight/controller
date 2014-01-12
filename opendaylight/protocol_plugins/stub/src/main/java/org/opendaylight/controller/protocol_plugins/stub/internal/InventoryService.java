@@ -65,6 +65,12 @@ public class InventoryService implements IPluginInInventoryService {
         }
     }
 
+    @Override
+    public Set<Node> getConfiguredNotConnectedNodes() {
+        // TODO
+        return null;
+    }
+
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
