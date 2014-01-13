@@ -67,19 +67,28 @@ class TopologyMapping {
     
     public static def toADNodeId(NodeId nodeId) {
         checkNotNull(nodeId);
-        return nodeId.value
+        return nodeId.toInvNodeId.toADNodeId
     }
+    
+    public static def toInvNodeId(NodeId nodeId) {
+        return new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId(nodeId)
+    }
+    
     public static def toADNodeConnector(TpId source,NodeId nodeId) throws ConstructionException {
         checkNotNull(source);
-        return new NodeConnector(MD_SAL_TYPE,source.toADNodeConnectorId,nodeId.toADNode)
+        return new NodeConnector(MD_SAL_NODE_TYPE,source.toADNodeConnectorId,nodeId.toADNode)
     }
     
     public static def toADNodeConnectorId(TpId nodeConnectorId) {
-        return nodeConnectorId.value
+        return nodeConnectorId.toInvNodeConnectorId.toPortNumber
+    }
+    
+    public static def toInvNodeConnectorId(TpId ncid) {
+        return new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId(ncid)
     }
     
     public static def toADNode(NodeId nodeId) {
         checkNotNull(nodeId);
-        return new Node(MD_SAL_TYPE,nodeId.toADNodeId);       
+        return new Node(MD_SAL_NODE_TYPE,nodeId.toADNodeId);       
     }
 }

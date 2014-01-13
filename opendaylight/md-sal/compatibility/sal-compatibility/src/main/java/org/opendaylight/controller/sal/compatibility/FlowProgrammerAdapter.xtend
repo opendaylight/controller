@@ -183,7 +183,11 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
         flowId = UUID.randomUUID();
         getCache().put(flow, flowId);
 
-        return writeFlowAsync(flow.toMDFlow(flowId.toString()), new NodeKey(new NodeId(node.getNodeIDString())));
+        return writeFlowAsync(flow.toMDFlow(flowId.toString()), new NodeKey(new NodeId(node.toNode)));
+    }
+    
+    private def toNode(Node node) {
+        return "openflow:" + node.ID;
     }
 
     private def Future<RpcResult<TransactionStatus>> internalModifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
