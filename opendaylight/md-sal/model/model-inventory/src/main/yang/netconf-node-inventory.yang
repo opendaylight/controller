@@ -10,6 +10,10 @@ module netconf-node-inventory {
     }
     
     grouping netconf-node-fields {
+        leaf connected {
+            type boolean; 
+        }
+    
         leaf-list initial-capability {
             type string;
         }
