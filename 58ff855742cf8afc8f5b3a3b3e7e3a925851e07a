@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c93e1628",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/port-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "I would recommend rather than using a typedef port-config as bits that we model it as\ngrouping port-config {\n  container port-config {\n     leaf port-down {\n       type boolean;\n     leaf no-recv {\n       type boolean;\n     }\n     leaf no-fwd {\n       type boolean;\n     }\n     leaf no-packet-in {\n       type boolean;\n     }\n  }\n}",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a94762bb",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/port-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "Please use the inv:node-connector-ref we have already defined",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_89449eb7",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/port-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "If you take my suggestions in port-service.yang, you should not need either the port or port-mod grouping here.",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_491a26cd",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "This uses port:port-mod; is not needed as the config information is already captured elsewhere in the data tree.",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_290b727e",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/port-service.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "I would suggest modeling this as\nrpc update-port {\n  input {\n     uses \"inv:node-context-ref\";\n     uses \"inv:node-connector-ref\";\n     uses \"port:port-config\";\n     leaf barrier { \n       type  boolean;\n     }\n  }\n}",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_0910aea6",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/port-service.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "We don\u0027t actually need this notification as its handled by the node-connector-updated notification already.",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c925f609",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/port-service.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-13T06:23:54Z",
+      "side": 1,
+      "message": "We don\u0027t actually need this notification as its handled by the node-connector-updated notification already.",
+      "revId": "58ff855742cf8afc8f5b3a3b3e7e3a925851e07a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
