@@ -8,28 +8,32 @@
 
 package org.opendaylight.controller.config.persist.storage.directory;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class DirectoryStorageAdapterTest {
-    DirectoryPersister tested;
+    Persister tested;
 
     @Test
     public void testEmptyDirectory() throws Exception {
         File folder = new File("target/emptyFolder");
         folder.mkdir();
-        tested = new DirectoryPersister((folder));
+
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("directoryStorage",folder.getPath());
+        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
+        tested = dsa.instantiate(pp);
         assertEquals(Collections.<ConfigSnapshotHolder>emptyList(), tested.loadLastConfigs());
 
         try {
@@ -60,7 +64,11 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testOneFile() throws Exception {
         File folder = getFolder("oneFile");
-        tested = new DirectoryPersister((folder));
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("directoryStorage",folder.getPath());
+        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
+        tested = dsa.instantiate(pp);
+
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
         ConfigSnapshotHolder result = results.get(0);
@@ -71,7 +79,11 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testTwoFiles() throws Exception {
         File folder = getFolder("twoFiles");
-        tested = new DirectoryPersister((folder));
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("directoryStorage",folder.getPath());
+        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
+        tested = dsa.instantiate(pp);
+
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());
         assertSnapshot(results.get(0), "twoFilesExpected1");
