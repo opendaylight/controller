@@ -342,7 +342,7 @@ public class ToSalConversionsUtils {
     private static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
         NodeConnector nodeConnector = null;
         try {
-            nodeConnector = new NodeConnector(NodeMapping.MD_SAL_TYPE,node.getNodeIDString()+":"+uri.getValue(),node);
+            nodeConnector = new NodeConnector(NodeMapping.MD_SAL_NODECONNECTOR_TYPE,NodeMapping.toPortNumber(uri),node);
         } catch (ConstructionException e) {
             e.printStackTrace();
         }
@@ -578,7 +578,7 @@ public class ToSalConversionsUtils {
         }
         return macAddress;
     }
-    
+
     public static byte[] bytesFromDpid(long dpid) {
         byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 

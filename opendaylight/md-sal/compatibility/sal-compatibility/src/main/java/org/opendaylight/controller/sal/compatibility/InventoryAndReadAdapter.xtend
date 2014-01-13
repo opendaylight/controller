@@ -385,7 +385,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
                         perNodePropMap.put(perNodeProp.name,perNodeProp)
                     }
                 }
-                props.put(new Node(MD_SAL_TYPE, node.id.toADNodeId),perNodePropMap)
+                props.put(new Node(MD_SAL_NODE_TYPE, node.id.toADNodeId),perNodePropMap)
             }
         }
         return props;
@@ -486,7 +486,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		lookupCount = tableStats.packetsLookedUp.value.intValue;
 		matchedCount = tableStats.packetsMatched.value.intValue;
 		name = tableId.toString;
-		nodeTable = new NodeTable(NodeMapping.MD_SAL_TYPE,tableId,node);
+		nodeTable = new NodeTable(NodeMapping.MD_SAL_NODE_TYPE,tableId,node);
 		return it;
 	}
 	

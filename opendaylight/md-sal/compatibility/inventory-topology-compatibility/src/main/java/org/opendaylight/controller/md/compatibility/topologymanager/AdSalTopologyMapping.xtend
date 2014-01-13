@@ -71,19 +71,19 @@ class AdSalTopologyMapping {
     def org.opendaylight.controller.sal.core.Node toAdNode(
         org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId node) {
         val key = new NodeKey(new NodeId(node))
-        return new org.opendaylight.controller.sal.core.Node(NodeMapping.MD_SAL_TYPE, key);
+        return new org.opendaylight.controller.sal.core.Node(NodeMapping.MD_SAL_NODE_TYPE, key);
     }
 
     def NodeConnector toNodeConnector(Source ref) {
         val adNode = ref.sourceNode.toAdNode();
         val key = new NodeConnectorKey(new NodeConnectorId(ref.sourceTp))
-        return new NodeConnector(NodeMapping.MD_SAL_TYPE, key, adNode);
+        return new NodeConnector(NodeMapping.MD_SAL_NODECONNECTOR_TYPE, key, adNode);
     }
 
     def NodeConnector toNodeConnector(Destination ref) {
         val adNode = ref.destNode.toAdNode();
         val key = new NodeConnectorKey(new NodeConnectorId(ref.destTp))
-        return new NodeConnector(NodeMapping.MD_SAL_TYPE, key, adNode);
+        return new NodeConnector(NodeMapping.MD_SAL_NODECONNECTOR_TYPE, key, adNode);
     }
 
     def TerminationPointKey toTerminationPointKey(NodeConnector connector) {
