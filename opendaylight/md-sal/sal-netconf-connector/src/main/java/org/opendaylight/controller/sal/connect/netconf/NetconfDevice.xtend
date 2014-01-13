@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader
 import org.opendaylight.controller.netconf.api.NetconfMessage
 import org.opendaylight.controller.netconf.client.NetconfClient
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher
+import org.opendaylight.controller.netconf.util.xml.XmlUtil
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession
 import org.opendaylight.controller.sal.core.api.Provider
 import org.opendaylight.controller.sal.core.api.RpcImplementation
@@ -25,7 +26,6 @@ import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
 import org.opendaylight.protocol.framework.ReconnectStrategy
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState
 import org.opendaylight.yangtools.concepts.Registration
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
@@ -39,7 +39,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders
-import org.opendaylight.yangtools.yang.model.util.repo.SourceIdentifier
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl
 import org.opendaylight.yangtools.yang.parser.impl.util.YangSourceContext
 import org.slf4j.Logger
@@ -49,7 +48,6 @@ import static com.google.common.base.Preconditions.*
 import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*
 
 import static extension org.opendaylight.controller.sal.connect.netconf.NetconfMapping.*
-import org.opendaylight.controller.netconf.util.xml.XmlUtil
 
 class NetconfDevice implements Provider, // 
 DataReader<InstanceIdentifier, CompositeNode>, //
@@ -105,6 +103,8 @@ AutoCloseable {
 
     @Property
     var SchemaSourceProvider<InputStream> remoteSourceProvider
+    
+    DataBrokerService dataBroker
 
     public new(String name) {
         this.name = name;
@@ -121,8 +121,6 @@ AutoCloseable {
         val listener = new NetconfDeviceListener(this, eventExecutor);
         val task = startClientTask(dispatcher, listener)
         if (mountInstance != null) {
-            confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, this);
-            operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, this);
             commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, this)
         }
         return processingExecutor.submit(task) as Future<Void>;
@@ -138,27 +136,61 @@ AutoCloseable {
     }
 
     private def Runnable startClientTask(NetconfClientDispatcher dispatcher, NetconfDeviceListener listener) {
-
         return [ |
-            logger.info("Starting Netconf Client on: {}", socketAddress);
-            client = NetconfClient.clientFor(name, socketAddress, reconnectStrategy, dispatcher, listener);
-            logger.debug("Initial capabilities {}", initialCapabilities);
-            var SchemaSourceProvider<String> delegate;
-            if (NetconfRemoteSchemaSourceProvider.isSupportedFor(initialCapabilities)) {
-                delegate = new NetconfRemoteSchemaSourceProvider(this);
-            }  else if(client.capabilities.contains(NetconfRemoteSchemaSourceProvider.IETF_NETCONF_MONITORING.namespace.toString)) {
-                delegate = new NetconfRemoteSchemaSourceProvider(this);
-            } else {
-                logger.info("Netconf server {} does not support IETF Netconf Monitoring", socketAddress);
-                delegate = SchemaSourceProviders.<String>noopProvider();
-            }
-            remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);
-            deviceContextProvider = new NetconfDeviceSchemaContextProvider(this, remoteSourceProvider);
-            deviceContextProvider.createContextFromCapabilities(initialCapabilities);
-            if (mountInstance != null && schemaContext.isPresent) {
-                mountInstance.schemaContext = schemaContext.get();
+            try {
+                logger.info("Starting Netconf Client on: {}", socketAddress);
+                client = NetconfClient.clientFor(name, socketAddress, reconnectStrategy, dispatcher, listener);
+                logger.debug("Initial capabilities {}", initialCapabilities);
+                var SchemaSourceProvider<String> delegate;
+                if (NetconfRemoteSchemaSourceProvider.isSupportedFor(initialCapabilities)) {
+                    delegate = new NetconfRemoteSchemaSourceProvider(this);
+                }  else if(client.capabilities.contains(NetconfRemoteSchemaSourceProvider.IETF_NETCONF_MONITORING.namespace.toString)) {
+                    delegate = new NetconfRemoteSchemaSourceProvider(this);
+                } else {
+                    logger.info("Netconf server {} does not support IETF Netconf Monitoring", socketAddress);
+                    delegate = SchemaSourceProviders.<String>noopProvider();
+                }
+                remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);
+                deviceContextProvider = new NetconfDeviceSchemaContextProvider(this, remoteSourceProvider);
+                deviceContextProvider.createContextFromCapabilities(initialCapabilities);
+                if (mountInstance != null && schemaContext.isPresent) {
+                    mountInstance.schemaContext = schemaContext.get();
+                }
+                updateDeviceState()
+                if (mountInstance != null && confReaderReg == null && operReaderReg == null) {
+                    confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, this);
+                    operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, this);
+                }
+            } catch (Exception e) {
+                logger.error("Netconf client NOT started. ", e)
             }
         ]
+    }
+
+    private def updateDeviceState() {
+        val transaction = dataBroker.beginTransaction
+
+        val it = ImmutableCompositeNode.builder
+        setQName(INVENTORY_NODE)
+        addLeaf(INVENTORY_ID, name)
+        addLeaf(INVENTORY_CONNECTED, client.clientSession.up)
+
+        logger.debug("Client capabilities {}", client.capabilities)
+        for (capability : client.capabilities) {
+            addLeaf(NETCONF_INVENTORY_INITIAL_CAPABILITY, capability)
+        }
+
+        logger.debug("Update device state transaction " + transaction.identifier + " putting operational data started.")
+        transaction.putOperationalData(path, it.toInstance)
+        logger.debug("Update device state transaction " + transaction.identifier + " putting operational data ended.")
+        val transactionStatus = transaction.commit.get;
+
+        if (transactionStatus.successful) {
+            logger.debug("Update device state transaction " + transaction.identifier + " SUCCESSFUL.")
+        } else {
+            logger.debug("Update device state transaction " + transaction.identifier + " FAILED!")
+            logger.debug("Update device state transaction status " + transaction.status)
+        }
     }
 
     override readConfigurationData(InstanceIdentifier path) {
@@ -209,7 +241,7 @@ AutoCloseable {
     }
 
     override onSessionInitiated(ProviderSession session) {
-        val dataBroker = session.getService(DataBrokerService);
+        dataBroker = session.getService(DataBrokerService);
 
         val transaction = dataBroker.beginTransaction
         if (transaction.operationalNodeNotExisting) {

@@ -63,7 +63,6 @@ module opendaylight-inventory {
 
             uses node-connector;
         }
-
     }
 
     grouping node-connector {
