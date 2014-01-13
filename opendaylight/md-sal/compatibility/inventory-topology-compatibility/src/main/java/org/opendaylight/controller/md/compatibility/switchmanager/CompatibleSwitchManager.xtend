@@ -122,7 +122,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
 
     override getNodeConnector(Node node, String nodeConnectorName) {
         val key = new NodeConnectorKey(new NodeConnectorId(nodeConnectorName));
-        return new NodeConnector(MD_SAL_TYPE, key, node);
+        return new NodeConnector(MD_SAL_NODECONNECTOR_TYPE, key, node);
     }
 
     override getNodeConnectorProp(NodeConnector nodeConnector, String propName) {
@@ -141,7 +141,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
         val ret = new HashSet();
         for (nc : data.nodeConnector) {
 
-            val adConnector = new NodeConnector(MD_SAL_TYPE, nc.key, node);
+            val adConnector = new NodeConnector(MD_SAL_NODECONNECTOR_TYPE, nc.key, node);
             ret.add(adConnector);
         }
         return ret;
@@ -170,13 +170,13 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
         val data = dataService.readOperationalData(path) as Nodes;
         val ret = new HashSet<Node>();
         for (node : data.node) {
-            ret.add(new Node(MD_SAL_TYPE, node.key));
+            ret.add(new Node(MD_SAL_NODE_TYPE, node.key));
         }
         return ret;
     }
 
     def Switch toSwitch(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node) {
-        val adNode = new Node(MD_SAL_TYPE, node.key);
+        val adNode = new Node(MD_SAL_NODE_TYPE, node.key);
         val sw = new Switch(adNode)
         return sw;
     }
@@ -187,7 +187,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
         val ret = new HashSet();
         for (nc : data.nodeConnector) {
             val flowConnector = nc.getAugmentation(FlowCapableNodeConnector)
-            val adConnector = new NodeConnector(MD_SAL_TYPE, nc.key, node);
+            val adConnector = new NodeConnector(MD_SAL_NODE_TYPE, nc.key, node);
             ret.add(adConnector);
         }
         return ret;
@@ -226,7 +226,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
         for (nc : data.nodeConnector) {
             val flowConn = nc.getAugmentation(FlowCapableNodeConnector);
             if (flowConn != null && flowConn.state != null && !flowConn.state.linkDown) {
-                ret.add(new NodeConnector(MD_SAL_TYPE, nc.key, node));
+                ret.add(new NodeConnector(MD_SAL_NODECONNECTOR_TYPE, nc.key, node));
             }
         }
         return ret;

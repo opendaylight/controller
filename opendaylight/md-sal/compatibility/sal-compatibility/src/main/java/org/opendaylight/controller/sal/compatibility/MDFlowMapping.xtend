@@ -373,7 +373,7 @@ public class MDFlowMapping {
     }
 
     public static def Uri toUri(NodeConnector connector) {
-        return new NodeConnectorId(connector.ID as String);
+        return new NodeConnectorId("openflow:"+ (connector.node.ID as Long) + ":" + (connector.ID as Short));
     }
 
     public static def MacAddress toMacAddress(byte[] bytes) {
