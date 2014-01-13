@@ -1,0 +1,13 @@
+module modulTest {
+    namespace "xmlmapper:case:test";  
+    
+    prefix "test";
+    revision 2013-12-17 {    
+    }
+    
+    container cont {
+        leaf-list allow-user {
+            type string;
+        }
+    }
+} 

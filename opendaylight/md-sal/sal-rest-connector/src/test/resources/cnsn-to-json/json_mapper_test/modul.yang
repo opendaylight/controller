@@ -1,0 +1,23 @@
+module modul {
+    namespace "mapper:case:test";  
+    
+    prefix "test";
+    revision 2013-12-17 {    
+    }
+    
+    list user {
+         key "name";
+         config true;
+         description "This is a list of users in the system.";
+
+         leaf name {
+             type string;
+         }
+         leaf type {
+             type string;
+         }
+         leaf full-name {
+             type string;
+         }
+     }
+} 
