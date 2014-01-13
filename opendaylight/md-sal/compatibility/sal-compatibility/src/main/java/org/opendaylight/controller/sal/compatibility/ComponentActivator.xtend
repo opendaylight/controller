@@ -74,11 +74,6 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
 
 
 
-    override protected init() {
-        Node.NodeIDType.registerIDType(MD_SAL_TYPE, String);
-        NodeConnector.NodeConnectorIDType.registerIDType(MD_SAL_TYPE, String, MD_SAL_TYPE);
-    }
-
     override start(BundleContext context) {
         super.start(context)
         this.context = context;
@@ -194,8 +189,8 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
 
     private def Dictionary<String, Object> properties() {
         val props = new Hashtable<String, Object>();
-        props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString, MD_SAL_TYPE)
-        props.put("protocolName", MD_SAL_TYPE);
+        props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString, MD_SAL_NODE_TYPE)
+        props.put("protocolName", MD_SAL_NODE_TYPE);
         return props;
     }
 }

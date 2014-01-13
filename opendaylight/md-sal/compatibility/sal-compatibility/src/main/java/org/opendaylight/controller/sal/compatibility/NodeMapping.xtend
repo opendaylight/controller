@@ -1,7 +1,9 @@
 package org.opendaylight.controller.sal.compatibility
 
 import org.opendaylight.controller.sal.core.Node
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem
 
@@ -49,10 +51,13 @@ import org.opendaylight.controller.sal.core.TimeStamp
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowNodeConnector
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowNode
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
 
 public class NodeMapping {
 
-    public static val MD_SAL_TYPE = "MD_SAL";
+    public static val MD_SAL_NODE_TYPE = NodeIDType.OPENFLOW;
+    public static val MD_SAL_NODECONNECTOR_TYPE = NodeConnectorIDType.OPENFLOW;
+    public static val OF_PREFIX = "openflow:"
     private static val NODE_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
     private static val NODECONNECTOR_CLASS = org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.
         NodeConnector;
@@ -66,7 +71,7 @@ public class NodeMapping {
     }
 
     public static def toADNode(NodeId id) {
-        return new Node(MD_SAL_TYPE, id.toADNodeId);
+        return new Node(MD_SAL_NODE_TYPE, id.toADNodeId);
     }
 
     public static def toNodeId(InstanceIdentifier<?> node) {
@@ -81,7 +86,7 @@ public class NodeMapping {
 
     public static def toADNodeId(NodeId nodeId) {
         checkNotNull(nodeId);
-        return nodeId.value
+        return nodeId.toDpid
     }
 
     public static def toADNodeConnector(NodeConnectorRef source) throws ConstructionException {
@@ -108,7 +113,7 @@ public class NodeMapping {
         } else if (ncId.equals(nodeId.toControllerNodeConnectorId)) {
             return NodeConnector.NodeConnectorIDType.CONTROLLER
         }
-        return MD_SAL_TYPE
+        return MD_SAL_NODECONNECTOR_TYPE
     }
 
     public static def toADNodeConnectorId(NodeConnectorId nodeConnectorId, NodeId nodeId) {
@@ -117,7 +122,15 @@ public class NodeMapping {
             nodeConnectorId.equals(nodeId.toControllerNodeConnectorId)) {
             return NodeConnector.SPECIALNODECONNECTORID
         }
-        return nodeConnectorId.value
+        return nodeConnectorId.toPortNumber
+    }
+    
+    public static def toPortNumber(NodeConnectorId ncId){
+        val split = ncId.value.split(":").toList;
+
+        val portNoString = split.get(split.length-1);
+        val portNo = Short.decode(portNoString);
+        return portNo;
     }
 
     public static def toControllerNodeConnectorId(NodeId node) {
@@ -133,9 +146,9 @@ public class NodeMapping {
     }
 
     public static def toNodeRef(Node node) {
-        checkArgument(MD_SAL_TYPE.equals(node.getType()));
-        var nodeId = node.ID.checkInstanceOf(String)
-        val nodeKey = new NodeKey(new NodeId(nodeId));
+        checkArgument(MD_SAL_NODE_TYPE.equals(node.getType()));
+        var nodeId = node.ID.checkInstanceOf(Long)
+        val nodeKey = new NodeKey(new NodeId(OF_PREFIX + nodeId));
         val nodePath = InstanceIdentifier.builder().node(Nodes).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
@@ -153,7 +166,7 @@ public class NodeMapping {
                 nodeConnectorId = nodePath.toNodeId.toControllerNodeConnectorId
             }
         } else {
-            nodeConnectorId = new NodeConnectorId(nodeConnector.ID.checkInstanceOf(String))
+            nodeConnectorId = new NodeConnectorId(OF_PREFIX + nodeConnector.node.ID.checkInstanceOf(Long) + ":" + nodeConnector.ID.checkInstanceOf(Short))
         }
         val connectorKey = new NodeConnectorKey(nodeConnectorId);
         val path = InstanceIdentifier.builder(nodePath).child(NODECONNECTOR_CLASS, connectorKey).toInstance();
@@ -321,7 +334,11 @@ public class NodeMapping {
     }
 
     public static def toADMacAddress(NodeId id) {
-        return new MacAddress(Long.parseLong(id.value.replaceAll("openflow:", "")).longValue.bytesFromDpid)
+        return new MacAddress(id.toDpid.longValue.bytesFromDpid)
+    }
+    
+    public static def toDpid(NodeId id) {
+        return Long.parseLong(id.value.replaceAll(OF_PREFIX, ""))
     }
 
     public static def toADTables(Short tables) {
