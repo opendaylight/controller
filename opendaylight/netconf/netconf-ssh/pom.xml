@@ -61,14 +61,10 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.opendaylight.controller.netconf.osgi.NetconfSSHActivator</Bundle-Activator>
-                        <Export-Package>
-                            org.opendaylight.controller.netconf.ssh,
-                        </Export-Package>
                         <Import-Package>
                             com.google.common.base,
                             ch.ethz.ssh2,
                             ch.ethz.ssh2.signature,
-                            java.net,
                             javax.annotation,
                             org.apache.commons.io,
                             org.opendaylight.controller.netconf.util,
