@@ -49,9 +49,7 @@ module opendaylight-action-types {
                     }
                     
                     leaf max-length {
-                        type uint16 {
-                            range "0..65294";
-                        }
+                        type uint16;
                     }
                 }
             }
@@ -59,9 +57,7 @@ module opendaylight-action-types {
             case controller-action-case {
                 container controller-action {
                  leaf max-length {
-                     type uint16 {
-                         range "0..65294";
-                     }
+                     type uint16;
                  }
              }
             }
