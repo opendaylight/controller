@@ -1,61 +1,60 @@
 package org.opendaylight.controller.sal.connect.netconf
 
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
-import org.opendaylight.controller.md.sal.common.api.data.DataReader
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import org.opendaylight.controller.netconf.client.NetconfClient
-import org.opendaylight.controller.sal.core.api.RpcImplementation
-import static extension org.opendaylight.controller.sal.connect.netconf.NetconfMapping.*
-import java.net.InetSocketAddress
-import org.opendaylight.yangtools.yang.data.api.Node
-import org.opendaylight.yangtools.yang.data.api.SimpleNode
-import org.opendaylight.yangtools.yang.common.QName
-import java.util.Collections
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher
-import org.opendaylight.yangtools.concepts.Registration
-import org.opendaylight.controller.sal.core.api.Provider
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
-import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*;
-import org.opendaylight.controller.sal.core.api.data.DataBrokerService
-import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
-import org.opendaylight.protocol.framework.ReconnectStrategy
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
-import org.opendaylight.controller.md.sal.common.api.data.DataModification
+import com.google.common.base.Optional
 import com.google.common.collect.FluentIterable
-import org.opendaylight.yangtools.yang.model.api.SchemaContext
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl
-import java.io.InputStream
-import org.slf4j.LoggerFactory
-import org.slf4j.Logger
-import org.opendaylight.controller.netconf.client.AbstractNetconfClientNotifySessionListener
-import org.opendaylight.controller.netconf.client.NetconfClientSession
-import org.opendaylight.controller.netconf.api.NetconfMessage
+import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableMap
 import io.netty.util.concurrent.EventExecutor
-
+import io.netty.util.concurrent.Promise
+import java.io.InputStream
+import java.net.InetSocketAddress
+import java.util.Collections
 import java.util.Map
 import java.util.Set
-import com.google.common.collect.ImmutableMap
-
-import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider
-import com.google.common.base.Optional
-import com.google.common.collect.ImmutableList
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders
-import static com.google.common.base.Preconditions.*;
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
+import java.util.concurrent.locks.ReentrantLock
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
+import org.opendaylight.controller.md.sal.common.api.data.DataModification
+import org.opendaylight.controller.md.sal.common.api.data.DataReader
+import org.opendaylight.controller.netconf.api.NetconfMessage
+import org.opendaylight.controller.netconf.client.NetconfClient
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher
+import org.opendaylight.controller.netconf.client.NetconfClientSession
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener
-import io.netty.util.concurrent.Promise
 import org.opendaylight.controller.netconf.util.xml.XmlElement
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.locks.ReentrantLock
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession
+import org.opendaylight.controller.sal.core.api.Provider
+import org.opendaylight.controller.sal.core.api.RpcImplementation
+import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
+import org.opendaylight.controller.sal.core.api.data.DataProviderService
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
+import org.opendaylight.protocol.framework.ReconnectStrategy
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState
+import org.opendaylight.yangtools.concepts.Registration
+import org.opendaylight.yangtools.yang.common.QName
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.yangtools.yang.data.api.Node
+import org.opendaylight.yangtools.yang.data.api.SimpleNode
+import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode
+import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
+import org.opendaylight.yangtools.yang.model.api.SchemaContext
+import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider
+import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider
+import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import static com.google.common.base.Preconditions.*
+import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*
+
+import static extension org.opendaylight.controller.sal.connect.netconf.NetconfMapping.*
 
 class NetconfDevice implements Provider, // 
 DataReader<InstanceIdentifier, CompositeNode>, //
@@ -105,8 +104,10 @@ AutoCloseable {
 
     @Property
     var NetconfClientDispatcher dispatcher
-    
+
     static val InstanceIdentifier ROOT_PATH = InstanceIdentifier.builder().toInstance();
+
+    DataProviderService dataBroker
 
     public new(String name) {
         this.name = name;
@@ -120,12 +121,9 @@ AutoCloseable {
         checkState(schemaSourceProvider != null, "Schema Source Provider must be set.")
         checkState(eventExecutor != null, "Event executor must be set.");
 
-        val listener = new NetconfDeviceListener(this,eventExecutor);
+        val listener = new NetconfDeviceListener(this, eventExecutor);
         val task = startClientTask(dispatcher, listener)
-        if(mountInstance != null) {
-            confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, this);
-            operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, this);
-        }
+
         return processingExecutor.submit(task) as Future<Void>;
 
     //commitHandlerReg = mountInstance.registerCommitHandler(path,this);
@@ -140,23 +138,60 @@ AutoCloseable {
 
     private def Runnable startClientTask(NetconfClientDispatcher dispatcher, NetconfDeviceListener listener) {
         return [ |
-            logger.info("Starting Netconf Client on: {}", socketAddress);
-            client = NetconfClient.clientFor(name, socketAddress, reconnectStrategy, dispatcher, listener);
-            logger.debug("Initial capabilities {}", initialCapabilities);
-            var SchemaSourceProvider<String> delegate;
-            if (initialCapabilities.contains(NetconfMapping.IETF_NETCONF_MONITORING_MODULE)) {
-                delegate = new NetconfDeviceSchemaSourceProvider(this);
-            } else {
-                logger.info("Device does not support IETF Netconf Monitoring.", socketAddress);
-                delegate = SchemaSourceProviders.<String>noopProvider();
-            }
-            val sourceProvider = schemaSourceProvider.createInstanceFor(delegate);
-            schemaContextProvider = new NetconfDeviceSchemaContextProvider(this, sourceProvider);
-            schemaContextProvider.createContextFromCapabilities(initialCapabilities);
-            if (mountInstance != null && schemaContext.isPresent) {
-                mountInstance.schemaContext = schemaContext.get();
+            try {
+                logger.info("Starting Netconf Client on: {}", socketAddress);
+                client = NetconfClient.clientFor(name, socketAddress, reconnectStrategy, dispatcher, listener);
+                logger.debug("Initial capabilities {}", initialCapabilities);
+                var SchemaSourceProvider<String> delegate;
+                if (initialCapabilities.contains(NetconfMapping.IETF_NETCONF_MONITORING_MODULE)) {
+                    delegate = new NetconfDeviceSchemaSourceProvider(this);
+                } else {
+                    logger.info("Device does not support IETF Netconf Monitoring.", socketAddress);
+                    delegate = SchemaSourceProviders.<String>noopProvider();
+                }
+
+                val sourceProvider = schemaSourceProvider.createInstanceFor(delegate);
+                schemaContextProvider = new NetconfDeviceSchemaContextProvider(this, sourceProvider);
+                schemaContextProvider.createContextFromCapabilities(initialCapabilities);
+                if (mountInstance != null && schemaContext.isPresent) {
+                    mountInstance.schemaContext = schemaContext.get();
+                }
+                updateDeviceState()
+
+                if (mountInstance != null && confReaderReg == null && operReaderReg == null) {
+                    confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, this);
+                    operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, this);
+                }
+            } catch (Exception e) {
+                logger.error("Netconf client NOT started. ", e)
             }
         ]
+    }
+
+    private def updateDeviceState() {
+        val transaction = dataBroker.beginTransaction
+
+        val it = ImmutableCompositeNode.builder
+        setQName(INVENTORY_NODE)
+        addLeaf(INVENTORY_ID, name)
+        addLeaf(INVENTORY_CONNECTED, client.clientSession.up)
+
+        logger.debug("Client capabilities {}", client.capabilities)
+        for (capability : client.capabilities) {
+            addLeaf(NETCONF_INVENTORY_INITIAL_CAPABILITY, capability)
+        }
+
+        logger.debug("Update device state transaction " + transaction.identifier + " putting operational data started.")
+        transaction.putOperationalData(path, it.toInstance)
+        logger.debug("Update device state transaction " + transaction.identifier + " putting operational data ended.")
+        val transactionStatus = transaction.commit.get;
+
+        if (transactionStatus.successful) {
+            logger.debug("Update device state transaction " + transaction.identifier + " SUCCESSFUL.")
+        } else {
+            logger.debug("Update device state transaction " + transaction.identifier + " FAILED!")
+            logger.debug("Update device state transaction status " + transaction.status)
+        }
     }
 
     override readConfigurationData(InstanceIdentifier path) {
@@ -175,12 +210,12 @@ AutoCloseable {
     override getSupportedRpcs() {
         Collections.emptySet;
     }
-    
+
     def createSubscription(String streamName) {
         val it = ImmutableCompositeNode.builder()
         QName = NETCONF_CREATE_SUBSCRIPTION_QNAME
-        addLeaf("stream",streamName);
-        invokeRpc(QName,toInstance())
+        addLeaf("stream", streamName);
+        invokeRpc(QName, toInstance())
     }
 
     override invokeRpc(QName rpc, CompositeNode input) {
@@ -194,7 +229,7 @@ AutoCloseable {
     }
 
     override onSessionInitiated(ProviderSession session) {
-        val dataBroker = session.getService(DataBrokerService);
+        dataBroker = session.getService(DataProviderService);
 
         val transaction = dataBroker.beginTransaction
         if (transaction.operationalNodeNotExisting) {
@@ -278,26 +313,27 @@ package class NetconfDeviceListener extends NetconfClientSessionListener {
     val NetconfDevice device
     val EventExecutor eventExecutor
 
-    new(NetconfDevice device,EventExecutor eventExecutor) {
+    new(NetconfDevice device, EventExecutor eventExecutor) {
         this.device = device
         this.eventExecutor = eventExecutor
     }
 
     var Promise<NetconfMessage> messagePromise;
     val promiseLock = new ReentrantLock;
-    
+
     override onMessage(NetconfClientSession session, NetconfMessage message) {
         if (isNotification(message)) {
             onNotification(session, message);
-        } else try {
-            promiseLock.lock
-            if (messagePromise != null) {
-                messagePromise.setSuccess(message);
-                messagePromise = null;
+        } else
+            try {
+                promiseLock.lock
+                if (messagePromise != null) {
+                    messagePromise.setSuccess(message);
+                    messagePromise = null;
+                }
+            } finally {
+                promiseLock.unlock
             }
-        } finally {
-            promiseLock.unlock
-        }
     }
 
     /**
@@ -313,16 +349,16 @@ package class NetconfDeviceListener extends NetconfClientSessionListener {
      *            NetconfMessage)}
      */
     def void onNotification(NetconfClientSession session, NetconfMessage message) {
-        device.logger.debug("Received NETCONF notification.",message);
+        device.logger.debug("Received NETCONF notification.", message);
         val domNotification = message?.toCompositeNode?.notificationBody;
-        if(domNotification != null) {
+        if (domNotification != null) {
             device?.mountInstance?.publish(domNotification);
         }
     }
-    
+
     private static def CompositeNode getNotificationBody(CompositeNode node) {
-        for(child : node.children) {
-            if(child instanceof CompositeNode) {
+        for (child : node.children) {
+            if (child instanceof CompositeNode) {
                 return child as CompositeNode;
             }
         }
@@ -347,11 +383,11 @@ package class NetconfDeviceListener extends NetconfClientSessionListener {
     def Promise<NetconfMessage> promiseReply() {
         promiseLock.lock
         try {
-        if (messagePromise == null) {
-            messagePromise = eventExecutor.newPromise();
+            if (messagePromise == null) {
+                messagePromise = eventExecutor.newPromise();
+                return messagePromise;
+            }
             return messagePromise;
-        }
-        return messagePromise;
         } finally {
             promiseLock.unlock
         }
