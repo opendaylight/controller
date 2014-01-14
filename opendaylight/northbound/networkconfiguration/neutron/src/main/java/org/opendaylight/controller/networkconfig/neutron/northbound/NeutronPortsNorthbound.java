@@ -30,7 +30,6 @@ import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
@@ -268,7 +267,7 @@ public class NeutronPortsNorthbound {
             List<NeutronPort> bulk = input.getBulk();
             Iterator<NeutronPort> i = bulk.iterator();
             HashMap<String, NeutronPort> testMap = new HashMap<String, NeutronPort>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
+            Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
             while (i.hasNext()) {
                 NeutronPort test = i.next();
 
