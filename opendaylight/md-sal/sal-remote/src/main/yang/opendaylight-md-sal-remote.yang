@@ -1,0 +1,56 @@
+module md-sal-remote {
+
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
+    prefix "md-sal-remote";
+    
+
+    revision "2014-01-14" {
+    description
+        "Initial revision";
+    }
+
+    rpc register-data-change-listener {
+        input {
+            leaf path {
+                type instance-identifier;
+                description "Subtree path. ";
+            }
+         }
+    }
+
+    rpc on-data-changed {
+        input {
+            anyxml change {
+                description "DataChangeEvent xml. ";
+            }
+         }
+    }
+
+    rpc register-notfication-listener {
+        input {
+            leaf path {
+                type instance-identifier;
+                description "Subtree path. ";
+            }
+            leaf reader {
+                type string;
+                description "DataReader placeholder.";
+            }
+         }
+        output {
+            anyxml registration {
+                description "Registration<org.opendaylight.yangtools.yang.binding.NotificationListener> xml";
+            }
+        }
+    }
+
+    rpc begin-transaction{
+        output{
+            anyxml data-modification-transaction{
+                description "DataModificationTransaction xml";
+            }
+        }
+    }
+
+}
