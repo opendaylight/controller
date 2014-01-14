@@ -164,7 +164,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         add(
             createServiceDependency() //
             .setService(IPluginOutInventoryService) //
-            .setCallbacks("setInventoryPublisher", "setInventoryPublisher") //
+            .setCallbacks("setInventoryPublisher", "unsetInventoryPublisher") //
             .setRequired(false))
         add(
             createServiceDependency() //
