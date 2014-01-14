@@ -35,7 +35,7 @@ module opendaylight-group-statistics {
         }
 	}
     
-    augment "/inv:nodes/inv:node/group-types:group" {
+    augment "/inv:nodes/inv:node/fni:group" {
         ext:augment-identifier "node-group-desc-stats";
         uses group-desc;
     }
