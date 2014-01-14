@@ -2988,7 +2988,11 @@ public class ForwardingRulesManager implements
                 // staticFlowEntry should never be null.
                 // the null check is just an extra defensive check.
                 if(staticFlowEntry != null) {
-                    staticFlows.remove(staticFlowEntry.getKey());
+                    // Modify status and update cluster cache
+                    log.debug("Updating static flow configuration on async error event");
+                    String status = String.format("Cannot be installed on node. reason: %s", errorString);
+                    staticFlowEntry.getValue().setStatus(status);
+                    refreshClusterStaticFlowsStatus(node);
                 }
             }
         }
