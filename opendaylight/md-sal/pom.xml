@@ -36,6 +36,7 @@
 
         <!-- Base Models -->
         <module>model</module>
+        <module>sal-remote</module>
 
 
         <!-- Connectors -->
