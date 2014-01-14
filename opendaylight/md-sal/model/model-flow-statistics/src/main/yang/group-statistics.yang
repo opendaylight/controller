@@ -6,6 +6,7 @@ module opendaylight-group-statistics {
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-group-types {prefix group-types;revision-date "2013-10-18";}
     import flow-capable-transaction {prefix tr;}
+    import flow-node-inventory {prefix fni;}
     
     contact
         "Anilkumar Vishnoi
@@ -22,7 +23,7 @@ module opendaylight-group-statistics {
         }
 	}    
     
-    augment "/inv:nodes/inv:node/group-types:group" {
+    augment "/inv:nodes/inv:node/fni:group" {
         ext:augment-identifier "node-group-statistics";
         uses group-statistics;
     }
