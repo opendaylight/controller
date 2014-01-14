@@ -92,19 +92,19 @@ class RestconfImpl implements RestconfService {
     }
 
     override readData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
     override readConfigurationData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         val data = broker.readConfigurationData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
     override readOperationalData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
@@ -114,7 +114,7 @@ class RestconfImpl implements RestconfService {
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
         val value = normalizeNode(payload, identifierWithSchemaNode.schemaNode, identifierWithSchemaNode.mountPoint)
         val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier, value).get();
         switch status.result {
@@ -128,7 +128,7 @@ class RestconfImpl implements RestconfService {
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
-        val uncompleteIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val uncompleteIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         var schemaNode = (uncompleteIdentifierWithSchemaNode.schemaNode as DataNodeContainer).getSchemaChildNode(payload)
         if (schemaNode === null) {
             schemaNode = payload.findModule(uncompleteIdentifierWithSchemaNode.instanceIdentifier)?.getSchemaChildNode(payload)
@@ -160,20 +160,12 @@ class RestconfImpl implements RestconfService {
     }
     
     override deleteConfigurationData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         val status = broker.commitConfigurationDataDelete(instanceIdentifierWithSchemaNode.getInstanceIdentifier).get;
         switch status.result {
             case TransactionStatus.COMMITED: Response.status(OK).build
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
-    }
-
-    private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
-        val identifierWithSchemaNode = identifier.toInstanceIdentifier
-        if (identifierWithSchemaNode === null) {
-            throw new ResponseException(BAD_REQUEST, "URI has bad format");
-        }
-        return identifierWithSchemaNode
     }
 
     private def dispatch Module findModule(CompositeNode data, InstanceIdentifier partialPath) {

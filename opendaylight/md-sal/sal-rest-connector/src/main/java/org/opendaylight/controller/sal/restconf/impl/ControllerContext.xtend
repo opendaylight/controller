@@ -10,7 +10,6 @@ import java.util.HashMap
 import java.util.List
 import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
-import javax.ws.rs.core.Response
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
 import org.opendaylight.controller.sal.core.api.mount.MountService
 import org.opendaylight.controller.sal.rest.impl.RestUtil
@@ -37,7 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
-import java.util.ArrayList
+import static javax.ws.rs.core.Response.Status.*
 
 class ControllerContext implements SchemaServiceListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
@@ -66,7 +65,7 @@ class ControllerContext implements SchemaServiceListener {
 
     private def void checkPreconditions() {
         if (globalSchema === null) {
-            throw new ResponseException(Response.Status.SERVICE_UNAVAILABLE, RestconfProvider::NOT_INITALIZED_MSG)
+            throw new ResponseException(SERVICE_UNAVAILABLE, RestconfProvider::NOT_INITALIZED_MSG)
         }
     }
 
@@ -84,20 +83,17 @@ class ControllerContext implements SchemaServiceListener {
         if (pathArgs.head.empty) {
             pathArgs.remove(0)
         }
-        val mountPoints = new ArrayList
-        val schemaNode = ret.collectPathArguments(pathArgs, globalSchema.findModule(pathArgs.head), mountPoints);
-        if (schemaNode === null) {
-            return null
+        val startModule = pathArgs.head.toModuleName();
+        if (startModule === null) {
+            throw new ResponseException(BAD_REQUEST, "First node in URI has to be in format \"moduleName:nodeName\"")
         }
-        return new InstanceIdWithSchemaNode(ret.toInstance, schemaNode, mountPoints.last)
+        val iiWithSchemaNode = ret.collectPathArguments(pathArgs, globalSchema.getLatestModule(startModule), null);
+        if (iiWithSchemaNode === null) {
+            throw new ResponseException(BAD_REQUEST, "URI has bad format")
+        }
+        return iiWithSchemaNode
     }
 
-    private def findModule(SchemaContext context,String argument) {
-        checkNotNull(argument);
-        val startModule = argument.toModuleName();
-        return context.getLatestModule(startModule)
-    }
-    
     private def getLatestModule(SchemaContext schema,String moduleName) {
         checkArgument(schema !== null);
         checkArgument(moduleName !== null && !moduleName.empty)
@@ -255,38 +251,58 @@ class ControllerContext implements SchemaServiceListener {
         return URLEncoder.encode(object.toString)
     }
 
-    private def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
-        DataNodeContainer parentNode, List<InstanceIdentifier> mountPoints) {
+    private def InstanceIdWithSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
+        DataNodeContainer parentNode, InstanceIdentifier mountPoint) {
         checkNotNull(strings)
         if (parentNode === null) {
             return null;
         }
         if (strings.empty) {
-            return parentNode as DataSchemaNode;
-        }
-        val nodeRef = strings.head;
-
-        val nodeName = nodeRef.toNodeName;
-        var targetNode = parentNode.findInstanceDataChild(nodeName);
-        if (targetNode instanceof ChoiceNode) {
-            return null
+            return new InstanceIdWithSchemaNode(builder.toInstance, parentNode as DataSchemaNode, mountPoint)
         }
         
-        if (targetNode === null) {
-            // Node is possibly in other mount point
-            val partialPath = builder.toInstance;
-            val mountPointSchema = mountService?.getMountPoint(partialPath)?.schemaContext;
-            if(mountPointSchema !== null) {
-                val module = mountPointSchema.findModule(strings.head)
-                if (module !== null) {
-                    mountPoints.add(partialPath)
+        val nodeName = strings.head.toNodeName
+        val moduleName = strings.head.toModuleName
+        var DataSchemaNode targetNode = null
+        if (!moduleName.nullOrEmpty) {
+            if (parentNode instanceof Module && (parentNode as Module).name == moduleName) {
+                targetNode = parentNode.findInstanceDataChild(nodeName);
+                if (targetNode === null) {
+                    throw new ResponseException(BAD_REQUEST, "URI has bad format. \"" + nodeName 
+                        + "\" was not found in parent data node."
+                    )
                 }
-                return builder.collectPathArguments(strings, module, mountPoints);
+            } else { // Node is possibly in other mount point
+                if (mountPoint !== null) {
+                    throw new ResponseException(BAD_REQUEST, "Restconf supports just one mount point in URI.")
+                }
+                if (mountService === null) {
+                    throw new ResponseException(SERVICE_UNAVAILABLE, "MountService was not found. " 
+                        + "Finding behind mount points does not work."
+                    )
+                }
+                val partialPath = builder.toInstance;
+                val mountPointSchema = mountService.getMountPoint(partialPath)?.schemaContext;
+                if(mountPointSchema !== null) {
+                    val module = mountPointSchema.getLatestModule(moduleName)
+                    if (module === null) {
+                        throw new ResponseException(BAD_REQUEST, "URI has bad format. \"" + moduleName + "\" module does not exist.")
+                    }
+                    return builder.collectPathArguments(strings, module, partialPath);
+                }
+                LOG.debug("Instance identifier to missing mount point: {}", partialPath)
+                throw new ResponseException(BAD_REQUEST, "Mount point does not exist.")
             }
-            return null
+        } else {
+            targetNode = parentNode.findInstanceDataChild(nodeName);
+            if (targetNode === null) {
+                throw new ResponseException(BAD_REQUEST, "URI has bad format. Possible reasons:\n" + 
+                    "1. \"" + nodeName + "\" was not found in parent data node.\n" + 
+                    "2. \"" + nodeName + "\" is behind mount point. Then it should be in format \"moduleName:nodeName\".")
+            }
         }
         
-
+        
         // Number of consumed elements
         var consumed = 1;
         if (targetNode instanceof ListSchemaNode) {
@@ -295,7 +311,7 @@ class ControllerContext implements SchemaServiceListener {
 
             // every key has to be filled
             if ((strings.length - consumed) < keysSize) {
-                return null;
+                throw new ResponseException(BAD_REQUEST,"Missing key for list \"" + listNode.QName.localName + "\".")
             }
             val uriKeyValues = strings.subList(consumed, consumed + keysSize);
             val keyValues = new HashMap<QName, Object>();
@@ -305,7 +321,9 @@ class ControllerContext implements SchemaServiceListener {
 
                 // key value cannot be NULL
                 if (uriKeyValue.equals(NULL_VALUE)) {
-                    return null
+                    throw new ResponseException(BAD_REQUEST, "URI has bad format. List \"" + listNode.QName.localName 
+                        + "\" cannot contain \"null\" value as a key."
+                    )
                 }
                 keyValues.addKeyValue(listNode.getDataChildByName(key), uriKeyValue);
                 i = i + 1;
@@ -319,13 +337,13 @@ class ControllerContext implements SchemaServiceListener {
         }
         if (targetNode instanceof DataNodeContainer) {
             val remaining = strings.subList(consumed, strings.length);
-            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer, mountPoints);
+            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer, mountPoint);
             return result
         }
 
-        return targetNode
+        return new InstanceIdWithSchemaNode(builder.toInstance, targetNode, mountPoint)
     }
-    
+
     static def DataSchemaNode findInstanceDataChild(DataNodeContainer container, String name) {
         // FIXME: Add namespace comparison
         var potentialNode = container.getDataChildByName(name);
@@ -372,21 +390,21 @@ class ControllerContext implements SchemaServiceListener {
         checkNotNull(str)
         if (str.contains(":")) {
             val args = str.split(":");
-            checkArgument(args.size === 2);
-            return args.get(0);
-        } else {
-            return null;
+            if (args.size === 2) {
+                return args.get(0);
+            }
         }
+        return null;
     }
 
     private def String toNodeName(String str) {
         if (str.contains(":")) {
             val args = str.split(":");
-            checkArgument(args.size === 2);
-            return args.get(1);
-        } else {
-            return str;
+            if (args.size === 2) {
+                return args.get(1);
+            }
         }
+        return str;
     }
 
     private def QName toQName(String name) {
