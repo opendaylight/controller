@@ -62,11 +62,14 @@
                     <instructions>
                         <Bundle-Activator>org.opendaylight.controller.netconf.osgi.NetconfSSHActivator</Bundle-Activator>
                         <Import-Package>
+                            com.google.common.base,
                             ch.ethz.ssh2,
                             ch.ethz.ssh2.signature,
+                            org.apache.commons.io,
                             org.opendaylight.controller.netconf.util.osgi,
                             org.opendaylight.controller.usermanager,
                             org.opendaylight.controller.sal.authorization,
+                            org.opendaylight.controller.sal.utils,
                             org.osgi.framework,
                             org.osgi.util.tracker,
                             org.slf4j,
