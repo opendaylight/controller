@@ -303,21 +303,23 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
     }
 
     def void publishDataChangeEvent(ImmutableList<ListenerStateCapture<P, D, DCL>> listeners) {
-        for (listenerSet : listeners) {
-            val updatedConfiguration = dataBroker.readConfigurationData(listenerSet.path);
-            val updatedOperational = dataBroker.readOperationalData(listenerSet.path);
+        dataBroker.executor.submit [|
+            for (listenerSet : listeners) {
+                val updatedConfiguration = dataBroker.readConfigurationData(listenerSet.path);
+                val updatedOperational = dataBroker.readOperationalData(listenerSet.path);
 
-            val changeEvent = new DataChangeEventImpl(transaction, listenerSet.initialConfigurationState,
-                listenerSet.initialOperationalState, updatedOperational, updatedConfiguration);
-            for (listener : listenerSet.listeners) {
-                try {
-                    listener.instance.onDataChanged(changeEvent);
+                val changeEvent = new DataChangeEventImpl(transaction, listenerSet.initialConfigurationState,
+                    listenerSet.initialOperationalState, updatedOperational, updatedConfiguration);
+                for (listener : listenerSet.listeners) {
+                    try {
+                        listener.instance.onDataChanged(changeEvent);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        }
+            }        
+        ]
     }
 
     def rollback(List<DataCommitTransaction<P, D>> transactions, Exception e) {
