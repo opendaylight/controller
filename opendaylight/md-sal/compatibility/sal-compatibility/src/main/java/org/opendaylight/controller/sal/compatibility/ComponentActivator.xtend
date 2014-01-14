@@ -28,8 +28,10 @@ import org.opendaylight.controller.sal.utils.GlobalConstants
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory
 import org.opendaylight.controller.sal.utils.INodeFactory
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices
+import org.opendaylight.controller.sal.packet.IPluginInDataPacketService
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
@@ -38,6 +40,7 @@ import org.osgi.framework.BundleContext
 
 import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
 import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
+import org.opendaylight.controller.sal.compatibility.adsal.DataPacketServiceAdapter
 
 class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareConsumer {
 
@@ -64,6 +67,10 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     @Property
     TopologyProvider tpProvider = new TopologyProvider()
 
+    @Property
+    DataPacketServiceAdapter dataPacketService = new DataPacketServiceAdapter()
+
+
 
     override protected init() {
         Node.NodeIDType.registerIDType(MD_SAL_TYPE, String);
@@ -89,6 +96,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
 
         // Data Packet Service
         subscribe.registerNotificationListener(inventory);
+        dataPacketService.delegate = session.getRpcService(PacketProcessingService)
 
         // Inventory Service
         inventory.dataService = session.getSALService(DataBrokerService);
@@ -99,6 +107,8 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
 		inventory.dataProviderService = session.getSALService(DataProviderService)
 		topology.dataService = session.getSALService(DataProviderService)
 		tpProvider.dataService = session.getSALService(DataProviderService)
+
+
 		tpProvider.start();
 
         subscribe.registerNotificationListener(dataPacket)
@@ -111,6 +121,14 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
 
     override protected configureGlobalInstance(Component c, Object imp) {
         configure(imp, c);
+    }
+
+    override protected getImplementations() {
+        return Arrays.asList(dataPacketService)
+    }
+
+    override protected configureInstance(Component c, Object imp, String containerName) {
+        instanceConfigure(imp, c, containerName);
     }
 
     private def dispatch configure(MDSalNodeFactory imp, Component it) {
@@ -154,6 +172,14 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
 
     }
 
+    private def dispatch instanceConfigure(DataPacketServiceAdapter imp, Component it, String containerName) {
+        setInterface(IPluginInDataPacketService.name, properties)
+    }
+
+    private def dispatch instanceConfigure(ComponentActivator imp, Component it, String containerName) {
+    }
+
+
     private def dispatch configure(InventoryAndReadAdapter imp, Component it) {
         setInterface(Arrays.asList(IPluginInInventoryService.name, IPluginInReadService.name), properties)
         add(
@@ -164,7 +190,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         add(
             createServiceDependency() //
             .setService(IPluginOutInventoryService) //
-            .setCallbacks("setInventoryPublisher", "setInventoryPublisher") //
+            .setCallbacks("setInventoryPublisher", "unsetInventoryPublisher") //
             .setRequired(false))
         add(
             createServiceDependency() //

@@ -3,7 +3,6 @@ package org.opendaylight.controller.sal.compatibility.adsal;
 import org.opendaylight.controller.sal.compatibility.NodeMapping;
 import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
 import org.opendaylight.controller.sal.packet.RawPacket;
-import org.opendaylight.controller.sal.packet.RawPacket;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.TransmitPacketInput;
@@ -22,6 +21,8 @@ public class DataPacketServiceAdapter implements IPluginInDataPacketService {
     private TransmitPacketInput toTransmitPacketInput(RawPacket rawPacket) {
         TransmitPacketInputBuilder builderTPIB = new TransmitPacketInputBuilder();
 
+        builderTPIB.setNode(NodeMapping.toNodeRef(rawPacket.getOutgoingNodeConnector().getNode()));
+
         NodeConnectorRef egress = NodeMapping.toNodeConnectorRef(rawPacket.getOutgoingNodeConnector());
         NodeConnectorRef ingress = NodeMapping.toNodeConnectorRef(rawPacket.getIncomingNodeConnector());
         byte[] payload = rawPacket.getPacketData();
@@ -32,5 +33,15 @@ public class DataPacketServiceAdapter implements IPluginInDataPacketService {
 
         return builderTPIB.build();
     }
+
+    public PacketProcessingService getDelegate() {
+        return delegate;
+    }
+
+    public void setDelegate(PacketProcessingService delegate) {
+        this.delegate = delegate;
+    }
+
+
 
 }
