@@ -26,6 +26,8 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
+import org.opendaylight.controller.sal.core.api.mount.MountInstance
+import org.opendaylight.yangtools.yang.common.RpcResult
 
 class RestconfImpl implements RestconfService {
 
@@ -92,20 +94,37 @@ class RestconfImpl implements RestconfService {
     }
 
     override readData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        var CompositeNode data = null;
+        if (instanceIdentifierWithSchemaNode.mountPoint !== null) {
+            data = broker.readOperationalData(instanceIdentifierWithSchemaNode.mountPoint,
+                instanceIdentifierWithSchemaNode.getInstanceIdentifier)
+        } else {
+            data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        }
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
     override readConfigurationData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val data = broker.readConfigurationData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        var CompositeNode data = null;
+        if (instanceIdentifierWithSchemaNode.mountPoint !== null) {
+            data = broker.readConfigurationData(instanceIdentifierWithSchemaNode.mountPoint,
+                instanceIdentifierWithSchemaNode.getInstanceIdentifier)
+        } else {
+            data = broker.readConfigurationData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        }
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
     override readOperationalData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
-        val data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
+        var CompositeNode data = null;
+        if (instanceIdentifierWithSchemaNode.mountPoint !== null) {
+            data = broker.readOperationalData(instanceIdentifierWithSchemaNode.mountPoint, instanceIdentifierWithSchemaNode.getInstanceIdentifier)
+        } else {
+            data = broker.readOperationalData(instanceIdentifierWithSchemaNode.getInstanceIdentifier);
+        }
         return new StructuredData(data, instanceIdentifierWithSchemaNode.schemaNode)
     }
 
@@ -114,9 +133,14 @@ class RestconfImpl implements RestconfService {
     }
 
     override updateConfigurationData(String identifier, CompositeNode payload) {
-        val identifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val identifierWithSchemaNode = identifier.toInstanceIdentifier
         val value = normalizeNode(payload, identifierWithSchemaNode.schemaNode, identifierWithSchemaNode.mountPoint)
-        val status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier, value).get();
+        var RpcResult<TransactionStatus> status = null
+        if (identifierWithSchemaNode.mountPoint !== null) {
+            status = broker.commitConfigurationDataPut(identifierWithSchemaNode.mountPoint, identifierWithSchemaNode.instanceIdentifier, value).get()
+        } else {
+            status = broker.commitConfigurationDataPut(identifierWithSchemaNode.instanceIdentifier, value).get();
+        }
         switch status.result {
             case TransactionStatus.COMMITED: Response.status(OK).build
             default: Response.status(INTERNAL_SERVER_ERROR).build
@@ -128,12 +152,12 @@ class RestconfImpl implements RestconfService {
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
-        val uncompleteIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val uncompleteIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         var schemaNode = (uncompleteIdentifierWithSchemaNode.schemaNode as DataNodeContainer).getSchemaChildNode(payload)
-        if (schemaNode === null) {
-            schemaNode = payload.findModule(uncompleteIdentifierWithSchemaNode.instanceIdentifier)?.getSchemaChildNode(payload)
+        if (schemaNode === null && uncompleteIdentifierWithSchemaNode.mountPoint !== null) {
+            schemaNode = uncompleteIdentifierWithSchemaNode.mountPoint.findModule(payload)?.getSchemaChildNode(payload)
         }
-        val value = normalizeNode(payload, schemaNode, uncompleteIdentifierWithSchemaNode.instanceIdentifier)
+        val value = normalizeNode(payload, schemaNode, uncompleteIdentifierWithSchemaNode.mountPoint)
         val completeIdentifierWithSchemaNode = uncompleteIdentifierWithSchemaNode.addLastIdentifierFromData(value, schemaNode)
         val status = broker.commitConfigurationDataPost(completeIdentifierWithSchemaNode.instanceIdentifier, value)?.get();
         if (status === null) {
@@ -160,7 +184,7 @@ class RestconfImpl implements RestconfService {
     }
     
     override deleteConfigurationData(String identifier) {
-        val instanceIdentifierWithSchemaNode = identifier.resolveInstanceIdentifier
+        val instanceIdentifierWithSchemaNode = identifier.toInstanceIdentifier
         val status = broker.commitConfigurationDataDelete(instanceIdentifierWithSchemaNode.getInstanceIdentifier).get;
         switch status.result {
             case TransactionStatus.COMMITED: Response.status(OK).build
@@ -168,28 +192,20 @@ class RestconfImpl implements RestconfService {
         }
     }
 
-    private def InstanceIdWithSchemaNode resolveInstanceIdentifier(String identifier) {
-        val identifierWithSchemaNode = identifier.toInstanceIdentifier
-        if (identifierWithSchemaNode === null) {
-            throw new ResponseException(BAD_REQUEST, "URI has bad format");
-        }
-        return identifierWithSchemaNode
-    }
-
-    private def dispatch Module findModule(CompositeNode data, InstanceIdentifier partialPath) {
-        if (partialPath !== null && !partialPath.path.empty) {
-            return data.nodeType.namespace.findModuleByNamespace(partialPath)
+    private def dispatch Module findModule(CompositeNode data, MountInstance mountPoint) {
+        if (mountPoint !== null) {
+            return mountPoint.findModuleByNamespace(data.nodeType.namespace)
         } else {
-            return data.nodeType.namespace.findModuleByNamespace
+            return findModuleByNamespace(data.nodeType.namespace)
         }
     }
 
-    private def dispatch Module findModule(CompositeNodeWrapper data, InstanceIdentifier partialPath) {
+    private def dispatch Module findModule(MountInstance mountPoint, CompositeNodeWrapper data) {
         var Module module = null;
-        if (partialPath !== null && !partialPath.path.empty) {
-            module = data.namespace.findModuleByNamespace(partialPath) // namespace from XML
+        if (mountPoint !== null) {
+            module = mountPoint.findModuleByNamespace(data.namespace) // namespace from XML
             if (module === null) {
-                module = data.namespace.toString.findModuleByName(partialPath) // namespace (module name) from JSON
+                module = mountPoint.findModuleByName(data.namespace.toString) // namespace (module name) from JSON
             }
         } else {
             module = data.namespace.findModuleByNamespace // namespace from XML
@@ -237,7 +253,7 @@ class RestconfImpl implements RestconfService {
         return keyValues
     }
 
-    private def CompositeNode normalizeNode(CompositeNode node, DataSchemaNode schema, InstanceIdentifier mountPoint) {
+    private def CompositeNode normalizeNode(CompositeNode node, DataSchemaNode schema, MountInstance mountPoint) {
         if (schema !== null && !schema.containerOrList) {
             throw new ResponseException(BAD_REQUEST, "Root element has to be container or list yang datatype.");
         }
@@ -255,7 +271,7 @@ class RestconfImpl implements RestconfService {
     }
 
     private def void normalizeNode(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment,
-        InstanceIdentifier mountPoint) {
+        MountInstance mountPoint) {
         if (schema === null) {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format.\n\"" + nodeBuilder.localName + "\" does not exist in yang schema.");
@@ -268,8 +284,8 @@ class RestconfImpl implements RestconfService {
             validQName = QName.create(currentAugment, schema.QName.localName);
         }
         var moduleName = controllerContext.findModuleNameByNamespace(validQName.namespace);
-        if (moduleName === null && mountPoint !== null && !mountPoint.path.empty) {
-            moduleName = controllerContext.findModuleByNamespace(validQName.namespace, mountPoint)?.name
+        if (moduleName === null && mountPoint !== null) {
+            moduleName = mountPoint.findModuleByNamespace(validQName.namespace)?.name
         }
         if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
             nodeBuilder.namespace.toString == moduleName) {
