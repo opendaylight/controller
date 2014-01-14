@@ -36,6 +36,8 @@
 
         <!-- Base Models -->
         <module>model</module>
+        <module>sal-remote</module>
+        <module>sal-restconf-broker</module>
 
 
         <!-- Connectors -->
