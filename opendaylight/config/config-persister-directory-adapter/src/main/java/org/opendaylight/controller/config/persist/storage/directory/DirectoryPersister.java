@@ -33,21 +33,23 @@ public class DirectoryPersister implements Persister {
     private static final Logger logger = LoggerFactory.getLogger(DirectoryPersister.class);
     private static final Charset ENCODING = Charsets.UTF_8;
 
-    static final String MODULES_START = "//MODULES START";
+    public static final String MODULES_START = "//MODULES START";
     static final String SERVICES_START = "//SERVICES START";
     static final String CAPABILITIES_START = "//CAPABILITIES START";
 
 
     private final File storage;
-    private final String header, middle, footer;
+    private static final String header, middle, footer;
+
+    static {
+        header = readResource("header.txt");
+        middle = readResource("middle.txt");
+        footer = readResource("footer.txt");
+    }
 
     public DirectoryPersister(File storage) {
         checkArgument(storage.exists() && storage.isDirectory(), "Storage directory does not exist: " + storage);
         this.storage = storage;
-        header = readResource("header.txt");
-        middle = readResource("middle.txt");
-        footer = readResource("footer.txt");
-
     }
 
     private static String readResource(String resource) {
@@ -78,11 +80,16 @@ public class DirectoryPersister implements Persister {
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
 
-            final MyLineProcessor lineProcessor = new MyLineProcessor(file.getAbsolutePath());
-            Files.readLines(file, ENCODING, lineProcessor);
-            result.add(lineProcessor.getConfigSnapshotHolder(header, middle, footer));
+            ConfigSnapshotHolder configSnapshotHolder = loadLastConfig(file);
+            result.add(configSnapshotHolder);
         }
         return result;
+    }
+
+    public static ConfigSnapshotHolder loadLastConfig(File file) throws IOException {
+        final MyLineProcessor lineProcessor = new MyLineProcessor(file.getAbsolutePath());
+        Files.readLines(file, ENCODING, lineProcessor);
+        return lineProcessor.getConfigSnapshotHolder(header, middle, footer);
     }
 
 
