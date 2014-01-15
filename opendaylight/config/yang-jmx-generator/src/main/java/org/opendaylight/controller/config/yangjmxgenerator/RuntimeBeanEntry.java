@@ -163,41 +163,42 @@ public class RuntimeBeanEntry {
 
         for (RpcDefinition rpc : currentModule.getRpcs()) {
             ContainerSchemaNode input = rpc.getInput();
-            for (UsesNode uses : input.getUses()) {
+            if (input != null) {
+                for (UsesNode uses : input.getUses()) {
 
-                if (uses.getGroupingPath().getPath().size() != 1)
-                    continue;
+                    if (uses.getGroupingPath().getPath().size() != 1)
+                        continue;
 
-                // check grouping path
-                QName qname = uses.getGroupingPath().getPath().get(0);
-                if (false == qname
-                        .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME))
-                    continue;
+                    // check grouping path
+                    QName qname = uses.getGroupingPath().getPath().get(0);
+                    if (false == qname
+                            .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME))
+                        continue;
 
-                for (SchemaNode refinedNode : uses.getRefines().values()) {
+                    for (SchemaNode refinedNode : uses.getRefines().values()) {
 
-                    for (UnknownSchemaNode unknownSchemaNode : refinedNode
-                            .getUnknownSchemaNodes()) {
-                        if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
-                                .equals(unknownSchemaNode.getNodeType())) {
-                            String localIdentityName = unknownSchemaNode
-                                    .getNodeParameter();
-                            QName identityQName = new QName(
-                                    currentModule.getNamespace(),
-                                    currentModule.getRevision(),
-                                    localIdentityName);
-                            Set<RpcDefinition> rpcDefinitions = result
-                                    .get(identityQName);
-                            if (rpcDefinitions == null) {
-                                throw new IllegalArgumentException(
-                                        "Identity referenced by rpc not found. Identity:"
-                                                + localIdentityName + " , rpc "
-                                                + rpc);
+                        for (UnknownSchemaNode unknownSchemaNode : refinedNode
+                                .getUnknownSchemaNodes()) {
+                            if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
+                                    .equals(unknownSchemaNode.getNodeType())) {
+                                String localIdentityName = unknownSchemaNode
+                                        .getNodeParameter();
+                                QName identityQName = new QName(
+                                        currentModule.getNamespace(),
+                                        currentModule.getRevision(),
+                                        localIdentityName);
+                                Set<RpcDefinition> rpcDefinitions = result
+                                        .get(identityQName);
+                                if (rpcDefinitions == null) {
+                                    throw new IllegalArgumentException(
+                                            "Identity referenced by rpc not found. Identity:"
+                                                    + localIdentityName + " , rpc "
+                                                    + rpc);
+                                }
+                                rpcDefinitions.add(rpc);
                             }
-                            rpcDefinitions.add(rpc);
                         }
                     }
-
                 }
             }
         }
