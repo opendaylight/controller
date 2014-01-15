@@ -14,15 +14,15 @@ import java.util.List;
 import java.util.SortedSet;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class DirectoryStorageAdapterTest {
-
-    Persister tested;
+    XmlDirectoryPersister tested;
+    Logger logger = LoggerFactory.getLogger(DirectoryStorageAdapterTest.class.toString());
 
     @Test
     public void testEmptyDirectory() throws Exception {
@@ -59,12 +59,8 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testOneFile() throws Exception {
         File folder = getFolder("oneFile");
-
-        PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty("directoryStorage",folder.getPath());
-        XmlDirectoryStorageAdapter xmlDsa = new XmlDirectoryStorageAdapter();
-        tested = xmlDsa.instantiate(pp);
-
+        tested = new XmlDirectoryPersister(folder);
+        logger.info("Testing : "+tested.toString());
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
         ConfigSnapshotHolder result = results.get(0);
@@ -82,12 +78,8 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testTwoFiles() throws Exception {
         File folder = getFolder("twoFiles");
-
-        PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty("directoryStorage",folder.getPath());
-        XmlDirectoryStorageAdapter xmlDsa = new XmlDirectoryStorageAdapter();
-        tested = xmlDsa.instantiate(pp);
-
+        tested = new XmlDirectoryPersister((folder));
+        logger.info("Testing : "+tested.toString());
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());
 
