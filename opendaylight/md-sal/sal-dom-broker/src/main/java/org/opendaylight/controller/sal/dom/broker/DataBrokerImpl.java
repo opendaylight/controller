@@ -13,6 +13,8 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
 public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, CompositeNode, DataChangeListener> implements
         DataProviderService, AutoCloseable {
 
@@ -21,6 +23,7 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
     
     public DataBrokerImpl() {
         setDataReadRouter(new DataReaderRouter());
+        setExecutor(MoreExecutors.sameThreadExecutor());
     }
     
     public AtomicLong getCreatedTransactionsCount() {

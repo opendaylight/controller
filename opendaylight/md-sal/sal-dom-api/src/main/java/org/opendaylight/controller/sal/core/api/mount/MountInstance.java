@@ -6,7 +6,6 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-
 package org.opendaylight.controller.sal.core.api.mount;
 
 import java.util.concurrent.Future;
@@ -18,9 +17,11 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public interface MountInstance extends NotificationService, DataBrokerService {
+public interface MountInstance extends //
+        NotificationService, //
+        DataBrokerService {
 
     Future<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input);
-    
+
     SchemaContext getSchemaContext();
 }

@@ -36,7 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class MountPointImpl implements MountProvisionInstance {
 
     private final RpcRouter rpcs;
-    private final DataReaderRouter dataReader;
+    private final DataBrokerImpl dataReader;
     private final NotificationRouter notificationRouter;
     private final DataReader<InstanceIdentifier,CompositeNode> readWrapper;
     
@@ -48,7 +48,7 @@ public class MountPointImpl implements MountProvisionInstance {
     public MountPointImpl(InstanceIdentifier path) {
         this.mountPath = path;
         rpcs = new RpcRouterImpl("");
-        dataReader = new DataReaderRouter();
+        dataReader = new DataBrokerImpl();
         notificationRouter = new NotificationRouterImpl();
         readWrapper = new ReadWrapper();
     }
@@ -124,15 +124,13 @@ public class MountPointImpl implements MountProvisionInstance {
 
     @Override
     public DataModificationTransaction beginTransaction() {
-        // TODO Auto-generated method stub
-        return null;
+        return dataReader.beginTransaction();
     }
 
     @Override
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(InstanceIdentifier path,
             DataChangeListener listener) {
-        // TODO Auto-generated method stub
-        return null;
+        return dataReader.registerDataChangeListener(path, listener);
     }
 
     @Override
@@ -143,8 +141,7 @@ public class MountPointImpl implements MountProvisionInstance {
     @Override
     public Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> registerCommitHandler(
             InstanceIdentifier path, DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
-        // TODO Auto-generated method stub
-        return null;
+        return dataReader.registerCommitHandler(path, commitHandler);
     }
     
     @Override
@@ -208,7 +205,6 @@ public class MountPointImpl implements MountProvisionInstance {
     @Override
     public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
             RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
-        // TODO Auto-generated method stub
-        return null;
+        return dataReader.registerCommitHandlerListener(commitHandlerListener);
     }
 }
