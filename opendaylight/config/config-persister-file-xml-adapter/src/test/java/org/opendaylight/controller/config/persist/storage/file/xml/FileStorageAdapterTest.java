@@ -9,18 +9,17 @@
 package org.opendaylight.controller.config.persist.storage.file.xml;
 
 import com.google.common.base.Charsets;
-import junit.framework.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import static junit.framework.Assert.assertFalse;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -43,8 +42,11 @@ public class FileStorageAdapterTest {
     @Test
     public void testFileAdapter() throws Exception {
         XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
-        storage.setFileStorage(file);
-        storage.setNumberOfBackups(Integer.MAX_VALUE);
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("fileStorage",file.getPath());
+        pp.addProperty("numberOfBackups",Integer.toString(Integer.MAX_VALUE));
+        storage.instantiate(pp);
+
         final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
@@ -89,8 +91,12 @@ public class FileStorageAdapterTest {
     @Test
     public void testFileAdapterOneBackup() throws Exception {
         XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
-        storage.setFileStorage(file);
-        storage.setNumberOfBackups(1);
+
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("fileStorage",file.getPath());
+        pp.addProperty("numberOfBackups",Integer.toString(Integer.MAX_VALUE));
+        storage.instantiate(pp);
+
         final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
@@ -106,7 +112,7 @@ public class FileStorageAdapterTest {
 
         storage.persistConfig(holder);
 
-        assertEquals(16, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
+        assertEquals(27, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
 
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
