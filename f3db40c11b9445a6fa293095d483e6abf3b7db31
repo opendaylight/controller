@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d500e8ac",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-15T13:33:08Z",
+      "side": 1,
+      "message": "Please add yourself as author, plus the usual copyright stuff -- see https://git.opendaylight.org/gerrit/gitweb?p\u003dbgpcep.git;a\u003dblob;f\u003dconcepts/src/main/yang/iana.yang;h\u003da5ca602bebb0a0ebe69452b5627c9cbfb72f47d8;hb\u003dmaster for an example",
+      "revId": "f3db40c11b9445a6fa293095d483e6abf3b7db31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
