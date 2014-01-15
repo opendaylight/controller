@@ -13,12 +13,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.opendaylight.controller.config.yang.md.sal.binding.statistics.DataBrokerRuntimeMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
+import org.opendaylight.controller.sal.binding.impl.RootDataBrokerImpl;
+import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
+import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedDataBrokerImpl;
 import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -52,24 +56,37 @@ public final class DataBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        DataBrokerRuntimeMXBeanImpl dataBindingBroker = new DataBrokerRuntimeMXBeanImpl();
+        RootDataBrokerImpl dataBindingBroker;
         
-        // FIXME: obtain via dependency management
-        ExecutorService executor = Executors.newCachedThreadPool();
-        ExecutorService listeningExecutor = MoreExecutors.listeningDecorator(executor);
-        dataBindingBroker.setExecutor(listeningExecutor);
-
-        Broker domBroker = getDomBrokerDependency();
-        BindingIndependentMappingService mappingService = getMappingServiceDependency();
         
-        if (domBroker != null && mappingService != null) {
-            BindingIndependentConnector runtimeMapping = new BindingIndependentConnector();
-            runtimeMapping.setMappingService(mappingService);
-            runtimeMapping.setBaDataService(dataBindingBroker);
-            domBroker.registerProvider(runtimeMapping, getBundleContext());
+        ExecutorService listeningExecutor = SingletonHolder.getDefaultCommitExecutor();
+        
+        if (getDomBrokerDependency() != null && getMappingServiceDependency() != null) {
+            
+            dataBindingBroker = createDomConnectedBroker(listeningExecutor);
+        } else {
+            dataBindingBroker = createStandAloneBroker(listeningExecutor);
         }
-        getRootRuntimeBeanRegistratorWrapper().register(dataBindingBroker);
+        dataBindingBroker.registerRuntimeBean(getRootRuntimeBeanRegistratorWrapper());
+
         return dataBindingBroker;
+    }
+    private RootDataBrokerImpl createStandAloneBroker(ExecutorService listeningExecutor) {
+        RootDataBrokerImpl broker = new RootDataBrokerImpl();
+        broker.setExecutor(listeningExecutor);
+        return broker;
+    }
+
+    private RootDataBrokerImpl createDomConnectedBroker(ExecutorService listeningExecutor) {
+        DomForwardedDataBrokerImpl forwardedBroker = new DomForwardedDataBrokerImpl();
+        forwardedBroker.setExecutor(listeningExecutor);
+        BindingIndependentConnector connector = BindingDomConnectorDeployer.createConnector(getMappingServiceDependency());
+        getDomBrokerDependency().registerProvider(forwardedBroker, getBundleContext());
+        ProviderSession domContext = forwardedBroker.getDomProviderContext();
+        forwardedBroker.setConnector(connector);
+        forwardedBroker.setDomProviderContext(domContext);
+        forwardedBroker.startForwarding();
+        return forwardedBroker;
     }
 
     public BundleContext getBundleContext() {

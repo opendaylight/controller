@@ -5,13 +5,16 @@ import static org.junit.Assert.assertNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
@@ -24,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalF
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.binding.RpcService;
 
 public class NoficationTest extends AbstractTest {
 
@@ -95,16 +99,36 @@ public class NoficationTest extends AbstractTest {
          * The registration of the Consumer 2. SalFlowListener is registered
          * registered as notification listener.
          */
-        BindingAwareConsumer consumer2 = new BindingAwareConsumer() {
+        BindingAwareProvider provider = new BindingAwareProvider() {
+            
             @Override
-            public void onSessionInitialized(ConsumerContext session) {
+            public void onSessionInitiated(ProviderContext session) {
                 listener2Reg = session.getSALService(NotificationProviderService.class).registerNotificationListener(
                         listener2);
             }
+            
+            @Override
+            public void onSessionInitialized(ConsumerContext session) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public Collection<? extends RpcService> getImplementations() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Collection<? extends ProviderFunctionality> getFunctionality() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
         };
 
         // registerConsumer method calls onSessionInitialized method above
-        broker.registerConsumer(consumer2, getBundleContext());
+        broker.registerProvider(provider, getBundleContext());
 
         /**
          * 3 notifications are published

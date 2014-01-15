@@ -16,11 +16,11 @@ import org.junit.Test;
 import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.*;
 
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
 import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
-import org.opendaylight.controller.sal.binding.spi.RpcRouter;
-import org.opendaylight.controller.sal.binding.spi.RpcRoutingTable;
 import org.opendaylight.controller.sal.binding.test.mock.BarListener;
 import org.opendaylight.controller.sal.binding.test.mock.BarUpdate;
 import org.opendaylight.controller.sal.binding.test.mock.CompositeListener;

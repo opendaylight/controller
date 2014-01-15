@@ -7,7 +7,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * version of RpcServices
  * 
  */
-public interface RpcConsumerRegistry {
+public interface RpcConsumerRegistry extends BindingAwareService {
     /**
      * Returns a session specific instance (implementation) of requested
      * YANG module implentation / service provided by consumer.
