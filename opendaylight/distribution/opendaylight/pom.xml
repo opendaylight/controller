@@ -1462,6 +1462,16 @@
           </execution>
         </executions>
       </plugin>
+
+        <!--Make checkstyle ignore initial xml configuration files by overriding its configuration from parent-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+            <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/configuration\/initial\/</excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
