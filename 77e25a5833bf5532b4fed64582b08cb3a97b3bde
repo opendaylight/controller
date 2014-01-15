@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_1a590e8e",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/node-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-15T02:52:26Z",
+      "side": 1,
+      "message": "Please do not add attributes like \u0027connected\u0027 to the base inventory node as they may not be applicable to all types of nodes.  Please use augmentation if needed.",
+      "revId": "77e25a5833bf5532b4fed64582b08cb3a97b3bde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
