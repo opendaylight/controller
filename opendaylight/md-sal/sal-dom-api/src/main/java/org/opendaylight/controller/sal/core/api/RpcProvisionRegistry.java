@@ -4,7 +4,7 @@ import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 
-public interface RpcProvisionRegistry {
+public interface RpcProvisionRegistry extends BrokerService {
 
     /**
      * Registers an implementation of the rpc.
