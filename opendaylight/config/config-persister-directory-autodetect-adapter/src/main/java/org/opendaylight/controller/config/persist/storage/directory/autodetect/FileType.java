@@ -23,6 +23,7 @@ enum FileType {
     plaintext, xml;
 
     public static final String XML_STORAGE_FIRST_LINE = "<" + ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME + ">";
+    private static final String XML_FILE_DEFINITION_LINE = "<?xml";
 
     static FileType getFileType(File file) {
         String firstLine = readFirstLine(file);
@@ -35,7 +36,10 @@ enum FileType {
     }
 
     private static boolean isXmlStorage(String firstLine) {
-        return firstLine.startsWith(XML_STORAGE_FIRST_LINE);
+        boolean isXml = false;
+        isXml |= firstLine.startsWith(XML_STORAGE_FIRST_LINE);
+        isXml |= firstLine.startsWith(XML_FILE_DEFINITION_LINE);
+        return isXml;
     }
 
     private static boolean isPlaintextStorage(String firstLine) {
