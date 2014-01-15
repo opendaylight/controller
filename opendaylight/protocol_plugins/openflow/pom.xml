@@ -85,6 +85,7 @@
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.openflow.openflowj</artifactId>
+      <version>1.0.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

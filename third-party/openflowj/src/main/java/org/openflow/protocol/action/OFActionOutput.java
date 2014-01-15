@@ -14,7 +14,7 @@ import org.openflow.util.U16;
 public class OFActionOutput extends OFAction implements Cloneable {
     public static int MINIMUM_LENGTH = 8;
 
-    protected short port;
+    protected int port;
     protected short maxLength;
 
     public OFActionOutput() {
@@ -22,7 +22,7 @@ public class OFActionOutput extends OFAction implements Cloneable {
         super.setLength((short) MINIMUM_LENGTH);
     }
 
-    public OFActionOutput(short port, short maxLength) {
+    public OFActionOutput(int port, short maxLength) {
         super();
         super.setType(OFActionType.OUTPUT);
         super.setLength((short) MINIMUM_LENGTH);
@@ -34,7 +34,7 @@ public class OFActionOutput extends OFAction implements Cloneable {
      * Get the output port
      * @return
      */
-    public short getPort() {
+    public int getPort() {
         return this.port;
     }
 
@@ -42,7 +42,7 @@ public class OFActionOutput extends OFAction implements Cloneable {
      * Set the output port
      * @param port
      */
-    public OFActionOutput setPort(short port) {
+    public OFActionOutput setPort(int port) {
         this.port = port;
         return this;
     }
@@ -67,14 +67,14 @@ public class OFActionOutput extends OFAction implements Cloneable {
     @Override
     public void readFrom(ByteBuffer data) {
         super.readFrom(data);
-        this.port = data.getShort();
+        this.port = data.getInt();
         this.maxLength = data.getShort();
     }
 
     @Override
     public void writeTo(ByteBuffer data) {
         super.writeTo(data);
-        data.putShort(port);
+        data.putInt(port);
         data.putShort(maxLength);
     }
 
@@ -113,7 +113,7 @@ public class OFActionOutput extends OFAction implements Cloneable {
      */
     @Override
     public String toString() {
-        return "OFActionOutput [maxLength=" + maxLength + ", port=" + U16.f(port)
+        return "OFActionOutput [maxLength=" + maxLength + ", port=" + U16.t(port)
                 + ", length=" + length + ", type=" + type + "]";
     }
 }
