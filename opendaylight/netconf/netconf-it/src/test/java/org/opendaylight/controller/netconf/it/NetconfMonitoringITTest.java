@@ -175,7 +175,6 @@ public class NetconfMonitoringITTest extends AbstractConfigTest {
 
                 responseBuilder.append(line);
                 responseBuilder.append(System.lineSeparator());
-                System.out.println(responseBuilder.toString());
 
                 if(line.contains("</rpc-reply>"))
                     break;

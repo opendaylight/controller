@@ -7,15 +7,10 @@
 */
 package org.opendaylight.controller.netconf.monitoring.xml;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.util.Date;
-
+import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1;
@@ -30,7 +25,10 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.ZeroBasedCounter32;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.Lists;
+import java.util.Date;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class JaxBSerializerTest {
 
@@ -51,7 +49,6 @@ public class JaxBSerializerTest {
         };
         NetconfState model = new NetconfState(service);
         Element xml = new JaxBSerializer().toXml(model);
-        System.out.println(XmlUtil.toString(xml));
     }
 
     private Session getMockSession() {
