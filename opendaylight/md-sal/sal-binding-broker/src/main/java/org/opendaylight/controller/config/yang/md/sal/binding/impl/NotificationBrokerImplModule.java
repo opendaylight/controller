@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -43,8 +44,7 @@ public final class NotificationBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ExecutorService executor = Executors.newFixedThreadPool(5);
-        ListeningExecutorService listeningExecutor = MoreExecutors.listeningDecorator(executor);
+        ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
         NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
         return broker;
     }

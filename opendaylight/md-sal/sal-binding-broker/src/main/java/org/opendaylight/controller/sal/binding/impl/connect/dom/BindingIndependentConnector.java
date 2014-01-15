@@ -1,12 +1,9 @@
 package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,21 +15,23 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
-import org.opendaylight.controller.sal.binding.spi.RpcContextIdentifier;
-import org.opendaylight.controller.sal.binding.spi.RpcRouter;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
+import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -49,7 +48,6 @@ import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.RpcInput;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -65,7 +63,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 
 import static com.google.common.base.Preconditions.*;
-import static org.opendaylight.yangtools.concepts.util.ClassLoaderUtils.*;
 
 public class BindingIndependentConnector implements //
         RuntimeDataProvider, //
@@ -96,7 +93,7 @@ public class BindingIndependentConnector implements //
     private Registration<DataCommitHandler<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>> biCommitHandlerRegistration;
 
     private RpcProvisionRegistry biRpcRegistry;
-    private RpcProviderRegistryImpl baRpcRegistry;
+    private RpcProviderRegistry baRpcRegistry;
 
     private ListenerRegistration<DomToBindingRpcForwardingManager> domToBindingRpcManager;
     // private ListenerRegistration<BindingToDomRpcForwardingManager>
@@ -110,6 +107,14 @@ public class BindingIndependentConnector implements //
         }
 
     };
+
+    private Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> baDataReaderRegistration;
+
+    private boolean rpcForwarding = false;
+
+    private boolean dataForwarding = false;
+
+    private boolean notificationForwarding = false;
 
     @Override
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
@@ -222,7 +227,7 @@ public class BindingIndependentConnector implements //
         return biDataService;
     }
 
-    public void setBiDataService(org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService) {
+    protected void setDomDataService(org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService) {
         this.biDataService = biDataService;
     }
 
@@ -230,7 +235,7 @@ public class BindingIndependentConnector implements //
         return baDataService;
     }
 
-    public void setBaDataService(DataProviderService baDataService) {
+    protected void setBindingDataService(DataProviderService baDataService) {
         this.baDataService = baDataService;
     }
 
@@ -238,23 +243,33 @@ public class BindingIndependentConnector implements //
         return baRpcRegistry;
     }
 
-    public void setRpcRegistry(RpcProviderRegistryImpl rpcRegistry) {
+    protected void setBindingRpcRegistry(RpcProviderRegistry rpcRegistry) {
         this.baRpcRegistry = rpcRegistry;
     }
 
-    public void start() {
-        baDataService.registerDataReader(ROOT, this);
+    public void startDataForwarding() {
+        checkState(!dataForwarding, "Connector is already forwarding data.");
+        baDataReaderRegistration = baDataService.registerDataReader(ROOT, this);
         baCommitHandlerRegistration = baDataService.registerCommitHandler(ROOT, bindingToDomCommitHandler);
         biCommitHandlerRegistration = biDataService.registerCommitHandler(ROOT_BI, domToBindingCommitHandler);
         baDataService.registerCommitHandlerListener(domToBindingCommitHandler);
-
-        if (baRpcRegistry != null && biRpcRegistry != null) {
+        dataForwarding = true;
+    }
+    
+    public void startRpcForwarding() {
+        if (baRpcRegistry != null && biRpcRegistry != null && baRpcRegistry instanceof RouteChangePublisher<?, ?>) {
+            checkState(!rpcForwarding,"Connector is already forwarding RPCs");
             domToBindingRpcManager = baRpcRegistry.registerRouteChangeListener(new DomToBindingRpcForwardingManager());
-
+            rpcForwarding = true;
         }
     }
+    
+    public void startNotificationForwarding() {
+        checkState(!notificationForwarding, "Connector is already forwarding notifications.");
+        notificationForwarding = true;
+    }
 
-    public void setMappingService(BindingIndependentMappingService mappingService) {
+    protected void setMappingService(BindingIndependentMappingService mappingService) {
         this.mappingService = mappingService;
     }
 
@@ -265,8 +280,9 @@ public class BindingIndependentConnector implements //
 
     @Override
     public void onSessionInitiated(ProviderSession session) {
-        setBiDataService(session.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
-        start();
+        setDomDataService(session.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
+        setDomRpcRegistry(session.getService(RpcProvisionRegistry.class));
+        
     }
 
     public <T extends RpcService> void onRpcRouterCreated(Class<T> serviceType, RpcRouter<T> router) {
@@ -381,7 +397,7 @@ public class BindingIndependentConnector implements //
              */
             if (bindingOpenedTransactions.containsKey(bindingTransaction.getIdentifier())) {
 
-                return CommitHandlersTransactions.allwaysSuccessfulTransaction(bindingTransaction);
+                return CommitHandlerTransactions.allwaysSuccessfulTransaction(bindingTransaction);
             }
             DataModificationTransaction domTransaction = createBindingToDomTransaction(bindingTransaction);
             BindingToDomTransaction wrapped = new BindingToDomTransaction(domTransaction, bindingTransaction);
@@ -420,7 +436,7 @@ public class BindingIndependentConnector implements //
              * duplicating data.
              */
             if (domOpenedTransactions.containsKey(identifier)) {
-                return CommitHandlersTransactions.allwaysSuccessfulTransaction(domTransaction);
+                return CommitHandlerTransactions.allwaysSuccessfulTransaction(domTransaction);
             }
 
             org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction baTransaction = createDomToBindingTransaction(domTransaction);
@@ -597,6 +613,7 @@ public class BindingIndependentConnector implements //
         @SuppressWarnings("rawtypes")
         private WeakReference<Class> outputClass;
 
+        @SuppressWarnings({ "rawtypes", "unchecked" })
         public DefaultInvocationStrategy(Method targetMethod, Class<?> outputClass,
                 Class<? extends DataContainer> inputClass) {
             super(targetMethod);
@@ -624,10 +641,27 @@ public class BindingIndependentConnector implements //
         }
 
         public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
+            @SuppressWarnings("unchecked")
             Future<RpcResult<Void>> result = (Future<RpcResult<Void>>) targetMethod.invoke(rpcService);
             RpcResult<Void> bindingResult = result.get();
             return Rpcs.getRpcResult(bindingResult.isSuccessful(), bindingResult.getErrors());
         }
+    }
 
+    public boolean isRpcForwarding() {
+        return rpcForwarding;
+    }
+
+    public boolean isDataForwarding() {
+        return dataForwarding;
+    }
+
+    public boolean isNotificationForwarding() {
+        // TODO Auto-generated method stub
+        return notificationForwarding;
+    }
+
+    public BindingIndependentMappingService getMappingService() {
+        return mappingService;
     }
 }

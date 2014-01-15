@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.codegen;
 
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
-import org.opendaylight.controller.sal.binding.spi.RpcRouter;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;

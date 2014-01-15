@@ -1,4 +1,4 @@
-package org.opendaylight.controller.sal.binding.spi;
+package org.opendaylight.controller.sal.binding.api.rpc;
 
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;

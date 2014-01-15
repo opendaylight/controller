@@ -197,6 +197,12 @@
             <artifactId>netty-config-api</artifactId>
             <version>0.2.3-SNAPSHOT</version>
         </dependency>
+        <dependency>
+        <groupId>org.opendaylight.i2ss</groupId>
+        <artifactId>xr-configuration-model</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <packaging>bundle</packaging>

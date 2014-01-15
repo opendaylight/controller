@@ -3,7 +3,8 @@ package org.opendaylight.controller.sal.binding.codegen.impl;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
-import org.opendaylight.controller.sal.binding.spi.RpcRouter;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -13,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 
-import org.opendaylight.controller.sal.binding.spi.RpcRoutingTable;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.RpcImplementation;
 import org.opendaylight.controller.md.sal.common.api.routing.MutableRoutingTable;
@@ -147,7 +147,6 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
         @Override
         public void unregisterPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
             routingTables.get(context).removeRoute(path, getInstance());
-
         }
 
         @Override

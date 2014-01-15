@@ -1,6 +1,6 @@
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
-import org.opendaylight.controller.sal.binding.spi.RpcRoutingTable;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
