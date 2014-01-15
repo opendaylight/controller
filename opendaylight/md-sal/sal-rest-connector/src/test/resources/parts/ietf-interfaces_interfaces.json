@@ -1,0 +1,10 @@
+{
+    "interface":[
+        {
+            "name":"eth0",
+            "type":"ethernetCsmacd",
+            "enabled":false,
+            "description": "some interface"
+        }
+    ]
+}

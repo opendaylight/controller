@@ -1,0 +1,43 @@
+module test-module {
+  namespace "test:module";
+  prefix tstmod;
+
+  revision 2014-01-09 {
+  }
+  
+  container cont {
+    container cont1 {
+        leaf lf11 {
+            type string;
+        }
+        leaf lf12 {
+            type string;
+        }
+    }
+  } 
+  
+  
+  rpc rpc-test {
+    input {
+      container cont {
+        container cont1 {
+            leaf lf11 {
+                type string;
+            }
+            leaf lf12 {
+                type string;
+            }
+        }
+      }    
+    }
+    output {
+        container cont-output {
+        }
+    } 
+  
+  }
+  
+  
+ 
+
+}

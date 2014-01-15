@@ -63,10 +63,7 @@ public class CnSnToXmlNotExistingLeafTypeTest {
         leafBuild.setConfiguration(true);
 
         contBuild.addChildNode(leafBuild);
-        // FIXME: build method does not accept any arguments
-        //return contBuild.build(null);
-        return null;
-
+        return contBuild.build();
     }
 
 }
