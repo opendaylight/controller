@@ -23,7 +23,8 @@ class FRMActivator extends AbstractBindingAwareProvider {
     static var FlowProvider provider = new FlowProvider();
     static var GroupProvider groupProvider = new GroupProvider();
     static var MeterProvider meterProvider = new MeterProvider();
-
+	static var PortProvider portProvider = new PortProvider();
+	
     override onSessionInitiated(ProviderContext session) {
         provider.dataService = session.getSALService(DataProviderService)
         provider.salFlowService = session.getRpcService(SalFlowService);
@@ -36,6 +37,12 @@ class FRMActivator extends AbstractBindingAwareProvider {
         meterProvider.dataService = session.getSALService(DataProviderService)
         meterProvider.salMeterService = session.getRpcService(SalMeterService)
         meterProvider.start();
+        
+        portProvider.dataService = session.getSALService(DataProviderService)
+        portProvider.salPortService = session.getRpcService(SalPortService)
+        portProvider.start();
+        
+        
     }
 
     override protected stopImpl(BundleContext context) {

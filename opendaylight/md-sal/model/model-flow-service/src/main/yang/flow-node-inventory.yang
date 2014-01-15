@@ -146,7 +146,6 @@ module flow-node-inventory {
         uses tables;
         uses group:groups;
         uses meters;
-        // TODO: ports
         
         container supported-match-types {
             list match-type {
@@ -209,6 +208,11 @@ module flow-node-inventory {
     augment "/inv:nodes/inv:node/inv:node-connector" {
         ext:augment-identifier "flow-capable-node-connector";
         uses flow-node-connector;
+    }
+    
+    augment "/inv:nodes/inv:node/inv:node-connector" {
+        ext:augment-identifier "update-node-connector";
+        uses port:port-mod;
     }
 
     augment "/inv:node-updated" {
