@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_15044048",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-01-15T16:14:33Z",
+      "side": 1,
+      "message": "This should be notification",
+      "revId": "0e3eed4332e68d19de7d5678cb47a45996f82a1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
