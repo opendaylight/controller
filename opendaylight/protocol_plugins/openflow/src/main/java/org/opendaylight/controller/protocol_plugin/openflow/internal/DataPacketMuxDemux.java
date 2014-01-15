@@ -296,7 +296,7 @@ public class DataPacketMuxDemux implements IContainerListener,
             return;
         }
 
-        Short port = (Short) outPort.getID();
+        int port = (int) outPort.getID();
         Long swID = (Long) outPort.getNode().getID();
         ISwitch sw = this.swID2ISwitch.get(swID);
 
