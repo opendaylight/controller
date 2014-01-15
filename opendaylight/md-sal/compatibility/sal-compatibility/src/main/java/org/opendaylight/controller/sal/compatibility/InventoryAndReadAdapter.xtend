@@ -3,6 +3,8 @@ package org.opendaylight.controller.sal.compatibility
 import java.util.ArrayList
 import java.util.Collections
 import java.util.List
+import java.util.Set
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.controller.sal.core.Edge
@@ -94,14 +96,22 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     OpendaylightFlowTableStatisticsService flowTableStatisticsService;
 
     @Property
-    IPluginOutInventoryService inventoryPublisher;
-
-    @Property
     FlowTopologyDiscoveryService topologyDiscovery;
     
     @Property
-    List<IPluginOutReadService> statisticsPublisher = new ArrayList<IPluginOutReadService>();
-	
+    List<IPluginOutReadService> statisticsPublisher = new CopyOnWriteArrayList<IPluginOutReadService>();
+
+    @Property
+    List<IPluginOutInventoryService> inventoryPublisher = new CopyOnWriteArrayList<IPluginOutInventoryService>();
+
+	def setInventoryPublisher(IPluginOutInventoryService listener){
+        inventoryPublisher.add(listener);
+	}
+
+	def unsetInventoryPublisher(IPluginOutInventoryService listener){
+        inventoryPublisher.remove(listener);
+	}
+
     def setReadPublisher(IPluginOutReadService listener) {
     	statisticsPublisher.add(listener);
     }
@@ -330,7 +340,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     override onNodeRemoved(NodeRemoved notification) {
         val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
 
-        inventoryPublisher.updateNode(notification.nodeRef.toADNode, UpdateType.REMOVED, properties);
+        publishNodeUpdate(notification.nodeRef.toADNode, UpdateType.REMOVED, properties);
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated update) {
@@ -341,7 +351,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
         var nodeConnector = update.nodeConnectorRef.toADNodeConnector
 
-        inventoryPublisher.updateNodeConnector(nodeConnector , updateType , update.toADNodeConnectorProperties);
+        publishNodeConnectorUpdate(nodeConnector , updateType , update.toADNodeConnectorProperties);
     }
 
     override onNodeUpdated(NodeUpdated notification) {
@@ -351,7 +361,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         if ( this._dataService.readOperationalData(identifier) == null ){
             updateType = UpdateType.ADDED;
         }
-        inventoryPublisher.updateNode(notification.nodeRef.toADNode, updateType, notification.toADNodeProperties);
+        publishNodeUpdate(notification.nodeRef.toADNode, updateType, notification.toADNodeProperties);
         
 		//Notify the listeners of IPluginOutReadService
         
@@ -573,5 +583,18 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
 	override  getConfiguredNotConnectedNodes() {
         return Collections.emptySet();
+	}
+
+
+	private def publishNodeUpdate(Node node, UpdateType updateType, Set<org.opendaylight.controller.sal.core.Property> properties){
+	    for( publisher : inventoryPublisher){
+	        publisher.updateNode(node, updateType, properties);
+	    }
+	}
+
+	private def publishNodeConnectorUpdate(org.opendaylight.controller.sal.core.NodeConnector nodeConnector, UpdateType updateType, Set<org.opendaylight.controller.sal.core.Property> properties){
+	    for( publisher : inventoryPublisher){
+	        publisher.updateNodeConnector(nodeConnector, updateType, properties);
+	    }
 	}
 }
