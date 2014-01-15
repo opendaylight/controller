@@ -286,4 +286,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
+    override getConfiguredNotConnectedSwitches() {
+        return null;
     }
+}
