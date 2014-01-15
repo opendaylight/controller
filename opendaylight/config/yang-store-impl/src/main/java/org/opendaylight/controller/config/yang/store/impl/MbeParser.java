@@ -17,6 +17,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -47,11 +48,12 @@ public class MbeParser {
 
         Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
 
+        Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
         // create SIE structure qNamesToSIEs
         for (Module module : resolveSchemaContext.getModules()) {
             String packageName = packageTranslator.getPackageName(module);
             Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
-                    .create(module, packageName);
+                    .create(module, packageName,knownSEITracker);
 
             for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries
                     .entrySet()) {
