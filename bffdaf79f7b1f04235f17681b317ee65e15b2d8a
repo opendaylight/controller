@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b899e97a",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/table/TableCommitHandler.xtend",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-15T21:19:57Z",
+      "side": 1,
+      "message": "For this to be a safe thing we need to put validation here in the first phase of the commit to insure that we have fields that would warrant writing TableConfig out.  This should be done with a call to the validator function in the validator class.",
+      "revId": "bffdaf79f7b1f04235f17681b317ee65e15b2d8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_988aa519",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/table/TableTransactionValidator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-15T21:19:57Z",
+      "side": 1,
+      "message": "For this to be a safe thing we need to put validation here in the first phase of the commit to insure that we have fields that would warrant writing TableConfig out.",
+      "revId": "bffdaf79f7b1f04235f17681b317ee65e15b2d8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
