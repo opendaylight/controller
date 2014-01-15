@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_55e079cc",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-01-15T09:31:31Z",
+      "side": 1,
+      "message": "Consider name create-data-change-event-subscription,\nwhich will return leaf with notification stream name, in which data changes will be propagated.",
+      "revId": "ef7cdf2bf02a0c5a763712866a852b7bcca41ea7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_35e505dd",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-01-15T09:31:31Z",
+      "side": 1,
+      "message": "For normal notification I would suggest name create-notification-stream which will contain a leaf-list of QNames representing notifications.",
+      "revId": "ef7cdf2bf02a0c5a763712866a852b7bcca41ea7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_75bffdaa",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-01-15T09:31:31Z",
+      "side": 1,
+      "message": "This is unnecessary, reader concepts is internal to implementation of MD-SAL.",
+      "revId": "ef7cdf2bf02a0c5a763712866a852b7bcca41ea7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d5cc696c",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-01-15T09:31:31Z",
+      "side": 1,
+      "message": "Output should be structured and provide information such as unique notification stream identifier, in which notifications will be propagated",
+      "revId": "ef7cdf2bf02a0c5a763712866a852b7bcca41ea7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
