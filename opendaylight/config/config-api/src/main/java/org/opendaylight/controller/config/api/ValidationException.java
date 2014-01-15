@@ -140,8 +140,7 @@ public class ValidationException extends RuntimeException {
 
         @Override
         public String toString() {
-            return "ExceptionMessageWithStackTrace [message=" + message
-                    + ", stackTrace=" + stackTrace + "]";
+            return message;
         }
 
     }

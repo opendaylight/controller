@@ -272,7 +272,9 @@ public class XmlElement {
 
     public String getTextContent() {
         Node textChild = element.getFirstChild();
-        Preconditions.checkState(textChild instanceof Text, getName() + " should contain text");
+        Preconditions.checkNotNull(textChild, "Child node expected, got null for " + getName() + " : " + element);
+        Preconditions.checkState(textChild instanceof Text, getName() + " should contain text." +
+                Text.class.getName() + " expected, got " + textChild);
         String content = textChild.getTextContent();
         // Trim needed
         return content.trim();

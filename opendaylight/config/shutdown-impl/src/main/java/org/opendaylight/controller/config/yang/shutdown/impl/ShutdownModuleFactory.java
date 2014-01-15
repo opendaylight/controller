@@ -10,28 +10,15 @@
 package org.opendaylight.controller.config.yang.shutdown.impl;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import java.util.Arrays;
+import java.util.Set;
+
 public class ShutdownModuleFactory extends AbstractShutdownModuleFactory {
-
-    @Override
-    public org.opendaylight.controller.config.spi.Module createModule(String instanceName, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.controller.config.api.DynamicMBeanWithInstance old, org.osgi.framework.BundleContext bundleContext) throws Exception {
-        org.opendaylight.controller.config.yang.shutdown.impl.ShutdownModule oldModule = null;
-        try {
-            oldModule = (org.opendaylight.controller.config.yang.shutdown.impl.ShutdownModule) old.getModule();
-        } catch(Exception e) {
-            return handleChangedClass(old);
-        }
-        org.opendaylight.controller.config.yang.shutdown.impl.ShutdownModule module = instantiateModule(instanceName, dependencyResolver, oldModule, old.getInstance(), bundleContext);
-
-        module.setOldSecret(oldModule.getActualOldSecret());
-        module.setSecret(oldModule.getActualSecret());
-
-        return module;
-    }
-
 
     public ShutdownModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
                                             ShutdownModule oldModule, AutoCloseable oldInstance,
@@ -45,5 +32,13 @@ public class ShutdownModuleFactory extends AbstractShutdownModuleFactory {
                                             BundleContext bundleContext) {
         Bundle systemBundle = bundleContext.getBundle(0);
         return new ShutdownModule(new ModuleIdentifier(NAME, instanceName), systemBundle);
+    }
+
+    @Override
+    public Set<ShutdownModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
+        ModuleIdentifier id = new ModuleIdentifier(NAME, NAME);
+        DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(id);
+        ShutdownModule shutdownModule = instantiateModule(NAME, dependencyResolver, bundleContext);
+        return new java.util.HashSet<>(Arrays.asList(shutdownModule));
     }
 }

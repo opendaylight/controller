@@ -34,11 +34,12 @@ import org.slf4j.LoggerFactory;
  * Code based on http://www.toedter.com/blog/?p=236
  */
 public class ExtenderBundleTracker extends BundleTracker<Object> {
-
+    private final BlankTransactionServiceTracker blankTransactionServiceTracker;
     private static final Logger logger = LoggerFactory.getLogger(ExtenderBundleTracker.class);
 
-    public ExtenderBundleTracker(BundleContext context) {
+    public ExtenderBundleTracker(BundleContext context, BlankTransactionServiceTracker blankTransactionServiceTracker) {
         super(context, Bundle.ACTIVE, null);
+        this.blankTransactionServiceTracker = blankTransactionServiceTracker;
         logger.trace("Registered as extender with context {}", context);
     }
 
@@ -64,6 +65,8 @@ public class ExtenderBundleTracker extends BundleTracker<Object> {
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
         super.removedBundle(bundle,event,object);
+        // workaround for service tracker not getting removed service event
+        blankTransactionServiceTracker.blankTransaction();
     }
 
     // TODO:test
