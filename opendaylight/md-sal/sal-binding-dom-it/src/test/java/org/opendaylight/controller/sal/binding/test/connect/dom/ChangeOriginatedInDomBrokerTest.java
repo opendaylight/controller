@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.CommitHandlersTransactions;
+import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpVersion;
@@ -136,7 +136,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> requestCommit(
                     DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
                 modificationCapture = modification;
-                return CommitHandlersTransactions.allwaysSuccessfulTransaction(modification);
+                return CommitHandlerTransactions.allwaysSuccessfulTransaction(modification);
             }
 
         };

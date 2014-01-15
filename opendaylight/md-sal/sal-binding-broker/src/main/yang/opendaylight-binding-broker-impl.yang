@@ -85,10 +85,10 @@ module opendaylight-sal-binding-broker-impl {
                         config:required-identity sal:binding-notification-service;
                     }
                 }
-            } 
+            }
         }
     }
-    
+
     augment "/config:modules/config:module/config:configuration" {
         case binding-data-broker {
             when "/config:modules/config:module/config:type = 'binding-data-broker'";
@@ -100,6 +100,7 @@ module opendaylight-sal-binding-broker-impl {
                     }
                 }
             }
+
             container mapping-service {
                 uses config:service-ref {
                     refine type {

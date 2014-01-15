@@ -175,6 +175,7 @@ class NotifyTask implements Callable<Object> {
 
     private static val log = LoggerFactory.getLogger(NotifyTask);
 
+    @SuppressWarnings("rawtypes")
     val NotificationListener listener;
     val Notification notification;
 

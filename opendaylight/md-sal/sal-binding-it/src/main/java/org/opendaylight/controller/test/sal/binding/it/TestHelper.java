@@ -87,6 +87,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "sal-binding-util").versionAsInProject(), //
                 mavenBundle("org.javassist", "javassist").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
 
