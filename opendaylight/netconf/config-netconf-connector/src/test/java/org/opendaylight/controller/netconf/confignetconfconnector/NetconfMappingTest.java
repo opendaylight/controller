@@ -260,10 +260,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         commit();
         response = getConfigCandidate();
         final String responseFromCandidate = XmlUtil.toString(response).replaceAll("\\s+", "");
-        // System.out.println(responseFromCandidate);
         response = getConfigRunning();
         final String responseFromRunning = XmlUtil.toString(response).replaceAll("\\s+", "");
-        // System.out.println(responseFromRunning);
         assertEquals(responseFromCandidate, responseFromRunning);
 
         final String expectedResult = XmlFileLoader.fileToString("netconfMessages/editConfig_expectedResult.xml")
