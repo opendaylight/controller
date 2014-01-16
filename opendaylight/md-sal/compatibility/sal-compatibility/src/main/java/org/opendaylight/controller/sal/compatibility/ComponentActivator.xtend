@@ -41,8 +41,10 @@ import org.osgi.framework.BundleContext
 import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
 import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
 import org.opendaylight.controller.sal.compatibility.adsal.DataPacketServiceAdapter
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
 
-class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareConsumer {
+class ComponentActivator extends ComponentActivatorAbstractBase {
 
     private BundleContext context;
 
@@ -83,37 +85,9 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     }
 
     def setBroker(BindingAwareBroker broker) {
-        broker.registerConsumer(this, context)
+        broker.registerProvider(new SalCompatibilityProvider(this), context)
     }
 
-    override onSessionInitialized(ConsumerContext session) {
-        val subscribe = session.getSALService(NotificationService)
-
-        // Registration of Flow Service
-        flow.delegate = session.getRpcService(SalFlowService)
-        flow.dataBrokerService = session.getSALService(DataBrokerService);
-        subscribe.registerNotificationListener(flow);
-
-        // Data Packet Service
-        subscribe.registerNotificationListener(inventory);
-        dataPacketService.delegate = session.getRpcService(PacketProcessingService)
-
-        // Inventory Service
-        inventory.dataService = session.getSALService(DataBrokerService);
-        inventory.flowStatisticsService = session.getRpcService(OpendaylightFlowStatisticsService);
-        inventory.flowTableStatisticsService = session.getRpcService(OpendaylightFlowTableStatisticsService);
-        inventory.nodeConnectorStatisticsService = session.getRpcService(OpendaylightPortStatisticsService);
-        inventory.topologyDiscovery = session.getRpcService(FlowTopologyDiscoveryService);
-		inventory.dataProviderService = session.getSALService(DataProviderService)
-		topology.dataService = session.getSALService(DataProviderService)
-		tpProvider.dataService = session.getSALService(DataProviderService)
-
-
-		tpProvider.start();
-
-        subscribe.registerNotificationListener(dataPacket)
-
-    }
 
     override protected getGlobalImplementations() {
         return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory, nodeConnectorFactory,topology,tpProvider)
@@ -223,5 +197,56 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString, MD_SAL_TYPE)
         props.put("protocolName", MD_SAL_TYPE);
         return props;
+    }
+}
+package class SalCompatibilityProvider implements BindingAwareProvider {
+    
+    private val ComponentActivator activator;
+    
+    new(ComponentActivator cmpAct) {
+        activator = cmpAct;
+    }
+    
+    override getFunctionality() {
+        // Noop
+    }
+    
+    override getImplementations() {
+        // Noop
+    }
+    
+    
+    override onSessionInitialized(ConsumerContext session) {
+        // Noop
+    }
+    
+    
+    override onSessionInitiated(ProviderContext session) {
+        val it = activator
+                val subscribe = session.getSALService(NotificationService)
+
+        // Registration of Flow Service
+        flow.delegate = session.getRpcService(SalFlowService)
+        flow.dataBrokerService = session.getSALService(DataBrokerService);
+        subscribe.registerNotificationListener(flow);
+
+        // Data Packet Service
+        subscribe.registerNotificationListener(inventory);
+        dataPacketService.delegate = session.getRpcService(PacketProcessingService)
+
+        // Inventory Service
+        inventory.dataService = session.getSALService(DataBrokerService);
+        inventory.flowStatisticsService = session.getRpcService(OpendaylightFlowStatisticsService);
+        inventory.flowTableStatisticsService = session.getRpcService(OpendaylightFlowTableStatisticsService);
+        inventory.nodeConnectorStatisticsService = session.getRpcService(OpendaylightPortStatisticsService);
+        inventory.topologyDiscovery = session.getRpcService(FlowTopologyDiscoveryService);
+        inventory.dataProviderService = session.getSALService(DataProviderService)
+        topology.dataService = session.getSALService(DataProviderService)
+        tpProvider.dataService = session.getSALService(DataProviderService)
+
+
+        tpProvider.start();
+
+        subscribe.registerNotificationListener(dataPacket)
     }
 }
