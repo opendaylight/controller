@@ -68,9 +68,6 @@
         <osgi.version>5.0.0</osgi.version>
         <jacoco.version>0.6.2.201302030002</jacoco.version>
         <slf4j.version>1.7.2</slf4j.version>
-        <opendaylight.yang.version>0.5.9-SNAPSHOT</opendaylight.yang.version>
-        <opendaylight.binding.version>0.6.0-SNAPSHOT</opendaylight.binding.version>
-        <opendaylight.yangtools.version>0.1.1-SNAPSHOT</opendaylight.yangtools.version>
         <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
     </properties>
 
@@ -163,22 +160,22 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-spi</artifactId>
-                <version>${opendaylight.binding.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-util</artifactId>
-                <version>${opendaylight.binding.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-parser-impl</artifactId>
-                <version>${opendaylight.yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-impl</artifactId>
-                <version>${opendaylight.binding.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -199,12 +196,12 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-type-provider</artifactId>
-                <version>${opendaylight.binding.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin-spi</artifactId>
-                <version>${opendaylight.yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -222,17 +219,17 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-binding</artifactId>
-                <version>${opendaylight.binding.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-common</artifactId>
-                <version>${opendaylight.yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>concepts</artifactId>
-                <version>${opendaylight.yangtools.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -284,7 +281,7 @@
                 <plugin>
                     <groupId>org.opendaylight.yangtools</groupId>
                     <artifactId>yang-maven-plugin</artifactId>
-                    <version>${opendaylight.yang.version}</version>
+                    <version>${yangtools.version}</version>
                     <executions>
                         <execution>
                             <id>sal</id>
@@ -315,7 +312,7 @@
                         <dependency>
                             <groupId>org.opendaylight.yangtools</groupId>
                             <artifactId>maven-sal-api-gen-plugin</artifactId>
-                            <version>${opendaylight.binding.version}</version>
+                            <version>${yangtools.version}</version>
                             <type>jar</type>
                         </dependency>
                     </dependencies>

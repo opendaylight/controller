@@ -22,7 +22,7 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5.9-SNAPSHOT</version>
+                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <goals>
