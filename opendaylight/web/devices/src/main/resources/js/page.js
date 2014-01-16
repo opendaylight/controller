@@ -1361,7 +1361,7 @@ one.f.switchmanager.spanPortConfig = {
 
       $fieldset.append($label).append($select);
       // input port
-      var $label = one.lib.form.label("Input Port");
+      var $label = one.lib.form.label("Port");
       var $select = one.lib.form.select.create();
       one.lib.form.select.prepend($select, {'':'None'});
       $select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.port);
