@@ -146,7 +146,9 @@ AutoCloseable {
             var SchemaSourceProvider<String> delegate;
             if (NetconfRemoteSchemaSourceProvider.isSupportedFor(initialCapabilities)) {
                 delegate = new NetconfRemoteSchemaSourceProvider(this);
-            }  else {
+            }  else if(client.capabilities.contains(NetconfRemoteSchemaSourceProvider.IETF_NETCONF_MONITORING.namespace.toString)) {
+                delegate = new NetconfRemoteSchemaSourceProvider(this);
+            } else {
                 logger.info("Netconf server {} does not support IETF Netconf Monitoring", socketAddress);
                 delegate = SchemaSourceProviders.<String>noopProvider();
             }
@@ -317,6 +319,7 @@ package class NetconfDeviceSchemaContextProvider {
     new(NetconfDevice device, SchemaSourceProvider<InputStream> sourceProvider) {
         _device = device
         _sourceProvider = sourceProvider
+        _currentContext = Optional.absent();
     }
 
     def createContextFromCapabilities(Iterable<QName> capabilities) {
