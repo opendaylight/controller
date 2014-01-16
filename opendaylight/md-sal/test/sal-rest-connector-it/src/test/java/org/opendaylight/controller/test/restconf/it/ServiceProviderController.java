@@ -221,7 +221,6 @@ public class ServiceProviderController {
                 mavenBundle(ODL, "config-persister-impl").versionAsInProject(),
 
                 mavenBundle("org.opendaylight.bgpcep", "framework").versionAsInProject(),
-                mavenBundle("org.opendaylight.bgpcep", "util").versionAsInProject(),
                 mavenBundle(YANG, "binding-generator-spi").versionAsInProject(), //
                 mavenBundle(YANG, "binding-model-api").versionAsInProject(), //
                 mavenBundle(YANG, "binding-generator-util").versionAsInProject(),

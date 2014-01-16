@@ -693,16 +693,6 @@
        <version>${yang-ext.version}</version>
       </dependency>
       <!-- bgppcep dependencies -->
-      <dependency>
-       <groupId>org.opendaylight.bgpcep</groupId>
-       <artifactId>concepts</artifactId>
-       <version>${bgpcep.version}</version>
-      </dependency>
-      <dependency>
-       <groupId>org.opendaylight.bgpcep</groupId>
-       <artifactId>util</artifactId>
-       <version>${bgpcep.version}</version>
-      </dependency>
     <dependency>
         <groupId>org.opendaylight.bgpcep</groupId>
         <artifactId>framework</artifactId>
