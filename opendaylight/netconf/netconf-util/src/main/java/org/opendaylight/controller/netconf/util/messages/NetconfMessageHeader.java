@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import org.opendaylight.protocol.util.ByteArray;
 
 import java.nio.ByteBuffer;
 
@@ -39,8 +38,7 @@ public final class NetconfMessageHeader {
         // the length should be only numbers and therefore easily parsed with
         // ASCII
         this.length = Long.parseLong(Charsets.US_ASCII.decode(
-                ByteBuffer.wrap(ByteArray.subByte(bytes, headerBegin.length, bytes.length - headerBegin.length - 1)))
-                .toString());
+                ByteBuffer.wrap(bytes, headerBegin.length, bytes.length - headerBegin.length - 1)).toString());
         Preconditions.checkState(this.length < Integer.MAX_VALUE && this.length > 0);
         this.parsed = true;
         return this;
