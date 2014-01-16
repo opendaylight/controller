@@ -22,9 +22,8 @@
             <artifactId>netconf-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.bgpcep</groupId>
-            <artifactId>framework</artifactId>
-            <version>${bgpcep.version}</version>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>protocol-framework</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
