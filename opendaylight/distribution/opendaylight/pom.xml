@@ -171,7 +171,7 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>concepts</artifactId>
-          <version>0.1.1-SNAPSHOT</version>
+          <version>${yangtools.version}</version>
         </dependency>
 
         <dependency>
@@ -414,27 +414,27 @@
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-spi</artifactId>
-          <version>${yangtools.binding.version}</version>
+          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-api</artifactId>
-          <version>${yangtools.binding.version}</version>
+          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-impl</artifactId>
-          <version>${yangtools.binding.version}</version>
+          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-util</artifactId>
-          <version>${yangtools.binding.version}</version>
+          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-model-api</artifactId>
-          <version>${yangtools.binding.version}</version>
+          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
            <groupId>commons-lang</groupId>
