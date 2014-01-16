@@ -42,10 +42,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opendaylight.bgpcep</groupId>
+            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
