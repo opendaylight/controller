@@ -65,7 +65,7 @@
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>${yangtools.binding.version}</version>
+                        <version>${yangtools.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

@@ -73,7 +73,7 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-impl</artifactId>
-            <version>0.5.9-SNAPSHOT</version>
+            <version>${yangtools.version}</version>
         </dependency>
 
         <dependency>

@@ -146,7 +146,7 @@
                         <Export-Package>
                             org.opendaylight.controller.config.yang.md.sal.remote.rpc,
                             org.opendaylight.controller.sal.connector.remoterpc,
-                            org.opendaylight.controller.sal.connector.remoterpc.*
+                            org.opendaylight.controller.sal.connector.remoterpc.*,
                         </Export-Package>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                     </instructions>
@@ -157,7 +157,7 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5.9-SNAPSHOT</version>
+                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <goals>
