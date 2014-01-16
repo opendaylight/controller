@@ -38,8 +38,10 @@ import org.osgi.framework.BundleContext
 
 import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
 import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider
 
-class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareConsumer {
+class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareProvider {
 
     private BundleContext context;
 
@@ -76,10 +78,10 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
     }
 
     def setBroker(BindingAwareBroker broker) {
-        broker.registerConsumer(this, context)
+        broker.registerProvider(this, context)
     }
 
-    override onSessionInitialized(ConsumerContext session) {
+    override onSessionInitiated(ProviderContext session) {
         val subscribe = session.getSALService(NotificationService)
 
         // Registration of Flow Service
@@ -104,6 +106,8 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         subscribe.registerNotificationListener(dataPacket)
 
     }
+    
+    
 
     override protected getGlobalImplementations() {
         return Arrays.asList(this, flow, inventory, dataPacket, nodeFactory, nodeConnectorFactory,topology,tpProvider)
@@ -197,5 +201,13 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString, MD_SAL_TYPE)
         props.put("protocolName", MD_SAL_TYPE);
         return props;
+    }
+    
+    override getFunctionality() {
+        // NOOP
+    }
+
+    override onSessionInitialized(ConsumerContext session) {
+        // NOOP
     }
 }
