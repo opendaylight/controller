@@ -30,7 +30,7 @@ public class DefaultStartExi extends AbstractNetconfOperation implements Default
 
     public static final String START_EXI = "start-exi";
 
-    private static NetconfSession netconfSession;
+    private NetconfSession netconfSession;
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStartExi.class);
 
