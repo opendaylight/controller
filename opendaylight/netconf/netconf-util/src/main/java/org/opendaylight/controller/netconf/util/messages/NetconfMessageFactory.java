@@ -20,7 +20,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.DeserializerException;
 import org.opendaylight.protocol.framework.DocumentedException;
 import org.opendaylight.protocol.framework.ProtocolMessageFactory;
-import org.opendaylight.protocol.util.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Comment;
@@ -77,9 +76,34 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
         return message;
     }
 
+    private static int findByteSequence(final byte[] bytes, final byte[] sequence) {
+        if (bytes.length < sequence.length) {
+            throw new IllegalArgumentException("Sequence to be found is longer than the given byte array.");
+        }
+        if (bytes.length == sequence.length) {
+            if (Arrays.equals(bytes, sequence)) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+        int j = 0;
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] == sequence[j]) {
+                j++;
+                if (j == sequence.length) {
+                    return i - j + 1;
+                }
+            } else {
+                j = 0;
+            }
+        }
+        return -1;
+    }
+
     private int getAdditionalHeaderEndIndex(byte[] bytes) {
         for (byte[] possibleEnd : POSSIBLE_ENDS) {
-            int idx = ByteArray.findByteSequence(bytes, possibleEnd);
+            int idx = findByteSequence(bytes, possibleEnd);
 
             if (idx != -1) {
                 return idx;

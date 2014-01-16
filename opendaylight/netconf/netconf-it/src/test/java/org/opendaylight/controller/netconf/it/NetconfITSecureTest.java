@@ -43,7 +43,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFact
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.protocol.util.SSLUtil;
 
 public class NetconfITSecureTest extends AbstractConfigTest {
 
