@@ -27,8 +27,8 @@
             <artifactId>config-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.bgpcep</groupId>
-            <artifactId>framework</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>protocol-framework</artifactId>
         </dependency>
 
         <dependency>
