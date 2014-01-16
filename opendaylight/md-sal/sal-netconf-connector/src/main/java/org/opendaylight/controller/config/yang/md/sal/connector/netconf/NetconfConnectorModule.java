@@ -118,7 +118,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider(BundleContext bundleContext) {
         if(GLOBAL_NETCONF_SOURCE_PROVIDER == null) {
             String storageFile = "cache/schema";
-            File directory = bundleContext.getDataFile(storageFile);
+//            File directory = bundleContext.getDataFile(storageFile);
+            File directory = new File("cache/schema");
             SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
             GLOBAL_NETCONF_SOURCE_PROVIDER = FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
         }

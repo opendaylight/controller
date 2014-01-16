@@ -1,6 +1,8 @@
 package org.opendaylight.controller.sal.connect.netconf;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -90,19 +92,26 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
         for (PathArgument arg : reversed) {
             CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
             builder.setQName(arg.getNodeType());
-
+            Map<QName, Object> predicates = Collections.emptyMap();
             if (arg instanceof NodeIdentifierWithPredicates) {
-                for (Entry<QName, Object> entry : ((NodeIdentifierWithPredicates) arg).getKeyValues().entrySet()) {
-                    builder.addLeaf(entry.getKey(), entry.getValue());
-                }
+                predicates = ((NodeIdentifierWithPredicates) arg).getKeyValues();
             }
+            for (Entry<QName, Object> entry : predicates.entrySet()) {
+                builder.addLeaf(entry.getKey(), entry.getValue());
+            }
+            
             if (isLast) {
                 if (action.isPresent()) {
                     builder.setAttribute(NETCONF_ACTION_QNAME, action.get());
                 }
                 if (lastChildOverride.isPresent()) {
                     List<Node<?>> children = lastChildOverride.get().getChildren();
-                    builder.addAll(children);
+                    for(Node<?> child : children) {
+                        if(!predicates.containsKey(child.getKey())) {
+                            builder.add(child);
+                        }
+                    }
+                    
                 }
             } else {
                 builder.add(previous);
