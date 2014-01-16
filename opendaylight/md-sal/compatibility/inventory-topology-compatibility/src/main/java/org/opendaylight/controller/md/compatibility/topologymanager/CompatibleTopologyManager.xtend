@@ -8,7 +8,7 @@ import java.util.Set
 import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader
 import java.util.HashMap
 import org.opendaylight.controller.sal.core.Edge
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev130712.network.topology.topology.node.TerminationPoint
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint
 import com.google.common.collect.FluentIterable
 
 class CompatibleTopologyManager extends ConfigurableLinkManager implements ITopologyManager {
