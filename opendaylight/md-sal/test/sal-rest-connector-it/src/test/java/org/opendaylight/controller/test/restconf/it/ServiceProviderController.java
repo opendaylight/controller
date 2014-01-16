@@ -211,6 +211,7 @@ public class ServiceProviderController {
                 mavenBundle(ODL, "logback-config").versionAsInProject(),
                 mavenBundle(ODL, "config-persister-api").versionAsInProject(),
                 // mavenBundle(ODL,"config-persister-file-adapter").versionAsInProject(),
+                mavenBundle(ODL, "protocol-framework").versionAsInProject(),
                 mavenBundle(ODL, "netconf-api").versionAsInProject(),
                 mavenBundle(ODL, "netconf-impl").versionAsInProject(),
                 mavenBundle(ODL, "netconf-client").versionAsInProject(),
@@ -220,7 +221,6 @@ public class ServiceProviderController {
                 mavenBundle(ODL, "config-netconf-connector").versionAsInProject(),
                 mavenBundle(ODL, "config-persister-impl").versionAsInProject(),
 
-                mavenBundle("org.opendaylight.bgpcep", "framework").versionAsInProject(),
                 mavenBundle(YANG, "binding-generator-spi").versionAsInProject(), //
                 mavenBundle(YANG, "binding-model-api").versionAsInProject(), //
                 mavenBundle(YANG, "binding-generator-util").versionAsInProject(),
