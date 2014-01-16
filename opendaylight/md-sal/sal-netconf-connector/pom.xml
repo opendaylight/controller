@@ -43,7 +43,6 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-impl</artifactId>
-            <version>0.5.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -206,11 +205,18 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5.9-SNAPSHOT</version>
+                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <goals>

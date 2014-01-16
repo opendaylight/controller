@@ -73,8 +73,7 @@
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <junit.version>4.8.1</junit.version>
     <bgpcep.version>0.3.0-SNAPSHOT</bgpcep.version>
-    <yangtools.version>0.5.9-SNAPSHOT</yangtools.version>
-    <yangtools.binding.version>0.6.0-SNAPSHOT</yangtools.binding.version>
+    <yangtools.version>0.6.0-SNAPSHOT</yangtools.version>
     <!--versions for bits of the controller -->
     <controller.version>0.4.1-SNAPSHOT</controller.version>
     <hosttracker.version>0.5.1-SNAPSHOT</hosttracker.version>
@@ -729,7 +728,7 @@
       <dependency>
        <groupId>org.opendaylight.yangtools</groupId>
        <artifactId>yang-binding</artifactId>
-       <version>${yangtools.binding.version}</version>
+       <version>${yangtools.version}</version>
       </dependency>
       <dependency>
        <groupId>org.opendaylight.yangtools</groupId>
@@ -740,6 +739,11 @@
        <groupId>org.opendaylight.yangtools</groupId>
        <artifactId>yang-data-api</artifactId>
        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-data-impl</artifactId>
+        <version>${yangtools.version}</version>
       </dependency>
       <dependency>
        <groupId>org.opendaylight.yangtools</groupId>
@@ -755,6 +759,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>switchmanager</artifactId>
         <version>${switchmanager.api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>concepts</artifactId>
+        <version>${yangtools.version}</version>
       </dependency>
 
       <!-- equinox http service bridge -->

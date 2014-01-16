@@ -40,12 +40,10 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-impl</artifactId>
-      <version>${yang.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-util</artifactId>
-      <version>${yang.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -73,7 +71,6 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-parser-impl</artifactId>
-      <version>${yang.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -102,7 +99,7 @@
               org.opendaylight.controller.sal.restconf.impl,
               org.eclipse.xtend2.lib,
               org.eclipse.xtend.lib,
-              org.eclipse.xtext.xbase.*
+              org.eclipse.xtext.xbase.*,
             </Private-Package>
             <Import-Package>
             *,
