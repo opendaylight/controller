@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.SortedSet;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.junit.Assert.assertEquals;
@@ -21,14 +23,22 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class DirectoryStorageAdapterTest {
-    XmlDirectoryPersister tested;
+    Persister tested;
     Logger logger = LoggerFactory.getLogger(DirectoryStorageAdapterTest.class.toString());
+
+    private Persister instantiatePersisterFromAdapter(File file){
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("directoryStorage",file.getPath());
+        XmlDirectoryStorageAdapter dsa = new XmlDirectoryStorageAdapter();
+        return dsa.instantiate(pp);
+    }
 
     @Test
     public void testEmptyDirectory() throws Exception {
         File folder = new File("target/emptyFolder");
         folder.mkdir();
-        tested = new XmlDirectoryPersister((folder));
+
+        tested = instantiatePersisterFromAdapter(folder);
         assertEquals(Collections.<ConfigSnapshotHolder>emptyList(), tested.loadLastConfigs());
 
         try {
@@ -59,7 +69,8 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testOneFile() throws Exception {
         File folder = getFolder("oneFile");
-        tested = new XmlDirectoryPersister(folder);
+        tested = instantiatePersisterFromAdapter(folder);
+
         logger.info("Testing : "+tested.toString());
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
@@ -78,7 +89,7 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testTwoFiles() throws Exception {
         File folder = getFolder("twoFiles");
-        tested = new XmlDirectoryPersister((folder));
+        tested = instantiatePersisterFromAdapter(folder);
         logger.info("Testing : "+tested.toString());
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());

@@ -7,21 +7,26 @@
  */
 package org.opendaylight.controller.config.persist.storage.directory.autodetect;
 
+import java.io.File;
+import java.util.List;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-
-import java.io.File;
-import java.util.List;
+import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 
 public class AutodetectDirectoryPersisterTest {
 
     @Test
     public void testCombined() throws Exception {
         File resourcePath = FileTypeTest.getResourceAsFile("/combined/1controller.txt.config");
+        File parentFile = resourcePath.getParentFile();
 
-        AutodetectDirectoryPersister persister = new AutodetectDirectoryPersister(resourcePath.getParentFile());
+        AutodetectDirectoryStorageAdapter adapter = new AutodetectDirectoryStorageAdapter();
+
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("directoryStorage",parentFile.getPath());
+        AutodetectDirectoryPersister persister = (AutodetectDirectoryPersister) adapter.instantiate(pp);
         List<ConfigSnapshotHolder> configs = persister.loadLastConfigs();
 
         Assert.assertEquals(2, configs.size());
@@ -32,6 +37,5 @@ public class AutodetectDirectoryPersisterTest {
         String snapFromXml = configs.get(1).getConfigSnapshot();
         org.junit.Assert.assertThat(snapFromXml, JUnitMatchers.containsString("<config>xml</config>"));
 
-        Assert.assertEquals(configs.get(0).getCapabilities(), configs.get(1).getCapabilities());
-    }
+        Assert.assertEquals(configs.get(0).getCapabilities(), configs.get(1).getCapabilities());    }
 }
