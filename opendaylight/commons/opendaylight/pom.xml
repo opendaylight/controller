@@ -72,7 +72,6 @@
     <enforcer.version>1.3.1</enforcer.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <junit.version>4.8.1</junit.version>
-    <bgpcep.version>0.3.0-SNAPSHOT</bgpcep.version>
     <yangtools.version>0.5.9-SNAPSHOT</yangtools.version>
     <yangtools.binding.version>0.6.0-SNAPSHOT</yangtools.binding.version>
     <!--versions for bits of the controller -->
@@ -663,9 +662,9 @@
         <version>2.0.1</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.bgpcep</groupId>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>mockito-configuration</artifactId>
-        <version>${bgpcep.version}</version>
+        <version>1.0.0-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <!-- yang model dependencies -->
