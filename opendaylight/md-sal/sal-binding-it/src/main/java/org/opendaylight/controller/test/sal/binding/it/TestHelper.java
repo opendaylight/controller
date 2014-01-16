@@ -38,10 +38,10 @@ public class TestHelper {
 
     public static Option configMinumumBundles() {
         return new DefaultCompositeOption(
-                mavenBundle("org.opendaylight.bgpcep", "framework").versionAsInProject(), //
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
                 mavenBundle(CONTROLLER, "config-api").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-api").versionAsInProject(), //
