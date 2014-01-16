@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 /**
  * NetconfMessageFactory for (de)serializing DOM documents.
@@ -37,6 +37,10 @@ import com.google.common.collect.Lists;
 public final class NetconfMessageFactory implements ProtocolMessageFactory<NetconfMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfMessageFactory.class);
+    private static final List<byte[]> POSSIBLE_STARTS = ImmutableList.of(
+        "[".getBytes(Charsets.UTF_8), "\r\n[".getBytes(Charsets.UTF_8), "\n[".getBytes(Charsets.UTF_8));
+    private static final List<byte[]> POSSIBLE_ENDS = ImmutableList.of(
+        "]\n".getBytes(Charsets.UTF_8), "]\r\n".getBytes(Charsets.UTF_8));
 
     private final Optional<String> clientId;
 
@@ -74,8 +78,8 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
     }
 
     private int getAdditionalHeaderEndIndex(byte[] bytes) {
-        for (String possibleEnd : Lists.newArrayList("]\n", "]\r\n")) {
-            int idx = ByteArray.findByteSequence(bytes, possibleEnd.getBytes(Charsets.UTF_8));
+        for (byte[] possibleEnd : POSSIBLE_ENDS) {
+            int idx = ByteArray.findByteSequence(bytes, possibleEnd);
 
             if (idx != -1) {
                 return idx;
@@ -86,11 +90,10 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
     }
 
     private boolean startsWithAdditionalHeader(byte[] bytes) {
-        List<String> possibleStarts = Lists.newArrayList("[", "\r\n[", "\n[");
-        for (String possibleStart : possibleStarts) {
+        for (byte[] possibleStart : POSSIBLE_STARTS) {
             int i = 0;
-            for (byte b : possibleStart.getBytes(Charsets.UTF_8)) {
-                if(bytes[i]!=b)
+            for (byte b : possibleStart) {
+                if(bytes[i] != b)
                     break;
 
                 return true;
