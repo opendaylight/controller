@@ -37,11 +37,11 @@ one.f.dashlet = {
 one.f.menu = {
   left : {
     top : [
-      one.f.dashlet.nodesLearnt,
-      one.f.dashlet.connection
+      one.f.dashlet.nodesLearnt
       ],
     bottom : [
-      one.f.dashlet.staticRouteConfig
+      one.f.dashlet.staticRouteConfig,
+      one.f.dashlet.connection
       ]
   },
   right : {
