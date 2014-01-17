@@ -78,10 +78,12 @@ public class NeutronSubnet_IPAllocationPool {
 
     static long convert(String inputString) {
         long ans = 0;
-        String[] parts = inputString.split("\\.");
-        for (String part: parts) {
-            ans <<= 8;
-            ans |= Integer.parseInt(part);
+        if (inputString != null) {
+            String[] parts = inputString.split("\\.");
+            for (String part: parts) {
+                ans <<= 8;
+                ans |= Integer.parseInt(part);
+            }
         }
         return ans;
     }
