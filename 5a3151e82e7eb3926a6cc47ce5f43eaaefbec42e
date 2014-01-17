@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_64b4e881",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-17T15:28:13Z",
+      "side": 1,
+      "message": "We should allow the save config only to whom has WRITE privilege.",
+      "revId": "5a3151e82e7eb3926a6cc47ce5f43eaaefbec42e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
