@@ -748,7 +748,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
             for (OFStatistics stats : targetList) {
                 V6StatsReply v6Stats = (V6StatsReply) stats;
                 V6Match v6Match = v6Stats.getMatch();
-                if (v6Stats.getPriority() == priority && v6Match.equals(targetMatch)) {
+                if (v6Stats.getPriority() == priority && targetMatch.equals(v6Match)) {
                     List<OFStatistics> list = new ArrayList<OFStatistics>();
                     list.add(stats);
                     return list;
@@ -757,7 +757,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
         } else {
             for (OFStatistics stats : statsList) {
                 OFFlowStatisticsReply flowStats = (OFFlowStatisticsReply) stats;
-                if (flowStats.getPriority() == priority && flowStats.getMatch().equals(ofMatch)) {
+                if (flowStats.getPriority() == priority && ofMatch.equals(flowStats.getMatch())) {
                     List<OFStatistics> list = new ArrayList<OFStatistics>();
                     list.add(stats);
                     return list;
