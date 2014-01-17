@@ -4,9 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-
 import com.google.common.base.Charsets;
 
 public class RestOperationUtils {
@@ -15,14 +12,6 @@ public class RestOperationUtils {
     static final String XML = "+xml";
 
     private RestOperationUtils() {
-    }
-
-    static Entity<String> entity(String data, MediaType mediaType) {
-        return Entity.entity(data, mediaType);
-    }
-
-    static Entity<String> entity(String data, String mediaType) {
-        return Entity.entity(data, mediaType);
     }
 
     static String createUri(String prefix, String encodedPart) throws UnsupportedEncodingException {
