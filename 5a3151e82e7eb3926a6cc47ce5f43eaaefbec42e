@@ -16,6 +16,24 @@
       "revId": "5a3151e82e7eb3926a6cc47ce5f43eaaefbec42e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4ff69dfa",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-01-17T18:08:14Z",
+      "side": 1,
+      "message": "Cut/paste error. Thanks for pointing out. Will take care of it in the next patch.",
+      "parentUuid": "da6255ed_64b4e881",
+      "revId": "5a3151e82e7eb3926a6cc47ce5f43eaaefbec42e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
