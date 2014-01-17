@@ -1,0 +1,15 @@
+module module3 {
+  namespace "module:two";  
+
+  prefix "m3";
+  revision 2014-01-17 {    
+  }
+
+    container cont_m3 {
+        leaf lf1_m3 {
+            type string;
+        }
+    }
+
+  
+}
