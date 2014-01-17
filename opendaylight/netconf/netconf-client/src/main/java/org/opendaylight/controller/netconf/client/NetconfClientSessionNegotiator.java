@@ -48,7 +48,8 @@ public class NetconfClientSessionNegotiator extends
             @Nullable
             @Override
             public String apply(@Nullable XmlElement input) {
-                return input.getTextContent();
+                // Trim possible leading/tailing whitespace
+                return input.getTextContent().trim();
             }
         });
     }

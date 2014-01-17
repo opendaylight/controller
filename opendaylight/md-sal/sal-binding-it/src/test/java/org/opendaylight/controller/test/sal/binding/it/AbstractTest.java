@@ -27,7 +27,7 @@ public abstract class AbstractTest {
     @Inject
     @Filter(timeout=60*1000)
     BindingAwareBroker broker;
-    
+
     @Inject
     BundleContext bundleContext;
 
@@ -64,9 +64,12 @@ public abstract class AbstractTest {
                 bindingAwareSalBundles(),
                 configMinumumBundles(),
                 // BASE Models
-                baseModelBundles(), 
-                flowCapableModelBundles(), 
+                baseModelBundles(),
+                flowCapableModelBundles(),
+
+                // Set fail if unresolved bundle present
+                systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
                 junitAndMockitoBundles());
     }
-    
+
 }

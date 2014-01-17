@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.SortedSet;
 
 @XmlRootElement(name = ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME)
@@ -46,6 +47,7 @@ public class ConfigSnapshot {
 
     @XmlElement(name = "capability")
     @XmlElementWrapper(name = "required-capabilities")
+    @XmlJavaTypeAdapter(value=StringTrimAdapter.class)
     public SortedSet<String> getCapabilities() {
         return capabilities;
     }
@@ -62,4 +64,6 @@ public class ConfigSnapshot {
         sb.append('}');
         return sb.toString();
     }
+
 }
+
