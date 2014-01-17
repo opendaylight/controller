@@ -1,9 +1,7 @@
-module opendaylight-table-types {
+module table-types {
     namespace "urn:opendaylight:table:types";
     prefix table;
 
-    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-flow-types {prefix flow;revision-date "2013-10-26";}
     import opendaylight-action-types {prefix action;}
 
@@ -219,7 +217,7 @@ module opendaylight-table-types {
             }
 
             case next-table {   
-                container tables {
+                container next-table {
                     leaf-list table-ids {
                         type uint8;
                     }
@@ -227,7 +225,7 @@ module opendaylight-table-types {
             }
             
             case next-table-miss {   
-                container tables {
+                container next-table-miss {
                     leaf-list table-ids {
                         type uint8;
                     }
@@ -259,31 +257,38 @@ module opendaylight-table-types {
             }
             
             case match {
+		container match {
                 uses set-field-match; 
             }
+	    }
             
-            case wildcards {   
+            case wildcards { 
+		container wildcards {  
                 uses set-field-match;
             }
-            
-            case write-setfield {   
+            }
+            case write-setfield {
+		container write-setfield {   
                 uses set-field-match;
             }
-            
+            }
             case write-setfield-miss {   
-                uses set-field-match;
+		container write-setfield-miss {                
+		uses set-field-match;
             }
-            
-            case apply-setfield {   
+            }
+            case apply-setfield {
+		container apply-setfield {   
                 uses set-field-match; 
             }
-            
-            case apply-setfield-miss {   
+            }
+            case apply-setfield-miss { 
+		container apply-setfield-miss {  
                 uses set-field-match; 
             }
         }
     } 
-    
+    }
     grouping table-features {
         list table-features {
             key "table-id";

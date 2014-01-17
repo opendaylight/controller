@@ -1,4 +1,4 @@
-module opendaylight-match-types {
+module match-types {
     namespace "urn:opendaylight:model:match:types";
     prefix "match";
 

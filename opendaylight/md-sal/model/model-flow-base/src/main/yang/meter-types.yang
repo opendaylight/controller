@@ -1,8 +1,8 @@
-module opendaylight-meter-types {
+module meter-types {
     namespace "urn:opendaylight:meter:types";
     prefix meter;
 
-    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
 
 
@@ -83,6 +83,7 @@ module opendaylight-meter-types {
             }
 
             case dscp-remark {
+		container dscp-remark {
                 leaf rate {
                     type uint32;
                 }
@@ -94,10 +95,12 @@ module opendaylight-meter-types {
                 leaf perc_level {
                     type uint8;
                 }
+		}
             }
             
             case experimenter {
-                leaf rate {
+		container experimenter {                
+		leaf rate {
                     type uint32;
                 }
                 
@@ -108,6 +111,7 @@ module opendaylight-meter-types {
                 leaf experimenter {
                     type uint32;
                 }
+		}
             }
         }
     }
