@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -19,7 +18,6 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import org.glassfish.jersey.test.TestProperties;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -38,7 +36,6 @@ public class RestDeleteOperationTest extends JerseyTest {
     private static ControllerContext controllerContext;
     private static BrokerFacade brokerFacade;
     private static RestconfImpl restconfImpl;
-    private static final MediaType MEDIA_TYPE_DRAFT02 = new MediaType("application", "yang.data+xml");
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
@@ -56,13 +53,10 @@ public class RestDeleteOperationTest extends JerseyTest {
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-        /*
-         * enable(TestProperties.LOG_TRAFFIC);
-         */
-        enable(TestProperties.DUMP_ENTITY);
-        enable(TestProperties.RECORD_LOG_LEVEL);
-        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
-
+//        enable(TestProperties.LOG_TRAFFIC);
+//        enable(TestProperties.DUMP_ENTITY);
+//        enable(TestProperties.RECORD_LOG_LEVEL);
+//        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 XmlToCompositeNodeProvider.INSTANCE);
@@ -70,24 +64,22 @@ public class RestDeleteOperationTest extends JerseyTest {
     }
 
     @Test
-    public void testDeleteConfigurationData() throws UnsupportedEncodingException, FileNotFoundException {
-        String uri2 = createUri("/config/", "test-interface:interfaces");
-
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
-                TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+    public void deleteConfigStatusCodes() throws UnsupportedEncodingException {
+        String uri = createUri("/config/", "test-interface:interfaces");
+        Future<RpcResult<TransactionStatus>> dummyFuture = createFuture(TransactionStatus.COMMITED);
         when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
-
-        Response response = target(uri2).request(MEDIA_TYPE_DRAFT02).delete();
+        Response response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(200, response.getStatus());
-
-        rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.FAILED).build();
-        dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
-
+        
+        dummyFuture = createFuture(TransactionStatus.FAILED);
         when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
-
-        response = target(uri2).request(MEDIA_TYPE_DRAFT02).delete();
+        response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(500, response.getStatus());
+    }
+    
+    private Future<RpcResult<TransactionStatus>> createFuture(TransactionStatus statusName) {
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName).build();
+        return DummyFuture.builder().rpcResult(rpcResult).build();
     }
 
 }

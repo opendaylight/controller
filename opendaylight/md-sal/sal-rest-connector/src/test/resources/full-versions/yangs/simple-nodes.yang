@@ -54,6 +54,11 @@ module simple-nodes {
                leaf beer {
                    type string;
                }
+               container nonalcoholic {
+                   leaf beer {
+                       type string;
+                   }
+               }
            }
            case late-night {
                leaf chocolate {
