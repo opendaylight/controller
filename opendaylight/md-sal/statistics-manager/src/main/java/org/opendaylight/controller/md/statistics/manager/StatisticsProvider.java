@@ -177,34 +177,32 @@ public class StatisticsProvider implements AutoCloseable {
 
         for (Node targetNode : targetNodes){
             
-            InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
-            NodeRef targetNodeRef = new NodeRef(targetInstanceId);
-            
-            try {
-                
-                sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
-
-                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
-
-                sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
-                
-                sendAllFlowTablesStatisticsRequest(targetNodeRef);
-                
-                sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
-
-            }catch(Exception e){
-                spLogger.error("Exception occured while sending statistics requests : {}",e);
-            }
-
             if(targetNode.getAugmentation(FlowCapableNode.class) != null){
 
                 spLogger.info("Send request for stats collection to node : {})",targetNode.getId());
-
+                
+                InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
+                
+                NodeRef targetNodeRef = new NodeRef(targetInstanceId);
+            
                 try{
-                  sendAllGroupStatisticsRequest(targetNodeRef);
-                  sendAllMeterStatisticsRequest(targetNodeRef);
-                  sendGroupDescriptionRequest(targetNodeRef);
-                  sendMeterConfigStatisticsRequest(targetNodeRef);
+                    sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
+                
+                    sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
+
+                    sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
+                
+                    sendAllFlowTablesStatisticsRequest(targetNodeRef);
+                
+                    sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
+
+                    sendAllGroupStatisticsRequest(targetNodeRef);
+                    
+                    sendAllMeterStatisticsRequest(targetNodeRef);
+                    
+                    sendGroupDescriptionRequest(targetNodeRef);
+                    
+                    sendMeterConfigStatisticsRequest(targetNodeRef);
                 }catch(Exception e){
                     spLogger.error("Exception occured while sending statistics requests : {}", e);
                 }
