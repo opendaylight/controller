@@ -390,8 +390,8 @@ one.f.flows = {
                     $tr = $(tr);
                     $span = $("td span", $tr);
                     var flowstatus = $span.data("flowstatus");
-                    if($span.data("installInHw") != null) {
-                        var installInHw = $span.data("installInHw").toString();
+                    if($span.data("installinhw") != null) {
+                        var installInHw = $span.data("installinhw").toString();
                         if(installInHw == "true" && flowstatus == "Success") {
                             $tr.addClass("success");
                         } else {
