@@ -77,15 +77,18 @@ public class NeutronSubnet_IPAllocationPool implements Serializable {
      *
      * @param inputString
      *            IPv4 address in dotted decimal format
-     * @returns high-endian representation of the IPv4 address as a long
+     * @returns high-endian representation of the IPv4 address as a long.
+     *          This method will return 0 if the input is null.
      */
 
     static long convert(String inputString) {
         long ans = 0;
-        String[] parts = inputString.split("\\.");
-        for (String part: parts) {
-            ans <<= 8;
-            ans |= Integer.parseInt(part);
+        if (inputString != null) {
+            String[] parts = inputString.split("\\.");
+            for (String part: parts) {
+                ans <<= 8;
+                ans |= Integer.parseInt(part);
+            }
         }
         return ans;
     }
