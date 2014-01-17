@@ -29,6 +29,7 @@ import javax.ws.rs.core.UriInfo;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
+import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
@@ -249,6 +250,44 @@ public class ControllerManagerNorthbound {
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Controller Property", username, "removed", propertyName);
 
+            return Response.noContent().build();
+        }
+        return NorthboundUtils.getResponse(status);
+    }
+
+    /**
+     * Save controller configuration
+     *
+     * Request URL:
+     *  http://localhost:8080/controller/nb/v2/controllermanager/configuration
+     *
+     * Request body is empty
+     */
+    @Path("/configuration")
+    @PUT
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
+            @ResponseCode(code = 204, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+            @ResponseCode(code = 503, condition = "Configuration service is unavailable.")
+    })
+    public Response saveConfiguration() {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation");
+        }
+
+        IConfigurationService configService = (IConfigurationService)
+                ServiceHelper.getGlobalInstance(IConfigurationService.class, this);
+
+        if (configService == null) {
+            throw new ServiceUnavailableException("Configuration Service " +
+                    RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+        Status status = configService.saveConfigurations();
+        if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Controller Configuration", username,
+                    "save", "configuration");
             return Response.noContent().build();
         }
         return NorthboundUtils.getResponse(status);
