@@ -666,26 +666,33 @@ public class ContainerFlowConfig implements Serializable {
      * @return the result of the check as Status object, if successful
      */
     private Status validateIPs() {
-        if (nwSrc != null) {
-            if (!NetUtils.isIPAddressValid(nwSrc)) {
-                return new Status(StatusCode.BADREQUEST, "Invalid network source address");
-            }
-            byte[] bytePrefix = NetUtils.getSubnetPrefix(this.getSrcIPNum(), this.getSrcIPMaskLen()).getAddress();
-            long prefix = BitBufferHelper.getLong(bytePrefix);
-            if (prefix == 0) {
-                return new Status(StatusCode.BADREQUEST, "Invalid network source address: subnet zero");
-            }
+        if(nwSrc == null || nwSrc.equals("")) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network source address");
         }
-        if (nwDst != null) {
-            if (!NetUtils.isIPAddressValid(nwDst)) {
-                return new Status(StatusCode.BADREQUEST, "Invalid network destination address");
-            }
-            byte[] bytePrefix = NetUtils.getSubnetPrefix(this.getDstIPNum(), this.getDstIPMaskLen()).getAddress();
-            long prefix = BitBufferHelper.getLong(bytePrefix);
-            if (prefix == 0) {
-                return new Status(StatusCode.BADREQUEST, "Invalid network destination address: subnet zero");
-            }
+
+        if (!NetUtils.isIPAddressValid(nwSrc)) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network source address");
         }
+
+        if(nwDst == null || nwSrc.equals("")) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network destination address");
+        }
+
+        byte[] bytePrefix = NetUtils.getSubnetPrefix(this.getSrcIPNum(), this.getSrcIPMaskLen()).getAddress();
+        long prefix = BitBufferHelper.getLong(bytePrefix);
+        if (prefix == 0) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network source address: subnet zero");
+        }
+
+        if (!NetUtils.isIPAddressValid(nwDst)) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network destination address");
+        }
+        bytePrefix = NetUtils.getSubnetPrefix(this.getDstIPNum(), this.getDstIPMaskLen()).getAddress();
+        prefix = BitBufferHelper.getLong(bytePrefix);
+        if (prefix == 0) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network destination address: subnet zero");
+        }
+
         return new Status(StatusCode.SUCCESS);
     }
 
