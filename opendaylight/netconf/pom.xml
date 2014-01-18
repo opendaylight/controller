@@ -75,12 +75,6 @@
                 <version>${osgi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.bgpcep</groupId>
-                <artifactId>mockito-configuration</artifactId>
-                <version>${bgpcep.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>config-api</artifactId>
                 <version>${config.version}</version>

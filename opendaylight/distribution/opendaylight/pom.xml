@@ -169,6 +169,10 @@
           <version>${concepts.version}</version>
         </dependency>
         <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>protocol-framework</artifactId>
+        </dependency>
+        <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>concepts</artifactId>
           <version>0.1.1-SNAPSHOT</version>
@@ -1362,12 +1366,6 @@
     <dependency>
      <groupId>org.opendaylight.yangtools.model</groupId>
      <artifactId>opendaylight-l2-types</artifactId>
-    </dependency>
-
-    <!-- bgppcep dependencies -->
-    <dependency>
-      <groupId>org.opendaylight.bgpcep</groupId>
-      <artifactId>framework</artifactId>
     </dependency>
 
     <!--Netty-->

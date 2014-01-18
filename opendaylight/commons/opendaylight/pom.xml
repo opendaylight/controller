@@ -93,6 +93,7 @@
     <networkconfig.bridgedomain.northbound.version>0.0.2-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <commons.httpclient.version>0.1.1-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
+    <protocol-framework.version>0.4.0-SNAPSHOT</protocol-framework.version>
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
     <netty.version>4.0.10.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>
@@ -693,12 +694,13 @@
        <artifactId>yang-ext</artifactId>
        <version>${yang-ext.version}</version>
       </dependency>
-      <!-- bgppcep dependencies -->
-    <dependency>
-        <groupId>org.opendaylight.bgpcep</groupId>
-        <artifactId>framework</artifactId>
-        <version>${bgpcep.version}</version>
-     </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>protocol-framework</artifactId>
+        <version>${protocol-framework.version}</version>
+      </dependency>
+
         <!--Netty-->
         <dependency>
             <groupId>io.netty</groupId>
