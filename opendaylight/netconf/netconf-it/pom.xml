@@ -123,9 +123,8 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.bgpcep</groupId>
+            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>

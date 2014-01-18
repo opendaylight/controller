@@ -166,11 +166,6 @@
                 <type>test-jar</type>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.bgpcep</groupId>
-                <artifactId>mockito-configuration</artifactId>
-                <version>${bgpcep.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-spi</artifactId>
                 <version>${opendaylight.binding.version}</version>
