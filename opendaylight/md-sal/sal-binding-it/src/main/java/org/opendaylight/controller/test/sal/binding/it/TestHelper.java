@@ -78,7 +78,9 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "config-netconf-connector").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-impl").versionAsInProject(), //
 
-                mavenBundle(CONTROLLER, "config-persister-file-adapter").versionAsInProject().noStart());
+                mavenBundle(CONTROLLER, "config-persister-file-xml-adapter").versionAsInProject().noStart(),
+                mavenBundle("org.eclipse.persistence", "org.eclipse.persistence.moxy").versionAsInProject(),
+                mavenBundle("org.eclipse.persistence", "org.eclipse.persistence.core").versionAsInProject());
 
     }
 
@@ -119,9 +121,9 @@ public class TestHelper {
                 systemProperty("netconf.tcp.client.port").value("18383"), //
                 systemProperty("netconf.config.persister.active").value("1"), //
                 systemProperty("netconf.config.persister.1.storageAdapterClass").value(
-                        "org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter"), //
+                        "org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter"), //
                 systemProperty("netconf.config.persister.1.properties.fileStorage")
-                        .value(PathUtils.getBaseDir() + "/src/test/resources/controller.config"), //
+                        .value(PathUtils.getBaseDir() + "/src/test/resources/controller.xml"), //
                 systemProperty("netconf.config.persister.1.properties.numberOfBackups").value("1") //
                 //systemProperty("yangstore.blacklist").value(".*controller.model.*") //
 
