@@ -25,15 +25,18 @@ import static org.junit.Assert.fail;
 public class DirectoryStorageAdapterTest {
     Persister tested;
 
+    private Persister instantiatePersisterFromAdapter(File file){
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("directoryStorage",file.getPath());
+        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
+        return dsa.instantiate(pp);
+    }
     @Test
     public void testEmptyDirectory() throws Exception {
         File folder = new File("target/emptyFolder");
         folder.mkdir();
 
-        PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty("directoryStorage",folder.getPath());
-        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
-        tested = dsa.instantiate(pp);
+        tested =  instantiatePersisterFromAdapter(folder);
         assertEquals(Collections.<ConfigSnapshotHolder>emptyList(), tested.loadLastConfigs());
 
         try {
@@ -64,10 +67,8 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testOneFile() throws Exception {
         File folder = getFolder("oneFile");
-        PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty("directoryStorage",folder.getPath());
-        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
-        tested = dsa.instantiate(pp);
+
+        tested = instantiatePersisterFromAdapter(folder);
 
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
@@ -79,10 +80,7 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testTwoFiles() throws Exception {
         File folder = getFolder("twoFiles");
-        PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty("directoryStorage",folder.getPath());
-        DirectoryStorageAdapter dsa = new DirectoryStorageAdapter();
-        tested = dsa.instantiate(pp);
+        tested = instantiatePersisterFromAdapter(folder);
 
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());
