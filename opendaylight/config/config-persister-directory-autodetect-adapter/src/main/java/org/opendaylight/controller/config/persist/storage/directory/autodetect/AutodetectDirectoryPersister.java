@@ -67,6 +67,8 @@ public class AutodetectDirectoryPersister implements Persister {
     private ConfigSnapshotHolder loadLastConfig(File file, FileType fileType) throws IOException {
         switch (fileType) {
         case plaintext:
+            logger.warn("Plaintext configuration files are deprecated, and will not be supported in future versions. " +
+                    "Use xml files instead");
             return DirectoryPersister.loadLastConfig(file);
         case xml:
             try {
