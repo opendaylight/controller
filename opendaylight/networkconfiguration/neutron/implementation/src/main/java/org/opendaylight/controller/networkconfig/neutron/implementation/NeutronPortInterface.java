@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -17,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -24,6 +28,7 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
@@ -32,11 +37,20 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectWriter;
+import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronPortInterface implements INeutronPortCRUD {
+public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationContainerAware,
+                                             IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronPortInterface.class);
+    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
+    private static final String FILENAME ="neutron.port";
+    private static String fileName;
     private String containerName = null;
 
     private IClusterContainerServices clusterContainerService = null;
@@ -104,6 +118,10 @@ public class NeutronPortInterface implements INeutronPortCRUD {
     private void startUp() {
         allocateCache();
         retrieveCache();
+        if (portDB.isEmpty()) {
+            loadConfiguration();
+        }
+
     }
 
     /**
@@ -120,6 +138,7 @@ public class NeutronPortInterface implements INeutronPortCRUD {
             // In the Global instance case the containerName is empty
             containerName = "";
         }
+        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -327,6 +346,32 @@ public class NeutronPortInterface implements INeutronPortCRUD {
             }
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadConfiguration() {
+        ObjectReader objReader = new ObjectReader();
+        ConcurrentMap<String, NeutronPort> confList = (ConcurrentMap<String, NeutronPort>)
+                                                            objReader.read(this, fileName);
+
+        if (confList == null) {
+            return;
+        }
+
+        for (String key : confList.keySet()) {
+            portDB.put(key, confList.get(key));
+        }
+    }
+
+    @Override
+    public Status saveConfiguration() {
+        ObjectWriter objWriter = new ObjectWriter();
+        return objWriter.write(new ConcurrentHashMap<String, NeutronPort>(portDB), fileName);
+    }
+
+    @Override
+    public Object readObject(ObjectInputStream ois) throws FileNotFoundException, IOException, ClassNotFoundException {
+        return ois.readObject();
     }
 
 }

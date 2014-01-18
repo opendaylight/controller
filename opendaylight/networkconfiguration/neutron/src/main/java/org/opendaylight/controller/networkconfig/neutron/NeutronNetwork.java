@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.networkconfig.neutron;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,9 +21,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "network")
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronNetwork {
+public class NeutronNetwork implements Serializable {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
+
+    private static final long serialVersionUID = 1L;
 
     @XmlElement (name="id")
     String networkUUID;              // network UUID

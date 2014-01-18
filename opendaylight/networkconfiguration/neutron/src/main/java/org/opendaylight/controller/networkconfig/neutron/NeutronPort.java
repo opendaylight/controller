@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.networkconfig.neutron;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +23,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronPort {
+public class NeutronPort implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 

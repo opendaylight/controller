@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.networkconfig.neutron;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class NeutronSubnet_IPAllocationPool {
+public class NeutronSubnet_IPAllocationPool implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -28,7 +31,8 @@ public class NeutronSubnet_IPAllocationPool {
     @XmlElement(name="end")
     String poolEnd;
 
-    public NeutronSubnet_IPAllocationPool() { }
+    public NeutronSubnet_IPAllocationPool() {
+    }
 
     public NeutronSubnet_IPAllocationPool(String lowAddress, String highAddress) {
         poolStart = lowAddress;
