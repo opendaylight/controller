@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -16,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -23,13 +27,23 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectWriter;
+import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronRouterInterface implements INeutronRouterCRUD {
+public class NeutronRouterInterface implements INeutronRouterCRUD, IConfigurationContainerAware,
+                                               IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronRouterInterface.class);
+    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
+    private static final String FILENAME ="neutron.router";
+    private static String fileName;
     private String containerName = null;
 
     private IClusterContainerServices clusterContainerService = null;
@@ -96,6 +110,10 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
     private void startUp() {
         allocateCache();
         retrieveCache();
+        if (routerDB.isEmpty()) {
+            loadConfiguration();
+        }
+
     }
 
     /**
@@ -112,6 +130,7 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
+        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -172,16 +191,19 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
 
     // IfNBRouterCRUD Interface methods
 
+    @Override
     public boolean routerExists(String uuid) {
         return routerDB.containsKey(uuid);
     }
 
+    @Override
     public NeutronRouter getRouter(String uuid) {
         if (!routerExists(uuid))
             return null;
         return routerDB.get(uuid);
     }
 
+    @Override
     public List<NeutronRouter> getAllRouters() {
         Set<NeutronRouter> allRouters = new HashSet<NeutronRouter>();
         for (Entry<String, NeutronRouter> entry : routerDB.entrySet()) {
@@ -194,6 +216,7 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
         return ans;
     }
 
+    @Override
     public boolean addRouter(NeutronRouter input) {
         if (routerExists(input.getID()))
             return false;
@@ -201,6 +224,7 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
         return true;
     }
 
+    @Override
     public boolean removeRouter(String uuid) {
         if (!routerExists(uuid))
             return false;
@@ -208,6 +232,7 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
         return true;
     }
 
+    @Override
     public boolean updateRouter(String uuid, NeutronRouter delta) {
         if (!routerExists(uuid))
             return false;
@@ -215,10 +240,38 @@ public class NeutronRouterInterface implements INeutronRouterCRUD {
         return overwrite(target, delta);
     }
 
+    @Override
     public boolean routerInUse(String routerUUID) {
         if (!routerExists(routerUUID))
             return true;
         NeutronRouter target = routerDB.get(routerUUID);
         return (target.getInterfaces().size() > 0);
     }
+
+    @SuppressWarnings("unchecked")
+    private void loadConfiguration() {
+        ObjectReader objReader = new ObjectReader();
+        ConcurrentMap<String, NeutronRouter> confList = (ConcurrentMap<String, NeutronRouter>)
+                                                            objReader.read(this, fileName);
+
+        if (confList == null) {
+            return;
+        }
+
+        for (String key : confList.keySet()) {
+            routerDB.put(key, confList.get(key));
+        }
+    }
+
+    @Override
+    public Status saveConfiguration() {
+        ObjectWriter objWriter = new ObjectWriter();
+        return objWriter.write(new ConcurrentHashMap<String, NeutronRouter>(routerDB), fileName);
+    }
+
+    @Override
+    public Object readObject(ObjectInputStream ois) throws FileNotFoundException, IOException, ClassNotFoundException {
+        return ois.readObject();
+    }
+
 }

@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -16,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -23,6 +27,7 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
@@ -31,11 +36,20 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectWriter;
+import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
+public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConfigurationContainerAware,
+                                                   IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronFloatingIPInterface.class);
+    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
+    private static final String FILENAME ="neutron.floatingip";
+    private static String fileName;
     private String containerName = null;
 
     private IClusterContainerServices clusterContainerService = null;
@@ -103,6 +117,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
     private void startUp() {
         allocateCache();
         retrieveCache();
+        if (floatingIPDB.isEmpty()) {
+            loadConfiguration();
+        }
     }
 
     /**
@@ -119,6 +136,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
+        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -178,16 +196,19 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
 
     // IfNBFloatingIPCRUD interface methods
 
+    @Override
     public boolean floatingIPExists(String uuid) {
         return floatingIPDB.containsKey(uuid);
     }
 
+    @Override
     public NeutronFloatingIP getFloatingIP(String uuid) {
         if (!floatingIPExists(uuid))
             return null;
         return floatingIPDB.get(uuid);
     }
 
+    @Override
     public List<NeutronFloatingIP> getAllFloatingIPs() {
         Set<NeutronFloatingIP> allIPs = new HashSet<NeutronFloatingIP>();
         for (Entry<String, NeutronFloatingIP> entry : floatingIPDB.entrySet()) {
@@ -200,6 +221,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
         return ans;
     }
 
+    @Override
     public boolean addFloatingIP(NeutronFloatingIP input) {
         INeutronNetworkCRUD networkCRUD = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
         INeutronSubnetCRUD subnetCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
@@ -223,6 +245,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
         return true;
     }
 
+    @Override
     public boolean removeFloatingIP(String uuid) {
         INeutronNetworkCRUD networkCRUD = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
         INeutronSubnetCRUD subnetCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
@@ -242,6 +265,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
         return true;
     }
 
+    @Override
     public boolean updateFloatingIP(String uuid, NeutronFloatingIP delta) {
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
@@ -262,5 +286,31 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD {
         target.setPortUUID(delta.getPortUUID());
         target.setFixedIPAddress(delta.getFixedIPAddress());
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadConfiguration() {
+        ObjectReader objReader = new ObjectReader();
+        ConcurrentMap<String, NeutronFloatingIP> confList = (ConcurrentMap<String, NeutronFloatingIP>)
+                                                            objReader.read(this, fileName);
+
+        if (confList == null) {
+            return;
+        }
+
+        for (String key : confList.keySet()) {
+            floatingIPDB.put(key, confList.get(key));
+        }
+    }
+
+    @Override
+    public Status saveConfiguration() {
+        ObjectWriter objWriter = new ObjectWriter();
+        return objWriter.write(new ConcurrentHashMap<String, NeutronFloatingIP>(floatingIPDB), fileName);
+    }
+
+    @Override
+    public Object readObject(ObjectInputStream ois) throws FileNotFoundException, IOException, ClassNotFoundException {
+        return ois.readObject();
     }
 }

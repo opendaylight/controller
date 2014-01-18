@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -16,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -23,13 +27,23 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectWriter;
+import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronNetworkInterface implements INeutronNetworkCRUD {
+public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurationContainerAware,
+                                                IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronNetworkInterface.class);
+    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
+    private static final String FILENAME ="neutron.network";
+    private static String fileName;
     private String containerName = null;
 
     private ConcurrentMap<String, NeutronNetwork> networkDB;
@@ -85,6 +99,9 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
     private void startUp() {
         allocateCache();
         retrieveCache();
+        if (networkDB.isEmpty()) {
+            loadConfiguration();
+        }
     }
 
     /**
@@ -101,6 +118,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
+        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -170,16 +188,19 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
 
     // IfNBNetworkCRUD methods
 
+    @Override
     public boolean networkExists(String uuid) {
         return networkDB.containsKey(uuid);
     }
 
+    @Override
     public NeutronNetwork getNetwork(String uuid) {
         if (!networkExists(uuid))
             return null;
         return networkDB.get(uuid);
     }
 
+    @Override
     public List<NeutronNetwork> getAllNetworks() {
         Set<NeutronNetwork> allNetworks = new HashSet<NeutronNetwork>();
         for (Entry<String, NeutronNetwork> entry : networkDB.entrySet()) {
@@ -192,6 +213,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
         return ans;
     }
 
+    @Override
     public boolean addNetwork(NeutronNetwork input) {
         if (networkExists(input.getID()))
             return false;
@@ -200,6 +222,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
         return true;
     }
 
+    @Override
     public boolean removeNetwork(String uuid) {
         if (!networkExists(uuid))
             return false;
@@ -208,6 +231,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
         return true;
     }
 
+    @Override
     public boolean updateNetwork(String uuid, NeutronNetwork delta) {
         if (!networkExists(uuid))
             return false;
@@ -215,6 +239,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
         return overwrite(target, delta);
     }
 
+    @Override
     public boolean networkInUse(String netUUID) {
         if (!networkExists(netUUID))
             return true;
@@ -223,4 +248,31 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD {
             return true;
         return false;
     }
+
+    @SuppressWarnings("unchecked")
+    private void loadConfiguration() {
+        ObjectReader objReader = new ObjectReader();
+        ConcurrentMap<String, NeutronNetwork> confList = (ConcurrentMap<String, NeutronNetwork>)
+                                                            objReader.read(this, fileName);
+
+        if (confList == null) {
+            return;
+        }
+
+        for (String key : confList.keySet()) {
+            networkDB.put(key, confList.get(key));
+        }
+    }
+
+    @Override
+    public Status saveConfiguration() {
+        ObjectWriter objWriter = new ObjectWriter();
+        return objWriter.write(new ConcurrentHashMap<String, NeutronNetwork>(networkDB), fileName);
+    }
+
+    @Override
+    public Object readObject(ObjectInputStream ois) throws FileNotFoundException, IOException, ClassNotFoundException {
+        return ois.readObject();
+    }
+
 }
