@@ -46,11 +46,11 @@ public class ConfigManagerActivator implements BundleActivator {
         configRegistryJMXRegistrator.registerToJMX(configRegistry);
 
         // track bundles containing factories
-        extenderBundleTracker = new ExtenderBundleTracker(context);
+        BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(configRegistry);
+        extenderBundleTracker = new ExtenderBundleTracker(context, blankTransactionServiceTracker);
         extenderBundleTracker.open();
 
-        BlankTransactionServiceTracker customizer = new BlankTransactionServiceTracker(configRegistry);
-        ServiceTracker<?, ?> serviceTracker = new ServiceTracker(context, ModuleFactory.class, customizer);
+        ServiceTracker<?, ?> serviceTracker = new ServiceTracker(context, ModuleFactory.class, blankTransactionServiceTracker);
         serviceTracker.open();
     }
 

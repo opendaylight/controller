@@ -37,10 +37,6 @@ module shutdown-impl {
                 type string;
                 default "";
             }
-            leaf old-secret {
-                type string;
-                default "";
-            }
         }
     }
 
@@ -62,6 +58,10 @@ module shutdown-impl {
             }
             leaf input-secret {
                 type string;
+            }
+            leaf max-wait-time {
+                type uint32;
+                description "Maximum time in milliseconds before process is forcibly exited. Zero or null cancels this functionality.";
             }
             leaf reason {
                 type string;

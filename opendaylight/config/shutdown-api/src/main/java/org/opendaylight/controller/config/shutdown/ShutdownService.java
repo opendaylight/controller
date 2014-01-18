@@ -17,5 +17,5 @@ public interface ShutdownService {
      * @param inputSecret must match configured secret of the implementation
      * @param reason Optional string to be logged while shutting down
      */
-    void shutdown(String inputSecret, Optional<String> reason);
+    void shutdown(String inputSecret, Long maxWaitTime, Optional<String> reason);
 }

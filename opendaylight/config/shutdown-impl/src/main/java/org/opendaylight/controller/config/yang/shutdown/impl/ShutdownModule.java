@@ -16,13 +16,11 @@ import org.osgi.framework.Bundle;
 
 public final class ShutdownModule extends AbstractShutdownModule {
     private final Bundle systemBundle;
-    private final ShutdownModule nullableOldModule;
 
     public ShutdownModule(ModuleIdentifier identifier, Bundle systemBundle) {
         super(identifier, null);
         singletonCheck(identifier);
         this.systemBundle = systemBundle;
-        this.nullableOldModule = null;
     }
 
     public ShutdownModule(ModuleIdentifier identifier, ShutdownModule oldModule, java.lang.AutoCloseable oldInstance,
@@ -30,7 +28,6 @@ public final class ShutdownModule extends AbstractShutdownModule {
         super(identifier, null, oldModule, oldInstance);
         singletonCheck(identifier);
         this.systemBundle = systemBundle;
-        this.nullableOldModule = oldModule;
     }
 
     private static void singletonCheck(ModuleIdentifier identifier) {
@@ -53,39 +50,12 @@ public final class ShutdownModule extends AbstractShutdownModule {
     }
 
     @Override
-    public String getSecret() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getOldSecret() {
-        throw new UnsupportedOperationException();
-    }
-
-    String getActualSecret() {
-        return super.getSecret();
-    }
-
-    String getActualOldSecret() {
-        return super.getOldSecret();
-    }
-
-    @Override
     protected void customValidation() {
-        JmxAttributeValidationException.checkNotNull(super.getOldSecret(), oldSecretJmxAttribute);
         JmxAttributeValidationException.checkNotNull(super.getSecret(), secretJmxAttribute);
-        if (nullableOldModule != null) {
-            // if nothing changed, remain valid
-            boolean sameAsOldModule = isSame(nullableOldModule);
-            if (sameAsOldModule == false) {
-                boolean valid = getActualOldSecret().equals(nullableOldModule.getActualSecret());
-                JmxAttributeValidationException.checkCondition(valid, "Invalid old secret", oldSecretJmxAttribute);
-            }
-        }
     }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return new ShutdownServiceImpl(getActualSecret(), systemBundle, getRootRuntimeBeanRegistratorWrapper());
+        return new ShutdownServiceImpl(getSecret(), systemBundle, getRootRuntimeBeanRegistratorWrapper());
     }
 }

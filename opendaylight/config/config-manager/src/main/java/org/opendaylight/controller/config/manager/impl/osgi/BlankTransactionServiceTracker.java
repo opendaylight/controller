@@ -38,7 +38,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
         return null;
     }
 
-    private synchronized void blankTransaction() {
+    synchronized void blankTransaction() {
         // race condition check: config-persister might push new configuration while server is starting up.
         ConflictingVersionException lastException = null;
         for (int i = 0; i < 10; i++) {
