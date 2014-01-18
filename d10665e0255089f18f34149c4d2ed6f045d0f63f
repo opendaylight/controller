@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_2a435743",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronFloatingIPInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-18T00:39:28Z",
+      "side": 1,
+      "message": "FYI, we are restricting the configuration read to the bundles running on the cluster coordinator only.\n\nWe will take care to enforce it here as well.",
+      "revId": "d10665e0255089f18f34149c4d2ed6f045d0f63f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
