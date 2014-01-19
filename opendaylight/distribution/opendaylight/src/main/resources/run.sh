@@ -190,7 +190,7 @@ if [ "${statusdaemon}" -eq 1 ]; then
         else
             echo "Controller with PID: ${daemonpid} -- Doesn't seem to exist"
             rm -f "${pidfile}"
-            exit 0
+            exit 1
         fi
     else
         echo "Doesn't seem any Controller daemon is currently running, at least no PID file has been found"
