@@ -69,7 +69,7 @@ public class NetconfSSHServer implements Runnable {
             try {
                SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                logger.warn("Unhandled Exception ",e);
             }
         }
     }

@@ -178,7 +178,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
                         toMethod.invoke(target, value);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Unhanded Exception ", e);
                     return false;
                 }
             }

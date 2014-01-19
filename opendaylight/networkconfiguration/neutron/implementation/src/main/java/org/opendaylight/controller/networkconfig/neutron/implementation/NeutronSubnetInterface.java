@@ -185,7 +185,7 @@ public class NeutronSubnetInterface implements INeutronSubnetCRUD, IConfiguratio
                         toMethod.invoke(target, value);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Unhanded Exception ", e);
                     return false;
                 }
             }
