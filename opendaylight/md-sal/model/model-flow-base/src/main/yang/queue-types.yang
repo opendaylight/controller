@@ -54,8 +54,6 @@ module opendaylight-queue-types {
            
     }
      grouping queue-packet	{
-		
-		
         leaf queue-id {
             type queue-id;
             description "id for the specific queue.";  
@@ -68,13 +66,10 @@ module opendaylight-queue-types {
         uses common-queue;
     }
     
-   grouping queue-config-request 
-   {
-           leaf port {
+   grouping queue-config-request {
+        leaf port {
             type uint32;
             description "Port to be queried.";  
-        }
-        
-        }
- }
+        }    
+   }
 }
