@@ -18,11 +18,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 
 public class RestconfProvider implements BundleActivator, Provider, ServiceTrackerCustomizer<Broker, Broker> {
-
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RestconfProvider.class);
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
-    
+
     private ListenerRegistration<SchemaServiceListener> listenerRegistration;
     private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;
@@ -54,7 +55,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
             try {
                 listenerRegistration.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.warn("Unhanded Exception ", e);
             }
         }
         session.close();

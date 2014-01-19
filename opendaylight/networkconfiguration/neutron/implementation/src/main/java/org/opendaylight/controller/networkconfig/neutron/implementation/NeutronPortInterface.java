@@ -188,7 +188,7 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
                         toMethod.invoke(target, value);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Unhanded Exception ", e);
                     return false;
                 }
             }

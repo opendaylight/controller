@@ -306,7 +306,7 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
                     listener.instance.onDataChanged(changeEvent);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.warn("Unhandled Exception ", e);
                 }
             }
         }

@@ -212,7 +212,7 @@ public class RpcProviderRegistryImpl implements //
                 try {
                     listener.getInstance().onRouteChange(toPublish);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.warn("Unhanded Exception ", e);
                 }
             }
         }
