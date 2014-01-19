@@ -204,7 +204,7 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
             _logger.debug("Received bytes:[{}]", bytes.length);
             msg = (Message) Message.deserialize(bytes);
         } catch (Throwable t) {
-            t.printStackTrace();
+            _logger.warn("Unhanded Exception ", t);
         }
         return msg;
     }
@@ -226,13 +226,13 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
         // TODO: Broker session needs to be updated to support this
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Listener for rpc registrations
      */
     private class RpcListener implements RpcRegistrationListener {
 
-        
+
 
         @Override
         public void onRpcImplementationAdded(QName name) {

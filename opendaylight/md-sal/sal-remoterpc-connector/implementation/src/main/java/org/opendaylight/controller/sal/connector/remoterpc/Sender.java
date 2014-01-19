@@ -29,8 +29,8 @@ public class Sender implements Runnable{
   private final Client client;
 
 
-  
-  
+
+
   public Sender(Client client) {
     super();
     this.client = client;
@@ -77,7 +77,7 @@ public class Sender implements Runnable{
         try {
           response.getReceiveSocket().send(Message.serialize(response.getMessage()));
         } catch (IOException e) {
-          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            _logger.warn("Unhanded Exception ", e);  //To change body of catch statement use File | Settings | File Templates.
         }
       }
     }
