@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d7db437a",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/queue-types.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-19T12:14:22Z",
+      "side": 1,
+      "message": "Could we just remove queue-config-request entirely here?  Its used nowhere in the model, and its class is used nowhere.",
+      "revId": "047b8f8d6e664bf7808ff65dae4e2ef6dacd2457",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
