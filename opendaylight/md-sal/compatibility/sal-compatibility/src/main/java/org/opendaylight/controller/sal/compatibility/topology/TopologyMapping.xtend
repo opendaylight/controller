@@ -20,9 +20,10 @@ import static extension org.opendaylight.controller.sal.compatibility.NodeMappin
 import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
+import org.slf4j.LoggerFactory
 
 class TopologyMapping {
-    
+    private static val LOG = LoggerFactory.getLogger(TopologyMapping);
     private new() {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
     }
@@ -47,7 +48,20 @@ class TopologyMapping {
     }
     
     public static def toAdEdgeProperties(Edge e,TypeSafeDataReader reader) {
-        val nc = reader.readOperationalData(e.tailNodeConnector.toNodeConnectorRef.value as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector>)
+        val ncref = e.tailNodeConnector.toNodeConnectorRef
+        if(ncref == null) {
+            LOG.debug("Edge {} ncref {}",e,ncref)
+            return null;
+        }
+        val ncInstanceId = (ncref.value as InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector>)
+        if(ncInstanceId == null) {
+            LOG.debug("Edge {} ncref {}",e,ncref)
+            return null;
+        }
+        val nc = reader.readOperationalData(ncInstanceId)
+        if(nc == null) {
+            return null;
+        }
         return nc.toADNodeConnectorProperties     
     }
     
