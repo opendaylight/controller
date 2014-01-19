@@ -1372,7 +1372,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             return new Status(StatusCode.BADREQUEST, "Invalid IP Address when trying to remove host");
         } catch (ConstructionException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Unhandled exception: ",e);
             return new Status(StatusCode.BADREQUEST, "Invalid Input parameters have been passed.");
         }
     }

@@ -44,7 +44,7 @@ public class RpcProviderRegistryImpl implements //
             .create();
 
     private final static Logger LOG = LoggerFactory.getLogger(RpcProviderRegistryImpl.class);
-    
+
     private final String name;
 
     public String getName() {
@@ -94,7 +94,7 @@ public class RpcProviderRegistryImpl implements //
              * Potential proxy could be instantiated by other thread while we were
              * waiting for the lock.
              */
-            
+
             potentialProxy = (T) publicProxies.get(type);
             if (potentialProxy != null) {
                 return (T) potentialProxy;
@@ -116,7 +116,7 @@ public class RpcProviderRegistryImpl implements //
              * Potential Router could be instantiated by other thread while we were
              * waiting for the lock.
              */
-            potentialRouter = rpcRouters.get(type); 
+            potentialRouter = rpcRouters.get(type);
             if (potentialRouter != null) {
                 return (RpcRouter<T>) potentialRouter;
             }
@@ -172,7 +172,7 @@ public class RpcProviderRegistryImpl implements //
                 try {
                     listener.getInstance().onRouteChange(toPublish);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.warn("Unhanded Exception ", e);
                 }
             }
         }
