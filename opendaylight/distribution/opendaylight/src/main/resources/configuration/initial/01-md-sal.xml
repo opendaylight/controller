@@ -144,9 +144,7 @@
         <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl?module=threadpool-impl&amp;revision=2013-04-05</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:yang:extension:yang-ext?module=yang-ext&amp;revision=2013-07-09</capability>
-        <capability>urn:opendaylight:params:xml:ns:yang:iana?module=iana&amp;revision=2013-08-16</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
-        <capability>urn:opendaylight:params:xml:ns:yang:ieee754?module=ieee754&amp;revision=2013-08-19</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:cluster:store?module=odl-sal-dom-clustered-store-cfg&amp;revision=2013-10-28</capability>
     </required-capabilities>
 </snapshot>
