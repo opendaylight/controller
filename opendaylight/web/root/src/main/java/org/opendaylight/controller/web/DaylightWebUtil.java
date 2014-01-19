@@ -73,7 +73,7 @@ public class DaylightWebUtil {
         } else {
             auditMsg = "Mode: " + mode + " User " + user + " "  + action + " " + moduleName + " " + resource;
         }
-        logger.info(auditMsg);
+        logger.trace(auditMsg);
     }
 
     public static void auditlog(String moduleName, String user, String action, String resource) {

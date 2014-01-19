@@ -66,7 +66,7 @@ public class Commit extends AbstractConfigNetconfOperation {
                     "Unable to retrieve config snapshot after commit for persister, details: " + e.getMessage(),
                     ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error, e.getErrorInfo());
         }
-        logger.info("Datastore {} committed successfully: {}", Datastore.candidate, status);
+        logger.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
 
         return document.createElement(XmlNetconfConstants.OK);
     }

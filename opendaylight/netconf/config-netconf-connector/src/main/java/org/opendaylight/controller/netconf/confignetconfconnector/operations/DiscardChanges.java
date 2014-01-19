@@ -71,7 +71,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
         }
-        logger.info("Changes discarded successfully from datastore {}", Datastore.candidate);
+        logger.trace("Changes discarded successfully from datastore {}", Datastore.candidate);
 
         return document.createElement(XmlNetconfConstants.OK);
     }

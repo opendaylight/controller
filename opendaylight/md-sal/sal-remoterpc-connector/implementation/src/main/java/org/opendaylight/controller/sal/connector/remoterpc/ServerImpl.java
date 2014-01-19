@@ -217,7 +217,7 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
             brokerSession.addRpcImplementation((QName) rId.fromString(key).getType(), client);
 
         } catch (Exception e) {
-            _logger.info("Route update failed {}", e);
+            _logger.trace("Route update failed {}", e);
         }
     }
 

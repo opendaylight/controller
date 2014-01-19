@@ -142,7 +142,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		val table= it.readConfigurationData(tableRef) as Table;
 		
 		if(table != null){
-			LOG.info("Number of flows installed in table 0 of node {} : {}",node,table.flow.size);
+			LOG.trace("Number of flows installed in table 0 of node {} : {}",node,table.flow.size);
 			
 			for(flow : table.flow){
 				
@@ -248,7 +248,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		val table= it.readConfigurationData(tableRef) as Table;
 		
 		if(table != null){
-			LOG.info("Number of flows installed in table 0 of node {} : {}",node,table.flow.size);
+			LOG.trace("Number of flows installed in table 0 of node {} : {}",node,table.flow.size);
 			
 			for(mdsalFlow : table.flow){
 				if(FromSalConversionsUtils.flowEquals(mdsalFlow, MDFlowMapping.toMDSalflow(targetFlow))){

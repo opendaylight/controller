@@ -34,13 +34,13 @@ public class SendErrorExceptionUtil {
 
     public static void sendErrorMessage(final NetconfSession session,
             final NetconfDocumentedException sendErrorException) {
-        logger.info("Sending error {}", sendErrorException.getMessage(), sendErrorException);
+        logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         session.sendMessage(new NetconfMessage(errorDocument));
     }
 
     public static void sendErrorMessage(Channel channel, NetconfDocumentedException sendErrorException) {
-        logger.info("Sending error {}", sendErrorException.getMessage(), sendErrorException);
+        logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         channel.writeAndFlush(new NetconfMessage(errorDocument));
     }
@@ -48,7 +48,7 @@ public class SendErrorExceptionUtil {
     public static void sendErrorMessage(NetconfSession session, NetconfDocumentedException sendErrorException,
             NetconfMessage incommingMessage) {
         final Document errorDocument = createDocument(sendErrorException);
-        logger.info("Sending error {}", XmlUtil.toString(errorDocument));
+        logger.trace("Sending error {}", XmlUtil.toString(errorDocument));
         tryToCopyAttributes(incommingMessage.getDocument(), errorDocument, sendErrorException);
         session.sendMessage(new NetconfMessage(errorDocument));
     }

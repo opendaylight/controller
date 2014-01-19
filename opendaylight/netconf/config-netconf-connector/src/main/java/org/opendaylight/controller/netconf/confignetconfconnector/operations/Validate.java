@@ -98,7 +98,7 @@ public class Validate extends AbstractConfigNetconfOperation {
 
         }
 
-        logger.info("Datastore {} validated successfully", Datastore.candidate);
+        logger.trace("Datastore {} validated successfully", Datastore.candidate);
 
         return document.createElement(XmlNetconfConstants.OK);
     }

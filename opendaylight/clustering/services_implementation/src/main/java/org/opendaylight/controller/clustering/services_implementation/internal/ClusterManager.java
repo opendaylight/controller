@@ -232,7 +232,7 @@ public class ClusterManager implements IClusterServices {
                 System.getProperty("jgroups.tcpgossip.initial_hosts"));
         GossipRouter res = null;
         if (amIGossipRouter) {
-            logger.info("I'm a GossipRouter will listen on port {}",
+            logger.trace("I'm a GossipRouter will listen on port {}",
                     gossipRouterPort);
             // Start a GossipRouter with JMX support
             res = new GossipRouter(gossipRouterPort, null, true);
@@ -257,7 +257,7 @@ public class ClusterManager implements IClusterServices {
             logger.debug("Trying to start Gossiper");
             try {
                 this.gossiper.start();
-                logger.info("Started GossipRouter");
+                logger.trace("Started GossipRouter");
             } catch (Exception e) {
                 logger.error("GossipRouter didn't start. Exception Stack Trace",
                              e);
@@ -296,7 +296,7 @@ public class ClusterManager implements IClusterServices {
     public void stop() {
         logger.info("Stopping the ClusterManager");
         if (this.cm != null) {
-            logger.info("Found a valid ClusterManager, now let it be stopped");
+            logger.trace("Found a valid ClusterManager, now let it be stopped");
             this.cm.stop();
             this.cm = null;
         }

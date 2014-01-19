@@ -185,13 +185,13 @@ class NotifyTask implements Callable<Object> {
             if(log.isDebugEnabled){
                 log.debug("Delivering notification {} to {}",notification,listener);
             } else {
-                log.info("Delivering notification {} to {}",notification.class.name,listener);
+                log.trace("Delivering notification {} to {}",notification.class.name,listener);
             }
             listener.onNotification(notification);
             if(log.isDebugEnabled){
                 log.debug("Notification delivered {} to {}",notification,listener);
             } else {
-                log.info("Notification delivered {} to {}",notification.class.name,listener);
+                log.trace("Notification delivered {} to {}",notification.class.name,listener);
             }
         } catch (Exception e) {
             log.error("Unhandled exception thrown by listener: {}", listener, e);

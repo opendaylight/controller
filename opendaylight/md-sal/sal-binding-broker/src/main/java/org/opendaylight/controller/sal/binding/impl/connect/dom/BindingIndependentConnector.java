@@ -255,7 +255,7 @@ public class BindingIndependentConnector implements //
         baDataService.registerCommitHandlerListener(domToBindingCommitHandler);
         dataForwarding = true;
     }
-    
+
     public void startRpcForwarding() {
         if (baRpcRegistry != null && biRpcRegistry != null && baRpcRegistry instanceof RouteChangePublisher<?, ?>) {
             checkState(!rpcForwarding,"Connector is already forwarding RPCs");
@@ -263,7 +263,7 @@ public class BindingIndependentConnector implements //
             rpcForwarding = true;
         }
     }
-    
+
     public void startNotificationForwarding() {
         checkState(!notificationForwarding, "Connector is already forwarding notifications.");
         notificationForwarding = true;
@@ -282,7 +282,7 @@ public class BindingIndependentConnector implements //
     public void onSessionInitiated(ProviderSession session) {
         setDomDataService(session.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
         setDomRpcRegistry(session.getService(RpcProvisionRegistry.class));
-        
+
     }
 
     public <T extends RpcService> void onRpcRouterCreated(Class<T> serviceType, RpcRouter<T> router) {
@@ -401,7 +401,7 @@ public class BindingIndependentConnector implements //
             }
             DataModificationTransaction domTransaction = createBindingToDomTransaction(bindingTransaction);
             BindingToDomTransaction wrapped = new BindingToDomTransaction(domTransaction, bindingTransaction);
-            LOG.info("Forwarding Binding Transaction: {} as DOM Transaction: {} .", bindingTransaction.getIdentifier(),
+            LOG.trace("Forwarding Binding Transaction: {} as DOM Transaction: {} .", bindingTransaction.getIdentifier(),
                     domTransaction.getIdentifier());
             return wrapped;
         }
@@ -441,7 +441,7 @@ public class BindingIndependentConnector implements //
 
             org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction baTransaction = createDomToBindingTransaction(domTransaction);
             DomToBindingTransaction forwardedTransaction = new DomToBindingTransaction(baTransaction, domTransaction);
-            LOG.info("Forwarding DOM Transaction: {} as Binding Transaction: {}.", domTransaction.getIdentifier(),
+            LOG.trace("Forwarding DOM Transaction: {} as Binding Transaction: {}.", domTransaction.getIdentifier(),
                     baTransaction.getIdentifier());
             return forwardedTransaction;
         }

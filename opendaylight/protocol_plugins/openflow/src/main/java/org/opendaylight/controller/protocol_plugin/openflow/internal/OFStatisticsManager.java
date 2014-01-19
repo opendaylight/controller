@@ -431,7 +431,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     }
 
     private void printInfoMessage(String type, StatsRequest request) {
-        log.info("{} stats request not inserted for switch: {}. Queue size: {}. Collector state: {}.",
+        log.trace("{} stats request not inserted for switch: {}. Queue size: {}. Collector state: {}.",
                 new Object[] {type, HexString.toHexString(request.switchId), pendingStatsRequests.size(),
                 statisticsCollector.getState().toString() });
     }

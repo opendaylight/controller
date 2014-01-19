@@ -83,7 +83,7 @@ public class NotificationModule implements BrokerModule {
     private void sendNotification(CompositeNode notification) {
         QName type = notification.getNodeType();
         Collection<NotificationListener> toNotify = listeners.get(type);
-        log.info("Publishing notification " + type);
+        log.trace("Publishing notification " + type);
 
         if (toNotify == null) {
             // No listeners were registered - returns.
@@ -118,7 +118,7 @@ public class NotificationModule implements BrokerModule {
                 .create();
         private boolean closed = false;
 
-    
+
         public Registration<NotificationListener> addNotificationListener(QName notification,
                 NotificationListener listener) {
             checkSessionState();
@@ -132,7 +132,7 @@ public class NotificationModule implements BrokerModule {
 
             consumerListeners.put(notification, listener);
             listeners.put(notification, listener);
-            log.info("Registered listener for notification: " + notification);
+            log.trace("Registered listener for notification: " + notification);
             return null; // Return registration Object.
         }
 

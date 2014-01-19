@@ -83,12 +83,12 @@ public class FtlFilePersister {
                 pathToFile.mkdirs();
             }
             if (targetFile.exists() && overwrite == false) {
-                logger.info("Skipping {} since it already exists", targetFile);
+                logger.trace("Skipping {} since it already exists", targetFile);
             } else {
                 try (Writer fileWriter = new FileWriter(targetFile)) {
                     fileWriter.write(entry.getValue());
                 }
-                logger.info("{}: File {} generated successfully",
+                logger.trace("{}: File {} generated successfully",
                         JMXGenerator.class.getCanonicalName(), targetFile);
                 result.add(targetFile);
             }

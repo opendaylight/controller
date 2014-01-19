@@ -182,7 +182,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             throws ConflictingVersionException, ValidationException {
         final String transactionName = ObjectNameUtil
                 .getTransactionName(transactionControllerON);
-        logger.info("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
+        logger.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
 
         // find ConfigTransactionController
         Map<String, ConfigTransactionControllerInternal> transactions = transactionsHolder.getCurrentTransactions();

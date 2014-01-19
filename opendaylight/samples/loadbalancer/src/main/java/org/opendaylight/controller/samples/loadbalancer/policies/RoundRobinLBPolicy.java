@@ -60,7 +60,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
     @Override
     public String getPoolMemberForClient(Client source, VIP dest){
 
-        rrLogger.info("Received traffic from client : {} for VIP : {} ",source, dest);
+        rrLogger.trace("Received traffic from client : {} for VIP : {} ",source, dest);
 
         syncWithLoadBalancerData();
 
@@ -69,7 +69,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
         if(this.clientMemberMap.containsKey(source)){
 
             pm= this.clientMemberMap.get(source);
-            rrLogger.info("Client {} had sent traffic before,new traffic will be routed to the same pool member {}",source,pm);
+            rrLogger.trace("Client {} had sent traffic before,new traffic will be routed to the same pool member {}",source,pm);
         }else{
 
             Pool pool = null;
@@ -80,7 +80,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
                 pool = this.cmgr.getPool(dest.getPoolName());
                 pm = pool.getAllMembers().get(memberNum);
                 this.clientMemberMap.put(source, pm );
-                rrLogger.info("New client's packet will be directed to pool member {}",pm);
+                rrLogger.trace("New client's packet will be directed to pool member {}",pm);
                 memberNum++;
 
                 if(memberNum > pool.getAllMembers().size()-1){
@@ -95,7 +95,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
                 pm = pool.getAllMembers().get(0);
                 this.clientMemberMap.put(source, pm);
 
-                rrLogger.info("Network traffic from client {} will be directed to pool member {}",pm);
+                rrLogger.trace("Network traffic from client {} will be directed to pool member {}",pm);
                 this.nextItemFromPool.put(dest, 1);
                 rrLogger.debug("Next pool member for new client of VIP is set to {}",pool.getAllMembers().get(1));
             }
