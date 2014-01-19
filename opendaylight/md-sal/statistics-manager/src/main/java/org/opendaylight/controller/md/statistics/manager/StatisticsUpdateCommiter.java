@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
@@ -84,10 +88,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericQueueStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
@@ -106,10 +106,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Class implement statistics manager related listener interface and augment all the 
@@ -810,6 +806,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
      * @param storedFlow
      * @return
      */
+    
     public boolean matchEquals(Match statsFlow, Match storedFlow) {
         if (statsFlow == storedFlow) {
             return true;
@@ -819,12 +816,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         if (storedFlow.getEthernetMatch() == null) {
             if (statsFlow.getEthernetMatch() != null) {
-                if(!statsFlow.getEthernetMatch().getEthernetDestination().getAddress().getValue().equals("00:00:00:00:00:00") ||
-                        !statsFlow.getEthernetMatch().getEthernetSource().getAddress().getValue().equals("00:00:00:00:00:00")){
-                    return false;
-                }
+                return false;
             }
-        } else if(!EthernetMatchEquals(statsFlow.getEthernetMatch(),storedFlow.getEthernetMatch())) {
+        } else if(!storedFlow.getEthernetMatch().equals(statsFlow.getEthernetMatch())) {
             return false;
         }
         if (storedFlow.getIcmpv4Match()== null) {
@@ -850,12 +844,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         if (storedFlow.getInPort()== null) {
             if (statsFlow.getInPort() != null) {
-                String[] portArr = statsFlow.getInPort().getValue().split(":");
-                if(portArr.length >= 3){
-                    if(Integer.parseInt(portArr[2]) != 0){
-                        return false;
-                    }
-                }
+                return false;
             }
         } else if(!storedFlow.getInPort().equals(statsFlow.getInPort())) {
             return false;
@@ -869,22 +858,14 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         if (storedFlow.getLayer3Match()== null) {
             if (statsFlow.getLayer3Match() != null) {
-                Ipv4Match ipv4Match = (Ipv4Match)statsFlow.getLayer3Match();
-                if(!ipv4Match.getIpv4Source().getValue().equals("0.0.0.0/0") ||
-                        !ipv4Match.getIpv4Destination().getValue().equals("0.0.0.0/0")){
                     return false;
-                }
             }
         } else if(!storedFlow.getLayer3Match().equals(statsFlow.getLayer3Match())) {
             return false;
         }
         if (storedFlow.getLayer4Match()== null) {
             if (statsFlow.getLayer4Match() != null) {
-                TcpMatch tcpMatch = (TcpMatch)statsFlow.getLayer4Match();
-                if(!tcpMatch.getTcpDestinationPort().getValue().equals(0) ||
-                    !tcpMatch.getTcpSourcePort().getValue().equals(0)){
-                        return false;
-                }
+                return false;
             }
         } else if(!storedFlow.getLayer4Match().equals(statsFlow.getLayer4Match())) {
             return false;
@@ -912,47 +893,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         }
         if (storedFlow.getVlanMatch()== null) {
             if (statsFlow.getVlanMatch() != null) {
-                VlanMatch vlanMatch = statsFlow.getVlanMatch();
-                if(!vlanMatch.getVlanId().getVlanId().getValue().equals(0) ||
-                        !vlanMatch.getVlanPcp().getValue().equals((short)0)){
-                    return false;
-                }
+                return false;
             }
         } else if(!storedFlow.getVlanMatch().equals(statsFlow.getVlanMatch())) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean EthernetMatchEquals(EthernetMatch statsEtherMatch, EthernetMatch storedEtherMatch) {
-        if (statsEtherMatch == storedEtherMatch) {
-            return true;
-        }
-        if (storedEtherMatch.getEthernetDestination()== null) {
-            if (statsEtherMatch.getEthernetDestination() != null) {
-                if(!statsEtherMatch.getEthernetDestination().getAddress().getValue().equals("00:00:00:00:00:00")){
-                    return false;
-                }
-            }
-        } else if(!storedEtherMatch.getEthernetDestination().equals(statsEtherMatch.getEthernetDestination())) {
-            return false;
-        }
-        if (storedEtherMatch.getEthernetSource() == null) {
-            if (statsEtherMatch.getEthernetSource() != null) {
-                if(!statsEtherMatch.getEthernetSource().getAddress().getValue().equals("00:00:00:00:00:00")){
-                    return false;
-                }
-            }
-        } else if(!storedEtherMatch.getEthernetSource().equals(statsEtherMatch.getEthernetSource())) {
-            return false;
-        }
-        if (storedEtherMatch.getEthernetType() == null) {
-            if (statsEtherMatch.getEthernetType() != null) {
-                if(!statsEtherMatch.getEthernetType().getType().getValue().equals(0)){
-                    return false;
-                }
-            }
-        } else if(!storedEtherMatch.getEthernetType().equals(statsEtherMatch.getEthernetType())) {
             return false;
         }
         return true;
