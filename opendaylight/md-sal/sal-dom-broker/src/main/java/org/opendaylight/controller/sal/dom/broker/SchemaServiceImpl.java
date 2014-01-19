@@ -157,7 +157,7 @@ public class SchemaServiceImpl implements //
             inconsistentBundlesToYangURLs.clear();
             // update cache
             updateCache(snapshot);
-            logger.info("SchemaService updated to new consistent state");
+            logger.trace("SchemaService updated to new consistent state");
             logger.trace("SchemaService  updated to new consistent state containing {}", consistentBundlesToYangURLs);
 
             // notifyListeners(changedURLs, adding);

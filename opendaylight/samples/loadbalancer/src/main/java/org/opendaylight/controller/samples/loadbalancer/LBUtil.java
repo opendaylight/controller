@@ -35,17 +35,17 @@ public class LBUtil {
      * @return  Details of the source machine in Client object.
      */
     public Client getClientFromPacket(IPv4 inPkt){
-        lbuLogger.info("Find client information from packet : {}",inPkt.toString());
+        lbuLogger.trace("Find client information from packet : {}",inPkt.toString());
 
         String ip = NetUtils.getInetAddress(inPkt.getSourceAddress()).getHostAddress();
 
         String protocol = IPProtocols.getProtocolName(inPkt.getProtocol());
 
-        lbuLogger.info("client ip {} and protocl {}",ip,protocol);
+        lbuLogger.trace("client ip {} and protocl {}",ip,protocol);
 
         Packet tpFrame= inPkt.getPayload();
 
-        lbuLogger.info("Get protocol layer {}",tpFrame.toString());
+        lbuLogger.trace("Get protocol layer {}",tpFrame.toString());
 
         short port = 0;
 
@@ -57,11 +57,11 @@ public class LBUtil {
             port = udpFrame.getSourcePort();
         }
 
-        lbuLogger.info("Found port {}",port);
+        lbuLogger.trace("Found port {}",port);
 
         Client source = new Client(ip, protocol,port);
 
-        lbuLogger.info("Client information : {}",source.toString());
+        lbuLogger.trace("Client information : {}",source.toString());
 
         return source;
     }
@@ -74,7 +74,7 @@ public class LBUtil {
      */
     public VIP getVIPFromPacket(IPv4 inPkt){
 
-        lbuLogger.info("Find VIP information from packet : {}",inPkt.toString());
+        lbuLogger.trace("Find VIP information from packet : {}",inPkt.toString());
 
         String ip = NetUtils.getInetAddress(inPkt.getDestinationAddress()).getHostAddress();
 
@@ -95,7 +95,7 @@ public class LBUtil {
 
         VIP dest = new VIP(null,ip, protocol,port,null);
 
-        lbuLogger.info("VIP information : {}",dest.toString());
+        lbuLogger.trace("VIP information : {}",dest.toString());
 
         return dest;
     }

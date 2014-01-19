@@ -91,23 +91,23 @@ public class ConfigManager implements IConfigManager{
     }
 
     public VIP getVIPWithPoolName(VIP vip){
-        cmLogger.info("Search a VIP with name:{}",vip);
+        cmLogger.trace("Search a VIP with name:{}",vip);
         for(VIP vipTemp: this.vips.values()){
             if(vipTemp.equals(vip)){
 
-                cmLogger.info("Found VIP with pool detail : {}",vipTemp);
+                cmLogger.trace("Found VIP with pool detail : {}",vipTemp);
                 return vipTemp;
             }
         }
 
-        cmLogger.info("VIP with pool detail not found ");
+        cmLogger.trace("VIP with pool detail not found ");
         return null;
     }
 
     @Override
     public VIP createVIP(String name,String ip,String protocol,short protocolPort,String poolName){
 
-        cmLogger.info("Create VIP with the following details :[ name : "+name
+        cmLogger.trace("Create VIP with the following details :[ name : "+name
                                                                     +" ip : "+ip
                                                                     +" protocol : "+protocol
                                                                     +" protocol_port : "+protocolPort
@@ -124,7 +124,7 @@ public class ConfigManager implements IConfigManager{
         vip.setStatus(LBConst.STATUS_ACTIVE);
         this.vips.put(name, vip);
 
-        cmLogger.info("New VIP created : "+vip.toString());
+        cmLogger.trace("New VIP created : "+vip.toString());
         return vip;
     }
 
@@ -136,7 +136,7 @@ public class ConfigManager implements IConfigManager{
     @Override
     public VIP updateVIP(String name, String poolName){
 
-        cmLogger.info("Updating VIP : "+name+" pool name  to "+poolName);
+        cmLogger.trace("Updating VIP : "+name+" pool name  to "+poolName);
 
         if(vips.containsKey(name)){
             VIP vip = vips.get(name);
@@ -154,7 +154,7 @@ public class ConfigManager implements IConfigManager{
     @Override
     public VIP deleteVIP(String name){
 
-        cmLogger.info("Deleting VIP : "+name);
+        cmLogger.trace("Deleting VIP : "+name);
 
         VIP vip = vips.get(name);
 
@@ -167,7 +167,7 @@ public class ConfigManager implements IConfigManager{
             }
         }
 
-        cmLogger.info("VIP removed : "+vip.toString());
+        cmLogger.trace("VIP removed : "+vip.toString());
 
         vips.remove(vip.getName());
 
@@ -196,7 +196,7 @@ public class ConfigManager implements IConfigManager{
 
         PoolMember pm = new PoolMember(name,memberIP,poolName);
 
-        cmLogger.info("Adding pool member : "+pm.toString());
+        cmLogger.trace("Adding pool member : "+pm.toString());
 
         pools.get(poolName).addMember(pm);
 
@@ -206,7 +206,7 @@ public class ConfigManager implements IConfigManager{
     @Override
     public PoolMember removePoolMember(String name, String poolName){
 
-        cmLogger.info("Removing pool member : {} from pool {}",name, poolName);
+        cmLogger.trace("Removing pool member : {} from pool {}",name, poolName);
 
         Pool pool = pools.get(poolName);
 
@@ -214,7 +214,7 @@ public class ConfigManager implements IConfigManager{
 
         pool.removeMember(name);
 
-        cmLogger.info("Pool member {} removed from {} ",name,poolName);
+        cmLogger.trace("Pool member {} removed from {} ",name,poolName);
 
         return pm;
     }
@@ -240,7 +240,7 @@ public class ConfigManager implements IConfigManager{
 
         Pool newPool = new Pool(name,lbMethod);
 
-        cmLogger.info("New pool created : " + newPool.toString());
+        cmLogger.trace("New pool created : " + newPool.toString());
 
         pools.put(name, newPool);
 
@@ -258,7 +258,7 @@ public class ConfigManager implements IConfigManager{
 
         }
 
-        cmLogger.info("Pool removed : "+pool.toString());
+        cmLogger.trace("Pool removed : "+pool.toString());
 
         pools.remove(poolName);
 

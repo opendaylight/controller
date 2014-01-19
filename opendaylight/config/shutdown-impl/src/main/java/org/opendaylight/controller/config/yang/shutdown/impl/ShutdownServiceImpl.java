@@ -138,7 +138,7 @@ class CallSystemExitThread extends Thread {
             logger.warn("Thread dump:{}", sb);
             System.exit(1);
         } catch (InterruptedException e) {
-            logger.info("Interrupted, not going to call System.exit(1)");
+            logger.warn("Interrupted, not going to call System.exit(1)");
         }
     }
 }

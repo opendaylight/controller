@@ -136,7 +136,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
 
         updateCache(snapshot);
         cache.setInconsistentURLsForReporting(Collections.<URL> emptySet());
-        logger.info("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
+        logger.trace("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
         logger.debug("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
     }
 

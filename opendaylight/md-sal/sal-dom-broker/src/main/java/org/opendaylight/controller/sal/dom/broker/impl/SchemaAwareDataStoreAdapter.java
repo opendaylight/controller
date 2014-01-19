@@ -131,7 +131,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         }
 
         if (schema == null) {
-            LOG.info("Validation not performed for {}. Reason: YANG Schema not present.", modification.getIdentifier());
+            LOG.warn("Validation not performed for {}. Reason: YANG Schema not present.", modification.getIdentifier());
             return;
         }
     }

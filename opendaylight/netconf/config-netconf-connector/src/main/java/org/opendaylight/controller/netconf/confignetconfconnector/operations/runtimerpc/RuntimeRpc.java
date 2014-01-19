@@ -173,7 +173,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         final Object result = executeOperation(configRegistryClient, execution.on, execution.operationName,
                 execution.attributes);
 
-        logger.info("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
+        logger.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
                 execution.on, execution.attributes, result);
 
         if (execution.isVoid()) {

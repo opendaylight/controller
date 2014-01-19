@@ -260,7 +260,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         if (typeDef !== null) {
             return typeDef;
         }
-        LOG.info("Thread blocked waiting for schema for: {}",type.fullyQualifiedName)
+        LOG.trace("Thread blocked waiting for schema for: {}",type.fullyQualifiedName)
         return type.getSchemaInFuture.get();
     }
 

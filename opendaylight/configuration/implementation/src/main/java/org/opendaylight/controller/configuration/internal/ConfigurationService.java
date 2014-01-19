@@ -99,7 +99,7 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
             Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
                 success = false;
-                logger.info("Failed to save config for {}",
+                logger.trace("Failed to save config for {}",
                         configurationAware.getClass().getName());
             }
         }
