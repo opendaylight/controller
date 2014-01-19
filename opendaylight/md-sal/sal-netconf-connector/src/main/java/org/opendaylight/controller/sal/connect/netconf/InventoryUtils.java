@@ -7,9 +7,10 @@ import java.util.Date;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.slf4j.Logger;
 
 public class InventoryUtils {
-
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InventoryUtils.class);
     private static final URI INVENTORY_NAMESPACE = URI.create("urn:opendaylight:inventory");
     private static final URI NETCONF_INVENTORY_NAMESPACE = URI.create("urn:opendaylight:netconf-node-inventory");
     private static final Date INVENTORY_REVISION = dateFromString("2013-08-19");
@@ -28,7 +29,7 @@ public class InventoryUtils {
 
     /**
      * Converts date in string format yyyy-MM-dd to java.util.Date.
-     * 
+     *
      * @return java.util.Date conformant to string formatted date yyyy-MM-dd.
      */
     private static Date dateFromString(final String date) {
@@ -36,7 +37,7 @@ public class InventoryUtils {
         try {
             return formatter.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOG.warn("Unhanded Exception ", e);
         }
         return null;
     }

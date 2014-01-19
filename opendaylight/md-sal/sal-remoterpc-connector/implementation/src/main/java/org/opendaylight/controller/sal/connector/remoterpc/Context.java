@@ -7,6 +7,7 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import org.slf4j.Logger;
 import org.zeromq.ZMQ;
 
 import java.net.Inet4Address;
@@ -19,6 +20,7 @@ import java.util.Enumeration;
  * Provides a ZeroMQ Context object
  */
 public class Context {
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Context.class);
   private ZMQ.Context zmqContext = ZMQ.context(1);
   private String uri;
   private final String DEFAULT_RPC_PORT = "5554";
@@ -73,7 +75,7 @@ public class Context {
     try {
       e = NetworkInterface.getNetworkInterfaces();
     } catch (SocketException e1) {
-      e1.printStackTrace();
+        LOG.warn("Unhanded Exception ", e);
     }
     while (e.hasMoreElements()) {
 

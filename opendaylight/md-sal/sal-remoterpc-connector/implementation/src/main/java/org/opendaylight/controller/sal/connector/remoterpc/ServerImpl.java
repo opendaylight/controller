@@ -8,422 +8,278 @@
 package org.opendaylight.controller.sal.connector.remoterpc;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Sets;
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
+
 import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.Message.MessageType;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
+import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
+import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.concurrent.Future;
 
 /**
- * ZeroMq based implementation of RpcRouter. It implements RouteChangeListener of RoutingTable
- * so that it gets route change notifications from routing table.
+ * ZeroMq based implementation of RpcRouter TODO: 1. Make rpc request handling
+ * async and non-blocking. Note zmq socket is not thread safe 2. Read properties
+ * from config file using existing(?) ODL properties framework
  */
-public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, String> {
+public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, Set> {
 
-  private Logger _logger = LoggerFactory.getLogger(ServerImpl.class);
+    private Logger _logger = LoggerFactory.getLogger(ServerImpl.class);
 
-  private ExecutorService serverPool;
-  protected ServerRequestHandler handler;
+    private ExecutorService serverPool;
 
-  private Set<QName> remoteServices;
-  private ProviderSession brokerSession;
-  private ZMQ.Context context;
+    // private RoutingTable<RpcRouter.RouteIdentifier, String> routingTable;
+    private RoutingTableProvider routingTable;
+    private Set<QName> remoteServices;
+    private ProviderSession brokerSession;
+    private ZMQ.Context context;
+    private ZMQ.Socket replySocket;
 
-  private final RpcListener listener = new RpcListener();
+    private final RpcListener listener = new RpcListener();
 
-  private final String HANDLER_INPROC_ADDRESS = "inproc://rpc-request-handler";
-  private final int HANDLER_WORKER_COUNT = 2;
-  private final int HWM = 200;//high water mark on sockets
-  private volatile State status = State.STOPPED;
+    private final String localUri = Context.getInstance().getLocalUri();
 
-  private String serverAddress;
-  private int port;
+    private final int rpcPort;
 
-  private ClientImpl client;
+    private RpcImplementation client;
 
-  private  RoutingTableProvider routingTableProvider;
+    public RpcImplementation getClient() {
+        return client;
+    }
 
-  public static enum State {
-    STARTING, STARTED, STOPPED;
-  }
+    public void setClient(RpcImplementation client) {
+        this.client = client;
+    }
 
-  public ServerImpl(int port) {
-    this.port = port;
-    this.serverAddress = new StringBuilder(findIpAddress()).
-                              append(":").
-                              append(port).
-                              toString();
-  }
+    // Prevent instantiation
+    public ServerImpl(int rpcPort) {
+        this.rpcPort = rpcPort;
+    }
 
-  public RoutingTableProvider getRoutingTableProvider() {
-    return routingTableProvider;
-  }
+    public void setBrokerSession(ProviderSession session) {
+        this.brokerSession = session;
+    }
 
-  public void setRoutingTableProvider(RoutingTableProvider routingTableProvider) {
-    this.routingTableProvider = routingTableProvider;
-  }
+    public ExecutorService getServerPool() {
+        return serverPool;
+    }
 
-  public ClientImpl getClient(){
-    return this.client;
-  }
+    public void setServerPool(ExecutorService serverPool) {
+        this.serverPool = serverPool;
+    }
 
-  public void setClient(ClientImpl client) {
-    this.client = client;
-  }
+    public void start() {
+        context = ZMQ.context(1);
+        serverPool = Executors.newSingleThreadExecutor();
+        remoteServices = new HashSet<QName>();
 
-  public State getStatus() {
-    return this.status;
-  }
+        // Start listening rpc requests
+        serverPool.execute(receive());
 
-  public Optional<ServerRequestHandler> getHandler() {
-    return Optional.fromNullable(this.handler);
-  }
+        brokerSession.addRpcRegistrationListener(listener);
+        // routingTable.registerRouteChangeListener(routeChangeListener);
 
-  public void setBrokerSession(ProviderSession session) {
-    this.brokerSession = session;
-  }
+        Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
+        for (QName rpc : currentlySupported) {
+            listener.onRpcImplementationAdded(rpc);
+        }
 
-  public Optional<ProviderSession> getBrokerSession() {
-    return Optional.fromNullable(this.brokerSession);
-  }
+        _logger.debug("RPC Server started [{}]", localUri);
+    }
 
-  public Optional<ZMQ.Context> getZmqContext() {
-    return Optional.fromNullable(this.context);
-  }
+    public void stop() {
+        // TODO: un-subscribe
 
-  public String getServerAddress() {
-    return serverAddress;
-  }
+        // if (context != null)
+        // context.term();
+        //
+        // _logger.debug("ZMQ Context is terminated.");
 
-  public String getHandlerAddress() {
-    return HANDLER_INPROC_ADDRESS;
-  }
+        if (serverPool != null)
+            serverPool.shutdown();
 
-  /**
-   *
-   */
-  public void start() {
-    Preconditions.checkState(State.STOPPED == this.getStatus(),
-        "Remote RPC Server is already running");
+        _logger.debug("Thread pool is closed.");
+    }
 
-    status = State.STARTING;
-    context = ZMQ.context(1);
-    remoteServices = new HashSet<QName>();//
-    serverPool = Executors.newSingleThreadExecutor();//main server thread
-    serverPool.execute(receive()); // Start listening rpc requests
-    brokerSession.addRpcRegistrationListener(listener);
+    private Runnable receive() {
+        return new Runnable() {
+            public void run() {
 
-    announceLocalRpcs();
+                // Bind to RPC reply socket
+                replySocket = context.socket(ZMQ.REP);
+                replySocket.bind("tcp://*:" + Context.getInstance().getRpcPort());
 
-    registerRemoteRpcs();
+                // Poller enables listening on multiple sockets using a single
+                // thread
+                ZMQ.Poller poller = new ZMQ.Poller(1);
+                poller.register(replySocket, ZMQ.Poller.POLLIN);
+                try {
+                    // TODO: Add code to restart the thread after exception
+                    while (!Thread.currentThread().isInterrupted()) {
 
-    status = State.STARTED;
-    _logger.info("Remote RPC Server started [{}]", getServerAddress());
-  }
+                        poller.poll();
 
-  public void stop(){
-    close();
-  }
+                        if (poller.pollin(0)) {
+                            handleRpcCall();
+                        }
+                    }
+                } catch (Exception e) {
+                    // log and continue
+                    _logger.error("Unhandled exception [{}]", e);
+                } finally {
+                    poller.unregister(replySocket);
+                    replySocket.close();
+                }
 
-  /**
-   *
-   */
-  @Override
-  public void close() {
+            }
+        };
+    }
 
-    if (State.STOPPED == this.getStatus()) return; //do nothing
+    /**
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    private void handleRpcCall() {
 
-    unregisterLocalRpcs();
+        Message request = parseMessage(replySocket);
 
-    if (serverPool != null)
-      serverPool.shutdown();
+        _logger.debug("Received rpc request [{}]", request);
 
-    closeZmqContext();
-
-    status = State.STOPPED;
-    _logger.info("Remote RPC Server stopped");
-  }
-
-  /**
-   * Closes ZMQ Context. It tries to gracefully terminate the context. If
-   * termination takes more than a second, its forcefully shutdown.
-   */
-  private void closeZmqContext() {
-    ExecutorService exec = Executors.newSingleThreadExecutor();
-    FutureTask zmqTermination = new FutureTask(new Runnable() {
-
-      @Override
-      public void run() {
+        // Call broker to process the message then reply
+        Future<RpcResult<CompositeNode>> rpc = null;
+        RpcResult<CompositeNode> result = null;
         try {
-          if (context != null)
-            context.term();
-          _logger.debug("ZMQ Context terminated gracefully!");
-        } catch (Exception e) {
-          _logger.debug("ZMQ Context termination threw exception [{}]. Continuing shutdown...", e);
-        }
-      }
-    }, null);
+            rpc = brokerSession.rpc((QName) request.getRoute().getType(),
+                    XmlUtils.xmlToCompositeNode((String) request.getPayload()));
 
-    exec.execute(zmqTermination);
-
-    try {
-      zmqTermination.get(5L, TimeUnit.SECONDS);
-    } catch (Exception e) {/*ignore and continue with shutdown*/}
-
-    exec.shutdownNow();
-  }
-
-  /**
-   * Main listener thread that spawns {@link ServerRequestHandler} as workers.
-   *
-   * @return
-   */
-  private Runnable receive() {
-    return new Runnable() {
-
-      @Override
-      public void run() {
-        Thread.currentThread().setName("remote-rpc-server");
-        _logger.debug("Remote RPC Server main thread starting...");
-
-        //socket clients connect to (frontend)
-        ZMQ.Socket clients = context.socket(ZMQ.ROUTER);
-
-        //socket RequestHandlers connect to (backend)
-        ZMQ.Socket workers = context.socket(ZMQ.DEALER);
-
-        try (SocketPair capturePair = new SocketPair();
-             ServerRequestHandler requestHandler = new ServerRequestHandler(context,
-                 brokerSession,
-                 HANDLER_WORKER_COUNT,
-                 HANDLER_INPROC_ADDRESS,
-                 getServerAddress());) {
-
-          handler = requestHandler;
-          clients.setHWM(HWM);
-          clients.bind("tcp://*:" + port);
-          workers.setHWM(HWM);
-          workers.bind(HANDLER_INPROC_ADDRESS);
-          //start worker threads
-          _logger.debug("Remote RPC Server worker threads starting...");
-          requestHandler.start();
-          //start capture thread
-          // handlerPool.execute(new CaptureHandler(capturePair.getReceiver()));
-          //  Connect work threads to client threads via a queue
-          ZMQ.proxy(clients, workers, null);//capturePair.getSender());
+            result = (rpc != null) ? rpc.get() : null;
 
         } catch (Exception e) {
-          _logger.debug("Unhandled exception [{}, {}]", e.getClass(), e.getMessage());
-        } finally {
-          if (clients != null) clients.close();
-          if (workers != null) workers.close();
-          _logger.info("Remote RPC Server stopped");
+            _logger.debug("Broker threw  [{}]", e);
         }
-      }
-    };
-  }
 
-  /**
-   * Register the remote RPCs from the routing table into broker
-   */
-  private void registerRemoteRpcs(){
-    Optional<RoutingTable<String, String>> routingTableOptional = routingTableProvider.getRoutingTable();
+        CompositeNode payload = (result != null) ? result.getResult() : null;
 
-    Preconditions.checkState(routingTableOptional.isPresent(), "Routing table is absent");
+        Message response = new Message.MessageBuilder().type(MessageType.RESPONSE).sender(localUri)
+                .route(request.getRoute()).payload(XmlUtils.compositeNodeToXml(payload)).build();
 
-    Set<Map.Entry> remoteRoutes =
-            routingTableProvider.getRoutingTable().get().getAllRoutes();
+        _logger.debug("Sending rpc response [{}]", response);
 
-    //filter out all entries that contains local address
-    //we dont want to register local RPCs as remote
-    Predicate<Map.Entry> notLocalAddressFilter = new Predicate<Map.Entry>(){
-      public boolean apply(Map.Entry remoteRoute){
-        return !getServerAddress().equalsIgnoreCase((String)remoteRoute.getValue());
-      }
-    };
+        try {
+            replySocket.send(Message.serialize(response));
+        } catch (Exception e) {
+            _logger.debug("rpc response send failed for message [{}]", response);
+            _logger.debug("{}", e);
+        }
 
-    //filter the entries created by current node
-    Set<Map.Entry> filteredRemoteRoutes = Sets.filter(remoteRoutes, notLocalAddressFilter);
-
-    for (Map.Entry route : filteredRemoteRoutes){
-      onRouteUpdated((String) route.getKey(), "");//value is not needed by broker
     }
-  }
 
-  /**
-   * Un-Register the local RPCs from the routing table
-   */
-  private void unregisterLocalRpcs(){
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      listener.onRpcImplementationRemoved(rpc);
-    }
-  }
+    /**
+     * @param socket
+     * @return
+     */
+    private Message parseMessage(ZMQ.Socket socket) {
 
-  /**
-   * Publish all the locally registered RPCs in the routing table
-   */
-  private void announceLocalRpcs(){
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      listener.onRpcImplementationAdded(rpc);
-    }
-  }
-
-  /**
-   * @param key
-   * @param value
-   */
-  @Override
-  public void onRouteUpdated(String key, String value) {
-    RouteIdentifierImpl rId = new RouteIdentifierImpl();
-    try {
-      _logger.debug("Updating key/value {}-{}", key, value);
-      brokerSession.addRpcImplementation(
-          (QName) rId.fromString(key).getType(), client);
-
-      //TODO: Check with Tony for routed rpc
-      //brokerSession.addRoutedRpcImplementation((QName) rId.fromString(key).getRoute(), client);
-    } catch (Exception e) {
-      _logger.info("Route update failed {}", e);
-    }
-  }
-
-  /**
-   * @param key
-   */
-  @Override
-  public void onRouteDeleted(String key) {
-    //TODO: Broker session needs to be updated to support this
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Finds IPv4 address of the local VM
-   * TODO: This method is non-deterministic. There may be more than one IPv4 address. Cant say which
-   * address will be returned. Read IP from a property file or enhance the code to make it deterministic.
-   * Should we use IP or hostname?
-   *
-   * @return
-   */
-  private String findIpAddress() {
-    String hostAddress = null;
-    Enumeration e = null;
-    try {
-      e = NetworkInterface.getNetworkInterfaces();
-    } catch (SocketException e1) {
-      e1.printStackTrace();
-    }
-    while (e.hasMoreElements()) {
-
-      NetworkInterface n = (NetworkInterface) e.nextElement();
-
-      Enumeration ee = n.getInetAddresses();
-      while (ee.hasMoreElements()) {
-        InetAddress i = (InetAddress) ee.nextElement();
-        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress()))
-          hostAddress = i.getHostAddress();
-      }
-    }
-    return hostAddress;
-
-  }
-
-  /**
-   * Listener for rpc registrations
-   */
-  private class RpcListener implements RpcRegistrationListener {
-
-    @Override
-    public void onRpcImplementationAdded(QName name) {
-
-      //if the service name exists in the set, this notice
-      //has bounced back from the broker. It should be ignored
-      if (remoteServices.contains(name))
-        return;
-
-      _logger.debug("Adding registration for [{}]", name);
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl();
-      routeId.setType(name);
-
-      RoutingTable<String, String> routingTable = getRoutingTable();
-
-      try {
-        routingTable.addGlobalRoute(routeId.toString(), getServerAddress());
-        _logger.debug("Route added [{}-{}]", name, getServerAddress());
-
-      } catch (RoutingTableException | SystemException e) {
-        //TODO: This can be thrown when route already exists in the table. Broker
-        //needs to handle this.
-        _logger.error("Unhandled exception while adding global route to routing table [{}]", e);
-
-      }
+        Message msg = null;
+        try {
+            byte[] bytes = socket.recv();
+            _logger.debug("Received bytes:[{}]", bytes.length);
+            msg = (Message) Message.deserialize(bytes);
+        } catch (Throwable t) {
+            _logger.warn("Unhanded Exception ", t);
+        }
+        return msg;
     }
 
     @Override
-    public void onRpcImplementationRemoved(QName name) {
+    public void onRouteUpdated(String key, Set values) {
+        RouteIdentifierImpl rId = new RouteIdentifierImpl();
+        try {
+            _logger.debug("Updating key/value {}-{}", key, values);
+            brokerSession.addRpcImplementation((QName) rId.fromString(key).getType(), client);
 
-      _logger.debug("Removing registration for [{}]", name);
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl();
-      routeId.setType(name);
-
-      RoutingTable<String, String> routingTable = getRoutingTable();
-
-      try {
-        routingTable.removeGlobalRoute(routeId.toString());
-      } catch (RoutingTableException | SystemException e) {
-        _logger.error("Route delete failed {}", e);
-      }
+        } catch (Exception e) {
+            _logger.info("Route update failed {}", e);
+        }
     }
-
-    private RoutingTable<String, String> getRoutingTable(){
-      Optional<RoutingTable<String, String>> routingTable =
-          routingTableProvider.getRoutingTable();
-
-      checkNotNull(routingTable.isPresent(), "Routing table is null");
-
-      return routingTable.get();
-    }
-  }
-
-  /*
-   * Listener for Route changes in broker. Broker notifies this listener in the event
-   * of any change (add/delete). Listener then updates the routing table.
-   */
-  private class BrokerRouteChangeListener
-      implements org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener<RpcRoutingContext, InstanceIdentifier>{
 
     @Override
-    public void onRouteChange(RouteChange<RpcRoutingContext, InstanceIdentifier> routeChange) {
-
+    public void onRouteDeleted(String key) {
+        // TODO: Broker session needs to be updated to support this
+        throw new UnsupportedOperationException();
     }
-  }
+
+    /**
+     * Listener for rpc registrations
+     */
+    private class RpcListener implements RpcRegistrationListener {
+
+
+
+        @Override
+        public void onRpcImplementationAdded(QName name) {
+
+            // if the service name exists in the set, this notice
+            // has bounced back from the broker. It should be ignored
+            if (remoteServices.contains(name))
+                return;
+
+            _logger.debug("Adding registration for [{}]", name);
+            RouteIdentifierImpl routeId = new RouteIdentifierImpl();
+            routeId.setType(name);
+
+            try {
+                routingTable.getRoutingTable().get().addGlobalRoute(routeId.toString(), localUri);
+                _logger.debug("Route added [{}-{}]", name, localUri);
+            } catch (RoutingTableException | SystemException e) {
+                // TODO: This can be thrown when route already exists in the
+                // table. Broker
+                // needs to handle this.
+                _logger.error("Unhandled exception while adding global route to routing table [{}]", e);
+
+            }
+        }
+
+        @Override
+        public void onRpcImplementationRemoved(QName name) {
+
+            _logger.debug("Removing registration for [{}]", name);
+            RouteIdentifierImpl routeId = new RouteIdentifierImpl();
+            routeId.setType(name);
+
+            try {
+                routingTable.getRoutingTable().get().removeGlobalRoute(routeId.toString());
+            } catch (RoutingTableException | SystemException e) {
+                _logger.error("Route delete failed {}", e);
+            }
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        stop();
+    }
+
+    public void setRoutingTableProvider(RoutingTableProvider provider) {
+        this.routingTable = provider;
+    }
 
 }
