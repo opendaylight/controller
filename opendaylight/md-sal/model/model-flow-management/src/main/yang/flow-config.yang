@@ -25,7 +25,7 @@ module flow-management {
             leaf id {
                 type uint32;
             }
-            uses flow:flow-entry;
+            uses flow-entry;
         }
     }
 }
