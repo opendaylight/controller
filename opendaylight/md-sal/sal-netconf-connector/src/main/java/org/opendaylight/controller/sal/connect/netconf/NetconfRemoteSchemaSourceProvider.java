@@ -38,16 +38,16 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
             request.addLeaf("version", revision.get());
         }
 
-        device.logger.info("Loading YANG schema source for {}:{}", moduleName, revision);
+        device.logger.trace("Loading YANG schema source for {}:{}", moduleName, revision);
         RpcResult<CompositeNode> schemaReply = device.invokeRpc(GET_SCHEMA_QNAME, request.toInstance());
         if (schemaReply.isSuccessful()) {
             String schemaBody = getSchemaFromRpc(schemaReply.getResult());
             if (schemaBody != null) {
-                device.logger.info("YANG Schema successfully retrieved from remote for {}:{}", moduleName, revision);
+                device.logger.trace("YANG Schema successfully retrieved from remote for {}:{}", moduleName, revision);
                 return Optional.of(schemaBody);
             }
         }
-        device.logger.info("YANG shcema was not successfully retrieved.");
+        device.logger.warn("YANG shcema was not successfully retrieved.");
         return Optional.absent();
     }
 
@@ -62,7 +62,7 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
         }
         return null;
     }
-    
+
     public static final boolean isSupportedFor(Set<QName> capabilities) {
         return capabilities.contains(IETF_NETCONF_MONITORING);
     }

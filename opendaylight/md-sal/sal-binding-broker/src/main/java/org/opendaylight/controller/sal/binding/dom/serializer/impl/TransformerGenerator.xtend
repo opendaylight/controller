@@ -1102,7 +1102,7 @@ class TransformerGenerator {
     }
 
     private def createDummyImplementation(Class<?> object, GeneratedTransferObject typeSpec) {
-        log.info("Generating Dummy DOM Codec for {} with {}", object, object.classLoader)
+        log.trace("Generating Dummy DOM Codec for {} with {}", object, object.classLoader)
         return createClass(typeSpec.codecClassName) [
             if (object.isYangBindingAvailable) {
                 implementsType(BINDING_CODEC)

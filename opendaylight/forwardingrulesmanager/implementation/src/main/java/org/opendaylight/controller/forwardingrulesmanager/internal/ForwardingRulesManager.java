@@ -467,7 +467,7 @@ public class ForwardingRulesManager implements
         Status succeeded = null;
         boolean decouple = false;
         if (installedList.size() != toInstallList.size()) {
-            log.info("Modify: New flow entry does not satisfy the same "
+            log.trace("Modify: New flow entry does not satisfy the same "
                     + "number of container flows as the original entry does");
             decouple = true;
         }
@@ -479,7 +479,7 @@ public class ForwardingRulesManager implements
              */
             FlowEntryInstall sameMatchEntry = installedSwView.get(installEntry);
             if (sameMatchEntry != null && !sameMatchEntry.getOriginal().equals(currentFlowEntry)) {
-                log.info("Modify: new container flow merged flow entry clashes with existing flow");
+                log.trace("Modify: new container flow merged flow entry clashes with existing flow");
                 decouple = true;
             } else {
                 toInstallSafe.add(installEntry);
@@ -1263,7 +1263,7 @@ public class ForwardingRulesManager implements
                 }
                 Status error = modifyEntry(currentFlowEntry, newFlowEntry, false);
                 if (error.isSuccess()) {
-                    log.info("Ports {} added to FlowEntry {}", portList, flowName);
+                    log.trace("Ports {} added to FlowEntry {}", portList, flowName);
                 } else {
                     log.warn("Failed to add ports {} to Flow entry {}. The failure is: {}", portList,
                             currentFlowEntry.toString(), error.getDescription());
@@ -1287,7 +1287,7 @@ public class ForwardingRulesManager implements
                 }
                 Status status = modifyEntry(currentFlowEntry, newFlowEntry, false);
                 if (status.isSuccess()) {
-                    log.info("Ports {} removed from FlowEntry {}", portList, flowName);
+                    log.trace("Ports {} removed from FlowEntry {}", portList, flowName);
                 } else {
                     log.warn("Failed to remove ports {} from Flow entry {}. The failure is: {}", portList,
                             currentFlowEntry.toString(), status.getDescription());
@@ -1335,7 +1335,7 @@ public class ForwardingRulesManager implements
         Status status = modifyEntry(currentFlowEntry, newFlowEntry, false);
 
         if (status.isSuccess()) {
-            log.info("Output port replaced with {} for flow {} on node {}", outPort, flowName, node);
+            log.trace("Output port replaced with {} for flow {} on node {}", outPort, flowName, node);
         } else {
             log.warn("Failed to replace output port for flow {} on node {}. The failure is: {}", flowName, node,
                     status.getDescription());
@@ -1793,7 +1793,7 @@ public class ForwardingRulesManager implements
         // Do not attempt to reinstall the flow, warn user
         if (newFlowConfig.equals(oldFlowConfig)) {
             String msg = "No modification detected";
-            log.info("Static flow modification skipped. New flow and old flow are the same: {}", newFlowConfig);
+            log.trace("Static flow modification skipped. New flow and old flow are the same: {}", newFlowConfig);
             return new Status(StatusCode.SUCCESS, msg);
         }
 
@@ -1895,7 +1895,7 @@ public class ForwardingRulesManager implements
      *            inactive list
      */
     private void uninstallAllFlowEntries(boolean preserveFlowEntries) {
-        log.info("Uninstalling all non-internal flows");
+        log.trace("Uninstalling all non-internal flows");
 
         List<FlowEntryInstall> toRemove = new ArrayList<FlowEntryInstall>();
 
@@ -1933,7 +1933,7 @@ public class ForwardingRulesManager implements
      * default container instance of FRM only when the last container is deleted
      */
     private void reinstallAllFlowEntries() {
-        log.info("Reinstalling all inactive flows");
+        log.trace("Reinstalling all inactive flows");
 
         for (FlowEntry flowEntry : this.inactiveFlows.keySet()) {
             this.addEntry(flowEntry, false);
@@ -2118,11 +2118,11 @@ public class ForwardingRulesManager implements
                 dropAllConfig.setActions(dropAction);
                 defaultConfigs.add(dropAllConfig);
 
-                log.info("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
+                log.trace("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
                 for (FlowConfig fc : defaultConfigs) {
                     Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
                     if (status.isSuccess()) {
-                        log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
+                        log.trace("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
                     } else {
                         log.warn("Failed to {} Proactive Static flow: {}", (proactive ? "install" : "remove"),
                                 fc.getName());
@@ -2145,7 +2145,7 @@ public class ForwardingRulesManager implements
      * @param node
      */
     private void cleanDatabaseForNode(Node node) {
-        log.info("Cleaning Flow database for Node {}", node);
+        log.trace("Cleaning Flow database for Node {}", node);
         if (nodeFlows.containsKey(node)) {
             List<FlowEntryInstall> toRemove = new ArrayList<FlowEntryInstall>(nodeFlows.get(node));
 
@@ -2322,7 +2322,7 @@ public class ForwardingRulesManager implements
 
     @Override
     public void portGroupChanged(PortGroupConfig config, Map<Node, PortGroup> data, boolean add) {
-        log.info("PortGroup Changed for: {} Data: {}", config, portGroupData);
+        log.trace("PortGroup Changed for: {} Data: {}", config, portGroupData);
         Map<Node, PortGroup> existingData = portGroupData.get(config);
         if (existingData != null) {
             for (Map.Entry<Node, PortGroup> entry : data.entrySet()) {

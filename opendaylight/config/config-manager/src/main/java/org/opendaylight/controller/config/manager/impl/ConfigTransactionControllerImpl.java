@@ -306,7 +306,7 @@ class ConfigTransactionControllerImpl implements
 
     private void validate_noLocks() throws ValidationException {
         transactionStatus.checkNotAborted();
-        logger.info("Validating transaction {}", getTransactionIdentifier());
+        logger.trace("Validating transaction {}", getTransactionIdentifier());
         // call validate()
         List<ValidationException> collectedExceptions = new ArrayList<>();
         for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager
@@ -326,7 +326,7 @@ class ConfigTransactionControllerImpl implements
             throw ValidationException
                     .createFromCollectedValidationExceptions(collectedExceptions);
         }
-        logger.info("Validated transaction {}", getTransactionIdentifier());
+        logger.trace("Validated transaction {}", getTransactionIdentifier());
     }
 
     /**
@@ -345,7 +345,7 @@ class ConfigTransactionControllerImpl implements
         try {
             validate_noLocks();
         } catch (ValidationException e) {
-            logger.info("Commit failed on validation");
+            logger.trace("Commit failed on validation");
             configBeanModificationDisabled.set(false); // recoverable error
             throw e;
         }
@@ -368,7 +368,7 @@ class ConfigTransactionControllerImpl implements
                             + "to obtain a lock");
         }
 
-        logger.info("Committing transaction {}", getTransactionIdentifier());
+        logger.trace("Committing transaction {}", getTransactionIdentifier());
 
         // call getInstance()
         for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager
@@ -391,7 +391,7 @@ class ConfigTransactionControllerImpl implements
 
         // count dependency order
 
-        logger.info("Committed configuration {}", getTransactionIdentifier());
+        logger.trace("Committed configuration {}", getTransactionIdentifier());
         transactionStatus.setCommitted();
         // unregister this and all modules from jmx
         close();

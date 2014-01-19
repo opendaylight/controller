@@ -28,7 +28,7 @@ public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy 
         ObjectName on = null;
         try {
             on = ta.createModule(module, instance);
-            logger.info("New instance for {} {} created under name {}", module, instance, on);
+            logger.trace("New instance for {} {} created under name {}", module, instance, on);
         } catch (InstanceAlreadyExistsException e1) {
             throw new IllegalStateException("Unable to create instance for " + module + " : " + instance);
         }

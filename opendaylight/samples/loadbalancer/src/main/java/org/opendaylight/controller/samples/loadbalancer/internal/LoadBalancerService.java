@@ -268,14 +268,14 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager {
                                 forwardPort = hnConnector.getnodeConnector();
 
                                 lbsLogger
-                                        .info("Both source (client) and destination pool machine is connected to same switch nodes. Respective ports are - {},{}",
+                                        .trace("Both source (client) and destination pool machine is connected to same switch nodes. Respective ports are - {},{}",
                                                 forwardPort, inPkt.getIncomingNodeConnector());
 
                             } else {
 
                                 Path route = this.routing.getRoute(clientNode, destNode);
 
-                                lbsLogger.info("Path between source (client) and destination switch nodes : {}",
+                                lbsLogger.trace("Path between source (client) and destination switch nodes : {}",
                                         route.toString());
 
                                 forwardPort = route.getEdges().get(0).getTailNodeConnector();
@@ -285,7 +285,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager {
                             if (installLoadBalancerFlow(client, vip, clientNode, poolMemberIp,
                                     hnConnector.getDataLayerAddressBytes(), forwardPort,
                                     LBConst.FORWARD_DIRECTION_LB_FLOW)) {
-                                lbsLogger.info("Traffic from client : {} will be routed " + "to pool machine : {}",
+                                lbsLogger.trace("Traffic from client : {} will be routed " + "to pool machine : {}",
                                         client, poolMemberIp);
                             } else {
                                 lbsLogger.error("Not able to route traffic from client : {}", client);
@@ -293,7 +293,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager {
 
                             if (installLoadBalancerFlow(client, vip, clientNode, poolMemberIp, vipMacAddr,
                                     inPkt.getIncomingNodeConnector(), LBConst.REVERSE_DIRECTION_LB_FLOW)) {
-                                lbsLogger.info("Flow rule installed to change the source ip/mac from "
+                                lbsLogger.trace("Flow rule installed to change the source ip/mac from "
                                         + "pool machine ip {} to VIP {} for traffic coming pool machine", poolMemberIp,
                                         vip);
                             } else {
@@ -389,7 +389,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager {
 
         FlowEntry fEntry = new FlowEntry(policyName, flowName, flow, sourceSwitch);
 
-        lbsLogger.info("Install flow entry {} on node {}", fEntry.toString(), sourceSwitch.toString());
+        lbsLogger.trace("Install flow entry {} on node {}", fEntry.toString(), sourceSwitch.toString());
 
         if (!this.ruleManager.checkFlowEntryConflict(fEntry)) {
             if (this.ruleManager.installFlowEntry(fEntry).isSuccess()) {
@@ -413,13 +413,13 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager {
         if (props != null) {
             this.containerName = (String) props.get("containerName");
 
-            lbsLogger.info("Running container name:" + this.containerName);
+            lbsLogger.trace("Running container name:" + this.containerName);
         } else {
 
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
-        lbsLogger.info(configManager.toString());
+        lbsLogger.trace(configManager.toString());
 
     }
 

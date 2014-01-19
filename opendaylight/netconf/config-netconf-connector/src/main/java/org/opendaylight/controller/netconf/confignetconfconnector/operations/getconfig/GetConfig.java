@@ -90,7 +90,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(ta);
         dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
 
-        logger.info("{} operation successful", GET_CONFIG);
+        logger.trace("{} operation successful", GET_CONFIG);
 
         return dataElement;
     }

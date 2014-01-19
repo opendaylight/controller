@@ -43,7 +43,7 @@ public class DestroyedModule implements AutoCloseable,
 
     @Override
     public void close() {
-        logger.info("Destroying {}", identifier);
+        logger.trace("Destroying {}", identifier);
         try {
             instance.close();
         } catch (Exception e) {

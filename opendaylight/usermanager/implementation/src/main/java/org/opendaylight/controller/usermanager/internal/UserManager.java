@@ -247,8 +247,8 @@ public class UserManager implements IUserManager, IObjectReader,
              * Warn user and delete recovery file.
              */
             this.localUserConfigList.remove(UserManager.DEFAULT_ADMIN);
-            logger.info("Default Network Administrator password has been reset to factory default.");
-            logger.info("Please change the default Network Administrator password as soon as possible");
+            logger.trace("Default Network Administrator password has been reset to factory default.");
+            logger.trace("Please change the default Network Administrator password as soon as possible");
             File filePointer = new File(UserManager.RECOVERY_FILE);
             boolean status = filePointer.delete();
             if (!status) {
@@ -283,18 +283,18 @@ public class UserManager implements IUserManager, IObjectReader,
                 rcResponse = aaaClient.authService(userName, password,
                         aaaServer.getAddress(), aaaServer.getSecret());
                 if (rcResponse.getStatus() == AuthResultEnum.AUTH_ACCEPT) {
-                    logger.info(
+                    logger.trace(
                             "Remote Authentication Succeeded for User: \"{}\", by Server: {}",
                             userName, aaaServer.getAddress());
                     remotelyAuthenticated = true;
                     break;
                 } else if (rcResponse.getStatus() == AuthResultEnum.AUTH_REJECT) {
-                    logger.info(
+                    logger.trace(
                             "Remote Authentication Rejected User: \"{}\", from Server: {}, Reason:{}",
                             new Object[] { userName, aaaServer.getAddress(),
                                     rcResponse.getStatus().toString() });
                 } else {
-                    logger.info(
+                    logger.trace(
                             "Remote Authentication Failed for User: \"{}\", from Server: {}, Reason:{}",
                             new Object[] { userName, aaaServer.getAddress(),
                                     rcResponse.getStatus().toString() });
@@ -691,7 +691,7 @@ public class UserManager implements IUserManager, IObjectReader,
         // Trigger cluster update
         localUserConfigList.put(user, targetConfigEntry);
 
-        logger.info("Password changed for User \"{}\"", user);
+        logger.trace("Password changed for User \"{}\"", user);
 
         return status;
     }
@@ -701,7 +701,7 @@ public class UserManager implements IUserManager, IObjectReader,
         // TODO: if user was authenticated through AAA server, send
         // Acct-Status-Type=stop message to server with logout as reason
         removeUserFromActiveList(userName);
-        logger.info("User \"{}\" logged out", userName);
+        logger.trace("User \"{}\" logged out", userName);
     }
 
     /*
@@ -712,7 +712,7 @@ public class UserManager implements IUserManager, IObjectReader,
         // TODO: if user was authenticated through AAA server, send
         // Acct-Status-Type=stop message to server with timeout as reason
         removeUserFromActiveList(userName);
-        logger.info("User \"{}\" timed out", userName);
+        logger.trace("User \"{}\" timed out", userName);
     }
 
     @Override

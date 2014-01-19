@@ -42,25 +42,25 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
     override readConfigurationData(InstanceIdentifier path) {
         checkPreconditions
-        LOG.info("Read Configuration via Restconf: {}", path)
+        LOG.trace("Read Configuration via Restconf: {}", path)
         return dataService.readConfigurationData(path);
     }
     
     def readConfigurationDataBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path) {
         checkPreconditions
-        LOG.info("Read Configuration via Restconf: {}", path)
+        LOG.trace("Read Configuration via Restconf: {}", path)
         return mountPoint.readConfigurationData(path);
     }
 
     override readOperationalData(InstanceIdentifier path) {
         checkPreconditions
-        LOG.info("Read Operational via Restconf: {}", path)
+        LOG.trace("Read Operational via Restconf: {}", path)
         return dataService.readOperationalData(path);
     }
     
     def readOperationalDataBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path) {
         checkPreconditions
-        LOG.info("Read Operational via Restconf: {}", path)
+        LOG.trace("Read Operational via Restconf: {}", path)
         return mountPoint.readOperationalData(path);
     }
 
@@ -73,7 +73,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     def commitConfigurationDataPut(InstanceIdentifier path, CompositeNode payload) {
         checkPreconditions
         val transaction = dataService.beginTransaction;
-        LOG.info("Put Configuration via Restconf: {}", path)
+        LOG.trace("Put Configuration via Restconf: {}", path)
         transaction.putConfigurationData(path, payload);
         return transaction.commit
     }
@@ -81,7 +81,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     def commitConfigurationDataPutBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path, CompositeNode payload) {
         checkPreconditions
         val transaction = mountPoint.beginTransaction;
-        LOG.info("Put Configuration via Restconf: {}", path)
+        LOG.trace("Put Configuration via Restconf: {}", path)
         transaction.putConfigurationData(path, payload);
         return transaction.commit
     }
@@ -91,10 +91,10 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         val transaction = dataService.beginTransaction;
         transaction.putConfigurationData(path, payload);
         if (payload == transaction.createdConfigurationData.get(path)) {
-            LOG.info("Post Configuration via Restconf: {}", path)
+            LOG.trace("Post Configuration via Restconf: {}", path)
             return transaction.commit
         }
-        LOG.info("Post Configuration via Restconf was not executed because data already exists: {}", path)
+        LOG.trace("Post Configuration via Restconf was not executed because data already exists: {}", path)
         return null;
     }
     
@@ -103,10 +103,10 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         val transaction = mountPoint.beginTransaction;
         transaction.putConfigurationData(path, payload);
         if (payload == transaction.createdConfigurationData.get(path)) {
-            LOG.info("Post Configuration via Restconf: {}", path)
+            LOG.trace("Post Configuration via Restconf: {}", path)
             return transaction.commit
         }
-        LOG.info("Post Configuration via Restconf was not executed because data already exists: {}", path)
+        LOG.trace("Post Configuration via Restconf was not executed because data already exists: {}", path)
         return null;
     }
 

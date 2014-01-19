@@ -73,7 +73,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             executeSet(configRegistryClient, editConfigExecution);
         }
 
-        logger.info("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
+        logger.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
 
         return document.createElement(XmlNetconfConstants.OK);
     }

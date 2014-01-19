@@ -423,7 +423,7 @@ public class FlowConverter {
                     continue;
                 }
                 if (action.getType() == ActionType.SET_NEXT_HOP) {
-                    logger.info("Unsupported action: {}", action);
+                    logger.warn("Unsupported action: {}", action);
                     continue;
                 }
             }

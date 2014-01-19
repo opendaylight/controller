@@ -56,7 +56,7 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
         try {
             startNegotiation();
         } catch (Exception e) {
-            logger.info("Unexpected negotiation failure", e);
+            logger.warn("Unexpected negotiation failure", e);
             negotiationFailed(e);
         }
     }
