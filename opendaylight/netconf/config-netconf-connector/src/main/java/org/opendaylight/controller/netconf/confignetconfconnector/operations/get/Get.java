@@ -153,7 +153,7 @@ public class Get extends AbstractConfigNetconfOperation {
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(txOn);
         final Element element = runtime.toXml(runtimeBeans, configBeans, document, new ServiceRegistryWrapper(ta));
 
-        logger.info("{} operation successful", XmlNetconfConstants.GET);
+        logger.trace("{} operation successful", XmlNetconfConstants.GET);
 
         return element;
     }

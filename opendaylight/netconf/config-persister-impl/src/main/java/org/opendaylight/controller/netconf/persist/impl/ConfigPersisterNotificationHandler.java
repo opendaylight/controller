@@ -69,7 +69,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called
 
-        logger.info("Received notification {}", notification);
+        logger.trace("Received notification {}", notification);
         if (notification instanceof CommitJMXNotification) {
             try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
@@ -87,7 +87,7 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
         try {
             persisterAggregator.persistConfig(new CapabilityStrippingConfigSnapshotHolder(notification.getConfigSnapshot(),
                     notification.getCapabilities(), ignoredMissingCapabilityRegex));
-            logger.info("Configuration persisted successfully");
+            logger.trace("Configuration persisted successfully");
         } catch (IOException e) {
             throw new RuntimeException("Unable to persist configuration snapshot", e);
         }

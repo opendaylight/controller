@@ -313,7 +313,7 @@ import org.slf4j.LoggerFactory;
             }
         }
         if (conflictsMsg.length() > 0) {
-            LOGGER.info("JAXB type conflicts detected : {}", conflictsMsg.toString());
+            LOGGER.warn("JAXB type conflicts detected : {}", conflictsMsg.toString());
         }
     }
 

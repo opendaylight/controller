@@ -96,12 +96,12 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
     public Status saveConfiguration() {
         boolean success = true;
         for (IConfigurationContainerAware configurationAware : configurationAwareList) {
-            logger.info("Save Config triggered for {}", configurationAware.getClass().getSimpleName());
+            logger.trace("Save Config triggered for {}", configurationAware.getClass().getSimpleName());
 
             Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
                 success = false;
-                logger.info("Failed to save config for {}", configurationAware.getClass().getSimpleName());
+                logger.warn("Failed to save config for {}", configurationAware.getClass().getSimpleName());
             }
         }
         if (success) {

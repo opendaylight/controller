@@ -57,7 +57,7 @@ public class DefaultStopExi extends AbstractNetconfOperation implements DefaultN
         Element getSchemaResult = document.createElement(XmlNetconfConstants.OK);
         XmlUtil.addNamespaceAttr(getSchemaResult,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-        logger.info("{} operation successful", STOP_EXI);
+        logger.trace("{} operation successful", STOP_EXI);
         logger.debug("received stop-exi message {} ", XmlUtil.toString(document));
         return getSchemaResult;
     }

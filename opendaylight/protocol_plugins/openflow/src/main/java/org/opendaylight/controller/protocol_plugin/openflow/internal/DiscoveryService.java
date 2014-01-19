@@ -412,7 +412,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         List<LLDPTLV> optionalTLVList = lldp.getOptionalTLVList();
         if (optionalTLVList == null) {
-            logger.info("The discovery packet with null custom option from {}", dstNodeConnector);
+            logger.warn("The discovery packet with null custom option from {}", dstNodeConnector);
             return false;
         }
 
