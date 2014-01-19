@@ -95,7 +95,7 @@ public final class DefaultGetSchema extends AbstractNetconfOperation implements 
         XmlUtil.addNamespaceAttr(getSchemaResult,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING);
 
-        logger.info("{} operation successful", GET_SCHEMA);
+        logger.trace("{} operation successful", GET_SCHEMA);
 
         return getSchemaResult;
     }

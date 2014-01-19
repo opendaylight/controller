@@ -57,7 +57,7 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
 
     override registerConsumer(Consumer consumer, BundleContext ctx) {
         checkPredicates(consumer);
-        log.info("Registering consumer " + consumer);
+        log.trace("Registering consumer " + consumer);
         val session = newSessionFor(consumer, ctx);
         consumer.onSessionInitiated(session);
         sessions.add(session);

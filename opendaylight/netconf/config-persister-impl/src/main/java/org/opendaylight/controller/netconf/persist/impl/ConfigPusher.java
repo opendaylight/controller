@@ -148,7 +148,7 @@ public class ConfigPusher {
             latestCapabilities = netconfClient.getCapabilities();
             if (Util.isSubset(netconfClient, expectedCaps)) {
                 logger.debug("Hello from netconf stable with {} capabilities", latestCapabilities);
-                logger.info("Session id received from netconf server: {}", netconfClient.getClientSession());
+                logger.trace("Session id received from netconf server: {}", netconfClient.getClientSession());
                 return netconfClient;
             }
             logger.debug("Polling hello from netconf, attempt {}, capabilities {}", attempt, latestCapabilities);
@@ -167,7 +167,7 @@ public class ConfigPusher {
             throws ConflictingVersionException, IOException, SAXException {
 
         Element xmlToBePersisted = XmlUtil.readXmlToElement(configSnapshotHolder.getConfigSnapshot());
-        logger.info("Pushing last configuration to netconf: {}", configSnapshotHolder);
+        logger.trace("Pushing last configuration to netconf: {}", configSnapshotHolder);
         StringBuilder response = new StringBuilder("editConfig response = {");
 
         NetconfMessage message = createEditConfigMessage(xmlToBePersisted, "/netconfOp/editConfig.xml");
@@ -186,7 +186,7 @@ public class ConfigPusher {
         response.append("commit response = {");
         response.append(XmlUtil.toString(responseMessage.getDocument()));
         response.append("}");
-        logger.info("Last configuration loaded successfully");
+        logger.trace("Last configuration loaded successfully");
         logger.trace("Detailed message {}", response);
     }
 

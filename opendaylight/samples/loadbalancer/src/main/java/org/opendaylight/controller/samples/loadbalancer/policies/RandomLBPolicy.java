@@ -57,7 +57,7 @@ public class RandomLBPolicy implements ILoadBalancingPolicy {
     @Override
     public String getPoolMemberForClient(Client source, VIP dest){
 
-        rLogger.info("Received traffic from client : {} for VIP : {} ",source, dest);
+        rLogger.trace("Received traffic from client : {} for VIP : {} ",source, dest);
 
         syncWithLoadBalancerData();
 
@@ -65,14 +65,14 @@ public class RandomLBPolicy implements ILoadBalancingPolicy {
 
         if(this.clientMemberMap.containsKey(source)){
             pm= this.clientMemberMap.get(source);
-            rLogger.info("Client {} had sent traffic before,new traffic will be routed to the same pool member {}",source,pm);
+            rLogger.trace("Client {} had sent traffic before,new traffic will be routed to the same pool member {}",source,pm);
         }else{
             Pool pool = null;
             pool = this.cmgr.getPool(dest.getPoolName());
             int memberNum = this.randomGenerator.nextInt(pool.getAllMembers().size()-1);
             pm = pool.getAllMembers().get(memberNum);
             this.clientMemberMap.put(source, pm );
-            rLogger.info("Network traffic from client {} will be directed to pool member {}",pm);
+            rLogger.trace("Network traffic from client {} will be directed to pool member {}",pm);
         }
         return pm.getIp();
     }

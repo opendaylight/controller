@@ -896,7 +896,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
      */
     private void notifyContainerModeChange(boolean lastActionDelete, boolean notifyLocal) {
         if (lastActionDelete == false && containerConfigs.size() == 1) {
-            logger.info("First container Creation. Inform listeners");
+            logger.trace("First container Creation. Inform listeners");
             synchronized (this.iContainerListener) {
                 for (IContainerListener i : this.iContainerListener) {
                     i.containerModeUpdated(UpdateType.ADDED);
@@ -910,7 +910,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
                 }
             }
         } else if (lastActionDelete == true && containerConfigs.isEmpty()) {
-            logger.info("Last container Deletion. Inform listeners");
+            logger.trace("Last container Deletion. Inform listeners");
             synchronized (this.iContainerListener) {
                 for (IContainerListener i : this.iContainerListener) {
                     i.containerModeUpdated(UpdateType.REMOVED);

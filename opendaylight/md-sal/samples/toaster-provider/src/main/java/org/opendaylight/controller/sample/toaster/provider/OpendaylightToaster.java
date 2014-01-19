@@ -64,7 +64,7 @@ public class OpendaylightToaster implements ToasterData, ToasterService {
     @Override
     public Future<RpcResult<Void>> makeToast(MakeToastInput input) {
         // TODO Auto-generated method stub
-        log.info("makeToast - Received input for toast");
+        log.trace("makeToast - Received input for toast");
         logToastInput(input);
         if (currentTask != null) {
             return inProgressError();
@@ -92,7 +92,7 @@ public class OpendaylightToaster implements ToasterData, ToasterService {
     private void logToastInput(MakeToastInput input) {
         String toastType = input.getToasterToastType().getName();
         String toastDoneness = input.getToasterDoneness().toString();
-        log.info("Toast: {} doneness: {}", toastType, toastDoneness);
+        log.trace("Toast: {} doneness: {}", toastType, toastDoneness);
     }
 
     private class MakeToastTask implements Callable<RpcResult<Void>> {
@@ -110,7 +110,7 @@ public class OpendaylightToaster implements ToasterData, ToasterService {
             ToastDoneBuilder notifyBuilder = new ToastDoneBuilder();
             notifyBuilder.setToastStatus(ToastStatus.Done);
             notificationProvider.notify(notifyBuilder.build());
-            log.info("Toast Done");
+            log.trace("Toast Done");
             logToastInput(toastRequest);
             currentTask = null;
             return Rpcs.<Void> getRpcResult(true, null, Collections.<RpcError> emptySet());

@@ -49,18 +49,18 @@ public class ToastConsumerImpl extends AbstractBindingAwareConsumer implements B
             RpcResult<Void> result = getToastService().makeToast(toastInput.build()).get();
 
             if (result.isSuccessful()) {
-                log.info("Toast was successfuly finished");
+                log.trace("Toast was successfuly finished");
             } else {
-                log.info("Toast was not successfuly finished");
+                log.warn("Toast was not successfuly finished");
             }
             return result.isSuccessful();
         } catch (InterruptedException | ExecutionException e) {
-            log.info("Error occured during toast creation");
+            log.warn("Error occured during toast creation");
         }
         return false;
 
     }
-    
+
     @Override
     @Deprecated
     protected void startImpl(BundleContext context) {
@@ -76,7 +76,7 @@ public class ToastConsumerImpl extends AbstractBindingAwareConsumer implements B
 
     @Override
     public void onNotification(ToastDone notification) {
-        log.info("ToastDone Notification Received: {} ",notification.getToastStatus());
+        log.trace("ToastDone Notification Received: {} ",notification.getToastStatus());
 
     }
 

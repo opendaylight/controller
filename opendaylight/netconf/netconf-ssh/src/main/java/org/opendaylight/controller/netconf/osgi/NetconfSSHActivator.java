@@ -43,7 +43,7 @@ public class NetconfSSHActivator implements BundleActivator{
     ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>(){
         @Override
         public IUserManager addingService(ServiceReference<IUserManager> reference) {
-            logger.info("Service {} added, let there be SSH bridge.", reference);
+            logger.trace("Service {} added, let there be SSH bridge.", reference);
             iUserManager =  context.getService(reference);
             try {
                 onUserManagerFound(iUserManager);
@@ -54,12 +54,12 @@ public class NetconfSSHActivator implements BundleActivator{
         }
         @Override
         public void modifiedService(ServiceReference<IUserManager> reference, IUserManager service) {
-            logger.info("Replacing modified service {} in netconf SSH.", reference);
+            logger.trace("Replacing modified service {} in netconf SSH.", reference);
             server.addUserManagerService(service);
         }
         @Override
         public void removedService(ServiceReference<IUserManager> reference, IUserManager service) {
-            logger.info("Removing service {} from netconf SSH. " +
+            logger.trace("Removing service {} from netconf SSH. " +
                     "SSH won't authenticate users until IUserManeger service will be started.", reference);
             removeUserManagerService();
         }

@@ -143,7 +143,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
     @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (this.clusterContainerService == null) {
-            log.info("un-initialized clusterContainerService, can't create cache");
+            log.trace("un-initialized clusterContainerService, can't create cache");
             return;
         }
 
@@ -162,7 +162,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
     @SuppressWarnings({ "unchecked", "deprecation" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
-            log.info("un-initialized clusterContainerService, can't retrieve cache");
+            log.warn("un-initialized clusterContainerService, can't retrieve cache");
             return;
         }
 
@@ -181,7 +181,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
 
     private void notifyStaticRouteUpdate(StaticRoute s, boolean update) {
         if (this.staticRoutingAware != null) {
-            log.info("Invoking StaticRoutingAware listeners");
+            log.trace("Invoking StaticRoutingAware listeners");
             synchronized (this.staticRoutingAware) {
                 for (IStaticRoutingAware ra : this.staticRoutingAware) {
                     try {
