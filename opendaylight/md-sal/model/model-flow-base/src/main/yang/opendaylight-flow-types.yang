@@ -2,7 +2,6 @@ module opendaylight-flow-types {
     namespace "urn:opendaylight:flow:types";
     prefix flow;
 
-    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}    
     import opendaylight-match-types {prefix match; revision-date "2013-10-26";}
     import opendaylight-action-types {prefix action;}
