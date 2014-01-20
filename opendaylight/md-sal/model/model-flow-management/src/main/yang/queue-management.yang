@@ -2,7 +2,6 @@ module queue-management {
     namespace "urn:opendaylight:queue:config";
     prefix queue-cfg;
 
-    import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}      
      
     import opendaylight-queue-types {prefix queue; revision-date "2013-09-25";}
