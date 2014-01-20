@@ -158,7 +158,9 @@ class RestconfImpl implements RestconfService {
                 "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)");
         }
         val uncompleteInstIdWithData = identifier.toInstanceIdentifier
-        val schemaNode = uncompleteInstIdWithData.mountPoint.findModule(payload)?.getSchemaChildNode(payload)
+        val parentSchema = uncompleteInstIdWithData.schemaNode as DataNodeContainer
+        val namespace = uncompleteInstIdWithData.mountPoint.findModule(payload)?.namespace
+        val schemaNode = parentSchema.findInstanceDataChild(payload.name, namespace)
         val value = normalizeNode(payload, schemaNode, uncompleteInstIdWithData.mountPoint)
         val completeInstIdWithData = uncompleteInstIdWithData.addLastIdentifierFromData(value, schemaNode)
         var RpcResult<TransactionStatus> status = null
@@ -182,7 +184,12 @@ class RestconfImpl implements RestconfService {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)");
         }
-        val schemaNode = findModule(null, payload)?.getSchemaChildNode(payload)
+        val module = findModule(null, payload)
+        if (module === null) {
+            throw new ResponseException(BAD_REQUEST,
+                "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)");
+        }
+        val schemaNode = module.findInstanceDataChild(payload.name, module.namespace)
         val value = normalizeNode(payload, schemaNode, null)
         val iiWithData = addLastIdentifierFromData(null, value, schemaNode)
         var RpcResult<TransactionStatus> status = null
@@ -249,14 +256,14 @@ class RestconfImpl implements RestconfService {
         return module
     }
     
-    private def dispatch DataSchemaNode getSchemaChildNode(DataNodeContainer parentSchemaNode, CompositeNode data) {
-        return parentSchemaNode?.getDataChildByName(data.nodeType.localName)
+    private def dispatch getName(CompositeNode data) {
+        return data.nodeType.localName
     }
     
-    private def dispatch DataSchemaNode getSchemaChildNode(DataNodeContainer parentSchemaNode, CompositeNodeWrapper data) {
-        return parentSchemaNode?.getDataChildByName(data.localName)
+    private def dispatch getName(CompositeNodeWrapper data) {
+        return data.localName
     }
-
+    
     private def InstanceIdWithSchemaNode addLastIdentifierFromData(InstanceIdWithSchemaNode identifierWithSchemaNode,
         CompositeNode data, DataSchemaNode schemaOfData) {
         val iiOriginal = identifierWithSchemaNode?.instanceIdentifier
