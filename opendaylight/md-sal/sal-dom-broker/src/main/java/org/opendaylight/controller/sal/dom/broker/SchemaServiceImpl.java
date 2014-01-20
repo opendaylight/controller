@@ -27,6 +27,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,7 @@ import com.google.common.collect.Sets;
 import static com.google.common.base.Preconditions.*;
 
 public class SchemaServiceImpl implements //
+        SchemaContextProvider, //
         SchemaService, //
         ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
         AutoCloseable {
@@ -100,6 +102,12 @@ public class SchemaServiceImpl implements //
         listenerTracker.open();
     }
 
+    
+    @Override
+    public SchemaContext getSchemaContext() {
+        return getGlobalContext();
+    }
+    
     public SchemaContext getGlobalContext() {
         return getSchemaContextSnapshot();
     }

@@ -1,10 +1,13 @@
 package org.opendaylight.controller.sal.core.api;
 
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public interface RpcProvisionRegistry extends BrokerService {
+public interface RpcProvisionRegistry extends BrokerService, RouteChangePublisher<RpcRoutingContext, InstanceIdentifier> {
 
     /**
      * Registers an implementation of the rpc.
@@ -28,6 +31,8 @@ public interface RpcProvisionRegistry extends BrokerService {
      */
     RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
             throws IllegalArgumentException;
+    
+    ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
 
     RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
 }

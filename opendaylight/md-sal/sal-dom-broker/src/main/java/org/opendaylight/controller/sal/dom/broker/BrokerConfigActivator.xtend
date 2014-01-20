@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.controller.sal.core.api.data.DataStore
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
-import org.opendaylight.controller.sal.dom.broker.impl.RpcRouterImpl
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker
 
 class BrokerConfigActivator implements AutoCloseable {
     
@@ -38,12 +38,14 @@ class BrokerConfigActivator implements AutoCloseable {
         val emptyProperties = new Hashtable<String, String>();
         broker.setBundleContext(context);
         
-        broker.setRouter(new RpcRouterImpl("Rpc router"))
+        
         schemaService = new SchemaServiceImpl();
         schemaService.setContext(context);
         schemaService.setParser(new YangParserImpl());
         schemaService.start();
         schemaReg = context.registerService(SchemaService, schemaService, emptyProperties);
+        
+        broker.setRouter(new SchemaAwareRpcBroker("/",schemaService));
         
         dataService = new DataBrokerImpl();
         dataService.setExecutor(broker.getExecutor());

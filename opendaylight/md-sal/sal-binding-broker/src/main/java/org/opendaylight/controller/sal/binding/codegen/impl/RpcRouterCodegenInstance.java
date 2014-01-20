@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -5,6 +12,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcR
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
+import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -125,6 +133,7 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
     @Override
     public RpcRegistration<T> registerDefaultService(T service) {
         // TODO Auto-generated method stub
+        RuntimeCodeHelper.setDelegate(invocationProxy, service);
         return null;
     }
 
