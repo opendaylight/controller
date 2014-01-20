@@ -3,7 +3,7 @@ module sal-meter {
     prefix meter;
 
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
-    import opendaylight-meter-types {prefix meter-type;revision-date "2013-09-18";}
+    import meter-types {prefix meter-type;revision-date "2013-09-18";}
     import flow-capable-transaction {prefix tr;}
 
     revision "2013-09-18" {

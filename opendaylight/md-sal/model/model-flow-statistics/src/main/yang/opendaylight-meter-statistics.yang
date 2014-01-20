@@ -5,7 +5,7 @@ module opendaylight-meter-statistics {
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
-    import opendaylight-meter-types {prefix meter-types;revision-date "2013-09-18";}
+    import meter-types {prefix meter-types;revision-date "2013-09-18";}
     import flow-capable-transaction {prefix tr;}
     
     contact

@@ -3,7 +3,7 @@ module meter-management {
     prefix meter-cfg;
 
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}  
-    import opendaylight-meter-types {prefix meter;}
+    import meter-types {prefix meter;}
 
     revision "2013-10-24" {
         description "Initial revision of meter service";

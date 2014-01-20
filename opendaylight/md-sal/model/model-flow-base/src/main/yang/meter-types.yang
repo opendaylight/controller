@@ -1,4 +1,4 @@
-module opendaylight-meter-types {
+module meter-types {
     namespace "urn:opendaylight:meter:types";
     prefix meter;
 
@@ -83,6 +83,7 @@ module opendaylight-meter-types {
             }
 
             case dscp-remark {
+		container dscp-remark {
                 leaf rate {
                     type uint32;
                 }
@@ -95,8 +96,9 @@ module opendaylight-meter-types {
                     type uint8;
                 }
             }
-            
+            }
             case experimenter {
+		container experimenter {
                 leaf rate {
                     type uint32;
                 }
@@ -111,7 +113,7 @@ module opendaylight-meter-types {
             }
         }
     }
-    
+    }
     typedef meter-ref {
         type instance-identifier;
     }
