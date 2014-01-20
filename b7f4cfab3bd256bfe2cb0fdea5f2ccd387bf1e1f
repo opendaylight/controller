@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_83dfc90c",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-20T16:48:34Z",
+      "side": 1,
+      "message": "An open stream that was received as a parameter from outside is closed here .\nIt\u0027s not recommended because some other component can rely on the fact that the resource is open.\nThe code that opens it should be responsible for closing it as well.\n\nAlso, if the line IOUtils.toString will fail, the stream will never be closed.\n\nPlease also check this\nhttp://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html",
+      "revId": "b7f4cfab3bd256bfe2cb0fdea5f2ccd387bf1e1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a3be4dac",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-20T16:48:34Z",
+      "side": 1,
+      "message": "if this is an error, please log it in error level.",
+      "revId": "b7f4cfab3bd256bfe2cb0fdea5f2ccd387bf1e1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e3cfa554",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-20T16:48:34Z",
+      "side": 1,
+      "message": "Why isn\u0027t this error logged?\nAlso, please add brackets  (curlys - {}) around the \u0027if\u0027 statement body.",
+      "revId": "b7f4cfab3bd256bfe2cb0fdea5f2ccd387bf1e1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
