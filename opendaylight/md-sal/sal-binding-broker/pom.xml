@@ -101,7 +101,7 @@
                             org.opendaylight.controller.sal.binding.impl.*,
                             org.opendaylight.controller.sal.binding.codegen,
                             org.opendaylight.controller.sal.binding.codegen.*,
-                            org.opendaylight.controller.sal.binding.dom.*,
+                            <!--org.opendaylight.controller.sal.binding.dom.*,-->
                             org.opendaylight.controller.sal.binding.osgi.*,
                         </Private-Package>
                     </instructions>
