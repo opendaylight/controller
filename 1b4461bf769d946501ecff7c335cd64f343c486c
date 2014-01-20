@@ -16,6 +16,24 @@
       "revId": "1b4461bf769d946501ecff7c335cd64f343c486c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e83f82b2",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-01-20T08:50:01Z",
+      "side": 1,
+      "message": "Mea culpa, I haven\u0027t read that.",
+      "parentUuid": "da6255ed_7e1919d6",
+      "revId": "1b4461bf769d946501ecff7c335cd64f343c486c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
