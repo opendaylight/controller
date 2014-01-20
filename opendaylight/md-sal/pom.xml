@@ -139,6 +139,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-binding-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
                 <artifactId>sal</artifactId>
                 <version>${sal.version}</version>
                 <exclusions>
@@ -147,6 +152,16 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-remote</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-binding-util</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- Supporting Libraries -->
