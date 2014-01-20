@@ -23,7 +23,7 @@ public class AuthProvider implements AuthProviderInterface {
     private static IUserManager um;
     private static final String DEFAULT_USER = "netconf";
     private static final String DEFAULT_PASSWORD = "netconf";
-    private static InputStream privateKeyFileInputStream;
+    private final InputStream privateKeyFileInputStream;
 
     private static final Logger logger =  LoggerFactory.getLogger(AuthProvider.class);
 
