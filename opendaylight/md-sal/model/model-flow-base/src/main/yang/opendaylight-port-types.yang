@@ -2,7 +2,6 @@ module opendaylight-port-types {
     namespace "urn:opendaylight:flow:types:port";
     prefix port-types;
 
-    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-queue-types {prefix queue-types; revision-date "2013-09-25";}
     
@@ -41,16 +40,16 @@ module opendaylight-port-types {
     
     typedef port-features {
         type bits {
-            bit 10mb-hd;
-            bit 10mb-fd;
-            bit 100mb-hd;
-            bit 100mb-fd;
-            bit 1gb-hd;
-            bit 1gb-fd;
-            bit 10gb-fd;
-            bit 40gb-fd;
-            bit 100gb-fd;
-            bit 1tb-fd;
+            bit ten-mb-hd;
+            bit ten-mb-fd;
+            bit hundred-mb-hd;
+            bit hundred-mb-fd;
+            bit one-gb-hd;
+            bit one-gb-fd;
+            bit ten-gb-fd;
+            bit forty-gb-fd;
+            bit hundred-gb-fd;
+            bit one-tb-fd;
             bit other;
             bit copper;
             bit fiber;
