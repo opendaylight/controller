@@ -5,9 +5,7 @@ module opendaylight-topology-view  {
     prefix "nt";
 
     import yang-ext { prefix "ext"; }
-    import ietf-inet-types { prefix "inet"; }
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
-    import opendaylight-topology {prefix "odl";}
 
     organization "TBD";
 
