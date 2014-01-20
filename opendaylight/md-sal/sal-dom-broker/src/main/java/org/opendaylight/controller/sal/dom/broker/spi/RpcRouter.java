@@ -26,6 +26,4 @@ public interface RpcRouter extends RpcProvisionRegistry, RpcImplementation {
     
     @Override
     public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input);
-
-    ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
 }

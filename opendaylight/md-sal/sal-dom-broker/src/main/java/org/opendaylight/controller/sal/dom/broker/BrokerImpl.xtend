@@ -31,6 +31,9 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
 import org.opendaylight.controller.sal.core.api.RpcImplementation
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener
+import org.opendaylight.controller.sal.core.api.RpcRoutingContext
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 
 public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BrokerImpl);
@@ -123,6 +126,14 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     
     override addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
         router.addRoutedRpcImplementation(rpcType,implementation);
+    }
+    
+    override addRpcRegistrationListener(RpcRegistrationListener listener) {
+        return router.addRpcRegistrationListener(listener);
+    }
+    
+    override <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> registerRouteChangeListener(L listener) {
+        return router.registerRouteChangeListener(listener);
     }
     
 }

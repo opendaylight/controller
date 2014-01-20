@@ -1,13 +1,25 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
@@ -19,19 +31,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddF
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -40,11 +47,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 
-import static junit.framework.Assert.*;
-
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -60,6 +64,9 @@ public class CrossBrokerRpcTest {
     public static final NodeId NODE_B = new NodeId("b");
     public static final NodeId NODE_C = new NodeId("c");
     public static final NodeId NODE_D = new NodeId("d");
+    
+    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
+    private static final QName ADD_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "add-flow");
 
     public static final InstanceIdentifier<Node> BA_NODE_A_ID = createBANodeIdentifier(NODE_A);
     public static final InstanceIdentifier<Node> BA_NODE_B_ID = createBANodeIdentifier(NODE_B);
@@ -71,10 +78,7 @@ public class CrossBrokerRpcTest {
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_C_ID = createBINodeIdentifier(NODE_C);
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_D_ID = createBINodeIdentifier(NODE_D);
 
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
-    private static final QName ADD_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "add-flow");
-    private static final QName REMOVE_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "remove-flow");
-    private static final QName UPDATE_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "update-flow");
+    
 
     @Before
     public void setup() {
@@ -117,8 +121,29 @@ public class CrossBrokerRpcTest {
         assertEquals(addFlowA, flowService.getReceivedAddFlows().get(BA_NODE_A_ID).iterator().next());
     }
 
-    public void bindingRpcInvoker_DomRoutedProviderTest() {
+    @Test
+    public void bindingRpcInvoker_DomRoutedProviderTest() throws Exception {
+        AddFlowOutputBuilder builder = new AddFlowOutputBuilder();
+        builder.setTransactionId(new TransactionId(BigInteger.valueOf(10)));
+        final AddFlowOutput output = builder.build();
+        org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration registration = biRpcRegistry.addRoutedRpcImplementation(ADD_FLOW_QNAME, new RpcImplementation() {
+            @Override
+            public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+                CompositeNode result = testContext.getBindingToDomMappingService().toDataDom(output);
+                return Rpcs.getRpcResult(true, result, ImmutableList.<RpcError>of());
+            }
 
+            @Override
+            public Set<QName> getSupportedRpcs() {
+                return ImmutableSet.of(ADD_FLOW_QNAME);
+            }
+        });
+        registration.registerPath(NodeContext.QNAME, BI_NODE_C_ID);
+        
+        SalFlowService baFlowInvoker = baRpcRegistry.getRpcService(SalFlowService.class);
+        Future<RpcResult<AddFlowOutput>> baResult = baFlowInvoker.addFlow(addFlow(BA_NODE_C_ID).setPriority(500).build());
+        assertNotNull(baResult);
+        assertEquals(output,baResult.get().getResult());
     }
 
     private CompositeNode toDomRpcInput(DataObject addFlowA) {

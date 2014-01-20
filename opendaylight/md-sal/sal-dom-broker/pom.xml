@@ -118,9 +118,16 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                        <Export-Package>
+                            org.opendaylight.controller.sal.dom.broker.spi
+                        </Export-Package>
                         <Private-Package>
-                            org.opendaylight.controller.sal.dom.broker.*,
-                            org.opendaylight.controller.config.yang.md.sal.dom.impl
+                            org.opendaylight.controller.sal.dom.broker,
+                            org.opendaylight.controller.sal.dom.broker.impl,
+                            org.opendaylight.controller.sal.dom.broker.osgi,
+                            org.opendaylight.controller.config.yang.md.sal.dom.impl,
+                            org.opendaylight.controller.config.yang.md.sal.dom.statistics,
+                            org.opendaylight.yangtools.yang.util
                         </Private-Package>
                         <Import-Package>
                             *

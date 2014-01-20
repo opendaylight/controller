@@ -36,8 +36,9 @@ import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
-import org.opendaylight.controller.sal.dom.broker.impl.RpcRouterImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -58,7 +59,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import static com.google.common.base.Preconditions.*;
 
-public class BindingTestContext implements AutoCloseable {
+public class BindingTestContext implements AutoCloseable, SchemaContextProvider {
 
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier TREE_ROOT = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
             .builder().toInstance();
@@ -87,6 +88,12 @@ public class BindingTestContext implements AutoCloseable {
     private final boolean startWithSchema;
 
     private MountPointManagerImpl biMountImpl;
+
+    private SchemaContext schemaContext;
+
+    public SchemaContext getSchemaContext() {
+        return schemaContext;
+    }
 
     protected BindingTestContext(ListeningExecutorService executor, ClassPool classPool, boolean startWithSchema) {
         this.executor = executor;
@@ -218,12 +225,12 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void updateYangSchema(String[] files) {
-        SchemaContext context = getContext(files);
+        schemaContext = getContext(files);
         if (schemaAwareDataStore != null) {
-            schemaAwareDataStore.onGlobalContextUpdated(context);
+            schemaAwareDataStore.onGlobalContextUpdated(schemaContext);
         }
         if (mappingServiceImpl != null) {
-            mappingServiceImpl.onGlobalContextUpdated(context);
+            mappingServiceImpl.onGlobalContextUpdated(schemaContext);
         }
     }
 
@@ -275,7 +282,7 @@ public class BindingTestContext implements AutoCloseable {
         checkState(executor != null);
         biBrokerImpl = new BrokerImpl();
         biBrokerImpl.setExecutor(executor);
-        biBrokerImpl.setRouter(new RpcRouterImpl("test"));
+        biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", this));
     }
 
     public void startBindingNotificationBroker() {

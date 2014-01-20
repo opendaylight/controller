@@ -211,7 +211,7 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-broker-impl</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
