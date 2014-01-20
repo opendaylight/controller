@@ -273,7 +273,7 @@ public final class TestUtils {
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
-        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode), null, null, null, null, null,
+        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null, null,
                 byteArrayOS);
 
         return byteArrayOS.toString();

@@ -92,7 +92,7 @@ class RestconfImpl implements RestconfService {
         if (rpcResult.result === null) {
             return null
         }
-        return new StructuredData(rpcResult.result, rpc.output)
+        return new StructuredData(rpcResult.result, rpc.output, null)
     }
 
     override readData(String identifier) {
@@ -103,7 +103,7 @@ class RestconfImpl implements RestconfService {
         } else {
             data = broker.readOperationalData(iiWithData.getInstanceIdentifier);
         }
-        return new StructuredData(data, iiWithData.schemaNode)
+        return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
     }
 
     override readConfigurationData(String identifier) {
@@ -114,7 +114,7 @@ class RestconfImpl implements RestconfService {
         } else {
             data = broker.readConfigurationData(iiWithData.getInstanceIdentifier);
         }
-        return new StructuredData(data, iiWithData.schemaNode)
+        return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
     }
 
     override readOperationalData(String identifier) {
@@ -125,7 +125,7 @@ class RestconfImpl implements RestconfService {
         } else {
             data = broker.readOperationalData(iiWithData.getInstanceIdentifier);
         }
-        return new StructuredData(data, iiWithData.schemaNode)
+        return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
     }
 
     override updateConfigurationDataLegacy(String identifier, CompositeNode payload) {
@@ -322,7 +322,7 @@ class RestconfImpl implements RestconfService {
         if (mountPoint === null) {
             moduleName = controllerContext.findModuleNameByNamespace(validQName.namespace);
         } else {
-            moduleName = mountPoint.findModuleByNamespace(validQName.namespace)?.name
+            moduleName = controllerContext.findModuleNameByNamespace(mountPoint, validQName.namespace)
         }
         if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
             nodeBuilder.namespace.toString == moduleName) {
@@ -367,7 +367,7 @@ class RestconfImpl implements RestconfService {
                 } // else value is instance of ValuesDTO
             }
             
-            val outputValue = RestCodec.from(schema.typeDefinition)?.deserialize(inputValue);
+            val outputValue = RestCodec.from(schema.typeDefinition, mountPoint)?.deserialize(inputValue);
             simpleNode.setValue(outputValue)
         } else if (nodeBuilder instanceof EmptyNodeWrapper) {
             val emptyNodeBuilder = nodeBuilder as EmptyNodeWrapper

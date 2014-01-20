@@ -113,6 +113,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     def commitConfigurationDataDelete(InstanceIdentifier path) {
         checkPreconditions
         val transaction = dataService.beginTransaction;
+        LOG.info("Delete Configuration via Restconf: {}", path)
         transaction.removeConfigurationData(path)
         return transaction.commit
     }
@@ -120,6 +121,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     def commitConfigurationDataDeleteBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path) {
         checkPreconditions
         val transaction = mountPoint.beginTransaction;
+        LOG.info("Delete Configuration via Restconf: {}", path)
         transaction.removeConfigurationData(path)
         return transaction.commit
     }
