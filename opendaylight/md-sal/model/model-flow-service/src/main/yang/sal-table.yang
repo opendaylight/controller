@@ -2,7 +2,6 @@ module sal-table {
     namespace "urn:opendaylight:table:service";
     prefix table;
 
-    import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-table-types {prefix table-type;revision-date "2013-10-26";}
     import flow-capable-transaction {prefix tr;}

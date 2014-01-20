@@ -2,7 +2,6 @@ module sal-queue {
     namespace "urn:opendaylight:queue:service";
     prefix queue;
 
-    import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
     import opendaylight-queue-types {prefix queue-type; revision-date "2013-09-25";}
 

@@ -2,9 +2,7 @@ module sal-group {
     namespace "urn:opendaylight:group:service";
     prefix group;
 
-    import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
-    import ietf-inet-types {prefix inet;revision-date 2010-09-24;}
     import opendaylight-group-types {prefix group-type;revision-date 2013-10-18;}
     import flow-capable-transaction {prefix tr;}
 

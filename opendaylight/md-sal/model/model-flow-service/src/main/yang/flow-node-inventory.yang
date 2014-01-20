@@ -4,7 +4,6 @@ module flow-node-inventory {
 
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-port-types {prefix port;revision-date "2013-09-25";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-table-types {prefix table;revision-date "2013-10-26";}
@@ -150,6 +149,7 @@ module flow-node-inventory {
         
         container supported-match-types {
             list match-type {
+		key "match";
                 uses feature;
                 leaf match {
                     type string; // FIXME: Add identity
@@ -160,6 +160,7 @@ module flow-node-inventory {
         
         container supported-instructions {
             list instruction-type {
+		key "instruction";
                 uses feature;
                 leaf instruction {
                     type string; // FIXME: Add identity
@@ -169,6 +170,7 @@ module flow-node-inventory {
 
         container supported-actions {
             list action-type {
+		key "action";
                 uses feature;
 
                 leaf action {

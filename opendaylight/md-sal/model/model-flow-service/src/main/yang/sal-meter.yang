@@ -2,7 +2,6 @@ module sal-meter {
     namespace "urn:opendaylight:meter:service";
     prefix meter;
 
-    import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-meter-types {prefix meter-type;revision-date "2013-09-18";}
     import flow-capable-transaction {prefix tr;}
