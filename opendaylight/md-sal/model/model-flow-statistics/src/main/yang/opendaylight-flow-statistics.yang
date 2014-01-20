@@ -3,14 +3,12 @@ module opendaylight-flow-statistics {
     prefix flowstat;
 
     import yang-ext {prefix ext; revision-date "2013-07-09";}
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}   
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import opendaylight-flow-types {prefix flow-types;revision-date "2013-10-26";}
     import opendaylight-statistics-types {prefix stat-types;revision-date "2013-09-25";}
     import opendaylight-table-types {prefix table-types;revision-date "2013-10-26";}
     import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
     import flow-capable-transaction {prefix tr;}
-    import sal-flow {prefix flow;}
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     
 

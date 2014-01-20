@@ -4,7 +4,6 @@ module opendaylight-queue-statistics {
 
 	import flow-capable-transaction {prefix tr;}
     import yang-ext {prefix ext; revision-date "2013-07-09";}
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}   
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
     import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
     import opendaylight-queue-types {prefix queue-types;revision-date "2013-09-25";}
