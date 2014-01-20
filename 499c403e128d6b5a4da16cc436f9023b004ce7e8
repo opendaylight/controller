@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c38dc17d",
+        "filename": "opendaylight/md-sal/sal-restconf-broker/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-20T14:54:14Z",
+      "side": 1,
+      "message": "This should be 0.6.0",
+      "revId": "499c403e128d6b5a4da16cc436f9023b004ce7e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
