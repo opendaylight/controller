@@ -64,6 +64,7 @@
 
     <build>
         <plugins>
+            <!-- TODO - unite yang-maven-plugin configuration in md-sal-->
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
