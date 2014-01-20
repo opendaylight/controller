@@ -52,6 +52,16 @@
           <artifactId>sal-broker-impl</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
+          <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>sal-remote</artifactId>
+              <version>${mdsal.version}</version>
+          </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-restconf-broker</artifactId>
+            <version>${mdsal.version}</version>
+        </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-core-spi</artifactId>
@@ -175,6 +185,16 @@
           <artifactId>concepts</artifactId>
           <version>${yangtools.version}</version>
         </dependency>
+          <dependency>
+              <groupId>org.opendaylight.yangtools</groupId>
+              <artifactId>restconf-client-api</artifactId>
+              <version>${yangtools.version}</version>
+          </dependency>
+          <dependency>
+              <groupId>org.opendaylight.yangtools</groupId>
+              <artifactId>restconf-client-impl</artifactId>
+              <version>${yangtools.version}</version>
+          </dependency>
 
         <!-- config-->
         <dependency>
