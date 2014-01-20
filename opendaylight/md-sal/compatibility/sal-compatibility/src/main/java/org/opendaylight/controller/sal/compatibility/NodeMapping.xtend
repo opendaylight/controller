@@ -234,21 +234,21 @@ public class NodeMapping {
 
     public static def toAdBandwidth(PortFeatures pf) {
         var Bandwidth bw = null
-        if (pf.is_10mbHd || pf.is_10mbFd) {
+        if (pf.isTenMbHd || pf.isTenMbFd) {
             bw = new Bandwidth(Bandwidth.BW10Mbps)
-        } else if (pf.is_100mbHd || pf.is_100mbFd) {
+        } else if (pf.isHundredMbHd || pf.isHundredMbFd) {
             bw = new Bandwidth(Bandwidth.BW100Mbps)
-        } else if (pf.is_1gbHd || pf.is_1gbFd) {
+        } else if (pf.isOneGbHd || pf.isOneGbFd) {
             bw = new Bandwidth(Bandwidth.BW1Gbps)
-        } else if (pf.is_1gbFd) {
+        } else if (pf.isOneGbFd) {
             bw = new Bandwidth(Bandwidth.BW10Gbps)
-        } else if (pf.is_10gbFd) {
+        } else if (pf.isTenGbFd) {
             bw = new Bandwidth(Bandwidth.BW10Gbps)
-        } else if (pf.is_40gbFd) {
+        } else if (pf.isFortyGbFd) {
             bw = new Bandwidth(Bandwidth.BW40Gbps)
-        } else if (pf.is_100gbFd) {
+        } else if (pf.isHundredGbFd) {
             bw = new Bandwidth(Bandwidth.BW100Gbps)
-        } else if (pf.is_1tbFd) {
+        } else if (pf.isOneTbFd) {
             bw = new Bandwidth(Bandwidth.BW1Tbps)
         }
         return bw;
