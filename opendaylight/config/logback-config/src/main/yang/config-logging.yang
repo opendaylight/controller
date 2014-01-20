@@ -32,7 +32,7 @@ module config-logging {
             when "/config:modules/config:module/config:type = 'logback'";
 
             list file-appenders {
-            	leaf append {
+                leaf append {
                     type boolean;
                     mandatory false;
                 }
@@ -41,12 +41,12 @@ module config-logging {
                     type string;
                     mandatory true;
                 }
-                
+
                 leaf encoder-pattern {
                     type string;
                     mandatory true;
                 }
-                
+
                 leaf name {
                     type string;
                     mandatory true;
@@ -54,7 +54,7 @@ module config-logging {
                 key name;
                 config:java-name-prefix FileAppenderTO;
             }
-            
+
             list rolling-appenders {
                 leaf append {
                     type boolean;
@@ -96,17 +96,17 @@ module config-logging {
                     type string;
                     mandatory true;
                 }
-                
+
                 leaf rolling-policy-type {
                     type string;
                     mandatory true;
                 }
-                
+
                 leaf max-history {
                     type int32;
                     mandatory true;
                 }
-                
+
                 leaf clean-history-on-start {
                     type boolean;
                     default false;
