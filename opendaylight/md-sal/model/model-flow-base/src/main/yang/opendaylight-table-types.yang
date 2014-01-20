@@ -2,8 +2,6 @@ module opendaylight-table-types {
     namespace "urn:opendaylight:table:types";
     prefix table;
 
-    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-flow-types {prefix flow;revision-date "2013-10-26";}
     import opendaylight-action-types {prefix action;}
 
@@ -227,7 +225,7 @@ module opendaylight-table-types {
             }
             
             case next-table-miss {   
-                container tables {
+                container tables-miss {
                     leaf-list table-ids {
                         type uint8;
                     }
@@ -259,27 +257,39 @@ module opendaylight-table-types {
             }
             
             case match {
-                uses set-field-match; 
+		        container match-setfield {
+               	    uses set-field-match; 
+		        }
             }
             
             case wildcards {   
-                uses set-field-match;
+		        container wildcard-setfield {
+                    uses set-field-match;
+                }
             }
             
             case write-setfield {   
-                uses set-field-match;
+		        container write-setfield {
+                    uses set-field-match;
+                }
             }
             
             case write-setfield-miss {   
-                uses set-field-match;
+                container write-setfield-miss {
+                    uses set-field-match;
+                }
             }
             
             case apply-setfield {   
-                uses set-field-match; 
+                container apply-setfield {
+                    uses set-field-match; 
+                }
             }
             
             case apply-setfield-miss {   
-                uses set-field-match; 
+                container apply-setfield-miss {
+                    uses set-field-match; 
+                }
             }
         }
     } 
@@ -326,7 +336,6 @@ module opendaylight-table-types {
                      uses table-feature-prop-type;
                 }
             }
-
         }
     }    
 }
