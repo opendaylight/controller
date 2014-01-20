@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_23b7fdf6",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-port-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-01-20T15:54:40Z",
+      "side": 1,
+      "message": "If we are going to fix this, we really ought to fix it.  Currently its completely non-extensible, and highly OF centric, and commingles several semantic concepts.  I\u0027d suggest modeling it as \n\nidentity port-speed {\n  description \"Base identify for all port speeds\"\n}\n\nidentity ten-mb {\n  base port-speed;\n}\n\n...\n\nidentity port-media-type {\n\n}\n\nidentity copper {\n   base port-media-type;\n}\n\n...\n\ngrouping port-features {\n  leaf speed {\n       type port-speed;\n  }\n  leaf duplex {\n     enum enumeration {\n          enum half;\n          enum full;\n          enum autoneg;\n     }\n   }\n\n  leaf media {\n      type port-media-type;\n  }\n\n  leaf pause {\n      type boolean;\n  }\n  \n  leaf pause-asym {\n      type boolean;\n  }\n\n}",
+      "revId": "1eea12d39c67f96772ef6425154ffb7c9225b83a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
