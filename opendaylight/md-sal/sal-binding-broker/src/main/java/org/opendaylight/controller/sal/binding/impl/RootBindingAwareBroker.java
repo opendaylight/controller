@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.md.sal.binding.util.BindingContextUtils;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
@@ -33,8 +32,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableClassToInstanceMap;
+import static com.google.common.base.Preconditions.checkState;
 
 public class RootBindingAwareBroker implements //
         Mutable, //

@@ -19,8 +19,6 @@ public interface RpcConsumerRegistry extends BindingAwareService {
      * Returns a session specific instance (implementation) of requested
      * YANG module implentation / service provided by consumer.
      * 
-     * @param service
-     *            Broker service
      * @return Session specific implementation of service
      */
     <T extends RpcService> T getRpcService(Class<T> module);
