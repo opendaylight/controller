@@ -2,7 +2,6 @@ module opendaylight-meter-types {
     namespace "urn:opendaylight:meter:types";
     prefix meter;
 
-    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
 
 
@@ -73,21 +72,21 @@ module opendaylight-meter-types {
     grouping band-type {
         choice band-type {
             case drop {
-                leaf rate {
+                leaf drop-rate {
                     type uint32;
                 }
                 
-                leaf burst-size {
+                leaf drop-burst-size {
                     type uint32;
                 }
             }
 
             case dscp-remark {
-                leaf rate {
+                leaf dscp-remark-rate {
                     type uint32;
                 }
                 
-                leaf burst-size {
+                leaf dscp-remark-burst-size {
                     type uint32;
                 }
                 
@@ -97,11 +96,11 @@ module opendaylight-meter-types {
             }
             
             case experimenter {
-                leaf rate {
+                leaf experimenter-rate {
                     type uint32;
                 }
                 
-                leaf burst-size {
+                leaf experimenter-burst-size {
                     type uint32;
                 }
                 
@@ -151,11 +150,11 @@ module opendaylight-meter-types {
                     }
                 }
             
-                leaf rate {
+                leaf band-rate {
                     type uint32;
                 }
         
-                leaf burst-size {
+                leaf band-burst-size {
                     type uint32;
                 }
                 uses band-type;
