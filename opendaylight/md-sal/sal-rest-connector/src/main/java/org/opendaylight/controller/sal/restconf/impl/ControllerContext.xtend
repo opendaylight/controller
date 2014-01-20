@@ -45,7 +45,7 @@ class ControllerContext implements SchemaServiceListener {
     val static NULL_VALUE = "null"
     val static MOUNT_MODULE = "yang-ext"
     val static MOUNT_NODE = "mount"
-    val static MOUNT = "yang-ext:mount"
+    public val static MOUNT = "yang-ext:mount"
 
     @Property
     var SchemaContext globalSchema;
