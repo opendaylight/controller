@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javassist.ClassPool;
-
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
@@ -28,9 +27,6 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 /**
 *
@@ -65,7 +61,7 @@ public final class RuntimeMappingModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-
+        
         RuntimeGeneratedMappingServiceProxy potential = tryToReuseGlobalInstance();
         if(potential != null) {
             return potential;
@@ -102,7 +98,7 @@ public final class RuntimeMappingModule extends
     BindingIndependentMappingService, //
     Delegator<BindingIndependentMappingService>, //
     AutoCloseable {
-
+        
         private BindingIndependentMappingService delegate;
         private ServiceReference<BindingIndependentMappingService> reference;
         private BundleContext bundleContext;
@@ -148,15 +144,15 @@ public final class RuntimeMappingModule extends
             return delegate.getRpcQNamesFor(service);
         }
 
+        @Override
+        public Optional<Class<? extends RpcService>> getRpcServiceClassFor(String namespace, String revision) {
+            return delegate.getRpcServiceClassFor(namespace,revision);
+        }
+
         public DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput) {
             return delegate.dataObjectFromDataDom(inputClass, domInput);
         }
-
-        @Override
-        public Optional<Class<? extends RpcService>> getRpcServiceClassFor(String namespace, String revision) {
-            return delegate.getRpcServiceClassFor(namespace, revision);
-        }
-
+        
         @Override
         public void close() throws Exception {
             if(delegate != null) {
