@@ -95,7 +95,6 @@ public class ConcurrentClientsTest {
             final YangStoreSnapshot yStore = mock(YangStoreSnapshot.class);
             doReturn(yStore).when(this.yangStoreService).getYangStoreSnapshot();
             doReturn(Collections.emptyMap()).when(yStore).getModuleMXBeanEntryMap();
-            doReturn(Collections.emptyMap()).when(yStore).getModuleMap();
 
             final ConfigTransactionJMXClient mockedTCl = mock(ConfigTransactionJMXClient.class);
             doReturn(mockedTCl).when(this.jmxClient).getConfigTransactionClient(any(ObjectName.class));

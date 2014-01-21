@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Mockito.doNothing;
@@ -82,8 +81,9 @@ public class ExtenderYangTrackerCustomizerTest {
         doReturn(22).when(yangStoreSnapshot).countModuleMXBeanEntries();
         doReturn("mock yang store").when(yangStoreSnapshot).toString();
         doNothing().when(yangStoreSnapshot).close();
-        doReturn(moduleMap).when(yangStoreSnapshot).getModuleMap();
         doReturn(Collections.emptyMap()).when(yangStoreSnapshot).getModuleMXBeanEntryMap();
+        doReturn(Collections.emptyMap()).when(yangStoreSnapshot).getModulesToSources();
+        doReturn(Collections.emptyMap()).when(yangStoreSnapshot).getQNamesToIdentitiesToModuleMXBeanEntries();
     }
 
     @Test
@@ -99,7 +99,6 @@ public class ExtenderYangTrackerCustomizerTest {
 
         returnedStore = tested.getYangStoreSnapshot();
 
-        assertEquals(yangStoreSnapshot.getModuleMap(), returnedStore.getModuleMap());
 
         tested.removedBundle(bundle, null, null);
         tested.getYangStoreSnapshot();

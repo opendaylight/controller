@@ -18,9 +18,12 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class CapabilityProviderImpl implements CapabilityProvider {
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
@@ -31,7 +34,9 @@ public class CapabilityProviderImpl implements CapabilityProvider {
     public CapabilityProviderImpl(NetconfOperationServiceSnapshot netconfOperationServiceSnapshot) {
         this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
         Map<String, Capability> urisToCapabilitiesInternalMap = getCapabilitiesInternal(netconfOperationServiceSnapshot);
-        capabilityURIs = Collections.unmodifiableSet(urisToCapabilitiesInternalMap.keySet());
+        List<String> capabilityURIs = new ArrayList<>(urisToCapabilitiesInternalMap.keySet());
+        Collections.sort(capabilityURIs);
+        this.capabilityURIs = Collections.unmodifiableSet(new TreeSet<>(capabilityURIs));
     }
 
     private static Map<String, Capability> getCapabilitiesInternal(
