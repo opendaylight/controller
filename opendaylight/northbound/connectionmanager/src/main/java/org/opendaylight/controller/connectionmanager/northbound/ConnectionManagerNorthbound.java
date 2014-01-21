@@ -334,7 +334,7 @@ public class ConnectionManagerNorthbound {
         }
 
         try {
-            Node node = new Node(nodeType, nodeId);
+            Node node = Node.fromString(nodeType, nodeId);
             Status status = connectionManager.disconnect(node);
             if (status.isSuccess()) {
                 return Response.ok().build();
