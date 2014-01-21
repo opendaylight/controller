@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.match.Match;
@@ -37,7 +38,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
  */
 @XmlRootElement(name = "containerConfig")
 @XmlAccessorType(XmlAccessType.NONE)
-public class ContainerConfig implements Serializable {
+public class ContainerConfig extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 2L;
     private static final String regexName = "^\\w+$";
     private static final String containerProfile = System.getProperty("container.profile") == null ? "Container"
@@ -227,7 +228,7 @@ public class ContainerConfig implements Serializable {
      */
     private Status validateName() {
         // No Container configuration allowed to container default
-        return ((container != null) && container.matches(regexName) && !container.equalsIgnoreCase(GlobalConstants.DEFAULT.toString())) ?
+        return (isValidResourceName(container) && !container.equalsIgnoreCase(GlobalConstants.DEFAULT.toString())) ?
                 new Status(StatusCode.SUCCESS) : new Status(StatusCode.BADREQUEST, "Invalid container name");
     }
 

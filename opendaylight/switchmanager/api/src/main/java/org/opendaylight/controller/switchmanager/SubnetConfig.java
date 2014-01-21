@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.packet.BitBufferHelper;
 import org.opendaylight.controller.sal.utils.GUIField;
@@ -32,7 +33,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class SubnetConfig implements Cloneable, Serializable {
+public class SubnetConfig extends ConfigurationObject implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
     private static final String prettyFields[] = { GUIField.NAME.toString(), GUIField.GATEWAYIP.toString(),
             GUIField.NODEPORTS.toString() };
@@ -148,7 +149,7 @@ public class SubnetConfig implements Cloneable, Serializable {
     }
 
     private Status validateName() {
-        if (name == null || name.trim().isEmpty()) {
+        if (!isValidResourceName(name)) {
             return new Status(StatusCode.BADREQUEST, "Invalid name");
         }
         return new Status(StatusCode.SUCCESS);
