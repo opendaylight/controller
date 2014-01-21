@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_49dc4f73",
+        "filename": "opendaylight/northbound/connectionmanager/src/main/java/org/opendaylight/controller/connectionmanager/northbound/ConnectionManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-21T19:53:47Z",
+      "side": 1,
+      "message": "Please do not assume node is of type openflow.\n\nPlease use Node.fromString() instead to create the Node object.\n\nNode node \u003d Node.fromString(nodeType, nodeId);  (the original nodeId)",
+      "revId": "1c461a31f1f331f51fd2301bac1f6d836db4d7c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
