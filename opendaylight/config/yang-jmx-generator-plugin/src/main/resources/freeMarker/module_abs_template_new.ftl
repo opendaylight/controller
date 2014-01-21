@@ -85,6 +85,12 @@ package ${packageName};
     </#if>
     </#list>
 
+    // caches of resolved IdentityRefs
+    <#list moduleFields as field>
+    <#if field.identityRef==true>
+        private ${field.identityClassType} ${field.identityClassName};
+    </#if>
+    </#list>
 
     @Override
     public final ${instanceType} getInstance(){
@@ -108,6 +114,11 @@ package ${packageName};
                     <#if field.dependency.mandatory==false>
                         }
                     </#if>
+                </#if>
+                <#if field.identityRef==true>
+            if(${field.name} != null) {
+                set${field.attributeName}(${field.name}.resolveIdentity(dependencyResolver, ${field.identityBaseClass}.class));
+            }
                 </#if>
             </#list>
 

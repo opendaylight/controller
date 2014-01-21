@@ -41,6 +41,10 @@ public class ModuleField extends Field {
                 nullableDefault, isDependency, dependency, isListOfDependencies);
     }
 
+    public boolean isIdentityRef() {
+        return false;
+    }
+
     public Dependency getDependency() {
         return dependency;
     }
