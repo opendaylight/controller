@@ -15,6 +15,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeReadingStrategy;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.SimpleIdentityRefAttributeReadingStrategy;
 import org.w3c.dom.Document;
 
 import javax.management.openmbean.ArrayType;
@@ -23,6 +25,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritingStrategy> {
 
@@ -66,6 +69,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     protected AttributeWritingStrategy caseJavaArrayAttribute(ArrayType<?> openType) {
         AttributeWritingStrategy innerStrategy = new SimpleAttributeWritingStrategy(document, key);
         return new ArrayAttributeWritingStrategy(innerStrategy);
+    }
+
+    @Override
+    protected AttributeWritingStrategy caseJavaIdentityRefAttribute(OpenType<?> openType) {
+        return new SimpleIdentityRefAttributeWritingStrategy(document, key);
     }
 
     @Override

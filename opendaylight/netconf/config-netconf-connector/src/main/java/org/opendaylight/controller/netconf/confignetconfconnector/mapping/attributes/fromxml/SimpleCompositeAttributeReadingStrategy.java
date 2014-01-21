@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.collect.Maps;
+import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.HashMap;
 
@@ -21,6 +22,7 @@ public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeRead
         this.key = key;
     }
 
+    @Override
     protected Object postprocessParsedValue(String textContent) {
         HashMap<String,String> map = Maps.newHashMap();
         map.put(key, textContent);

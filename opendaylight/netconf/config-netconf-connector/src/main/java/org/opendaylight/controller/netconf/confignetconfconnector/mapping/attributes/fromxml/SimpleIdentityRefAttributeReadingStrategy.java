@@ -8,33 +8,33 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
-import com.google.common.collect.Lists;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
-import java.util.List;
-import java.util.Map;
-
-public class SimpleUnionAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
+public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
 
     private final String key;
 
-    public SimpleUnionAttributeReadingStrategy(String nullableDefault, String key) {
+    public SimpleIdentityRefAttributeReadingStrategy(String nullableDefault, String key) {
         super(nullableDefault);
         this.key = key;
     }
 
     @Override
+    protected String readElementContent(XmlElement xmlElement) {
+        // TODO test
+        Map.Entry<String, String> namespaceOfTextContent = xmlElement.findNamespaceOfTextContent();
+        String content = xmlElement.getTextContent();
+        return content.replace(namespaceOfTextContent.getKey(), namespaceOfTextContent.getValue());
+    }
+
+    @Override
     protected Object postprocessParsedValue(String textContent) {
-        char[] charArray = textContent.toCharArray();
-        List<String> chars = Lists.newArrayListWithCapacity(charArray.length);
-
-        for (char c : charArray) {
-            chars.add(Character.toString(c));
-        }
-
-        Map<String, Object> map = Maps.newHashMap();
-        map.put(key, chars);
+        HashMap<String,String> map = Maps.newHashMap();
+        map.put(key, textContent);
         return map;
     }
 

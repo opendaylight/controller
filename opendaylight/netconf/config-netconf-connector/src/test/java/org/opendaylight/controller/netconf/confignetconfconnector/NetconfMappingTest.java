@@ -35,6 +35,10 @@ import org.opendaylight.controller.config.yang.test.impl.DtoAInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInnerInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoC;
 import org.opendaylight.controller.config.yang.test.impl.DtoD;
+import org.opendaylight.controller.config.yang.test.impl.Identities;
+import org.opendaylight.controller.config.yang.test.impl.IdentityTestModule;
+import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.Peers;
@@ -66,6 +70,7 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
+import java.beans.XMLEncoder;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,6 +100,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private static final String NETCONF_SESSION_ID = "foo";
     private NetconfTestImplModuleFactory factory;
     private DepTestImplModuleFactory factory2;
+    private IdentityTestModuleFactory factory3;
 
     @Mock
     YangStoreSnapshot yangStoreSnapshot;
@@ -109,7 +115,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2));
+        this.factory3 = new IdentityTestModuleFactory();
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2,
+                this.factory3));
 
         transactionProvider = new TransactionProvider(this.configRegistryClient, NETCONF_SESSION_ID);
     }
@@ -131,6 +139,16 @@ public class NetconfMappingTest extends AbstractConfigTest {
         }
         transaction.commit();
         return on;
+    }
+
+    @Test
+    public void testIdentityRefs() throws Exception {
+        edit("netconfMessages/editConfig_identities.xml");
+
+        commit();
+        Element response = getConfigRunning();
+        System.err.println(XmlUtil.toString(response));
+
     }
 
     @Test
@@ -236,7 +254,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         Element configCandidate = getConfigCandidate();
-        System.err.println(XmlUtil.toString(configCandidate));
         checkBinaryLeafEdited(configCandidate);
 
 
@@ -624,7 +641,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private List<InputStream> getYangs() throws FileNotFoundException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
                 "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
-                "/META-INF/yang/ietf-inet-types.yang");
+                "/META-INF/yang/ietf-inet-types.yang", "/META-INF/yang/bgp-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         for (String path : paths) {
             final InputStream is = Preconditions

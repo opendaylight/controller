@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
+import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class SimpleBinaryAttributeReadingStrategy extends SimpleAttributeReading
         super(nullableDefault);
     }
 
+    @Override
     protected Object postprocessParsedValue(String textContent) {
         BaseEncoding en = BaseEncoding.base64();
         byte[] decode = en.decode(textContent);

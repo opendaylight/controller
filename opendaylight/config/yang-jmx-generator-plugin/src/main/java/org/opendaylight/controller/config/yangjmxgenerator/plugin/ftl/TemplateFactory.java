@@ -42,6 +42,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQual
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 
 import javax.management.openmbean.SimpleType;
 import java.util.ArrayList;
@@ -173,6 +174,10 @@ public class TemplateFactory {
         } else {
             return type.getFullyQualifiedName();
         }
+    }
+
+    private static boolean isIdentityRefType(Type type) {
+        return type instanceof IdentityrefTypeDefinition;
     }
 
 
@@ -540,26 +545,26 @@ public class TemplateFactory {
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     type = serializeType(typedAttribute.getType());
-                } else if (attributeIfc instanceof TOAttribute) {
-                    String fullyQualifiedName = FullyQualifiedNameHelper
-                            .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
-
-                    type = fullyQualifiedName;
-                } else if (attributeIfc instanceof ListAttribute) {  //FIXME: listAttribute might extend TypedAttribute
-                    String fullyQualifiedName = null;
-                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
-                            .getInnerAttribute();
-                    if (innerAttr instanceof JavaAttribute) {
-                        fullyQualifiedName = ((JavaAttribute) innerAttr)
-                                .getType().getFullyQualifiedName();
-                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
-                    } else if (innerAttr instanceof TOAttribute) {
-                        fullyQualifiedName = FullyQualifiedNameHelper
-                                .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
-                    }
-
-                    type = STRING_FULLY_QUALIFIED_NAME.concat("<")
-                            .concat(fullyQualifiedName).concat(">");
+//                } else if (attributeIfc instanceof TOAttribute) {
+//                    String fullyQualifiedName = FullyQualifiedNameHelper
+//                            .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
+//
+//                    type = fullyQualifiedName;
+//                } else if (attributeIfc instanceof ListAttribute) {  //FIXME: listAttribute might extend TypedAttribute
+//                    String fullyQualifiedName = null;
+//                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
+//                            .getInnerAttribute();
+//                    if (innerAttr instanceof JavaAttribute) {
+//                        fullyQualifiedName = ((JavaAttribute) innerAttr)
+//                                .getType().getFullyQualifiedName();
+//                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
+//                    } else if (innerAttr instanceof TOAttribute) {
+//                        fullyQualifiedName = FullyQualifiedNameHelper
+//                                .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
+//                    }
+//
+//                    type = STRING_FULLY_QUALIFIED_NAME.concat("<")
+//                            .concat(fullyQualifiedName).concat(">");
 
                 } else {
                     throw new UnsupportedOperationException(
@@ -597,26 +602,26 @@ public class TemplateFactory {
                         nullableDefaultWrapped = ((JavaAttribute) attributeIfc).getNullableDefaultWrappedForCode();
                     }
 
-                } else if (attributeIfc instanceof TOAttribute) {
-                    String fullyQualifiedName = FullyQualifiedNameHelper
-                            .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
-
-                    type = fullyQualifiedName;
-                } else if (attributeIfc instanceof ListAttribute) {
-                    String fullyQualifiedName = null;
-                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
-                            .getInnerAttribute();
-                    if (innerAttr instanceof JavaAttribute) {
-                        fullyQualifiedName = ((JavaAttribute) innerAttr)
-                                .getType().getFullyQualifiedName();
-                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
-                    } else if (innerAttr instanceof TOAttribute) {
-                        fullyQualifiedName = FullyQualifiedNameHelper
-                                .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
-                    }
-
-                    type = STRING_FULLY_QUALIFIED_NAME.concat("<")
-                            .concat(fullyQualifiedName).concat(">");
+//                } else if (attributeIfc instanceof TOAttribute) {
+//                    String fullyQualifiedName = FullyQualifiedNameHelper
+//                            .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
+//
+//                    type = fullyQualifiedName;
+//                } else if (attributeIfc instanceof ListAttribute) {
+//                    String fullyQualifiedName = null;
+//                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
+//                            .getInnerAttribute();
+//                    if (innerAttr instanceof JavaAttribute) {
+//                        fullyQualifiedName = ((JavaAttribute) innerAttr)
+//                                .getType().getFullyQualifiedName();
+//                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
+//                    } else if (innerAttr instanceof TOAttribute) {
+//                        fullyQualifiedName = FullyQualifiedNameHelper
+//                                .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
+//                    }
+//
+//                    type = STRING_FULLY_QUALIFIED_NAME.concat("<")
+//                            .concat(fullyQualifiedName).concat(">");
                 } else {
                     throw new UnsupportedOperationException(
                             "Attribute not supported: "

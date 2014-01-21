@@ -32,7 +32,20 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
         factory = new NetconfTestImplModuleFactory();
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
-                new DepTestImplModuleFactory()));
+                new DepTestImplModuleFactory(), new IdentityTestModuleFactory()));
+    }
+
+    @Test
+    public void testIdentities() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+
+        ObjectName nameCreated = transaction.createModule(IdentityTestModuleFactory.NAME, instanceName);
+        IdentityTestModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, IdentityTestModuleMXBean.class);
+
+        mxBean.setIdentities(Lists.newArrayList(new Identities()));
+
+        transaction.commit();
+
     }
 
     @Test
