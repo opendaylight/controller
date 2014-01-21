@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_29535be3",
+        "filename": "opendaylight/md-sal/sal-remote/src/main/yang/opendaylight-md-sal-remote.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-21T20:37:21Z",
+      "side": 1,
+      "message": "A better description? This is from iana.yang and does not really apply.",
+      "revId": "e529a278d94bc8d9b2197807dd0b2a0af9bbee4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_095097d2",
+        "filename": "opendaylight/md-sal/sal-restconf-broker/src/main/java/org/opendaylight/controller/sal/restconf/broker/SalRemoteServiceBroker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-21T20:37:21Z",
+      "side": 1,
+      "message": "I don\u0027t think we\u0027ll end up throwing exceptions here -- it\u0027s not like we can retry shutting down. Just remove the throws statement.",
+      "revId": "e529a278d94bc8d9b2197807dd0b2a0af9bbee4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
