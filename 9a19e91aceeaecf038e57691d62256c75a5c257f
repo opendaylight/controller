@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_09b9b714",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1856,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-21T20:20:52Z",
+      "side": 1,
+      "message": "Hi, could you please help me understand what the root cause is.\nYour change which moves code from toggleInstallation() into here should not have changed existing behavior. Besides the fact you are always forcing the installInHw flag.\n\nThis makes me think the issue is in in UI presentation where the install button is shown even when the flow is already installed and vice-versa.\n\nCan you please check after merge of\nhttps://git.opendaylight.org/gerrit/#/c/4336/",
+      "revId": "9a19e91aceeaecf038e57691d62256c75a5c257f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
