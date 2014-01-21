@@ -40,6 +40,7 @@ import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -323,7 +324,7 @@ public class ConnectionManagerNorthbound {
         @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
     public Response disconnect(
             @PathParam(value = "nodeType") String nodeType,
-            @PathParam(value = "nodeId") String nodeId) {
+            @PathParam(value = "nodeId") String requestNodeId) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container");
@@ -334,6 +335,7 @@ public class ConnectionManagerNorthbound {
         }
 
         try {
+            Long nodeId = Long.valueOf(HexEncode.stringToLong(requestNodeId));
             Node node = new Node(nodeType, nodeId);
             Status status = connectionManager.disconnect(node);
             if (status.isSuccess()) {
