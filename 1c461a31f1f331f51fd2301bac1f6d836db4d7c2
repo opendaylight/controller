@@ -16,6 +16,24 @@
       "revId": "1c461a31f1f331f51fd2301bac1f6d836db4d7c2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_29efdbea",
+        "filename": "opendaylight/northbound/connectionmanager/src/main/java/org/opendaylight/controller/connectionmanager/northbound/ConnectionManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-01-21T21:47:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da6255ed_49dc4f73",
+      "revId": "1c461a31f1f331f51fd2301bac1f6d836db4d7c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
