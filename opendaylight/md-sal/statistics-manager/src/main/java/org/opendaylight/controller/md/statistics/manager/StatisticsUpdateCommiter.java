@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
+import org.opendaylight.controller.md.statistics.manager.NodeStatisticsAger.FlowEntry;
+import org.opendaylight.controller.md.statistics.manager.NodeStatisticsAger.QueueEntry;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
@@ -44,7 +45,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupDescStatsUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupFeaturesUpdated;
@@ -88,7 +88,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericQueueStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsDataBuilder;
@@ -126,7 +125,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
 
     private final StatisticsProvider statisticsManager;
     
-    private final int unaccountedFlowsCounter = 1;
+    private int unaccountedFlowsCounter = 1;
 
     public StatisticsUpdateCommiter(final StatisticsProvider manager){
 
@@ -143,19 +142,19 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
             return;
         
+        NodeKey key = new NodeKey(notification.getId());
+
         //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+        ConcurrentMap<NodeId, NodeStatisticsAger> cache = this.statisticsManager.getStatisticsCache();
         if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
+            cache.put(notification.getId(), new NodeStatisticsAger(statisticsManager,key));
         }
-        cache.get(notification.getId()).setMeterConfigStats(notification.getMeterConfigStats());
+        cache.get(notification.getId()).updateMeterConfigStats(notification.getMeterConfigStats());
         
         //Publish data to configuration data store
-        NodeKey key = new NodeKey(notification.getId());
+        List<MeterConfigStats> meterConfigStatsList = notification.getMeterConfigStats();
         
-        List<MeterConfigStats> eterConfigStatsList = notification.getMeterConfigStats();
-        
-        for(MeterConfigStats meterConfigStats : eterConfigStatsList){
+        for(MeterConfigStats meterConfigStats : meterConfigStatsList){
             DataModificationTransaction it = this.statisticsManager.startChange();
             MeterBuilder meterBuilder = new MeterBuilder();
             MeterKey meterKey = new MeterKey(meterConfigStats.getMeterId());
@@ -185,13 +184,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
             return;
 
-        //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-        if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
-        }
-        cache.get(notification.getId()).setMeterStatistics(notification.getMeterStats());
-        
         NodeKey key = new NodeKey(notification.getId());
         
         List<MeterStats> meterStatsList = notification.getMeterStats();
@@ -227,15 +219,16 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
             return;
 
+        NodeKey key = new NodeKey(notification.getId());
+
         //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+        ConcurrentMap<NodeId, NodeStatisticsAger> cache = this.statisticsManager.getStatisticsCache();
         if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
+            cache.put(notification.getId(), new NodeStatisticsAger(statisticsManager,key));
         }
-        cache.get(notification.getId()).setGroupDescStats(notification.getGroupDescStats());
+        cache.get(notification.getId()).updateGroupDescStats(notification.getGroupDescStats());
         
         //Publish data to configuration data store
-        NodeKey key = new NodeKey(notification.getId());
         List<GroupDescStats> groupDescStatsList = notification.getGroupDescStats();
 
         for(GroupDescStats groupDescStats : groupDescStatsList){
@@ -269,13 +262,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
             return;
 
-        //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-        if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
-        }
-        cache.get(notification.getId()).setGroupStatistics(notification.getGroupStats());
-        
         //Publish data to configuration data store
         NodeKey key = new NodeKey(notification.getId());
         List<GroupStats> groupStatsList = notification.getGroupStats();
@@ -306,19 +292,12 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onMeterFeaturesUpdated(MeterFeaturesUpdated notification) {
 
-        //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-        if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
-        }
         MeterFeaturesBuilder meterFeature = new MeterFeaturesBuilder();
         meterFeature.setMeterBandSupported(notification.getMeterBandSupported());
         meterFeature.setMeterCapabilitiesSupported(notification.getMeterCapabilitiesSupported());
         meterFeature.setMaxBands(notification.getMaxBands());
         meterFeature.setMaxColor(notification.getMaxColor());
         meterFeature.setMaxMeter(notification.getMaxMeter());
-        
-        cache.get(notification.getId()).setMeterFeatures(meterFeature.build());
         
         //Publish data to configuration data store
         DataModificationTransaction it = this.statisticsManager.startChange();
@@ -342,18 +321,11 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onGroupFeaturesUpdated(GroupFeaturesUpdated notification) {
 
-        //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-        if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
-        }
-        
         GroupFeaturesBuilder groupFeatures = new GroupFeaturesBuilder();
         groupFeatures.setActions(notification.getActions());
         groupFeatures.setGroupCapabilitiesSupported(notification.getGroupCapabilitiesSupported());
         groupFeatures.setGroupTypesSupported(notification.getGroupTypesSupported());
         groupFeatures.setMaxGroups(notification.getMaxGroups());
-        cache.get(notification.getId()).setGroupFeatures(groupFeatures.build());
         
         //Publish data to configuration data store
         DataModificationTransaction it = this.statisticsManager.startChange();
@@ -427,14 +399,13 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             GenericStatistics flowStats = stats.build();
                 
             //Add statistics to local cache
-            ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+            ConcurrentMap<NodeId, NodeStatisticsAger> cache = this.statisticsManager.getStatisticsCache();
             if(!cache.containsKey(notification.getId())){
-                cache.put(notification.getId(), new NodeStatistics());
+                cache.put(notification.getId(), new NodeStatisticsAger(statisticsManager,key));
             }
-            if(!cache.get(notification.getId()).getFlowAndStatsMap().containsKey(tableId)){
-                cache.get(notification.getId()).getFlowAndStatsMap().put(tableId, new HashMap<Flow,GenericStatistics>());
-            }
-            cache.get(notification.getId()).getFlowAndStatsMap().get(tableId).put(flowRule,flowStats);
+            NodeStatisticsAger nsa = cache.get(notification.getId());
+            FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flowRule);
+            cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
                 
             //Augment the data to the flow node
 
@@ -492,10 +463,35 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                 }
             }
             
+            table= (Table)it.readOperationalData(tableRef);
+            if(!foundOriginalFlow && table != null){
+
+                for(Flow existingFlow : table.getFlow()){
+                    FlowStatisticsData augmentedflowStatisticsData = existingFlow.getAugmentation(FlowStatisticsData.class);
+                    if(augmentedflowStatisticsData != null){
+                        FlowBuilder existingOperationalFlow = new FlowBuilder();
+                        existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
+                        sucLogger.debug("Existing unaccounted flow in operational data store : {}",existingFlow.toString());
+                        if(flowEquals(flowRule,existingOperationalFlow.build())){
+                            InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
+                                    .augmentation(FlowCapableNode.class)
+                                    .child(Table.class, new TableKey(tableId))
+                                    .child(Flow.class,existingFlow.getKey()).toInstance();
+                            flowBuilder.setKey(existingFlow.getKey());
+                            flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
+                            sucLogger.debug("Found matching flow in the operational datastore, augmenting statistics");
+                            foundOriginalFlow = true;
+                            it.putOperationalData(flowRef, flowBuilder.build());
+                            it.commit();
+                            break;
+                        }
+                    }
+                }
+            }
             if(!foundOriginalFlow){
                 sucLogger.debug("Associated original flow is not found in data store. Augmenting flow in operational data store");
-                //TODO: Temporary fix: format [ 1+tableid+1+unaccounted flow counter]
-                long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"1"+Integer.toString(this.unaccountedFlowsCounter)));
+                long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"0"+Integer.toString(this.unaccountedFlowsCounter)));
+                this.unaccountedFlowsCounter++;
                 FlowKey newFlowKey = new FlowKey(new FlowId(Long.toString(flowKey)));
                 InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                         .augmentation(FlowCapableNode.class)
@@ -534,12 +530,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             aggregateFlowStatisticsBuilder.setPacketCount(notification.getPacketCount());
             aggregateFlowStatisticsDataBuilder.setAggregateFlowStatistics(aggregateFlowStatisticsBuilder.build());
             
-            ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-            if(!cache.containsKey(notification.getId())){
-                cache.put(notification.getId(), new NodeStatistics());
-            }
-            cache.get(notification.getId()).getTableAndAggregateFlowStatsMap().put(tableId,aggregateFlowStatisticsBuilder.build());
-            
             sucLogger.debug("Augment aggregate statistics: {} for table {} on Node {}",aggregateFlowStatisticsBuilder.build().toString(),tableId,key);
 
             TableBuilder tableBuilder = new TableBuilder();
@@ -560,13 +550,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         NodeKey key = new NodeKey(notification.getId());
         sucLogger.debug("Received port stats update : {}",notification.toString());
         
-        //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-        if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
-        }
-
-
         List<NodeConnectorStatisticsAndPortNumberMap> portsStats = notification.getNodeConnectorStatisticsAndPortNumberMap();
         for(NodeConnectorStatisticsAndPortNumberMap portStats : portsStats){
             
@@ -585,9 +568,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             statisticsBuilder.setReceiveOverRunError(portStats.getReceiveOverRunError());
             statisticsBuilder.setTransmitDrops(portStats.getTransmitDrops());
             statisticsBuilder.setTransmitErrors(portStats.getTransmitErrors());
-            
-            //Update data in the cache
-            cache.get(notification.getId()).getNodeConnectorStats().put(portStats.getNodeConnectorId(), statisticsBuilder.build());
             
             //Augment data to the node-connector
             FlowCapableNodeConnectorStatisticsDataBuilder statisticsDataBuilder = 
@@ -635,12 +615,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             
             statisticsDataBuilder.setFlowTableStatistics(statisticsBuilder.build());
             
-            ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
-            if(!cache.containsKey(notification.getId())){
-                cache.put(notification.getId(), new NodeStatistics());
-            }
-            cache.get(notification.getId()).getFlowTableAndStatisticsMap().put(ftStats.getTableId().getValue(),statisticsBuilder.build());
-            
             sucLogger.debug("Augment flow table statistics: {} for table {} on Node {}",statisticsBuilder.build().toString(),ftStats.getTableId(),key);
             
             TableBuilder tableBuilder = new TableBuilder();
@@ -662,17 +636,18 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         sucLogger.debug("Received queue stats update : {}",notification.toString());
         
         //Add statistics to local cache
-        ConcurrentMap<NodeId, NodeStatistics> cache = this.statisticsManager.getStatisticsCache();
+        ConcurrentMap<NodeId, NodeStatisticsAger> cache = this.statisticsManager.getStatisticsCache();
         if(!cache.containsKey(notification.getId())){
-            cache.put(notification.getId(), new NodeStatistics());
+            cache.put(notification.getId(), new NodeStatisticsAger(statisticsManager,key));
         }
+        
+        NodeStatisticsAger nsa = cache.get(notification.getId());
         
         List<QueueIdAndStatisticsMap> queuesStats = notification.getQueueIdAndStatisticsMap();
         for(QueueIdAndStatisticsMap swQueueStats : queuesStats){
             
-            if(!cache.get(notification.getId()).getNodeConnectorAndQueuesStatsMap().containsKey(swQueueStats.getNodeConnectorId())){
-                cache.get(notification.getId()).getNodeConnectorAndQueuesStatsMap().put(swQueueStats.getNodeConnectorId(), new HashMap<QueueId,GenericQueueStatistics>());
-            }
+            QueueEntry queueEntry = nsa.new QueueEntry(swQueueStats.getNodeConnectorId(),swQueueStats.getQueueId());
+            nsa.updateQueueStats(queueEntry);
             
             FlowCapableNodeConnectorQueueStatisticsDataBuilder queueStatisticsDataBuilder = new FlowCapableNodeConnectorQueueStatisticsDataBuilder();
             
@@ -681,11 +656,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             queueStatisticsBuilder.fieldsFrom(swQueueStats);
             
             queueStatisticsDataBuilder.setFlowCapableNodeConnectorQueueStatistics(queueStatisticsBuilder.build());
-            
-            cache.get(notification.getId()).getNodeConnectorAndQueuesStatsMap()
-                                            .get(swQueueStats.getNodeConnectorId())
-                                            .put(swQueueStats.getQueueId(), queueStatisticsBuilder.build());
-            
             
             DataModificationTransaction it = this.statisticsManager.startChange();
 

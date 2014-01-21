@@ -17,26 +17,37 @@ import java.util.concurrent.Future;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsInputBuilder;
@@ -49,19 +60,36 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.G
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** 
+ * Following are main responsibilities of the class:
+ * 1) Invoke statistics request thread to send periodic statistics request to all the 
+ * flow capable switch connected to the controller. It sends statistics request for 
+ * Group,Meter,Table,Flow,Queue,Aggregate stats.   
+ * 
+ * 2) Invoke statistics ager thread, to clean up all the stale statistics data from 
+ * operational data store.
+ * 
+ * @author avishnoi@in.ibm.com
+ *
+ */
 public class StatisticsProvider implements AutoCloseable {
 
     public final static Logger spLogger = LoggerFactory.getLogger(StatisticsProvider.class);
     
     private DataProviderService dps;
+    
+    private DataBrokerService dbs;
 
     private NotificationProviderService nps;
     
@@ -79,15 +107,19 @@ public class StatisticsProvider implements AutoCloseable {
 
     private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
     
+    private StatisticsUpdateHandler statsUpdateHandler;
+    
     private Thread statisticsRequesterThread;
     
+    private Thread statisticsAgerThread;
+
     private final  InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).toInstance();
     
-    private final int STATS_THREAD_EXECUTION_TIME= 50000;
+    public static final int STATS_THREAD_EXECUTION_TIME= 30000;
     //Local caching of stats
     
-    private final ConcurrentMap<NodeId,NodeStatistics> statisticsCache = 
-            new ConcurrentHashMap<NodeId,NodeStatistics>();
+    private final ConcurrentMap<NodeId,NodeStatisticsAger> statisticsCache = 
+            new ConcurrentHashMap<NodeId,NodeStatisticsAger>();
     
     public DataProviderService getDataService() {
       return this.dps;
@@ -97,6 +129,14 @@ public class StatisticsProvider implements AutoCloseable {
       this.dps = dataService;
     }
     
+    public DataBrokerService getDataBrokerService() {
+        return this.dbs;
+    }
+      
+    public void setDataBrokerService(final DataBrokerService dataBrokerService) {
+        this.dbs = dataBrokerService;
+    }
+
     public NotificationProviderService getNotificationService() {
       return this.nps;
     }
@@ -118,6 +158,10 @@ public class StatisticsProvider implements AutoCloseable {
         NotificationProviderService nps = this.getNotificationService();
         Registration<NotificationListener> registerNotificationListener = nps.registerNotificationListener(this.updateCommiter);
         this.listenerRegistration = registerNotificationListener;
+        
+        statsUpdateHandler = new StatisticsUpdateHandler(StatisticsProvider.this);
+        
+        registerDataStoreUpdateListener(this.getDataBrokerService());
         
         // Get Group/Meter statistics service instance
         groupStatsService = StatisticsManagerActivator.getProviderContext().
@@ -158,9 +202,60 @@ public class StatisticsProvider implements AutoCloseable {
         
         statisticsRequesterThread.start();
         
+        statisticsAgerThread = new Thread( new Runnable(){
+
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        for(NodeStatisticsAger nodeStatisticsAger : statisticsCache.values()){
+                            nodeStatisticsAger.cleanStaleStatistics();
+                        }
+                        
+                        Thread.sleep(STATS_THREAD_EXECUTION_TIME);
+                    }catch (Exception e){
+                        spLogger.error("Exception occurred while sending stats request : {}",e);
+                    }
+                }
+            }
+        });
+        
+        spLogger.debug("Statistics ager thread started with timer interval : {}",STATS_THREAD_EXECUTION_TIME);
+
+        statisticsAgerThread.start();
+        
         spLogger.info("Statistics Provider started.");
     }
     
+    private void registerDataStoreUpdateListener(DataBrokerService dbs) {
+        //Register for flow updates
+        InstanceIdentifier<? extends DataObject> pathFlow = InstanceIdentifier.builder(Nodes.class).child(Node.class)
+                                                                    .augmentation(FlowCapableNode.class)
+                                                                    .child(Table.class)
+                                                                    .child(Flow.class).toInstance();
+        dbs.registerDataChangeListener(pathFlow, statsUpdateHandler);
+        
+        //Register for meter updates
+        InstanceIdentifier<? extends DataObject> pathMeter = InstanceIdentifier.builder(Nodes.class).child(Node.class)
+                                                    .augmentation(FlowCapableNode.class)
+                                                    .child(Meter.class).toInstance();
+
+        dbs.registerDataChangeListener(pathMeter, statsUpdateHandler);
+        
+        //Register for group updates 
+        InstanceIdentifier<? extends DataObject> pathGroup = InstanceIdentifier.builder(Nodes.class).child(Node.class)
+                                                    .augmentation(FlowCapableNode.class)
+                                                    .child(Group.class).toInstance();
+        dbs.registerDataChangeListener(pathGroup, statsUpdateHandler);
+
+        //Register for queue updates
+        InstanceIdentifier<? extends DataObject> pathQueue = InstanceIdentifier.builder(Nodes.class).child(Node.class)
+                                                                    .child(NodeConnector.class)
+                                                                    .augmentation(FlowCapableNodeConnector.class)
+                                                                    .child(Queue.class).toInstance();
+        dbs.registerDataChangeListener(pathQueue, statsUpdateHandler);
+    }
+
     protected DataModificationTransaction startChange() {
         
         DataProviderService dps = this.getDataService();
@@ -210,7 +305,7 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
 
-    private void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) throws InterruptedException, ExecutionException {
+    public void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) throws InterruptedException, ExecutionException {
         final GetFlowTablesStatisticsInputBuilder input = 
                 new GetFlowTablesStatisticsInputBuilder();
         
@@ -224,7 +319,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input =
                 new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
         
@@ -238,7 +333,22 @@ public class StatisticsProvider implements AutoCloseable {
         
     }
     
-    private void sendAggregateFlowsStatsFromAllTablesRequest(NodeKey targetNodeKey) throws InterruptedException, ExecutionException{
+    public void sendFlowStatsFromTableRequest(NodeRef targetNode,Flow flow) throws InterruptedException, ExecutionException{
+        final GetFlowStatisticsFromFlowTableInputBuilder input =
+                new GetFlowStatisticsFromFlowTableInputBuilder();
+        
+        input.setNode(targetNode);
+        input.fieldsFrom(flow);
+        
+        Future<RpcResult<GetFlowStatisticsFromFlowTableOutput>> response = 
+                flowStatsService.getFlowStatisticsFromFlowTable(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_FLOW);
+        
+    }
+
+    public void sendAggregateFlowsStatsFromAllTablesRequest(NodeKey targetNodeKey) throws InterruptedException, ExecutionException{
         
         List<Short> tablesId = getTablesFromNode(targetNodeKey);
         
@@ -263,7 +373,7 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
 
-    private void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
         
@@ -276,7 +386,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    private void sendAllGroupStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendAllGroupStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         
@@ -290,7 +400,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
     
-    private void sendGroupDescriptionRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendGroupDescriptionRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();
         
         input.setNode(targetNode);
@@ -303,7 +413,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
     
-    private void sendAllMeterStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendAllMeterStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
         
@@ -317,7 +427,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
     
-    private void sendMeterConfigStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendMeterConfigStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         
         GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
         
@@ -331,7 +441,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
     
-    private void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) throws InterruptedException, ExecutionException {
+    public void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) throws InterruptedException, ExecutionException {
         GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
         
         input.setNode(targetNode);
@@ -344,7 +454,21 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public ConcurrentMap<NodeId, NodeStatistics> getStatisticsCache() {
+    public void sendQueueStatsFromGivenNodeConnector(NodeRef targetNode,NodeConnectorId nodeConnectorId, QueueId queueId) throws InterruptedException, ExecutionException {
+        GetQueueStatisticsFromGivenPortInputBuilder input = new GetQueueStatisticsFromGivenPortInputBuilder();
+        
+        input.setNode(targetNode);
+        input.setNodeConnectorId(nodeConnectorId);
+        input.setQueueId(queueId);
+        Future<RpcResult<GetQueueStatisticsFromGivenPortOutput>> response = 
+                queueStatsService.getQueueStatisticsFromGivenPort(input.build());
+        
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(response.get().getResult().getTransactionId()
+                , StatsRequestType.ALL_QUEUE_STATS);;
+
+    }
+
+    public ConcurrentMap<NodeId, NodeStatisticsAger> getStatisticsCache() {
         return statisticsCache;
     }
     
@@ -383,6 +507,8 @@ public class StatisticsProvider implements AutoCloseable {
                 this.listenerRegistration.close();
                 
                 this.statisticsRequesterThread.destroy();
+                
+                this.statisticsAgerThread.destroy();
             
             }
           } catch (Throwable e) {
