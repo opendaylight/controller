@@ -99,6 +99,7 @@ public class ClusteringServicesIT {
             mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
             mavenBundle("org.opendaylight.controller",
                         "sal.implementation").versionAsInProject(),
+            mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
             mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
             mavenBundle("org.opendaylight.controller",
                         "containermanager.it.implementation").versionAsInProject(),
@@ -133,10 +134,10 @@ public class ClusteringServicesIT {
         assertNotNull(bc);
         boolean debugit = false;
         Bundle b[] = bc.getBundles();
-        for (int i = 0; i < b.length; i++) {
-            int state = b[i].getState();
+        for (Bundle element : b) {
+            int state = element.getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.debug("Bundle:" + b[i].getSymbolicName() + " state:"
+                log.debug("Bundle:" + element.getSymbolicName() + " state:"
                           + stateToString(state));
                 debugit = true;
             }

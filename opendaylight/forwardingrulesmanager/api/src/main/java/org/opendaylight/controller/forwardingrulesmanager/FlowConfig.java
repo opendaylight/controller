@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.forwardingrulesmanager;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -67,10 +68,9 @@ import java.util.regex.Pattern;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class FlowConfig implements Serializable {
+public class FlowConfig extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(FlowConfig.class);
-    private static final String NAMEREGEX = "^[a-zA-Z0-9]+$";
     public static final String STATICFLOWGROUP = "__StaticFlows__";
     public static final String INTERNALSTATICFLOWGROUP = "__InternalStaticFlows__";
     public static final String INTERNALSTATICFLOWBEGIN = "__";
@@ -687,7 +687,8 @@ public class FlowConfig implements Serializable {
 
         Switch sw = null;
         try {
-            if (name == null || name.trim().isEmpty() || !name.matches(FlowConfig.NAMEREGEX)) {
+            // Flow name cannot be internal flow signature
+            if (!isValidResourceName(name) || isInternalFlow()) {
                 return new Status(StatusCode.BADREQUEST, "Invalid name");
             }
 
