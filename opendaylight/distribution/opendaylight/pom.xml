@@ -26,9 +26,7 @@
         </property>
       </activation>
       <dependencies>
-
         <!-- md-sal -->
-
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common</artifactId>
@@ -199,31 +197,6 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-jmx-generator</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>netty-event-executor-config</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>netty-threadgroup-config</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>threadpool-config-api</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>threadpool-config-impl</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>yang-store-api</artifactId>
           <version>${config.version}</version>
         </dependency>
         <dependency>
@@ -513,9 +486,22 @@
         </dependency>
         <dependency>
               <groupId>org.zeromq</groupId>
-              <artifactId>jeromq</artifactId>
-              <version>0.3.1</version>
-          </dependency>
+          <artifactId>jeromq</artifactId>
+          <version>0.3.1</version>
+        </dependency>
+        <!-- yang model dependencies -->
+        <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>ietf-inet-types</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>ietf-yang-types</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>opendaylight-l2-types</artifactId>
+        </dependency>
       </dependencies>
     </profile>
     <profile>
@@ -543,7 +529,6 @@
                 <artifactItem>
                   <groupId>org.opendaylight.controller</groupId>
                   <artifactId>sanitytest</artifactId>
-                  <version>${controller.version}</version>
                   <type>jar</type>
                 </artifactItem>
               </artifactItems>
@@ -589,135 +574,108 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwarding.staticrouting</artifactId>
-      <version>${forwarding.staticrouting}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
-      <version>${clustering.services.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services-implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>routing.dijkstra_implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>arphandler</artifactId>
-      <version>${arphandler.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker</artifactId>
-      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker.implementation</artifactId>
-      <version>${hosttracker.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
-      <version>${containermanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager.implementation</artifactId>
-      <version>${containermanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>appauth</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>
-      <version>${switchmanager.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>statisticsmanager</artifactId>
-      <version>${statisticsmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>statisticsmanager.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>topologymanager</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>usermanager</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>usermanager.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>connectionmanager</artifactId>
-      <version>${connectionmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>connectionmanager.implementation</artifactId>
-      <version>${connectionmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>security</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-      <version>${forwardingrulesmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
 
     <!-- SAL bundles -->
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>${sal.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
 
   <!-- SAL Extension bundles -->
@@ -725,22 +683,18 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.connection</artifactId>
-      <version>${sal.connection.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.connection.implementation</artifactId>
-      <version>${sal.connection.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.networkconfiguration</artifactId>
-      <version>${sal.networkconfiguration.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.networkconfiguration.implementation</artifactId>
-      <version>${sal.networkconfiguration.version}</version>
     </dependency>
 
     <!--  Web bundles -->
@@ -748,191 +702,150 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>web</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>flows.web</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>devices.web</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>troubleshoot.web</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>topology.web</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>osgi-brandfragment.web</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
     <!--  Neutron -->
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>networkconfig.neutron</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>networkconfig.neutron.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>networkconfig.neutron.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
 
     <!-- Northbound bundles -->
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>bundlescanner</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>bundlescanner.implementation</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>topology.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwarding.staticrouting.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>statistics.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>flowprogrammer.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>subnets.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>networkconfig.bridgedomain.northbound</artifactId>
-      <version>${networkconfig.bridgedomain.northbound.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>httpservice-bridge</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-osgi</artifactId>
-      <version>${jolokia.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>jolokia-bridge</artifactId>
-      <version>${jolokia.bridge.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>connectionmanager.northbound</artifactId>
-      <version>${connectionmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>usermanager.northbound</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>controllermanager.northbound</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <!-- Debug and logging -->
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>logging.bridge</artifactId>
-      <version>${controller.version}</version>
     </dependency>
 
     <!-- Southbound bundles -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>protocol_plugins.openflow</artifactId>
-      <version>${controller.version}</version>
     </dependency>
 
     <!-- samples -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>samples.loadbalancer</artifactId>
-      <version>${samples.loadbalancer}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>samples.loadbalancer.northbound</artifactId>
-      <version>${controller.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>samples.simpleforwarding</artifactId>
-      <version>${controller.version}</version>
     </dependency>
 
     <!-- Third party depedencies -->
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -1105,8 +1018,6 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.2.4</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.transaction</groupId>
@@ -1202,26 +1113,6 @@
     </dependency>
     <!-- Add Pax Exam -->
     <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-native</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit4</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-link-mvn</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-aether</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>org.springframework.asm</artifactId>
     </dependency>
@@ -1291,12 +1182,10 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
-      <version>${jersey.version}</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>${jersey.version}</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -1323,17 +1212,12 @@
     <dependency>
       <groupId>org.eclipse.equinox.http</groupId>
       <artifactId>servlet</artifactId>
-      <!--
-      <version>1.0.0-v20070606</version>
-      -->
     </dependency>
     <!-- felix webconsole -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>4.2.0</version>
       <classifier>all</classifier>
-      <!-- the all bundle includes all the necessary plugins -->
     </dependency>
 
     <!-- Third parties from opendaylight released -->
@@ -1352,19 +1236,6 @@
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-    </dependency>
-    <!-- yang model dependencies -->
-    <dependency>
-     <groupId>org.opendaylight.yangtools.model</groupId>
-     <artifactId>ietf-inet-types</artifactId>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools.model</groupId>
-     <artifactId>ietf-yang-types</artifactId>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools.model</groupId>
-     <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
 
     <!--Netty-->
@@ -1389,28 +1260,16 @@
       <artifactId>netty-common</artifactId>
     </dependency>
 
-
-      <!-- testing dependencies I'm pretty sure we should trim -->
-    <dependency>
-     <groupId>org.opendaylight.controller</groupId>
-     <artifactId>clustering.test</artifactId>
-     <version>${controller.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.controller</groupId>
-     <artifactId>commons.httpclient</artifactId>
-     <version>${commons.httpclient.version}</version>
-    </dependency>
-
+    <!-- testing dependencies I'm pretty sure we should trim -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sanitytest</artifactId>
-      <version>${controller.version}</version>
+      <artifactId>clustering.test</artifactId>
     </dependency>
-
-
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.httpclient</artifactId>
+    </dependency>
   </dependencies>
-
 
   <build>
     <plugins>
