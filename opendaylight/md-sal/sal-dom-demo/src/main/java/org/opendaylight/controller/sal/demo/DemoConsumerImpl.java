@@ -38,9 +38,9 @@ public class DemoConsumerImpl implements Consumer {
 
         @Override
         public void onNotification(CompositeNode notification) {
-            System.out.println(name
-                    + ": Received alert: "
-                    + notification.getFirstSimpleByName(
+            log.info(name,
+                     ": Received alert: ",
+                     notification.getFirstSimpleByName(
                             DemoUtils.contentNodeName).getValue());
             log.info("AlertLogger: Received notification: " + notification);
         }
@@ -57,9 +57,9 @@ public class DemoConsumerImpl implements Consumer {
 
         @Override
         public void onNotification(CompositeNode notification) {
-            System.out.println(name
-                    + ": Received change: "
-                    + notification.getFirstSimpleByName(
+            log.info(name,
+                    ": Received change: ",
+                    notification.getFirstSimpleByName(
                             DemoUtils.contentNodeName).getValue());
             log.info("ChangeLogger: Received notification: " + notification);
         }

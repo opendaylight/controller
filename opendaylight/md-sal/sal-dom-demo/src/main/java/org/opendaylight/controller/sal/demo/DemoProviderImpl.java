@@ -16,10 +16,14 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.notify.NotificationProviderService;
 import org.opendaylight.controller.yang.data.api.Node;
 import org.opendaylight.controller.yang.data.util.Nodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class DemoProviderImpl implements
         org.opendaylight.controller.sal.core.api.Provider {
+	
+	private static Logger log = LoggerFactory.getLogger(DemoProviderImpl.class);
 
     private ProviderSession session;
     private NotificationProviderService notifier;
@@ -40,9 +44,8 @@ public class DemoProviderImpl implements
         nodes.add(DemoUtils.contentNode(content));
 
         if (notifier == null) {
-            System.out.println("Provider: Error: Session not available");
-            System.out
-                    .println("                 Notification Service not available");
+            log.info("Provider: Error: Session not available");
+            log.info("                 Notification Service not available");
             return;
         }
         notifier.sendNotification(Nodes.containerNode(
@@ -54,9 +57,8 @@ public class DemoProviderImpl implements
         nodes.add(DemoUtils.contentNode(content));
 
         if (notifier == null) {
-            System.out.println("Provider: Error: Session not available");
-            System.out
-                    .println("                 Notification Service not available");
+        	log.info("Provider: Error: Session not available");
+        	log.info("                 Notification Service not available");
             return;
         }
         notifier.sendNotification(Nodes.containerNode(

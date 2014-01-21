@@ -25,12 +25,15 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides osgi cli commands for developers to debug Switch Manager
  * functionality
  */
 public class SwitchManagerCLI {
+    private static Logger logger = LoggerFactory.getLogger(SwitchManagerCLI.class);
     @SuppressWarnings("rawtypes")
     private ServiceRegistration sr = null;
 
@@ -60,7 +63,7 @@ public class SwitchManagerCLI {
         final ISwitchManager sm = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, container, this);
 
         if (sm == null) {
-            System.out.println("Cannot find the switch manager instance on container: " + container);
+            logger.info("Cannot find the switch manager instance on container: ", container);
             return;
         }
 
@@ -80,7 +83,7 @@ public class SwitchManagerCLI {
         for (String s : sortedProps) {
             properties = properties.concat(String.format("%-18s ", s));
         }
-        System.out.println(properties);
+        logger.info(properties);
         for (Node node : nodes) {
             String nodeProp = String.format("%-26s  ", node);
             Map<String, Property> propList = sm.getNodeProps(node);
@@ -91,9 +94,9 @@ public class SwitchManagerCLI {
                     nodeProp = nodeProp.concat(String.format("%-18s ", "null"));
                 }
             }
-            System.out.println(nodeProp);
+            logger.info(nodeProp);
         }
-        System.out.println("Total number of Nodes: " + nodes.size());
+        logger.info("Total number of Nodes: ", nodes.size());
     }
 
     @Descriptor("Retrieves the node connectors information present in Switch Manager DB for the specified node")
@@ -103,13 +106,13 @@ public class SwitchManagerCLI {
         final ISwitchManager sm = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName, this);
 
         if (sm == null) {
-            System.out.println("Cannot find the switch manager instance on container: " + containerName);
+            logger.info("Cannot find the switch manager instance on container: ", containerName);
             return;
         }
 
         Node target = Node.fromString(node);
         if (target == null) {
-            System.out.println("Please enter a valid node id");
+            logger.info("Please enter a valid node id");
             return;
         }
 
@@ -129,7 +132,7 @@ public class SwitchManagerCLI {
         for (String s : sortedProps) {
             properties = properties.concat(String.format("%-18s ", s));
         }
-        System.out.println(properties);
+        logger.info(properties);
         for (NodeConnector nodeConnector : nodeConnectorSet) {
             String ncProp = String.format("%-33s  ", nodeConnector);
             Map<String, Property> ncProperties = sm.getNodeConnectorProps(nodeConnector);
@@ -140,8 +143,8 @@ public class SwitchManagerCLI {
                     ncProp = ncProp.concat(String.format("%-18s ", "null"));
                 }
             }
-            System.out.println(ncProp);
+            logger.info(ncProp);
         }
-        System.out.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
+        logger.info("Total number of NodeConnectors: ", nodeConnectorSet.size());
     }
 }

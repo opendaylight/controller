@@ -16,8 +16,11 @@ import org.opendaylight.controller.sal.core.Path;
 import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DijkstraImplementationCLI {
+    protected static final Logger logger = LoggerFactory.getLogger(DijkstraImplementationCLI.class);
     @SuppressWarnings("rawtypes")
     private ServiceRegistration sr = null;
 
@@ -49,7 +52,7 @@ public class DijkstraImplementationCLI {
         final IRouting r = (IRouting) ServiceHelper.getInstance(IRouting.class, container, this);
 
         if (r == null) {
-            System.out.println("Cannot find the routing instance on container:" + container);
+            logger.info("Cannot find the routing instance on container:", container);
             return;
         }
 
@@ -57,9 +60,9 @@ public class DijkstraImplementationCLI {
         final Node dst = Node.fromString(dstNode);
         final Path p = r.getRoute(src, dst);
         if (p != null) {
-            System.out.println("Route between srcNode:" + src + " and dstNode:" + dst + " = " + p);
+            logger.info("Route between srcNode:", src, " and dstNode:", dst, " = ", p);
         } else {
-            System.out.println("There is no route between srcNode:" + src + " and dstNode:" + dst);
+            logger.info("There is no route between srcNode:", src, " and dstNode:", dst);
         }
     }
 }

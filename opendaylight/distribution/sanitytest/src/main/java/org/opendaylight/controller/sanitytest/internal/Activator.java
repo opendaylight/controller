@@ -7,8 +7,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleRevision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator {
+	protected static final Logger logger = LoggerFactory
+            .getLogger(Activator.class);
+	
     //10 Second initial, 1 second subsequent
     private static final int INITIAL_DELAY = 10000;
     private static final int SUBSEQUENT_DELAY = 1000;
@@ -51,14 +56,14 @@ public class Activator implements BundleActivator {
                         if ((bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
                             //fragment
                             if (state != Bundle.RESOLVED) {
-                                System.out.println("------ Failed to activate/resolve fragment = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
+                                logger.error("------ Failed to activate/resolve fragment = ", bundle.getSymbolicName(), " state = ", stateToString(bundle.getState()));
                                 failed = true;
                                 if (state == Bundle.STARTING)
                                     resolved = false;
                             }
                         } else {
                             if(state != Bundle.ACTIVE) {
-                                System.out.println("------ Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
+                                logger.error("------ Failed to activate/resolve bundle = ", bundle.getSymbolicName(), " state = ", stateToString(bundle.getState()));
                                 failed = true;
                                 if (state == Bundle.STARTING)
                                     resolved = false;
@@ -68,11 +73,11 @@ public class Activator implements BundleActivator {
                     if (!resolved) {
                         countup++;
                         if (countup < MAX_ATTEMPTS) {
-                            System.out.println("all bundles haven't finished starting, will repeat");
+                            logger.error("all bundles haven't finished starting, will repeat");
                             try {
                                 Thread.sleep(SUBSEQUENT_DELAY);
                             } catch (Exception e) {
-                                System.out.println("Thread.sleep interuptted.");
+                                logger.error("Thread.sleep interuptted.");
                                 break;
                             }
                         } else
@@ -82,12 +87,12 @@ public class Activator implements BundleActivator {
 
                 if(failed){
                     System.out.flush();
-                    System.out.println("exiting with 1 as failed");
+                    logger.error("exiting with 1 as failed");
                     System.out.close();
                     Runtime.getRuntime().exit(1);
                 } else {
                     System.out.flush();
-                    System.out.println("exiting with 0 as succeeded");
+                    logger.error("exiting with 0 as succeeded");
                     System.out.close();
                     Runtime.getRuntime().exit(0);
                 }

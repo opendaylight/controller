@@ -10,8 +10,12 @@ import org.infinispan.distribution.DistributionManager;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClusterManagerCLI {
+    protected static final Logger logger = LoggerFactory
+            .getLogger(ClusterManagerCLI.class);
     @SuppressWarnings("rawtypes")
     private ServiceRegistration sr = null;
 
@@ -41,28 +45,28 @@ public class ClusterManagerCLI {
         IClusterContainerServices s =
                 (IClusterContainerServices) ServiceHelper.getInstance(IClusterContainerServices.class, container, this);
         if (s == null) {
-            System.out.println("Could not get an handle to the container cluster service:" + container);
+            logger.error("Could not get an handle to the container cluster service:", container);
             return;
         }
         if (!s.existCache(cacheName)) {
-            System.out.println("Could not get cache named:" + cacheName);
+            logger.error("Could not get cache named:", cacheName);
         }
         ConcurrentMap<?, ?> aC = s.getCache(cacheName);
         if (aC == null) {
-            System.out.println("Could not get cache named:" + cacheName);
+            logger.error("Could not get cache named:", cacheName);
             return;
         }
         if (aC instanceof AdvancedCache) {
             @SuppressWarnings("rawtypes")
             AdvancedCache advCache = (AdvancedCache) aC;
-            System.out.println("AdvancedCache retrieved!");
+            logger.info("AdvancedCache retrieved!");
             DistributionManager dMgr = advCache.getDistributionManager();
             if (dMgr == null) {
                 return;
             }
-            System.out.println("Routing Table for the Hash:" + dMgr.getConsistentHash()
+            logger.info("Routing Table for the Hash:", dMgr.getConsistentHash()
                     .getRoutingTableAsString());
-            System.out.println("Get Members:" + dMgr.getConsistentHash()
+            logger.info("Get Members:", dMgr.getConsistentHash()
                     .getMembers());
         }
     }

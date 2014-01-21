@@ -10,12 +10,15 @@ import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManage
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides osgi cli commands for developers to debug
  * ForwardingRulesManager functionality
  */
 public class ForwardingRulesManagerCLI {
+    protected static final Logger logger = LoggerFactory.getLogger(ForwardingRulesManagerCLI.class);
     @SuppressWarnings("rawtypes")
     private ServiceRegistration sr = null;
 
@@ -46,16 +49,18 @@ public class ForwardingRulesManagerCLI {
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                 IForwardingRulesManager.class, container, this);
         if (frm == null) {
-            System.out.println("Cannot find the FRM instance on container: " + container);
+            logger.info("Cannot find the FRM instance on container: ", container);
             return;
         }
         List<FlowEntry> groupFlows = frm.getFlowEntriesForGroup(group);
-        System.out.println("Group " + group);
+        logger.info("Group ", group);
         for (FlowEntry flowEntry : groupFlows) {
             if (!verbose) {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.getFlowName());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.getFlowName());
             } else {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.toString());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.toString());
             }
         }
     }
@@ -66,16 +71,18 @@ public class ForwardingRulesManagerCLI {
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                 IForwardingRulesManager.class, container, this);
         if (frm == null) {
-            System.out.println("Cannot find the FRM instance on container: " + container);
+            logger.error("Cannot find the FRM instance on container: ", container);
             return;
         }
         List<FlowEntry> groupFlows = frm.getInstalledFlowEntriesForGroup(group);
-        System.out.println("Group " + group);
+        logger.info("Group ", group);
         for (FlowEntry flowEntry : groupFlows) {
             if (!verbose) {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.getFlowName());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.getFlowName());
             } else {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.toString());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.toString());
             }
         }
     }
@@ -88,21 +95,23 @@ public class ForwardingRulesManagerCLI {
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                 IForwardingRulesManager.class, container, this);
         if (frm == null) {
-            System.out.println("Cannot find the FRM instance on container: " + container);
+            logger.error("Cannot find the FRM instance on container: ", container);
             return;
         }
         Node node = Node.fromString(nodeId);
         if (node == null) {
-            System.out.println("Please enter a valid node id");
+            logger.info("Please enter a valid node id");
             return;
         }
         List<FlowEntry> groupFlows = frm.getFlowEntriesForNode(node);
-        System.out.println("Node " + nodeId);
+        logger.info("Node " + nodeId);
         for (FlowEntry flowEntry : groupFlows) {
             if (!verbose) {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.getFlowName());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.getFlowName());
             } else {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.toString());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.toString());
             }
         }
     }
@@ -115,21 +124,23 @@ public class ForwardingRulesManagerCLI {
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                 IForwardingRulesManager.class, container, this);
         if (frm == null) {
-            System.out.println("Cannot find the FRM instance on container: " + container);
+            logger.info("Cannot find the FRM instance on container: ", container);
             return;
         }
         Node node = Node.fromString(nodeId);
         if (node == null) {
-            System.out.println("Please enter a valid node id");
+            logger.info("Please enter a valid node id");
             return;
         }
         List<FlowEntry> groupFlows = frm.getInstalledFlowEntriesForNode(node);
-        System.out.println("Node " + nodeId);
+        logger.info("Node ", nodeId);
         for (FlowEntry flowEntry : groupFlows) {
             if (!verbose) {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.getFlowName());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.getFlowName());
             } else {
-                System.out.println(flowEntry.getNode() + " " + flowEntry.toString());
+                logger.error(flowEntry.getNode().toString());
+                logger.error(" ", flowEntry.toString());
             }
         }
     }

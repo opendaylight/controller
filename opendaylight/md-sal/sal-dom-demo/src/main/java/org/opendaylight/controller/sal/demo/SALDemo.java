@@ -38,7 +38,7 @@ public class SALDemo {
         try {
             while (true) {
 
-                System.out.print("\nEnter your choice (0 - list): ");
+                logger.info("\nEnter your choice (0 - list): ");
                 s = in.readLine();
                 int choice = Integer.parseInt(s.trim());
                 try {
@@ -73,14 +73,13 @@ public class SALDemo {
                     case 9:
                         return;
                     default:
-                        System.out.println("Please enter valid input.");
+                    	logger.info("Please enter valid input.");
                         break;
                     }
                 } catch (Exception e) {
-                    System.out
-                            .println("Operation failed. Reason exception raised: "
-                                    + e.getClass().getSimpleName());
-                    System.out.println("   Message: " + e.getMessage());
+                    logger.info("Operation failed. Reason exception raised: ",
+                                    e.getClass().getSimpleName());
+                    logger.info("   Message: ", e.getMessage());
                 }
 
             }
@@ -99,13 +98,13 @@ public class SALDemo {
     }
 
     private static void sendAlert(BufferedReader in) throws IOException {
-        System.out.print("Please enter notification content:");
+    	logger.info("Please enter notification content:");
         String content = in.readLine();
         provider.sendAlertNotification(content);
     }
 
     private static void sendChange(BufferedReader in) throws IOException {
-        System.out.print("Please enter notification content:");
+    	logger.info("Please enter notification content:");
         String content = in.readLine();
         provider.sendChangeNotification(content);
     }
@@ -123,18 +122,17 @@ public class SALDemo {
     }
 
     private static void displayHelp() {
-        System.out.println("Usage: ");
-        System.out.println("  0) Display Help");
-        System.out.println("  1) Register Provider");
-        System.out.println("  2) Register Consumer 1 (listening on alert)");
-        System.out
-                .println("  3) Register Consumer 2 (listening on alert,change)");
-        System.out.println("  4) Send Alert Notification");
-        System.out.println("  5) Send Change Notification");
-        System.out.println("  6) Unregister Consumer 1");
-        System.out.println("  7) Unregister Consumer 2");
-        System.out.println("  8) Unregister Provider");
-        System.out.println("  9) Exit");
+    	logger.info("Usage: ");
+    	logger.info("  0) Display Help");
+    	logger.info("  1) Register Provider");
+    	logger.info("  2) Register Consumer 1 (listening on alert)");
+    	logger.info("  3) Register Consumer 2 (listening on alert,change)");
+    	logger.info("  4) Send Alert Notification");
+    	logger.info("  5) Send Change Notification");
+    	logger.info("  6) Unregister Consumer 1");
+    	logger.info("  7) Unregister Consumer 2");
+    	logger.info("  8) Unregister Provider");
+    	logger.info("  9) Exit");
 
     }
 
@@ -143,7 +141,7 @@ public class SALDemo {
     }
 
     private static void initialize() {
-        System.out.println("Initializing broker");
+    	logger.info("Initializing broker");
         broker = new BrokerImpl();
         NotificationModule notifyModule = new NotificationModule();
         broker.addModule(notifyModule);
