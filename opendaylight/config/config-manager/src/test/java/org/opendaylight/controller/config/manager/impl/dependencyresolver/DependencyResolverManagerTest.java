@@ -42,7 +42,7 @@ public class DependencyResolverManagerTest {
     public void setUp() {
         transactionStatus = mock(TransactionStatus.class);
         ServiceReferenceReadableRegistry mockedRegistry = mock(ServiceReferenceReadableRegistry.class);
-        tested = new DependencyResolverManager("txName", transactionStatus, mockedRegistry);
+        tested = new DependencyResolverManager("txName", transactionStatus, mockedRegistry, codecRegistry);
         doNothing().when(transactionStatus).checkCommitStarted();
         doNothing().when(transactionStatus).checkNotCommitted();
     }

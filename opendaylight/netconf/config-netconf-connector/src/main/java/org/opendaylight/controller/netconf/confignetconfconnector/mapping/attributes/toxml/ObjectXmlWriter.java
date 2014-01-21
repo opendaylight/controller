@@ -69,6 +69,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
+    protected AttributeWritingStrategy caseJavaIdentityRefAttribute(OpenType<?> openType) {
+        return new SimpleIdentityRefAttributeWritingStrategy(document, key);
+    }
+
+    @Override
     protected AttributeWritingStrategy caseJavaCompositeAttribute(CompositeType openType) {
         return new SimpleCompositeAttributeWritingStrategy(document, key);
     }

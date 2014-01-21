@@ -23,6 +23,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadingStrategy> {
 
@@ -70,6 +71,15 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
         Preconditions.checkState(openType.keySet().size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
         String mappingKey = openType.keySet().iterator().next();
         return new SimpleCompositeAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey);
+    }
+
+    @Override
+    protected AttributeReadingStrategy caseJavaIdentityRefAttribute(OpenType<?> openType) {
+        Preconditions.checkState(openType instanceof CompositeType);
+        Set<String> keys = ((CompositeType) openType).keySet();
+        Preconditions.checkState(keys.size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
+        String mappingKey = keys.iterator().next();
+        return new SimpleIdentityRefAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey);
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.manager.impl.util.ModuleQNameUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
+    private final CodecRegistry codecRegistry;
 
     @GuardedBy("this")
     private long version = 0;
@@ -107,19 +109,20 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
-            MBeanServer configMBeanServer) {
+            MBeanServer configMBeanServer, CodecRegistry codecRegistry) {
         this(resolver, configMBeanServer,
-                new BaseJMXRegistrator(configMBeanServer));
+                new BaseJMXRegistrator(configMBeanServer), codecRegistry);
     }
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
             MBeanServer configMBeanServer,
-            BaseJMXRegistrator baseJMXRegistrator) {
+            BaseJMXRegistrator baseJMXRegistrator, CodecRegistry codecRegistry) {
         this.resolver = resolver;
         this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
+        this.codecRegistry = codecRegistry;
         this.registryMBeanServer = MBeanServerFactory
                 .createMBeanServer("ConfigRegistry" + configMBeanServer.getDefaultDomain());
         this.transactionsMBeanServer = MBeanServerFactory
@@ -161,7 +164,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 readableSRRegistry, txLookupRegistry, allCurrentFactories);
 
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
-                txLookupRegistry, version,
+                txLookupRegistry, version, codecRegistry,
                 versionCounter, allCurrentFactories, transactionsMBeanServer,
                 configMBeanServer, blankTransaction, writableRegistry);
         try {
