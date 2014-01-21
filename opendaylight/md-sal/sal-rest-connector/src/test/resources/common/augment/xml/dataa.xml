@@ -1,0 +1,5 @@
+<cont xmlns="ns:main">
+    <cont1 xmlns="ns:augment:main:a">
+        <lf11>lf11 value for a</lf11>
+    </cont1>
+</cont>
