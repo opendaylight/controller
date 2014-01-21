@@ -56,7 +56,7 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
         try {
             startNegotiation();
         } catch (Exception e) {
-            logger.info("Unexpected negotiation failure", e);
+            logger.info("Failed to start negotiation", e);
             negotiationFailed(e);
         }
     }
@@ -67,8 +67,14 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
         try {
             handleMessage((M)msg);
         } catch (Exception e) {
-            logger.debug("Unexpected exception during negotiation", e);
+            logger.debug("Unexpected error while handling negotiation message {}", msg, e);
             negotiationFailed(e);
         }
+    }
+
+    @Override
+    public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
+        logger.info("Unexpected error during negotiation", cause);
+        negotiationFailed(cause);
     }
 }
