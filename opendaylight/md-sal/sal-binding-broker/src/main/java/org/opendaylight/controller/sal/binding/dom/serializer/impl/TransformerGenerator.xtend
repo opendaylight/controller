@@ -408,7 +408,7 @@ class TransformerGenerator {
                 method(Object, "deserialize", Object) [
                     bodyChecked = '''
                         {
-                            ////System.out.println("«type.name»#deserialize: " +$1);
+                            //System.out.println("«type.name»#deserialize: " +$1);
                             java.util.Map.Entry _input = (java.util.Map.Entry) $1;
                             return fromDomStatic((«QName.name»)_input.getKey(),_input.getValue());
                         }
@@ -528,7 +528,7 @@ class TransformerGenerator {
                             return null;
                             }
                             java.util.Map _compositeNode = (java.util.Map) $2;
-                            System.out.println(_localQName + " " + _compositeNode);
+                            //System.out.println(_localQName + " " + _compositeNode);
                             «type.builderName» _builder = new «type.builderName»();
                             boolean _is_empty = true;
                             «FOR child : node.childNodes»
@@ -676,7 +676,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            System.out.println(_localQName + " " + _compositeNode);
+            //System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeKey(type, node)»
             «deserializeDataNodeContainerBody(type, node)»
@@ -692,7 +692,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            System.out.println(_localQName + " " + _compositeNode);
+            //System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»
@@ -708,7 +708,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            System.out.println(_localQName + " " + _compositeNode);
+            //System.out.println(_localQName + " " + _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»
