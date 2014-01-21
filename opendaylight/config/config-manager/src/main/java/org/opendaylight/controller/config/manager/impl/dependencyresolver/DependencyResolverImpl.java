@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -17,6 +18,7 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.ObjectName;
@@ -160,6 +162,17 @@ final class DependencyResolverImpl implements DependencyResolver,
                     instance.getClass(), expectedType, jmxAttribute);
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
         }
+    }
+
+    @Override
+    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(IdentityAttributeRef identityRef, Class<T> baseIdentity) {
+        // FIXME implement
+        throw new UnsupportedOperationException("FIXME");
+    }
+
+    @Override
+    public <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> baseIdentity) {
+        // FIXME implement
     }
 
     @Override

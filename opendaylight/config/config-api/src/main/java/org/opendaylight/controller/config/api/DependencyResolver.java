@@ -11,6 +11,7 @@ import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 
 /**
  * Each new {@link org.opendaylight.controller.config.spi.Module} can receive
@@ -48,5 +49,16 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
      */
     <T> T resolveInstance(Class<T> expectedType, ObjectName objectName,
             JmxAttribute jmxAttribute);
+
+    // TODO finish javadoc
+
+    /**
+     * To be used during commit phase to resolve identity-ref config attributes.
+     *
+     * @return actual class object generated from identity
+     */
+    <T extends BaseIdentity> Class<? extends T> resolveIdentity(IdentityAttributeRef identityRef, Class<T> baseIdentity);
+
+    <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> baseIdentity);
 
 }
