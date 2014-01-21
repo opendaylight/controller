@@ -36,12 +36,12 @@ import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.IResourceAuthorization;
 import org.opendaylight.controller.sal.authorization.UserLevel;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.AuthResponse;
 import org.opendaylight.controller.usermanager.AuthenticatedUser;
 import org.opendaylight.controller.usermanager.AuthorizationConfig;
@@ -52,7 +52,6 @@ import org.opendaylight.controller.usermanager.ServerConfig;
 import org.opendaylight.controller.usermanager.UserConfig;
 import org.opendaylight.controller.usermanager.security.SessionManager;
 import org.opendaylight.controller.usermanager.security.UserSecurityContextRepository;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -202,18 +201,12 @@ public class UserManager implements IUserManager, IObjectReader,
     private void loadConfigurations() {
         // To encode and decode user and server configuration objects
         loadSecurityKeys();
-
         /*
-         * Do not load local startup file if we already got the configurations
-         * synced from another cluster node
+         * Do not load local startup file if we are not the coordinator
          */
-        if (localUserConfigList.isEmpty()) {
+        if ((clusterGlobalService != null) && (clusterGlobalService.amICoordinator())) {
             loadUserConfig();
-        }
-        if (remoteServerConfigList.isEmpty()) {
             loadServerConfig();
-        }
-        if (authorizationConfList.isEmpty()) {
             loadAuthConfig();
         }
     }

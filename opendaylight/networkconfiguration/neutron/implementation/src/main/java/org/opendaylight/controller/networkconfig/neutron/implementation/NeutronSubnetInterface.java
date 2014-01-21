@@ -17,8 +17,8 @@ import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -115,7 +115,7 @@ public class NeutronSubnetInterface implements INeutronSubnetCRUD, IConfiguratio
     private void startUp() {
         allocateCache();
         retrieveCache();
-        if (subnetDB.isEmpty()) {
+        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
             loadConfiguration();
         }
 

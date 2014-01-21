@@ -2631,10 +2631,9 @@ public class ForwardingRulesManager implements
         }
 
         /*
-         * Read startup and build database if we have not already gotten the
-         * configurations synced from another node
+         * Read startup and build database if we are the coordinator
          */
-        if (staticFlows.isEmpty()) {
+        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
             loadFlowConfiguration();
         }
     }
