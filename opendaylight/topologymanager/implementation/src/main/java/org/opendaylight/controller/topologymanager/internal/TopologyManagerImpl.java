@@ -574,10 +574,26 @@ public class TopologyManagerImpl implements
     private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
         switch (type) {
         case ADDED:
-            // Avoid redundant update as notifications trigger expensive tasks
-            if (edgesDB.containsKey(e)) {
-                log.trace("Skipping redundant edge addition: {}", e);
-                return null;
+
+            // Make sure the props are non-null or create a copy
+            if (props == null) {
+                props = new HashSet<Property>();
+            } else {
+                props = new HashSet<Property>(props);
+            }
+
+            Set<Property> currentProps = this.edgesDB.get(e);
+            if (currentProps != null) {
+
+                if (currentProps.equals(props)) {
+                    // Avoid redundant updates as notifications trigger expensive tasks
+                    log.trace("Skipping redundant edge addition: {}", e);
+                    return null;
+                }
+
+                // In case of node switch-over to a different cluster controller,
+                // let's retain edge props (e.g. creation time)
+                props.addAll(currentProps);
             }
 
             // Ensure that head node connector exists
@@ -587,22 +603,8 @@ public class TopologyManagerImpl implements
             }
 
             // Check if nodeConnectors of the edge were correctly categorized
-            // by OF plugin
+            // by protocol plugin
             crossCheckNodeConnectors(e);
-
-            // Make sure the props are non-null
-            if (props == null) {
-                props = new HashSet<Property>();
-            } else {
-                props = new HashSet<Property>(props);
-            }
-
-            //in case of node switch-over to a different cluster controller,
-            //let's retain edge props
-            Set<Property> currentProps = this.edgesDB.get(e);
-            if (currentProps != null){
-                props.addAll(currentProps);
-            }
 
             // Now make sure there is the creation timestamp for the
             // edge, if not there, stamp with the first update
