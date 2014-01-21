@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.packet.BitBufferHelper;
@@ -44,14 +45,11 @@ import org.slf4j.LoggerFactory;
  */
 @XmlRootElement (name = "flow-spec-config")
 @XmlAccessorType(XmlAccessType.NONE)
-public class ContainerFlowConfig implements Serializable {
+public class ContainerFlowConfig extends ConfigurationObject implements Serializable {
     private static Logger log = LoggerFactory.getLogger(ContainerFlowConfig.class);
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
-
-    /** The Constant regexName. */
-    private static final String regexName = "^[\\w-+.@]+$";
 
     /** Flow Spec name. */
     @XmlElement
@@ -596,7 +594,7 @@ public class ContainerFlowConfig implements Serializable {
      * @return true, if is valid
      */
     public Status validate() {
-        if (!hasValidName()) {
+        if (!isValidResourceName(name)) {
             return new Status(StatusCode.BADREQUEST, "Invalid name");
         }
         Status status = validateVlan();
@@ -617,15 +615,6 @@ public class ContainerFlowConfig implements Serializable {
             return new Status(StatusCode.BADREQUEST, "Flow Spec is empty");
         }
         return new Status(StatusCode.SUCCESS);
-    }
-
-    /**
-     * Checks if this flow specification configuration has a valid name.
-     *
-     * @return true, if successful
-     */
-    private boolean hasValidName() {
-        return (name != null && !name.isEmpty() && name.matches(regexName));
     }
 
     /**

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.utils.GUIField;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -25,7 +26,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 /**
  * This class defines all the necessary configuration information for a static route.
  */
-public class StaticRouteConfig implements Serializable {
+public class StaticRouteConfig extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String regexSubnet = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
@@ -150,7 +151,7 @@ public class StaticRouteConfig implements Serializable {
      * @return SUCCESS if the config is valid
      */
     public Status isValid() {
-        if ((name == null) || (name.trim().length() < 1)) {
+        if (!isValidResourceName(name)) {
             return new Status(StatusCode.BADREQUEST,
                         "Invalid Static Route name");
         }
@@ -207,8 +208,9 @@ public class StaticRouteConfig implements Serializable {
         if (getNextHopType().equalsIgnoreCase(
                 StaticRoute.NextHopType.SWITCHPORT.toString())) {
             String pieces[] = nextHop.split("/");
-            if (pieces.length < 2)
+            if (pieces.length < 2) {
                 return false;
+            }
             return isValidSwitchId(pieces[0]);
         }
         return false;
@@ -350,20 +352,26 @@ public class StaticRouteConfig implements Serializable {
         }
         StaticRouteConfig other = (StaticRouteConfig) obj;
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
+        }
         if (nextHop == null) {
-            if (other.nextHop != null)
+            if (other.nextHop != null) {
                 return false;
-        } else if (!nextHop.equals(other.nextHop))
+            }
+        } else if (!nextHop.equals(other.nextHop)) {
             return false;
+        }
         if (staticRoute == null) {
-            if (other.staticRoute != null)
+            if (other.staticRoute != null) {
                 return false;
-        } else if (!staticRoute.equals(other.staticRoute))
+            }
+        } else if (!staticRoute.equals(other.staticRoute)) {
             return false;
+        }
         return true;
     }
 
