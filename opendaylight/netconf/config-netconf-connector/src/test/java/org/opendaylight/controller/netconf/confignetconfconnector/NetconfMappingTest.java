@@ -30,7 +30,6 @@ import org.opendaylight.controller.config.yang.store.impl.MbeParser;
 import org.opendaylight.controller.config.yang.test.impl.ComplexDtoBInner;
 import org.opendaylight.controller.config.yang.test.impl.ComplexList;
 import org.opendaylight.controller.config.yang.test.impl.Deep;
-import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInnerInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoC;

@@ -36,6 +36,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             TypeProviderWrapper typeProviderWrapper) {
         super(leaf);
         this.type = typeProviderWrapper.getType(leaf);
+
         this.typeDefinition = leaf.getType();
         this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = leaf.getDefault();
