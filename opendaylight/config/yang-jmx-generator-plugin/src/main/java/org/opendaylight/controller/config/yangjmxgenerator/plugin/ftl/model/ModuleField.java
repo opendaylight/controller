@@ -20,10 +20,9 @@ public class ModuleField extends Field {
     private final boolean dependent, isListOfDependencies;
     private final Dependency dependency;
 
-    private ModuleField(List<String> modifiers, String type, String name,
-            String attributeName, String nullableDefault, boolean isDependency,
-            Dependency dependency, boolean isListOfDependencies) {
-        super(modifiers, type, name);
+    private ModuleField(List<String> modifiers, String type, String name, String attributeName, String nullableDefault,
+            boolean isDependency, Dependency dependency, boolean isListOfDependencies, boolean needsDepResolver) {
+        super(modifiers, type, name, null, needsDepResolver);
         this.dependent = isDependency;
         this.dependency = dependency;
         this.attributeName = attributeName;
@@ -35,10 +34,14 @@ public class ModuleField extends Field {
         this.isListOfDependencies = isListOfDependencies;
     }
 
-    public ModuleField(String type, String name, String attributeName,
-            String nullableDefault, boolean isDependency, Dependency dependency, boolean isListOfDependencies) {
-        this(Collections.<String> emptyList(), type, name, attributeName,
-                nullableDefault, isDependency, dependency, isListOfDependencies);
+    public ModuleField(String type, String name, String attributeName, String nullableDefault, boolean isDependency,
+            Dependency dependency, boolean isListOfDependencies, boolean needsDepResolve) {
+        this(Collections.<String> emptyList(), type, name, attributeName, nullableDefault, isDependency, dependency,
+                isListOfDependencies, needsDepResolve);
+    }
+
+    public boolean isIdentityRef() {
+        return false;
     }
 
     public Dependency getDependency() {

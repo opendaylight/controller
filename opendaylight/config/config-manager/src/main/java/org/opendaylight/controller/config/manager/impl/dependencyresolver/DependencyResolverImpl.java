@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -17,6 +18,9 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.ObjectName;
@@ -39,11 +43,12 @@ final class DependencyResolverImpl implements DependencyResolver,
     @GuardedBy("this")
     private final Set<ModuleIdentifier> dependencies = new HashSet<>();
     private final ServiceReferenceReadableRegistry readableRegistry;
+    private final CodecRegistry codecRegistry;
 
     DependencyResolverImpl(ModuleIdentifier currentModule,
-            TransactionStatus transactionStatus, ModulesHolder modulesHolder,
-            ServiceReferenceReadableRegistry readableRegistry) {
-
+                           TransactionStatus transactionStatus, ModulesHolder modulesHolder,
+                           ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry) {
+        this.codecRegistry = codecRegistry;
         this.name = currentModule;
         this.transactionStatus = transactionStatus;
         this.modulesHolder = modulesHolder;
@@ -160,6 +165,21 @@ final class DependencyResolverImpl implements DependencyResolver,
                     instance.getClass(), expectedType, jmxAttribute);
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
         }
+    }
+
+    @Override
+    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(IdentityAttributeRef identityRef, Class<T> baseIdentity) {
+//        return codecRegistry.getIdentityCodec().deserialize(getQName(identityRef));
+    }
+
+    private static QName getQName(IdentityAttributeRef identityRef) {
+        // TODO implement
+        return null;
+    }
+
+    @Override
+    public <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> baseIdentity) {
+        // FIXME implement
     }
 
     @Override
