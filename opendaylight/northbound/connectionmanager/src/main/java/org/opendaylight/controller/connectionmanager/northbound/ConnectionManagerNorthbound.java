@@ -9,40 +9,40 @@
 
 package org.opendaylight.controller.connectionmanager.northbound;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+        import java.net.InetAddress;
+        import java.net.UnknownHostException;
+        import java.util.HashMap;
+        import java.util.Map;
+        import java.util.Set;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+        import javax.ws.rs.DELETE;
+        import javax.ws.rs.DefaultValue;
+        import javax.ws.rs.GET;
+        import javax.ws.rs.PUT;
+        import javax.ws.rs.Path;
+        import javax.ws.rs.PathParam;
+        import javax.ws.rs.Produces;
+        import javax.ws.rs.QueryParam;
+        import javax.ws.rs.core.Context;
+        import javax.ws.rs.core.MediaType;
+        import javax.ws.rs.core.Response;
+        import javax.ws.rs.core.SecurityContext;
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.codehaus.enunciate.jaxrs.TypeHint;
-import org.opendaylight.controller.connectionmanager.IConnectionManager;
-import org.opendaylight.controller.northbound.commons.exception.NotAcceptableException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
-import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
-import org.opendaylight.controller.sal.authorization.Privilege;
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.utils.NetUtils;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.controller.sal.utils.Status;
+        import org.codehaus.enunciate.jaxrs.ResponseCode;
+        import org.codehaus.enunciate.jaxrs.StatusCodes;
+        import org.codehaus.enunciate.jaxrs.TypeHint;
+        import org.opendaylight.controller.connectionmanager.IConnectionManager;
+        import org.opendaylight.controller.northbound.commons.exception.NotAcceptableException;
+        import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
+        import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
+        import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+        import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
+        import org.opendaylight.controller.sal.authorization.Privilege;
+        import org.opendaylight.controller.sal.connection.ConnectionConstants;
+        import org.opendaylight.controller.sal.core.Node;
+        import org.opendaylight.controller.sal.utils.NetUtils;
+        import org.opendaylight.controller.sal.utils.ServiceHelper;
+        import org.opendaylight.controller.sal.utils.Status;
 
 /**
  * Connection Manager Northbound APIs
@@ -111,9 +111,9 @@ public class ConnectionManagerNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Nodes.class)
     @StatusCodes( {
-        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-        @ResponseCode(code = 406, condition = "Invalid Controller IP Address passed."),
-        @ResponseCode(code = 503, condition = "Connection Manager Service not available")})
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+            @ResponseCode(code = 406, condition = "Invalid Controller IP Address passed."),
+            @ResponseCode(code = 503, condition = "Connection Manager Service not available")})
 
     public Nodes getNodes(@DefaultValue("") @QueryParam("controller") String controllerAddress) {
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.READ, this)) {
@@ -126,7 +126,7 @@ public class ConnectionManagerNorthbound {
         }
 
         if ((controllerAddress != null) && (controllerAddress.trim().length() > 0) &&
-            !NetUtils.isIPv4AddressValid(controllerAddress)) {
+                !NetUtils.isIPv4AddressValid(controllerAddress)) {
             throw new NotAcceptableException("Invalid ip address "+controllerAddress);
         }
         Set<Node> nodeSet = null;
@@ -176,10 +176,10 @@ public class ConnectionManagerNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Node.class)
     @StatusCodes( {
-        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-        @ResponseCode(code = 404, condition = "Could not connect to the Node with the specified parameters"),
-        @ResponseCode(code = 406, condition = "Invalid IP Address or Port parameter passed."),
-        @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+            @ResponseCode(code = 404, condition = "Could not connect to the Node with the specified parameters"),
+            @ResponseCode(code = 406, condition = "Invalid IP Address or Port parameter passed."),
+            @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
     public Node connect(
             @PathParam(value = "nodeId") String nodeId,
             @PathParam(value = "ipAddress") String ipAddress,
@@ -253,10 +253,10 @@ public class ConnectionManagerNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Node.class)
     @StatusCodes( {
-        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-        @ResponseCode(code = 404, condition = "Could not connect to the Node with the specified parameters"),
-        @ResponseCode(code = 406, condition = "Invalid IP Address or Port parameter passed."),
-        @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+            @ResponseCode(code = 404, condition = "Could not connect to the Node with the specified parameters"),
+            @ResponseCode(code = 406, condition = "Invalid IP Address or Port parameter passed."),
+            @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
     public Node connect(
             @PathParam(value = "nodeType") String nodeType,
             @PathParam(value = "nodeId") String nodeId,
@@ -317,10 +317,10 @@ public class ConnectionManagerNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Response.class)
     @StatusCodes( {
-        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-        @ResponseCode(code = 200, condition = "Node disconnected successfully"),
-        @ResponseCode(code = 404, condition = "Could not find a connection with the specified Node identifier"),
-        @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+            @ResponseCode(code = 200, condition = "Node disconnected successfully"),
+            @ResponseCode(code = 404, condition = "Could not find a connection with the specified Node identifier"),
+            @ResponseCode(code = 503, condition = "Connection Manager Service not available")} )
     public Response disconnect(
             @PathParam(value = "nodeType") String nodeType,
             @PathParam(value = "nodeId") String nodeId) {
@@ -334,7 +334,7 @@ public class ConnectionManagerNorthbound {
         }
 
         try {
-            Node node = new Node(nodeType, nodeId);
+            Node node = Node.fromString(nodeType, nodeId);
             Status status = connectionManager.disconnect(node);
             if (status.isSuccess()) {
                 return Response.ok().build();
