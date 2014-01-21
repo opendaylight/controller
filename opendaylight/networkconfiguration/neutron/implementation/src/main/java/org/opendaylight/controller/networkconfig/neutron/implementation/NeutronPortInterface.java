@@ -18,8 +18,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -118,7 +118,7 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
     private void startUp() {
         allocateCache();
         retrieveCache();
-        if (portDB.isEmpty()) {
+        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
             loadConfiguration();
         }
 
