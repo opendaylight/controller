@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d78a1a1a",
+        "filename": "opendaylight/config/yang-store-impl/src/main/java/org/opendaylight/controller/config/yang/store/impl/YangStoreActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-22T16:45:55Z",
+      "side": 1,
+      "message": "What about the background thread?",
+      "revId": "46604b4e7ba0f86733a76b5bee77c8b242a706af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b78fa629",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/SchemaServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-22T16:45:55Z",
+      "side": 1,
+      "message": "There is a race with the thread: listenTracker may be allocated, but not open. Also, who is shutting down the thread?",
+      "revId": "46604b4e7ba0f86733a76b5bee77c8b242a706af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
