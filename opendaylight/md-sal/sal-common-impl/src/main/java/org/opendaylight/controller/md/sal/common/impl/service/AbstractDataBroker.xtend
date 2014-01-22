@@ -324,6 +324,8 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
 
 public abstract class AbstractDataTransaction<P extends Path<P>, D> extends AbstractDataModification<P, D> {
 
+    private static val LOG = LoggerFactory.getLogger(AbstractDataTransaction);
+
     @Property
     private val Object identifier;
 
@@ -336,6 +338,7 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D> extends Abst
         _identifier = identifier;
         broker = dataBroker;
         status = TransactionStatus.NEW;
+        LOG.debug("Transaction {} Allocated.", identifier);
 
     //listeners = new ListenerRegistry<>();
     }
@@ -393,6 +396,7 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D> extends Abst
     protected abstract def void onStatusChange(TransactionStatus status);
 
     public def changeStatus(TransactionStatus status) {
+        LOG.debug("Transaction {} transitioned from {} to {}", identifier, this.status, status);
         this.status = status;
         onStatusChange(status);
     }
