@@ -343,6 +343,16 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D> extends Abst
     //listeners = new ListenerRegistry<>();
     }
 
+    override finalize() {
+        try {
+            if (status == TransactionStatus.NEW) {
+                LOG.debug("Transation {} Retired in state {}", identifier, status);
+            }
+        } finally {
+            super.finalize();
+        }
+    }
+
     override commit() {
         return broker.commit(this);
     }
