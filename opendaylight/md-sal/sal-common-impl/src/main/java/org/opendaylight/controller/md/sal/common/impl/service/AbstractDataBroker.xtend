@@ -85,7 +85,7 @@ DataProvisionService<P, D> {
     override final registerCommitHandler(P path, DataCommitHandler<P, D> commitHandler) {
         val registration = new DataCommitHandlerRegistrationImpl(path, commitHandler, this);
         commitHandlers.put(path, registration)
-        LOG.info("Registering Commit Handler {} for path: {}",commitHandler,path);
+        LOG.trace("Registering Commit Handler {} for path: {}",commitHandler,path);
         for(listener : commitHandlerRegistrationListeners) {
             try {
                 listener.instance.onRegister(registration);
@@ -132,7 +132,7 @@ DataProvisionService<P, D> {
     protected final def removeCommitHandler(DataCommitHandlerRegistrationImpl<P, D> registration) {
         commitHandlers.remove(registration.path, registration);
         
-         LOG.info("Removing Commit Handler {} for path: {}",registration.instance,registration.path);
+         LOG.trace("Removing Commit Handler {} for path: {}",registration.instance,registration.path);
         for(listener : commitHandlerRegistrationListeners) {
             try {
                 listener.instance.onUnregister(registration);
@@ -264,7 +264,7 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
 
         val transactionId = transaction.identifier;
 
-        log.info("Transaction: {} Started.",transactionId);
+        log.trace("Transaction: {} Started.",transactionId);
         // requesting commits
         val Iterable<DataCommitHandler<P, D>> commitHandlers = dataBroker.affectedCommitHandlers(affectedPaths);
         val List<DataCommitTransaction<P, D>> handlerTransactions = new ArrayList();
@@ -288,7 +288,7 @@ package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListene
             dataBroker.failedTransactionsCount.andIncrement
             return rollback(handlerTransactions, e);
         }
-        log.info("Transaction: {} Finished successfully.",transactionId);
+        log.trace("Transaction: {} Finished successfully.",transactionId);
         dataBroker.finishedTransactionsCount.andIncrement;
         return Rpcs.getRpcResult(true, TransactionStatus.COMMITED, Collections.emptySet());
 

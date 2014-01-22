@@ -237,7 +237,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
-            log.info("un-initialized clusterContainerService, can't create cache");
+            log.warn("un-initialized clusterContainerService, can't create cache");
             return;
         }
 
@@ -789,7 +789,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             return;
         }
 
-        log.info("Set Node {}'s Mode to {}", nodeId, cfgObject.getMode());
+        log.trace("Set Node {}'s Mode to {}", nodeId, cfgObject.getMode());
 
         if (modeChange) {
             notifyModeChange(node, cfgObject.isProactive());

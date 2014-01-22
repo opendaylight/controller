@@ -43,7 +43,7 @@ public class NotificationRouterImpl implements NotificationRouter {
     private void sendNotification(CompositeNode notification) {
         QName type = notification.getNodeType();
         Collection<Registration<NotificationListener>> toNotify = listeners.get(type);
-        log.info("Publishing notification " + type);
+        log.trace("Publishing notification " + type);
 
         if (toNotify == null) {
             // No listeners were registered - returns.

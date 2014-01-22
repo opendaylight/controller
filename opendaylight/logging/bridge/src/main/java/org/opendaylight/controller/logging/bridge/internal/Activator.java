@@ -77,7 +77,7 @@ public class Activator implements BundleActivator {
                         log.warn("Invalid policy name \"{}\", defaulting to {}", policy, handler);
                     }
                 }
-                log.info("Setting uncaught exception policy to {}", handler);
+                log.trace("Setting uncaught exception policy to {}", handler);
                 Thread.setDefaultUncaughtExceptionHandler(handler);
 
                 /*

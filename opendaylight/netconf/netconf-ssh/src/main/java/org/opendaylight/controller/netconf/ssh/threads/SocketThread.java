@@ -194,7 +194,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                 return AuthenticationResult.SUCCESS;
             }
         } catch (Exception e){
-            logger.info("Authentication failed due to :" + e.getLocalizedMessage());
+            logger.warn("Authentication failed due to :" + e.getLocalizedMessage());
         }
         return AuthenticationResult.FAILURE;
     }

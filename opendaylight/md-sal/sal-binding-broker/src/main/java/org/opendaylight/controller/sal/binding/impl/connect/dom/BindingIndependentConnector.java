@@ -444,7 +444,7 @@ public class BindingIndependentConnector implements //
             }
             DataModificationTransaction domTransaction = createBindingToDomTransaction(bindingTransaction);
             BindingToDomTransaction wrapped = new BindingToDomTransaction(domTransaction, bindingTransaction);
-            LOG.info("Forwarding Binding Transaction: {} as DOM Transaction: {} .", bindingTransaction.getIdentifier(),
+            LOG.trace("Forwarding Binding Transaction: {} as DOM Transaction: {} .", bindingTransaction.getIdentifier(),
                     domTransaction.getIdentifier());
             return wrapped;
         }
@@ -484,7 +484,7 @@ public class BindingIndependentConnector implements //
 
             org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction baTransaction = createDomToBindingTransaction(domTransaction);
             DomToBindingTransaction forwardedTransaction = new DomToBindingTransaction(baTransaction, domTransaction);
-            LOG.info("Forwarding DOM Transaction: {} as Binding Transaction: {}.", domTransaction.getIdentifier(),
+            LOG.trace("Forwarding DOM Transaction: {} as Binding Transaction: {}.", domTransaction.getIdentifier(),
                     baTransaction.getIdentifier());
             return forwardedTransaction;
         }

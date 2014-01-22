@@ -45,7 +45,7 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
     private Logger logger = LoggerFactory.getLogger(ClusteredDataStoreImpl.class);
 
     public ClusteredDataStoreImpl(IClusterGlobalServices clusterGlobalServices) throws CacheConfigException {
-        logger.info("Constructing clustered data store");
+        logger.trace("Constructing clustered data store");
         Preconditions.checkNotNull(clusterGlobalServices, "clusterGlobalServices cannot be null");
 
         operationalDataCache = getOrCreateCache(clusterGlobalServices, OPERATIONAL_DATA_CACHE);
@@ -72,24 +72,24 @@ public class ClusteredDataStoreImpl implements ClusteredDataStore {
     public boolean containsConfigurationPath(InstanceIdentifier path) {
         return configurationDataCache.containsKey(path);
     }
-    
+
     @Override
     public boolean containsOperationalPath(InstanceIdentifier path) {
         return operationalDataCache.containsKey(path);
     }
-    
+
     @Override
     public Iterable<InstanceIdentifier> getStoredConfigurationPaths() {
         return configurationDataCache.keySet();
     }
-    
+
     @Override
     public Iterable<InstanceIdentifier> getStoredOperationalPaths() {
         return operationalDataCache.keySet();
     }
-    
-    
-    
+
+
+
     @Override
     public CompositeNode readConfigurationData(InstanceIdentifier path) {
         Preconditions.checkNotNull(path, "path cannot be null");

@@ -73,7 +73,7 @@ public class DefaultStartExi extends AbstractNetconfOperation implements Default
                     .createElement(XmlNetconfConstants.RPC_ERROR);
         }
 
-        logger.info("{} operation successful", START_EXI);
+        logger.trace("{} operation successful", START_EXI);
         logger.debug("received start-exi message {} ", XmlUtil.toString(document));
         return getSchemaResult;
 

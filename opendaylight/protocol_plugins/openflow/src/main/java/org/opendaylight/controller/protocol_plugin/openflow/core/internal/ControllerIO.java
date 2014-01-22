@@ -150,7 +150,7 @@ public class ControllerIO {
             } else {
                 if (!currentlyUp) {
                     // only generate log if the interface changes from down to up
-                    logger.info("Interface {} with address {} is UP!",
+                    logger.trace("Interface {} with address {} is UP!",
                             netInt.getDisplayName(),
                             controllerIP.getHostAddress());
                 }
