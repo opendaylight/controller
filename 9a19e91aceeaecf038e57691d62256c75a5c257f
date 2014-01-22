@@ -16,6 +16,24 @@
       "revId": "9a19e91aceeaecf038e57691d62256c75a5c257f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ec91d147",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1856,
+      "author": {
+        "id": 1545
+      },
+      "writtenOn": "2014-01-22T10:13:50Z",
+      "side": 1,
+      "message": "Root cause of the issue:\ntarget.toggleInstallation() function is setting the value of variable installInHw as false if it is null and true otherwise.\nThere is no mechanism to set installInHw as false in case uninstallflowentry is successful.\n\nCode flow before change:\n1. if (target.installinHW) is true -\u003e uninstallFlowEntry() -\u003e toggleInstallation() -\u003e sets installInHw as true. \u003cIncorrect\u003e\n2. if (target.installinHW) is false -\u003e installFlowEntry()-\u003e toggleInstallation() -\u003e sets installInHw as true.\n\nCode flow after change:\n1. if (target.installinHW) is true -\u003e uninstallFlowEntry() -\u003e if successful -\u003e sets installInHw as false.\n2. if (target.installinHW) is false -\u003e installFlowEntry() -\u003e if successful -\u003e sets installInHw as true.\n\nWith the change specified by you https://git.opendaylight.org/gerrit/#/c/4336/. the problem specified in bug #217 still remains.",
+      "parentUuid": "da6255ed_09b9b714",
+      "revId": "9a19e91aceeaecf038e57691d62256c75a5c257f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
