@@ -21,6 +21,7 @@ import java.util.Enumeration;
 public class Context {
   private ZMQ.Context zmqContext = ZMQ.context(1);
   private String uri;
+  private final String DEFAULT_RPC_PORT = "5554";
 
   private static Context _instance = new Context();
 
@@ -36,7 +37,7 @@ public class Context {
 
   public String getLocalUri(){
     uri = (uri != null) ? uri
-            : new StringBuilder("tcp://").append(getIpAddress()).append(":")
+            : new StringBuilder().append(getIpAddress()).append(":")
               .append(getRpcPort()).toString();
 
     return uri;
@@ -45,7 +46,7 @@ public class Context {
   public String getRpcPort(){
     String rpcPort = (System.getProperty("rpc.port") != null)
         ? System.getProperty("rpc.port")
-        : "5554";
+        : DEFAULT_RPC_PORT;
 
     return rpcPort;
   }
