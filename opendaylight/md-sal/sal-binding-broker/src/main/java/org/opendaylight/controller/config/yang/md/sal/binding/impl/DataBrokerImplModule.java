@@ -10,25 +10,14 @@
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
-import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.RootDataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedDataBrokerImpl;
-import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.sal.core.api.data.DataProviderService;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
-
-import com.google.common.util.concurrent.MoreExecutors;
 
 /**
 *
@@ -57,12 +46,12 @@ public final class DataBrokerImplModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         RootDataBrokerImpl dataBindingBroker;
-        
-        
+
+
         ExecutorService listeningExecutor = SingletonHolder.getDefaultCommitExecutor();
-        
+
         if (getDomBrokerDependency() != null && getMappingServiceDependency() != null) {
-            
+
             dataBindingBroker = createDomConnectedBroker(listeningExecutor);
         } else {
             dataBindingBroker = createStandAloneBroker(listeningExecutor);

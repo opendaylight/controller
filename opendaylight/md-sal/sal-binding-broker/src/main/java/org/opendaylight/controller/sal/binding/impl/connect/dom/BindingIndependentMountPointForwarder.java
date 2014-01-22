@@ -4,6 +4,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService.MountProvisionListener;
@@ -15,7 +17,7 @@ public class BindingIndependentMountPointForwarder {
     private MountProvisionService domMountService;
     private MountProviderService baMountService;
     private BindingIndependentMappingService mappingService;
-    
+
     private final DomMountPointForwardingManager domForwardingManager = new DomMountPointForwardingManager();
     private final BindingMountPointForwardingManager bindingForwardingManager = new BindingMountPointForwardingManager();
 
@@ -57,11 +59,11 @@ public class BindingIndependentMountPointForwarder {
     private BindingIndependentConnector createForwarder(InstanceIdentifier<?> path, MountProviderInstance baMountPoint,
             MountProvisionInstance domMountPoint) {
         BindingIndependentConnector connector = new BindingIndependentConnector();
-        
+
         connector.setBindingDataService(baMountPoint);
         connector.setBindingRpcRegistry(baMountPoint);
         //connector.setBindingNotificationBroker(baMountPoint);
-        
+
         connector.setDomDataService(domMountPoint);
         connector.setDomRpcRegistry(domMountPoint);
         //connector.setDomNotificationBroker(domMountPoint);
@@ -78,7 +80,7 @@ public class BindingIndependentMountPointForwarder {
             }
             tryToDeployConnector(baPath,domPath);
         } catch (DeserializationException e) {
-            
+
         }
     }
 

@@ -72,6 +72,8 @@
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
+
+
                         </goals>
                         <configuration>
                             <sources>
@@ -89,6 +91,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                        <Bundle-Activator>org.opendaylight.controller.sal.binding.osgi.Activator</Bundle-Activator>
                         <Export-package>
                             org.opendaylight.controller.sal.binding.spi.*,
                         </Export-package>
@@ -99,6 +102,7 @@
                             org.opendaylight.controller.sal.binding.codegen,
                             org.opendaylight.controller.sal.binding.codegen.*,
                             org.opendaylight.controller.sal.binding.dom.*,
+                            org.opendaylight.controller.sal.binding.osgi.*,
                         </Private-Package>
                     </instructions>
                 </configuration>

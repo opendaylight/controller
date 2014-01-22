@@ -9,13 +9,22 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import javassist.ClassPool;
-
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.RpcService;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.osgi.framework.BundleContext;
 
 import com.google.common.base.Preconditions;
+import org.osgi.framework.ServiceReference;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
 *
@@ -50,10 +59,9 @@ public final class RuntimeMappingModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        RuntimeGeneratedMappingServiceImpl service = new RuntimeGeneratedMappingServiceImpl();
-        service.setPool(SingletonHolder.CLASS_POOL);
-        service.start(getBundleContext());
-        return service;
+        final ServiceReference<?> ref = getBundleContext().getServiceReference(BindingIndependentMappingService.class.getName());
+        Preconditions.checkNotNull(ref, "Service %s must be present in bundle context", BindingIndependentMappingService.class);
+        return new AutoCloseableBindingIndependentService(ref, getBundleContext());
     }
 
     private BundleContext getBundleContext() {
@@ -62,5 +70,65 @@ public final class RuntimeMappingModule extends
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    private class AutoCloseableBindingIndependentService implements AutoCloseable, BindingIndependentMappingService {
+        private final ServiceReference<?> ref;
+        private final BindingIndependentMappingService service;
+        private final BundleContext ctx;
+
+        public AutoCloseableBindingIndependentService(ServiceReference<?> ref, BundleContext ctx) {
+            this.ref = ref;
+            Object service = getBundleContext().getService(ref);
+            Preconditions.checkNotNull(service, "Service %s must be present in bundle context", BindingIndependentMappingService.class);
+            Preconditions.checkState(service instanceof BindingIndependentMappingService);
+            this.service = (BindingIndependentMappingService) service;
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void close() throws Exception {
+            ctx.ungetService(ref);
+        }
+
+        @Override
+        public CompositeNode toDataDom(DataObject data) {
+            return service.toDataDom(data);
+        }
+
+        @Override
+        public Map.Entry<InstanceIdentifier, CompositeNode> toDataDom(Map.Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> entry) {
+            return service.toDataDom(entry);
+        }
+
+        @Override
+        public InstanceIdentifier toDataDom(org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path) {
+            return service.toDataDom(path);
+        }
+
+        @Override
+        public DataObject dataObjectFromDataDom(org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path, CompositeNode result) throws DeserializationException {
+            return service.dataObjectFromDataDom(path, result);
+        }
+
+        @Override
+        public org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> fromDataDom(InstanceIdentifier entry) throws DeserializationException {
+            return service.fromDataDom(entry);
+        }
+
+        @Override
+        public Set<QName> getRpcQNamesFor(Class<? extends RpcService> service) {
+            return this.service.getRpcQNamesFor(service);
+        }
+
+        @Override
+        public DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput) {
+            return service.dataObjectFromDataDom(inputClass, domInput);
+        }
+
+        @Override
+        public CodecRegistry getCodecRegistry() {
+            return service.getCodecRegistry();
+        }
     }
 }
