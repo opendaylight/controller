@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_37017638",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManagerCLI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T21:22:08Z",
+      "side": 1,
+      "message": "This file has CLI output so  it must be using System.out.println else the user output will not be generated when needed",
+      "revId": "03112135d05de92d00b16ff7855a1ec7c8bc4759",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_17faf242",
+        "filename": "opendaylight/distribution/sanitytest/src/main/java/org/opendaylight/controller/sanitytest/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T21:22:08Z",
+      "side": 1,
+      "message": "This is only executed during integration tests and so also output shall not be conditional",
+      "revId": "03112135d05de92d00b16ff7855a1ec7c8bc4759",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f7f63e5c",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManagerCLI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T21:22:08Z",
+      "side": 1,
+      "message": "CLI file please don\u0027t change it because the output shall be generated to user directly",
+      "revId": "03112135d05de92d00b16ff7855a1ec7c8bc4759",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d797baea",
+        "filename": "opendaylight/routing/dijkstra_implementation/src/main/java/org/opendaylight/controller/routing/dijkstra_implementation/internal/DijkstraImplementationCLI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T21:22:08Z",
+      "side": 1,
+      "message": "CLI file please don\u0027t change it because the output shall be generated to user directly",
+      "revId": "03112135d05de92d00b16ff7855a1ec7c8bc4759",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b79c4610",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerCLI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T21:22:08Z",
+      "side": 1,
+      "message": "CLI file please don\u0027t change it because the output shall be generated to user directly",
+      "revId": "03112135d05de92d00b16ff7855a1ec7c8bc4759",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
