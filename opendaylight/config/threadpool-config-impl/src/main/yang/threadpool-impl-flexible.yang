@@ -13,7 +13,7 @@ module threadpool-impl-flexible {
 
     description
         "This module contains the base YANG definitions for
-         thread services pure Java implementation.
+        thread services pure Java implementation.
 
         Copyright (c)2013 Cisco Systems, Inc. All rights reserved.;
 
