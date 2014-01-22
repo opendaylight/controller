@@ -40,12 +40,11 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 
 import com.google.common.base.Charsets;
 
-public class RestConfigDataTest extends JerseyTest {
+public class ConfigDataTest extends JerseyTest {
 
     private static ControllerContext controllerContext;
     private static BrokerFacade brokerFacade;
@@ -73,16 +72,9 @@ public class RestConfigDataTest extends JerseyTest {
         restconfImpl.setControllerContext(controllerContext);
     }
 
-//    @Test
-    // TODO 
+    @Test
     public void createConfigurationDataTest() throws UnsupportedEncodingException, ParseException {
         initMocking();
-        String URI_1 = createUri("/config", "");
-        String URI_2 = createUri("/config/", "");
-        String URI_3 = createUri("/config/", "test-interface:interfaces/");
-        String URI_4 = createUri("/config/", "test-interface:interfaces/");
-        String URI_5 = createUri("/config/", "test-interface:interfaces/test-interface2:class");
-
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
@@ -93,64 +85,29 @@ public class RestConfigDataTest extends JerseyTest {
         ArgumentCaptor<InstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(InstanceIdentifier.class);
         ArgumentCaptor<CompositeNode> compNodeCaptor = ArgumentCaptor.forClass(CompositeNode.class);
 
-        // Test URI_1
+        String URI_1 = createUri("/config", "");
         Entity<String> entity = createEntity("/test-config-data/xml/test-interface.xml");
         Response response = target(URI_1).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
         assertEquals(204, response.getStatus());
         verify(brokerFacade).commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
         String identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces]";
-        assertEquals("Bad format URI", identifier, instanceIdCaptor.getValue().getPath().toString());
+        assertEquals(identifier, instanceIdCaptor.getValue().getPath().toString());
 
-        // Test URI_2
+        String URI_2 = createUri("/config/", "test-interface:interfaces");
+        entity = createEntity("/test-config-data/xml/block-data.xml");
         response = target(URI_2).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
         assertEquals(204, response.getStatus());
         verify(brokerFacade, times(2))
                 .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-        assertEquals("Bad format URI", identifier, instanceIdCaptor.getValue().getPath().toString());
-
-        // Test URI_3
-        entity = createEntity("/test-config-data/xml/test-interface2.xml");
-        response = target(URI_3).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
-        assertEquals(204, response.getStatus());
-        verify(brokerFacade, times(3))
-                .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-
-        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interface[{(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)name=eth0}]]";
-        assertEquals("Bad format URI", identifier, instanceIdCaptor.getValue().getPath().toString());
-
-        // Test URI_4
-        Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
-        SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
-        MountInstance mountInstance = mock(MountInstance.class);
-        when(mountInstance.getSchemaContext()).thenReturn(schemaContext2);
-        when(mountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
-
-        entity = createEntity("/test-config-data/xml/test-interface3.xml");
-        response = target(URI_4).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
-        assertEquals(204, response.getStatus());
-        verify(brokerFacade, times(4))
-                .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class]";
-        assertEquals("Bad format URI", identifier, instanceIdCaptor.getValue().getPath().toString());
-
-        // Test URI_5
-        response = target(URI_5).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
-        assertEquals(204, response.getStatus());
-        verify(brokerFacade, times(5))
-                .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class]";
-        assertEquals("Bad format URI", identifier, instanceIdCaptor.getValue().getPath().toString());
+        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)block]";
+        assertEquals(identifier, instanceIdCaptor.getValue().getPath().toString());
     }
     
-//    @Test
-    // TODO
-    public void testExistingData() throws UnsupportedEncodingException {
+    @Test
+    public void createConfigurationDataNullTest() throws UnsupportedEncodingException {
         initMocking();
         String URI_1 = createUri("/config", "");
-        String URI_2 = createUri("/config/", "");
-        String URI_3 = createUri("/config/", "test-interface:interfaces/");
-        String URI_4 = createUri("/config/", "test-interface:interfaces/");
-        String URI_5 = createUri("/config/", "test-interface:interfaces/test-interface2:class");
+        String URI_2 = createUri("/config/", "test-interface:interfaces");
 
         when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(null);
@@ -161,27 +118,8 @@ public class RestConfigDataTest extends JerseyTest {
         assertEquals(202, response.getStatus());
 
         // Test URI_2
+        entity = createEntity("/test-config-data/xml/block-data.xml");
         response = target(URI_2).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
-        assertEquals(202, response.getStatus());
-
-        // Test URI_3
-        entity = createEntity("/test-config-data/xml/test-interface2.xml");
-        response = target(URI_3).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
-        assertEquals(202, response.getStatus());
-
-        // Test URI_4
-        Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
-        SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
-        MountInstance mountInstance = mock(MountInstance.class);
-        when(mountInstance.getSchemaContext()).thenReturn(schemaContext2);
-        when(mountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
-
-        entity = createEntity("/test-config-data/xml/test-interface3.xml");
-        response = target(URI_4).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
-        assertEquals(202, response.getStatus());
-
-        // Test URI_5
-        response = target(URI_5).request(MEDIA_TYPE_XML_DRAFT02).post(entity);
         assertEquals(202, response.getStatus());
     }
 
@@ -199,10 +137,10 @@ public class RestConfigDataTest extends JerseyTest {
 
     @Override
     protected Application configure() {
-        enable(TestProperties.LOG_TRAFFIC);
-        enable(TestProperties.DUMP_ENTITY);
-        enable(TestProperties.RECORD_LOG_LEVEL);
-        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        //enable(TestProperties.LOG_TRAFFIC);
+        //enable(TestProperties.DUMP_ENTITY);
+        //enable(TestProperties.RECORD_LOG_LEVEL);
+        //set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
 
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
