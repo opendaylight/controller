@@ -445,6 +445,7 @@
                             <sources>
                                 <source>${project.build.directory}/generated-sources/config</source>
                                 <source>${project.build.directory}/generated-sources/sal</source>
+                                <source>src/main/xtend-gen</source>
                             </sources>
                         </configuration>
                     </execution>
