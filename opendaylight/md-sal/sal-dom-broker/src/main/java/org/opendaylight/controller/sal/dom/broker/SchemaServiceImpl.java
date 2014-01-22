@@ -1,5 +1,7 @@
 package org.opendaylight.controller.sal.dom.broker;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -8,26 +10,24 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.Checksum;
+import java.util.concurrent.ExecutorService;
 
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.ServiceReference;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +38,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-
-import static com.google.common.base.Preconditions.*;
 
 public class SchemaServiceImpl implements //
         SchemaContextProvider, //
@@ -95,11 +93,19 @@ public class SchemaServiceImpl implements //
         if (listeners == null) {
             listeners = new ListenerRegistry<>();
         }
-
-        listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, this);
-        bundleTracker = new BundleTracker<Object>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
-        bundleTracker.open();
-        listenerTracker.open();
+        
+        new Thread() {
+            
+            @Override
+            public void run() {
+                setName("yang-schema-service-activation");
+                listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, SchemaServiceImpl.this);
+                bundleTracker = new BundleTracker<Object>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
+                bundleTracker.open();
+                listenerTracker.open();
+            }
+        }.start();
+        
     }
 
     
@@ -147,9 +153,13 @@ public class SchemaServiceImpl implements //
 
     @Override
     public void close() throws Exception {
-        bundleTracker.close();
+        if(bundleTracker != null) {
+            bundleTracker.close();
+        }
+        if(listenerTracker != null) {
+            listenerTracker.close();
+        }
         // FIXME: Add listeners.close();
-
     }
 
     private synchronized boolean tryToUpdateState(Collection<URL> changedURLs, Multimap<Bundle, URL> proposedNewState,

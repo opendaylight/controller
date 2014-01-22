@@ -8,21 +8,26 @@
 package org.opendaylight.controller.config.yang.store.impl;
 
 import com.google.common.base.Optional;
+
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public class YangStoreActivator implements BundleActivator {
     private static final Logger logger = LoggerFactory.getLogger(YangStoreActivator.class);
+    private ExtenderYangTracker extenderYangTracker;
+    private ServiceRegistration<YangStoreService> registration;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         // get blacklist
         Optional<Pattern> maybeBlacklistPattern = Optional.absent();
         String blacklist = context.getProperty("yangstore.blacklist");
@@ -34,9 +39,19 @@ public class YangStoreActivator implements BundleActivator {
                 throw e;
             }
         }
-        ExtenderYangTracker extenderYangTracker = new ExtenderYangTracker(maybeBlacklistPattern, context);
-        Dictionary<String, ?> properties = new Hashtable<>();
-        context.registerService(YangStoreService.class, extenderYangTracker, properties);
+        final Optional<Pattern> maybeBlacklistPatternFinal = maybeBlacklistPattern;
+        
+        new Thread() {
+            
+            @Override
+            public void run() {
+                setName("yang-tracker-activation");
+                extenderYangTracker = new ExtenderYangTracker(maybeBlacklistPatternFinal, context);
+                Dictionary<String, ?> properties = new Hashtable<>();
+                registration = context.registerService(YangStoreService.class, extenderYangTracker, properties);
+            }
+        }.start();
+        
     }
 
     @Override
