@@ -1,0 +1,8 @@
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <cont xmlns="test:module">
+        <cont1>
+            <lf11>lf1 data</lf11>
+            <lf12>lf2 data</lf12>
+        </cont1>
+    </cont>
+</data>

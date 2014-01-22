@@ -1,0 +1,4 @@
+<block xmlns="urn:ietf:params:xml:ns:yang:test-interface">
+    <address>456</address>
+    <location>First</location>
+</block>

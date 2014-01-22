@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
@@ -42,6 +43,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class RestPutOperationTest extends JerseyTest {
 
     private static String xmlData;
+    private static String xmlData2;
+    private static String xmlData3;
 
     private static BrokerFacade brokerFacade;
     private static RestconfImpl restconfImpl;
@@ -64,15 +67,19 @@ public class RestPutOperationTest extends JerseyTest {
     private static void loadData() throws IOException {
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces.xml");
         xmlData = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
+        InputStream xmlStream2 = RestconfImplTest.class.getResourceAsStream("/full-versions/test-data2/data2.xml");
+        xmlData2 = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream2));
+        InputStream xmlStream3 = RestconfImplTest.class.getResourceAsStream("/full-versions/test-data2/data7.xml");
+        xmlData3 = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream3));
     }
 
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//        enable(TestProperties.LOG_TRAFFIC);
-//        enable(TestProperties.DUMP_ENTITY);
-//        enable(TestProperties.RECORD_LOG_LEVEL);
-//        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        // enable(TestProperties.LOG_TRAFFIC);
+        // enable(TestProperties.DUMP_ENTITY);
+        // enable(TestProperties.RECORD_LOG_LEVEL);
+        // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
@@ -88,11 +95,10 @@ public class RestPutOperationTest extends JerseyTest {
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         mockCommitConfigurationDataPutMethod(TransactionStatus.COMMITED);
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
-        
+
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
-
 
     /**
      * Tests of status codes for "/datastore/{identifier}".
@@ -102,7 +108,7 @@ public class RestPutOperationTest extends JerseyTest {
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         mockCommitConfigurationDataPutMethod(TransactionStatus.COMMITED);
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
-        
+
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
@@ -111,12 +117,12 @@ public class RestPutOperationTest extends JerseyTest {
     public void testRpcResultCommitedToStatusCodesWithMountPoint() throws UnsupportedEncodingException,
             FileNotFoundException, URISyntaxException {
 
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
-                .build();
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
+                TransactionStatus.COMMITED).build();
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
-        when(brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
+        when(
+                brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-        
 
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/full-versions/test-data2/data2.xml");
         String xml = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
@@ -130,12 +136,30 @@ public class RestPutOperationTest extends JerseyTest {
         ControllerContext.getInstance().setMountService(mockMountService);
 
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont");
-        Response response = target(uri).request(Draft02.MediaTypes.DATA + XML).put(entity);
-        assertEquals(200, response.getStatus());
-        
+        assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData2));
+
         uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont");
-        response = target(uri).request(Draft02.MediaTypes.DATA + XML).put(entity);
-        assertEquals(200, response.getStatus());
+        assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData2));
+    }
+
+    @Test
+    public void putDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
+                TransactionStatus.COMMITED).build();
+        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+        when(
+                brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
+                        any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
+
+        MountInstance mountInstance = mock(MountInstance.class);
+        when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
+        MountService mockMountService = mock(MountService.class);
+        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+
+        ControllerContext.getInstance().setMountService(mockMountService);
+
+        String uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount");
+        assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData3));
     }
 
     private int put(String uri, String mediaType, String data) throws UnsupportedEncodingException {

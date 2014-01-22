@@ -1,6 +1,6 @@
-module test-interface {
+module mount-interface {
     yang-version 1;
-    namespace "urn:ietf:params:xml:ns:yang:test-interface";
+    namespace "urn:ietf:params:xml:ns:yang:mount-interface";
     prefix "sn";
 
     description
@@ -13,17 +13,6 @@ module test-interface {
     }
     
     container interfaces {
-    
-        container block {
-            
-            leaf address {
-                type string;
-            }
-            leaf location {
-                type string;
-            }
-        }
-    
         list interface {
             key "name";
          
