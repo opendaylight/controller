@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.netconf.ssh.authentication;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class AuthProvider implements AuthProviderInterface {
     private static IUserManager um;
     private static final String DEFAULT_USER = "netconf";
     private static final String DEFAULT_PASSWORD = "netconf";
-    private static InputStream privateKeyFileInputStream;
+    private String PEM;
 
     private static final Logger logger =  LoggerFactory.getLogger(AuthProvider.class);
 
@@ -34,11 +35,16 @@ public class AuthProvider implements AuthProviderInterface {
             throw new Exception("No usermanager service available.");
         }
 
-        this.privateKeyFileInputStream = privateKeyFileInputStream;
-
         List<String> roles = new ArrayList<String>(1);
         roles.add(UserLevel.SYSTEMADMIN.toString());
         this.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles));
+
+        try {
+            PEM = IOUtils.toString(privateKeyFileInputStream);
+        } catch (IOException e) {
+            logger.error("Error reading RSA key from file.");
+            throw new IllegalStateException("Error reading RSA key from file.");
+        }
     }
     @Override
     public boolean authenticated(String username, String password)  throws Exception {
@@ -54,9 +60,11 @@ public class AuthProvider implements AuthProviderInterface {
 
     @Override
     public char[] getPEMAsCharArray() throws Exception {
-        char [] PEM  = IOUtils.toCharArray(privateKeyFileInputStream);
-        privateKeyFileInputStream.close();
-        return PEM;
+        if (null == PEM){
+            logger.error("Missing RSA key string.");
+            throw new Exception("Missing RSA key.");
+        }
+        return PEM.toCharArray();
     }
 
     @Override
