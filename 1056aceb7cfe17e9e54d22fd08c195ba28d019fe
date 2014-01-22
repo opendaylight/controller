@@ -50,6 +50,40 @@
       "revId": "1056aceb7cfe17e9e54d22fd08c195ba28d019fe",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f7487eb4",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-22T20:58:33Z",
+      "side": 1,
+      "message": "Shouldn\u0027t user let know that a bundle configuration save failed ?\nI think this should be made warn",
+      "revId": "1056aceb7cfe17e9e54d22fd08c195ba28d019fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_97cf0229",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-22T20:58:33Z",
+      "side": 1,
+      "message": "This is an informational message and for security I think it is better to be logged as info, if not warn.\n\nPassword recovery procedure happens outside of controller code and current user has to be prompted to change the newly set default password ASAP",
+      "revId": "1056aceb7cfe17e9e54d22fd08c195ba28d019fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
