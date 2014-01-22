@@ -52,14 +52,8 @@
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.usermanager,
-<!--
-              org.opendaylight.controller.usermanager.internal
- -->
              </Export-Package>
             <Bundle-Activator>
-<!--
-              org.opendaylight.controller.usermanager.internal.Activator
- -->
              </Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
@@ -71,22 +65,18 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

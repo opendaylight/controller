@@ -22,37 +22,30 @@
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.eclipse.equinox.console</artifactId>
-      <version>1.0.0.v20120522-1841</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.eclipse.equinox.util</artifactId>
-      <version>1.0.400.v20120522-2049</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.eclipse.osgi.services</artifactId>
-      <version>3.3.100.v20120522-1822</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.eclipse.equinox.ds</artifactId>
-      <version>1.4.0.v20120522-1841</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.apache.felix.gogo.command</artifactId>
-      <version>0.8.0.v201108120515</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>0.8.0.v201108120515</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.apache.felix.gogo.shell</artifactId>
-      <version>0.8.0.v201110170705</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
