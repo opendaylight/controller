@@ -51,7 +51,6 @@ public final class SchemaServiceImplSingletonModule extends org.opendaylight.con
     public java.lang.AutoCloseable createInstance() {
         SchemaServiceImpl newInstance = new SchemaServiceImpl();
         newInstance.setContext(getBundleContext());
-        newInstance.setParser(new YangParserImpl());
         newInstance.start();
         return newInstance;
     }
