@@ -1,0 +1,18 @@
+package org.opendaylight.controller.sal.binding.dom.serializer.api;
+
+import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+
+public interface AugmentationCodec<A extends Augmentation<?>> extends org.opendaylight.controller.sal.binding.dom.serializer.api.DomCodec<A> {
+
+
+    @Override
+    public CompositeNode serialize(org.opendaylight.controller.sal.binding.dom.serializer.api.ValueWithQName<A> input);
+
+    @Override
+    public org.opendaylight.controller.sal.binding.dom.serializer.api.ValueWithQName<A> deserialize(Node<?> input);
+
+    public QName getAugmentationQName();
+}

@@ -8,7 +8,7 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
@@ -22,7 +22,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class RestconfProvider implements BundleActivator, Provider, ServiceTrackerCustomizer<Broker, Broker> {
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
-    
+
     private ListenerRegistration<SchemaServiceListener> listenerRegistration;
     private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;
