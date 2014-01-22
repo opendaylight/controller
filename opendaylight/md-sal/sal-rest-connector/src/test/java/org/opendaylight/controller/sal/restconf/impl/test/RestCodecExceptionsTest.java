@@ -13,7 +13,7 @@ public class RestCodecExceptionsTest {
 
     @Test
     public void serializeExceptionTest() {
-        Codec<Object, Object> codec = RestCodec.from(new BitsType(null));
+        Codec<Object, Object> codec = RestCodec.from(new BitsType(null), null);
         String serializedValue = (String) codec.serialize("incorrect value"); // set
                                                                               // expected
         assertEquals("incorrect value", serializedValue);
@@ -23,7 +23,7 @@ public class RestCodecExceptionsTest {
     public void deserializeExceptionTest() {
         IdentityrefTypeDefinition mockedIidentityrefType = mock(IdentityrefTypeDefinition.class);
 
-        Codec<Object, Object> codec = RestCodec.from(mockedIidentityrefType);
+        Codec<Object, Object> codec = RestCodec.from(mockedIidentityrefType, null);
         String serializedValue = (String) codec.deserialize("incorrect value"); // IdentityValuesDTO
                                                                                 // object
         // expected

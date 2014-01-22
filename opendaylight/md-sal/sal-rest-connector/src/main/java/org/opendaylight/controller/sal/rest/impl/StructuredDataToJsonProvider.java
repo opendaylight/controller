@@ -52,7 +52,7 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, "UTF-8"));
         writer.setIndent("    ");
         JsonMapper jsonMapper = new JsonMapper();
-        jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema());
+        jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema(), t.getMountPoint());
         writer.flush();
     }
 

@@ -129,6 +129,7 @@ class ControllerContext implements SchemaServiceListener {
     
     def findModuleByNamespace(URI namespace) {
         checkPreconditions
+        checkArgument(namespace !== null)
         val moduleSchemas = globalSchema.findModuleByNamespace(namespace)
         return moduleSchemas?.filterLatestModule
     }
@@ -170,27 +171,35 @@ class ControllerContext implements SchemaServiceListener {
 
     def findModuleNameByNamespace(URI namespace) {
         checkPreconditions
-        var module = uriToModuleName.get(namespace)
-        if (module === null) {
-            val moduleSchemas = globalSchema.findModuleByNamespace(namespace);
-            if(moduleSchemas === null) return null
-            var latestModule = moduleSchemas.filterLatestModule
-            if(latestModule === null) return null
-            uriToModuleName.put(namespace, latestModule.name)
-            module = latestModule.name;
+        var moduleName = uriToModuleName.get(namespace)
+        if (moduleName === null) {
+            val module = findModuleByNamespace(namespace)
+            if (module === null) return null
+            moduleName = module.name
+            uriToModuleName.put(namespace, moduleName)
         }
-        return module
+        return moduleName
+    }
+    
+    def findModuleNameByNamespace(MountInstance mountPoint, URI namespace) {
+        val module = mountPoint.findModuleByNamespace(namespace);
+        return module?.name
     }
 
-    def findNamespaceByModuleName(String module) {
-        var namespace = moduleNameToUri.get(module)
+    def findNamespaceByModuleName(String moduleName) {
+        var namespace = moduleNameToUri.get(moduleName)
         if (namespace === null) {
-            var latestModule = globalSchema.getLatestModule(module)
-            if(latestModule === null) return null
-            namespace = latestModule.namespace
-            uriToModuleName.put(namespace, latestModule.name)
+            var module = findModuleByName(moduleName)
+            if(module === null) return null
+            namespace = module.namespace
+            uriToModuleName.put(namespace, moduleName)
         }
         return namespace
+    }
+    
+    def findNamespaceByModuleName(MountInstance mountPoint, String moduleName) {
+        val module = mountPoint.findModuleByName(moduleName)
+        return module?.namespace
     }
 
     def CharSequence toRestconfIdentifier(QName qname) {

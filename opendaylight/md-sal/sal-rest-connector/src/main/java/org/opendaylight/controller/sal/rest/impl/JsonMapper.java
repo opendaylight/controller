@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.activation.UnsupportedDataTypeException;
 
+import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
@@ -43,13 +44,15 @@ class JsonMapper {
 
     private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
     private final Set<ListSchemaNode> foundLists = new HashSet<>();
+    private MountInstance mountPoint;
     private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
-    public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema) throws IOException {
+    public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema, MountInstance mountPoint) throws IOException {
         Preconditions.checkNotNull(writer);
         Preconditions.checkNotNull(data);
         Preconditions.checkNotNull(schema);
-
+        this.mountPoint = mountPoint;
+        
         writer.beginObject();
 
         if (schema instanceof ContainerSchemaNode) {
@@ -192,10 +195,16 @@ class JsonMapper {
         // TODO check InstanceIdentifierTypeDefinition
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
-                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType).serialize(node.getValue());
+                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType, mountPoint).serialize(node.getValue());
                 IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
-                String moduleName = ControllerContext.getInstance().findModuleNameByNamespace(
-                        URI.create(valueFromDTO.getNamespace()));
+                String moduleName;
+                if (mountPoint != null) {
+                    moduleName = ControllerContext.getInstance().findModuleNameByNamespace(mountPoint,
+                            URI.create(valueFromDTO.getNamespace()));
+                } else {
+                    moduleName = ControllerContext.getInstance().findModuleNameByNamespace(
+                            URI.create(valueFromDTO.getNamespace()));
+                }
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
             } else {
                 logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
@@ -205,13 +214,13 @@ class JsonMapper {
             }
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
                 || baseType instanceof UnsignedIntegerTypeDefinition) {
-            writer.value(new NumberForJsonWriter((String) RestCodec.from(baseType).serialize(node.getValue())));
+            writer.value(new NumberForJsonWriter((String) RestCodec.from(baseType, mountPoint).serialize(node.getValue())));
         } else if (baseType instanceof BooleanTypeDefinition) {
-            writer.value(Boolean.parseBoolean((String) RestCodec.from(baseType).serialize(node.getValue())));
+            writer.value(Boolean.parseBoolean((String) RestCodec.from(baseType, mountPoint).serialize(node.getValue())));
         } else if (baseType instanceof EmptyTypeDefinition) {
             writeEmptyDataTypeToJson(writer);
         } else {
-            String value = String.valueOf(RestCodec.from(baseType).serialize(node.getValue()));
+            String value = String.valueOf(RestCodec.from(baseType, mountPoint).serialize(node.getValue()));
             if (value == null) {
                 value = String.valueOf(node.getValue());
             }
