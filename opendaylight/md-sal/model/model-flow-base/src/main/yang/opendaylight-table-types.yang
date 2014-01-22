@@ -191,6 +191,7 @@ module opendaylight-table-types {
         
     grouping set-field-match {
         list set-field-match {
+	    key "match-type";
             leaf match-type {
                 type identityref {
                     base match-field;
