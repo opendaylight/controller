@@ -26,8 +26,8 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,16 +100,15 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
     }
 
     private static Set<Capability> setupCapabilities(YangStoreSnapshot yangStoreSnapshot) {
-        Set<Capability> capabilities = Sets.newHashSet();
-
+        Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
         // [RFC6241] 8.5.  Rollback-on-Error Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
 
-        final Collection<Map.Entry<Module, String>> modulesAndContents = yangStoreSnapshot.getModuleMap().values();
-        for (Map.Entry<Module, String> moduleAndContent : modulesAndContents) {
-            capabilities.add(new YangStoreCapability(moduleAndContent));
+        Set<Module> modules = yangStoreSnapshot.getModules();
+        for (Module module : modules) {
+            capabilities.add(new YangStoreCapability(module, yangStoreSnapshot.getModuleSource(module)));
         }
 
         return capabilities;
@@ -161,10 +160,9 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         private final String moduleName;
         private final String moduleNamespace;
 
-        public YangStoreCapability(Map.Entry<Module, String> moduleAndContent) {
-            super(getAsString(moduleAndContent.getKey()));
-            this.content = moduleAndContent.getValue();
-            Module module = moduleAndContent.getKey();
+        public YangStoreCapability(Module module, String moduleContent) {
+            super(getAsString(module));
+            this.content = moduleContent;
             this.moduleName = module.getName();
             this.moduleNamespace = module.getNamespace().toString();
             this.revision = Util.writeDate(module.getRevision());

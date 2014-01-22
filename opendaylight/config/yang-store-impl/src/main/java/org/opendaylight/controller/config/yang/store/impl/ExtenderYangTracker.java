@@ -14,12 +14,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -36,8 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -218,80 +213,5 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
     public synchronized void setMaybeBlacklist(Optional<Pattern> maybeBlacklistPattern) {
         maybeBlacklist = maybeBlacklistPattern;
         cache.invalidate();
-    }
-}
-
-class YangStoreCache {
-    private static final Logger logger = LoggerFactory.getLogger(YangStoreCache.class);
-
-    @GuardedBy("this")
-    private Set<URL> cachedUrls = null;
-    @GuardedBy("this")
-    private Optional<YangStoreSnapshot> cachedYangStoreSnapshot = getInitialSnapshot();
-    @GuardedBy("this")
-    private Collection<URL> inconsistentURLsForReporting = Collections.emptySet();
-
-    synchronized Optional<YangStoreSnapshot> getSnapshotIfPossible(Multimap<Bundle, URL> bundlesToYangURLs) {
-        Set<URL> urls = setFromMultimapValues(bundlesToYangURLs);
-
-        if (cachedUrls==null || cachedUrls.equals(urls)) {
-            Preconditions.checkState(cachedYangStoreSnapshot.isPresent());
-            YangStoreSnapshot freshSnapshot = new YangStoreSnapshotImpl(cachedYangStoreSnapshot.get());
-            if (inconsistentURLsForReporting.size() > 0){
-                logger.warn("Some yang URLs are ignored: {}", inconsistentURLsForReporting);
-            }
-            return Optional.of(freshSnapshot);
-        }
-
-        return Optional.absent();
-    }
-
-    private static Set<URL> setFromMultimapValues(
-            Multimap<Bundle, URL> bundlesToYangURLs) {
-        Set<URL> urls = Sets.newHashSet(bundlesToYangURLs.values());
-        Preconditions.checkState(bundlesToYangURLs.size() == urls.size());
-        return urls;
-    }
-
-    synchronized void cacheYangStore(Multimap<Bundle, URL> urls,
-                                     YangStoreSnapshot yangStoreSnapshot) {
-        this.cachedUrls = setFromMultimapValues(urls);
-        this.cachedYangStoreSnapshot = Optional.of(yangStoreSnapshot);
-    }
-
-    synchronized void invalidate() {
-        cachedUrls.clear();
-        if (cachedYangStoreSnapshot.isPresent()){
-            cachedYangStoreSnapshot.get().close();
-            cachedYangStoreSnapshot = Optional.absent();
-        }
-    }
-
-    public synchronized void setInconsistentURLsForReporting(Collection<URL> urls){
-        inconsistentURLsForReporting = urls;
-    }
-
-    private Optional<YangStoreSnapshot> getInitialSnapshot() {
-        YangStoreSnapshot initialSnapshot = new YangStoreSnapshot() {
-            @Override
-            public Map<String, Map<String, ModuleMXBeanEntry>> getModuleMXBeanEntryMap() {
-                return Collections.emptyMap();
-            }
-
-            @Override
-            public Map<String, Map.Entry<Module, String>> getModuleMap() {
-                return Collections.emptyMap();
-            }
-
-            @Override
-            public int countModuleMXBeanEntries() {
-                return 0;
-            }
-
-            @Override
-            public void close() {
-            }
-        };
-        return Optional.of(initialSnapshot);
     }
 }

@@ -21,25 +21,27 @@ import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class MbeParser {
+    private static final Logger logger = LoggerFactory.getLogger(MbeParser.class);
 
-    public YangStoreSnapshotImpl parseYangFiles(
-            Collection<? extends InputStream> allInput)
-            throws YangStoreException {
+    public YangStoreSnapshotImpl parseYangFiles(Collection<? extends InputStream> allInput) throws YangStoreException {
         YangParserImpl parser = YangParserWrapper.getYangParserInstance();
 
         Map<InputStream, Module> allYangModules = YangParserWrapper.parseYangFiles(parser, allInput);
 
         SchemaContext resolveSchemaContext = YangParserWrapper.getSchemaContextFromModules(parser, allYangModules);
-
+        logger.trace("Resolved modules:{}", resolveSchemaContext.getModules());
         // JMX generator
 
         Map<String, String> namespaceToPackageMapping = Maps.newHashMap();
@@ -69,35 +71,47 @@ public class MbeParser {
             }
         }
 
-        Map<String, Map<String, ModuleMXBeanEntry>> retVal = Maps.newHashMap();
-        Map<String, Entry<Module, String>> modulesMap = new HashMap<>();
+        Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
+        Map<Module, String> modulesToSources = new HashMap<>();
+        Map<QName, Map<String /* identity local name */, ModuleMXBeanEntry>>
+                qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
+
 
         for (Entry<InputStream, Module> moduleEntry : allYangModules.entrySet()) {
-            String packageName = packageTranslator.getPackageName(moduleEntry
-                    .getValue());
+            Module module = moduleEntry.getValue();
+            String packageName = packageTranslator.getPackageName(module);
             TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
                     new TypeProviderImpl(resolveSchemaContext));
-            String yangAsString;
-            try {
-                moduleEntry.getKey().reset();
-                yangAsString = IOUtils.toString(moduleEntry.getKey());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-            modulesMap.put(moduleEntry.getValue().getName(),
-                    Maps.immutableEntry(moduleEntry.getValue(), yangAsString));
-            Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
-                    .create(moduleEntry.getValue(), qNamesToSIEs, resolveSchemaContext, typeProviderWrapper,
-                            packageName);
-            retVal.put(moduleEntry.getValue().getNamespace().toString(),
-                    namesToMBEs);
+            String yangAsString = reReadInputStream(moduleEntry);
+
+            QName qName = new QName(module.getNamespace(), module.getRevision(), module.getName());
+
+            Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
+                    Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, resolveSchemaContext,
+                            typeProviderWrapper, packageName));
+            moduleMXBeanEntryMap.put(module.getNamespace().toString(), namesToMBEs);
+            modulesToSources.put(module, yangAsString);
+            qNamesToIdentitiesToModuleMXBeanEntries.put(qName, namesToMBEs);
         }
 
-        return new YangStoreSnapshotImpl(retVal, modulesMap);
+        return new YangStoreSnapshotImpl(moduleMXBeanEntryMap, modulesToSources, qNamesToIdentitiesToModuleMXBeanEntries);
     }
 
-    public Map<Module, String> parseYangFilesToString(
-            Collection<? extends InputStream> allYangs) {
+    private String reReadInputStream(Entry<InputStream, Module> moduleEntry) {
+        String yangAsString;
+        try {
+            moduleEntry.getKey().reset();
+            yangAsString = IOUtils.toString(moduleEntry.getKey());
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot reread " + moduleEntry.getValue(), e);
+        }
+        return yangAsString;
+    }
+
+    @Deprecated
+    public Map<Module, String> parseYangFilesToString(Collection<? extends InputStream> allYangs) {
+
+        logger.error("Using deprecated method that will be removed soon", new UnsupportedOperationException("Deprecated"));
         YangParserImpl parser = YangParserWrapper.getYangParserInstance();
 
         Map<InputStream, Module> allYangModules = parser

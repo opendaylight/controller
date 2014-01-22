@@ -9,29 +9,39 @@ package org.opendaylight.controller.config.yang.store.impl;
 
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 public class YangStoreSnapshotImpl implements YangStoreSnapshot {
+    private static final Logger logger = LoggerFactory.getLogger(YangStoreSnapshotImpl.class);
 
+    @Deprecated
     private final Map<String /* Namespace from yang file */,
             Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
 
-    private final Map<String, Entry<Module, String>> moduleMap;
+    private final Map<Module, String> modulesToSources;
+    private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
 
-    public YangStoreSnapshotImpl(
-            Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap,
-            Map<String, Entry<Module, String>> moduleMap) {
+    public YangStoreSnapshotImpl(Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap,
+                                 Map<Module, String> modulesToSources,
+                                 Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries) {
+
         this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntryMap);
-        this.moduleMap = Collections.unmodifiableMap(moduleMap);
+        this.modulesToSources = Collections.unmodifiableMap(modulesToSources);
+        this.qNamesToIdentitiesToModuleMXBeanEntries = Collections.unmodifiableMap(qNamesToIdentitiesToModuleMXBeanEntries);
     }
 
-    public YangStoreSnapshotImpl(YangStoreSnapshot yangStoreSnapshot) {
-        this.moduleMXBeanEntryMap = yangStoreSnapshot.getModuleMXBeanEntryMap();
-        this.moduleMap = yangStoreSnapshot.getModuleMap();
+    public static YangStoreSnapshotImpl copy(YangStoreSnapshot yangStoreSnapshot) {
+        return new YangStoreSnapshotImpl(
+                yangStoreSnapshot.getModuleMXBeanEntryMap(),
+                yangStoreSnapshot.getModulesToSources(),
+                yangStoreSnapshot.getQNamesToIdentitiesToModuleMXBeanEntries());
     }
 
     /**
@@ -44,8 +54,28 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
     }
 
     @Override
-    public Map<String, Entry<Module, String>> getModuleMap() {
-        return moduleMap;
+    public Map<QName, Map<String, ModuleMXBeanEntry>> getQNamesToIdentitiesToModuleMXBeanEntries() {
+        return qNamesToIdentitiesToModuleMXBeanEntries;
+    }
+
+    @Override
+    public Set<Module> getModules() {
+        return modulesToSources.keySet();
+    }
+
+    @Override
+    public String getModuleSource(Module module) {
+        String result = modulesToSources.get(module);
+        if (result == null) {
+            logger.trace("Cannot find module {} in {}", module, modulesToSources);
+            throw new IllegalArgumentException("Module not found in this snapshot:" + module);
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Module, String> getModulesToSources() {
+        return modulesToSources;
     }
 
     @Override
