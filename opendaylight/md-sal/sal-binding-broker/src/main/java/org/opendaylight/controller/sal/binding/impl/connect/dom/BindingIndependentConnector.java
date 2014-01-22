@@ -43,6 +43,7 @@ import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
+import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.GlobalRpcRegistrationListener;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.RouterInstantiationListener;
 import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
 import org.opendaylight.controller.sal.common.util.Rpcs;
@@ -304,6 +305,7 @@ public class BindingIndependentConnector implements //
             if (baRpcRegistry instanceof RpcProviderRegistryImpl) {
                 baRpcRegistryImpl = (RpcProviderRegistryImpl) baRpcRegistry;
                 baRpcRegistryImpl.registerRouterInstantiationListener(domToBindingRpcManager.getInstance());
+                baRpcRegistryImpl.registerGlobalRpcRegistrationListener(domToBindingRpcManager.getInstance());
             }
             if(biRpcRegistry instanceof org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) {
                 biRouter = (org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) biRpcRegistry;
@@ -502,7 +504,8 @@ public class BindingIndependentConnector implements //
      */
     private class DomToBindingRpcForwardingManager implements
             RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>,
-            RouterInstantiationListener {
+            RouterInstantiationListener,
+            GlobalRpcRegistrationListener {
 
         private final Map<Class<? extends RpcService>, DomToBindingRpcForwarder> forwarders = new WeakHashMap<>();
         private RpcProviderRegistryImpl registryImpl;
@@ -515,6 +518,15 @@ public class BindingIndependentConnector implements //
             this.registryImpl = registryImpl;
         }
         
+        @Override
+        public void onGlobalRpcRegistered(Class<? extends RpcService> cls) {
+            getRpcForwarder(cls, null);
+        }
+        
+        @Override
+        public void onGlobalRpcUnregistered(Class<? extends RpcService> cls) {
+            // NOOP
+        }
         
         @Override
         public void onRpcRouterCreated(RpcRouter<?> router) {
