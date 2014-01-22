@@ -56,6 +56,8 @@ public class RpcProviderRegistryImpl implements //
 
     private final String name;
 
+    private ListenerRegistry<GlobalRpcRegistrationListener> globalRpcListeners = ListenerRegistry.create();
+
     public String getName() {
         return name;
     }
@@ -86,6 +88,7 @@ public class RpcProviderRegistryImpl implements //
         checkState(currentDelegate == null, "Rpc service is already registered");
         LOG.debug("Registering {} as global implementation of {} in {}", implementation, type.getSimpleName(), this);
         RuntimeCodeHelper.setDelegate(publicProxy, implementation);
+        notifyGlobalRpcAdded(type);
         return new RpcProxyRegistration<T>(type, implementation, this);
     }
 
@@ -140,6 +143,17 @@ public class RpcProviderRegistryImpl implements //
         }
     }
 
+    private void notifyGlobalRpcAdded(Class<? extends RpcService> type) {
+        for(ListenerRegistration<GlobalRpcRegistrationListener> listener : globalRpcListeners) {
+            try {
+                listener.getInstance().onGlobalRpcRegistered(type);
+            } catch (Exception e) {
+                LOG.error("Unhandled exception during invoking listener {}", e);
+            }
+        }
+        
+    }
+
     private void notifyListenersRoutedCreated(RpcRouter router) {
 
         for (ListenerRegistration<RouterInstantiationListener> listener : routerInstantiationListener) {
@@ -181,6 +195,16 @@ public class RpcProviderRegistryImpl implements //
 
     public interface RouterInstantiationListener extends EventListener {
         void onRpcRouterCreated(RpcRouter<?> router);
+    }
+    
+    public ListenerRegistration<GlobalRpcRegistrationListener> registerGlobalRpcRegistrationListener(GlobalRpcRegistrationListener listener) {
+        return globalRpcListeners.register(listener);
+    }
+
+    public interface GlobalRpcRegistrationListener extends EventListener {
+        void onGlobalRpcRegistered(Class<? extends RpcService> cls);
+        void onGlobalRpcUnregistered(Class<? extends RpcService> cls);
+        
     }
 
     private class RouteChangeForwarder<T extends RpcService> implements
