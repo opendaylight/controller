@@ -6,7 +6,6 @@ module odl-sal-netconf-connector-cfg {
 	import config { prefix config; revision-date 2013-04-05; }
 	import threadpool {prefix th;}
 	import netty {prefix netty;}
- 	import ietf-inet-types {prefix inet;}
  	import opendaylight-md-sal-dom {prefix dom;}
 
     description
