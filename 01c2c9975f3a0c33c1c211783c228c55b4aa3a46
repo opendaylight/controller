@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f752be33",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-01-22T21:51:42Z",
+      "side": 1,
+      "message": "Would be nice if this constant was all uppercase with words separated by underscores just like DEFAULT_TRANSACTION_TIMEOUT.",
+      "revId": "01c2c9975f3a0c33c1c211783c228c55b4aa3a46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d7333a12",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-01-22T21:51:42Z",
+      "side": 1,
+      "message": "Also interesting variable naming convention in this class. Some camel case and some words separated by underscores",
+      "revId": "01c2c9975f3a0c33c1c211783c228c55b4aa3a46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
