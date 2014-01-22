@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b767a64c",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T20:46:01Z",
+      "side": 1,
+      "message": "This notification is generated in case of module start, so it complies with info level set in:\n\nhttps://wiki.opendaylight.org/view/Draft_Syslog_Level_Settings",
+      "revId": "1056aceb7cfe17e9e54d22fd08c195ba28d019fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_775dae78",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T20:46:01Z",
+      "side": 1,
+      "message": "This notification is generated in case of module start, so it complies with info level set in:\n\nhttps://wiki.opendaylight.org/view/Draft_Syslog_Level_Settings",
+      "revId": "1056aceb7cfe17e9e54d22fd08c195ba28d019fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_57562a5d",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-22T20:46:01Z",
+      "side": 1,
+      "message": "This notification is generated in case of module stop, so it complies with info level set in:\n\nhttps://wiki.opendaylight.org/view/Draft_Syslog_Level_Settings",
+      "revId": "1056aceb7cfe17e9e54d22fd08c195ba28d019fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
