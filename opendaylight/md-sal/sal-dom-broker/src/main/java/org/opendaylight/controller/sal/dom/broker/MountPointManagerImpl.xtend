@@ -35,8 +35,8 @@ class MountPointManagerImpl implements MountProvisionService {
     }
     
     def registerMountPoint(MountPointImpl impl) {
-        dataBroker?.registerConfigurationReader(impl.mountPath,impl.readWrapper);
-        dataBroker?.registerOperationalReader(impl.mountPath,impl.readWrapper);
+        //dataBroker?.registerConfigurationReader(impl.mountPath,impl.readWrapper);
+        //dataBroker?.registerOperationalReader(impl.mountPath,impl.readWrapper);
         
     }
     
