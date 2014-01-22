@@ -313,9 +313,13 @@ public class DataPacketMuxDemux implements IContainerListener,
         // build packet out
         OFPacketOut po = new OFPacketOut()
                 .setBufferId(OFPacketOut.BUFFER_ID_NONE)
-                .setInPort(OFPort.OFPP_NONE)
                 .setActions(Collections.singletonList((OFAction) action))
                 .setActionsLength((short) OFActionOutput.MINIMUM_LENGTH);
+        if(outPkt.getIncomingNodeConnector() != null) {
+            po.setInPort((Short)outPkt.getIncomingNodeConnector().getID());
+        } else {
+            po.setInPort(OFPort.OFPP_NONE);
+        }
 
         po.setLengthU(OFPacketOut.MINIMUM_LENGTH + po.getActionsLength()
                 + data.length);
