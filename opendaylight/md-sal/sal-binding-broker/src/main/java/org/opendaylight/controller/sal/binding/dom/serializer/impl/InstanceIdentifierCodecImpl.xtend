@@ -59,6 +59,7 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
             baArgs.add(baArg)
         }
         val ret = new InstanceIdentifier(baArgs,baType as Class<? extends DataObject>);
+        LOG.debug("DOM Instance Identifier {} deserialized to {}",input,ret);
         return ret;
     }
     
@@ -110,7 +111,9 @@ class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec {
                 previousAugmentation = baArg.type;
             }
         }
-        return new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(components);
+        val ret = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(components);
+        LOG.debug("Binding Instance Identifier {} serialized to DOM InstanceIdentifier {}",input,ret);
+        return ret;
     }
     
     def updateAugmentationInjection(Class<? extends DataObject> class1, ImmutableList<QName> list, Class<?> augmentation) {
