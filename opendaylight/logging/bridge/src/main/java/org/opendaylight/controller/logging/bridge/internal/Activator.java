@@ -50,14 +50,15 @@ public class Activator implements BundleActivator {
                 if (reader == null) {
                     this.log.error("Cannot register the LogListener because "
                             + "cannot retrieve LogReaderService");
-                }
-                reader.addLogListener(this.listener);
-                // Now lets walk all the exiting messages
-                Enumeration<LogEntry> entries = reader.getLog();
-                if (entries != null) {
-                    while (entries.hasMoreElements()) {
-                        LogEntry entry = (LogEntry) entries.nextElement();
-                        this.listener.logged(entry);
+                } else {
+                    reader.addLogListener(this.listener);
+                    // Now lets walk all the exiting messages
+                    Enumeration<LogEntry> entries = reader.getLog();
+                    if (entries != null) {
+                        while (entries.hasMoreElements()) {
+                            LogEntry entry = entries.nextElement();
+                            this.listener.logged(entry);
+                        }
                     }
                 }
 
@@ -98,10 +99,10 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) {
-        ServiceReference service = null;
-        service = context.getServiceReference(LogReaderService.class.getName());
-        if (service != null) {
-            LogReaderService reader = (LogReaderService) service;
+        ServiceReference serviceRef = context.getServiceReference(
+                LogReaderService.class.getName());
+        if (serviceRef != null) {
+            LogReaderService reader = (LogReaderService) context.getService(serviceRef);
             reader.removeLogListener(this.listener);
         }
         if (this.shutdownHandler != null) {
