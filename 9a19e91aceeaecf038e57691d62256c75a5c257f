@@ -34,6 +34,24 @@
       "revId": "9a19e91aceeaecf038e57691d62256c75a5c257f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_77b36ee9",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1856,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-22T17:44:23Z",
+      "side": 1,
+      "message": "One correction:\n\"target.toggleInstallation() function is setting the value of variable installInHw as false if it is null and __ !installInHw __ otherwise.\"\nThis because if installInHw is not specified, we want to install it by default.\n\nI am not sure why this is not working.\n\nI agree the toggling logic is fragile, but I would like to keep the two codes separate: \n1) hw installation/removal\n2) config update\n\nInstead, could you please add your change that forces the setting of installInHw field at the old line 1857, replacing what is there. You will only need to maintain a flag which tells you if the action was install or uninstall, so that you will know to which value  to reset the field in case of successfull hw modification.\n\nThanks,\nAlessandro",
+      "parentUuid": "da6255ed_ec91d147",
+      "revId": "9a19e91aceeaecf038e57691d62256c75a5c257f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
