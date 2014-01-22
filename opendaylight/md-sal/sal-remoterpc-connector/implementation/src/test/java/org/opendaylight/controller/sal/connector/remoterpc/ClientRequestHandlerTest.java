@@ -22,7 +22,7 @@ public class ClientRequestHandlerTest {
 
   ZMQ.Context context;
   ExecutorService serverThread;
-  final String SERVER_ADDRESS = "localhost:5554";
+  final String SERVER_ADDRESS = "localhost:5553";
 
   ClientRequestHandler handler;
 
