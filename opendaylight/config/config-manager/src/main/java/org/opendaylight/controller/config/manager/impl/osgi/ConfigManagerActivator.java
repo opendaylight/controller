@@ -9,11 +9,13 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import java.lang.management.ManagementFactory;
 
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -32,6 +34,17 @@ public class ConfigManagerActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
+        BindingIndependentMappingServiceTracker mappingServiceTracker = new BindingIndependentMappingServiceTracker(
+                context, this);
+        ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService> tracker = new ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService>(
+                context, BindingIndependentMappingService.class, mappingServiceTracker);
+
+        logger.warn("Waiting for codec registry");
+
+        tracker.open();
+    }
+
+    void initConfigManager(BundleContext context) {
         BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
                 new BundleContextBackedModuleFactoriesResolver(context);
         MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -43,7 +56,11 @@ public class ConfigManagerActivator implements BundleActivator {
 
         // register config registry to jmx
         configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
-        configRegistryJMXRegistrator.registerToJMX(configRegistry);
+        try {
+            configRegistryJMXRegistrator.registerToJMX(configRegistry);
+        } catch (InstanceAlreadyExistsException e) {
+            throw new RuntimeException("Config Registry was already registered to JMX", e);
+        }
 
         // track bundles containing factories
         BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(configRegistry);

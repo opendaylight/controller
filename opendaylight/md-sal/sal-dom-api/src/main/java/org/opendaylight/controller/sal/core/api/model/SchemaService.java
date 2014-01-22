@@ -11,35 +11,36 @@ import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 
 public interface SchemaService extends BrokerService {
 
     /**
-     * Registers a YANG module to session and global context 
-     * 
+     * Registers a YANG module to session and global context
+     *
      * @param module
      */
     void addModule(Module module);
-    
+
     /**
      * Unregisters a YANG module from session context
-     * 
+     *
      * @param module
      */
     void removeModule(Module module);
-    
+
     /**
      * Returns session specific YANG schema context
      * @return
      */
     SchemaContext getSessionContext();
-    
+
     /**
      * Returns global schema context
-     * 
+     *
      * @return
      */
     SchemaContext getGlobalContext();
-    
+
     ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener listener);
 }
