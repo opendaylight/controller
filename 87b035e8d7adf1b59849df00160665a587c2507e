@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_6cd0411f",
+        "filename": "opendaylight/netconf/netconf-client/src/test/resources/get_schema.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 866
+      },
+      "writtenOn": "2014-01-22T08:45:52Z",
+      "side": 1,
+      "message": "Maybe this xml file should be moved to netconf/netconf-util/src/test/resources/netconfMessages/ where all other netconf xml files are stored for test purposes.",
+      "revId": "87b035e8d7adf1b59849df00160665a587c2507e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
