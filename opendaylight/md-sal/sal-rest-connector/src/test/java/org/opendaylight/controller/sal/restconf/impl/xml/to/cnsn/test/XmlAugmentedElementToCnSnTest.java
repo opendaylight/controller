@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.ResponseException;
@@ -15,7 +14,6 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 
 public class XmlAugmentedElementToCnSnTest {
 
-    @Ignore
     @Test
     public void loadDataAugmentedSchemaMoreEqualNamesTest() {
         boolean exceptionCaught = false;

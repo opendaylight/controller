@@ -26,11 +26,11 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.Module
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
+import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
-import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 class RestconfImpl implements RestconfService {
 
@@ -356,35 +356,29 @@ class RestconfImpl implements RestconfService {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format.\n\"" + nodeBuilder.localName + "\" does not exist in yang schema.");
         }
-        var validQName = schema.QName
-        var currentAugment = previousAugment;
-        if (schema.augmenting) {
-            currentAugment = schema.QName
-        } else if (previousAugment !== null && schema.QName.namespace !== previousAugment.namespace) {
-            validQName = QName.create(currentAugment, schema.QName.localName);
-        }
-        var String moduleName = null;
-        if (mountPoint === null) {
-            moduleName = controllerContext.findModuleNameByNamespace(validQName.namespace);
+        
+        var QName currentAugment;
+        if (nodeBuilder.qname !== null) {
+            currentAugment = previousAugment
         } else {
-            moduleName = controllerContext.findModuleNameByNamespace(mountPoint, validQName.namespace)
+            currentAugment = normalizeNodeName(nodeBuilder, schema, previousAugment, mountPoint)
         }
-        if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
-            nodeBuilder.namespace.toString == moduleName || nodeBuilder.namespace == MOUNT_POINT_MODULE_NAME) {
-            nodeBuilder.qname = validQName
-        } else {
-            throw new ResponseException(BAD_REQUEST,
-                "Data has bad format.\nIf data is in XML format then namespace for \"" + nodeBuilder.localName +
-                    "\" should be \"" + schema.QName.namespace + "\".\nIf data is in Json format then module name for \"" +
-                    nodeBuilder.localName + "\" should be \"" + moduleName + "\".");
-        }
-
+        
         if (nodeBuilder instanceof CompositeNodeWrapper) {
             val List<NodeWrapper<?>> children = (nodeBuilder as CompositeNodeWrapper).getValues
             for (child : children) {
-                normalizeNode(child,
-                    findFirstSchemaByLocalName(child.localName, (schema as DataNodeContainer).childNodes),
-                    currentAugment, mountPoint)
+                val potentialNodeSchemas = new ArrayList
+                collectInstanceDataChildren(potentialNodeSchemas, schema as DataNodeContainer, child.localName)
+                var break = false
+                for (potentialNodeSchema : potentialNodeSchemas) {
+                    if (!break) {
+                        val potentialCurrentAugment = normalizeNodeName(child, potentialNodeSchema, currentAugment, mountPoint)
+                        if (nodeBuilder.qname !== null) {
+                            normalizeNode(child, potentialNodeSchema, potentialCurrentAugment, mountPoint)
+                            break = true
+                        }
+                    }
+                }
             }
             if(schema instanceof ListSchemaNode) {
                 val listKeys = (schema as ListSchemaNode).keyDefinition
@@ -408,7 +402,7 @@ class RestconfImpl implements RestconfService {
             
             if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
                 if (value instanceof String) {
-                    inputValue = new IdentityValuesDTO(validQName.namespace.toString, value as String, null)
+                    inputValue = new IdentityValuesDTO(nodeBuilder.namespace.toString, value as String, null)
                 } // else value is instance of ValuesDTO
             }
             
@@ -440,6 +434,57 @@ class RestconfImpl implements RestconfService {
             baseType = baseType.baseType;
         }
         baseType
+    }
+    
+    private def QName filterByNamespace(List<DataSchemaNode> potentialNodeSchemas, NodeWrapper<?> nodeBuilder, QName previousAugment,
+        MountInstance mountPoint) {
+        for (potentialNodeSchema : potentialNodeSchemas) {
+            val currentAugment = normalizeNodeName(nodeBuilder, potentialNodeSchema, previousAugment, mountPoint)
+            if (nodeBuilder.qname !== null) {
+                return currentAugment
+            }
+        }
+        return previousAugment
+    }
+    
+    private def QName normalizeNodeName(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment,
+        MountInstance mountPoint) {
+        var validQName = schema.QName
+        var currentAugment = previousAugment;
+        if (schema.augmenting) {
+            currentAugment = schema.QName
+        } else if (previousAugment !== null && schema.QName.namespace !== previousAugment.namespace) {
+            validQName = QName.create(currentAugment, schema.QName.localName);
+        }
+        var String moduleName = null;
+        if (mountPoint === null) {
+            moduleName = controllerContext.findModuleNameByNamespace(validQName.namespace);
+        } else {
+            moduleName = controllerContext.findModuleNameByNamespace(mountPoint, validQName.namespace)
+        }
+        if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
+            nodeBuilder.namespace.toString == moduleName || nodeBuilder.namespace == MOUNT_POINT_MODULE_NAME) {
+            nodeBuilder.qname = validQName
+        } else {
+            throw new ResponseException(BAD_REQUEST,
+                "Data has bad format.\nIf data is in XML format then namespace for \"" + nodeBuilder.localName +
+                    "\" should be \"" + schema.QName.namespace + "\".\nIf data is in Json format then module name for \"" +
+                    nodeBuilder.localName + "\" should be \"" + moduleName + "\".");
+        }
+        return currentAugment
+    }
+    
+    private def void collectInstanceDataChildren(List<DataSchemaNode> potentialNodeSchemas, DataNodeContainer container, String name) {
+        val nodes = container.childNodes.filter[n|n.QName.localName == name]
+        for (potentialNode : nodes) {
+            if (potentialNode.instantiatedDataSchema) {
+                potentialNodeSchemas.add(potentialNode)
+            }
+        }
+        val allCases = container.childNodes.filter(ChoiceNode).map[cases].flatten
+        for (caze : allCases) {
+            collectInstanceDataChildren(potentialNodeSchemas, caze, name)
+        }
     }
 
     private def DataSchemaNode findFirstSchemaByLocalName(String localName, Set<DataSchemaNode> schemas) {
