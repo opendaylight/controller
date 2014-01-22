@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -444,13 +445,16 @@ public class Match implements Cloneable, Serializable {
         if (this.fields == null) {
             result = prime * result;
         } else {
-            int sum = 0;
-            for (MatchType field : this.fields.keySet()) {
-                MatchField f = this.fields.get(field);
-                sum = sum + ((field==null ? 0 : field.calculateConsistentHashCode()) ^
-                             (f==null ? 0 : f.hashCode()));
+            // use a tree map as the order of hashMap is not guaranteed.
+            // 2 Match objects with fields in different order are still equal.
+            // Hence the hashCode should be the same too.
+            TreeMap<MatchType, MatchField> tm = new TreeMap<MatchType, MatchField>(this.fields);
+            for (MatchType field : tm.keySet()) {
+                MatchField f = tm.get(field);
+                int fieldHashCode = (field==null ? 0 : field.calculateConsistentHashCode()) ^
+                             (f==null ? 0 : f.hashCode());
+                result = prime * result + fieldHashCode;
             }
-            result = prime * result + sum;
         }
         result = prime * result + matches;
         return result;

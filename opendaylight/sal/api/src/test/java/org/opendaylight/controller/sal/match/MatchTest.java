@@ -338,6 +338,21 @@ public class MatchTest {
     }
 
     @Test
+    public void testHashCodeWithReverseMatch() throws Exception {
+        InetAddress srcIP1 = InetAddress.getByName("1.1.1.1");
+        InetAddress ipMask1 = InetAddress.getByName("255.255.255.255");
+        InetAddress srcIP2 = InetAddress.getByName("2.2.2.2");
+        InetAddress ipMask2 = InetAddress.getByName("255.255.255.255");
+        MatchField field1 = new MatchField(MatchType.NW_SRC, srcIP1, ipMask1);
+        MatchField field2 = new MatchField(MatchType.NW_DST, srcIP2, ipMask2);
+        Match match1 = new Match();
+        match1.setField(field1);
+        match1.setField(field2);
+        Match match2 = match1.reverse();
+        Assert.assertFalse(match1.hashCode() == match2.hashCode());
+    }
+
+    @Test
     public void testHashCode() throws Exception {
         byte srcMac1[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9a, (byte) 0xbc };
         byte srcMac2[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9a, (byte) 0xbc };
