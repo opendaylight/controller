@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f7707e41",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/DataPacketMuxDemux.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-22T17:18:38Z",
+      "side": 1,
+      "message": "Thanks for the fix.\nCould you please add the curly braces after the if. It is a convention in controller project, even though code to enforce it has not been merged yet.",
+      "revId": "41103ac4992d954f28340c07288076aabd82b6c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
