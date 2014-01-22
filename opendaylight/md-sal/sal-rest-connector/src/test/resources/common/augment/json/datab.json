@@ -1,0 +1,7 @@
+{
+    "main:cont":{
+        "augment-main-b:cont1":{
+            "lf11":"lf11 value from b"
+        }
+    }
+}

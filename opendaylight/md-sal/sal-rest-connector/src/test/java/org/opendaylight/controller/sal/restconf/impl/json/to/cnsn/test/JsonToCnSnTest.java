@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -10,9 +11,11 @@ import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -264,9 +267,28 @@ public class JsonToCnSnTest {
         assertEquals("iden_local", ((QName) lf14.getValue()).getLocalName());
         assertEquals("identity:module", ((QName) lf14.getValue()).getNamespace().toString());
     }
+    
+    @Ignore
+    @Test
+    public void loadDataAugmentedSchemaMoreEqualNamesTest() {
+        boolean exceptionCaught = false;
+        try {
+            loadAndNormalizeData("/common/augment/json/dataa.json", "/common/augment/yang", "cont", "main");
+            loadAndNormalizeData("/common/augment/json/datab.json", "/common/augment/yang", "cont", "main");
+        } catch (ResponseException e) {
+            exceptionCaught = true;
+        }
+        
+        assertFalse(exceptionCaught);
+    }
 
     private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace,
             String moduleName) {
+        CompositeNode compNode = loadAndNormalizeData(jsonPath, yangPath, topLevelElementName, moduleName);
+        verifyCompositeNode(compNode, namespace);
+    }
+
+    private CompositeNode loadAndNormalizeData(String jsonPath, String yangPath, String topLevelElementName, String moduleName) {
         CompositeNode compositeNode = TestUtils.readInputToCnSn(jsonPath, false, JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
@@ -280,7 +302,7 @@ public class JsonToCnSnTest {
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
 
         assertEquals(topLevelElementName, compNode.getNodeType().getLocalName());
-        verifyCompositeNode(compNode, namespace);
+        return compNode;
     }
 
     private void verityMultipleItemsInList(CompositeNode compositeNode) {
