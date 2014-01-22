@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_373e1629",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1375,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-22T20:20:31Z",
+      "side": 1,
+      "message": "Given this is likely to happen when maformed request are sent to HT, and given you have to republish because of another comment, could you please change this to log as debug only the full exception. And have the exception message be part of the error message.\nWe do not want to print a stack trace to console for an any invalid REST request.\n\n(BTW, actually this is not unhanded as we are returning the correct status.)\n\nFollowing would do it:\n\nString msg \u003d String.format(\"Invalid Input parameters have been passed: %s\", e.getMessage());\nlogger.debug(\"\", e);\nreturn new Status(StatusCode.BADREQUEST, msg);\n\nThanks !",
+      "revId": "96c6df6d9a4dc397c1f3d98c7fbf873b7ba2dccf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d72d7aff",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/sal/connector/remoterpc/Context.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-22T20:20:31Z",
+      "side": 1,
+      "message": "Exception here is \"e1\"",
+      "revId": "96c6df6d9a4dc397c1f3d98c7fbf873b7ba2dccf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
