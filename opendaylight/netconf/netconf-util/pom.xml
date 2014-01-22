@@ -109,6 +109,7 @@
                             com.siemens.ct.exi.exceptions,
                             com.siemens.ct.exi.api.dom,
                             org.xml.sax.helpers,
+                            org.opendaylight.controller.config.api,
                         </Import-Package>
                     </instructions>
                 </configuration>

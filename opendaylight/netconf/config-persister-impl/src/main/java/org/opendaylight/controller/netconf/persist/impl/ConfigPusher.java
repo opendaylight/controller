@@ -8,23 +8,15 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import io.netty.channel.EventLoopGroup;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.concurrent.Immutable;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -35,8 +27,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Immutable
 public class ConfigPusher {
@@ -84,8 +82,7 @@ public class ConfigPusher {
         int maxAttempts = 30;
         for(int i = 0 ; i < maxAttempts; i++) {
             NetconfClient netconfClient = makeNetconfConnection(configSnapshotHolder.getCapabilities(), oldClientForPossibleReuse);
-            final String configSnapshot = configSnapshotHolder.getConfigSnapshot();
-            logger.trace("Pushing following xml to netconf {}", configSnapshot);
+            logger.trace("Pushing following xml to netconf {}", configSnapshotHolder);
             try {
                 pushLastConfig(configSnapshotHolder, netconfClient);
                 return netconfClient;
@@ -173,26 +170,19 @@ public class ConfigPusher {
         logger.info("Pushing last configuration to netconf: {}", configSnapshotHolder);
         StringBuilder response = new StringBuilder("editConfig response = {");
 
-
         NetconfMessage message = createEditConfigMessage(xmlToBePersisted, "/netconfOp/editConfig.xml");
 
         // sending message to netconf
         NetconfMessage responseMessage = getResponse(message, netconfClient);
 
-        XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
-        Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
-        element = element.getOnlyChildElement();
-
-        Util.checkIsOk(element, responseMessage);
+        NetconfUtil.checkIsMessageOk(responseMessage);
         response.append(XmlUtil.toString(responseMessage.getDocument()));
         response.append("}");
         responseMessage = getResponse(getNetconfMessageFromResource("/netconfOp/commit.xml"), netconfClient);
 
-        element = XmlElement.fromDomDocument(responseMessage.getDocument());
-        Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
-        element = element.getOnlyChildElement();
 
-        Util.checkIsOk(element, responseMessage);
+
+        NetconfUtil.checkIsMessageOk(responseMessage);
         response.append("commit response = {");
         response.append(XmlUtil.toString(responseMessage.getDocument()));
         response.append("}");
