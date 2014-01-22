@@ -175,16 +175,11 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         retrieveCaches();
 
         /*
-         * Read startup and build database if we have not already gotten the
-         * configurations synced from another node
+         * Read startup and build database if we are the coordinator
          */
-        if (subnetsConfigList.isEmpty()) {
+        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
             loadSubnetConfiguration();
-        }
-        if (spanConfigList.isEmpty()) {
             loadSpanConfiguration();
-        }
-        if (nodeConfigList.isEmpty()) {
             loadSwitchConfiguration();
         }
 

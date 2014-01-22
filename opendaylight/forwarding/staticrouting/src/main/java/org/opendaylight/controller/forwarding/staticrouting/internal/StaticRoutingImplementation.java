@@ -427,7 +427,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
         allocateCaches();
         retrieveCaches();
         this.executor = Executors.newFixedThreadPool(1);
-        if (staticRouteConfigs.isEmpty()) {
+        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
             loadConfiguration();
         }
 

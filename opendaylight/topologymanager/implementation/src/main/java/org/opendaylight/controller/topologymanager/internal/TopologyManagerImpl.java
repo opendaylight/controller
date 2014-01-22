@@ -195,7 +195,9 @@ public class TopologyManagerImpl implements
 
         userLinksFileName = ROOT + "userTopology_" + containerName + ".conf";
         registerWithOSGIConsole();
-        loadConfiguration();
+        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
+            loadConfiguration();
+        }
         // Restore the shuttingDown status on init of the component
         shuttingDown = false;
         notifyThread = new Thread(new TopologyNotify(notifyQ));
