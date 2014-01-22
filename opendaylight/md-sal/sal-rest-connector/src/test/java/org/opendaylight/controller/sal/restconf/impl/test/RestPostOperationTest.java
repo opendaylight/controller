@@ -43,9 +43,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class RestPostOperationTest extends JerseyTest {
 
     private static String xmlDataAbsolutePath;
+    private static String xmlDataInterfaceAbsolutePath;
     private static String xmlDataRpcInput;
     private static CompositeNodeWrapper cnSnDataOutput;
     private static String xmlData2;
+    private static String xmlData3;
 
     private static ControllerContext controllerContext;
     private static BrokerFacade brokerFacade;
@@ -115,13 +117,13 @@ public class RestPostOperationTest extends JerseyTest {
         controllerContext.setSchemas(schemaContextYangsIetf);
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = createUri("/config/", "ietf-interfaces:interfaces");
-        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
         
         mockCommitConfigurationDataPostMethod(null);
-        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
         
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
-        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
     }
 
     @Test
@@ -129,13 +131,13 @@ public class RestPostOperationTest extends JerseyTest {
         controllerContext.setSchemas(schemaContextYangsIetf);
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces");
-        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
         
         mockCommitConfigurationDataPostMethod(null);
-        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
         
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
-        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
     }
 
     @Test
@@ -154,8 +156,10 @@ public class RestPostOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1");
+        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount");
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData2));
+        uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont");
+        assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData3));
     }
     
     private void mockInvokeRpc(CompositeNode result, boolean sucessful) {
@@ -185,12 +189,16 @@ public class RestPostOperationTest extends JerseyTest {
     private static void loadData() throws IOException, URISyntaxException {
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces_absolute_path.xml");
         xmlDataAbsolutePath = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
+        xmlStream = RestconfImplTest.class.getResourceAsStream("/parts/ietf-interfaces_interfaces_interface_absolute_path.xml");
+        xmlDataInterfaceAbsolutePath = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
         String xmlPathRpcInput = RestconfImplTest.class.getResource("/full-versions/test-data2/data-rpc-input.xml")
                 .getPath();
         xmlDataRpcInput = TestUtils.loadTextFile(xmlPathRpcInput);
         cnSnDataOutput = prepareCnSnRpcOutput();
         String data2Input = RestconfImplTest.class.getResource("/full-versions/test-data2/data2.xml").getPath();
         xmlData2 = TestUtils.loadTextFile(data2Input);
+        String data3Input = RestconfImplTest.class.getResource("/full-versions/test-data2/data3.xml").getPath();
+        xmlData3 = TestUtils.loadTextFile(data3Input);
     }
 
     private static CompositeNodeWrapper prepareCnSnRpcOutput() throws URISyntaxException {

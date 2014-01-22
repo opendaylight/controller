@@ -30,10 +30,12 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
+import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 class RestconfImpl implements RestconfService {
 
     val static RestconfImpl INSTANCE = new RestconfImpl
+    val static MOUNT_POINT_MODULE_NAME = "ietf-netconf"
 
     @Property
     BrokerFacade broker
@@ -157,16 +159,30 @@ class RestconfImpl implements RestconfService {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)");
         }
-        val uncompleteInstIdWithData = identifier.toInstanceIdentifier
-        val schemaNode = uncompleteInstIdWithData.mountPoint.findModule(payload)?.getSchemaChildNode(payload)
-        val value = normalizeNode(payload, schemaNode, uncompleteInstIdWithData.mountPoint)
-        val completeInstIdWithData = uncompleteInstIdWithData.addLastIdentifierFromData(value, schemaNode)
-        var RpcResult<TransactionStatus> status = null
-        if (completeInstIdWithData.mountPoint !== null) {
-            status = broker.commitConfigurationDataPostBehindMountPoint(completeInstIdWithData.mountPoint,
-                completeInstIdWithData.instanceIdentifier, value)?.get();
+        var InstanceIdWithSchemaNode iiWithData;
+        var CompositeNode value;
+        if (payload.representsMountPointRootData) { // payload represents mount point data and URI represents path to the mount point
+            if (identifier.endsWithMountPoint) {
+                throw new ResponseException(BAD_REQUEST,
+                "URI has bad format. URI should be without \"" + ControllerContext.MOUNT + "\" for POST operation.");
+            }
+            val completIdentifier = identifier.addMountPointIdentifier
+            iiWithData = completIdentifier.toInstanceIdentifier
+            value = normalizeNode(payload, iiWithData.schemaNode, iiWithData.mountPoint)
         } else {
-            status = broker.commitConfigurationDataPost(completeInstIdWithData.instanceIdentifier, value)?.get();
+            val uncompleteInstIdWithData = identifier.toInstanceIdentifier
+            val parentSchema = uncompleteInstIdWithData.schemaNode as DataNodeContainer
+            val namespace = uncompleteInstIdWithData.mountPoint.findModule(payload)?.namespace
+            val schemaNode = parentSchema.findInstanceDataChild(payload.name, namespace)
+            value = normalizeNode(payload, schemaNode, uncompleteInstIdWithData.mountPoint)
+            iiWithData = uncompleteInstIdWithData.addLastIdentifierFromData(value, schemaNode)
+        }
+        var RpcResult<TransactionStatus> status = null
+        if (iiWithData.mountPoint !== null) {
+            status = broker.commitConfigurationDataPostBehindMountPoint(iiWithData.mountPoint,
+                iiWithData.instanceIdentifier, value)?.get();
+        } else {
+            status = broker.commitConfigurationDataPost(iiWithData.instanceIdentifier, value)?.get();
         }
         if (status === null) {
             return Response.status(ACCEPTED).build
@@ -182,7 +198,12 @@ class RestconfImpl implements RestconfService {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)");
         }
-        val schemaNode = findModule(null, payload)?.getSchemaChildNode(payload)
+        val module = findModule(null, payload)
+        if (module === null) {
+            throw new ResponseException(BAD_REQUEST,
+                "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)");
+        }
+        val schemaNode = module.findInstanceDataChild(payload.name, module.namespace)
         val value = normalizeNode(payload, schemaNode, null)
         val iiWithData = addLastIdentifierFromData(null, value, schemaNode)
         var RpcResult<TransactionStatus> status = null
@@ -223,6 +244,14 @@ class RestconfImpl implements RestconfService {
     private def dispatch URI namespace(CompositeNodeWrapper data) {
         return data.namespace
     }
+    
+    private def dispatch String localName(CompositeNode data) {
+        return data.nodeType.localName
+    }
+    
+    private def dispatch String localName(CompositeNodeWrapper data) {
+        return data.localName
+    }
 
     private def dispatch Module findModule(MountInstance mountPoint, CompositeNode data) {
         if (mountPoint !== null) {
@@ -249,14 +278,14 @@ class RestconfImpl implements RestconfService {
         return module
     }
     
-    private def dispatch DataSchemaNode getSchemaChildNode(DataNodeContainer parentSchemaNode, CompositeNode data) {
-        return parentSchemaNode?.getDataChildByName(data.nodeType.localName)
+    private def dispatch getName(CompositeNode data) {
+        return data.nodeType.localName
     }
     
-    private def dispatch DataSchemaNode getSchemaChildNode(DataNodeContainer parentSchemaNode, CompositeNodeWrapper data) {
-        return parentSchemaNode?.getDataChildByName(data.localName)
+    private def dispatch getName(CompositeNodeWrapper data) {
+        return data.localName
     }
-
+    
     private def InstanceIdWithSchemaNode addLastIdentifierFromData(InstanceIdWithSchemaNode identifierWithSchemaNode,
         CompositeNode data, DataSchemaNode schemaOfData) {
         val iiOriginal = identifierWithSchemaNode?.instanceIdentifier
@@ -288,7 +317,23 @@ class RestconfImpl implements RestconfService {
         }
         return keyValues
     }
-
+    
+    private def endsWithMountPoint(String identifier) {
+        return (identifier.endsWith(ControllerContext.MOUNT) || identifier.endsWith(ControllerContext.MOUNT + "/"))
+    }
+    
+    private def representsMountPointRootData(CompositeNode data) {
+        return ((data.namespace == SchemaContext.NAME.namespace || data.namespace == MOUNT_POINT_MODULE_NAME) &&
+            data.localName == SchemaContext.NAME.localName)
+    }
+    
+    private def addMountPointIdentifier(String identifier) {
+        if (identifier.endsWith("/")) {
+            return identifier + ControllerContext.MOUNT
+        }
+        return identifier + "/" + ControllerContext.MOUNT
+    }
+    
     private def CompositeNode normalizeNode(CompositeNode node, DataSchemaNode schema, MountInstance mountPoint) {
         if (schema === null) {
             throw new ResponseException(INTERNAL_SERVER_ERROR, "Data schema node was not found for " + node?.nodeType?.localName)
@@ -304,7 +349,7 @@ class RestconfImpl implements RestconfService {
         }
         return node
     }
-
+    
     private def void normalizeNode(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment,
         MountInstance mountPoint) {
         if (schema === null) {
@@ -325,7 +370,7 @@ class RestconfImpl implements RestconfService {
             moduleName = controllerContext.findModuleNameByNamespace(mountPoint, validQName.namespace)
         }
         if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
-            nodeBuilder.namespace.toString == moduleName) {
+            nodeBuilder.namespace.toString == moduleName || nodeBuilder.namespace == MOUNT_POINT_MODULE_NAME) {
             nodeBuilder.qname = validQName
         } else {
             throw new ResponseException(BAD_REQUEST,

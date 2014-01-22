@@ -207,10 +207,15 @@ class JsonMapper {
                 }
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
             } else {
+                Object value = node.getValue();
                 logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
                         + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is "
-                        + node.getValue().getClass());
-                writer.value(String.valueOf(node.getValue()));
+                        + (value != null ? value.getClass() : "null"));
+                if (value == null) {
+                    writer.value("");
+                } else {
+                    writer.value(String.valueOf(value));
+                }
             }
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
                 || baseType instanceof UnsignedIntegerTypeDefinition) {
