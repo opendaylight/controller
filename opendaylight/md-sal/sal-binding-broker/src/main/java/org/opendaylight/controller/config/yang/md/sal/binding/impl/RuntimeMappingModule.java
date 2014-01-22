@@ -9,8 +9,6 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import javassist.ClassPool;
-
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.osgi.framework.BundleContext;

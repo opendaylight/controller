@@ -8,20 +8,17 @@ import java.util.concurrent.Future;
 
 import javassist.ClassPool;
 
-import org.eclipse.xtext.xbase.lib.Pure;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
-import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
+import org.opendaylight.controller.sal.binding.dom.serializer.api.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBindingBrokerImpl;
-import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
+import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
@@ -31,7 +28,6 @@ import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
@@ -55,7 +51,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 import static com.google.common.base.Preconditions.*;
 

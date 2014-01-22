@@ -28,6 +28,8 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "dom-serializer-api").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "dom-serializer-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), // //
 
                 mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(), //
