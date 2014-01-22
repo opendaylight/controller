@@ -36,8 +36,8 @@ import java.util.WeakHashMap
 import org.opendaylight.yangtools.yang.binding.annotations.QName
 import org.opendaylight.yangtools.yang.binding.DataContainer
 import org.opendaylight.yangtools.yang.binding.RpcImplementation
-import org.opendaylight.controller.sal.binding.codegen.util.JavassistUtils
-import org.opendaylight.controller.sal.binding.impl.util.ClassLoaderUtils
+import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils
+import org.opendaylight.yangtools.sal.binding.generator.util.ClassLoaderUtils
 import javassist.LoaderClassPath
 
 class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
@@ -96,7 +96,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             val supertype = iface.asCtClass
             return supertype.rpcMetadata;
         ]
-        
+
         val instance = <T>withClassLoaderAndLock(iface.classLoader,lock) [ |
             val supertype = iface.asCtClass
             val routerName = iface.routerName;
@@ -104,14 +104,14 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             if(potentialClass != null) {
                 return potentialClass.newInstance as T;
             }
-            
+
             val targetCls = createClass(iface.routerName, supertype) [
-                
-                
+
+
                 field(DELEGATE_FIELD, iface)
                 //field(REMOTE_INVOKER_FIELD,iface);
                 implementsType(RpcImplementation.asCtClass)
-                
+
                 for (ctx : metadata.contexts) {
                     field(ctx.routingTableField, Map)
                 }
@@ -146,14 +146,14 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                 ]
             ]
             return targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance as T
-            
+
         ];
         return new RpcRouterCodegenInstance(routerInstanceName,iface, instance, metadata.contexts,metadata.supportedInputs);
     }
 
     private def RpcServiceMetadata getRpcMetadata(CtClass iface) {
         val metadata = new RpcServiceMetadata;
-        
+
         iface.methods.filter[declaringClass == iface && parameterTypes.size === 1].forEach [ method |
             val routingPair = method.rpcMetadata;
             if (routingPair !== null) {
@@ -168,7 +168,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     }
 
     private def getRpcMetadata(CtMethod method) {
-        val inputClass = method.parameterTypes.get(0); 
+        val inputClass = method.parameterTypes.get(0);
         return inputClass.rpcMethodMetadata(inputClass,method.name);
     }
 
@@ -232,7 +232,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener<?>>);
     }
 
-    
+
 
 
 
@@ -245,7 +245,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             val newInvoker = generateListenerInvoker(class1);
             invokerClasses.put(class1, newInvoker);
             return newInvoker
-            
+
         ]
     }
 }
@@ -294,11 +294,11 @@ package class RpcServiceMetadata {
 
     @Property
     val rpcMethods = new HashMap<String, RpcMetadata>();
-    
+
     @Property
     val rpcInputs = new HashMap<Class<? extends DataContainer>, RpcMetadata>();
-    
-    
+
+
     @Property
     val supportedInputs = new HashSet<Class<? extends DataContainer>>();
 }
@@ -319,7 +319,7 @@ package class RpcMetadata {
 
     @Property
     val boolean routeEncapsulated;
-    
+
     @Property
     val CtClass inputType;
 }

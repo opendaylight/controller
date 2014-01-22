@@ -12,7 +12,7 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService
 import org.opendaylight.controller.sal.core.api.data.DataProviderService
 import org.opendaylight.controller.sal.core.api.data.DataStore
 import org.opendaylight.controller.sal.core.api.model.SchemaService
-import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
 import org.opendaylight.controller.sal.core.api.mount.MountService
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter
