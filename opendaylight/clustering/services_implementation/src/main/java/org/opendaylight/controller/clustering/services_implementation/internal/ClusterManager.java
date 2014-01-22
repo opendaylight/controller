@@ -69,7 +69,7 @@ public class ClusterManager implements IClusterServices {
     private ViewChangedListener cacheManagerListener;
 
     private static String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
-
+    private static final int gossipRouterPortDefault = 12001;
     // defaultTransactionTimeout is 60 seconds
     private static int DEFAULT_TRANSACTION_TIMEOUT = 60;
 
@@ -91,12 +91,11 @@ public class ClusterManager implements IClusterServices {
      */
     private GossipRouter startGossiper() {
         boolean amIGossipRouter = false;
-        Integer gossipRouterPortDefault = 12001;
         Integer gossipRouterPort = gossipRouterPortDefault;
         InetAddress gossipRouterAddress = null;
         String supernodes_list = System.getProperty("supernodes",
                 loopbackAddress);
-        StringBuffer sanitized_supernodes_list = new StringBuffer();
+        StringBuilder sanitized_supernodes_list = new StringBuilder();
         List<InetAddress> myAddresses = new ArrayList<InetAddress>();
 
         StringTokenizer supernodes = new StringTokenizer(supernodes_list, ":");
@@ -135,7 +134,7 @@ public class ClusterManager implements IClusterServices {
             try {
                 hostAddr = InetAddress.getByName(host);
             } catch (UnknownHostException ue) {
-                logger.error("Host not known");
+                logger.error("Host {} is not known", host);
                 continue;
             }
             if (host_port.hasMoreTokens()) {
@@ -143,13 +142,12 @@ public class ClusterManager implements IClusterServices {
                 try {
                     port_num = Integer.valueOf(port);
                 } catch (NumberFormatException ne) {
-                    logger
-                            .error("Supplied supernode gossiepr port is not recognized, using standard gossipport");
+                    logger.error("Supplied supernode gossip port is not recognized, using default gossip port {}",
+                                 gossipRouterPortDefault);
                     port_num = gossipRouterPortDefault;
                 }
                 if ((port_num > 65535) || (port_num < 0)) {
-                    logger
-                            .error("Supplied supernode gossip port is outside a valid TCP port range");
+                    logger.error("Supplied supernode gossip port is outside a valid TCP port range");
                     port_num = gossipRouterPortDefault;
                 }
             }
@@ -168,8 +166,7 @@ public class ClusterManager implements IClusterServices {
             if (!sanitized_supernodes_list.toString().equals("")) {
                 sanitized_supernodes_list.append(",");
             }
-            sanitized_supernodes_list.append(hostAddr.getHostAddress() + "["
-                    + port_num + "]");
+            sanitized_supernodes_list.append(hostAddr.getHostAddress()).append("[").append(port_num).append("]");
         }
 
         if (amIGossipRouter) {
