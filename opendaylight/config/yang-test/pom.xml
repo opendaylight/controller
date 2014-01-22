@@ -104,7 +104,7 @@
                                         org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
                                     </codeGeneratorClass>
                                     <outputBaseDir>
-                                        target/generated-sources/sal
+                                        ${project.build.directory}/generated-sources/sal
                                     </outputBaseDir>
                                 </generator>
                             </codeGenerators>

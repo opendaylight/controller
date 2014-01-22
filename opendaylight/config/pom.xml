@@ -259,7 +259,7 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/jacoco</outputDirectory>
+                            <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
                             <haltOnFailure>false</haltOnFailure>
                             <check>
                                 <classRatio>80</classRatio>
@@ -301,7 +301,7 @@
                                     </generator>
                                     <generator>
                                         <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
-                                        <outputBaseDir>target/site/models</outputBaseDir>
+                                        <outputBaseDir>${project.build.directory}/site/models</outputBaseDir>
                                     </generator>
                                 </codeGenerators>
                                 <inspectDependencies>true</inspectDependencies>
