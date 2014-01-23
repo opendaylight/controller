@@ -1310,10 +1310,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             if (nodeProps.replace(node, propMapCurr, propMap)) {
                 return;
             }
-            if (!propMapCurr.get(prop.getName()).equals(nodeProps.get(node).get(prop.getName()))) {
-                log.debug("Cluster conflict: Unable to add property {} to node {}.", prop.getName(), node.getID());
-                return;
-            }
         }
         log.warn("Cluster conflict: Unable to add property {} to node {}.", prop.getName(), node.getID());
     }
@@ -1331,12 +1327,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 if (nodeProps.replace(node, propMapCurr, propMap)) {
                     return new Status(StatusCode.SUCCESS);
                 }
-                if (!propMapCurr.get(propName).equals(nodeProps.get(node).get(propName))) {
-                    String msg = "Cluster conflict: Unable to remove property " + propName + " for node "
-                            + node.getID();
-                    return new Status(StatusCode.CONFLICT, msg);
-                }
-
             } else {
                 return new Status(StatusCode.SUCCESS);
             }
