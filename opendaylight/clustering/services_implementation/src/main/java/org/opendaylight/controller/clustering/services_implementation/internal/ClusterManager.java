@@ -13,6 +13,8 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -95,8 +97,19 @@ public class ClusterManager implements IClusterServices {
         InetAddress gossipRouterAddress = null;
         String supernodes_list = System.getProperty("supernodes",
                 loopbackAddress);
-        StringBuilder sanitized_supernodes_list = new StringBuilder();
+        /*
+         * Check the environment for the "container" variable, if this is set
+         * and is equal to "lxc", then ODL is running inside an lxc
+         * container, and address resolution of supernodes will be modified
+         * accordingly.
+         */
+        boolean inContainer = "lxc".equals(System.getenv("container"));
+        StringBuffer sanitized_supernodes_list = new StringBuffer();
         List<InetAddress> myAddresses = new ArrayList<InetAddress>();
+
+        if (inContainer) {
+            logger.info("DOCKER: Resolving supernode host names using docker container semantics");
+        }
 
         StringTokenizer supernodes = new StringTokenizer(supernodes_list, ":");
         if (supernodes.hasMoreTokens()) {
@@ -131,6 +144,34 @@ public class ClusterManager implements IClusterServices {
             }
             host = host_port.nextToken();
             InetAddress hostAddr;
+            /*
+             * If we are in a container and the hostname begins with a '+', this is
+             * an indication that we should resolve this host name in the context
+             * of a docker container.
+             *
+             * Specifically this means:
+             * '+self'   : self reference and the host will be mapped to the value of
+             *             HOSTNAME in the environment
+             * '+<name>' : references another container by its name. The docker established
+             *             environment variables will be used to resolve the host to an
+             *             IP address.
+             */
+            if (inContainer && host != null && host.charAt(0) == '+') {
+                if ("+self".equals(host)) {
+                    host = System.getenv("HOSTNAME");
+                } else {
+                    String link = System.getenv(host.substring(1).toUpperCase() + "_PORT");
+                    if (link != null) {
+                        try {
+                            host = new URI(link).getHost();
+                        } catch (URISyntaxException e) {
+                            logger.error("DOCKER: Unable to translate container reference ({}) to host IP Address, will attempt using normal host name",
+                                host.substring(1));
+                        }
+                    }
+                }
+            }
+
             try {
                 hostAddr = InetAddress.getByName(host);
             } catch (UnknownHostException ue) {
