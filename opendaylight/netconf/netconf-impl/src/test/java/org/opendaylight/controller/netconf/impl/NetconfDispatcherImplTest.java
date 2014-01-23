@@ -26,6 +26,7 @@ public class NetconfDispatcherImplTest {
     private EventLoopGroup nettyGroup;
     private NetconfServerDispatcher dispatch;
     private DefaultCommitNotificationProducer commitNot;
+    private HashedWheelTimer hashedWheelTimer;
 
     @Before
     public void setUp() throws Exception {
@@ -36,8 +37,9 @@ public class NetconfDispatcherImplTest {
         NetconfOperationServiceFactoryListener factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
 
         SessionIdProvider idProvider = new SessionIdProvider();
+        hashedWheelTimer = new HashedWheelTimer();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                new HashedWheelTimer(), factoriesListener, idProvider);
+                hashedWheelTimer, factoriesListener, idProvider, 5000);
 
         NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider, null);
@@ -49,6 +51,7 @@ public class NetconfDispatcherImplTest {
 
     @After
     public void tearDown() throws Exception {
+        hashedWheelTimer.stop();
         commitNot.close();
         nettyGroup.shutdownGracefully();
     }

@@ -8,16 +8,13 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Optional;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -33,7 +30,8 @@ import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
-import com.google.common.base.Optional;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 
@@ -42,19 +40,19 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
     private NetconfClientSessionNegotiatorFactory negotatorFactory;
 
     public NetconfSshClientDispatcher(AuthenticationHandler authHandler, EventLoopGroup bossGroup,
-            EventLoopGroup workerGroup) {
-        super(bossGroup, workerGroup);
+            EventLoopGroup workerGroup, long connectionTimeoutMillis) {
+        super(bossGroup, workerGroup, connectionTimeoutMillis);
         this.authHandler = authHandler;
         this.timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.<String>absent());
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.<String>absent(), connectionTimeoutMillis);
     }
 
     public NetconfSshClientDispatcher(AuthenticationHandler authHandler, EventLoopGroup bossGroup,
-            EventLoopGroup workerGroup, String additionalHeader) {
-        super(bossGroup, workerGroup, additionalHeader);
+            EventLoopGroup workerGroup, String additionalHeader, long socketTimeoutMillis) {
+        super(bossGroup, workerGroup, additionalHeader, socketTimeoutMillis);
         this.authHandler = authHandler;
         this.timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader));
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader), socketTimeoutMillis);
     }
 
     public Future<NetconfClientSession> createClient(InetSocketAddress address,

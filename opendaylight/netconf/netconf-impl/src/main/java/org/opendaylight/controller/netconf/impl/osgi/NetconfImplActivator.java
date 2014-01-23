@@ -48,8 +48,9 @@ public class NetconfImplActivator implements BundleActivator {
 
         SessionIdProvider idProvider = new SessionIdProvider();
         timer = new HashedWheelTimer();
+        long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                timer, factoriesListener, idProvider);
+                timer, factoriesListener, idProvider, connectionTimeoutMillis);
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 

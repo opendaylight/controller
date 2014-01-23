@@ -40,12 +40,14 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private static final Document helloMessageTemplate = loadHelloMessageTemplate();
     private final SessionIdProvider idProvider;
     private final NetconfOperationServiceFactoryListener factoriesListener;
+    private final long connectionTimeoutMillis;
 
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationServiceFactoryListener factoriesListener,
-            SessionIdProvider idProvider) {
+            SessionIdProvider idProvider, long connectionTimeoutMillis) {
         this.timer = timer;
         this.factoriesListener = factoriesListener;
         this.idProvider = idProvider;
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     private static Document loadHelloMessageTemplate() {
@@ -64,7 +66,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         NetconfServerSessionPreferences proposal = new NetconfServerSessionPreferences(createHelloMessage(sessionId),
                 sessionId);
         return new NetconfServerSessionNegotiator(proposal, promise, channel, timer,
-                sessionListenerFactory.getSessionListener());
+                sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
     }
 
     private static final XPathExpression sessionIdXPath = XMLNetconfUtil
