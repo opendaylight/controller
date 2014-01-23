@@ -29,7 +29,7 @@ public class SSHNetconfClientLiveTest {
         nettyThreadgroup = new NioEventLoopGroup();
         netconfClientDispatcher = new NetconfSshClientDispatcher(new LoginPassword(
                 System.getProperty("username"), System.getProperty("password")),
-                nettyThreadgroup, nettyThreadgroup);
+                nettyThreadgroup, nettyThreadgroup, 5000);
     }
 
     @Test

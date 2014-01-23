@@ -64,7 +64,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         }
 
         String timeoutProperty = propertiesProvider.getProperty(PUSH_TIMEOUT);
-        long timeout = timeoutProperty == null ? ConfigPusher.DEFAULT_TIMEOUT : TimeUnit.SECONDS.toNanos(Integer.valueOf(timeoutProperty));
+        long timeout = timeoutProperty == null ? ConfigPusher.DEFAULT_TIMEOUT_NANOS : TimeUnit.SECONDS.toNanos(Integer.valueOf(timeoutProperty));
 
         final Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
         nettyThreadgroup = new NioEventLoopGroup();

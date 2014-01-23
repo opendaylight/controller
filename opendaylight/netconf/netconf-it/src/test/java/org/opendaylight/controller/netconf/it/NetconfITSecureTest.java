@@ -9,9 +9,22 @@
 package org.opendaylight.controller.netconf.it;
 
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.controller.config.yang.store.api.YangStoreException;
+import org.opendaylight.controller.config.yang.store.impl.HardcodedYangStoreService;
+import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
+import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
+import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -23,34 +36,13 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.impl.HardcodedYangStoreService;
-import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
-import org.opendaylight.controller.netconf.impl.SessionIdProvider;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 
-public class NetconfITSecureTest extends AbstractConfigTest {
+public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
     private static final InetSocketAddress tlsAddress = new InetSocketAddress("127.0.0.1", 12024);
 
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatchS;
-    private EventLoopGroup nettyThreadgroup;
 
 
     @Before
@@ -63,7 +55,6 @@ public class NetconfITSecureTest extends AbstractConfigTest {
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
-        nettyThreadgroup = new NioEventLoopGroup();
 
         dispatchS = createDispatcher(factoriesListener);
         ChannelFuture s = dispatchS.createServer(tlsAddress);
@@ -71,22 +62,12 @@ public class NetconfITSecureTest extends AbstractConfigTest {
     }
 
     private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
-        SessionIdProvider idProvider = new SessionIdProvider();
-        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
-
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider, NetconfITTest.getNetconfMonitoringListenerService());
-
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
-                serverNegotiatorFactory, listenerFactory);
-        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
+        return super.createDispatcher(factoriesListener, NetconfITTest.getNetconfMonitoringListenerService(), commitNot);
     }
 
     @After
     public void tearDown() throws Exception {
         commitNot.close();
-        nettyThreadgroup.shutdownGracefully();
     }
 
     private SSLContext getSslContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
@@ -110,7 +91,7 @@ public class NetconfITSecureTest extends AbstractConfigTest {
 
     @Test
     public void testSecure() throws Exception {
-        NetconfClientDispatcher dispatch = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
+        NetconfClientDispatcher dispatch = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
         try (NetconfClient netconfClient = new NetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
 
         }
