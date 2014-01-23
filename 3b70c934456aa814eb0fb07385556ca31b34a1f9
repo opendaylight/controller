@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_32d064f5",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-23T09:04:19Z",
+      "side": 1,
+      "message": "Please make this one trace accordingly to:\n\nhttps://wiki.opendaylight.org/view/Draft_Syslog_Level_Settings",
+      "revId": "3b70c934456aa814eb0fb07385556ca31b34a1f9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
