@@ -8,6 +8,7 @@ import org.opendaylight.controller.sal.core.api.notify.NotificationPublishServic
 import org.opendaylight.controller.sal.core.api.notify.NotificationService
 import org.opendaylight.controller.sal.core.api.model.SchemaService
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
 
 class ProxyFactory {
 
@@ -38,6 +39,10 @@ class ProxyFactory {
 
     private static def dispatch createProxyImpl(ServiceReference<?> ref, SchemaService service) {
         new SchemaServiceProxy(ref as ServiceReference<SchemaService>, service);
+    }
+
+    private static def dispatch createProxyImpl(ServiceReference<?> ref, RpcProvisionRegistry service) {
+        new RpcProvisionRegistryProxy(ref as ServiceReference<RpcProvisionRegistry>, service);
     }
 
     private static def dispatch createProxyImpl(ServiceReference<?> reference, BrokerService service) {
