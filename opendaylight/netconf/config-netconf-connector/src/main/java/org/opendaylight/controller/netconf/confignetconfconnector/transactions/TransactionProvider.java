@@ -95,15 +95,29 @@ public class TransactionProvider implements AutoCloseable {
      * Commit and notification send must be atomic
      */
     public synchronized CommitStatus commitTransaction() throws NetconfDocumentedException {
-        final Optional<ObjectName> taON = getTransaction();
-        Preconditions.checkState(taON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
-        CommitStatus status = configRegistryClient.commitConfig(taON.get());
-        allOpenedTransactions.remove(transaction);
-        transaction = null;
-        return status;
+        final Optional<ObjectName> maybeTaON = getTransaction();
+        Preconditions.checkState(maybeTaON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
+        ObjectName taON = maybeTaON.get();
+        try {
+            CommitStatus status = configRegistryClient.commitConfig(taON);
+            // clean up
+            allOpenedTransactions.remove(transaction);
+            transaction = null;
+            return status;
+        } catch (ValidationException validationException) {
+            // no clean up: user can reconfigure and recover this transaction
+            logger.warn("Transaction {} failed on {}", taON, validationException.toString());
+            throw validationException;
+        } catch (Exception e) {
+            logger.error("Exception while commit of {}, aborting transaction", taON, e);
+            // clean up
+            abortTransaction();
+            throw e;
+        }
     }
 
     public synchronized void abortTransaction() {
+        logger.debug("Aborting current transaction");
         Optional<ObjectName> taON = getTransaction();
         Preconditions.checkState(taON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
 
@@ -114,6 +128,7 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     public synchronized void abortTestTransaction(ObjectName testTx) {
+        logger.debug("Aborting transaction {}", testTx);
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(testTx);
         allOpenedTransactions.remove(testTx);
         transactionClient.abortConfig();
