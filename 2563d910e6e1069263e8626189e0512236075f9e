@@ -1,0 +1,344 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f271ac0c",
+        "filename": "opendaylight/websocket/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "is there a reason to keep commented out code?",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d262283d",
+        "filename": "opendaylight/websocket/websocket-client/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "please use variables like ${netty.version} or better yet dependencymanagement",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_725dbc78",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/WebSocketClientHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "Can you throw something more specific? Use checked exceptions where there is a reason to believe caller might be able to make a decision based on it. Otherwise it should be subclass of RuntimeException.",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9258308b",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/WebSocketClientHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "printStackTrace? really?",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3253c46c",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/WebSocketIClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "the .toString() is not necessary here",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5256385d",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/WebSocketIClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "never use sysout",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_124c40c7",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/callback/IClientMessageCallback.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "ODL copyright header is missing",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f2488cb4",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/callback/IClientMessageCallback.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "this comment is useless",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d2c90827",
+        "filename": "opendaylight/websocket/websocket-client/src/main/java/org/opendaylight/controller/websocket/client/callback/IClientMessageCallback.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "if the I is there to prefix an interface please refactor it out",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_32daa4e8",
+        "filename": "opendaylight/websocket/websocket-client/src/test/java/org/opendaylight/controller/websocket/WebSocketClientTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "sure?",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_12e320a5",
+        "filename": "opendaylight/websocket/websocket-client/src/test/java/org/opendaylight/controller/websocket/WebSocketClientTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "\u0027this\u0027 is abundant. Opening and closing resources is according to best practise done in @Before and @After. An exception in this code would keep the thread running.",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_92cf1029",
+        "filename": "opendaylight/websocket/websocket-client/src/test/java/org/opendaylight/controller/websocket/WebSocketClientTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "sure?",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_72d49cbc",
+        "filename": "opendaylight/websocket/websocket-client/src/test/java/org/opendaylight/controller/websocket/WebSocketClientTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "if connect failed does it make sense to continue?",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5204f848",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "Use config-subsystem to wire these",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_92e6f0ae",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "Isn\u0027t it an error when websocket server does not start?",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_72eb7c78",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "sysout",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_32018438",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServerHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "dont use jul - ODL uses slf4j",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_12fa0043",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServerHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "don\u0027t use * imports",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f2f64c5c",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServerHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "log instead",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d297c8ea",
+        "filename": "opendaylight/websocket/websocket-server/src/main/java/org/opendaylight/controller/websocket/server/WebSocketServerIndexPage.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-01-23T10:54:13Z",
+      "side": 1,
+      "message": "move to test",
+      "revId": "2563d910e6e1069263e8626189e0512236075f9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
