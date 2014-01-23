@@ -17,7 +17,9 @@ module opendaylight-match-types {
             type yang:mac-address;
         }
         leaf mask {
-            type binary;
+            type uint64 {
+              range "0..281474976710656";
+            }
         }
     }
     
@@ -27,7 +29,7 @@ module opendaylight-match-types {
         }
         
         leaf metadata-mask {
-            type binary;
+            type uint64;
         }
     }
 
@@ -50,10 +52,6 @@ module opendaylight-match-types {
             leaf type {
                 mandatory true;
                 type l2t:ether-type; // Needs to define that as general model
-            }
-
-            leaf mask {
-                type binary;
             }
         }
     }
@@ -134,7 +132,9 @@ module opendaylight-match-types {
             }
             
             leaf flabel-mask {
-                type binary;
+                type uint32 {
+                  range "0..1048575";
+                }
             }
         }
         
@@ -155,7 +155,9 @@ module opendaylight-match-types {
             }
 
             leaf ipv6-exthdr-mask {
-                type binary;
+                type uint16 {
+                  range "0..512";
+                }
             }
         }
     }
@@ -194,7 +196,9 @@ module opendaylight-match-types {
             }  
 
             leaf pbb-mask {
-                type binary;
+                type uint32 {
+                  range "0..16777216";
+                }
             }
         }
     }
@@ -289,7 +293,7 @@ module opendaylight-match-types {
             }
             
             leaf tunnel-mask {
-                type binary;
+                type uint64;
             }
         }
         
