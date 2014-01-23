@@ -72,7 +72,9 @@ public class ConfigPusher {
     }
 
     private synchronized NetconfClient pushAllConfigs(List<ConfigSnapshotHolder> configs) throws InterruptedException {
+        // first just make sure we can connect to netconf, even if nothing is being pushed
         NetconfClient netconfClient = makeNetconfConnection(Collections.<String>emptySet(), Optional.<NetconfClient>absent());
+        // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder: configs){
             netconfClient = pushSnapshotWithRetries(configSnapshotHolder, Optional.of(netconfClient));
         }
@@ -106,21 +108,16 @@ public class ConfigPusher {
     /**
      * @param expectedCaps capabilities that server hello must contain. Will retry until all are found or throws RuntimeException.
      *                     If empty set is provided, will only make sure netconf client successfuly connected to the server.
-     * @param oldClientForPossibleReuse if present, try to get expected capabilities from it before closing it and retrying with
-     *                                  new client connection.
+     * @param maybeOldClient if present, close it.
      * @return NetconfClient that has all required capabilities from server.
      */
     private synchronized NetconfClient makeNetconfConnection(Set<String> expectedCaps,
-                                                             Optional<NetconfClient> oldClientForPossibleReuse)
+                                                             Optional<NetconfClient> maybeOldClient)
             throws InterruptedException {
 
-        if (oldClientForPossibleReuse.isPresent()) {
-            NetconfClient oldClient = oldClientForPossibleReuse.get();
-            if (Util.isSubset(oldClient, expectedCaps)) {
-                return oldClient;
-            } else {
-                Util.closeClientAndDispatcher(oldClient);
-            }
+        if (maybeOldClient.isPresent()) {
+            NetconfClient oldClient = maybeOldClient.get();
+            Util.closeClientAndDispatcher(oldClient);
         }
 
         // TODO think about moving capability subset check to netconf client
