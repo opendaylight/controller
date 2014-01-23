@@ -124,12 +124,14 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     public final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
 
     private final StatisticsProvider statisticsManager;
+    private final MultipartMessageManager messageManager;
     
     private int unaccountedFlowsCounter = 1;
 
     public StatisticsUpdateCommiter(final StatisticsProvider manager){
 
         this.statisticsManager = manager;
+        this.messageManager = this.statisticsManager.getMultipartMessageManager();
     }
     
     public StatisticsProvider getStatisticsManager(){
@@ -139,7 +141,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onMeterConfigStatsUpdated(MeterConfigStatsUpdated notification) {
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
         
         NodeKey key = new NodeKey(notification.getId());
@@ -181,7 +183,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     public void onMeterStatisticsUpdated(MeterStatisticsUpdated notification) {
         
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
@@ -216,7 +218,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     public void onGroupDescStatsUpdated(GroupDescStatsUpdated notification) {
         
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
@@ -259,7 +261,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     public void onGroupStatisticsUpdated(GroupStatisticsUpdated notification) {
         
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         //Publish data to configuration data store
@@ -350,7 +352,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     public void onFlowsStatisticsUpdate(FlowsStatisticsUpdate notification) {
         
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
@@ -454,7 +456,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                                 .child(Flow.class,existingFlow.getKey()).toInstance();
                         flowBuilder.setKey(existingFlow.getKey());
                         flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                        sucLogger.info("Found matching flow in the datastore, augmenting statistics");
+                        sucLogger.debug("Found matching flow in the datastore, augmenting statistics");
                         foundOriginalFlow = true;
                         it.putOperationalData(flowRef, flowBuilder.build());
                         it.commit();
@@ -479,7 +481,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                                     .child(Flow.class,existingFlow.getKey()).toInstance();
                             flowBuilder.setKey(existingFlow.getKey());
                             flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                            sucLogger.debug("Found matching flow in the operational datastore, augmenting statistics");
+                            sucLogger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
                             foundOriginalFlow = true;
                             it.putOperationalData(flowRef, flowBuilder.build());
                             it.commit();
@@ -489,7 +491,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                 }
             }
             if(!foundOriginalFlow){
-                sucLogger.debug("Associated original flow is not found in data store. Augmenting flow in operational data store");
                 long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"0"+Integer.toString(this.unaccountedFlowsCounter)));
                 this.unaccountedFlowsCounter++;
                 FlowKey newFlowKey = new FlowKey(new FlowId(Long.toString(flowKey)));
@@ -499,7 +500,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                         .child(Flow.class,newFlowKey).toInstance();
                 flowBuilder.setKey(newFlowKey);
                 flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                sucLogger.info("Flow was no present in data store, augmenting statistics as an unaccounted flow");
+                sucLogger.info("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",flowBuilder.build());
                 it.putOperationalData(flowRef, flowBuilder.build());
                 it.commit();
             }
@@ -509,13 +510,12 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
-        sucLogger.debug("Received aggregate flow statistics update : {}",notification.toString());
         
-        Short tableId = this.statisticsManager.getMultipartMessageManager().getTableIdForTxId(notification.getTransactionId());
+        Short tableId = messageManager.getTableIdForTxId(notification.getId(),notification.getTransactionId());
         if(tableId != null){
             
             DataModificationTransaction it = this.statisticsManager.startChange();
@@ -544,11 +544,10 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onNodeConnectorStatisticsUpdate(NodeConnectorStatisticsUpdate notification) {
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
-        sucLogger.debug("Received port stats update : {}",notification.toString());
         
         List<NodeConnectorStatisticsAndPortNumberMap> portsStats = notification.getNodeConnectorStatisticsAndPortNumberMap();
         for(NodeConnectorStatisticsAndPortNumberMap portStats : portsStats){
@@ -592,11 +591,10 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     @Override
     public void onFlowTableStatisticsUpdate(FlowTableStatisticsUpdate notification) {
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
-        sucLogger.debug("Received flow table statistics update : {}",notification.toString());
         
         List<FlowTableAndStatisticsMap> flowTablesStatsList = notification.getFlowTableAndStatisticsMap();
         for (FlowTableAndStatisticsMap ftStats : flowTablesStatsList){
@@ -629,11 +627,10 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
     public void onQueueStatisticsUpdate(QueueStatisticsUpdate notification) {
         
         //Check if response is for the request statistics-manager sent.
-        if(this.statisticsManager.getMultipartMessageManager().removeTxId(notification.getTransactionId()) == null)
+        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
         NodeKey key = new NodeKey(notification.getId());
-        sucLogger.debug("Received queue stats update : {}",notification.toString());
         
         //Add statistics to local cache
         ConcurrentMap<NodeId, NodeStatisticsAger> cache = this.statisticsManager.getStatisticsCache();
@@ -670,7 +667,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, queueStatisticsDataBuilder.build());
             queueBuilder.setKey(new QueueKey(swQueueStats.getQueueId()));
 
-            sucLogger.info("Augmenting queue statistics {} of queue {} to port {}"
+            sucLogger.debug("Augmenting queue statistics {} of queue {} to port {}"
                                         ,queueStatisticsDataBuilder.build().toString(),
                                         swQueueStats.getQueueId(),
                                         swQueueStats.getNodeConnectorId());
@@ -686,7 +683,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeKey);
         return new NodeRef(builder.toInstance());
     }
-    
+   
     public boolean flowEquals(Flow statsFlow, Flow storedFlow) {
         if (statsFlow.getClass() != storedFlow.getClass()) {
             return false;

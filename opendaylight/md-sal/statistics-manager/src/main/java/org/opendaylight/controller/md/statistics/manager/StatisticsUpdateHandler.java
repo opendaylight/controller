@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData;
@@ -63,6 +64,18 @@ public class StatisticsUpdateHandler implements DataChangeListener {
     @Override
     public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         
+        Map<InstanceIdentifier<?>, DataObject> nodeAdditions = change.getCreatedOperationalData();
+        for (InstanceIdentifier<? extends DataObject> dataObjectInstance : nodeAdditions.keySet()) {
+            DataObject dataObject = nodeAdditions.get(dataObjectInstance);
+            if(dataObject instanceof Node){
+                
+                Node node = (Node) dataObject;
+                if(node.getAugmentation(FlowCapableNode.class) != null){
+                    this.statisticsManager.sendStatisticsRequestsToNode(node);
+                }
+            }
+        }
+
         Map<InstanceIdentifier<?>, DataObject> additions = change.getCreatedConfigurationData();
         for (InstanceIdentifier<? extends DataObject> dataObjectInstance : additions.keySet()) {
             DataObject dataObject = additions.get(dataObjectInstance);
