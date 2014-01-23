@@ -200,7 +200,7 @@ public class SchemaServiceImpl implements //
 
         SchemaServiceListener listener = context.getService(reference);
         SchemaContext _ctxContext = getGlobalContext();
-        if (getContext() != null) {
+        if (_ctxContext != null) {
             listener.onGlobalContextUpdated(_ctxContext);
         }
         return listener;
