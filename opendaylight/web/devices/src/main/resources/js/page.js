@@ -127,6 +127,7 @@ one.f.switchmanager.nodesLearnt = {
     }
   },
   modal : {
+    registry : { callback:undefined },
     initialize: {
       updateNode: function(evt) {
         one.f.switchmanager.nodesLearnt.ajax.main(one.f.switchmanager.rootUrl + "/tiers", function(tiers) {
@@ -151,7 +152,13 @@ one.f.switchmanager.nodesLearnt = {
 
           // inject body (nodePorts)
           one.lib.modal.inject.body($modal, $body);
-          $modal.modal();
+
+          $modal.modal().on("shown",function() {
+              var callback = one.f.switchmanager.nodesLearnt.modal.registry.callback;
+              if( callback !== undefined && $.isFunction(callback)) {
+                 callback();
+              }
+          });
         });
       },
       popout: function() {
