@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Immutable
 public class ConfigPusher {
@@ -45,20 +46,24 @@ public class ConfigPusher {
     private final InetSocketAddress address;
     private final EventLoopGroup nettyThreadgroup;
 
-
-    public static final long DEFAULT_TIMEOUT = 120000L;// 120 seconds until netconf must be stable
-    private final long timeout;
+    // Default timeout for netconf becoming stable
+    public static final long DEFAULT_TIMEOUT = TimeUnit.MINUTES.toNanos(2);
+    private final int delayMillis = 5000;
+    private final long timeoutNanos;
 
     public ConfigPusher(InetSocketAddress address, EventLoopGroup nettyThreadgroup) {
-        this(address, DEFAULT_TIMEOUT, nettyThreadgroup);
-
+        this(address, nettyThreadgroup, DEFAULT_TIMEOUT);
     }
 
-    public ConfigPusher(InetSocketAddress address, long timeout, EventLoopGroup nettyThreadgroup) {
-        this.address = address;
-        this.timeout = timeout;
+    @Deprecated
+    public ConfigPusher(InetSocketAddress address, long timeoutMillis, EventLoopGroup nettyThreadgroup) {
+        this(address, nettyThreadgroup, TimeUnit.MILLISECONDS.toNanos(timeoutMillis));
+    }
 
+    public ConfigPusher(InetSocketAddress address, EventLoopGroup nettyThreadgroup, long timeoutNanos) {
+        this.address = address;
         this.nettyThreadgroup = nettyThreadgroup;
+        this.timeoutNanos = timeoutNanos;
     }
 
     public synchronized NetconfClient init(List<ConfigSnapshotHolder> configs) throws InterruptedException {
@@ -121,28 +126,25 @@ public class ConfigPusher {
         // TODO think about moving capability subset check to netconf client
         // could be utilized by integration tests
 
-        long pollingStart = System.currentTimeMillis();
-        int delay = 5000;
-
+        final long pollingStart = System.nanoTime();
+        final long deadline = pollingStart + timeoutNanos;
         int attempt = 0;
-
-        long deadline = pollingStart + timeout;
 
         String additionalHeader = NetconfMessageAdditionalHeader.toString("unknown", address.getAddress().getHostAddress(),
                 Integer.toString(address.getPort()), "tcp", Optional.of("persister"));
 
         Set<String> latestCapabilities = new HashSet<>();
-        while (System.currentTimeMillis() < deadline) {
+        while (System.nanoTime() < deadline) {
             attempt++;
             NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup,
                     nettyThreadgroup, additionalHeader);
             NetconfClient netconfClient;
             try {
-                netconfClient = new NetconfClient(this.toString(), address, delay, netconfClientDispatcher);
+                netconfClient = new NetconfClient(this.toString(), address, delayMillis, netconfClientDispatcher);
             } catch (IllegalStateException e) {
                 logger.debug("Netconf {} was not initialized or is not stable, attempt {}", address, attempt, e);
                 netconfClientDispatcher.close();
-                Thread.sleep(delay);
+                Thread.sleep(delayMillis);
                 continue;
             }
             latestCapabilities = netconfClient.getCapabilities();
@@ -153,7 +155,7 @@ public class ConfigPusher {
             }
             logger.debug("Polling hello from netconf, attempt {}, capabilities {}", attempt, latestCapabilities);
             Util.closeClientAndDispatcher(netconfClient);
-            Thread.sleep(delay);
+            Thread.sleep(delayMillis);
         }
         Set<String> allNotFound = new HashSet<>(expectedCaps);
         allNotFound.removeAll(latestCapabilities);

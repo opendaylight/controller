@@ -25,6 +25,7 @@ import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
@@ -32,6 +33,8 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     private final static MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
     private static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
+
+    private static final String PUSH_TIMEOUT = "pushTimeout";
 
     public static final String NETCONF_CONFIG_PERSISTER = "netconf.config.persister";
 
@@ -59,6 +62,10 @@ public class ConfigPersisterActivator implements BundleActivator {
         } else {
             regex = DEFAULT_IGNORED_REGEX;
         }
+
+        String timeoutProperty = propertiesProvider.getProperty(PUSH_TIMEOUT);
+        long timeout = timeoutProperty == null ? ConfigPusher.DEFAULT_TIMEOUT : TimeUnit.SECONDS.toNanos(Integer.valueOf(timeoutProperty));
+
         final Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
         nettyThreadgroup = new NioEventLoopGroup();
 
