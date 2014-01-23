@@ -8,13 +8,21 @@
 
 package org.opendaylight.controller.netconf.util.osgi;
 
-        import com.google.common.base.Optional;
-        import java.net.InetSocketAddress;
-        import org.osgi.framework.BundleContext;
-        import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Optional;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class NetconfConfigUtil {
+    private static final Logger logger = LoggerFactory.getLogger(NetconfConfigUtil.class);
+
     private static final String PREFIX_PROP = "netconf.";
+
+
 
     private enum InfixProp {
         tcp, ssh
@@ -24,6 +32,23 @@ public class NetconfConfigUtil {
     private static final String ADDRESS_SUFFIX_PROP = ".address";
     private static final String CLIENT_PROP = ".client";
     private static final String PRIVATE_KEY_PATH_PROP = ".pk.path";
+
+    private static final String CONNECTION_TIMEOUT_MILLIS_PROP = "connectionTimeoutMillis";
+    private static final long DEFAULT_TIMEOUT_MILLIS = 5000;
+
+    public static long extractTimeoutMillis(BundleContext bundleContext) {
+        String key = PREFIX_PROP + CONNECTION_TIMEOUT_MILLIS_PROP;
+        String timeoutString = bundleContext.getProperty(key);
+        if (timeoutString == null || timeoutString.length() == 0) {
+            return DEFAULT_TIMEOUT_MILLIS;
+        }
+        try {
+            return Long.parseLong(timeoutString);
+        }catch(NumberFormatException e) {
+            logger.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
+            return DEFAULT_TIMEOUT_MILLIS;
+        }
+    }
 
     public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound, boolean forClient) {
 

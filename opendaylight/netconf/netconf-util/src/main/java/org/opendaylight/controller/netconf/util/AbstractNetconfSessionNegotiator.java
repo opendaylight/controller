@@ -42,9 +42,6 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends NetconfSession>
         extends AbstractSessionNegotiator<NetconfMessage, S> {
 
-    // TODO Adjust wait time for negotiation, now is 1 minute ?
-    private static final long INITIAL_HOLDTIMER = 1;
-
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
 
@@ -62,13 +59,15 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
 
     private State state = State.IDLE;
     private final Timer timer;
+    private final long connectionTimeoutMillis;
 
     protected AbstractNetconfSessionNegotiator(P sessionPreferences, Promise<S> promise, Channel channel, Timer timer,
-            SessionListener sessionListener) {
+            SessionListener sessionListener, long connectionTimeoutMillis) {
         super(promise, channel);
         this.sessionPreferences = sessionPreferences;
         this.timer = timer;
         this.sessionListener = sessionListener;
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     @Override
@@ -120,6 +119,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
             public void run(final Timeout timeout) throws Exception {
                 synchronized (this) {
                     if (state != State.ESTABLISHED) {
+                        logger.debug("Connection timeout after {}", timeout);
                         final IllegalStateException cause = new IllegalStateException(
                                 "Session was not established after " + timeout);
                         negotiationFailed(cause);
@@ -129,7 +129,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
                     }
                 }
             }
-        }, INITIAL_HOLDTIMER, TimeUnit.MINUTES);
+        }, connectionTimeoutMillis, TimeUnit.MILLISECONDS);
 
         sendMessage(helloMessage);
         changeState(State.OPEN_WAIT);

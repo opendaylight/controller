@@ -8,16 +8,16 @@
 
 package org.opendaylight.controller.netconf.util.handler;
 
+import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-
-import java.util.List;
-
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class NetconfMessageAggregator extends ByteToMessageDecoder {
 
@@ -36,6 +36,10 @@ public class NetconfMessageAggregator extends ByteToMessageDecoder {
         int index = indexOfSequence(in, eom);
         if (index == -1) {
             logger.debug("Message is not complete, read again.");
+            if (logger.isTraceEnabled()) {
+                String str = in.toString(Charsets.UTF_8);
+                logger.trace("Message read so far: {}", str);
+            }
             ctx.read();
         } else {
             ByteBuf msg = in.readBytes(index);
