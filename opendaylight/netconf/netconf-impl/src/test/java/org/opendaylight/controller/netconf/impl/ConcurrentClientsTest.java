@@ -8,34 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.management.ObjectName;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -63,15 +43,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import javax.management.ObjectName;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class ConcurrentClientsTest {
 
     private static final int CONCURRENCY = 16;
-    private static EventLoopGroup nettyGroup = new NioEventLoopGroup();
-    public static final NetconfClientDispatcher NETCONF_CLIENT_DISPATCHER =
-            new NetconfClientDispatcher( nettyGroup, nettyGroup);
+    private EventLoopGroup nettyGroup;
+    private NetconfClientDispatcher netconfClientDispatcher;
 
     @Mock
     private YangStoreService yangStoreService;
@@ -88,6 +83,8 @@ public class ConcurrentClientsTest {
     @Mock
     private SessionMonitoringService monitoring;
 
+    HashedWheelTimer hashedWheelTimer;
+
     @Before
     public void setUp() throws Exception {
         { // init mocks
@@ -102,12 +99,16 @@ public class ConcurrentClientsTest {
             doReturn(Collections.emptySet()).when(jmxClient).lookupConfigBeans();
         }
 
+        nettyGroup = new NioEventLoopGroup();
+        netconfClientDispatcher = new NetconfClientDispatcher( nettyGroup, nettyGroup, 5000);
+
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesListener.onAddNetconfOperationServiceFactory(mockOpF());
 
         SessionIdProvider idProvider = new SessionIdProvider();
+        hashedWheelTimer = new HashedWheelTimer();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
+                hashedWheelTimer, factoriesListener, idProvider, 5000);
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
@@ -123,8 +124,9 @@ public class ConcurrentClientsTest {
         s.await();
     }
 
-    @AfterClass
-    public static void tearDownStatic() {
+    @After
+    public void tearDown(){
+        hashedWheelTimer.stop();
         nettyGroup.shutdownGracefully();
     }
 
@@ -285,7 +287,7 @@ public class ConcurrentClientsTest {
         @Override
         public void run() {
             try {
-                final NetconfClient netconfClient = new NetconfClient(clientId, netconfAddress, NETCONF_CLIENT_DISPATCHER);
+                final NetconfClient netconfClient = new NetconfClient(clientId, netconfAddress, netconfClientDispatcher);
                 long sessionId = netconfClient.getSessionId();
                 logger.info("Client with sessionid {} hello exchanged", sessionId);
 

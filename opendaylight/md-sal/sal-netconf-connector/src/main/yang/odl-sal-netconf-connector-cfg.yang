@@ -88,6 +88,25 @@ module odl-sal-netconf-connector-cfg {
                     }
                 }
             }
+
+            leaf connection-timeout-millis {
+                description "Specifies timeout in milliseconds after which connection must be established.";
+                type uint32;
+                default 5000;
+            }
+
+            leaf max-connection-attempts {
+                description "Maximum number of connection retries. Non positive value or null is interpreted as infinity.";
+                type uint32;
+                default 0; // retry forever
+            }
+
+
+            leaf between-attempts-timeout-millis {
+                description "Timeout in milliseconds to wait between connection attempts.";
+                type uint16;
+                default 10000;
+            }
         }
     }
 }

@@ -8,13 +8,11 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -23,18 +21,20 @@ import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory {
 
     private final Timer timer;
 
     private final Optional<String> additionalHeader;
+    private final long connectionTimeoutMillis;
 
-    public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<String> additionalHeader) {
+    public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<String> additionalHeader, long connectionTimeoutMillis) {
         this.timer = timer;
         this.additionalHeader = additionalHeader;
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     private static NetconfMessage loadHelloMessageTemplate() {
@@ -57,7 +57,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         }
         NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
-                sessionListenerFactory.getSessionListener());
+                sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
     }
 
 }

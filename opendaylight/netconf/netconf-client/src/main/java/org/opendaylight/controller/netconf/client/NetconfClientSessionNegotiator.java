@@ -34,8 +34,9 @@ public class NetconfClientSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfSessionPreferences, NetconfClientSession> {
 
     protected NetconfClientSessionNegotiator(NetconfSessionPreferences sessionPreferences,
-            Promise<NetconfClientSession> promise, Channel channel, Timer timer, SessionListener sessionListener) {
-        super(sessionPreferences, promise, channel, timer, sessionListener);
+            Promise<NetconfClientSession> promise, Channel channel, Timer timer, SessionListener sessionListener,
+            long connectionTimeoutMillis) {
+        super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
     }
 
     private static Collection<String> getCapabilities(Document doc) {

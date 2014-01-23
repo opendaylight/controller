@@ -47,23 +47,21 @@ public class ConfigPusher {
     private final EventLoopGroup nettyThreadgroup;
 
     // Default timeout for netconf becoming stable
-    public static final long DEFAULT_TIMEOUT = TimeUnit.MINUTES.toNanos(2);
+    public static final long DEFAULT_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(2);
+    private static final long DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     private final int delayMillis = 5000;
     private final long timeoutNanos;
+    private final long connectionTimeoutMillis;
 
     public ConfigPusher(InetSocketAddress address, EventLoopGroup nettyThreadgroup) {
-        this(address, nettyThreadgroup, DEFAULT_TIMEOUT);
+        this(address, nettyThreadgroup, DEFAULT_TIMEOUT_NANOS, DEFAULT_CONNECTION_TIMEOUT_MILLIS);
     }
 
-    @Deprecated
-    public ConfigPusher(InetSocketAddress address, long timeoutMillis, EventLoopGroup nettyThreadgroup) {
-        this(address, nettyThreadgroup, TimeUnit.MILLISECONDS.toNanos(timeoutMillis));
-    }
-
-    public ConfigPusher(InetSocketAddress address, EventLoopGroup nettyThreadgroup, long timeoutNanos) {
+    public ConfigPusher(InetSocketAddress address, EventLoopGroup nettyThreadgroup, long timeoutNanos, long connectionTimeoutMillis) {
         this.address = address;
         this.nettyThreadgroup = nettyThreadgroup;
         this.timeoutNanos = timeoutNanos;
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     public synchronized NetconfClient init(List<ConfigSnapshotHolder> configs) throws InterruptedException {
@@ -133,11 +131,11 @@ public class ConfigPusher {
         String additionalHeader = NetconfMessageAdditionalHeader.toString("unknown", address.getAddress().getHostAddress(),
                 Integer.toString(address.getPort()), "tcp", Optional.of("persister"));
 
-        Set<String> latestCapabilities = new HashSet<>();
+        Set<String> latestCapabilities = null;
         while (System.nanoTime() < deadline) {
             attempt++;
             NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(nettyThreadgroup,
-                    nettyThreadgroup, additionalHeader);
+                    nettyThreadgroup, additionalHeader, connectionTimeoutMillis);
             NetconfClient netconfClient;
             try {
                 netconfClient = new NetconfClient(this.toString(), address, delayMillis, netconfClientDispatcher);
@@ -156,6 +154,10 @@ public class ConfigPusher {
             logger.debug("Polling hello from netconf, attempt {}, capabilities {}", attempt, latestCapabilities);
             Util.closeClientAndDispatcher(netconfClient);
             Thread.sleep(delayMillis);
+        }
+        if (latestCapabilities == null) {
+            logger.error("Could not connect to the server in {} ms", timeoutNanos / 1000);
+            throw new RuntimeException("Could not connect to netconf server");
         }
         Set<String> allNotFound = new HashSet<>(expectedCaps);
         allNotFound.removeAll(latestCapabilities);

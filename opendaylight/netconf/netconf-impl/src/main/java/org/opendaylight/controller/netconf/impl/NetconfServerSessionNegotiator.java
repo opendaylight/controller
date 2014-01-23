@@ -8,12 +8,10 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import com.google.common.base.Optional;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-
-import java.net.InetSocketAddress;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.util.AdditionalHeaderUtil;
@@ -22,7 +20,7 @@ import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.net.InetSocketAddress;
 
 public class NetconfServerSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession> {
@@ -30,8 +28,9 @@ public class NetconfServerSessionNegotiator extends
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
 
     protected NetconfServerSessionNegotiator(NetconfServerSessionPreferences sessionPreferences,
-            Promise<NetconfServerSession> promise, Channel channel, Timer timer, SessionListener sessionListener) {
-        super(sessionPreferences, promise, channel, timer, sessionListener);
+            Promise<NetconfServerSession> promise, Channel channel, Timer timer, SessionListener sessionListener,
+            long connectionTimeoutMillis) {
+        super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
     }
 
     @Override
