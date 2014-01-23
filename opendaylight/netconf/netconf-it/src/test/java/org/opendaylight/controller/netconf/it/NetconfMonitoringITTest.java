@@ -11,15 +11,11 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
@@ -31,9 +27,6 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
-import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
@@ -57,13 +50,12 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class NetconfMonitoringITTest extends AbstractConfigTest {
+public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
 
@@ -72,7 +64,6 @@ public class NetconfMonitoringITTest extends AbstractConfigTest {
     @Mock
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
-    private EventLoopGroup nettyThreadgroup;
 
     private NetconfClientDispatcher clientDispatcher;
 
@@ -91,13 +82,12 @@ public class NetconfMonitoringITTest extends AbstractConfigTest {
                 .onAddNetconfOperationServiceFactory(new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
                         new NetconfMonitoringOperationService(monitoringService)));
 
-        nettyThreadgroup = new NioEventLoopGroup();
 
         dispatch = createDispatcher(factoriesListener);
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
+        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
     }
 
     private HardcodedYangStoreService getYangStore() throws YangStoreException, IOException {
@@ -107,16 +97,7 @@ public class NetconfMonitoringITTest extends AbstractConfigTest {
 
     private NetconfServerDispatcher createDispatcher(
                                                      NetconfOperationServiceFactoryListenerImpl factoriesListener) {
-        SessionIdProvider idProvider = new SessionIdProvider();
-        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
-
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider, getNetconfMonitoringListenerService(logger, monitoringService));
-
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
-                serverNegotiatorFactory, listenerFactory);
-        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
+        return super.createDispatcher(factoriesListener, getNetconfMonitoringListenerService(logger, monitoringService), commitNot);
     }
 
     static SessionMonitoringService getNetconfMonitoringListenerService(final Logger logger, final NetconfMonitoringServiceImpl monitor) {
