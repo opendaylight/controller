@@ -224,7 +224,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         @Override
         public Void call() {
             try {
-                //startSyncObject.wait();
+                //startSyncObj          ect.wait();
                 //Thread.sleep(500);
                 createFlow();
                 createFlow2();
