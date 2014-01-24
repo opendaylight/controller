@@ -42,8 +42,6 @@ public final class ZeroMQServerModule extends org.opendaylight.controller.config
         
         Broker broker = getDomBrokerDependency();
 
-
-        
         final int port = getPort() != null ? getPort() : ZEROMQ_ROUTER_PORT;
 
         ServerImpl serverImpl = new ServerImpl(port);
@@ -51,7 +49,6 @@ public final class ZeroMQServerModule extends org.opendaylight.controller.config
         ClientImpl clientImpl = new ClientImpl();
 
         RoutingTableProvider provider = new RoutingTableProvider(bundleContext,serverImpl);
-
 
         RemoteRpcProvider facade = new RemoteRpcProvider(serverImpl, clientImpl);
         
