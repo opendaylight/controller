@@ -132,42 +132,6 @@
                 <version>1.4.01</version>
             </dependency>
 
-            <!-- YANG Tools Dependencies -->
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-binding</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-model-util</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-common</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-data-api</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-data-impl</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-model-api</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-data-util</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
             <!-- SAL Dependencies -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -193,11 +157,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.xtend</groupId>
                 <artifactId>org.eclipse.xtend.lib</artifactId>
                 <version>${xtend.version}</version>
@@ -206,19 +165,6 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>${osgi.core.version}</version>
-            </dependency>
-            <!-- Testing Dependencies -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
@@ -230,16 +176,19 @@
                 <artifactId>yang-parser-impl</artifactId>
 		<version>${yangtools.version}</version>
             </dependency>
+
+            <!-- Testing Dependencies -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${releaseplugin.version}</version>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>

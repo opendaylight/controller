@@ -755,6 +755,12 @@
        <version>${yangtools.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-model-util</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>hosttracker</artifactId>
         <version>${hosttracker.api.version}</version>
