@@ -19,6 +19,7 @@ public class SimpleBinaryAttributeReadingStrategy extends SimpleAttributeReading
         super(nullableDefault);
     }
 
+    @Override
     protected Object postprocessParsedValue(String textContent) {
         BaseEncoding en = BaseEncoding.base64();
         byte[] decode = en.decode(textContent);
