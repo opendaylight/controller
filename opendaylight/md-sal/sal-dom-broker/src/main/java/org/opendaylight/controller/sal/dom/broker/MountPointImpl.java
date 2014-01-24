@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
+import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
@@ -104,6 +105,11 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
+    public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation) {
+      rpcs.setRoutedRpcDefaultDelegate(defaultImplementation);
+    }
+
+  @Override
     public RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
             throws IllegalArgumentException {
         return rpcs.addRpcImplementation(rpcType, implementation);

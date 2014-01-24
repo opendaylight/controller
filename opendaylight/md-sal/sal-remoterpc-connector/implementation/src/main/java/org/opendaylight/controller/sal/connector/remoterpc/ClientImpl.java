@@ -12,6 +12,8 @@ import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
+import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
@@ -20,14 +22,13 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -66,12 +67,6 @@ public class ClientImpl implements RemoteRpcClient {
     this.routingTableProvider = routingTableProvider;
   }
 
- @Override
-  public Set<QName> getSupportedRpcs(){
-    //TODO: Find the entries from routing table
-    return Collections.emptySet();
-  }
-
   @Override
   public void start() {/*NOOPS*/}
 
@@ -97,14 +92,40 @@ public class ClientImpl implements RemoteRpcClient {
    * @param input payload for the remote service
    * @return
    */
-  @Override
   public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
-
     RouteIdentifierImpl routeId = new RouteIdentifierImpl();
     routeId.setType(rpc);
 
-    String address = lookupRemoteAddress(routeId);
+    String address = lookupRemoteAddressForGlobalRpc(routeId);
+    return sendMessage(input, routeId, address);
+  }
 
+  /**
+   * Finds remote server that can execute this routed rpc and sends a message to it
+   * requesting execution.
+   * The call blocks until a response from remote server is received. Its upto
+   * the client of this API to implement a timeout functionality.
+   *
+   * @param rpc
+   *          rpc to be called
+   * @param identifier
+   *          instance identifier on which rpc is to be executed
+   * @param input
+   *          payload
+   * @return
+   */
+  public RpcResult<CompositeNode> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+
+    RouteIdentifierImpl routeId = new RouteIdentifierImpl();
+    routeId.setType(rpc);
+    routeId.setRoute(identifier);
+
+    String address = lookupRemoteAddressForRpc(routeId);
+
+    return sendMessage(input, routeId, address);
+  }
+
+  private RpcResult<CompositeNode> sendMessage(CompositeNode input, RouteIdentifierImpl routeId, String address) {
     Message request = new Message.MessageBuilder()
         .type(Message.MessageType.REQUEST)
         .sender(Context.getInstance().getLocalUri())
@@ -128,7 +149,6 @@ public class ClientImpl implements RemoteRpcClient {
       collectErrors(e, errors);
       return Rpcs.getRpcResult(false, null, errors);
     }
-
   }
 
   /**
@@ -136,19 +156,36 @@ public class ClientImpl implements RemoteRpcClient {
    * @param  routeId route identifier
    * @return         remote network address
    */
-  private String lookupRemoteAddress(RpcRouter.RouteIdentifier routeId){
+  private String lookupRemoteAddressForGlobalRpc(RpcRouter.RouteIdentifier routeId){
     checkNotNull(routeId, "route must not be null");
 
-    Optional<RoutingTable<String, String>> routingTable = routingTableProvider.getRoutingTable();
+    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> routingTable = routingTableProvider.getRoutingTable();
     checkNotNull(routingTable.isPresent(), "Routing table is null");
 
-    Set<String> addresses = routingTable.get().getRoutes(routeId.toString());
-    checkNotNull(addresses, "Address not found for route [%s]", routeId);
-    checkState(addresses.size() == 1,
-        "Multiple remote addresses found for route [%s], \nonly 1 expected", routeId); //its a global service.
+    String address = null;
+    try {
+      address = routingTable.get().getGlobalRoute(routeId);
+    } catch (RoutingTableException|SystemException e) {
+      _logger.error("Exception caught while looking up remote address " + e);
+    }
+    checkState(address != null, "Address not found for route [%s]", routeId);
 
-    String address = addresses.iterator().next();
-    checkNotNull(address, "Address not found for route [%s]", routeId);
+    return address;
+  }
+
+  /**
+   * Find address for the given route identifier in routing table
+   * @param  routeId route identifier
+   * @return         remote network address
+   */
+  private String lookupRemoteAddressForRpc(RpcRouter.RouteIdentifier routeId){
+    checkNotNull(routeId, "route must not be null");
+
+    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> routingTable = routingTableProvider.getRoutingTable();
+    checkNotNull(routingTable.isPresent(), "Routing table is null");
+
+    String address = routingTable.get().getLastAddedRoute(routeId);
+    checkState(address != null, "Address not found for route [%s]", routeId);
 
     return address;
   }

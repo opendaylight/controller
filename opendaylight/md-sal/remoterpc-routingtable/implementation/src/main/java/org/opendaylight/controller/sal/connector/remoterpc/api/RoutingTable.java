@@ -7,25 +7,11 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc.api;
 
-import java.util.Map;
 import java.util.Set;
 
 public interface RoutingTable<I,R> {
 
-
-
   /**
-   * Adds a network address for the route. If address for route
-   * exists, appends the address to the list
-   *
-   * @param routeId route identifier
-   * @param route network address
-   * @throws RoutingTableException for any logical exception
-   * @throws SystemException
-   */
-  public void addRoute(I routeId, R route) throws  RoutingTableException,SystemException;
-
-    /**
    * Adds a network address for the route. If the route already exists,
    * it throws <code>DuplicateRouteException</code>.
    * This method would be used when registering a global service.
@@ -38,7 +24,38 @@ public interface RoutingTable<I,R> {
    */
   public void addGlobalRoute(I routeId, R route) throws  RoutingTableException, SystemException;
 
+  /**
+   * Remove the route.
+   * This method would be used when registering a global service.
+   * @param routeId
+   * @throws RoutingTableException
+   * @throws SystemException
+   */
+  public void removeGlobalRoute(I routeId) throws RoutingTableException, SystemException;
 
+  /**
+   * Adds a network address for the route. If the route already exists,
+   * it throws <code>DuplicateRouteException</code>.
+   * This method would be used when registering a global service.
+   *
+   *
+   * @param routeId route identifier
+   * @param route network address
+   * @throws DuplicateRouteException
+   * @throws RoutingTableException
+   */
+  public R getGlobalRoute(I routeId) throws  RoutingTableException, SystemException;
+
+  /**
+   * Adds a network address for the route. If address for route
+   * exists, appends the address to the list
+   *
+   * @param routeId route identifier
+   * @param route network address
+   * @throws RoutingTableException for any logical exception
+   * @throws SystemException
+   */
+  public void addRoute(I routeId, R route) throws RoutingTableException,SystemException;
 
 
   /**
@@ -47,17 +64,28 @@ public interface RoutingTable<I,R> {
    * @param routeId
    * @param route
    */
-  public void removeRoute(I routeId, R route);
+  public void removeRoute(I routeId, R route) throws RoutingTableException,SystemException;
 
+  /**
+   * Adds address for a set of route identifiers. If address for route
+   * exists, appends the address to the set.
+   *
+   * @param routeIds a set of routeIds
+   * @param route network address
+   * @throws RoutingTableException for any logical exception
+   * @throws SystemException
+   */
+  public void addRoutes(Set<I> routeIds, R route) throws  RoutingTableException,SystemException;
 
-    /**
-     * Remove the route.
-     * This method would be used when registering a global service.
-     * @param routeId
-     * @throws RoutingTableException
-     * @throws SystemException
-     */
-    public void removeGlobalRoute(I routeId) throws RoutingTableException, SystemException;
+  /**
+   * Removes address for a set of route identifiers.
+   *
+   * @param routeIds a set of routeIds
+   * @param route network address
+   * @throws RoutingTableException for any logical exception
+   * @throws SystemException
+   */
+  public void removeRoutes(Set<I> routeIds, R route) throws  RoutingTableException,SystemException;
 
   /**
    * Returns a set of network addresses associated with this route
@@ -66,29 +94,14 @@ public interface RoutingTable<I,R> {
    */
   public Set<R> getRoutes(I routeId);
 
-  /**
-   * Returns all network addresses stored in the table
-   * @return
-   */
-  public Set<Map.Entry> getAllRoutes();
 
   /**
-   * Returns only one address from the list of network addresses
-   * associated with the route. The algorithm to determine that
-   * one address is upto the implementer
+   * Returns the last inserted address from the list of network addresses
+   * associated with the route.
    * @param routeId
    * @return
    */
-  public R getARoute(I routeId);
-
-    /**
-     *
-     * This will be removed after listeners
-     * have made change on their end to use whiteboard pattern
-     * @deprecated
-     */
-
-  public void registerRouteChangeListener(RouteChangeListener listener);
+  public R getLastAddedRoute(I routeId);
 
   public class DuplicateRouteException extends RoutingTableException {
       public DuplicateRouteException(String message) {

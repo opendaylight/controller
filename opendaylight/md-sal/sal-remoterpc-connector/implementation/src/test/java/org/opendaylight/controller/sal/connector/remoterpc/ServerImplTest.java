@@ -11,6 +11,7 @@ package org.opendaylight.controller.sal.connector.remoterpc;
 import com.google.common.base.Optional;
 import junit.framework.Assert;
 import org.junit.*;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -66,10 +67,9 @@ public class ServerImplTest {
 
     server = new ServerImpl(port);
     server.setBrokerSession(brokerSession);
-    server.setRoutingTableProvider(routingTableProvider);
 
-    RoutingTable<String, String> mockRoutingTable = new MockRoutingTable<String, String>();
-    Optional<RoutingTable<String, String>> optionalRoutingTable = Optional.fromNullable(mockRoutingTable);
+    RoutingTable<RpcRouter.RouteIdentifier, String> mockRoutingTable = new MockRoutingTable<String, String>();
+    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> optionalRoutingTable = Optional.fromNullable(mockRoutingTable);
     when(routingTableProvider.getRoutingTable()).thenReturn(optionalRoutingTable);
 
     when(brokerSession.addRpcRegistrationListener(listener)).thenReturn(null);
@@ -92,11 +92,6 @@ public class ServerImplTest {
 
     Thread.sleep(5000);//wait for server to stop
     Assert.assertEquals(ServerImpl.State.STOPPED, server.getStatus());
-  }
-
-  @Test
-  public void getRoutingTableProvider_Call_ShouldReturnRoutingTable() throws Exception {
-    Assert.assertNotNull(server.getRoutingTableProvider());
   }
 
   @Test

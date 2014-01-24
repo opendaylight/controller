@@ -24,14 +24,14 @@
             </Export-Package>
             <Import-Package>
               com.sun.jersey.spi.container.servlet,
-              org.codehaus.jackson.annotate,
+              !org.codehaus.jackson.annotate,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
               org.apache.catalina.filters,
-              org.codehaus.jackson.jaxrs,
+              !org.codehaus.jackson.jaxrs,
               org.opendaylight.controller.sample.zeromq.provider,
               org.opendaylight.controller.sample.zeromq.consumer,
               org.opendaylight.controller.sal.utils,
