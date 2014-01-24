@@ -10,14 +10,11 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
-import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -50,7 +47,8 @@ public class DefaultStopExi extends AbstractNetconfOperation implements DefaultN
     @Override
     protected Element handle(Document document, XmlElement operationElement,
             NetconfOperationRouter opRouter) throws NetconfDocumentedException {
-
+        throw new UnsupportedOperationException("Not implemented");
+        /*
         netconfSession.remove(ExiDecoderHandler.class);
         netconfSession.removeAfterMessageSent(ExiEncoderHandler.HANDLER_NAME);
 
@@ -60,6 +58,7 @@ public class DefaultStopExi extends AbstractNetconfOperation implements DefaultN
         logger.trace("{} operation successful", STOP_EXI);
         logger.debug("received stop-exi message {} ", XmlUtil.toString(document));
         return getSchemaResult;
+        */
     }
 
     @Override

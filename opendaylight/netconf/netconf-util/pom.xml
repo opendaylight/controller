@@ -48,10 +48,10 @@
             <artifactId>netty-handler</artifactId>
             <version>${netconf.netty.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>com.siemens.ct.exi</groupId>
             <artifactId>exificient</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.opendaylight.controller.thirdparty</groupId>
             <artifactId>ganymed</artifactId>
@@ -102,12 +102,6 @@
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax,
-                            com.siemens.ct.exi,
-                            com.siemens.ct.exi.api.sax,
-                            com.siemens.ct.exi.grammars,
-                            com.siemens.ct.exi.helpers,
-                            com.siemens.ct.exi.exceptions,
-                            com.siemens.ct.exi.api.dom,
                             org.xml.sax.helpers,
                             org.opendaylight.controller.config.api,
                         </Import-Package>

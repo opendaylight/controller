@@ -122,11 +122,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>exificient</artifactId>
-        <version>0.9.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-native</artifactId>
             <version>${exam.version}</version>

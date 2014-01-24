@@ -138,7 +138,6 @@
                             org.w3c.dom,
                             org.xml.sax,
                             org.opendaylight.controller.netconf.util.messages,
-                            com.siemens.ct.exi.exceptions,
                             io.netty.util.internal,
                             org.opendaylight.controller.netconf.api.monitoring,
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
