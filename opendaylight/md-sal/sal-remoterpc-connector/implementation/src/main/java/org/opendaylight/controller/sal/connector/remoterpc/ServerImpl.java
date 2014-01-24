@@ -334,12 +334,12 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
    * @return
    */
   private String findIpAddress() {
-    String hostAddress = null;
     Enumeration e = null;
     try {
       e = NetworkInterface.getNetworkInterfaces();
     } catch (SocketException e1) {
-      e1.printStackTrace();
+      _logger.error("Failed to get list of interfaces", e1);
+      throw new RuntimeException("Failed to acquire list of interfaces", e1);
     }
     while (e.hasMoreElements()) {
 
@@ -348,12 +348,17 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
       Enumeration ee = n.getInetAddresses();
       while (ee.hasMoreElements()) {
         InetAddress i = (InetAddress) ee.nextElement();
-        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress()))
-          hostAddress = i.getHostAddress();
+        _logger.debug("Trying address {}", i);
+        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress())) {
+          String hostAddress = i.getHostAddress();
+          _logger.debug("Settled on host address {}", hostAddress);
+          return hostAddress;
+        }
       }
     }
-    return hostAddress;
 
+    _logger.error("Failed to find a suitable host address");
+    return null;
   }
 
   /**
