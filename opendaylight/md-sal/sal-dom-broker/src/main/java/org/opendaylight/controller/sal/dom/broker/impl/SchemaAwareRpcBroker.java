@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener
 import org.opendaylight.controller.md.sal.common.impl.routing.RoutingUtils;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
+import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 
-public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
+public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, RoutedRpcDefaultImplementation {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchemaAwareRpcBroker.class);
 
@@ -58,6 +59,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
     private final ConcurrentMap<QName, RpcImplementation> implementations = new ConcurrentHashMap<>();
     private RpcImplementation defaultImplementation;
     private SchemaContextProvider schemaProvider;
+    private RoutedRpcDefaultImplementation defaultDelegate;
 
     public SchemaAwareRpcBroker(String identifier, SchemaContextProvider schemaProvider) {
         super();
@@ -81,7 +83,16 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
         this.schemaProvider = schemaProvider;
     }
 
+  public RoutedRpcDefaultImplementation getRoutedRpcDefaultDelegate() {
+    return defaultDelegate;
+  }
+
     @Override
+  public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultDelegate) {
+    this.defaultDelegate = defaultDelegate;
+  }
+
+  @Override
     public RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
         checkArgument(rpcType != null, "RPC Type should not be null");
         checkArgument(implementation != null, "RPC Implementatoin should not be null");
@@ -221,6 +232,12 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
         return ret;
     }
 
+    @Override
+    public RpcResult<CompositeNode> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+      checkState(defaultDelegate != null);
+      return defaultDelegate.invokeRpc(rpc, identifier, input);
+    }
+
     private static abstract class RoutingStrategy implements Identifiable<QName> {
 
         private final QName identifier;
@@ -304,6 +321,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
             SimpleNode<?> routeContainer = inputContainer.getFirstSimpleByName(strategy.getLeaf());
             checkArgument(routeContainer != null, "Leaf %s must be set with value", strategy.getLeaf());
             Object route = routeContainer.getValue();
+            checkArgument(route instanceof InstanceIdentifier);
             RpcImplementation potential = null;
             if (route != null) {
                 RoutedRpcRegImpl potentialReg = implementations.get(route);
@@ -312,7 +330,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
                 }
             }
             if (potential == null) {
-                potential = defaultDelegate;
+                return router.invokeRpc(rpc, (InstanceIdentifier) route, input);
             }
             checkState(potential != null, "No implementation is available for rpc:%s path:%s", rpc, route);
             return potential.invokeRpc(rpc, input);
