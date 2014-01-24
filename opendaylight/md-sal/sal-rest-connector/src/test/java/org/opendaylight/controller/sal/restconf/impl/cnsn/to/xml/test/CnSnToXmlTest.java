@@ -11,11 +11,14 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
+import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.*;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
+import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 
 /**
  * 
@@ -50,6 +53,7 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
     public void snAsYangLeafrefWithPrefixToXMLTest() {
         serializeToXml(prepareLeafrefData(), "<lfBoolean>true</lfBoolean>", "<lfLfref>true</lfLfref>");
     }
+
 
     @Test
     public void snAsYangStringToXmlTest() {

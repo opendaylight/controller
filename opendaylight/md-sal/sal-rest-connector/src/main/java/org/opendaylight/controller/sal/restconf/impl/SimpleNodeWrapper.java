@@ -37,6 +37,11 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
     
     @Override
+    public QName getQname() {
+        return name;
+    }
+    
+    @Override
     public String getLocalName() {
         if (simpleNode != null) {
             return simpleNode.getNodeType().getLocalName();

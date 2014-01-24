@@ -14,9 +14,11 @@ import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate;
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
@@ -32,6 +34,7 @@ import org.opendaylight.yangtools.yang.model.api.type.BooleanTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.DecimalTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.EmptyTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinition;
 import org.slf4j.Logger;
@@ -47,12 +50,13 @@ class JsonMapper {
     private MountInstance mountPoint;
     private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
-    public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema, MountInstance mountPoint) throws IOException {
+    public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema, MountInstance mountPoint)
+            throws IOException {
         Preconditions.checkNotNull(writer);
         Preconditions.checkNotNull(data);
         Preconditions.checkNotNull(schema);
         this.mountPoint = mountPoint;
-        
+
         writer.beginObject();
 
         if (schema instanceof ContainerSchemaNode) {
@@ -195,7 +199,8 @@ class JsonMapper {
         // TODO check InstanceIdentifierTypeDefinition
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
-                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType, mountPoint).serialize(node.getValue());
+                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType, mountPoint).serialize(
+                        node.getValue());
                 IdentityValue valueFromDTO = valueDTO.getValuesWithNamespaces().get(0);
                 String moduleName;
                 if (mountPoint != null) {
@@ -207,19 +212,20 @@ class JsonMapper {
                 }
                 writer.value(moduleName + ":" + valueFromDTO.getValue());
             } else {
-                Object value = node.getValue();
-                logger.debug("Value of " + baseType.getQName().getNamespace() + ":"
-                        + baseType.getQName().getLocalName() + " is not instance of " + QName.class + " but is "
-                        + (value != null ? value.getClass() : "null"));
-                if (value == null) {
-                    writer.value("");
-                } else {
-                    writer.value(String.valueOf(value));
-                }
+                writeStringRepresentation(writer, node, baseType, QName.class);
+            }
+        } else if (baseType instanceof InstanceIdentifierTypeDefinition) {
+            if (node.getValue() instanceof InstanceIdentifier) {
+                IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType, mountPoint).serialize(
+                        node.getValue());
+                writeIdentityValuesDTOToJson(writer, valueDTO);
+            } else {
+                writeStringRepresentation(writer, node, baseType, InstanceIdentifier.class);
             }
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
                 || baseType instanceof UnsignedIntegerTypeDefinition) {
-            writer.value(new NumberForJsonWriter((String) RestCodec.from(baseType, mountPoint).serialize(node.getValue())));
+            writer.value(new NumberForJsonWriter((String) RestCodec.from(baseType, mountPoint).serialize(
+                    node.getValue())));
         } else if (baseType instanceof BooleanTypeDefinition) {
             writer.value(Boolean.parseBoolean((String) RestCodec.from(baseType, mountPoint).serialize(node.getValue())));
         } else if (baseType instanceof EmptyTypeDefinition) {
@@ -230,6 +236,50 @@ class JsonMapper {
                 value = String.valueOf(node.getValue());
             }
             writer.value(value.equals("null") ? "" : value);
+        }
+    }
+
+    private void writeIdentityValuesDTOToJson(JsonWriter writer, IdentityValuesDTO valueDTO) throws IOException {
+        StringBuilder result = new StringBuilder();
+        for (IdentityValue identityValue : valueDTO.getValuesWithNamespaces()) {
+            result.append("/");
+
+            writeModuleNameAndIdentifier(result, identityValue);
+            if (identityValue.getPredicates() != null) {
+                for (Predicate predicate : identityValue.getPredicates()) {
+                    IdentityValue identityValuePredicate = predicate.getName();
+                    result.append("[");
+                    writeModuleNameAndIdentifier(result, identityValuePredicate);
+                    result.append("=\"");
+                    result.append(predicate.getValue());
+                    result.append("\"");
+                    result.append("]");
+                }
+            }
+        }
+
+        writer.value(result.toString());
+    }
+
+    private void writeModuleNameAndIdentifier(StringBuilder result, IdentityValue identityValue) {
+        String moduleName = ControllerContext.getInstance().findModuleNameByNamespace(
+                URI.create(identityValue.getNamespace()));
+        if (moduleName != null && !moduleName.isEmpty()) {
+            result.append(moduleName);
+            result.append(":");
+        }
+        result.append(identityValue.getValue());
+    }
+
+    private void writeStringRepresentation(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> baseType,
+            Class<?> requiredType) throws IOException {
+        Object value = node.getValue();
+        logger.debug("Value of " + baseType.getQName().getNamespace() + ":" + baseType.getQName().getLocalName()
+                + " is not instance of " + requiredType.getClass() + " but is " + node.getValue().getClass());
+        if (value == null) {
+            writer.value("");
+        } else {
+            writer.value(String.valueOf(value));
         }
     }
 

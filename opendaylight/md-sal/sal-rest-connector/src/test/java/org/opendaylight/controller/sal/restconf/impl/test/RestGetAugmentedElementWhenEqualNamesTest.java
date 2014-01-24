@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
@@ -16,7 +15,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestGetAugmentedElementWhenEqualNamesTest {
 
-    @Ignore
     @Test
     public void getDataWithUrlMountPoint() throws UnsupportedEncodingException, URISyntaxException,
             FileNotFoundException {
@@ -33,7 +31,7 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
                     .toInstanceIdentifier("main:cont/augment-main-b:cont1");
 
             assertEquals("ns:augment:main:a", instanceIdentifierA.getSchemaNode().getQName().getNamespace().toString());
-            assertEquals("ns:augment:main:b", instanceIdentifierB.getSchemaNode().getQName().getNamespace());
+            assertEquals("ns:augment:main:b", instanceIdentifierB.getSchemaNode().getQName().getNamespace().toString());
         } catch (ResponseException e) {
             exceptionCaught = true;
         }

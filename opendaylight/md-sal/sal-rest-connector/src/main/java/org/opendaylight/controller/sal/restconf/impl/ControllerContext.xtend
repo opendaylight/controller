@@ -411,7 +411,7 @@ class ControllerContext implements SchemaServiceListener {
         return null;
     }
     
-    static def boolean isInstantiatedDataSchema(DataSchemaNode node) {
+    def boolean isInstantiatedDataSchema(DataSchemaNode node) {
         switch node {
             LeafSchemaNode: return true
             LeafListSchemaNode: return true

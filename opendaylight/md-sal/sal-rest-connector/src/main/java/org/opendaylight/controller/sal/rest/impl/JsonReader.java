@@ -3,13 +3,18 @@ package org.opendaylight.controller.sal.rest.impl;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.EmptyStackException;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 
+import org.opendaylight.controller.sal.rest.impl.RestUtil.PrefixMapingFromJson;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
+import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -18,6 +23,9 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 class JsonReader {
+
+    private Stack<URI> currentModuleName = new Stack<>();
+    private final Logger log = LoggerFactory.getLogger(XmlReader.class);
 
     public CompositeNodeWrapper read(InputStream entityStream) throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
@@ -53,25 +61,55 @@ class JsonReader {
     }
 
     private CompositeNodeWrapper createStructureWithRoot(String rootObjectName, JsonObject rootObject) {
-        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFor(rootObjectName),
+        addCurrentModuleName(rootObjectName);
+        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getCurrentModuleName(),
                 getLocalNameFor(rootObjectName));
         for (Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
             addChildToParent(childOfFirstNode.getKey(), childOfFirstNode.getValue(), firstNode);
         }
+        removeCurrentModuleName(rootObjectName);
         return firstNode;
     }
 
+    private void removeCurrentModuleName(String rootObjectName) {
+        try {
+            currentModuleName.pop();
+        } catch (EmptyStackException e) {
+
+        }
+    }
+
+    private void addCurrentModuleName(String elementName) {
+        URI namespace = null;
+        String[] moduleNameAndLocalName = elementName.split(":");
+        if (moduleNameAndLocalName.length == 2) {
+            namespace = URI.create(moduleNameAndLocalName[0]);
+            currentModuleName.push(namespace);
+        } else {
+            try {
+                URI peekUri = currentModuleName.peek();
+                currentModuleName.push(peekUri);
+            } catch (EmptyStackException e) {
+                currentModuleName.push(null);
+            }
+        }
+    }
+
+    private URI getCurrentModuleName() {
+        return currentModuleName.peek();
+    }
+
     private void addChildToParent(String childName, JsonElement childType, CompositeNodeWrapper parent) {
+        addCurrentModuleName(childName);
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
-                    getLocalNameFor(childName));
+            CompositeNodeWrapper child = new CompositeNodeWrapper(getCurrentModuleName(), getLocalNameFor(childName));
             parent.addValue(child);
             for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
             }
         } else if (childType.isJsonArray()) {
             if (childType.getAsJsonArray().size() == 1 && childType.getAsJsonArray().get(0).isJsonNull()) {
-                parent.addValue(new EmptyNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName)));
+                parent.addValue(new EmptyNodeWrapper(getCurrentModuleName(), getLocalNameFor(childName)));
 
             } else {
                 for (JsonElement childOfChildType : childType.getAsJsonArray()) {
@@ -81,14 +119,16 @@ class JsonReader {
         } else if (childType.isJsonPrimitive()) {
             JsonPrimitive childPrimitive = childType.getAsJsonPrimitive();
             String value = childPrimitive.getAsString();
-            parent.addValue(new SimpleNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName),
+            parent.addValue(new SimpleNodeWrapper(getCurrentModuleName(), getLocalNameFor(childName),
                     resolveValueOfElement(value)));
         }
+        removeCurrentModuleName(childName);
     }
 
     private URI getNamespaceFor(String jsonElementName) {
         String[] moduleNameAndLocalName = jsonElementName.split(":");
-        if (moduleNameAndLocalName.length != 2) { // it is not "moduleName:localName"
+        if (moduleNameAndLocalName.length != 2) { // it is not
+                                                  // "moduleName:localName"
             return null;
         }
         return URI.create(moduleNameAndLocalName[0]);
@@ -96,7 +136,8 @@ class JsonReader {
 
     private String getLocalNameFor(String jsonElementName) {
         String[] moduleNameAndLocalName = jsonElementName.split(":");
-        if (moduleNameAndLocalName.length != 2) { // it is not "moduleName:localName"
+        if (moduleNameAndLocalName.length != 2) { // it is not
+                                                  // "moduleName:localName"
             return jsonElementName;
         }
         return moduleNameAndLocalName[1];
@@ -105,10 +146,21 @@ class JsonReader {
     /**
      * @param value
      *            value of json element
-     * @return if value is "moduleName:localName" then {@link IdentityValuesDTO} else
-     *         the same string as parameter "value"
+     * @return if value is "moduleName:localName" then {@link IdentityValuesDTO}
+     *         else the same string as parameter "value"
      */
     private Object resolveValueOfElement(String value) {
+
+        IdentityValuesDTO resolvedIdentityValuesDTO = null;
+        try {
+            URI currentModule = getCurrentModuleName();
+            resolvedIdentityValuesDTO = RestUtil.asInstanceIdentifier(value, new PrefixMapingFromJson());
+            if (resolvedIdentityValuesDTO != null) {
+                return resolvedIdentityValuesDTO;
+            }
+        } catch (ParsingException e) {
+            log.debug(e.getMessage());
+        }
         URI namespace = getNamespaceFor(value);
         return namespace == null ? value : new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null);
     }

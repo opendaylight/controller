@@ -14,16 +14,19 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XmlReader {
 
     private final static XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     private XMLEventReader eventReader;
+    private final Logger log = LoggerFactory.getLogger(XmlReader.class);
 
     public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException, UnsupportedFormatException {
         eventReader = xmlInputFactory.createXMLEventReader(entityStream);
@@ -148,12 +151,28 @@ public class XmlReader {
                 final Characters chars = innerEvent.asCharacters();
                 if (!chars.isWhiteSpace()) {
                     data = innerEvent.asCharacters().getData();
+                    data = data + getAdditionalData(eventReader.nextEvent());
                 }
             } else if (innerEvent.isEndElement()) {
                 if (startElement.getLocation().getCharacterOffset() == innerEvent.getLocation().getCharacterOffset()) {
                     data = null;
                 } else {
                     data = "";
+                }
+            }
+        }
+        return data;
+    }
+
+    private String getAdditionalData(XMLEvent event) throws XMLStreamException {
+        String data = "";
+        if (eventReader.hasNext()) {
+            final XMLEvent innerEvent = eventReader.peek();
+            if (innerEvent.isCharacters() && !innerEvent.isEndElement()) {
+                final Characters chars = innerEvent.asCharacters();
+                if (!chars.isWhiteSpace()) {
+                    data = innerEvent.asCharacters().getData();
+                    data = data + getAdditionalData(eventReader.nextEvent());
                 }
             }
         }
@@ -174,19 +193,29 @@ public class XmlReader {
      *            value of startElement
      * @param startElement
      *            element containing value
-     * @return if value is "prefix:value" then {@link IdentityValuesDTO} else the same
-     *         string as parameter "value"
+     * @return if value is "prefix:value" then {@link IdentityValuesDTO} else
+     *         the same string as parameter "value"
      */
     private Object resolveValueOfElement(String value, StartElement startElement) {
-        String[] namespaceAndValue = value.split(":");
-        if (namespaceAndValue.length != 2) { // it is not "prefix:value"
+        IdentityValuesDTO resolvedValue = null;
+        try {
+            resolvedValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(startElement));
+        } catch (ParsingException e) {
+            log.debug(e.getMessage());
+        }
+        if (resolvedValue == null) {
+
+            String[] namespaceAndValue = value.split(":");
+            if (namespaceAndValue.length != 2) { // it is not "prefix:value"
+                return value;
+            }
+            String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
+            if (namespace != null && !namespace.isEmpty()) {
+                return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0]);
+            }
             return value;
         }
-        String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
-        if (namespace != null && !namespace.isEmpty()) {
-            return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0]);
-        }
-        return value;
+        return resolvedValue;
     }
 
 }
