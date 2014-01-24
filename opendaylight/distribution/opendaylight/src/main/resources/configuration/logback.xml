@@ -75,6 +75,17 @@
   <logger name="org.opendaylight.controller.usermanager" level="INFO"/>
   <!-- Web modules -->
   <logger name="org.opendaylight.controller.web" level="INFO"/>
+
+  <!--
+       Unsynchronized controller startup causes models to crop up in random
+       order, which results in temporary inability to fully resolve a model,
+       which is usually resolved. Do not flood console, but keep the messages,
+       as they may be indicating and error.
+  -->
+  <logger name="org.opendaylight.yangtools.yang.parser.util.ModuleDependencySort" level="INFO" additivity="false">
+    <appender-ref "opendaylight.log"/>
+  </logger>
+
   <!-- additivity=false ensures analytics data only goes to the analytics log -->
   <logger name="audit" level="INFO" additivity="false">
        <appender-ref ref="audit-file"/>
