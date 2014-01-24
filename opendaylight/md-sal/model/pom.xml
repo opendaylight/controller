@@ -17,11 +17,6 @@
     <artifactId>model-parent</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bundle.plugin.version>2.4.0</bundle.plugin.version>
-    </properties>
-
     <modules>
         <module>model-inventory</module>
         <module>model-flow-base</module>
@@ -81,13 +76,13 @@
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>${yang.codegen.version}</version>
+                        <version>${yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>yang-binding</artifactId>
-                        <version>${yang.codegen.version}</version>
+                        <version>${yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>

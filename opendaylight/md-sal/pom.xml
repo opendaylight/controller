@@ -99,27 +99,15 @@
     </profiles>
 
     <properties>
-        <yangtools.version>0.6.0-SNAPSHOT</yangtools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-        <!-- Java Versions -->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
 
         <!-- Plugin Versions -->
         <bundle.plugin.version>2.4.0</bundle.plugin.version>
-        <releaseplugin.version>2.3.2</releaseplugin.version>
 
         <!-- Dependency Versions -->
-        <slf4j.version>1.7.2</slf4j.version>
-        <yang.codegen.version>0.6.0-SNAPSHOT</yang.codegen.version>
-        <guava.version>14.0.1</guava.version>
-        <osgi.core.version>5.0.0</osgi.core.version>
-        <junit.version>4.8.1</junit.version>
         <mockito.version>1.9.5</mockito.version>
         <xtend.version>2.4.3</xtend.version>
         <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
-        <jacoco.version>0.5.3.201107060350</jacoco.version>
 
         <!-- Sonar properties using jacoco to retrieve integration test results -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -129,85 +117,7 @@
         <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
         <sonar.branch>${user.name}-private-view</sonar.branch>
         <sonar.language>java</sonar.language>
-        <exam.version>3.0.0</exam.version>
-        <sal.version>0.7.0-SNAPSHOT</sal.version>
     </properties>
-
-    <pluginRepositories>
-        <!-- OpenDayLight Repo Mirror -->
-        <pluginRepository>
-            <id>opendaylight-mirror</id>
-            <name>opendaylight-mirror</name>
-            <url>${nexusproxy}/groups/public/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-        </pluginRepository>
-        <!-- OpenDayLight Snapshot artifact -->
-        <pluginRepository>
-            <id>opendaylight-snapshot</id>
-            <name>opendaylight-snapshot</name>
-            <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-
-
-    <repositories>
-        <!-- OpenDayLight Repo Mirror -->
-        <repository>
-            <id>opendaylight-mirror</id>
-            <name>opendaylight-mirror</name>
-            <url>${nexusproxy}/groups/public/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-        </repository>
-        <!-- OpenDayLight Snapshot artifact -->
-        <repository>
-            <id>opendaylight-snapshot</id>
-            <name>opendaylight-snapshot</name>
-            <url> ${nexusproxy}/repositories/opendaylight.snapshot/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <!-- OpenDayLight Released artifact -->
-        <repository>
-            <id>opendaylight-release</id>
-            <url>${nexusproxy}/repositories/opendaylight.release/</url>
-        </repository>
-        <!-- OpenDayLight Snapshot artifact -->
-        <snapshotRepository>
-            <id>opendaylight-snapshot</id>
-            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
-        </snapshotRepository>
-        <!-- Site deployment -->
-        <site>
-            <id>website</id>
-            <url>${sitedeploy}</url>
-        </site>
-    </distributionManagement>
-
 
     <dependencyManagement>
         <dependencies>
@@ -220,37 +130,7 @@
             <!-- YANG Tools Dependencies -->
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-binding</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-util</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-common</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-data-api</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-data-impl</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-model-api</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-data-util</artifactId>
                 <version>${yangtools.version}</version>
             </dependency>
             <!-- SAL Dependencies -->
@@ -261,7 +141,7 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal</artifactId>
+		<artifactId>sal</artifactId>
                 <version>${sal.version}</version>
                 <exclusions>
                     <exclusion>
@@ -273,32 +153,11 @@
 
             <!-- Supporting Libraries -->
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.xtend</groupId>
                 <artifactId>org.eclipse.xtend.lib</artifactId>
                 <version>${xtend.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>${osgi.core.version}</version>
-            </dependency>
             <!-- Testing Dependencies -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
@@ -308,23 +167,18 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-impl</artifactId>
-                <version>0.6.0-SNAPSHOT</version>
+		<version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-parser-impl</artifactId>
-                <version>0.6.0-SNAPSHOT</version>
+		<version>${yangtools.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${releaseplugin.version}</version>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
