@@ -34,7 +34,7 @@
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>    
+        </dependency>
 	    <dependency>
 	      <groupId>org.opendaylight.controller.model</groupId>
 	      <artifactId>model-flow-base</artifactId>
@@ -44,7 +44,7 @@
 	      <groupId>org.opendaylight.controller.model</groupId>
 	      <artifactId>model-flow-management</artifactId>
 	      <version>1.0-SNAPSHOT</version>
-	    </dependency>    
+	    </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-inventory</artifactId>
@@ -78,7 +78,7 @@
             <artifactId>sal</artifactId>
             <version>0.7.0-SNAPSHOT</version>
         </dependency>
-	      
+
     </dependencies>
 
     <build>

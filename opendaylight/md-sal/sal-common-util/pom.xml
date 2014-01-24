@@ -32,7 +32,7 @@
       <artifactId>sal-common-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
   </dependencies>
 
   <packaging>bundle</packaging>

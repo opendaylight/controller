@@ -91,7 +91,7 @@
                 </property>
             </activation>
             <build>
-                <!-- Put the IDE's build output in a folder other than target, 
+                <!-- Put the IDE's build output in a folder other than target,
                     so that IDE builds don't interact with Maven builds -->
                 <directory>target-ide</directory>
             </build>
@@ -184,8 +184,8 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${bundle.plugin.version}</version>
                     <extensions>true</extensions>
-                    <!--executions> <execution> <id>bundle-manifest</id> 
-                        <phase>process-classes</phase> <goals> <goal>manifest</goal> </goals> </execution> 
+                    <!--executions> <execution> <id>bundle-manifest</id>
+                        <phase>process-classes</phase> <goals> <goal>manifest</goal> </goals> </execution>
                         </executions -->
                     <configuration>
                         <instructions>
@@ -228,7 +228,7 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
                 </plugin>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>

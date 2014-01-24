@@ -14,7 +14,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>model-flow-base</artifactId>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>

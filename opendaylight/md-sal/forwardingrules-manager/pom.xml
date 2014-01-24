@@ -9,13 +9,13 @@
     <groupId>org.opendaylight.controller.md</groupId>
     <artifactId>forwardingrules-manager</artifactId>
     <packaging>bundle</packaging>
-    
+
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
-  
+
   	 <build>
         <plugins>
             <plugin>
@@ -37,12 +37,12 @@
         </plugins>
     </build>
 
-  
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>

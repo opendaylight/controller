@@ -147,7 +147,7 @@
                     </instructions>
                 </configuration>
             </plugin>
-           
+
 
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
