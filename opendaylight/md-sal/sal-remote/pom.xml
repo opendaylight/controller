@@ -14,8 +14,7 @@
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
     <properties>
-        <opendaylight.binding.version>0.6.0-SNAPSHOT</opendaylight.binding.version>
-        <opendaylight.yang.version>0.5.9-SNAPSHOT</opendaylight.yang.version>
+        <opendaylight.yangtools.version>0.6.0-SNAPSHOT</opendaylight.yangtools.version>
     </properties>
     <build>
         <plugins>
@@ -27,7 +26,7 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${opendaylight.yang.version}</version>
+                <version>${opendaylight.yangtools.version}</version>
                 <executions>
                     <execution>
                         <id>sal-remote</id>
@@ -58,7 +57,7 @@
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>${opendaylight.binding.version}</version>
+                        <version>${opendaylight.yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>
