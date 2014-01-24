@@ -47,7 +47,7 @@ class FlowCapableNodeMapping {
     static def toTerminationPointId(NodeConnectorId id) {
         return new TpId(id);
     }
-    
+
     static def toTopologyNode(NodeId nodeId,NodeRef invNodeRef) {
         val nb = new NodeBuilder();
         nb.setNodeId(nodeId)
@@ -56,7 +56,7 @@ class FlowCapableNodeMapping {
         nb.addAugmentation(InventoryNode,inb.build)
         return nb.build();
     }
-    
+
     static def toTerminationPoint(TpId id, NodeConnectorRef invNodeConnectorRef) {
         val tpb = new TerminationPointBuilder
         tpb.setTpId(id);
@@ -65,7 +65,7 @@ class FlowCapableNodeMapping {
         tpb.addAugmentation(InventoryNodeConnector,incb.build())
         return tpb.build();
     }
-    
+
     static def toTopologyLink(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.Link link) {
         val sb = new SourceBuilder();
         sb.setSourceNode(link.source.nodeKey.id.toToplogyNodeId)
@@ -78,5 +78,5 @@ class FlowCapableNodeMapping {
         lb.setDestination(db.build());
         lb.setLinkId(new LinkId(lb.source.sourceTp.value))
         return lb.build();
-    } 
+    }
 }

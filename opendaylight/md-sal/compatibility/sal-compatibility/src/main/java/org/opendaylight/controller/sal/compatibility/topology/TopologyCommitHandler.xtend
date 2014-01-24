@@ -23,15 +23,15 @@ class TopologyCommitHandler implements DataCommitHandler<InstanceIdentifier<? ex
     static val LOG = LoggerFactory.getLogger(TopologyCommitHandler);
     @Property
     IPluginOutTopologyService topologyPublisher;
-    
+
     @Property
     DataProviderService dataService;
-    
+
     new(DataProviderService dataService) {
         _topologyPublisher = topologyPublisher
         _dataService = dataService
     }
-    
+
     override requestCommit(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
         val msg = new CopyOnWriteArrayList<TopoEdgeUpdate>()
         try {

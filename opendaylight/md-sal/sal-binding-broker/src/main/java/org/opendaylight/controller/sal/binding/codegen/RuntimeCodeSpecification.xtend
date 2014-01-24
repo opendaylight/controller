@@ -12,8 +12,8 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity
 import org.opendaylight.yangtools.yang.binding.NotificationListener
 
 /**
- * 
- * 
+ *
+ *
  */
 class RuntimeCodeSpecification {
 
@@ -32,8 +32,8 @@ class RuntimeCodeSpecification {
 
     /**
      * Returns a name for DirectProxy implementation
-     * 
-     * 
+     *
+     *
      */
     public static def getDirectProxyName(Class<? extends RpcService> base) {
         getGeneratedName(base, DIRECT_PROXY_SUFFIX);
@@ -41,7 +41,7 @@ class RuntimeCodeSpecification {
 
     /**
      * Returns a name for Router implementation
-     * 
+     *
      */
     public static def getRouterName(Class<? extends RpcService> base) {
         getGeneratedName(base, ROUTER_SUFFIX);
@@ -49,7 +49,7 @@ class RuntimeCodeSpecification {
 
     /**
      * Returns a name for generated interface
-     * 
+     *
      */
     public static def getGeneratedName(Class<?> cls, String suffix) {
         '''«cls.name»$$Broker$«suffix»'''.toString()
@@ -57,7 +57,7 @@ class RuntimeCodeSpecification {
 
     /**
      * Returns a field name for specified routing context
-     * 
+     *
      */
     public static def getRoutingTableField(Class<? extends BaseIdentity> routingContext) {
         return '''_routes_«routingContext.simpleName»'''.toString;

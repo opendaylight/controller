@@ -19,30 +19,30 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowRe
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
 
 class FlowTransaction extends AbstractTransaction {
-    
+
     @Property
-    val SalFlowService salFlowService;   
-    
-    
+    val SalFlowService salFlowService;
+
+
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,SalFlowService salFlowService) {
-        super(modification)        
+        super(modification)
         _salFlowService = salFlowService;
     }
-    
+
     override remove(InstanceIdentifier<?> instanceId, DataObject obj) {
         if(obj instanceof Flow) {
             val flow = (obj as Flow)
             val tableInstanceId = instanceId.firstIdentifierOf(Table);
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new RemoveFlowInputBuilder(flow);
-            builder.setFlowRef(new FlowRef(instanceId));            
+            builder.setFlowRef(new FlowRef(instanceId));
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setFlowTable(new FlowTableRef(tableInstanceId));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
-            _salFlowService.removeFlow(builder.build());            
+            _salFlowService.removeFlow(builder.build());
         }
     }
-    
+
     override update(InstanceIdentifier<?> instanceId, DataObject originalObj, DataObject updatedObj) {
         if(originalObj instanceof Flow && updatedObj instanceof Flow) {
             val originalFlow = (originalObj as Flow)
@@ -55,12 +55,12 @@ class FlowTransaction extends AbstractTransaction {
             builder.setUpdatedFlow((ufb.build()));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
             val ofb = new OriginalFlowBuilder(originalFlow);
-            builder.setOriginalFlow(ofb.build());      
+            builder.setOriginalFlow(ofb.build());
             _salFlowService.updateFlow(builder.build());
-           
+
         }
     }
-    
+
     override add(InstanceIdentifier<?> instanceId, DataObject obj) {
         if(obj instanceof Flow) {
             val flow = (obj as Flow)
@@ -71,11 +71,11 @@ class FlowTransaction extends AbstractTransaction {
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
             builder.setFlowRef(new FlowRef(instanceId));
             builder.setFlowTable(new FlowTableRef(tableInstanceId));
-            _salFlowService.addFlow(builder.build());            
+            _salFlowService.addFlow(builder.build());
         }
     }
-    
+
     override validate() throws IllegalStateException {
         FlowTransactionValidator.validate(this)
-    }  
+    }
 }

@@ -22,11 +22,11 @@ class ProxyFactory {
     private static def dispatch createProxyImpl(ServiceReference<?> ref, DataProviderService service) {
         new DataProviderServiceProxy(ref as ServiceReference<DataProviderService>, service);
     }
-    
+
     private static def dispatch createProxyImpl(ServiceReference<?> ref, NotificationPublishService service) {
         new NotificationPublishServiceProxy(ref as ServiceReference<NotificationPublishService>, service);
     }
-    
+
     private static def dispatch createProxyImpl(ServiceReference<?> ref, NotificationService service) {
         new NotificationServiceProxy(ref as ServiceReference<NotificationService>, service);
     }

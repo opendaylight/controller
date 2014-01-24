@@ -523,7 +523,7 @@ class TransformerGenerator {
                     bodyChecked = '''
                         {
                             «QName.name» _localQName = QNAME;
-                            
+
                             if($2 == null) {
                             return null;
                             }
@@ -659,7 +659,7 @@ class TransformerGenerator {
     private def dispatch String deserializeBodyImpl(GeneratedType type, SchemaNode node) '''
         {
             «QName.name» _localQName = «QName.name».create($1,QNAME.getLocalName());
-            
+
             if($2 == null) {
                 return null;
             }
@@ -703,7 +703,7 @@ class TransformerGenerator {
     private def dispatch String deserializeBodyImpl(GeneratedType type, ChoiceCaseNode node) '''
         {
             «QName.name» _localQName = «QName.name».create($1,QNAME.getLocalName());
-            
+
             if($2 == null) {
                 return null;
             }
@@ -771,7 +771,7 @@ class TransformerGenerator {
                 _hasNext = _iterator.hasNext();
             }
         }
-        
+
         ////System.out.println(" list" + «propertyName»);
     '''
 
@@ -798,7 +798,7 @@ class TransformerGenerator {
     '''
 
     private def dispatch CharSequence deserializeProperty(LeafSchemaNode schema, Type type, String propertyName) '''
-        java.util.List _dom_«propertyName»_list = 
+        java.util.List _dom_«propertyName»_list =
             _compositeNode.get(«QName.name».create(_localQName,"«schema.QName.localName»"));
         «type.resolvedName» «propertyName» = null;
         if(_dom_«propertyName»_list != null && _dom_«propertyName»_list.size() > 0) {
@@ -811,7 +811,7 @@ class TransformerGenerator {
 
     private def dispatch CharSequence deserializeProperty(ContainerSchemaNode schema, Type type,
         String propertyName) '''
-        java.util.List _dom_«propertyName»_list = 
+        java.util.List _dom_«propertyName»_list =
             _compositeNode.get(«QName.name».create(_localQName,"«schema.QName.localName»"));
         «type.resolvedName» «propertyName» = null;
         if(_dom_«propertyName»_list != null && _dom_«propertyName»_list.size() > 0) {
@@ -862,7 +862,7 @@ class TransformerGenerator {
                     bodyChecked = '''
                         {
                             ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
-                            
+
                             if($1 == null) {
                                 return null;
                             }
@@ -887,7 +887,7 @@ class TransformerGenerator {
                     bodyChecked = '''
                         {
                             ////System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
-                            
+
                             if($1 == null) {
                                 return null;
                             }
@@ -932,11 +932,11 @@ class TransformerGenerator {
                 method(Object, "toDomValue", Object) [
                     modifiers = PUBLIC + FINAL + STATIC
                     val ctSpec = inputType.asCtClass;
-                    
+
                     bodyChecked = '''
                         {
                             ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
-                            
+
                             if($1 == null) {
                                 return null;
                             }
@@ -945,12 +945,12 @@ class TransformerGenerator {
                                 «IF property.key != "getValue"»
                                     «property.value.resolvedName» «property.key» = («property.value.resolvedName») _value.«property.
                             key»();
-                                    if(«property.key» != null) { 
+                                    if(«property.key» != null) {
                                         return «serializeValue(property.value, property.key, getterToTypeDefinition.get(property.key))»;
                                     }
                                 «ENDIF»
                             «ENDFOR»
-                            
+
                             return null;
                         }
                     '''
@@ -967,7 +967,7 @@ class TransformerGenerator {
                     bodyChecked = '''
                         {
                             ////System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
-                            
+
                             if($1 == null) {
                                 return null;
                             }
@@ -1016,14 +1016,14 @@ class TransformerGenerator {
                     bodyChecked = '''
                         {
                             ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
-                            
+
                             if($1 == null) {
                                 return null;
                             }
                             «typeSpec.resolvedName» _encapsulatedValue = («typeSpec.resolvedName») $1;
                             «HashSet.resolvedName» _value = new «HashSet.resolvedName»();
                             //System.out.println("«inputType.simpleName»#toDomValue:Enc: "+_encapsulatedValue);
-                            
+
                             «FOR bit : typeDef.bits»
                                 «val getter = bit.getterName()»
                                 if(Boolean.TRUE.equals(_encapsulatedValue.«getter»())) {
@@ -1032,7 +1032,7 @@ class TransformerGenerator {
                             «ENDFOR»
                             «Set.resolvedName» _domValue =  «Collections.resolvedName».unmodifiableSet(_value);
                             //System.out.println("«inputType.simpleName»#toDomValue:DeEnc: "+_domValue);
-                            
+
                             return _domValue;
                         }
                     '''
@@ -1050,7 +1050,7 @@ class TransformerGenerator {
                     bodyChecked = '''
                         {
                             //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
-                            
+
                             if($1 == null) {
                                 return null;
                             }
@@ -1058,7 +1058,7 @@ class TransformerGenerator {
                             «FOR bit : sortedBits»
                                 Boolean «bit.propertyName» = Boolean.valueOf(_domValue.contains("«bit.name»"));
                             «ENDFOR»
-                            
+
                             return new «inputType.resolvedName»(«FOR bit : sortedBits SEPARATOR ","»«bit.propertyName»«ENDFOR»);
                         }
                     '''
@@ -1118,7 +1118,7 @@ class TransformerGenerator {
                         return null;
                     }
                     return $1.toString();
-                    
+
                     }'''
             ]
             method(Object, "serialize", Object) [
@@ -1249,9 +1249,9 @@ class TransformerGenerator {
 
     }
 
-    /** 
+    /**
      * Default catch all
-     * 
+     *
      **/
     private def dispatch CharSequence deserializeProperty(DataSchemaNode container, Type type, String propertyName) '''
         «type.resolvedName» «propertyName» = null;
@@ -1272,7 +1272,7 @@ class TransformerGenerator {
         return "set" + it;
     }
 
-    /* 
+    /*
     private def dispatch CharSequence deserializeProperty(DataSchemaNode container,GeneratedType type, String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();
         if(«propertyName» != null) {
@@ -1394,7 +1394,7 @@ class TransformerGenerator {
 
     private def dispatch CharSequence serializeProperty(LeafSchemaNode schema, Type type, String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();
-        
+
         if(«propertyName» != null) {
             «QName.name» _qname = «QName.name».create(_resultName,"«schema.QName.localName»");
             Object _propValue = «serializeValue(type, propertyName, schema.type)»;
@@ -1451,9 +1451,9 @@ class TransformerGenerator {
         }
     '''
 
-    /** 
+    /**
      * Default catch all
-     * 
+     *
      **/
     private def dispatch CharSequence serializeProperty(DataSchemaNode container, Type type, String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();

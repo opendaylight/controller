@@ -13,19 +13,19 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.slf4j.LoggerFactory
 
 class MeterProvider implements AutoCloseable {
-    
+
     @Property
     DataProviderService dataService;
-    
+
     @Property
     SalMeterService salMeterService;
-    
+
     FlowCommitHandler commitHandler
 
     Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>,DataObject>> commitHandlerRegistration;
-    
+
     static val LOG = LoggerFactory.getLogger(MeterProvider);
-    
+
     def void start() {
         commitHandler = new FlowCommitHandler(salMeterService)
         val InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Nodes)
@@ -40,9 +40,9 @@ class MeterProvider implements AutoCloseable {
     protected def startChange() {
         return dataService.beginTransaction;
     }
-    
+
     override close() throws Exception {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
-    
+
 }

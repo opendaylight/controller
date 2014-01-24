@@ -93,7 +93,7 @@ public class NodeMapping {
         val connectorKey = item.getKey().checkInstanceOf(NodeConnectorKey);
         return connectorKey.id.toADNodeConnector(path.toNodeId)
     }
-    
+
     public static def toADNodeConnector(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId ncid,
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId nid) {
             return new NodeConnector(ncid.toNodeConnectorType(nid),

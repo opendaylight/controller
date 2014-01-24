@@ -43,8 +43,8 @@ class ConsumerContextImpl implements ConsumerSession {
             return null;
         }
         val serviceImpl = context.getService(serviceRef);
-        
-        
+
+
         val ret = ProxyFactory.createProxy(serviceRef,serviceImpl);
         if(ret != null) {
             instantiatedServices.putInstance(service, ret);
@@ -58,7 +58,7 @@ class ConsumerContextImpl implements ConsumerSession {
         for (BrokerService brokerService : toStop) {
             if(brokerService instanceof AbstractBrokerServiceProxy<?>) {
                 (brokerService as AutoCloseable).close();
-            } 
+            }
         }
         broker.consumerSessionClosed(this);
     }

@@ -23,7 +23,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
     @Property
     private DataBrokerService dataService;
-    
+
     private new() {
         if (INSTANCE !== null) {
             throw new IllegalStateException("Already instantiated");
@@ -45,7 +45,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         LOG.trace("Read Configuration via Restconf: {}", path)
         return dataService.readConfigurationData(path);
     }
-    
+
     def readConfigurationDataBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path) {
         checkPreconditions
         LOG.trace("Read Configuration via Restconf: {}", path)
@@ -57,7 +57,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         LOG.trace("Read Operational via Restconf: {}", path)
         return dataService.readOperationalData(path);
     }
-    
+
     def readOperationalDataBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path) {
         checkPreconditions
         LOG.trace("Read Operational via Restconf: {}", path)
@@ -77,7 +77,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         transaction.putConfigurationData(path, payload);
         return transaction.commit
     }
-    
+
     def commitConfigurationDataPutBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path, CompositeNode payload) {
         checkPreconditions
         val transaction = mountPoint.beginTransaction;
@@ -97,7 +97,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         LOG.trace("Post Configuration via Restconf was not executed because data already exists: {}", path)
         return null;
     }
-    
+
     def commitConfigurationDataPostBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path, CompositeNode payload) {
         checkPreconditions
         val transaction = mountPoint.beginTransaction;
@@ -117,7 +117,7 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         transaction.removeConfigurationData(path)
         return transaction.commit
     }
-    
+
     def commitConfigurationDataDeleteBehindMountPoint(MountInstance mountPoint, InstanceIdentifier path) {
         checkPreconditions
         val transaction = mountPoint.beginTransaction;

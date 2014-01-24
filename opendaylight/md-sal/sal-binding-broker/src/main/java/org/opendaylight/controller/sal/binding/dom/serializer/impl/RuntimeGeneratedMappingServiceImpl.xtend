@@ -70,9 +70,9 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
 
     @Property
     val ConcurrentMap<Type, SchemaNode> typeToSchemaNode = new ConcurrentHashMap();
-    
+
     @Property
-    val ConcurrentMap<Type,Set<QName>> serviceTypeToRpc = new ConcurrentHashMap(); 
+    val ConcurrentMap<Type,Set<QName>> serviceTypeToRpc = new ConcurrentHashMap();
 
     val promisedTypeDefinitions = HashMultimap.<Type, SettableFuture<GeneratedTypeBuilder>>create;
 
@@ -98,7 +98,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
             updateBindingFor(context.childNodes, schemaContext);
             updateBindingFor(context.cases, schemaContext);
             val namespace = BindingGeneratorUtil.moduleNamespaceToPackageName(module);
-            
+
             if(!module.rpcs.empty) {
             val rpcs = FluentIterable.from(module.rpcs).transform[QName].toSet
             val serviceClass = new ReferencedTypeImpl(namespace,BindingGeneratorUtil.parseToClassName(module.name)+"Service");
@@ -111,12 +111,12 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
                 binding.typeDefinitions.put(typeRef, typedef.value as GeneratedType);
                 val schemaNode = YangSchemaUtils.findTypeDefinition(schemaContext,typedef.key);
                 if(schemaNode != null) {
-                    
+
                     binding.typeToSchemaNode.put(typeRef,schemaNode);
                 } else {
                     LOG.error("Type definition for {} is not available",typedef.value);
                 }
-                
+
             }
             val augmentations = context.augmentations;
             for (augmentation : augmentations) {
@@ -133,7 +133,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
 
     override Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> toDataDom(
         Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry) {
-        
+
         try {
         val key = toDataDom(entry.key)
         var CompositeNode data;
@@ -143,7 +143,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
           data = toCompositeNodeImpl(entry.value);
         }
         return new SimpleEntry(key, data);
-        
+
         } catch (Exception e) {
             LOG.error("Error during serialization for {}.", entry.key,e);
             throw e;
@@ -157,10 +157,10 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
         val ret = codec.serialize(new ValueWithQName(null, object));
         return ret as CompositeNode;
     }
-    
-    
+
+
     private def CompositeNode toCompositeNodeImpl(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier identifier,DataObject object) {
-       
+
         //val cls = object.implementedInterface;
         //waitForSchema(cls);
         val last = identifier.path.last;
@@ -221,7 +221,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
     }
 
     private def void updateBindingFor(Map<SchemaPath, GeneratedTypeBuilder> map, SchemaContext module) {
-        
+
         for (entry : map.entrySet) {
             val schemaNode = SchemaContextUtil.findDataSchemaNode(module, entry.key);
 
@@ -232,7 +232,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
                 typeToSchemaNode.put(typeRef, schemaNode);
                 updatePromisedSchemas(typeRef, schemaNode);
             }
-            
+
         }
     }
 
@@ -250,7 +250,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
             listenerRegistration = ctx.registerService(SchemaServiceListener, this, new Hashtable<String, String>());
         }
     }
-    
+
     override getRpcQNamesFor(Class<? extends RpcService> service) {
         return serviceTypeToRpc.get(new ReferencedTypeImpl(service.package.name,service.simpleName));
     }
@@ -285,7 +285,7 @@ class RuntimeGeneratedMappingServiceImpl implements BindingIndependentMappingSer
     override close() throws Exception {
         listenerRegistration?.unregister();
     }
-    
+
     override dataObjectFromDataDom(Class<? extends DataContainer> container, CompositeNode domData) {
         return tryDeserialization[ |
             if (domData == null) {

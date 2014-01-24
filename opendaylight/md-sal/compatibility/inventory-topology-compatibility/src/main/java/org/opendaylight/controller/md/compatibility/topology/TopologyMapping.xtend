@@ -44,7 +44,7 @@ class TopologyMapping {
         val tpKey = (identifier.path.last as IdentifiableItem<Node,NodeKey>).key;
         return InventoryMapping.nodeFromNodeId(tpKey.nodeId.value);
     }
-    
+
 
 
     def NodeKey toTopologyNodeKey(org.opendaylight.controller.sal.core.Node node) {

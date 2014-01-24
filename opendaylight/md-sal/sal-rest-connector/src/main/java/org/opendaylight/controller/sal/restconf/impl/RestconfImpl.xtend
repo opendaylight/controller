@@ -69,11 +69,11 @@ class RestconfImpl implements RestconfService {
     override invokeRpc(String identifier, CompositeNode payload) {
         return callRpc(identifier.rpcDefinition, payload)
     }
-    
+
     override invokeRpc(String identifier) {
         return callRpc(identifier.rpcDefinition, null)
     }
-    
+
     private def StructuredData callRpc(RpcDefinition rpc, CompositeNode payload) {
         if (rpc === null) {
             throw new ResponseException(NOT_FOUND, "RPC does not exist.");
@@ -192,7 +192,7 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
-    
+
     override createConfigurationData(CompositeNode payload) {
         if (payload.namespace === null) {
             throw new ResponseException(BAD_REQUEST,
@@ -221,7 +221,7 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
-    
+
     override deleteConfigurationData(String identifier) {
         val iiWithData = identifier.toInstanceIdentifier
         var RpcResult<TransactionStatus> status = null
@@ -236,19 +236,19 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
-    
+
     private def dispatch URI namespace(CompositeNode data) {
         return data.nodeType.namespace
     }
-    
+
     private def dispatch URI namespace(CompositeNodeWrapper data) {
         return data.namespace
     }
-    
+
     private def dispatch String localName(CompositeNode data) {
         return data.nodeType.localName
     }
-    
+
     private def dispatch String localName(CompositeNodeWrapper data) {
         return data.localName
     }
@@ -277,15 +277,15 @@ class RestconfImpl implements RestconfService {
         }
         return module
     }
-    
+
     private def dispatch getName(CompositeNode data) {
         return data.nodeType.localName
     }
-    
+
     private def dispatch getName(CompositeNodeWrapper data) {
         return data.localName
     }
-    
+
     private def InstanceIdWithSchemaNode addLastIdentifierFromData(InstanceIdWithSchemaNode identifierWithSchemaNode,
         CompositeNode data, DataSchemaNode schemaOfData) {
         val iiOriginal = identifierWithSchemaNode?.instanceIdentifier
@@ -317,23 +317,23 @@ class RestconfImpl implements RestconfService {
         }
         return keyValues
     }
-    
+
     private def endsWithMountPoint(String identifier) {
         return (identifier.endsWith(ControllerContext.MOUNT) || identifier.endsWith(ControllerContext.MOUNT + "/"))
     }
-    
+
     private def representsMountPointRootData(CompositeNode data) {
         return ((data.namespace == SchemaContext.NAME.namespace || data.namespace == MOUNT_POINT_MODULE_NAME) &&
             data.localName == SchemaContext.NAME.localName)
     }
-    
+
     private def addMountPointIdentifier(String identifier) {
         if (identifier.endsWith("/")) {
             return identifier + ControllerContext.MOUNT
         }
         return identifier + "/" + ControllerContext.MOUNT
     }
-    
+
     private def CompositeNode normalizeNode(CompositeNode node, DataSchemaNode schema, MountInstance mountPoint) {
         if (schema === null) {
             throw new ResponseException(INTERNAL_SERVER_ERROR, "Data schema node was not found for " + node?.nodeType?.localName)
@@ -349,7 +349,7 @@ class RestconfImpl implements RestconfService {
         }
         return node
     }
-    
+
     private def void normalizeNode(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment,
         MountInstance mountPoint) {
         if (schema === null) {
@@ -405,13 +405,13 @@ class RestconfImpl implements RestconfService {
             val simpleNode = (nodeBuilder as SimpleNodeWrapper)
             val value = simpleNode.value
             var inputValue = value;
-            
+
             if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
                 if (value instanceof String) {
                     inputValue = new IdentityValuesDTO(validQName.namespace.toString, value as String, null)
                 } // else value is instance of ValuesDTO
             }
-            
+
             val outputValue = RestCodec.from(schema.typeDefinition, mountPoint)?.deserialize(inputValue);
             simpleNode.setValue(outputValue)
         } else if (nodeBuilder instanceof EmptyNodeWrapper) {

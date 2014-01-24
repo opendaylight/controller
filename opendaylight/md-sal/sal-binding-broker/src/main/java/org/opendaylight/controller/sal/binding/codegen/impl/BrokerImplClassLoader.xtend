@@ -12,7 +12,7 @@ import java.lang.ClassLoader
 class BrokerImplClassLoader extends ClassLoader {
 
     val ClassLoader spiClassLoader
-    
+
     public new(ClassLoader model, ClassLoader spi) {
         super(model)
         spiClassLoader = spi;

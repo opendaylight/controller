@@ -11,16 +11,16 @@ import org.opendaylight.yangtools.yang.binding.RpcService
 import org.osgi.framework.ServiceRegistration
 
 class RpcProxyContext {
-	
+
 	new(Class<? extends RpcService> proxyClass) {
 		this.proxyClass = proxyClass
 	}
-	
+
 	protected val Class<? extends RpcService> proxyClass;
-	
+
 	@Property
 	protected var RpcService proxy;
-	
+
 	@Property
 	protected var ServiceRegistration<? extends RpcService> registration;
 }

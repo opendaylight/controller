@@ -34,9 +34,9 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
     protected def removeRpcImplementation(RpcRegistrationWrapper implToRemove) throws IllegalArgumentException {
         registrations.remove(implToRemove);
     }
-    
+
     override close() {
-        
+
         for (reg : registrations) {
             reg.close()
         }

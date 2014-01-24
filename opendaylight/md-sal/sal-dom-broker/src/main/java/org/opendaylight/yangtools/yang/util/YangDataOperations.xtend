@@ -64,17 +64,17 @@ class YangDataOperations {
         checkConfigurational(node,configurational);
         if(node.keyDefinition === null || node.keyDefinition.empty) {
             return modified;
-        } 
+        }
         val originalMap = (original as List).toIndexMap(node.keyDefinition);
         val modifiedMap = (modified as List).toIndexMap(node.keyDefinition);
-        
+
         val List<Node<?>> mergedNodes = new ArrayList(original.size + modified.size);
         for(entry : modifiedMap.entrySet) {
             val originalEntry = originalMap.get(entry.key);
             if(originalEntry != null) {
                 originalMap.remove(entry.key);
                 mergedNodes.add(merge(node,originalEntry,entry.value,configurational));
-                
+
             }
         }
         mergedNodes.addAll(originalMap.values);
@@ -91,10 +91,10 @@ class YangDataOperations {
         checkArgument(stored.nodeType == modified.nodeType);
 
         val mergedChildNodes = new ArrayList<Node<?>>(stored.children.size + modified.children.size);
-        
+
         val toProcess = new HashSet<QName>(stored.keySet);
         toProcess.addAll(modified.keySet);
-        
+
         for (qname : toProcess) {
             val schemaChild = schema.getDataChildByName(qname);
             val storedChildren = stored.get(qname);

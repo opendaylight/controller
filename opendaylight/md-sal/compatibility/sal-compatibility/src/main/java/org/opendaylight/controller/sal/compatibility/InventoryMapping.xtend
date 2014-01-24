@@ -30,8 +30,8 @@ class InventoryMapping {
         val tpKey = (identifier.path.last as IdentifiableItem<Node,NodeKey>).key;
         return nodeFromNodeId(tpKey.id.value);
     }
-    
-    
+
+
      static def NodeRef toNodeRef(org.opendaylight.controller.sal.core.Node node) {
         val nodeId = new NodeKey(new NodeId(node.toNodeId))
         val path = InstanceIdentifier.builder().node(Nodes).child(Node,nodeId).toInstance;

@@ -134,7 +134,7 @@ public class MDFlowMapping {
         return it.build();
 
     }
-    
+
     public static def toMDFlow(Flow sourceFlow, String flowId) {
        if (sourceFlow == null)
             throw new IllegalArgumentException();
@@ -144,7 +144,7 @@ public class MDFlowMapping {
        cookie = BigInteger.valueOf(sourceFlow.id)
        priority = sourceFlow.priority as int
        id = new FlowId(flowId)
-    
+
        val sourceActions = sourceFlow.actions;
        val targetActions = new ArrayList<Action>();
        for (sourceAction : sourceActions) {
@@ -155,7 +155,7 @@ public class MDFlowMapping {
        tableId = new Integer(0).shortValue
        return it.build();
     }
-    
+
     public static def Instructions toApplyInstruction(ArrayList<Action> actions) {
         val it = new InstructionsBuilder;
         val applyActions = new InstructionBuilder;
@@ -385,7 +385,7 @@ public class MDFlowMapping {
         }
         return new MacAddress(sb.toString());
     }
-	
+
 	public static def toMDSalflow(Flow sourceFlow) {
         if (sourceFlow == null)
             throw new IllegalArgumentException();
@@ -405,5 +405,5 @@ public class MDFlowMapping {
         match = sourceFlow.match.toMatch();
         return it.build();
 	}
-	
+
 }

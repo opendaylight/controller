@@ -17,22 +17,22 @@ class HashMapDataStore implements DataStore, AutoCloseable {
 
     val Map<InstanceIdentifier, CompositeNode> configuration = new ConcurrentHashMap();
     val Map<InstanceIdentifier, CompositeNode> operational = new ConcurrentHashMap();
-    
-    
-    
+
+
+
     override containsConfigurationPath(InstanceIdentifier path) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
-        
+
     }
-    
+
     override containsOperationalPath(InstanceIdentifier path) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
-    
+
     override getStoredConfigurationPaths() {
         configuration.keySet
     }
-    
+
     override getStoredOperationalPaths() {
         operational.keySet
     }
@@ -68,7 +68,7 @@ class HashMapDataStore implements DataStore, AutoCloseable {
         }
         return Rpcs.getRpcResult(true, null, Collections.emptySet);
     }
-    
+
     def remove(Map<InstanceIdentifier, CompositeNode> map, InstanceIdentifier identifier) {
         val affected = new HashSet<InstanceIdentifier>();
         for(path : map.keySet) {
@@ -79,17 +79,17 @@ class HashMapDataStore implements DataStore, AutoCloseable {
         for(pathToRemove : affected) {
             map.remove(pathToRemove);
         }
-        
+
     }
 
 
     override close()  {
         // NOOP
     }
-    
+
 }
 
-class HashMapDataStoreTransaction implements // 
+class HashMapDataStoreTransaction implements //
 DataCommitTransaction<InstanceIdentifier, CompositeNode> {
     @Property
     val DataModification<InstanceIdentifier, CompositeNode> modification

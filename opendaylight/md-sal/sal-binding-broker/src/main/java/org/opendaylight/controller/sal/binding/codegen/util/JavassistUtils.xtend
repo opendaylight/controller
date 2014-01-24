@@ -23,7 +23,7 @@ class JavassistUtils {
     private val loaderClassPaths = new WeakHashMap<ClassLoader,LoaderClassPath>();
 
     ClassPool classPool
-    
+
     @Property
     val Lock lock = new ReentrantLock();
 
@@ -36,14 +36,14 @@ class JavassistUtils {
         function1.process(method);
         it.addMethod(method);
     }
-    
+
         def void method(CtClass it, Class<?> returnType, String name, Class<?> parameter1, Class<?> parameter2,  MethodGenerator function1) {
         val method = new CtMethod(returnType.asCtClass, name, Arrays.asList(parameter1.asCtClass,parameter2.asCtClass), it);
         function1.process(method);
         it.addMethod(method);
     }
-    
-    
+
+
     def void staticMethod(CtClass it, Class<?> returnType, String name, Class<?> parameter, MethodGenerator function1) {
         val method = new CtMethod(returnType.asCtClass, name, Arrays.asList(parameter.asCtClass), it);
         function1.process(method);
@@ -61,14 +61,14 @@ class JavassistUtils {
     }
 
     def CtClass createClass(String fqn, ClassGenerator cls) {
-        
+
         val target = classPool.makeClass(fqn);
         cls.process(target);
         return target;
     }
 
     def CtClass createClass(String fqn, CtClass superInterface, ClassGenerator cls) {
-        
+
         val target = classPool.makeClass(fqn);
         target.implementsType(superInterface);
         cls.process(target);
@@ -90,7 +90,7 @@ class JavassistUtils {
         addField(field);
         return field;
     }
-    
+
     def CtField staticField(CtClass it, String name, Class<?> returnValue) {
         val field = new CtField(returnValue.asCtClass, name, it);
         field.modifiers = Modifier.PUBLIC + Modifier.STATIC
@@ -108,12 +108,12 @@ class JavassistUtils {
             } catch (NotFoundException ef) {
                 LOG.warn("Appending ClassClassPath for {}",cls);
                 pool.appendClassPath(new ClassClassPath(cls));
-                
+
                 return pool.get(cls.name)
             }
         }
     }
-    
+
     def void appendClassLoaderIfMissing(ClassLoader loader) {
         if(loaderClassPaths.containsKey(loader)) {
             return;
@@ -121,7 +121,7 @@ class JavassistUtils {
         val ctLoader = new LoaderClassPath(loader);
         classPool.appendClassPath(ctLoader);
     }
-    
+
     def void ensureClassLoader(Class<?> child) {
         appendClassLoaderIfMissing(child.classLoader);
     }

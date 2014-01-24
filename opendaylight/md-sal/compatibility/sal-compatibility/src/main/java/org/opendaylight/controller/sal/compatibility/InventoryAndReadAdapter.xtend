@@ -91,13 +91,13 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     @Property
     OpendaylightPortStatisticsService nodeConnectorStatisticsService;
-    
+
     @Property
     OpendaylightFlowTableStatisticsService flowTableStatisticsService;
 
     @Property
     FlowTopologyDiscoveryService topologyDiscovery;
-    
+
     @Property
     List<IPluginOutReadService> statisticsPublisher = new CopyOnWriteArrayList<IPluginOutReadService>();
 
@@ -115,7 +115,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     def setReadPublisher(IPluginOutReadService listener) {
     	statisticsPublisher.add(listener);
     }
-    
+
     def unsetReadPublisher (IPluginOutReadService listener) {
     	if( listener != null)
     		statisticsPublisher.remove(listener);
@@ -136,31 +136,31 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		val tableRef = InstanceIdentifier.builder(Nodes)
 										.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(node))
                     					.augmentation(FlowCapableNode).child(Table, new TableKey(OPENFLOWV10_TABLE_ID)).toInstance();
-		
+
 		val it = this.startChange();
-		
+
 		val table= it.readConfigurationData(tableRef) as Table;
-		
+
 		if(table != null){
 			LOG.trace("Number of flows installed in table 0 of node {} : {}",node,table.flow.size);
-			
+
 			for(flow : table.flow){
-				
+
 				val adsalFlow = ToSalConversionsUtils.toFlow(flow);
 				val statsFromDataStore = flow.getAugmentation(FlowStatisticsData);
-				
+
 				if(statsFromDataStore != null){
 					val it = new FlowOnNode(adsalFlow);
 					byteCount =  statsFromDataStore.flowStatistics.byteCount.value.longValue;
 					packetCount = statsFromDataStore.flowStatistics.packetCount.value.longValue;
 					durationSeconds = statsFromDataStore.flowStatistics.duration.second.value.intValue;
 					durationNanoseconds = statsFromDataStore.flowStatistics.duration.nanosecond.value.intValue;
-					
+
 					output.add(it);
 				}
 			}
 		}
-        
+
         //TODO (main): Shell we send request to the switch? It will make async request to the switch.
         // Once plugin receive response, it will let adaptor know through onFlowStatisticsUpdate()
         // If we assume that md-sal statistics manager will always be running, then its not required
@@ -168,34 +168,34 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         val input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder;
         input.setNode(node.toNodeRef);
         flowStatisticsService.getAllFlowsStatisticsFromAllFlowTables(input.build)
-        
+
         return output;
     }
 
     override readAllNodeConnector(Node node, boolean cached) {
-    	
+
     	val ret = new ArrayList<NodeConnectorStatistics>();
 		val nodeRef = InstanceIdentifier.builder(Nodes)
 									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(node))
 									.toInstance();
-		
+
 		val provider = this.startChange();
-		
+
 		val dsNode= provider.readConfigurationData(nodeRef) as org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-		
+
  		if(dsNode != null){
- 			
+
  			for (dsNodeConnector : dsNode.nodeConnector){
 				val nodeConnectorRef = InstanceIdentifier.builder(Nodes)
 									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(node))
 									.child(NodeConnector, dsNodeConnector.key)
 									.toInstance();
- 				
+
  				val nodeConnectorFromDS = provider.readConfigurationData(nodeConnectorRef) as NodeConnector;
- 				
+
  				if(nodeConnectorFromDS != null){
  					val nodeConnectorStatsFromDs = nodeConnectorFromDS.getAugmentation(FlowCapableNodeConnectorStatisticsData) as FlowCapableNodeConnectorStatistics;
-	 				
+	
 					ret.add(toNodeConnectorStatistics(nodeConnectorStatsFromDs.flowCapableNodeConnectorStatistics,dsNode.id,dsNodeConnector.id));
  				}
  			}
@@ -210,15 +210,15 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     override readAllNodeTable(Node node, boolean cached) {
     	val ret = new ArrayList<NodeTableStatistics>();
-    	
+
 		val dsFlowCapableNode= readFlowCapableNode(node.toNodeRef)
-		
+
  		if(dsFlowCapableNode != null){
- 			
+
  			for (table : dsFlowCapableNode.table){
- 				
+
  				val tableStats = table.getAugmentation(FlowTableStatisticsData);
- 				
+
  				if(tableStats != null){
  					ret.add(toNodeTableStatistics(tableStats.flowTableStatistics,table.id,node));
  				}
@@ -238,22 +238,22 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     override readFlow(Node node, Flow targetFlow, boolean cached) {
 		var FlowOnNode ret= null;
-		
+
 		val tableRef = InstanceIdentifier.builder(Nodes)
 										.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(node))
                     					.augmentation(FlowCapableNode).child(Table, new TableKey(OPENFLOWV10_TABLE_ID)).toInstance();
-		
+
 		val it = this.startChange();
-		
+
 		val table= it.readConfigurationData(tableRef) as Table;
-		
+
 		if(table != null){
 			LOG.trace("Number of flows installed in table 0 of node {} : {}",node,table.flow.size);
-			
+
 			for(mdsalFlow : table.flow){
 				if(FromSalConversionsUtils.flowEquals(mdsalFlow, MDFlowMapping.toMDSalflow(targetFlow))){
 					val statsFromDataStore = mdsalFlow.getAugmentation(FlowStatisticsData);
-					
+
 					if(statsFromDataStore != null){
 						LOG.debug("Found matching flow in the data store flow table ");
 						val it = new FlowOnNode(targetFlow);
@@ -261,34 +261,34 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 						packetCount = statsFromDataStore.flowStatistics.packetCount.value.longValue;
 						durationSeconds = statsFromDataStore.flowStatistics.duration.second.value.intValue;
 						durationNanoseconds = statsFromDataStore.flowStatistics.duration.nanosecond.value.intValue;
-						
+
 						ret = it;
 					}
-				}			
+				}
 			}
 		}
-        
+
         //TODO: Refer TODO (main)
         val input = new GetFlowStatisticsFromFlowTableInputBuilder;
         input.setNode(node.toNodeRef);
         input.fieldsFrom(MDFlowMapping.toMDSalflow(targetFlow));
         flowStatisticsService.getFlowStatisticsFromFlowTable(input.build)
-        
+
         return ret;
-    	
+
     }
 
     override readNodeConnector(org.opendaylight.controller.sal.core.NodeConnector connector, boolean cached) {
     	var NodeConnectorStatistics  nodeConnectorStatistics = null;
-	
+
 		val nodeConnectorRef = InstanceIdentifier.builder(Nodes)
 									.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(connector.node))
 									.child(NodeConnector, InventoryMapping.toNodeConnectorKey(connector))
 									.toInstance();
  		val provider = this.startChange();
- 				
+
  		val nodeConnectorFromDS = provider.readConfigurationData(nodeConnectorRef) as NodeConnector;
- 				
+
  		if(nodeConnectorFromDS != null){
 			val nodeConnectorStatsFromDs = nodeConnectorFromDS.getAugmentation(FlowCapableNodeConnectorStatisticsData) as FlowCapableNodeConnectorStatistics;
 			if(nodeConnectorStatsFromDs != null) {
@@ -308,18 +308,18 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     override readNodeTable(NodeTable nodeTable, boolean cached) {
     	var NodeTableStatistics nodeStats = null
-    	
+
     	val tableRef = InstanceIdentifier.builder(Nodes)
 										.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, InventoryMapping.toNodeKey(nodeTable.node))
                     					.augmentation(FlowCapableNode).child(Table, new TableKey(nodeTable.ID as Short)).toInstance();
-		
+
 		val it = this.startChange();
-		
+
 		val table= it.readConfigurationData(tableRef) as Table;
-		
+
 		if(table != null){
 			val tableStats = table.getAugmentation(FlowTableStatisticsData);
- 				
+
  			if(tableStats != null){
  				nodeStats =  toNodeTableStatistics(tableStats.flowTableStatistics,table.id,nodeTable.node);
 			}
@@ -329,7 +329,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         val input = new GetFlowTablesStatisticsInputBuilder();
         input.setNode(nodeTable.node.toNodeRef);
         flowTableStatisticsService.getFlowTablesStatistics(input.build);
-        
+
         return nodeStats;
     }
 
@@ -362,9 +362,9 @@ class InventoryAndReadAdapter implements IPluginInReadService,
             updateType = UpdateType.ADDED;
         }
         publishNodeUpdate(notification.nodeRef.toADNode, updateType, notification.toADNodeProperties);
-        
+
 		//Notify the listeners of IPluginOutReadService
-        
+
         for (statsPublisher : statisticsPublisher){
 			val nodeRef = InstanceIdentifier.builder(Nodes).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(notification.id)).toInstance;
 			statsPublisher.descriptionStatisticsUpdated(nodeRef.toADNode,toNodeDescription(notification.nodeRef));
@@ -373,7 +373,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     override getNodeProps() {
         val props = new ConcurrentHashMap<Node, Map<String, org.opendaylight.controller.sal.core.Property>>()
-        
+
         val nodes = readAllMDNodes()
         for (node : nodes.node ) {
             val fcn = node.getAugmentation(FlowCapableNode)
@@ -390,14 +390,14 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         }
         return props;
     }
-    
+
     private def readAllMDNodes() {
         val nodesRef = InstanceIdentifier.builder(Nodes)
             .toInstance
         val reader = TypeSafeDataReader.forReader(dataService)
         return reader.readOperationalData(nodesRef)
     }
-    
+
     private def readAllMDNodeConnectors(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node) {
         val nodeRef = InstanceIdentifier.builder(Nodes)
             .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(node.id))
@@ -407,7 +407,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     }
 
     override getNodeConnectorProps(Boolean refresh) {
-        // Note, because the MD-SAL has a unified data store, we can ignore the Boolean refresh, as we have no secondary 
+        // Note, because the MD-SAL has a unified data store, we can ignore the Boolean refresh, as we have no secondary
         // data store to refresh from
         val props = new ConcurrentHashMap<org.opendaylight.controller.sal.core.NodeConnector, Map<String, org.opendaylight.controller.sal.core.Property>>()
         val nodes = readAllMDNodes()
@@ -423,7 +423,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
                             for(p : ncps) {
                                 ncpsm.put(p.name,p)
                             }
-                        }  
+                        }
                         props.put(nc.id.toADNodeConnector(node.id),ncpsm)
                     }
                 }
@@ -448,32 +448,32 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     private def toNodeConnectorStatistics(
         org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.NodeConnectorStatistics nodeConnectorStatistics, NodeId nodeId, NodeConnectorId nodeConnectorId) {
-        	
+
 			val it = new NodeConnectorStatistics();
-			
+
 			receivePacketCount = nodeConnectorStatistics.packets.received.longValue;
 			transmitPacketCount = nodeConnectorStatistics.packets.transmitted.longValue;
-			
+
 			receiveByteCount = nodeConnectorStatistics.bytes.received.longValue;
 			transmitByteCount = nodeConnectorStatistics.bytes.transmitted.longValue;
-			
+
 			receiveDropCount = nodeConnectorStatistics.receiveDrops.longValue;
 			transmitDropCount = nodeConnectorStatistics.transmitDrops.longValue;
-			
+
 			receiveErrorCount = nodeConnectorStatistics.receiveErrors.longValue;
 			transmitErrorCount = nodeConnectorStatistics.transmitErrors.longValue;
-			
+
 			receiveFrameErrorCount = nodeConnectorStatistics.receiveFrameError.longValue;
 			receiveOverRunErrorCount = nodeConnectorStatistics.receiveOverRunError.longValue;
 			receiveCRCErrorCount = nodeConnectorStatistics.receiveCrcError.longValue;
 			collisionCount = nodeConnectorStatistics.collisionCount.longValue;
-			
+
 			val nodeConnectorRef = InstanceIdentifier.builder(Nodes)
 								.child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(nodeId))
 								.child(NodeConnector,new NodeConnectorKey(nodeConnectorId)).toInstance;
-			
+
 			nodeConnector = NodeMapping.toADNodeConnector(new NodeConnectorRef(nodeConnectorRef));
-			
+
 			return it;
     }
 
@@ -481,7 +481,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		FlowTableStatistics tableStats,
 		Short tableId,Node node){
 		var it = new NodeTableStatistics();
-		
+
 		activeCount = tableStats.activeFlows.value.intValue;
 		lookupCount = tableStats.packetsLookedUp.value.intValue;
 		matchedCount = tableStats.packetsMatched.value.intValue;
@@ -489,7 +489,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		nodeTable = new NodeTable(NodeMapping.MD_SAL_TYPE,tableId,node);
 		return it;
 	}
-	
+
 	private def toNodeDescription(NodeRef nodeRef){
 		val capableNode = readFlowCapableNode(nodeRef);
 
@@ -498,50 +498,50 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         serialNumber = capableNode.serialNumber
         software = capableNode.software
         description = capableNode.description
-        
+
         return it;
 	}
-    
-    
+
+
     def Edge toADEdge(Link link) {
         new Edge(link.source.toADNodeConnector,link.destination.toADNodeConnector)
     }
-	
+
 	/*
 	 * OpendaylightFlowStatisticsListener interface implementation
 	 */
 	override onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
         //Ignoring this notification as there does not seem to be a way to bubble this up to AD-SAL
 	}
-	
+
 	override onFlowsStatisticsUpdate(FlowsStatisticsUpdate notification) {
-		
+
 		val adsalFlowsStatistics = new ArrayList<FlowOnNode>();
-		
+
 		for(flowStats : notification.flowAndStatisticsMapList){
 			if(flowStats.tableId == 0)
 				adsalFlowsStatistics.add(toFlowOnNode(flowStats));
 		}
-		
+
 		for (statsPublisher : statisticsPublisher){
 			val nodeRef = InstanceIdentifier.builder(Nodes).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(notification.id)).toInstance;
 			statsPublisher.nodeFlowStatisticsUpdated(nodeRef.toADNode,adsalFlowsStatistics);
 		}
-		
+
 	}
 	/*
 	 * OpendaylightFlowTableStatisticsListener interface implementation
-	 */	
+	 */
 	override onFlowTableStatisticsUpdate(FlowTableStatisticsUpdate notification) {
 		var adsalFlowTableStatistics = new ArrayList<NodeTableStatistics>();
-		
+
 		for(stats : notification.flowTableAndStatisticsMap){
 			if (stats.tableId.value == 0){
 				val it = new NodeTableStatistics();
 				activeCount = stats.activeFlows.value.intValue;
 				lookupCount = stats.packetsLookedUp.value.longValue;
 				matchedCount = stats.packetsMatched.value.longValue;
-				
+
 				adsalFlowTableStatistics.add(it);
 			}
 		}
@@ -550,34 +550,34 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 			statsPublisher.nodeTableStatisticsUpdated(nodeRef.toADNode,adsalFlowTableStatistics);
 		}
 	}
-	
+
 	/*
 	 * OpendaylightPortStatisticsUpdate interface implementation
 	 */
 	override onNodeConnectorStatisticsUpdate(NodeConnectorStatisticsUpdate notification) {
-		
+
 		val adsalPortStatistics  = new ArrayList<NodeConnectorStatistics>();
-		
+
 		for(nodeConnectorStatistics : notification.nodeConnectorStatisticsAndPortNumberMap){
 			adsalPortStatistics.add(toNodeConnectorStatistics(nodeConnectorStatistics,notification.id,nodeConnectorStatistics.nodeConnectorId));
 		}
-		
+
 		for (statsPublisher : statisticsPublisher){
 			val nodeRef = InstanceIdentifier.builder(Nodes).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(notification.id)).toInstance;
 			statsPublisher.nodeConnectorStatisticsUpdated(nodeRef.toADNode,adsalPortStatistics);
 		}
-		
+
 	}
-	
+
 	private static def toFlowOnNode (FlowAndStatisticsMapList flowAndStatsMap){
-		
+
 		val it = new FlowOnNode(ToSalConversionsUtils.toFlow(flowAndStatsMap));
-		
+
 		byteCount = flowAndStatsMap.byteCount.value.longValue;
 		packetCount = flowAndStatsMap.packetCount.value.longValue;
 		durationSeconds = flowAndStatsMap.duration.second.value.intValue;
 		durationNanoseconds = flowAndStatsMap.duration.nanosecond.value.intValue;
-		
+
 		return it;
 	}
 

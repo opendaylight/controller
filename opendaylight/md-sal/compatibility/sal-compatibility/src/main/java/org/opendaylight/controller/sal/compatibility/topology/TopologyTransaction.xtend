@@ -16,15 +16,15 @@ class TopologyTransaction implements DataCommitTransaction<InstanceIdentifier<?e
     static val LOG = LoggerFactory.getLogger(TopologyTransaction);
     @Property
     val DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification;
-    
+
     @Property
     IPluginOutTopologyService topologyPublisher;
-    
+
     @Property
     DataProviderService dataService;
     @Property
     List<TopoEdgeUpdate> edgeUpdates;
-    
+
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,IPluginOutTopologyService topologyPublisher,
         DataProviderService dataService,List<TopoEdgeUpdate> edgeUpdates) {
         _modification = modification;
@@ -33,34 +33,34 @@ class TopologyTransaction implements DataCommitTransaction<InstanceIdentifier<?e
         _edgeUpdates = edgeUpdates
     }
     override finish() throws IllegalStateException {
-        
+
         if(topologyPublisher != null && _edgeUpdates != null && !edgeUpdates.empty) {
             topologyPublisher.edgeUpdate(edgeUpdates)
         }
-         
+
          return new RpcResultTo()
     }
-    
+
     override getModification() {
         return _modification;
     }
-    
+
     override rollback() throws IllegalStateException {
         // NOOP
     }
 }
 class RpcResultTo implements RpcResult<Void> {
-    
+
     override getErrors() {
         return Collections.emptySet
     }
-    
+
     override getResult() {
         return null;
     }
-    
+
     override isSuccessful() {
         return true;
     }
-    
+
 }

@@ -6,9 +6,9 @@ import org.opendaylight.controller.switchmanager.SwitchConfig
 import org.opendaylight.controller.switchmanager.SubnetConfig
 
 /**
- * 
+ *
  * THis methods should be backed by config subsystem.
- * 
+ *
  */
 abstract class ConfigurableSwitchManager implements ISwitchManager {
 

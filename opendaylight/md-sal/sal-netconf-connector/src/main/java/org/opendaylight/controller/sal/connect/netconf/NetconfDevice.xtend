@@ -49,7 +49,7 @@ import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*
 
 import static extension org.opendaylight.controller.sal.connect.netconf.NetconfMapping.*
 
-class NetconfDevice implements Provider, // 
+class NetconfDevice implements Provider, //
 DataReader<InstanceIdentifier, CompositeNode>, //
 DataCommitHandler<InstanceIdentifier, CompositeNode>, //
 RpcImplementation, //
@@ -103,7 +103,7 @@ AutoCloseable {
 
     @Property
     var SchemaSourceProvider<InputStream> remoteSourceProvider
-    
+
     DataBrokerService dataBroker
 
     public new(String name) {
@@ -276,7 +276,7 @@ AutoCloseable {
                 return null;
             } else if (current instanceof CompositeNode) {
                 val currentComposite = (current as CompositeNode);
-                
+
                 current = currentComposite.getFirstCompositeByName(arg.nodeType);
                 if(current == null) {
                     current = currentComposite.getFirstCompositeByName(arg.nodeType.withoutRevision());

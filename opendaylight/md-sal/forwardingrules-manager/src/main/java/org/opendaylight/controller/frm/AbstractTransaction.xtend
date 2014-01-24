@@ -12,31 +12,31 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yangtools.yang.common.RpcError
 
 abstract class AbstractTransaction implements DataCommitTransaction<InstanceIdentifier<?extends DataObject>, DataObject> {
-        
+
     @Property
     val DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification;
-    
+
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
         _modification = modification;
     }
-    
+
     def void validate() throws IllegalStateException
-    
+
     override finish() throws IllegalStateException {
         validate()
         callRpcs();
-        return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());     
+        return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
     }
-    
+
     override getModification() {
         return _modification;
     }
-    
+
     override rollback() throws IllegalStateException {
         rollbackRpcs();
         return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
     }
-    
+
     def private callRpcs() {
         val Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> createdEntries = _modification.getCreatedConfigurationData().entrySet();
 
@@ -63,13 +63,13 @@ abstract class AbstractTransaction implements DataCommitTransaction<InstanceIden
                 remove(instanceId,removeValue);
         }
     }
-    
+
     def void remove(InstanceIdentifier<?> identifier, DataObject remove)
-    
+
     def void update(InstanceIdentifier<?> identifier, DataObject original, DataObject update)
-    
+
     def void add(InstanceIdentifier<?> identifier, DataObject add)
-    
+
     def private rollbackRpcs() {
         val Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> createdEntries = _modification.getCreatedConfigurationData().entrySet();
 
@@ -83,7 +83,7 @@ abstract class AbstractTransaction implements DataCommitTransaction<InstanceIden
 
         val Set<InstanceIdentifier<? >> removeEntriesInstanceIdentifiers = _modification.getRemovedConfigurationData();
         for (Entry<InstanceIdentifier<?>, DataObject> entry : createdEntries) {
-            remove(entry.key,entry.value); // because we are rolling back, remove what we would have added.            
+            remove(entry.key,entry.value); // because we are rolling back, remove what we would have added.
         }
         for (Entry<InstanceIdentifier<?>, DataObject> entry : updatedEntries) {
             val originalFlow = _modification.originalConfigurationData.get(entry.key);
@@ -95,5 +95,5 @@ abstract class AbstractTransaction implements DataCommitTransaction<InstanceIden
             val removeValue = _modification.getOriginalConfigurationData.get(instanceId);
             add(instanceId,removeValue);// because we are rolling back, add what we would have removed.
         }
-    }    
+    }
 }

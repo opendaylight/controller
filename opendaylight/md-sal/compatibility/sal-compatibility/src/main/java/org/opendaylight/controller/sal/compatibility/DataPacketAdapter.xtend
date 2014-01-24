@@ -15,7 +15,7 @@ class DataPacketAdapter implements PacketProcessingListener {
         dataPacketPublisher.receiveDataPacket(inPacket);
     }
 
-    public static def RawPacket toRawPacket(PacketReceived received) {        
+    public static def RawPacket toRawPacket(PacketReceived received) {
         val ret = new RawPacket(received.payload);
         ret.setIncomingNodeConnector(NodeMapping.toADNodeConnector(received.ingress))
         return ret;

@@ -54,7 +54,7 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
 
     @Property
     private DataBrokerService dataBrokerService;
-    
+
     @Property
     private IPluginOutFlowProgrammerService flowProgrammerPublisher;
 
@@ -121,41 +121,41 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     public static def toStatus(RpcResult<?> result) {
         return toStatus(result.isSuccessful());
     }
-    
+
     private static dispatch def Status processException(InterruptedException e) {
         LOG.error("Interruption occured during processing flow",e);
         return new Status(StatusCode.INTERNALERROR);
     }
-    
+
     private static dispatch def Status processException(ExecutionException e) {
         LOG.error("Execution exception occured during processing flow",e.cause);
         return new Status(StatusCode.INTERNALERROR);
     }
-    
+
     private static dispatch def Status processException(Exception e) {
         throw new RuntimeException(e);
     }
-    
+
     override onFlowAdded(FlowAdded notification) {
         // NOOP : Not supported by AD SAL
     }
-    
+
     override onFlowRemoved(FlowRemoved notification) {
         flowProgrammerPublisher.flowRemoved(notification.node.toADNode,notification.toFlow());
     }
-    
+
     override onFlowUpdated(FlowUpdated notification) {
         // NOOP : Not supported by AD SAL
     }
-    
+
     override onSwitchFlowRemoved(SwitchFlowRemoved notification) {
         // NOOP : Not supported by AD SAL
     }
-    
+
      override onNodeErrorNotification(NodeErrorNotification notification) {
         // NOOP : Not supported by AD SAL
     }
-    
+
      override onNodeExperimenterErrorNotification(
                 NodeExperimenterErrorNotification notification) {
         // NOOP : Not supported by AD SAL

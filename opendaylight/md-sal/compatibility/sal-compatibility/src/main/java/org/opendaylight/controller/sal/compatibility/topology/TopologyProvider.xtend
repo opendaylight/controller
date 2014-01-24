@@ -16,15 +16,15 @@ import org.slf4j.LoggerFactory
 class TopologyProvider implements AutoCloseable{
     static val LOG = LoggerFactory.getLogger(TopologyProvider);
     TopologyCommitHandler commitHandler
-    
+
     @Property
     IPluginOutTopologyService topologyPublisher;
-    
+
     @Property
     DataProviderService dataService;
-    
+
     Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>,DataObject>> commitHandlerRegistration;
-    
+
     def void start() {
         commitHandler = new TopologyCommitHandler(dataService)
         commitHandler.setTopologyPublisher(topologyPublisher)
@@ -35,14 +35,14 @@ class TopologyProvider implements AutoCloseable{
         commitHandlerRegistration = dataService.registerCommitHandler(path,commitHandler);
         LOG.info("TopologyProvider started")
     }
-    
+
     override close() throws Exception {
         commitHandlerRegistration.close
     }
-    
+
     def setTopologyPublisher(IPluginOutTopologyService topologyPublisher) {
         _topologyPublisher = topologyPublisher;
         commitHandler.setTopologyPublisher(topologyPublisher);
     }
-    
+
 }

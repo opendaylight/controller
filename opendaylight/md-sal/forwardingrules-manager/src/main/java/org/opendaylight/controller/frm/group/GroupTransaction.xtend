@@ -17,15 +17,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
 
 class GroupTransaction extends AbstractTransaction {
-    
+
     @Property
     val SalGroupService groupService;
-        
+
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,SalGroupService groupService) {
-        super(modification)        
+        super(modification)
         _groupService = groupService;
     }
-    
+
     override remove(InstanceIdentifier<?> instanceId, DataObject obj) {
         if(obj instanceof Group) {
             val group = (obj as Group)
@@ -34,10 +34,10 @@ class GroupTransaction extends AbstractTransaction {
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
             builder.setGroupRef(new GroupRef(instanceId));
-            _groupService.removeGroup(builder.build());            
+            _groupService.removeGroup(builder.build());
         }
     }
-    
+
     override update(InstanceIdentifier<?> instanceId, DataObject originalObj, DataObject updatedObj) {
         if(originalObj instanceof Group && updatedObj instanceof Group) {
             val originalGroup = (originalObj as Group)
@@ -50,12 +50,12 @@ class GroupTransaction extends AbstractTransaction {
             builder.setUpdatedGroup((ufb.build()));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
             val ofb = new OriginalGroupBuilder(originalGroup);
-            builder.setOriginalGroup(ofb.build());      
+            builder.setOriginalGroup(ofb.build());
             _groupService.updateGroup(builder.build());
-           
+
         }
     }
-    
+
     override add(InstanceIdentifier<?> instanceId, DataObject obj) {
         if(obj instanceof Group) {
             val group = (obj as Group)
@@ -64,11 +64,11 @@ class GroupTransaction extends AbstractTransaction {
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setGroupRef(new GroupRef(instanceId));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
-            _groupService.addGroup(builder.build());            
+            _groupService.addGroup(builder.build());
         }
     }
-    
+
     override validate() throws IllegalStateException {
         GroupTransactionValidator.validate(this)
-    }  
+    }
 }

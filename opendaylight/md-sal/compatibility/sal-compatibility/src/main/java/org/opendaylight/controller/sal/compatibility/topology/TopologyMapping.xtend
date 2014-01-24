@@ -27,26 +27,26 @@ class TopologyMapping {
     private new() {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
     }
-    
+
     public static def toADEdgeUpdates(Topology topology,TypeSafeDataReader reader) {
         val List<TopoEdgeUpdate> result = new CopyOnWriteArrayList<TopoEdgeUpdate>()
         return FluentIterable.from(topology.link).transform[toAdEdge(topology).toTopoEdgeUpdate(reader)].copyInto(result)
     }
-    
+
     public static def toAdEdge(Link link,Topology topology) {
         val adSrc = link.source.sourceTp.toADNodeConnector(link.source.sourceNode)
         val adDst = link.destination.destTp.toADNodeConnector(link.destination.destNode)
-        return new Edge(adSrc,adDst); 
+        return new Edge(adSrc,adDst);
     }
-    
+
     public static def toTopoEdgeUpdate(Edge e,TypeSafeDataReader reader) {
         return toTopoEdgeUpdate(e,UpdateType.ADDED,reader)
     }
-    
+
     public static def toTopoEdgeUpdate(Edge e,UpdateType type,TypeSafeDataReader reader) {
         return new TopoEdgeUpdate(e,e.toAdEdgeProperties(reader),type)
     }
-    
+
     public static def toAdEdgeProperties(Edge e,TypeSafeDataReader reader) {
         val ncref = e.tailNodeConnector.toNodeConnectorRef
         if(ncref == null) {
@@ -62,9 +62,9 @@ class TopologyMapping {
         if(nc == null) {
             return null;
         }
-        return nc.toADNodeConnectorProperties     
+        return nc.toADNodeConnectorProperties
     }
-    
+
     public static def toADNodeId(NodeId nodeId) {
         checkNotNull(nodeId);
         return nodeId.value
@@ -73,13 +73,13 @@ class TopologyMapping {
         checkNotNull(source);
         return new NodeConnector(MD_SAL_TYPE,source.toADNodeConnectorId,nodeId.toADNode)
     }
-    
+
     public static def toADNodeConnectorId(TpId nodeConnectorId) {
         return nodeConnectorId.value
     }
-    
+
     public static def toADNode(NodeId nodeId) {
         checkNotNull(nodeId);
-        return new Node(MD_SAL_TYPE,nodeId.toADNodeId);       
+        return new Node(MD_SAL_TYPE,nodeId.toADNodeId);
     }
 }

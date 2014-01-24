@@ -55,7 +55,7 @@ class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, Compos
         }
         /**
          * Reading from Root
-         * 
+         *
          */
         if(pathArgument == null) {
             return new CompositeNodeTOImpl(NETCONF_DATA,null,nodes);
@@ -65,13 +65,13 @@ class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, Compos
         finalNodes.addAll(nodes);
         return new CompositeNodeTOImpl(name,null,finalNodes);
     }
-    
-    
-    
+
+
+
     dispatch def Map<QName, SimpleNode<?>> getKeyNodes(PathArgument argument, CompositeNode node) {
         return Collections.emptyMap();
     }
-    
+
     dispatch def getKeyNodes(NodeIdentifierWithPredicates argument, CompositeNode node) {
         val ret = new HashMap<QName, SimpleNode<?>>();
         for (keyValue : argument.keyValues.entrySet) {
@@ -86,7 +86,7 @@ class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, Compos
         }
         return ret;
     }
-    
+
     def Collection<? extends Node<?>> childrenWithout(CompositeNode node, Set<Entry<QName, SimpleNode<?>>> entries) {
         if(entries.empty) {
             return node.children;
@@ -99,5 +99,5 @@ class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, Compos
         }
         return filteredNodes;
     }
-    
+
 }

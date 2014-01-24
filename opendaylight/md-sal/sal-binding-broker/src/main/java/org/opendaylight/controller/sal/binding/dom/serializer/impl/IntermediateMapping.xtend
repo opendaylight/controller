@@ -10,9 +10,9 @@ import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import com.google.common.base.Preconditions
 
 class IntermediateMapping {
-    
-    
-    
+
+
+
     static def Node<?> toNode(Map<?,?> map) {
         if(map instanceof Node<?>) {
             return map as Node<?>;
@@ -44,5 +44,5 @@ class IntermediateMapping {
 
     static def dispatch Node<?> toNodeImpl(QName name, Object object) {
         return new SimpleNodeTOImpl(name, null, object);
-    } 
+    }
 }

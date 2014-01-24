@@ -62,10 +62,10 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
 
     @Property
     INodeConnectorFactory nodeConnectorFactory = new MDSalNodeConnectorFactory
-    
+
     @Property
     TopologyAdapter topology = new TopologyAdapter
-    
+
     @Property
     TopologyProvider tpProvider = new TopologyProvider()
 
@@ -172,9 +172,9 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
             .setCallbacks("setDiscoveryPublisher", "setDiscoveryPublisher") //
             .setRequired(false))
 
-        
+
     }
-    
+
     private def dispatch configure (TopologyAdapter imp, Component it) {
         setInterface(Arrays.asList(IPluginInTopologyService.name), properties)
         add(
@@ -183,7 +183,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
             .setCallbacks("setTopologyPublisher", "setTopologyPublisher") //
             .setRequired(false))
     }
-    
+
     private def dispatch configure (TopologyProvider imp, Component it) {
         add(
             createServiceDependency() //
@@ -200,27 +200,27 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
     }
 }
 package class SalCompatibilityProvider implements BindingAwareProvider {
-    
+
     private val ComponentActivator activator;
-    
+
     new(ComponentActivator cmpAct) {
         activator = cmpAct;
     }
-    
+
     override getFunctionality() {
         // Noop
     }
-    
+
     override getImplementations() {
         // Noop
     }
-    
-    
+
+
     override onSessionInitialized(ConsumerContext session) {
         // Noop
     }
-    
-    
+
+
     override onSessionInitiated(ProviderContext session) {
         val it = activator
                 val subscribe = session.getSALService(NotificationService)

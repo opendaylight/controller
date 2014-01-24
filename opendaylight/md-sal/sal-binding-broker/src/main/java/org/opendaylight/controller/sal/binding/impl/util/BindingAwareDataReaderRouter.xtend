@@ -5,9 +5,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yangtools.yang.binding.DataObject
 
 class BindingAwareDataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier<? extends DataObject>, DataObject> {
-    
+
     override protected merge(InstanceIdentifier<? extends DataObject> path, Iterable<DataObject> data) {
         return data.iterator.next;
     }
-    
+
 }

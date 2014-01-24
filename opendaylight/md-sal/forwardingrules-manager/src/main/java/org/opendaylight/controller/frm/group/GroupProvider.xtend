@@ -13,19 +13,19 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.slf4j.LoggerFactory
 
 class GroupProvider implements AutoCloseable {
-    
+
     @Property
     DataProviderService dataService;
-    
+
     @Property
     SalGroupService salGroupService;
-    
+
     GroupCommitHandler commitHandler
 
     Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>,DataObject>> commitHandlerRegistration;
-    
+
     static val LOG = LoggerFactory.getLogger(GroupProvider);
-    
+
     def void start() {
         commitHandler = new GroupCommitHandler(salGroupService)
         val InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Nodes)
@@ -40,9 +40,9 @@ class GroupProvider implements AutoCloseable {
     protected def startChange() {
         return dataService.beginTransaction;
     }
-    
+
     override close() throws Exception {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
-    
+
 }

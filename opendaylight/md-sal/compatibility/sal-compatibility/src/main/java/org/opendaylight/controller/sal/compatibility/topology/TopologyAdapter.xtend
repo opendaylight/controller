@@ -13,18 +13,18 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import static extension org.opendaylight.controller.sal.compatibility.topology.TopologyMapping.*
 
 class TopologyAdapter implements IPluginInTopologyService {
-    
+
     @Property
     DataProviderService dataService;
-    
+
     @Property
     IPluginOutTopologyService topologyPublisher;
-    
+
     override sollicitRefresh() {
         val path = InstanceIdentifier.builder(NetworkTopology).child(Topology,new TopologyKey(new TopologyId("flow:1"))).toInstance;
         val reader = TypeSafeDataReader.forReader(dataService)
         val topology = reader.readOperationalData(path)
         topologyPublisher.edgeUpdate(topology.toADEdgeUpdates(reader))
     }
-    
+
 }

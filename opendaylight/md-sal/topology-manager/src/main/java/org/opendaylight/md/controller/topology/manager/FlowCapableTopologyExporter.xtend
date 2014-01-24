@@ -43,7 +43,7 @@ OpendaylightInventoryListener //
 
     @Property
     var DataProviderService dataService;
-    
+
     def start() {
         val tb = new TopologyBuilder();
         tb.setKey(topology);
@@ -51,7 +51,7 @@ OpendaylightInventoryListener //
         val top = tb.build();
         val it = dataService.beginTransaction
         putOperationalData(path,top);
-        commit()       
+        commit()
     }
 
     override onNodeRemoved(NodeRemoved notification) {
@@ -92,13 +92,13 @@ OpendaylightInventoryListener //
             val nodeId = notification.nodeConnectorRef.nodeKey.id.toToplogyNodeId;
             val TerminationPoint point = notification.id.toTerminationPointId.toTerminationPoint(notification.nodeConnectorRef);
             val path = tpPath(nodeId, point.key.tpId);
-    
+
             val it = dataService.beginTransaction
             putOperationalData(path, point);
             if((fcncu.state != null && fcncu.state.linkDown) || (fcncu.configuration != null && fcncu.configuration.PORTDOWN)) {
                 removeAffectedLinks(it,point.tpId)
             }
-            commit()     
+            commit()
        }
     }
 
@@ -156,7 +156,7 @@ OpendaylightInventoryListener //
             transaction.removeOperationalData(affectedLink);
         }
     }
-    
+
     private def void removeAffectedLinks(DataModificationTransaction transaction, TpId id) {
         val reader = TypeSafeDataReader.forReader(transaction)
         val topologyPath = InstanceIdentifier.builder(NetworkTopology).child(Topology, topology).toInstance;
@@ -174,7 +174,7 @@ OpendaylightInventoryListener //
             transaction.removeOperationalData(affectedLink);
         }
     }
-    
+
     private def InstanceIdentifier<Node> nodePath(NodeId nodeId) {
         val nodeKey = new NodeKey(nodeId);
         return InstanceIdentifier.builder(NetworkTopology)
@@ -182,19 +182,19 @@ OpendaylightInventoryListener //
             .child(Node, nodeKey)
             .toInstance;
     }
-    
+
     private def InstanceIdentifier<TerminationPoint> tpPath(NodeId nodeId, TpId tpId) {
         val nodeKey = new NodeKey(nodeId);
         val tpKey = new TerminationPointKey(tpId)
         return InstanceIdentifier.builder(NetworkTopology).child(Topology, topology).child(Node, nodeKey).
             child(TerminationPoint, tpKey).toInstance;
     }
-    
+
     private def InstanceIdentifier<Link> linkPath(Link link) {
         val linkInstanceId = InstanceIdentifier.builder(NetworkTopology)
             .child(Topology, topology)
             .child(Link, link.key)
             .toInstance;
         return linkInstanceId;
-    }    
+    }
 }

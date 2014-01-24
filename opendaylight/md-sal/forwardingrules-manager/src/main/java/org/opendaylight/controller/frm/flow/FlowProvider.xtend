@@ -14,19 +14,19 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.slf4j.LoggerFactory
 
 class FlowProvider implements AutoCloseable {
-    
+
     @Property
     DataProviderService dataService;
-    
+
     @Property
     SalFlowService salFlowService;
-    
+
     FlowCommitHandler commitHandler
 
     Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>,DataObject>> commitHandlerRegistration;
-    
+
     static val LOG = LoggerFactory.getLogger(FlowProvider);
-    
+
     def void start() {
         commitHandler = new FlowCommitHandler(salFlowService)
         val InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(Nodes)
@@ -42,9 +42,9 @@ class FlowProvider implements AutoCloseable {
     protected def startChange() {
         return dataService.beginTransaction;
     }
-    
+
     override close() throws Exception {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
-    
+
 }

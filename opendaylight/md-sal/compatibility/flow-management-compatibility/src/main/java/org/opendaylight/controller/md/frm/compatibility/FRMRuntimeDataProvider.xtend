@@ -34,7 +34,7 @@ class FRMRuntimeDataProvider implements RuntimeDataProvider, DataCommitHandler<I
 
     @Property
     var DataChangeListener changeListener;
-    
+
     @Property
     var IForwardingRulesManager manager;
 
@@ -74,20 +74,20 @@ class FRMRuntimeDataProvider implements RuntimeDataProvider, DataCommitHandler<I
         val key = Arguments.checkInstanceOf(item.key,FlowKey)
         return key;
     }
-    
+
     def RpcResult<Void> finish(FlowCommitTransaction transaction) {
         for(flw: transaction.toRemove) {
             manager.removeStaticFlow(flw.name,flw.node)
         }
-        
+
         for(flw: transaction.toUpdate) {
             manager.removeStaticFlow(flw.name,flw.node);
             manager.addStaticFlow(flw);
         }
-        
+
         return Rpcs.<Void>getRpcResult(true,null,Collections.<RpcError>emptySet())
     }
-    
+
     def RpcResult<Void> rollback(FlowCommitTransaction transaction) {
         // NOOP: We did not changed any state.
     }
@@ -120,16 +120,16 @@ public static class FlowCommitTransaction implements DataCommitTransaction<Insta
 
     @Property
     val FRMRuntimeDataProvider flowManager;
-    
+
     @Property
     val toAdd = new HashSet<FlowConfig>();
-    
+
     @Property
     var Iterable<FlowConfig> toUpdate
-    
+
     @Property
     var Iterable<FlowConfig> toRemove
-    
+
 
     new(FRMRuntimeDataProvider flowManager,DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
         super();
@@ -149,17 +149,17 @@ public static class FlowCommitTransaction implements DataCommitTransaction<Insta
 
     def processModification() {
         val updated = modification.updatedConfigurationData.entrySet;
-        
+
         val _toUpdate = updated.filter[key.isFlowPath].map[
              return (value as Flow).toFlowConfig
         ]
         toUpdate = _toUpdate as Iterable<FlowConfig>
-        
-        
+
+
         val _toRemove = modification.removedConfigurationData.filter[isFlowPath].map[
              toFlowConfig
         ]
         toRemove = _toRemove as Iterable<FlowConfig>
-        
+
     }
 }

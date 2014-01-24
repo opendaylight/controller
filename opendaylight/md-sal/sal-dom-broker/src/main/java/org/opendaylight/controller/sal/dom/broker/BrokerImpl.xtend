@@ -48,7 +48,7 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private var ExecutorService executor = Executors.newFixedThreadPool(5);
     @Property
     private var BundleContext bundleContext;
-    
+
     @Property
     private var AutoCloseable deactivator;
 
@@ -115,25 +115,25 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         sessions.remove(consumerContextImpl);
         providerSessions.remove(consumerContextImpl);
     }
-    
+
     override close() throws Exception {
         deactivator?.close();
     }
-    
+
     override addRpcImplementation(QName rpcType, RpcImplementation implementation) throws IllegalArgumentException {
         router.addRpcImplementation(rpcType,implementation);
     }
-    
+
     override addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
         router.addRoutedRpcImplementation(rpcType,implementation);
     }
-    
+
     override addRpcRegistrationListener(RpcRegistrationListener listener) {
         return router.addRpcRegistrationListener(listener);
     }
-    
+
     override <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> registerRouteChangeListener(L listener) {
         return router.registerRouteChangeListener(listener);
     }
-    
+
 }

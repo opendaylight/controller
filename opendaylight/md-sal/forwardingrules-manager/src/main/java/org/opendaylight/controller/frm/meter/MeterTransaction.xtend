@@ -17,15 +17,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.Meter
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
 
 class MeterTransaction extends AbstractTransaction {
-    
+
     @Property
     val SalMeterService salMeterService;
-        
+
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,SalMeterService salMeterService) {
-        super(modification)    
+        super(modification)
         _salMeterService = salMeterService;
     }
-    
+
     override remove(InstanceIdentifier<?> instanceId, DataObject obj) {
         if(obj instanceof Meter) {
             val meter = (obj as Meter)
@@ -34,10 +34,10 @@ class MeterTransaction extends AbstractTransaction {
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(instanceId));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
-            _salMeterService.removeMeter(builder.build());            
+            _salMeterService.removeMeter(builder.build());
         }
     }
-    
+
     override update(InstanceIdentifier<?> instanceId, DataObject originalObj, DataObject updatedObj) {
         if(originalObj instanceof Meter && updatedObj instanceof Meter) {
             val originalMeter = (originalObj as Meter)
@@ -50,12 +50,12 @@ class MeterTransaction extends AbstractTransaction {
             builder.setUpdatedMeter((ufb.build()));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
             val ofb = new OriginalMeterBuilder(originalMeter);
-            builder.setOriginalMeter(ofb.build());      
+            builder.setOriginalMeter(ofb.build());
             _salMeterService.updateMeter(builder.build());
-           
+
         }
     }
-    
+
     override add(InstanceIdentifier<?> instanceId, DataObject obj) {
         if(obj instanceof Meter) {
             val meter = (obj as Meter)
@@ -64,11 +64,11 @@ class MeterTransaction extends AbstractTransaction {
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(instanceId));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
-            _salMeterService.addMeter(builder.build());            
+            _salMeterService.addMeter(builder.build());
         }
     }
-    
+
     override validate() throws IllegalStateException {
         MeterTransactionValidator.validate(this)
-    }  
+    }
 }
