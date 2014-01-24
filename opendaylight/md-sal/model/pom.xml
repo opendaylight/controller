@@ -81,13 +81,13 @@
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>${yang.codegen.version}</version>
+                        <version>${yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>yang-binding</artifactId>
-                        <version>${yang.codegen.version}</version>
+                        <version>${yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>
