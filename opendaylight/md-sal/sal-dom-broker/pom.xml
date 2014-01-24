@@ -126,6 +126,7 @@
                             org.opendaylight.controller.sal.dom.broker,
                             org.opendaylight.controller.sal.dom.broker.impl,
                             org.opendaylight.controller.sal.dom.broker.osgi,
+                            org.opendaylight.controller.sal.dom.broker.util,
                             org.opendaylight.controller.config.yang.md.sal.dom.impl,
                             org.opendaylight.controller.config.yang.md.sal.dom.statistics,
                             org.opendaylight.yangtools.yang.util
