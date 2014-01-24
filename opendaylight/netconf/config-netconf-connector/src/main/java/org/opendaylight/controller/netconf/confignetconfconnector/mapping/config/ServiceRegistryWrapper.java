@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
+import org.opendaylight.yangtools.yang.common.QName;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
@@ -19,8 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ServiceRegistryWrapper {
 
@@ -77,27 +76,15 @@ public class ServiceRegistryWrapper {
                 ObjectName on = serviceMapping.get(serviceQName).get(refName);
                 Services.ServiceInstance si = Services.ServiceInstance.fromObjectName(on);
 
-                // FIXME use QName's new String constructor, after it is fixed
-//                QName qname;
-//                try {
-//                    qname = new QName(serviceQName);
-//                } catch (ParseException e) {
-//                    throw new IllegalStateException("Unable to parse qname of a service " + serviceQName, e);
-//                }
-                Pattern p = Pattern.compile("\\(([^\\(\\?]+)\\?[^\\?\\)]*\\)([^\\)]+)");
-                Matcher matcher = p.matcher(serviceQName);
-                Preconditions.checkArgument(matcher.matches());
-                String namespace = matcher.group(1);
-                String localName = matcher.group(2);
-
-//                String namespace = qname.getNamespace().toString();
+                QName qname = QName.create(serviceQName);
+                String namespace = qname.getNamespace().toString();
                 Map<String, Map<String, String>> serviceToRefs = retVal.get(namespace);
                 if(serviceToRefs==null) {
                     serviceToRefs = Maps.newHashMap();
                     retVal.put(namespace, serviceToRefs);
                 }
 
-//                String localName = qname.getLocalName();
+                String localName = qname.getLocalName();
                 Map<String, String> refsToSis = serviceToRefs.get(localName);
                 if(refsToSis==null) {
                     refsToSis = Maps.newHashMap();

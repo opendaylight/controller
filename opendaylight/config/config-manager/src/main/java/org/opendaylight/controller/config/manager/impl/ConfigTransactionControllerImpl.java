@@ -22,6 +22,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,11 +83,10 @@ class ConfigTransactionControllerImpl implements
     private final ServiceReferenceWritableRegistry writableSRRegistry;
 
     public ConfigTransactionControllerImpl(ConfigTransactionLookupRegistry txLookupRegistry,
-                                           long parentVersion, long currentVersion,
-                                           Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
+                                           long parentVersion, CodecRegistry codecRegistry, long currentVersion,
+                                           Map<String, Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
                                            MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer,
                                            boolean blankTransaction, ServiceReferenceWritableRegistry writableSRRegistry) {
-
         this.txLookupRegistry = txLookupRegistry;
         String transactionName = txLookupRegistry.getTransactionIdentifier().getName();
         this.controllerON = ObjectNameUtil.createTransactionControllerON(transactionName);
@@ -95,7 +95,7 @@ class ConfigTransactionControllerImpl implements
         this.currentlyRegisteredFactories = currentlyRegisteredFactories;
         this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(currentlyRegisteredFactories);
         this.transactionStatus = new TransactionStatus();
-        this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus, writableSRRegistry);
+        this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus, writableSRRegistry, codecRegistry);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
         this.blankTransaction = blankTransaction;

@@ -37,6 +37,8 @@ public abstract class AttributeIfcSwitchStatement<T> {
                     return caseJavaBinaryAttribute(openType);
                 } else if(((JavaAttribute)attributeIfc).isUnion()) {
                     return caseJavaUnionAttribute(openType);
+                } else if(((JavaAttribute)attributeIfc).isIdentityRef()) {
+                    return caseJavaIdentityRefAttribute(openType);
                 } else
                     return caseJavaAttribute(openType);
             } catch (UnknownOpenTypeException e) {
@@ -54,6 +56,10 @@ public abstract class AttributeIfcSwitchStatement<T> {
         }
 
         throw getIllegalArgumentException(attributeIfc);
+    }
+
+    protected T caseJavaIdentityRefAttribute(OpenType<?> openType) {
+        return caseJavaAttribute(openType);
     }
 
     protected T caseJavaUnionAttribute(OpenType<?> openType) {

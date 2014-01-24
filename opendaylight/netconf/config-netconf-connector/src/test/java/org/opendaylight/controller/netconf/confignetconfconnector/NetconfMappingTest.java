@@ -8,11 +8,33 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,6 +57,7 @@ import org.opendaylight.controller.config.yang.test.impl.DtoAInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInnerInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoC;
 import org.opendaylight.controller.config.yang.test.impl.DtoD;
+import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.Peers;
@@ -55,6 +78,13 @@ import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.test.impl.rev130403.TestIdentity1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.test.impl.rev130403.TestIdentity2;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -62,30 +92,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
@@ -95,6 +106,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private static final String NETCONF_SESSION_ID = "foo";
     private NetconfTestImplModuleFactory factory;
     private DepTestImplModuleFactory factory2;
+    private IdentityTestModuleFactory factory3;
 
     @Mock
     YangStoreSnapshot yangStoreSnapshot;
@@ -107,9 +119,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
+        doReturn(getModules()).when(this.yangStoreSnapshot).getModules();
+
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2));
+        this.factory3 = new IdentityTestModuleFactory();
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2,
+                this.factory3));
 
         transactionProvider = new TransactionProvider(this.configRegistryClient, NETCONF_SESSION_ID);
     }
@@ -131,6 +147,25 @@ public class NetconfMappingTest extends AbstractConfigTest {
         }
         transaction.commit();
         return on;
+    }
+
+    @Test
+    public void testIdentityRefs() throws Exception {
+        edit("netconfMessages/editConfig_identities.xml");
+
+        commit();
+        getConfigRunning();
+    }
+
+    @Override
+    protected CodecRegistry getCodecRegistry() {
+        IdentityCodec<?> idCodec = mock(IdentityCodec.class);
+        doReturn(TestIdentity1.class).when(idCodec).deserialize(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(idCodec).deserialize(TestIdentity2.QNAME);
+
+        CodecRegistry codecReg = super.getCodecRegistry();
+        doReturn(idCodec).when(codecReg).getIdentityCodec();
+        return codecReg;
     }
 
     @Test
@@ -236,7 +271,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         Element configCandidate = getConfigCandidate();
-        System.err.println(XmlUtil.toString(configCandidate));
         checkBinaryLeafEdited(configCandidate);
 
 
@@ -552,6 +586,21 @@ public class NetconfMappingTest extends AbstractConfigTest {
         mBeanEntries.putAll(new MbeParser().parseYangFiles(yangDependencies).getModuleMXBeanEntryMap());
 
         return mBeanEntries;
+    }
+
+    private Set<org.opendaylight.yangtools.yang.model.api.Module> getModules() throws Exception {
+        SchemaContext resolveSchemaContext = getSchemaContext();
+        return resolveSchemaContext.getModules();
+    }
+
+    private SchemaContext getSchemaContext() throws Exception {
+        final List<InputStream> yangDependencies = getYangs();
+        YangParserImpl parser = new YangParserImpl();
+
+        Set<Module> allYangModules = parser.parseYangModelsFromStreams(yangDependencies);
+
+        return parser.resolveSchemaContext(Sets
+                .newHashSet(allYangModules));
     }
 
     @Test

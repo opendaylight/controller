@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>yang-test</artifactId>
+    <packaging>bundle</packaging>
 
     <description>Artifact that contains only generated code from yang files. Suitable for testing.
     </description>
@@ -138,6 +139,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>

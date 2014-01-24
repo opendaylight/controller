@@ -16,25 +16,40 @@ public class Field {
     private final String name;
     private final String definition;
     private final List<String> modifiers;
+    private final boolean needsDepResolver;
 
     public Field(String type, String name) {
-        this(Lists.<String> newArrayList(), type, name, null);
+        this(Lists.<String> newArrayList(), type, name, null, false);
     }
 
     public Field(String type, String name, String definition) {
-        this(Lists.<String> newArrayList(), type, name, definition);
+        this(Lists.<String> newArrayList(), type, name, definition, false);
     }
 
     public Field(List<String> modifiers, String type, String name) {
-        this(modifiers, type, name, null);
+        this(modifiers, type, name, null, false);
     }
 
     public Field(List<String> modifiers, String type, String name,
             String definition) {
+        this(modifiers, type, name, definition, false);
+    }
+
+    public Field(List<String> modifiers, String type, String name,
+            String definition, boolean needsDepResolver) {
         this.modifiers = modifiers;
         this.type = type;
         this.name = name;
         this.definition = definition;
+        this.needsDepResolver = needsDepResolver;
+    }
+
+    public Field(String type, String name, String definition, boolean needsDepResolver) {
+        this(Lists.<String> newArrayList(), type, name, definition, needsDepResolver);
+    }
+
+    public boolean isNeedsDepResolver() {
+        return needsDepResolver;
     }
 
     public String getType() {
