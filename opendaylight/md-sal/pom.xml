@@ -103,25 +103,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-        <!-- Java Versions -->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
 
         <!-- Plugin Versions -->
         <bundle.plugin.version>2.4.0</bundle.plugin.version>
-        <releaseplugin.version>2.3.2</releaseplugin.version>
+        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
 
         <!-- Dependency Versions -->
-        <slf4j.version>1.7.2</slf4j.version>
-	<yang.codegen.version>${yangtools.version}</yang.codegen.version>
-        <guava.version>14.0.1</guava.version>
-        <osgi.core.version>5.0.0</osgi.core.version>
-        <junit.version>4.8.1</junit.version>
         <mockito.version>1.9.5</mockito.version>
         <xtend.version>2.4.3</xtend.version>
-        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
-        <jacoco.version>0.5.3.201107060350</jacoco.version>
 
         <!-- Sonar properties using jacoco to retrieve integration test results -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
