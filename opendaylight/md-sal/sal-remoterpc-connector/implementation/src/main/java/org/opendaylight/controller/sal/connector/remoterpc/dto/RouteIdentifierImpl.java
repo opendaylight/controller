@@ -18,8 +18,6 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QName, InstanceIdentifier>,Serializable {
 
-  transient ObjectMapper mapper = new ObjectMapper();
-
   private QName context;
   private QName type;
   private InstanceIdentifier route;
@@ -49,39 +47,5 @@ public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QNa
 
   public void setRoute(InstanceIdentifier route) {
     this.route = route;
-  }
-
-  @Override
-  public String toString() {
-    try {
-      return mapper.writeValueAsString(this);
-    } catch (Throwable e) {
-      //do nothing
-    }
-
-    return super.toString();
-  }
-
-  public RpcRouter.RouteIdentifier fromString(String input)
-      throws Exception {
-
-    JsonNode root = mapper.readTree(input);
-    this.context  = parseQName(root.get("context"));
-    this.type     = parseQName(root.get("type"));
-
-    return this;
-  }
-
-  private QName parseQName(JsonNode node){
-    if (node == null) return null;
-
-    String namespace = (node.get("namespace") != null) ?
-                       node.get("namespace").asText()  : "";
-
-    String localName = (node.get("localName") != null) ?
-                       node.get("localName").asText() : "";
-
-    URI uri = URI.create(namespace);
-    return new QName(uri, localName);
   }
 }
