@@ -35,6 +35,7 @@ import org.opendaylight.controller.config.yang.test.impl.DtoAInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoAInnerInner;
 import org.opendaylight.controller.config.yang.test.impl.DtoC;
 import org.opendaylight.controller.config.yang.test.impl.DtoD;
+import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.Peers;
@@ -55,6 +56,16 @@ import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.bgp.types.rev130919.Ipv4AddressFamily;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.bgp.types.rev130919.Ipv6AddressFamily;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.bgp.types.rev130919.MplsLabeledVpnSubsequentAddressFamily;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.bgp.types.rev130919.UnicastSubsequentAddressFamily;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.IdentitityCodec;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -71,6 +82,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,6 +96,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -95,6 +108,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private static final String NETCONF_SESSION_ID = "foo";
     private NetconfTestImplModuleFactory factory;
     private DepTestImplModuleFactory factory2;
+    private IdentityTestModuleFactory factory3;
 
     @Mock
     YangStoreSnapshot yangStoreSnapshot;
@@ -107,9 +121,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
+        doReturn(getModules()).when(this.yangStoreSnapshot).getModules();
+
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2));
+        this.factory3 = new IdentityTestModuleFactory();
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2,
+                this.factory3));
 
         transactionProvider = new TransactionProvider(this.configRegistryClient, NETCONF_SESSION_ID);
     }
@@ -131,6 +149,43 @@ public class NetconfMappingTest extends AbstractConfigTest {
         }
         transaction.commit();
         return on;
+    }
+
+    @Test
+    public void testIdentityRefs() throws Exception {
+        edit("netconfMessages/editConfig_identities.xml");
+
+        commit();
+        getConfigRunning();
+    }
+
+    @Override
+    protected CodecRegistry getCodecRegistry() {
+
+        CodecRegistry codecReg = mock(CodecRegistry.class);
+        IdentitityCodec<?> idCodec = mock(IdentitityCodec.class);
+
+        QName q = getQName("(urn:opendaylight:params:xml:ns:yang:bgp-types?revision=2013-09-19)ipv6-address-family");
+        doReturn(Ipv6AddressFamily.class).when(idCodec).deserialize(q);
+        q = getQName("(urn:opendaylight:params:xml:ns:yang:bgp-types?revision=2013-09-19)ipv4-address-family");
+        doReturn(Ipv4AddressFamily.class).when(idCodec).deserialize(q);
+        q = getQName("(urn:opendaylight:params:xml:ns:yang:bgp-types?revision=2013-09-19)unicast-subsequent-address-family");
+        doReturn(UnicastSubsequentAddressFamily.class).when(idCodec).deserialize(q);
+        q = getQName("(urn:opendaylight:params:xml:ns:yang:bgp-types?revision=2013-09-19)mpls-labeled-vpn-subsequent-address-family");
+        doReturn(MplsLabeledVpnSubsequentAddressFamily.class).when(idCodec).deserialize(q);
+
+        doReturn(idCodec).when(codecReg).getIdentityCodec();
+
+        return codecReg;
+    }
+
+    private QName getQName(String s) {
+        try {
+            // FIXME broken QName string constructor
+            return new QName(s.replace("revision=", ""));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -236,7 +291,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         Element configCandidate = getConfigCandidate();
-        System.err.println(XmlUtil.toString(configCandidate));
         checkBinaryLeafEdited(configCandidate);
 
 
@@ -554,6 +608,21 @@ public class NetconfMappingTest extends AbstractConfigTest {
         return mBeanEntries;
     }
 
+    private Set<org.opendaylight.yangtools.yang.model.api.Module> getModules() throws Exception {
+        SchemaContext resolveSchemaContext = getSchemaContext();
+        return resolveSchemaContext.getModules();
+    }
+
+    private SchemaContext getSchemaContext() throws Exception {
+        final List<InputStream> yangDependencies = getYangs();
+        YangParserImpl parser = new YangParserImpl();
+
+        Set<Module> allYangModules = parser.parseYangModelsFromStreams(yangDependencies);
+
+        return parser.resolveSchemaContext(Sets
+                .newHashSet(allYangModules));
+    }
+
     @Test
     public void testConfigNetconfRuntime() throws Exception {
 
@@ -624,7 +693,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private List<InputStream> getYangs() throws FileNotFoundException {
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
                 "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
-                "/META-INF/yang/ietf-inet-types.yang");
+                "/META-INF/yang/ietf-inet-types.yang", "/META-INF/yang/bgp-types.yang");
         final Collection<InputStream> yangDependencies = new ArrayList<>();
         for (String path : paths) {
             final InputStream is = Preconditions

@@ -8,6 +8,7 @@ module config-test-impl {
     import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
     import test-types { prefix tt; revision-date 2013-11-27; }
+	import bgp-types { prefix bgp-t; revision-date 2013-09-19; }
 
     description
         "Testing IMPL";
@@ -34,6 +35,61 @@ module config-test-impl {
         config:provided-service test:testing;
         config:java-name-prefix NetconfTestImpl;
     }
+
+    identity impl-identity-test {
+        base config:module-type;
+        config:provided-service test:testing;
+        config:java-name-prefix IdentityTest;
+    }
+
+     augment "/config:modules/config:module/config:configuration" {
+            case impl-identity-test {
+                when "/config:modules/config:module/config:type = 'impl-identity-test'";
+
+                leaf afi {
+                    type identityref {
+                        base bgp-t:address-family;
+                    }
+                }
+
+                container identities-container {
+                    leaf afi {
+                        type identityref {
+                            base bgp-t:address-family;
+                        }
+                    }
+                }
+
+                list identities {
+                    leaf afi {
+                        type identityref {
+                            base bgp-t:address-family;
+                        }
+                    }
+                    leaf safi {
+                        type identityref {
+                            base bgp-t:subsequent-address-family;
+                        }
+                    }
+
+                    container identities-inner {
+                        leaf afi {
+                            type identityref {
+                                base bgp-t:address-family;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+        augment "/config:modules/config:module/config:state" {
+            case impl-identity-test {
+                when "/config:modules/config:module/config:type = 'impl-identity-test'";
+
+            }
+        }
 
 
     augment "/config:modules/config:module/config:configuration" {

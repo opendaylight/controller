@@ -16,20 +16,25 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadingStrategy> {
 
     private String key;
+    private Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap;
 
-    public Map<String, AttributeReadingStrategy> prepareReading(Map<String, AttributeIfc> yangToAttrConfig) {
+    public Map<String, AttributeReadingStrategy> prepareReading(Map<String, AttributeIfc> yangToAttrConfig, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
         Map<String, AttributeReadingStrategy> strategies = Maps.newHashMap();
+        this.identityMap = identityMap;
 
         for (Entry<String, AttributeIfc> attributeEntry : yangToAttrConfig.entrySet()) {
             AttributeReadingStrategy strat = prepareReadingStrategy(attributeEntry.getKey(), attributeEntry.getValue());
@@ -70,6 +75,15 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
         Preconditions.checkState(openType.keySet().size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
         String mappingKey = openType.keySet().iterator().next();
         return new SimpleCompositeAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey);
+    }
+
+    @Override
+    protected AttributeReadingStrategy caseJavaIdentityRefAttribute(OpenType<?> openType) {
+        Preconditions.checkState(openType instanceof CompositeType);
+        Set<String> keys = ((CompositeType) openType).keySet();
+        Preconditions.checkState(keys.size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
+        String mappingKey = keys.iterator().next();
+        return new SimpleIdentityRefAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey, identityMap);
     }
 
     @Override

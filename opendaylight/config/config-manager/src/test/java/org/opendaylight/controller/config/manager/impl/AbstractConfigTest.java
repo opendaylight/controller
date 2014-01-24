@@ -23,6 +23,7 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -97,7 +98,7 @@ public abstract class AbstractConfigTest extends
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
         configRegistry = new ConfigRegistryImpl(resolver,
-                platformMBeanServer, baseJmxRegistrator);
+                platformMBeanServer, baseJmxRegistrator, getCodecRegistry());
 
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
@@ -206,6 +207,10 @@ public abstract class AbstractConfigTest extends
     protected ClassBasedModuleFactory createClassBasedCBF(
             Class<? extends Module> configBeanClass, String implementationName) {
         return new ClassBasedModuleFactory(implementationName, configBeanClass);
+    }
+
+    protected CodecRegistry getCodecRegistry() {
+        return mock(CodecRegistry.class);
     }
 
 

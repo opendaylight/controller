@@ -23,6 +23,7 @@ public class SimpleUnionAttributeReadingStrategy extends SimpleAttributeReadingS
         this.key = key;
     }
 
+    @Override
     protected Object postprocessParsedValue(String textContent) {
         char[] charArray = textContent.toCharArray();
         List<String> chars = Lists.newArrayListWithCapacity(charArray.length);

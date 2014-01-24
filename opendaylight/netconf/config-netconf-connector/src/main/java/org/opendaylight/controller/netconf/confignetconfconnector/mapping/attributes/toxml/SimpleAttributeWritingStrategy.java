@@ -31,9 +31,13 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
     public void writeElement(Element parentElement, String namespace, Object value) {
         value = preprocess(value);
         Util.checkType(value, String.class);
-        Element innerNode = XmlUtil.createTextElement(document, key, (String) value);
+        Element innerNode = createElement(document, key, (String) value);
         XmlUtil.addNamespaceAttr(innerNode, namespace);
         parentElement.appendChild(innerNode);
+    }
+
+    protected Element createElement(Document document, String key, String value) {
+        return XmlUtil.createTextElement(document, key, (String) value);
     }
 
     protected Object preprocess(Object value) {

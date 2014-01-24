@@ -21,6 +21,7 @@ public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeRead
         this.key = key;
     }
 
+    @Override
     protected Object postprocessParsedValue(String textContent) {
         HashMap<String,String> map = Maps.newHashMap();
         map.put(key, textContent);

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -17,9 +18,16 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.IdentitityCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.ObjectName;
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -33,17 +41,20 @@ import static java.lang.String.format;
  */
 final class DependencyResolverImpl implements DependencyResolver,
        Comparable<DependencyResolverImpl> {
+    private static final Logger logger = LoggerFactory.getLogger(DependencyResolverImpl.class);
+
     private final ModulesHolder modulesHolder;
     private final ModuleIdentifier name;
     private final TransactionStatus transactionStatus;
     @GuardedBy("this")
     private final Set<ModuleIdentifier> dependencies = new HashSet<>();
     private final ServiceReferenceReadableRegistry readableRegistry;
+    private final CodecRegistry codecRegistry;
 
     DependencyResolverImpl(ModuleIdentifier currentModule,
-            TransactionStatus transactionStatus, ModulesHolder modulesHolder,
-            ServiceReferenceReadableRegistry readableRegistry) {
-
+                           TransactionStatus transactionStatus, ModulesHolder modulesHolder,
+                           ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry) {
+        this.codecRegistry = codecRegistry;
         this.name = currentModule;
         this.transactionStatus = transactionStatus;
         this.modulesHolder = modulesHolder;
@@ -68,7 +79,7 @@ final class DependencyResolverImpl implements DependencyResolver,
             throw new NullPointerException("Parameter 'jmxAttribute' is null");
 
         JmxAttributeValidationException.checkNotNull(dependentReadOnlyON,
-                "is null, " + "expected dependency implementing "
+                "is null, expected dependency implementing "
                         + expectedServiceInterface, jmxAttribute);
 
 
@@ -128,7 +139,7 @@ final class DependencyResolverImpl implements DependencyResolver,
             JmxAttribute jmxAttribute) {
         if (expectedType == null || dependentReadOnlyON == null || jmxAttribute == null) {
             throw new IllegalArgumentException(format(
-                    "Null parameters not allowed, got {} {} {}", expectedType,
+                    "Null parameters not allowed, got %s %s %s", expectedType,
                     dependentReadOnlyON, jmxAttribute));
         }
         dependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
@@ -159,6 +170,38 @@ final class DependencyResolverImpl implements DependencyResolver,
                             + "expected type %s , attribute %s",
                     instance.getClass(), expectedType, jmxAttribute);
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
+        }
+    }
+
+    @Override
+    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass) {
+        QName qName;
+        try {
+            qName = new QName(identityRef.getqNameOfIdentity());
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Cannot convert to qName:" + identityRef, e);
+        }
+        IdentitityCodec<?> identityCodec = codecRegistry.getIdentityCodec();
+        Class<? extends BaseIdentity> deserialized = identityCodec.deserialize(qName);
+        if (deserialized == null) {
+            throw new RuntimeException("Unable to retrieve identity class for " + qName + ", null response from "
+                    + codecRegistry);
+        }
+        if (expectedBaseClass.isAssignableFrom(deserialized)) {
+            return (Class<T>) deserialized;
+        } else {
+            logger.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.",
+                    identityRef, deserialized, expectedBaseClass);
+            throw new IllegalArgumentException("Deserialized identity " + deserialized + " cannot be cast to " + expectedBaseClass);
+        }
+    }
+
+    @Override
+    public <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass, JmxAttribute jmxAttribute) {
+        try {
+            resolveIdentity(identityRef, expectedBaseClass);
+        } catch(Exception e) {
+            throw JmxAttributeValidationException.wrap(e, jmxAttribute);
         }
     }
 
@@ -198,7 +241,7 @@ final class DependencyResolverImpl implements DependencyResolver,
                     .getOrCreate(dependencyName);
             if (chainForDetectingCycles2.contains(dependencyName)) {
                 throw new IllegalStateException(format(
-                        "Cycle detected, {} contains {}",
+                        "Cycle detected, %s contains %s",
                         chainForDetectingCycles2, dependencyName));
             }
             int subDepth;

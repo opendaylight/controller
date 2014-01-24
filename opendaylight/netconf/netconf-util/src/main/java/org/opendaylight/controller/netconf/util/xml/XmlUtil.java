@@ -111,8 +111,8 @@ public class XmlUtil {
         root.setAttribute(concat(XMLNS_ATTRIBUTE_KEY, prefix), namespace);
     }
 
-    public static Element createPrefixedTextElement(Document document, String key, String prefix, String moduleName) {
-        return createTextElement(document, key, concat(prefix, moduleName));
+    public static Element createPrefixedTextElement(Document document, String key, String prefix, String content) {
+        return createTextElement(document, key, concat(prefix, content));
     }
 
     private static String concat(String prefix, String value) {
