@@ -2064,6 +2064,22 @@ public class ForwardingRulesManager implements
     public void subnetNotify(Subnet sub, boolean add) {
     }
 
+    private boolean programInternalFlow(boolean proactive, FlowConfig fc) {
+        boolean retVal = true; // program flows unless determined otherwise
+        if(proactive) {
+            // if the flow already exists do not program
+            if(flowConfigExists(fc)) {
+                retVal = false;
+            }
+        } else {
+            // if the flow does not exist do not program
+            if(!flowConfigExists(fc)) {
+                retVal = false;
+            }
+        }
+        return retVal;
+    }
+
     /**
      * (non-Javadoc)
      *
@@ -2120,12 +2136,16 @@ public class ForwardingRulesManager implements
 
                 log.info("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
                 for (FlowConfig fc : defaultConfigs) {
-                    Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
-                    if (status.isSuccess()) {
-                        log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
-                    } else {
-                        log.warn("Failed to {} Proactive Static flow: {}", (proactive ? "install" : "remove"),
-                                fc.getName());
+                    // check if the frm really needs to act on the notification.
+                    // this is to check against duplicate notifications
+                    if(programInternalFlow(proactive, fc)) {
+                        Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
+                        if (status.isSuccess()) {
+                            log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
+                        } else {
+                            log.warn("Failed to {} Proactive Static flow: {}", (proactive ? "install" : "remove"),
+                                    fc.getName());
+                        }
                     }
                 }
                 return new Status(StatusCode.SUCCESS);
