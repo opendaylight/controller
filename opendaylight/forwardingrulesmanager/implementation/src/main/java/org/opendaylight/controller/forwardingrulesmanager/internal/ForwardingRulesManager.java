@@ -1849,16 +1849,23 @@ public class ForwardingRulesManager implements
                 log.warn(status.getDescription());
                 return status;
             }
+            boolean flowInstalled = false;
+            flowInstalled = target.installInHw() ? false : true;
             status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry()) : this
                                     .installFlowEntry(target.getFlowEntry());
             if (status.isSuccess()) {
                 // Update Configuration database
                 target.setStatus(StatusCode.SUCCESS.toString());
-                target.toggleInstallation();
+                if (flowInstalled) {
+                    target.setInstallInHw(true);
+                    }
+                else {
+                    target.setInstallInHw(false);
+                    }
                 staticFlows.put(key, target);
-            }
+                }
             return status;
-        }
+            }
 
         return new Status(StatusCode.NOTFOUND, "Unable to locate the entry. Failed to toggle status");
     }
