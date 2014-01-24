@@ -227,8 +227,6 @@ public class ServiceProviderController {
                 mavenBundle(YANG, "yang-parser-impl").versionAsInProject(),
                 mavenBundle(YANG, "binding-type-provider").versionAsInProject(),
 
-                mavenBundle("org.opendaylight.controller.thirdparty", "exificient", "0.9.2"),
-
                 mavenBundle("equinoxSDK381", "javax.servlet").versionAsInProject(),
                 mavenBundle("equinoxSDK381", "javax.servlet.jsp").versionAsInProject(),
                 mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds").versionAsInProject(),

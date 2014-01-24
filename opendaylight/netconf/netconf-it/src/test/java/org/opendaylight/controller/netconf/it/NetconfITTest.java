@@ -41,8 +41,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
-import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
-import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
@@ -51,7 +49,6 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -301,8 +298,8 @@ public class NetconfITTest extends AbstractConfigTest {
         }
     }
 
+    /*
     @Test
-//    @Ignore
     public void testStartExi() throws Exception {
         try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
 
@@ -327,6 +324,7 @@ public class NetconfITTest extends AbstractConfigTest {
 
         }
     }
+    */
 
     @Test
     public void testCloseSession() throws Exception {
