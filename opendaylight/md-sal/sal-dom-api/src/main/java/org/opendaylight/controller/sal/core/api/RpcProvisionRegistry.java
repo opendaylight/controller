@@ -35,4 +35,13 @@ public interface RpcProvisionRegistry extends BrokerService, RouteChangePublishe
     ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
 
     RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
+
+  /**
+   * Sets this RoutedRpc Implementation as a delegate rpc provider and will be asked to invoke rpc if the
+   * current provider can't service the rpc request
+   *
+   * @param defaultImplementation
+   *              Provider's implementation of RPC functionality
+   */
+    public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation);
 }
