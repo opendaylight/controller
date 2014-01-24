@@ -97,7 +97,7 @@ public abstract class AbstractConfigTest extends
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
         configRegistry = new ConfigRegistryImpl(resolver,
-                platformMBeanServer, baseJmxRegistrator);
+                platformMBeanServer, baseJmxRegistrator, null);
 
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
