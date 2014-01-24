@@ -69,8 +69,6 @@ public class TestHelper {
                 mavenBundle("io.netty", "netty-transport").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-common").versionAsInProject(), //
 
-                mavenBundle("org.opendaylight.controller.thirdparty", "exificient", "0.9.2-SNAPSHOT"), //
-
                 mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.xerces", "2.11.0_1"),
                 mavenBundle("org.eclipse.birt.runtime.3_7_1", "org.apache.xml.resolver", "1.2.0"),
 

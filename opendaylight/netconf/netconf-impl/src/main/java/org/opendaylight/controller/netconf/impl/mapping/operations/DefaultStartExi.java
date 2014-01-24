@@ -10,12 +10,9 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
-import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -23,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.siemens.ct.exi.exceptions.EXIException;
 
 public class DefaultStartExi extends AbstractNetconfOperation implements DefaultNetconfOperation {
 
@@ -61,6 +56,9 @@ public class DefaultStartExi extends AbstractNetconfOperation implements Default
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
 
+        throw new UnsupportedOperationException("Not implemented");
+
+        /*
         try {
             ExiParameters exiParams = new ExiParameters();
             exiParams.setParametersFromXmlElement(operationElement);
@@ -76,7 +74,7 @@ public class DefaultStartExi extends AbstractNetconfOperation implements Default
         logger.trace("{} operation successful", START_EXI);
         logger.debug("received start-exi message {} ", XmlUtil.toString(document));
         return getSchemaResult;
-
+        */
     }
 
     @Override
