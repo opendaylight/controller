@@ -67,7 +67,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(RoutingTableImpl.class)) {
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
             Set<String> propSet = new HashSet<String>();
-            propSet.add(RoutingTableImpl.ROUTING_TABLE_GLOBAL_CACHE);
+            propSet.add(RoutingTableImpl.GLOBALRPC_CACHE);
+            propSet.add(RoutingTableImpl.RPC_CACHE);
             props.put(CACHE_UPDATE_AWARE_REGISTRY_KEY, propSet);
 
             c.setInterface(new String[] { RoutingTable.class.getName(),ICacheUpdateAware.class.getName()  }, props);
