@@ -1,4 +1,4 @@
-package org.opendaylight.yangtools.yang.util
+package org.opendaylight.controller.sal.dom.broker.util
 
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
@@ -14,14 +14,13 @@ import java.util.List
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode
 import java.util.Collections
-import static extension org.opendaylight.yangtools.yang.util.YangDataUtils.*;
 import java.util.HashSet
 import org.opendaylight.yangtools.yang.common.QName
+import static extension org.opendaylight.controller.sal.dom.broker.util.YangDataUtils.*;
 
 class YangDataOperations {
 
     static def CompositeNode merge(DataSchemaNode schema, CompositeNode stored, CompositeNode modified, boolean config) {
-        checkConfigurational(schema, config);
         if (stored === null) {
             return modified;
         }
@@ -42,7 +41,7 @@ class YangDataOperations {
         List<Node<?>> modified, boolean configurational) {
         checkArgument(original.size === 1);
         checkArgument(modified.size === 1);
-        checkConfigurational(node, configurational);
+        
         return modified;
     }
 
@@ -61,7 +60,7 @@ class YangDataOperations {
 
     private static dispatch def Iterable<? extends Node<?>> mergeMultiple(ListSchemaNode node, List<Node<?>> original,
         List<Node<?>> modified, boolean configurational) {
-        checkConfigurational(node,configurational);
+        
         if(node.keyDefinition === null || node.keyDefinition.empty) {
             return modified;
         } 

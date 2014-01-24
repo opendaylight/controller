@@ -1,4 +1,4 @@
-package org.opendaylight.yangtools.yang.util;
+package org.opendaylight.controller.sal.dom.broker.util;
 
 
 import java.util.Iterator;
