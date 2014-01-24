@@ -11,6 +11,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification;
 import org.opendaylight.controller.md.sal.common.impl.util.AbstractLockableDelegator;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
+import org.opendaylight.controller.sal.dom.broker.util.YangSchemaUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -20,8 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.util.YangDataOperations;
-import org.opendaylight.yangtools.yang.util.YangSchemaUtils;
+import org.opendaylight.controller.sal.dom.broker.util.YangDataOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
