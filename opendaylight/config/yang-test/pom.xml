@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>yang-test</artifactId>
+    <packaging>bundle</packaging>
 
     <description>Artifact that contains only generated code from yang files. Suitable for testing.
     </description>
@@ -21,6 +22,12 @@
     </prerequisites>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.opendaylight.bgpcep</groupId>
+            <artifactId>bgp-concepts</artifactId>
+            <version>0.3.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
@@ -138,6 +145,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.confi
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -21,6 +22,8 @@ import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 public class ModuleConfig {
 
@@ -85,9 +88,9 @@ public class ModuleConfig {
     }
 
     public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
-            String moduleNamespace, EditStrategyType defaultStrategy) {
+                                         String moduleNamespace, EditStrategyType defaultStrategy, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
 
-        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, providedServices);
+        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, providedServices, identityMap);
         return new ModuleElementResolved(instanceName, ice);
     }
 

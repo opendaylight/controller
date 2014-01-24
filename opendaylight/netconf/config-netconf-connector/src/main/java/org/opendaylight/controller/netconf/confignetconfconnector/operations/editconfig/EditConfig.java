@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
@@ -33,6 +34,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,9 +43,11 @@ import org.w3c.dom.Element;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class EditConfig extends AbstractConfigNetconfOperation {
 
@@ -207,12 +212,64 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         }
     }
 
-    public static Config getConfigMapping(ConfigRegistryClient configRegistryClient,
-            Map<String/* Namespace from yang file */,
-                    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
-        Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(configRegistryClient, mBeanEntries);
+    public static Config getConfigMapping(ConfigRegistryClient configRegistryClient, YangStoreSnapshot yangStoreSnapshot) {
+        Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(configRegistryClient,
+                yangStoreSnapshot.getModuleMXBeanEntryMap());
+        Map<String, Map<Date, IdentityMapping>> identitiesMap = transformIdentities(yangStoreSnapshot.getModules());
+        return new Config(factories, identitiesMap);
+    }
 
-        return new Config(factories);
+
+    public static class IdentityMapping {
+        private final Map<String, IdentitySchemaNode> identityNameToSchemaNode;
+
+        IdentityMapping() {
+            this.identityNameToSchemaNode = Maps.newHashMap();
+        }
+
+        void addIdSchemaNode(IdentitySchemaNode node) {
+            String name = node.getQName().getLocalName();
+            Preconditions.checkState(identityNameToSchemaNode.containsKey(name) == false);
+            identityNameToSchemaNode.put(name, node);
+        }
+
+        public boolean containsIdName(String idName) {
+            return identityNameToSchemaNode.containsKey(idName);
+        }
+
+        public IdentitySchemaNode getIdentitySchemaNode(String idName) {
+            Preconditions.checkState(identityNameToSchemaNode.containsKey(idName), "No identity under name %s", idName);
+            return identityNameToSchemaNode.get(idName);
+        }
+    }
+
+    private static Map<String, Map<Date, IdentityMapping>> transformIdentities(Set<Module> modules) {
+        Map<String, Map<Date, IdentityMapping>> mappedIds = Maps.newHashMap();
+        for (Module module : modules) {
+            String namespace = module.getNamespace().toString();
+            Map<Date, IdentityMapping> revisionsByNamespace= mappedIds.get(namespace);
+            if(revisionsByNamespace == null) {
+                revisionsByNamespace = Maps.newHashMap();
+                mappedIds.put(namespace, revisionsByNamespace);
+            }
+
+            Date revision = module.getRevision();
+            Preconditions.checkState(revisionsByNamespace.containsKey(revision) == false,
+                    "Duplicate revision %s for namespace %s", revision, namespace);
+
+            IdentityMapping identityMapping = revisionsByNamespace.get(revision);
+            if(identityMapping == null) {
+                identityMapping = new IdentityMapping();
+                revisionsByNamespace.put(revision, identityMapping);
+            }
+
+            for (IdentitySchemaNode identitySchemaNode : module.getIdentities()) {
+                identityMapping.addIdSchemaNode(identitySchemaNode);
+            }
+
+        }
+
+        return mappedIds;
     }
 
     public static Map<String/* Namespace from yang file */,
@@ -253,7 +310,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     protected Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
 
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
-        Config cfg = getConfigMapping(configRegistryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
+        Config cfg = getConfigMapping(configRegistryClient, yangStoreSnapshot);
         try {
             editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, configRegistryClient);
         } catch (IllegalStateException e) {
@@ -278,4 +335,5 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
         return getResponseInternal(document, editConfigExecution);
     }
+
 }

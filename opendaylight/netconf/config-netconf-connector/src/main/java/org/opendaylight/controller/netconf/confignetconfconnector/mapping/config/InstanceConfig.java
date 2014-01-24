@@ -25,6 +25,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.ObjectResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.AttributeWritingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -35,6 +36,7 @@ import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -129,10 +131,10 @@ public final class InstanceConfig {
     }
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
-            EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
+                                                 EditStrategyType defaultStrategy, Multimap<String, String> providedServices, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
-        Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig);
+        Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
         XmlElement type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);

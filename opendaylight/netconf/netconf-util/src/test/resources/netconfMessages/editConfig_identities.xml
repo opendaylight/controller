@@ -1,0 +1,37 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <test-option>
+            set
+        </test-option>
+        <default-operation>merge</default-operation>
+        <config>
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-identity-test
+                    </type>
+                    <name>id-test</name>
+                    <identities>
+                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:bgp-types">prefix:ipv4-address-family</afi>
+                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:bgp-types">prefix:unicast-subsequent-address-family</safi>
+                    </identities>
+                    <identities>
+                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:bgp-types">prefix:ipv6-address-family</afi>
+                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:bgp-types">prefix:mpls-labeled-vpn-subsequent-address-family</safi>
+                    </identities>
+                    <identities-container>
+                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:bgp-types">prefix:ipv6-address-family</afi>
+                    </identities-container>
+                    <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:bgp-types">prefix:ipv6-address-family</afi>
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+
+            </services>
+        </config>
+    </edit-config>
+</rpc>

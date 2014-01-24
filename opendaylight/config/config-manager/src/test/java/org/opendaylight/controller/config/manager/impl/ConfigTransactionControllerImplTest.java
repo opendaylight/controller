@@ -75,7 +75,7 @@ public class ConfigTransactionControllerImplTest extends
 
 
         testedTxController = new ConfigTransactionControllerImpl(
-                txLookupRegistry, 1, 1,
+                txLookupRegistry, 1, null, 1,
                 currentlyRegisteredFactories, transactionsMBeanServer,
                 ManagementFactory.getPlatformMBeanServer(), false, writableRegistry);
         TransactionModuleJMXRegistrator transactionModuleJMXRegistrator123 = testedTxController

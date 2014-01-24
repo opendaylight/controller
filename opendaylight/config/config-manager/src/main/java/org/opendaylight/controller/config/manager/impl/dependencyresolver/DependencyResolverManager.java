@@ -17,6 +17,7 @@ import org.opendaylight.controller.config.manager.impl.ModuleInternalTransaction
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.InstanceAlreadyExistsException;
@@ -37,12 +38,14 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
     private final ModulesHolder modulesHolder;
     private final TransactionStatus transactionStatus;
     private final ServiceReferenceReadableRegistry readableRegistry;
+    private final CodecRegistry codecRegistry;
 
     public DependencyResolverManager(String transactionName,
-            TransactionStatus transactionStatus, ServiceReferenceReadableRegistry readableRegistry) {
+                                     TransactionStatus transactionStatus, ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry) {
         this.modulesHolder = new ModulesHolder(transactionName);
         this.transactionStatus = transactionStatus;
         this.readableRegistry = readableRegistry;
+        this.codecRegistry = codecRegistry;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
         DependencyResolverImpl dependencyResolver = moduleIdentifiersToDependencyResolverMap.get(name);
         if (dependencyResolver == null) {
             transactionStatus.checkNotCommitted();
-            dependencyResolver = new DependencyResolverImpl(name, transactionStatus, modulesHolder, readableRegistry);
+            dependencyResolver = new DependencyResolverImpl(name, transactionStatus, modulesHolder, readableRegistry, codecRegistry);
             moduleIdentifiersToDependencyResolverMap.put(name, dependencyResolver);
         }
         return dependencyResolver;
