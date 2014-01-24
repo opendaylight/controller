@@ -18,6 +18,7 @@ import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableExcep
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -42,10 +43,9 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * ZeroMq based implementation of RpcRouter. It implements RouteChangeListener of RoutingTable
- * so that it gets route change notifications from routing table.
+ * ZeroMq based implementation of RpcRouter.
  */
-public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, String> {
+public class ServerImpl implements RemoteRpcServer {
 
   private Logger _logger = LoggerFactory.getLogger(ServerImpl.class);
 
@@ -56,8 +56,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
   private ProviderSession brokerSession;
   private ZMQ.Context context;
 
-  private final RpcListener listener = new RpcListener();
-
   private final String HANDLER_INPROC_ADDRESS = "inproc://rpc-request-handler";
   private final int HANDLER_WORKER_COUNT = 2;
   private final int HWM = 200;//high water mark on sockets
@@ -65,10 +63,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
 
   private String serverAddress;
   private int port;
-
-  private ClientImpl client;
-
-  private  RoutingTableProvider routingTableProvider;
 
   public static enum State {
     STARTING, STARTED, STOPPED;
@@ -80,22 +74,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
                               append(":").
                               append(port).
                               toString();
-  }
-
-  public RoutingTableProvider getRoutingTableProvider() {
-    return routingTableProvider;
-  }
-
-  public void setRoutingTableProvider(RoutingTableProvider routingTableProvider) {
-    this.routingTableProvider = routingTableProvider;
-  }
-
-  public ClientImpl getClient(){
-    return this.client;
-  }
-
-  public void setClient(ClientImpl client) {
-    this.client = client;
   }
 
   public State getStatus() {
@@ -138,11 +116,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
     remoteServices = new HashSet<QName>();//
     serverPool = Executors.newSingleThreadExecutor();//main server thread
     serverPool.execute(receive()); // Start listening rpc requests
-    brokerSession.addRpcRegistrationListener(listener);
-
-    announceLocalRpcs();
-
-    registerRemoteRpcs();
 
     status = State.STARTED;
     _logger.info("Remote RPC Server started [{}]", getServerAddress());
@@ -160,8 +133,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
 
     if (State.STOPPED == this.getStatus()) return; //do nothing
 
-    unregisterLocalRpcs();
-
     if (serverPool != null)
       serverPool.shutdown();
 
@@ -173,7 +144,7 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
 
   /**
    * Closes ZMQ Context. It tries to gracefully terminate the context. If
-   * termination takes more than a second, its forcefully shutdown.
+   * termination takes more than 5 seconds, its forcefully shutdown.
    */
   private void closeZmqContext() {
     ExecutorService exec = Executors.newSingleThreadExecutor();
@@ -251,81 +222,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
   }
 
   /**
-   * Register the remote RPCs from the routing table into broker
-   */
-  private void registerRemoteRpcs(){
-    Optional<RoutingTable<String, String>> routingTableOptional = routingTableProvider.getRoutingTable();
-
-    Preconditions.checkState(routingTableOptional.isPresent(), "Routing table is absent");
-
-    Set<Map.Entry> remoteRoutes =
-            routingTableProvider.getRoutingTable().get().getAllRoutes();
-
-    //filter out all entries that contains local address
-    //we dont want to register local RPCs as remote
-    Predicate<Map.Entry> notLocalAddressFilter = new Predicate<Map.Entry>(){
-      public boolean apply(Map.Entry remoteRoute){
-        return !getServerAddress().equalsIgnoreCase((String)remoteRoute.getValue());
-      }
-    };
-
-    //filter the entries created by current node
-    Set<Map.Entry> filteredRemoteRoutes = Sets.filter(remoteRoutes, notLocalAddressFilter);
-
-    for (Map.Entry route : filteredRemoteRoutes){
-      onRouteUpdated((String) route.getKey(), "");//value is not needed by broker
-    }
-  }
-
-  /**
-   * Un-Register the local RPCs from the routing table
-   */
-  private void unregisterLocalRpcs(){
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      listener.onRpcImplementationRemoved(rpc);
-    }
-  }
-
-  /**
-   * Publish all the locally registered RPCs in the routing table
-   */
-  private void announceLocalRpcs(){
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      listener.onRpcImplementationAdded(rpc);
-    }
-  }
-
-  /**
-   * @param key
-   * @param value
-   */
-  @Override
-  public void onRouteUpdated(String key, String value) {
-    RouteIdentifierImpl rId = new RouteIdentifierImpl();
-    try {
-      _logger.debug("Updating key/value {}-{}", key, value);
-      brokerSession.addRpcImplementation(
-          (QName) rId.fromString(key).getType(), client);
-
-      //TODO: Check with Tony for routed rpc
-      //brokerSession.addRoutedRpcImplementation((QName) rId.fromString(key).getRoute(), client);
-    } catch (Exception e) {
-      _logger.info("Route update failed {}", e);
-    }
-  }
-
-  /**
-   * @param key
-   */
-  @Override
-  public void onRouteDeleted(String key) {
-    //TODO: Broker session needs to be updated to support this
-    throw new UnsupportedOperationException();
-  }
-
-  /**
    * Finds IPv4 address of the local VM
    * TODO: This method is non-deterministic. There may be more than one IPv4 address. Cant say which
    * address will be returned. Read IP from a property file or enhance the code to make it deterministic.
@@ -354,76 +250,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
     }
     return hostAddress;
 
-  }
-
-  /**
-   * Listener for rpc registrations
-   */
-  private class RpcListener implements RpcRegistrationListener {
-
-    @Override
-    public void onRpcImplementationAdded(QName name) {
-
-      //if the service name exists in the set, this notice
-      //has bounced back from the broker. It should be ignored
-      if (remoteServices.contains(name))
-        return;
-
-      _logger.debug("Adding registration for [{}]", name);
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl();
-      routeId.setType(name);
-
-      RoutingTable<String, String> routingTable = getRoutingTable();
-
-      try {
-        routingTable.addGlobalRoute(routeId.toString(), getServerAddress());
-        _logger.debug("Route added [{}-{}]", name, getServerAddress());
-
-      } catch (RoutingTableException | SystemException e) {
-        //TODO: This can be thrown when route already exists in the table. Broker
-        //needs to handle this.
-        _logger.error("Unhandled exception while adding global route to routing table [{}]", e);
-
-      }
-    }
-
-    @Override
-    public void onRpcImplementationRemoved(QName name) {
-
-      _logger.debug("Removing registration for [{}]", name);
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl();
-      routeId.setType(name);
-
-      RoutingTable<String, String> routingTable = getRoutingTable();
-
-      try {
-        routingTable.removeGlobalRoute(routeId.toString());
-      } catch (RoutingTableException | SystemException e) {
-        _logger.error("Route delete failed {}", e);
-      }
-    }
-
-    private RoutingTable<String, String> getRoutingTable(){
-      Optional<RoutingTable<String, String>> routingTable =
-          routingTableProvider.getRoutingTable();
-
-      checkNotNull(routingTable.isPresent(), "Routing table is null");
-
-      return routingTable.get();
-    }
-  }
-
-  /*
-   * Listener for Route changes in broker. Broker notifies this listener in the event
-   * of any change (add/delete). Listener then updates the routing table.
-   */
-  private class BrokerRouteChangeListener
-      implements org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener<RpcRoutingContext, InstanceIdentifier>{
-
-    @Override
-    public void onRouteChange(RouteChange<RpcRoutingContext, InstanceIdentifier> routeChange) {
-
-    }
   }
 
 }

@@ -9,8 +9,10 @@
 package org.opendaylight.controller.sal.connector.remoterpc;
 
 import com.google.common.base.Optional;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.impl.RoutingTableImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -22,26 +24,26 @@ public class RoutingTableProvider implements AutoCloseable {
 
     private RoutingTableImpl routingTableImpl = null;
 
-    final private RouteChangeListener routeChangeListener;
+    //final private RouteChangeListener routeChangeListener;
     
     
-    public RoutingTableProvider(BundleContext ctx,RouteChangeListener rcl) {
+    public RoutingTableProvider(BundleContext ctx){//,RouteChangeListener rcl) {
         @SuppressWarnings("rawtypes")
         ServiceTracker<RoutingTable, RoutingTable> rawTracker = new ServiceTracker<>(ctx, RoutingTable.class, null);
         tracker = rawTracker;
         tracker.open();
 
-        routeChangeListener = rcl;
+        //routeChangeListener = rcl;
     }
     
-    public Optional<RoutingTable<String, String>> getRoutingTable() {
+    public Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> getRoutingTable() {
         @SuppressWarnings("unchecked")
-        RoutingTable<String,String> tracked = tracker.getService();
+        RoutingTable<RpcRouter.RouteIdentifier,String> tracked = tracker.getService();
 
         if(tracked instanceof RoutingTableImpl){
             if(routingTableImpl != tracked){
              routingTableImpl= (RoutingTableImpl)tracked;
-             routingTableImpl.setRouteChangeListener(routeChangeListener);
+             //routingTableImpl.setRouteChangeListener(routeChangeListener);
             }
         }
 
