@@ -40,6 +40,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * ZeroMq based implementation of RpcRouter. It implements RouteChangeListener of RoutingTable
@@ -76,10 +77,6 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
 
   public ServerImpl(int port) {
     this.port = port;
-    this.serverAddress = new StringBuilder(findIpAddress()).
-                              append(":").
-                              append(port).
-                              toString();
   }
 
   public RoutingTableProvider getRoutingTableProvider() {
@@ -134,6 +131,28 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
         "Remote RPC Server is already running");
 
     status = State.STARTING;
+    _logger.debug("Remote RPC Server is starting...");
+
+    String hostIpAddress = findIpAddress();
+
+    //Log and silently die as per discussion in the bug (bug-362)
+    //https://bugs.opendaylight.org/show_bug.cgi?id=362
+    //
+    // A tracking enhancement defect (bug-366) is created to properly fix this issue
+    //https://bugs.opendaylight.org/show_bug.cgi?id=366
+    //checkState(hostIpAddress != null, "Remote RPC Server could not acquire host ip address");
+
+    if (hostIpAddress == null) {
+      _logger.error("Remote RPC Server could not acquire host ip address. Stopping...");
+      stop();
+      return;
+    }
+
+    this.serverAddress = new StringBuilder(hostIpAddress).
+        append(":").
+        append(port).
+        toString();
+
     context = ZMQ.context(1);
     remoteServices = new HashSet<QName>();//
     serverPool = Executors.newSingleThreadExecutor();//main server thread
@@ -334,12 +353,13 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
    * @return
    */
   private String findIpAddress() {
-    String hostAddress = null;
     Enumeration e = null;
     try {
       e = NetworkInterface.getNetworkInterfaces();
     } catch (SocketException e1) {
-      e1.printStackTrace();
+      _logger.error("Failed to get list of interfaces", e1);
+      //throw new RuntimeException("Failed to acquire list of interfaces", e1);
+      return null;
     }
     while (e.hasMoreElements()) {
 
@@ -348,12 +368,17 @@ public class ServerImpl implements RemoteRpcServer, RouteChangeListener<String, 
       Enumeration ee = n.getInetAddresses();
       while (ee.hasMoreElements()) {
         InetAddress i = (InetAddress) ee.nextElement();
-        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress()))
-          hostAddress = i.getHostAddress();
+        _logger.debug("Trying address {}", i);
+        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress())) {
+          String hostAddress = i.getHostAddress();
+          _logger.debug("Settled on host address {}", hostAddress);
+          return hostAddress;
+        }
       }
     }
-    return hostAddress;
 
+    _logger.error("Failed to find a suitable host address");
+    return null;
   }
 
   /**
