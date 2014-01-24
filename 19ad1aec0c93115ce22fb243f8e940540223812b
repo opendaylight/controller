@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0ff0928f",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1853,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-24T19:01:02Z",
+      "side": 1,
+      "message": "You should combine the above two lines.\nThe first one is a dead store.\n\n boolean flowInstalled \u003d !target.installInHw();\n\nBTW, why are you storing the config field that says if the user wanted this config to be applied or not in hw ?\nThat field is already available at any time from target.\n\nWhat you are interested into is whether the user requested an uninstall or an install.\nWhich you already know because it depends on target.installInHw(), given this function is for toggling the flow to/from hw.\n\nSo, when this toggling function is called, it checks the current static flow config to see if current wanted status is \"flow in sw only\" or \"flow installed on the switch\".\n\nIn case of the former, it will attempt to install on hw. If installation is successful, it will update the config object: installInHw -\u003e true.\n\nIn case of the latter, it will attempt to uninstall the flow from hw. If operation is successful, it will update the config object: installInHw -\u003e false.\n\nThis is what the current code is already doing.\n\nIf you still want to add your change, if you feel it improves readability, I am ok with it.\nBut please change the boolean variable setting to:\n\nboolean wasInstalled \u003d target.installInHw().\n\nAlso please correct the indentation of the curly braces and follow existing file convention where else is on same line of closing brace.",
+      "revId": "19ad1aec0c93115ce22fb243f8e940540223812b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
