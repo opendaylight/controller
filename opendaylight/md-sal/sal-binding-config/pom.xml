@@ -34,6 +34,14 @@
                             <codeGenerators>
                                 <generator>
                                     <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        target/generated-sources/sal
+                                    </outputBaseDir>
+                                </generator>
+                                <generator>
+                                    <codeGeneratorClass>
                                         org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
                                     </codeGeneratorClass>
                                     <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
