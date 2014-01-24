@@ -120,9 +120,9 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
         // inconsistent state
         inconsistentBundlesToYangURLs.putAll(bundle, addedURLs);
 
-        logger.debug("Yang store is falling back on last consistent state containing {}, inconsistent yang files {}",
+        logger.debug("Yang store is falling back to last consistent state containing {}, inconsistent yang files {}",
                 consistentBundlesToYangURLs, inconsistentBundlesToYangURLs, failureReason);
-        logger.warn("Yang store is falling back on last consistent state containing {} files, inconsistent yang files size is {}, reason {}",
+        logger.info("Yang store is falling back to last consistent state containing {} files, keeping {} inconsistent yang files due to {}",
                 consistentBundlesToYangURLs.size(), inconsistentBundlesToYangURLs.size(), failureReason.toString());
         cache.setInconsistentURLsForReporting(inconsistentBundlesToYangURLs.values());
     }
@@ -132,12 +132,17 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements YangSt
         // merge into
         consistentBundlesToYangURLs.clear();
         consistentBundlesToYangURLs.putAll(proposedNewState);
-        inconsistentBundlesToYangURLs.clear();
+
+        logger.debug("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
+
+        // If we cleared up some inconsistent models, report that
+        if (!inconsistentBundlesToYangURLs.isEmpty()) {
+            inconsistentBundlesToYangURLs.clear();
+            logger.info("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
+        }
 
         updateCache(snapshot);
         cache.setInconsistentURLsForReporting(Collections.<URL> emptySet());
-        logger.trace("Yang store updated to new consistent state containing {} yang files", consistentBundlesToYangURLs.size());
-        logger.debug("Yang store updated to new consistent state containing {}", consistentBundlesToYangURLs);
     }
 
     private synchronized void updateCache(YangStoreSnapshotImpl snapshot) {
