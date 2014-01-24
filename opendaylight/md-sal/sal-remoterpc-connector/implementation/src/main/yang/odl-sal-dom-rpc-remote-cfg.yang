@@ -26,8 +26,6 @@ module odl-sal-dom-rpc-remote-cfg {
 
     identity remote-zeromq-rpc-server {
         base config:module-type;
-        config:provided-service remote-rpc-server;
-        config:provided-service remote-rpc-client;
         config:java-name-prefix ZeroMQServer;
     }
 

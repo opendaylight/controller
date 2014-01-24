@@ -9,11 +9,7 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
+import org.opendaylight.controller.sal.core.api.*;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -41,7 +37,12 @@ public class RpcProvisionRegistryProxy extends AbstractBrokerServiceProxy<RpcPro
         return getDelegate().addRoutedRpcImplementation(rpcType, implementation);
     }
 
-    @Override
+  @Override
+  public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation) {
+    getDelegate().setRoutedRpcDefaultDelegate(defaultImplementation);
+  }
+
+  @Override
     public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(L listener) {
         return getDelegate().registerRouteChangeListener(listener);
     }

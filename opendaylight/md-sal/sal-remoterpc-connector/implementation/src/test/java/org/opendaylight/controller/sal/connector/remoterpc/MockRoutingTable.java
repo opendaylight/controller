@@ -39,8 +39,23 @@ public class MockRoutingTable<K, V> implements RoutingTable {
   }
 
   @Override
+  public void addRoutes(Set set, Object o) throws RoutingTableException, SystemException {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public void removeRoutes(Set set, Object o) throws RoutingTableException, SystemException {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public void removeGlobalRoute(Object o) throws RoutingTableException, SystemException {
 
+  }
+
+  @Override
+  public Object getGlobalRoute(Object o) throws RoutingTableException, SystemException {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
   @Override
@@ -51,17 +66,17 @@ public class MockRoutingTable<K, V> implements RoutingTable {
   }
 
   @Override
-  public Set<Map.Entry> getAllRoutes() {
-    return Collections.emptySet();
+  public Object getLastAddedRoute(Object o) {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  @Override
-  public Object getARoute(Object o) {
-    return null;
-  }
+//  @Override
+//  public Set<Map.Entry> getAllRoutes() {
+//    return Collections.emptySet();
+//  }
 
-  @Override
-  public void registerRouteChangeListener(RouteChangeListener routeChangeListener) {
-
-  }
+//  @Override
+//  public Object getARoute(Object o) {
+//    return null;
+//  }
 }

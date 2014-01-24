@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.yang.md.sal.remote.rpc;
 
 import org.opendaylight.controller.sal.connector.remoterpc.*;
 import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -46,17 +47,18 @@ public final class ZeroMQServerModule extends org.opendaylight.controller.config
         
         ClientImpl clientImpl = new ClientImpl();
 
-        RoutingTableProvider provider = new RoutingTableProvider(bundleContext,serverImpl);
+    RoutingTableProvider provider = new RoutingTableProvider(bundleContext);//,serverImpl);
 
-        RemoteRpcProvider facade = new RemoteRpcProvider(serverImpl, clientImpl);
-        
-        facade.setRoutingTableProvider(provider );
-        
-        broker.registerProvider(facade, bundleContext);
-        return facade;
-    }
 
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
+    facade.setRoutingTableProvider(provider );
+    facade.setContext(bundleContext);
+    facade.setRpcProvisionRegistry((RpcProvisionRegistry) broker);
+
+    broker.registerProvider(facade, bundleContext);
+    return facade;
+  }
+
+  public void setBundleContext(BundleContext bundleContext) {
+    this.bundleContext = bundleContext;
+  }
 }

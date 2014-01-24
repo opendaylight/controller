@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.core.api.BrokerService
 import org.opendaylight.controller.sal.core.api.Consumer
 import org.opendaylight.controller.sal.core.api.Provider
 import org.opendaylight.controller.sal.core.spi.BrokerModule
+import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
@@ -127,7 +128,11 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     override addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
         router.addRoutedRpcImplementation(rpcType,implementation);
     }
-    
+
+    override setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation) {
+        router.setRoutedRpcDefaultDelegate(defaultImplementation);
+    }
+
     override addRpcRegistrationListener(RpcRegistrationListener listener) {
         return router.addRpcRegistrationListener(listener);
     }
