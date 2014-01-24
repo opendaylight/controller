@@ -13,10 +13,6 @@
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
-    <properties>
-        <opendaylight.binding.version>0.6.0-SNAPSHOT</opendaylight.binding.version>
-        <opendaylight.yang.version>0.5.9-SNAPSHOT</opendaylight.yang.version>
-    </properties>
     <build>
         <plugins>
             <plugin>
@@ -46,7 +42,7 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>restconf-client-api</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>${yangtools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
