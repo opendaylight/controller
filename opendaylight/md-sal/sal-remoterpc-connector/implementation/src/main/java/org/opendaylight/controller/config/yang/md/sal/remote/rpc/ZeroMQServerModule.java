@@ -39,24 +39,24 @@ public final class ZeroMQServerModule extends org.opendaylight.controller.config
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        
+
         Broker broker = getDomBrokerDependency();
 
 
-        
+
         final int port = getPort() != null ? getPort() : ZEROMQ_ROUTER_PORT;
 
         ServerImpl serverImpl = new ServerImpl(port);
-        
+
         ClientImpl clientImpl = new ClientImpl();
 
         RoutingTableProvider provider = new RoutingTableProvider(bundleContext,serverImpl);
 
 
         RemoteRpcProvider facade = new RemoteRpcProvider(serverImpl, clientImpl);
-        
+
         facade.setRoutingTableProvider(provider );
-        
+
         broker.registerProvider(facade, bundleContext);
         return facade;
     }

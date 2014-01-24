@@ -18,10 +18,10 @@ import org.opendaylight.yangtools.yang.common.QName;
 /**
  * NotificationService provides access to the notification functionality of the
  * SAL.
- * 
+ *
  * NotificationService allows for consumption of notifications by registering
  * implementations of NotificationListener.
- * 
+ *
  * The registration of notification listeners could be done by:
  * <ul>
  * <li>returning an instance of implementation in the return value of
@@ -30,14 +30,14 @@ import org.opendaylight.yangtools.yang.common.QName;
  * arguments to the
  * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)}
  * </ul>
- * 
- * 
+ *
+ *
  */
 public interface NotificationService extends BrokerService {
 
     /**
      * Registers a notification listener for supplied notification type.
-     * 
+     *
      * @param notification
      * @param listener
      */

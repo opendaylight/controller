@@ -20,7 +20,7 @@ public final class SchemaServiceImplSingletonModule extends org.opendaylight.con
 {
 
     BundleContext bundleContext;
-    
+
     public SchemaServiceImplSingletonModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -28,7 +28,7 @@ public final class SchemaServiceImplSingletonModule extends org.opendaylight.con
     public SchemaServiceImplSingletonModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, SchemaServiceImplSingletonModule oldModule, java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
-    
+
     @Override
     public boolean canReuseInstance(AbstractSchemaServiceImplSingletonModule oldModule) {
         return true;

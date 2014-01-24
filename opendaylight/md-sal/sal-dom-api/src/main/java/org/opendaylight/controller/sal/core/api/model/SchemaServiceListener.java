@@ -6,7 +6,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public interface SchemaServiceListener extends EventListener {
 
-    
+
     void onGlobalContextUpdated(SchemaContext context);
-    
+
 }

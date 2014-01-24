@@ -59,18 +59,18 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
             broker.registerProvider(this, context);
             return broker;
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void modifiedService(ServiceReference<Broker> reference, Broker service) {
         // NOOP
     }
-    
+
     @Override
     public void removedService(ServiceReference<Broker> reference, Broker service) {
         stopImpl(context);
     }
-    
+
 }

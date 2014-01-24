@@ -61,7 +61,7 @@ public class RestConfigDataTest extends JerseyTest {
         schemaContext = TestUtils.loadSchemaContext(modules);
         initMocking();
     }
-    
+
     private static void initMocking() {
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
@@ -74,7 +74,7 @@ public class RestConfigDataTest extends JerseyTest {
     }
 
 //    @Test
-    // TODO 
+    // TODO
     public void createConfigurationDataTest() throws UnsupportedEncodingException, ParseException {
         initMocking();
         String URI_1 = createUri("/config", "");
@@ -141,7 +141,7 @@ public class RestConfigDataTest extends JerseyTest {
         identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class]";
         assertEquals("Bad format URI", identifier, instanceIdCaptor.getValue().getPath().toString());
     }
-    
+
 //    @Test
     // TODO
     public void testExistingData() throws UnsupportedEncodingException {

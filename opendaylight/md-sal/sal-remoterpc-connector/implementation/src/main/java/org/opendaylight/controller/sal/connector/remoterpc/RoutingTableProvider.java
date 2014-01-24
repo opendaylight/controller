@@ -23,8 +23,8 @@ public class RoutingTableProvider implements AutoCloseable {
     private RoutingTableImpl routingTableImpl = null;
 
     final private RouteChangeListener routeChangeListener;
-    
-    
+
+
     public RoutingTableProvider(BundleContext ctx,RouteChangeListener rcl) {
         @SuppressWarnings("rawtypes")
         ServiceTracker<RoutingTable, RoutingTable> rawTracker = new ServiceTracker<>(ctx, RoutingTable.class, null);
@@ -33,7 +33,7 @@ public class RoutingTableProvider implements AutoCloseable {
 
         routeChangeListener = rcl;
     }
-    
+
     public Optional<RoutingTable<String, String>> getRoutingTable() {
         @SuppressWarnings("unchecked")
         RoutingTable<String,String> tracked = tracker.getService();

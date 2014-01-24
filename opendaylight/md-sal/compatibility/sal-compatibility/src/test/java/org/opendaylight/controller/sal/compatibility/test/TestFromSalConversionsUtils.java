@@ -227,10 +227,10 @@ public class TestFromSalConversionsUtils {
                     assertEquals("Wrong value of vlad ID in PushVlanAction.", (Integer) 4095,
                             ((PushVlanActionCase) innerAction).getPushVlanAction().getVlanId().getValue());
                 } else if (innerAction instanceof SetDlDstActionCase) {
-                    assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
+                    assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa",
                             ((SetDlDstActionCase) innerAction).getSetDlDstAction().getAddress().getValue());
                 } else if (innerAction instanceof SetDlSrcActionCase) {
-                    assertEquals("Wrong MAC source address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
+                    assertEquals("Wrong MAC source address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa",
                             ((SetDlSrcActionCase) innerAction).getSetDlSrcAction().getAddress().getValue());
                 } else if (innerAction instanceof SetDlTypeActionCase) {
                     assertEquals("Wrong data link type in SetDlTypeAction.", (long) 513,

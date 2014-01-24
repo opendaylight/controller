@@ -18,11 +18,11 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 
 /**
- * 
+ *
  * CnSn = Composite node and Simple node data structure Class contains test of
  * serializing simple nodes data values according data types from YANG schema to
  * XML file
- * 
+ *
  */
 public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
     @BeforeClass

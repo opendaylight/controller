@@ -10,8 +10,8 @@ public class Draft02 {
         public static final String PATCH_STATUS = "application/yang.patch-status";
         public static final String STREAM = "application/yang.stream";
     }
-    
+
     public static class Paths {
-        
+
     }
 }

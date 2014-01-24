@@ -8,9 +8,9 @@ public interface ChoiceCaseCodec<C extends DataContainer> extends DataContainerC
 
     @Override
     public CompositeNode serialize(ValueWithQName<C> input);
-    
+
     @Override
     public ValueWithQName<C> deserialize(Node<?> input);
-    
+
     public boolean isAcceptable(Node<?> input);
 }

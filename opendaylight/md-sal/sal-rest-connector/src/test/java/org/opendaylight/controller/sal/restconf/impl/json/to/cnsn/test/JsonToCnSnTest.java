@@ -183,7 +183,7 @@ public class JsonToCnSnTest {
      * Tests whether namespace <b>stay unchanged</b> if concrete values are
      * present in composite or simple node and if the method for update is
      * called.
-     * 
+     *
      */
     @Test
     public void notSupplyNamespaceIfAlreadySupplied() {
@@ -267,7 +267,7 @@ public class JsonToCnSnTest {
         assertEquals("iden_local", ((QName) lf14.getValue()).getLocalName());
         assertEquals("identity:module", ((QName) lf14.getValue()).getNamespace().toString());
     }
-    
+
     @Ignore
     @Test
     public void loadDataAugmentedSchemaMoreEqualNamesTest() {
@@ -278,7 +278,7 @@ public class JsonToCnSnTest {
         } catch (ResponseException e) {
             exceptionCaught = true;
         }
-        
+
         assertFalse(exceptionCaught);
     }
 

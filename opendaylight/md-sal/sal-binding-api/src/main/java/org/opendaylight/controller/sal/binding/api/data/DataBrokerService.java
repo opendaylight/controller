@@ -23,8 +23,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 /**
  * DataBrokerService provides unified access to the data stores available in the
  * system.
- * 
- * 
+ *
+ *
  * @see DataProviderService
  */
 public interface DataBrokerService extends //
@@ -35,9 +35,9 @@ public interface DataBrokerService extends //
 
     /**
      * Returns a data from specified Data Store.
-     * 
+     *
      * Returns all the data visible to the consumer from specified Data Store.
-     * 
+     *
      * @param <T>
      *            Interface generated from YANG module representing root of data
      * @param store
@@ -49,15 +49,15 @@ public interface DataBrokerService extends //
 
     /**
      * Returns a filtered subset of data from specified Data Store.
-     * 
+     *
      * <p>
      * The filter is modeled as an hierarchy of Java TOs starting with
      * implementation of {@link DataRoot} representing data root. The semantics
      * of the filter tree is the same as filter semantics defined in the NETCONF
      * protocol for rpc operations <code>get</code> and <code>get-config</code>
      * in Section 6 of RFC6241.
-     * 
-     * 
+     *
+     *
      * @see http://tools.ietf.org/html/rfc6241#section-6
      * @param <T>
      *            Interface generated from YANG module representing root of data
@@ -72,8 +72,8 @@ public interface DataBrokerService extends //
 
     /**
      * Returns a candidate data which are not yet commited.
-     * 
-     * 
+     *
+     *
      * @param <T>
      *            Interface generated from YANG module representing root of data
      * @param store
@@ -85,15 +85,15 @@ public interface DataBrokerService extends //
 
     /**
      * Returns a filtered subset of candidate data from specified Data Store.
-     * 
+     *
      * <p>
      * The filter is modeled as an hierarchy of {@link Node} starting with
      * {@link CompositeNode} representing data root. The semantics of the filter
      * tree is the same as filter semantics defined in the NETCONF protocol for
      * rpc operations <code>get</code> and <code>get-config</code> in Section 6
      * of RFC6241.
-     * 
-     * 
+     *
+     *
      * @see http://tools.ietf.org/html/rfc6241#section-6
      * @param <T>
      *            Interface generated from YANG module representing root of data
@@ -107,7 +107,7 @@ public interface DataBrokerService extends //
     <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, T filter);
 
     /**
-     * 
+     *
      * @param <T>
      *            Interface generated from YANG module representing root of data
      * @param store
@@ -123,21 +123,21 @@ public interface DataBrokerService extends //
 
     /**
      * Initiates a two-phase commit of candidate data.
-     * 
+     *
      * <p>
      * The {@link Consumer} could initiate a commit of candidate data
-     * 
+     *
      * <p>
      * The successful commit changes the state of the system and may affect
      * several components.
-     * 
+     *
      * <p>
      * The effects of successful commit of data are described in the
      * specifications and YANG models describing the {@link Provider} components
      * of controller. It is assumed that {@link Consumer} has an understanding
      * of this changes.
-     * 
-     * 
+     *
+     *
      * @see DataCommitHandler for further information how two-phase commit is
      *      processed.
      * @param store
@@ -155,7 +155,7 @@ public interface DataBrokerService extends //
     DataObject getConfigurationData(InstanceIdentifier<?> data);
     /**
      * Creates a data modification transaction.
-     * 
+     *
      * @return new blank data modification transaction.
      */
     DataModificationTransaction beginTransaction();
@@ -167,28 +167,28 @@ public interface DataBrokerService extends //
     public void unregisterChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener);
 
     /**
-     * Reads data subtree from configurational store. 
-     * (Store which is populated by consumer, which is usually used to 
+     * Reads data subtree from configurational store.
+     * (Store which is populated by consumer, which is usually used to
      * inject state into providers. E.g. Flow configuration)-
-     * 
+     *
      */
     @Override
     public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path);
-    
+
     /**
-     * Reads data subtree from operational store. 
-     * (Store which is populated by providers, which is usually used to 
+     * Reads data subtree from operational store.
+     * (Store which is populated by providers, which is usually used to
      * capture state of providers. E.g. Topology)
-     * 
+     *
      */
     @Override
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path);
-    
+
     /**
-     * Register a data change listener for particular subtree. 
-     * 
+     * Register a data change listener for particular subtree.
+     *
      * Callback is invoked each time data in subtree changes.
-     * 
+     *
      */
     @Override
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(

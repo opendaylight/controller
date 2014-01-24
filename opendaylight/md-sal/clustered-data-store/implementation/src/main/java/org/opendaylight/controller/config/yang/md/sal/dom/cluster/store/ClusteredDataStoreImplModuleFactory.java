@@ -22,16 +22,16 @@ public class ClusteredDataStoreImplModuleFactory extends org.opendaylight.contro
 
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
-        ClusteredDataStoreImplModule module = 
+        ClusteredDataStoreImplModule module =
         (ClusteredDataStoreImplModule) super.createModule(instanceName, dependencyResolver, bundleContext);
         module.setBundleContext(bundleContext);
         return module;
     }
-    
+
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver,
             DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
-        ClusteredDataStoreImplModule module = 
+        ClusteredDataStoreImplModule module =
                 (ClusteredDataStoreImplModule) super.createModule(instanceName, dependencyResolver, old, bundleContext);
         module.setBundleContext(bundleContext);
         return module;

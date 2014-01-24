@@ -9,12 +9,12 @@ import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier<? extends DataObject>, DataObject> 
+public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier<? extends DataObject>, DataObject>
     implements DataModificationTransaction {
     private final ListenerRegistry<DataTransactionListener> listeners = new ListenerRegistry<DataTransactionListener>();
-    
-    
-    
+
+
+
     public DataTransactionImpl(Object identifier,DataBrokerImpl dataBroker) {
         super(identifier,dataBroker);
     }

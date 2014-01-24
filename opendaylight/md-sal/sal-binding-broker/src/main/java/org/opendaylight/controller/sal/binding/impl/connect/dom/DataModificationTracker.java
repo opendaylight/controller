@@ -11,14 +11,14 @@ import com.google.common.util.concurrent.JdkFutureAdapters;
 public final class DataModificationTracker<P extends Path<P>,D> {
 
     ConcurrentMap<Object, DataModification<P,D>> trackedTransactions = new ConcurrentHashMap<>();
-    
-    
+
+
     public void startTrackingModification(DataModification<P,D> modification) {
         trackedTransactions.putIfAbsent(modification.getIdentifier(), modification);
-        
-        
+
+
     }
-    
+
     public boolean containsIdentifier(Object identifier) {
         return trackedTransactions.containsKey(identifier);
     }

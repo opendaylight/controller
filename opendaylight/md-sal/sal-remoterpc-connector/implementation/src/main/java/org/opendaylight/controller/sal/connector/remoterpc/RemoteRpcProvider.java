@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import java.util.Collection;
 import java.util.Set;
 
-public class RemoteRpcProvider implements 
+public class RemoteRpcProvider implements
     RemoteRpcServer,
     RemoteRpcClient,
     Provider {
@@ -32,23 +32,23 @@ public class RemoteRpcProvider implements
         server.setRoutingTableProvider(provider);
         client.setRoutingTableProvider(provider);
     }
-    
+
     @Override
     public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
         return client.invokeRpc(rpc, input);
     }
-    
+
     @Override
     public Set<QName> getSupportedRpcs() {
         return client.getSupportedRpcs();
     }
-    
-    
+
+
     public RemoteRpcProvider(ServerImpl server, ClientImpl client) {
         this.server = server;
         this.client = client;
     }
-    
+
     public void setBrokerSession(ProviderSession session) {
         server.setBrokerSession(session);
     }
@@ -65,21 +65,21 @@ public class RemoteRpcProvider implements
 
     }
 
-    
+
     @Override
     public Collection<ProviderFunctionality> getProviderFunctionality() {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    
+
+
     @Override
     public void onSessionInitiated(ProviderSession session) {
         server.setBrokerSession(session);
         start();
     }
-    
-    
+
+
     public void close() throws Exception {
         server.close();
         client.close();

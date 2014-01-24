@@ -28,7 +28,7 @@ public class InventoryUtils {
 
     /**
      * Converts date in string format yyyy-MM-dd to java.util.Date.
-     * 
+     *
      * @return java.util.Date conformant to string formatted date yyyy-MM-dd.
      */
     private static Date dateFromString(final String date) {

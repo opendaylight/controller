@@ -20,16 +20,16 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
 
     private AtomicLong nextTransaction = new AtomicLong();
     private final AtomicLong createdTransactionsCount = new AtomicLong();
-    
+
     public DataBrokerImpl() {
         setDataReadRouter(new DataReaderRouter());
         setExecutor(MoreExecutors.sameThreadExecutor());
     }
-    
+
     public AtomicLong getCreatedTransactionsCount() {
         return createdTransactionsCount;
     }
-    
+
     @Override
     public DataTransactionImpl beginTransaction() {
         String transactionId = "DOM-" + nextTransaction.getAndIncrement();
@@ -76,7 +76,7 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
 
     @Override
     public void close() throws Exception {
-        
+
     }
 
 }

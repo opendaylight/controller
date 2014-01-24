@@ -63,10 +63,10 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
     /**
      * This test is ignored, till found out better way to test generation
      * of classes without leaking of instances from previous run
-     * 
+     *
      * @throws Exception
      */
-    
+
     public void setUp() {
         ListeningExecutorService executor = MoreExecutors.sameThreadExecutor();
         BindingBrokerTestFactory factory = new BindingBrokerTestFactory();
@@ -75,13 +75,13 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
         factory.setStartWithParsedSchema(getStartWithSchema());
         testContext = factory.getTestContext();
         testContext.start();
-        
+
         baDataService = testContext.getBindingDataBroker();
         biDataService = testContext.getDomDataBroker();
         dataStore = testContext.getDomDataStore();
         mappingService = testContext.getBindingToDomMappingService();
     };
-    
+
     @Test
     public void testSchemaContextNotAvailable() throws Exception {
 
@@ -97,11 +97,11 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
                 return transaction.commit();
             }
         });
-        
-        
+
+
         RpcResult<TransactionStatus> result = future.get().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-        
+
         Nodes nodes = checkForNodes();
         assertNotNull(nodes);
 
@@ -111,7 +111,7 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
         return (Nodes) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
 
     }
-    
+
     @Override
     protected boolean getStartWithSchema() {
         return false;

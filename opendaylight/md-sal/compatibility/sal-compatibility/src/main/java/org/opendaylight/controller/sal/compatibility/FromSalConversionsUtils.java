@@ -254,11 +254,11 @@ public class FromSalConversionsUtils {
                     .setType(etherType);
             targetEthMatchBuild.setEthernetType(ethType.build());
         }
-        if((sourceMatch.getField(DL_SRC) != null && sourceMatch.getField(DL_SRC).getValue() != null) || 
-                (sourceMatch.getField(DL_DST) != null && sourceMatch.getField(DL_DST).getValue() != null)|| 
+        if((sourceMatch.getField(DL_SRC) != null && sourceMatch.getField(DL_SRC).getValue() != null) ||
+                (sourceMatch.getField(DL_DST) != null && sourceMatch.getField(DL_DST).getValue() != null)||
                 dataLinkType != null ) {
-            return targetEthMatchBuild.build();            
-        } 
+            return targetEthMatchBuild.build();
+        }
         return null;
     }
 
@@ -365,7 +365,7 @@ public class FromSalConversionsUtils {
                     .toAddrString(inetDestAddress);
             layer4MatchBuild
             .setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
-        }       
+        }
         return layer4MatchBuild.build();
 
     }
@@ -381,13 +381,13 @@ public class FromSalConversionsUtils {
         }
         if(inetDestAddress != null) {
             String inetDstAddressString = InetAddresses
-                    .toAddrString(inetDestAddress);    
+                    .toAddrString(inetDestAddress);
             layer6MatchBuild
                     .setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
         }
         return layer6MatchBuild.build();
     }
-    
+
     public static boolean flowEquals(Flow statsFlow, Flow storedFlow) {
         if (statsFlow.getClass() != storedFlow.getClass()) {
             return false;

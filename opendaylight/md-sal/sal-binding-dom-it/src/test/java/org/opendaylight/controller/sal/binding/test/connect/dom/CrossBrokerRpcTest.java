@@ -64,7 +64,7 @@ public class CrossBrokerRpcTest {
     public static final NodeId NODE_B = new NodeId("b");
     public static final NodeId NODE_C = new NodeId("c");
     public static final NodeId NODE_D = new NodeId("d");
-    
+
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final QName ADD_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "add-flow");
 
@@ -78,7 +78,7 @@ public class CrossBrokerRpcTest {
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_C_ID = createBINodeIdentifier(NODE_C);
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_D_ID = createBINodeIdentifier(NODE_D);
 
-    
+
 
     @Before
     public void setup() {
@@ -139,7 +139,7 @@ public class CrossBrokerRpcTest {
             }
         });
         registration.registerPath(NodeContext.QNAME, BI_NODE_C_ID);
-        
+
         SalFlowService baFlowInvoker = baRpcRegistry.getRpcService(SalFlowService.class);
         Future<RpcResult<AddFlowOutput>> baResult = baFlowInvoker.addFlow(addFlow(BA_NODE_C_ID).setPriority(500).build());
         assertNotNull(baResult);

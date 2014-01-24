@@ -18,7 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 public abstract class AbstractBindingAwareProvider extends AbstractBrokerAwareActivator implements BindingAwareProvider {
-    
+
     @Override
     protected final void onBrokerAvailable(BindingAwareBroker broker, BundleContext context) {
         ProviderContext ctx = broker.registerProvider(this, context);
@@ -57,13 +57,13 @@ public abstract class AbstractBindingAwareProvider extends AbstractBrokerAwareAc
     public Collection<? extends RpcService> getImplementations() {
         return Collections.emptySet();
     }
-    
+
     /**
      * Initialization of consumer context.
-     * 
+     *
      * {@link ProviderContext} is replacement of {@link ConsumerContext}
      * so this method is not needed in case of Provider.
-     * 
+     *
      */
     @Deprecated
     @Override

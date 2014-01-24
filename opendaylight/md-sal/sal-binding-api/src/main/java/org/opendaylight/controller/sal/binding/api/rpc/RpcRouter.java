@@ -21,10 +21,10 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * RpcRouter is responsible for selecting RpcService based on provided routing
  * context identifier {@link RpcRoutingTable#getContextIdentifier()} and path in
  * overal data tree (@link {@link InstanceIdentifier}.
- * 
- * 
+ *
+ *
  * @author Tony Tkacik <ttkacik@cisco.com>
- * 
+ *
  * @param <T>
  *            Type of RpcService for which router provides routing information
  *            and route selection.
@@ -34,23 +34,23 @@ public interface RpcRouter<T extends RpcService> extends //
 
     /**
      * Returns a type of RpcService which is served by this instance of router.
-     * 
+     *
      * @return type of RpcService which is served by this instance of router.
      */
     Class<T> getServiceType();
-    
-    
+
+
     /**
      * Returns a instance of T which is associated with this router instance
      * and routes messages based on routing tables.
-     * 
+     *
      * @return type of RpcService which is served by this instance of router.
      */
     T getInvocationProxy();
 
     /**
      * Returns a routing table for particular route context
-     * 
+     *
      * @param routeContext
      * @return Routing Table for particular route context.
      */
@@ -59,7 +59,7 @@ public interface RpcRouter<T extends RpcService> extends //
     /**
      * Returns an instance of RpcService which is responsible for processing
      * particular path.
-     * 
+     *
      * @param context
      *            Rpc Routing Context
      * @param path
@@ -72,15 +72,15 @@ public interface RpcRouter<T extends RpcService> extends //
     /**
      * Returns a default fallback instance of RpcService which is responsible
      * for handling all unknown imports.
-     * 
+     *
      * @return default instance responsible for processing RPCs.
      */
     T getDefaultService();
 
     Set<Class<? extends BaseIdentity>> getContexts();
-    
+
     RoutedRpcRegistration<T> addRoutedRpcImplementation(T service);
-    
+
     RpcRegistration<T> registerDefaultService(T service);
 
 }

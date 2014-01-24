@@ -14,8 +14,8 @@ public interface RemoteRpcClient extends RpcImplementation,AutoCloseable{
 
 
     void setRoutingTableProvider(RoutingTableProvider provider);
-    
+
     void stop();
-    
+
     void start();
 }

@@ -22,7 +22,7 @@ public interface BindingIndependentMappingService {
     DataObject dataObjectFromDataDom(InstanceIdentifier<? extends DataObject> path, CompositeNode result) throws DeserializationException;
 
     InstanceIdentifier<?> fromDataDom(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry)  throws DeserializationException;
-    
+
     Set<QName> getRpcQNamesFor(Class<? extends RpcService> service);
 
     DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput);

@@ -9,7 +9,7 @@ import org.osgi.framework.ServiceReference;
 
 public class MountProviderServiceProxy extends AbstractBrokerServiceProxy<MountProvisionService> implements MountProvisionService{
 
-    
+
     public MountProviderServiceProxy(ServiceReference<MountProvisionService> ref, MountProvisionService delegate) {
         super(ref, delegate);
     }
@@ -25,7 +25,7 @@ public class MountProviderServiceProxy extends AbstractBrokerServiceProxy<MountP
     public MountProvisionInstance createOrGetMountPoint(InstanceIdentifier path) {
         return getDelegate().createOrGetMountPoint(path);
     }
-    
+
     @Override
     public ListenerRegistration<MountProvisionListener> registerProvisionListener(MountProvisionListener listener) {
         return getDelegate().registerProvisionListener(listener);

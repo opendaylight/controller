@@ -27,8 +27,8 @@ import com.google.inject.Inject;
 public class DataServiceTest extends AbstractTest {
 
     protected DataBrokerService consumerDataService;
-    
-    
+
+
     @Inject
     Broker broker2;
 
@@ -49,51 +49,51 @@ public class DataServiceTest extends AbstractTest {
 
         assertNotNull(consumerDataService);
 
-        
+
         DataModificationTransaction transaction = consumerDataService.beginTransaction();
         assertNotNull(transaction);
-        
+
         NodeRef node1 = createNodeRef("0");
         DataObject  node = consumerDataService.readConfigurationData(node1.getValue());
         assertNull(node);
         Node nodeData1 = createNode("0");
-        
+
         transaction.putConfigurationData(node1.getValue(), nodeData1);
         Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
         assertNotNull(commitResult);
-        
+
         RpcResult<TransactionStatus> result = commitResult.get();
-        
+
         assertNotNull(result);
         assertNotNull(result.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-        
+
         Node readedData = (Node) consumerDataService.readConfigurationData(node1.getValue());
         assertNotNull(readedData);
         assertEquals(nodeData1.getKey(), readedData.getKey());
-        
-        
+
+
         DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
         assertNotNull(transaction);
-        
+
         transaction2.removeConfigurationData(node1.getValue());
-        
+
         Future<RpcResult<TransactionStatus>> commitResult2 = transaction2.commit();
         assertNotNull(commitResult2);
-        
+
         RpcResult<TransactionStatus> result2 = commitResult2.get();
-        
+
         assertNotNull(result2);
         assertNotNull(result2.getResult());
         assertEquals(TransactionStatus.COMMITED, result2.getResult());
-    
+
         DataObject readedData2 = consumerDataService.readConfigurationData(node1.getValue());
         assertNull(readedData2);
-        
-    
+
+
     }
 
-    
+
     private static NodeRef createNodeRef(String string) {
         NodeKey key = new NodeKey(new NodeId(string));
         InstanceIdentifier<Node> path = InstanceIdentifier.builder().node(Nodes.class).node(Node.class, key)
@@ -101,7 +101,7 @@ public class DataServiceTest extends AbstractTest {
 
         return new NodeRef(path);
     }
-    
+
     private static Node createNode(String string) {
         NodeBuilder ret = new NodeBuilder();
         NodeId id = new NodeId(string);

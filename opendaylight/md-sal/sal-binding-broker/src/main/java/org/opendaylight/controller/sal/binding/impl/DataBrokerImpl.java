@@ -102,8 +102,8 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     public void close() throws Exception {
         
     }
-    
-    
+
+
     @Override
     protected boolean isAffectedBy(InstanceIdentifier<? extends DataObject> key,
             Set<InstanceIdentifier<? extends DataObject>> paths) {

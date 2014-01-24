@@ -189,11 +189,11 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
         }
         return null;
     }
-    
+
     protected D mergeOperationalData(P path,D stored, D modified) {
         return modified;
     }
-    
+
     protected D mergeConfigurationData(P path,D stored, D modified) {
         return modified;
     }

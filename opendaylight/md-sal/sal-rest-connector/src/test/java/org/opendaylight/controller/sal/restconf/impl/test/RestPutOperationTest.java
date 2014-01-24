@@ -88,7 +88,7 @@ public class RestPutOperationTest extends JerseyTest {
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         mockCommitConfigurationDataPutMethod(TransactionStatus.COMMITED);
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
-        
+
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
@@ -102,7 +102,7 @@ public class RestPutOperationTest extends JerseyTest {
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         mockCommitConfigurationDataPutMethod(TransactionStatus.COMMITED);
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
-        
+
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
@@ -116,7 +116,7 @@ public class RestPutOperationTest extends JerseyTest {
         Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
         when(brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-        
+
 
         InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/full-versions/test-data2/data2.xml");
         String xml = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
@@ -132,7 +132,7 @@ public class RestPutOperationTest extends JerseyTest {
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont");
         Response response = target(uri).request(Draft02.MediaTypes.DATA + XML).put(entity);
         assertEquals(200, response.getStatus());
-        
+
         uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont");
         response = target(uri).request(Draft02.MediaTypes.DATA + XML).put(entity);
         assertEquals(200, response.getStatus());

@@ -12,11 +12,11 @@ public class Arguments {
     private Arguments() {
         throw new UnsupportedOperationException("Utility class");
     }
-    
+
     /**
      * Checks if value is instance of provided class
-     * 
-     * 
+     *
+     *
      * @param value Value to check
      * @param type Type to check
      * @return Reference which was checked

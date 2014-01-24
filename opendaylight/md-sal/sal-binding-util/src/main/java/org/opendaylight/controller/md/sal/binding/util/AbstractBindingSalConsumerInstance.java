@@ -47,7 +47,7 @@ public abstract class AbstractBindingSalConsumerInstance<D extends DataBrokerSer
     protected final D getDataBroker() {
         return dataBroker;
     }
-    
+
     protected final R getRpcRegistryChecked() {
         Preconditions.checkState(rpcRegistry != null,"Rpc Registry is not available.");
         return rpcRegistry;
@@ -62,7 +62,7 @@ public abstract class AbstractBindingSalConsumerInstance<D extends DataBrokerSer
         Preconditions.checkState(dataBroker != null, "Data Broker is not available");
         return dataBroker;
     }
-    
+
 
     protected AbstractBindingSalConsumerInstance(R rpcRegistry, N notificationBroker, D dataBroker) {
         this.rpcRegistry = rpcRegistry;

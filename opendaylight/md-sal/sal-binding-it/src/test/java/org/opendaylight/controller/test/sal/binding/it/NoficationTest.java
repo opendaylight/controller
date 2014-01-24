@@ -46,9 +46,9 @@ public class NoficationTest extends AbstractTest {
     @Test
     public void notificationTest() throws Exception {
         /**
-         * 
+         *
          * The registration of the Provider 1.
-         * 
+         *
          */
         AbstractTestProvider provider1 = new AbstractTestProvider() {
             @Override
@@ -62,10 +62,10 @@ public class NoficationTest extends AbstractTest {
         assertNotNull(notifyProviderService);
 
         /**
-         * 
+         *
          * The registration of the Consumer 1. It retrieves Notification Service
          * from MD-SAL and registers SalFlowListener as notification listener
-         * 
+         *
          */
         BindingAwareConsumer consumer1 = new BindingAwareConsumer() {
             @Override
@@ -90,7 +90,7 @@ public class NoficationTest extends AbstractTest {
 
         /**
          * Check that one notification was delivered and has correct cookie.
-         * 
+         *
          */
         assertEquals(1, listener1.addedFlows.size());
         assertEquals(0, listener1.addedFlows.get(0).getCookie().intValue());
@@ -100,31 +100,31 @@ public class NoficationTest extends AbstractTest {
          * registered as notification listener.
          */
         BindingAwareProvider provider = new BindingAwareProvider() {
-            
+
             @Override
             public void onSessionInitiated(ProviderContext session) {
                 listener2Reg = session.getSALService(NotificationProviderService.class).registerNotificationListener(
                         listener2);
             }
-            
+
             @Override
             public void onSessionInitialized(ConsumerContext session) {
                 // TODO Auto-generated method stub
-                
+
             }
-            
+
             @Override
             public Collection<? extends RpcService> getImplementations() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Collection<? extends ProviderFunctionality> getFunctionality() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
         };
 
         // registerConsumer method calls onSessionInitialized method above
@@ -146,19 +146,19 @@ public class NoficationTest extends AbstractTest {
         /**
          * Check that 3 notification was delivered to both listeners (first one
          * received 4 in total, second 3 in total).
-         * 
+         *
          */
         assertEquals(4, listener1.addedFlows.size());
         assertEquals(3, listener2.addedFlows.size());
 
         /**
          * The second listener is closed (unregistered)
-         * 
+         *
          */
         listener2Reg.close();
 
         /**
-         * 
+         *
          * The notification 5 is published
          */
         notifyProviderService.publish(flowAdded(10));
@@ -173,7 +173,7 @@ public class NoficationTest extends AbstractTest {
          * Check that first consumer received 5 notifications in total, second
          * consumer received only three. Last notification was never received by
          * second consumer because its listener was unregistered.
-         * 
+         *
          */
         assertEquals(5, listener1.addedFlows.size());
         assertEquals(3, listener2.addedFlows.size());
@@ -183,7 +183,7 @@ public class NoficationTest extends AbstractTest {
     /**
      * Creates instance of the type FlowAdded. Only cookie value is set. It is
      * used only for testing purpose.
-     * 
+     *
      * @param i
      *            cookie value
      * @return instance of the type FlowAdded
@@ -195,7 +195,7 @@ public class NoficationTest extends AbstractTest {
     }
 
     /**
-     * 
+     *
      * Implements
      * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener
      * SalFlowListener} and contains attributes which keep lists of objects of
@@ -218,7 +218,7 @@ public class NoficationTest extends AbstractTest {
         @Override
         public void onFlowRemoved(FlowRemoved notification) {
             removedFlows.add(notification);
-        }; 
+        };
 
         @Override
         public void onFlowUpdated(FlowUpdated notification) {
@@ -228,20 +228,20 @@ public class NoficationTest extends AbstractTest {
         @Override
         public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void onNodeErrorNotification(NodeErrorNotification notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void onNodeExperimenterErrorNotification(
                 NodeExperimenterErrorNotification notification) {
             // TODO Auto-generated method stub
-            
+
         }
 
     }

@@ -20,7 +20,7 @@ public class BindingBrokerTestFactory {
     private ExecutorService executor;
     private ClassPool classPool;
 
-    
+
     public boolean isStartWithParsedSchema() {
         return startWithParsedSchema;
     }
@@ -48,7 +48,7 @@ public class BindingBrokerTestFactory {
         if(classPool == null) {
             return CLASS_POOL;
         }
-        
+
         return classPool;
     }
 

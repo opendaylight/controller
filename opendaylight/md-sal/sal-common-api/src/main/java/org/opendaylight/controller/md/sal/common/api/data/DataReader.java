@@ -12,7 +12,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 /**
  * Reader for reading YANG subtrees based on their path.
- * 
+ *
  * Reader is requested to return object at specified path and all it's subnodes
  * known to the reader or null if node is not found in this reader.
  *
@@ -23,7 +23,7 @@ public interface DataReader<P/* extends Path<P> */,D> {
 
     /**
      * Reads data from Operational data store located at provided path
-     * 
+     *
      * @param path Path to data
      * @return
      */

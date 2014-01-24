@@ -26,7 +26,7 @@ public class ZeroMQServerModuleFactory extends org.opendaylight.controller.confi
         module.setBundleContext(bundleContext);
         return module;
     }
-    
+
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver,
             DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {

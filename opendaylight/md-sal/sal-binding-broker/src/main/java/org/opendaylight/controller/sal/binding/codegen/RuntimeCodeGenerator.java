@@ -18,7 +18,7 @@ public interface RuntimeCodeGenerator {
     /**
      * Returns an instance of provided RpcService type which delegates all calls
      * to the delegate.
-     * 
+     *
      * <p>
      * Returned instance:
      * <ul>
@@ -36,23 +36,23 @@ public interface RuntimeCodeGenerator {
      * all calls are delegated.
      * <li>{@link DelegateProxy#setDelegate(Object)} - sets the delegate for
      * particular instance
-     * 
+     *
      * </ul>
-     * 
+     *
      * @param serviceType
      *            - Subclass of RpcService for which direct proxy is to be
      *            generated.
      * @return Instance of RpcService of provided serviceType which implements
      *         and {@link DelegateProxy}
      * @throws IllegalArgumentException
-     * 
+     *
      */
     <T extends RpcService> T getDirectProxyFor(Class<T> serviceType) throws IllegalArgumentException;
 
     /**
      * Returns an instance of provided RpcService type which routes all calls to
      * other instances selected on particular input field.
-     * 
+     *
      * <p>
      * Returned instance:
      * <ul>
@@ -80,7 +80,7 @@ public interface RuntimeCodeGenerator {
      * is not present on any field invocation will be delegated to default
      * service {@link RpcRouter#getDefaultService()}.
      * </ul>
-     * 
+     *
      * @param serviceType
      *            - Subclass of RpcService for which Router is to be generated.
      * @return Instance of RpcService of provided serviceType which implements

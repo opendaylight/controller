@@ -14,30 +14,30 @@ public interface DataChangeEvent<P,D> extends DataChange<P, D>, Immutable {
     /**
      * Returns a orignal subtree of data, which starts at the path
      * where listener was registered.
-     * 
+     *
      */
     D getOriginalConfigurationSubtree();
 
     /**
      * Returns a new subtree of data, which starts at the path
      * where listener was registered.
-     * 
+     *
      */
     D getOriginalOperationalSubtree();
-    
-    
-    
+
+
+
     /**
      * Returns a updated subtree of data, which starts at the path
      * where listener was registered.
-     * 
+     *
      */
     D getUpdatedConfigurationSubtree();
 
     /**
      * Returns a udpated subtree of data, which starts at the path
      * where listener was registered.
-     * 
+     *
      */
     D getUpdatedOperationalSubtree();
 }

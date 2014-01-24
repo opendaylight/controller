@@ -7,36 +7,36 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 
 public class ToSalPropertyClassUtils {
     public static Bandwidth salAdvertisedBandwidthFrom(NodeConnector nodeConnector) {
-        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);        
+        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
         PortFeatures portFeatures = flowCapNodeConn.getAdvertisedFeatures();
         return new AdvertisedBandwidth(resolveBandwidth(portFeatures));
     }
 
     public static Bandwidth salPeerBandwidthFrom(NodeConnector nodeConnector) {
-        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);        
+        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
         PortFeatures portFeatures = flowCapNodeConn.getPeerFeatures();
         return new PeerBandwidth(resolveBandwidth(portFeatures));
     }
 
     public static Bandwidth salSupportedBandwidthFrom(NodeConnector nodeConnector) {
-        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);        
+        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
         PortFeatures portFeatures = flowCapNodeConn.getSupported();
         return new SupportedBandwidth(resolveBandwidth(portFeatures));
     }
 
     public static MacAddress salMacAddressFrom(NodeConnector nodeConnector) {
-        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);        
+        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
         String hwAddress = flowCapNodeConn.getHardwareAddress().getValue();
-        return new MacAddress(bytesFrom(hwAddress));        
+        return new MacAddress(bytesFrom(hwAddress));
     }
-    
-    
+
+
     public static Name salNameFrom(NodeConnector nodeConnector) {
-        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);        
+        FlowCapableNodeConnector flowCapNodeConn = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
         return new Name(flowCapNodeConn.getName());
     }
-    
-    
+
+
 
     private static byte[] bytesFrom(String hwAddress) {
         String[] mac = hwAddress.split(":");

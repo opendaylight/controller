@@ -6,9 +6,9 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 interface DomForwardedBroker {
 
     public BindingIndependentConnector getConnector();
-    
+
     public void setConnector(BindingIndependentConnector connector);
-    
+
     public void setDomProviderContext(ProviderSession domProviderContext);
 
     public ProviderSession getDomProviderContext();

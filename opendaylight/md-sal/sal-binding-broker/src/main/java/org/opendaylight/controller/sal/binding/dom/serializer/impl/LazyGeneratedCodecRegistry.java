@@ -154,7 +154,7 @@ public class LazyGeneratedCodecRegistry implements //
         }
         return codec;
     }
-    
+
     @Override
     public QName getQNameForAugmentation(Class<?> cls) {
         checkArgument(Augmentation.class.isAssignableFrom(cls));
@@ -741,7 +741,7 @@ public class LazyGeneratedCodecRegistry implements //
     /**
      * This map is used as only facade for {@link BindingCodec} in different
      * classloaders to retrieve codec dynamicly based on provided key.
-     * 
+     *
      * @param <T>
      *            Key type
      */
@@ -945,7 +945,7 @@ public class LazyGeneratedCodecRegistry implements //
             Object rawCodecValue = getDelegate().deserialize((Map<QName, Object>) input);
             return new ValueWithQName<T>(input.getNodeType(), (T) rawCodecValue);
         }
-        
+
         @Override
         public QName getAugmentationQName() {
             return augmentationQName;

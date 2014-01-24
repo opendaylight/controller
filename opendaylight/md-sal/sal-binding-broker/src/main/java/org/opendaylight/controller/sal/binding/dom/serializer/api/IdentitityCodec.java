@@ -8,7 +8,7 @@ public interface IdentitityCodec<T extends BaseIdentity> extends BindingCodec<QN
 
     @Override
     public QName serialize(Class<T> input);
-    
+
     @Override
     public Class<T> deserialize(QName input);
 }

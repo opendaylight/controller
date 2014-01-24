@@ -45,7 +45,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
             "2013-07-09", "context-reference");
     private final ListenerRegistry<RpcRegistrationListener> rpcRegistrationListeners = new ListenerRegistry<>();
     private final ListenerRegistry<RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> routeChangeListeners = new ListenerRegistry<>();
-    
+
 
     private final String identifier;
     private final ConcurrentMap<QName, RpcImplementation> implementations = new ConcurrentHashMap<>();
@@ -398,13 +398,13 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
                 routeListener.getInstance().onRouteChange(change);
             } catch (Exception e) {
                 LOG.error("Unhandled exception during invoking onRouteChange for {}",routeListener.getInstance(),e);
-                
+
             }
         }
-        
+
     }
 
-    
+
 
     private void notifyPathWithdrawal(QName context,QName identifier, InstanceIdentifier path) {
         RpcRoutingContext contextWrapped = RpcRoutingContext.create(context, identifier);
@@ -417,7 +417,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
             }
         }
     }
-    
+
     @Override
     public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
             L listener) {

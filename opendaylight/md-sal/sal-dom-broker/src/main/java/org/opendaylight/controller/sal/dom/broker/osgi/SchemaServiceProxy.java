@@ -40,6 +40,6 @@ public class SchemaServiceProxy extends AbstractBrokerServiceProxy<SchemaService
         return registration;
     }
 
-    
-    
+
+
 }

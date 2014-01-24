@@ -77,7 +77,7 @@ public class RuntimeCodeGeneratorTest {
 
         NotificationInvoker invokerFoo = invokerFactory.invokerFor(fooListener);
 
-        
+
         assertSame(fooListener,invokerFoo.getDelegate());
         assertNotNull(invokerFoo.getSupportedNotifications());
         assertEquals(1, invokerFoo.getSupportedNotifications().size());

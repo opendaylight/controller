@@ -17,13 +17,13 @@ import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * Utility interface which does type capture for BindingAware DataReader. 
- * 
- * @author 
+ * Utility interface which does type capture for BindingAware DataReader.
+ *
+ * @author
  *
  */
 public interface RuntimeDataProvider extends ProviderFunctionality,DataReader<InstanceIdentifier<? extends DataObject>, DataObject> {
-    
-    
+
+
 
 }

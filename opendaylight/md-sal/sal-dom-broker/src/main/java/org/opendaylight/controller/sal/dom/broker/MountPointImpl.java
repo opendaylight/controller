@@ -46,8 +46,8 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     private final DataBrokerImpl dataReader;
     private final NotificationRouter notificationRouter;
     private final DataReader<InstanceIdentifier,CompositeNode> readWrapper;
-    
-    
+
+
     private final InstanceIdentifier mountPath;
 
     private SchemaContext schemaContext;
@@ -113,7 +113,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         return rpcs.getSupportedRpcs();
     }
 
-    
+
     public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
         return rpcs.invokeRpc(rpc, input);
     }
@@ -143,23 +143,23 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     public void sendNotification(CompositeNode notification) {
         publish(notification);
     }
-    
+
     @Override
     public Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> registerCommitHandler(
             InstanceIdentifier path, DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
         return dataReader.registerCommitHandler(path, commitHandler);
     }
-    
+
     @Override
     public void removeRefresher(DataStoreIdentifier store, DataRefresher refresher) {
      // NOOP
     }
-    
+
     @Override
     public void addRefresher(DataStoreIdentifier store, DataRefresher refresher) {
      // NOOP
     }
-    
+
     @Override
     public void addValidator(DataStoreIdentifier store, DataValidator validator) {
      // NOOP
@@ -168,7 +168,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     public void removeValidator(DataStoreIdentifier store, DataValidator validator) {
         // NOOP
     }
-    
+
     public SchemaContext getSchemaContext() {
         return schemaContext;
     }
@@ -178,8 +178,8 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     class ReadWrapper implements DataReader<InstanceIdentifier, CompositeNode> {
-        
-        
+
+
         private InstanceIdentifier shortenPath(InstanceIdentifier path) {
             InstanceIdentifier ret = null;
             if(mountPath.contains(path)) {
@@ -188,7 +188,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
             }
             return ret;
         }
-        
+
         @Override
         public CompositeNode readConfigurationData(InstanceIdentifier path) {
             InstanceIdentifier newPath = shortenPath(path);
@@ -197,7 +197,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
             }
             return MountPointImpl.this.readConfigurationData(newPath);
         }
-        
+
         @Override
         public CompositeNode readOperationalData(InstanceIdentifier path) {
             InstanceIdentifier newPath = shortenPath(path);

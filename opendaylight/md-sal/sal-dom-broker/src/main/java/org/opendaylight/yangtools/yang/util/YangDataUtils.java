@@ -17,8 +17,8 @@ public class YangDataUtils {
         // TODO Auto-generated constructor stub
     }
 
-    
-    
+
+
     public static Map<Map<QName,Object>,CompositeNode> toIndexMap(List<CompositeNode> nodes,List<QName> keys) {
         ConcurrentHashMap<Map<QName,Object>,CompositeNode> ret = new ConcurrentHashMap<>();
         for(CompositeNode node : nodes) {
@@ -37,7 +37,7 @@ public class YangDataUtils {
             checkArgument(keyNode != null,"Node must contains all keys.");
             Object value = keyNode.getValue();
             map.put(key, value);
-            
+
         }
         return map;
     }

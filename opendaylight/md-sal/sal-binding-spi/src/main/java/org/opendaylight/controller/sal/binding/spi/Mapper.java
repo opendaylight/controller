@@ -12,23 +12,23 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 /**
  * Translator between Binding-Independent format and generated Binding Data Objects
- * 
- * 
- * 
- * 
- * @param <T> Result Type 
+ *
+ *
+ *
+ *
+ * @param <T> Result Type
  */
 public interface Mapper<T extends DataObject> {
 
     QName getQName();
-    Class<T> getDataObjectClass();    
+    Class<T> getDataObjectClass();
     T objectFromDom(CompositeNode object);
-    
+
     /**
-     * 
+     *
      * @param obj
      * @return
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     CompositeNode domFromObject(DataObject obj) throws IllegalArgumentException;
 

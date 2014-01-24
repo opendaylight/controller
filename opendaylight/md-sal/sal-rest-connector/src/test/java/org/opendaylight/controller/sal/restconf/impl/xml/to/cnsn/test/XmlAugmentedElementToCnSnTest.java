@@ -25,11 +25,11 @@ public class XmlAugmentedElementToCnSnTest {
         } catch (ResponseException e) {
             exceptionCaught = true;
         }
-        
-        assertFalse(exceptionCaught);        
+
+        assertFalse(exceptionCaught);
     }
-    
-    
+
+
     private void loadAndNormalizeData(String xmlPath, String yangPath, String topLevelElementName, String moduleName) {
         CompositeNode compNode = TestUtils.readInputToCnSn(xmlPath, false,
                 XmlToCompositeNodeProvider.INSTANCE);

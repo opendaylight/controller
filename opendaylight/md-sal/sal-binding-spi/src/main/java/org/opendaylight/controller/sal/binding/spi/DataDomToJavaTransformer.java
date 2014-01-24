@@ -16,7 +16,7 @@ public interface DataDomToJavaTransformer<P extends DataObject> extends Transfor
 
     /**
      * Returns a QName of valid input composite node.
-     * 
+     *
      * @return
      */
     QName getQName();

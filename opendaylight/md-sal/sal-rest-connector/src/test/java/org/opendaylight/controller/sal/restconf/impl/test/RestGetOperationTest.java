@@ -82,10 +82,10 @@ public class RestGetOperationTest extends JerseyTest {
         mockReadOperationalDataMethod();
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-        
+
         uri = createUri("/datastore/", "wrong-module:interfaces/interface/eth0");
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
-        
+
         // Test of request for not existing data. Returning status code 404
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
@@ -100,7 +100,7 @@ public class RestGetOperationTest extends JerseyTest {
         mockReadOperationalDataMethod();
         String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-        
+
         uri = createUri("/operational/", "wrong-module:interfaces/interface/eth0");
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
     }
@@ -113,7 +113,7 @@ public class RestGetOperationTest extends JerseyTest {
         mockReadConfigurationDataMethod();
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-        
+
         uri = createUri("/config/", "wrong-module:interfaces/interface/eth0");
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
     }
@@ -136,13 +136,13 @@ public class RestGetOperationTest extends JerseyTest {
                 "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1");
         Response response = target(uri).request(Draft02.MediaTypes.DATA + XML).get();
         assertEquals(200, response.getStatus());
-        
+
         uri = createUri("/config/",
                 "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont/cont1");
         response = target(uri).request(Draft02.MediaTypes.DATA + XML).get();
         assertEquals(200, response.getStatus());
     }
-    
+
     private int get(String uri, String mediaType) {
         return target(uri).request(mediaType).get().getStatus();
     }

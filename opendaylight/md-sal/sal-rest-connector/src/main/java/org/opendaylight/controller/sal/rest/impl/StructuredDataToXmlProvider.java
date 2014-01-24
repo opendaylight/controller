@@ -56,7 +56,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
         if (data == null) {
             throw new ResponseException(Response.Status.NOT_FOUND, "No data exists.");
         }
-        
+
         XmlMapper xmlMapper = new XmlMapper();
         Document domTree = xmlMapper.write(data, (DataNodeContainer) t.getSchema());
         try {

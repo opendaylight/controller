@@ -68,9 +68,9 @@ public class ServiceProviderController {
         InstanceIdentifier path = InstanceIdentifier.builder(InventoryUtils.INVENTORY_PATH)
                 .nodeWithKey(InventoryUtils.INVENTORY_NODE, InventoryUtils.INVENTORY_ID, "foo").toInstance();
 
-        
+
         InstanceIdentifier mountPointPath = path;
-        
+
         /** We retrive a mountpoint **/
         MountProvisionInstance mountPoint = mountService.getMountPoint(mountPointPath);
         CompositeNode data = mountPoint.readOperationalData(InstanceIdentifier.builder().node(CONFIG_MODULES)

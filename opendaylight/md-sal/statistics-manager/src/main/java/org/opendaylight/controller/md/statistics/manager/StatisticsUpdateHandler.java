@@ -35,12 +35,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Following are two main responsibilities of the class
- * 1) Listen for the create changes in config data store for tree nodes (Flow,Group,Meter,Queue) 
+ * 1) Listen for the create changes in config data store for tree nodes (Flow,Group,Meter,Queue)
  * and send statistics request to the switch to fetch the statistics
- * 
+ *
  * 2)Listen for the remove changes in config data store for tree nodes (Flow,Group,Meter,Queue)
  * and remove the relative statistics data from operational data store.
- * 
+ *
  * @author avishnoi@in.ibm.com
  *
  */
@@ -49,12 +49,12 @@ public class StatisticsUpdateHandler implements DataChangeListener {
     public final static Logger suhLogger = LoggerFactory.getLogger(StatisticsUpdateHandler.class);
 
     private final StatisticsProvider statisticsManager;
-    
+
     public StatisticsUpdateHandler(final StatisticsProvider manager){
 
         this.statisticsManager = manager;
     }
-    
+
     public StatisticsProvider getStatisticsManager(){
         return statisticsManager;
     }
@@ -62,7 +62,7 @@ public class StatisticsUpdateHandler implements DataChangeListener {
     @SuppressWarnings("unchecked")
     @Override
     public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        
+
         Map<InstanceIdentifier<?>, DataObject> additions = change.getCreatedConfigurationData();
         for (InstanceIdentifier<? extends DataObject> dataObjectInstance : additions.keySet()) {
             DataObject dataObject = additions.get(dataObjectInstance);
@@ -101,51 +101,51 @@ public class StatisticsUpdateHandler implements DataChangeListener {
                 }
             }
         }
-            
+
         Set<InstanceIdentifier<? extends DataObject>> removals = change.getRemovedConfigurationData();
         for (InstanceIdentifier<? extends DataObject> dataObjectInstance : removals) {
             DataObject dataObject = change.getOriginalConfigurationData().get(dataObjectInstance);
-            
+
             if(dataObject instanceof Flow){
                 InstanceIdentifier<Flow> flowII = (InstanceIdentifier<Flow>)dataObjectInstance;
-                InstanceIdentifier<?> flowAugmentation = 
+                InstanceIdentifier<?> flowAugmentation =
                         InstanceIdentifier.builder(flowII).augmentation(FlowStatisticsData.class).toInstance();
                 removeAugmentedOperationalData(flowAugmentation);
             }
             if(dataObject instanceof Meter){
                 InstanceIdentifier<Meter> meterII = (InstanceIdentifier<Meter>)dataObjectInstance;
-                
-                InstanceIdentifier<?> nodeMeterConfigStatsAugmentation = 
+
+                InstanceIdentifier<?> nodeMeterConfigStatsAugmentation =
                         InstanceIdentifier.builder(meterII).augmentation(NodeMeterConfigStats.class).toInstance();
                 removeAugmentedOperationalData(nodeMeterConfigStatsAugmentation);
 
-                InstanceIdentifier<?> nodeMeterStatisticsAugmentation = 
+                InstanceIdentifier<?> nodeMeterStatisticsAugmentation =
                         InstanceIdentifier.builder(meterII).augmentation(NodeMeterStatistics.class).toInstance();
                 removeAugmentedOperationalData(nodeMeterStatisticsAugmentation);
             }
-            
+
             if(dataObject instanceof Group){
                 InstanceIdentifier<Group> groupII = (InstanceIdentifier<Group>)dataObjectInstance;
-                
-                InstanceIdentifier<?> nodeGroupDescStatsAugmentation = 
+
+                InstanceIdentifier<?> nodeGroupDescStatsAugmentation =
                         InstanceIdentifier.builder(groupII).augmentation(NodeGroupDescStats.class).toInstance();
                 removeAugmentedOperationalData(nodeGroupDescStatsAugmentation);
 
-                InstanceIdentifier<?> nodeGroupStatisticsAugmentation = 
+                InstanceIdentifier<?> nodeGroupStatisticsAugmentation =
                         InstanceIdentifier.builder(groupII).augmentation(NodeGroupStatistics.class).toInstance();
                 removeAugmentedOperationalData(nodeGroupStatisticsAugmentation);
             }
-            
+
             if(dataObject instanceof Queue){
                 InstanceIdentifier<Queue> queueII = (InstanceIdentifier<Queue>)dataObjectInstance;
-                
-                InstanceIdentifier<?> nodeConnectorQueueStatisticsDataAugmentation = 
+
+                InstanceIdentifier<?> nodeConnectorQueueStatisticsDataAugmentation =
                         InstanceIdentifier.builder(queueII).augmentation(FlowCapableNodeConnectorQueueStatisticsData.class).toInstance();
                 removeAugmentedOperationalData(nodeConnectorQueueStatisticsDataAugmentation);
             }
         }
     }
-    
+
     private void removeAugmentedOperationalData(InstanceIdentifier<? extends DataObject> dataObjectInstance ){
         if(dataObjectInstance != null){
             DataModificationTransaction it = this.statisticsManager.startChange();

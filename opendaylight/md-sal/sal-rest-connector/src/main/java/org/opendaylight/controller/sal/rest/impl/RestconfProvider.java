@@ -22,7 +22,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class RestconfProvider implements BundleActivator, Provider, ServiceTrackerCustomizer<Broker, Broker> {
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
-    
+
     private ListenerRegistration<SchemaServiceListener> listenerRegistration;
     private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;

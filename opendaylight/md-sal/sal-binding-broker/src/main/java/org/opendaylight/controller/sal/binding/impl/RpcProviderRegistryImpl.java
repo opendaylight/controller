@@ -151,7 +151,7 @@ public class RpcProviderRegistryImpl implements //
                 LOG.error("Unhandled exception during invoking listener {}", e);
             }
         }
-        
+
     }
 
     private void notifyListenersRoutedCreated(RpcRouter router) {
@@ -196,7 +196,7 @@ public class RpcProviderRegistryImpl implements //
     public interface RouterInstantiationListener extends EventListener {
         void onRpcRouterCreated(RpcRouter<?> router);
     }
-    
+
     public ListenerRegistration<GlobalRpcRegistrationListener> registerGlobalRpcRegistrationListener(GlobalRpcRegistrationListener listener) {
         return globalRpcListeners.register(listener);
     }
@@ -204,7 +204,7 @@ public class RpcProviderRegistryImpl implements //
     public interface GlobalRpcRegistrationListener extends EventListener {
         void onGlobalRpcRegistered(Class<? extends RpcService> cls);
         void onGlobalRpcUnregistered(Class<? extends RpcService> cls);
-        
+
     }
 
     private class RouteChangeForwarder<T extends RpcService> implements

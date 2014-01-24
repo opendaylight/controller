@@ -14,9 +14,9 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import com.google.common.base.Preconditions;
 
 public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> {
-    
+
     private Node<?> unwrapped;
-    
+
     private String localName;
     private URI namespace;
     private QName name;
@@ -26,22 +26,22 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
     public boolean isComposite() {
         return composite;
     }
-    
+
     public void setComposite(boolean composite) {
         this.composite = composite;
     }
-    
+
     public EmptyNodeWrapper(URI namespace, String localName) {
         this.localName = Preconditions.checkNotNull(localName);
         this.namespace = namespace;
     }
-    
+
     @Override
     public void setQname(QName name) {
         Preconditions.checkState(unwrapped == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
-    
+
     @Override
     public String getLocalName() {
         if (unwrapped != null) {
@@ -49,7 +49,7 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
         }
         return localName;
     }
-    
+
     @Override
     public URI getNamespace() {
         if (unwrapped != null) {

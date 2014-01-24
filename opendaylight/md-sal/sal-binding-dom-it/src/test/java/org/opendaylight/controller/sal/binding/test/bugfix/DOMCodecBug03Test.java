@@ -53,15 +53,15 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier//
             .builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY).toInstance();
-    
-    
+
+
     private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = InstanceIdentifier//
             .builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY) //
             .augmentation(FlowCapableNode.class) //
             .child(SupportedActions.class)
             .toInstance();
-    
+
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
@@ -70,35 +70,35 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .toInstance();
     private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME, SupportedActions.QNAME.getLocalName());
 
-    
+
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier SUPPORTED_ACTIONS_INSTANCE_ID_BI = //
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
                     .node(Nodes.QNAME) //
                     .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
                     .node(SUPPORTED_ACTIONS_QNAME) //
                     .toInstance();
-    
+
     private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
 
-    
-    
+
+
     /**
      * Test for Bug 148
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testAugmentSerialization() throws Exception {
 
-        
+
         baDataService.registerDataChangeListener(NODES_INSTANCE_ID_BA, this);
-        
+
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(NODE_ID));
         nodeBuilder.setKey(NODE_KEY);
         DataModificationTransaction transaction = baDataService.beginTransaction();
-        
-        
+
+
         FlowCapableNodeBuilder fnub = new FlowCapableNodeBuilder();
         fnub.setHardware("Hardware Foo");
         fnub.setManufacturer("Manufacturer Foo");
@@ -109,47 +109,47 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         nodeBuilder.addAugmentation(FlowCapableNode.class, fnu);
         Node original = nodeBuilder.build();
         transaction.putOperationalData(NODE_INSTANCE_ID_BA, original);
-        
+
         RpcResult<TransactionStatus> result = transaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-        
+
         assertNotNull(receivedChangeEvent);
-        
+
         verifyNodes((Nodes) receivedChangeEvent.getUpdatedOperationalSubtree(),original);
         assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
         Nodes nodes = checkForNodes();
         verifyNodes(nodes,original);
-        
+
         testAddingNodeConnector();
         testNodeRemove();
 
     }
-    
+
     @Test
     public void testAugmentNestedSerialization() throws Exception {
         DataModificationTransaction transaction = baDataService.beginTransaction();
-        
+
         SupportedActionsBuilder actions = new SupportedActionsBuilder();
         ActionTypeBuilder action = new ActionTypeBuilder();
         action.setAction("foo-action");
         action.setSupportState(SupportType.Native);
         List<ActionType> actionTypes = Collections.singletonList(action.build());
         actions.setActionType(actionTypes );
-        
+
         transaction.putOperationalData(SUPPORTED_ACTIONS_INSTANCE_ID_BA, actions.build());
         RpcResult<TransactionStatus> putResult = transaction.commit().get();
         assertNotNull(putResult);
         assertEquals(TransactionStatus.COMMITED, putResult.getResult());
         SupportedActions readedTable = (SupportedActions) baDataService.readOperationalData(SUPPORTED_ACTIONS_INSTANCE_ID_BA);
         assertNotNull(readedTable);
-        
+
         CompositeNode biSupportedActions = biDataService.readOperationalData(SUPPORTED_ACTIONS_INSTANCE_ID_BI);
         assertNotNull(biSupportedActions);
-        
+
     }
 
     private void testAddingNodeConnector() throws Exception {
-        
+
         NodeConnectorId ncId = new NodeConnectorId("openflow:1:bar");
         NodeConnectorKey nodeKey = new NodeConnectorKey(ncId );
         InstanceIdentifier<NodeConnector> ncInstanceId = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA).child(NodeConnector.class, nodeKey).toInstance();
@@ -174,7 +174,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         transaction.removeOperationalData(NODE_INSTANCE_ID_BA);
         RpcResult<TransactionStatus> result = transaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-        
+
         Node node = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
         assertNull(node);
     }
@@ -186,13 +186,13 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         Node readedNode = nodes.getNode().get(0);
         assertEquals(original.getId(), readedNode.getId());
         assertEquals(original.getKey(), readedNode.getKey());
-        
+
         FlowCapableNode fnu = original.getAugmentation(FlowCapableNode.class);
         FlowCapableNode readedAugment = readedNode.getAugmentation(FlowCapableNode.class);
         assertNotNull(fnu);
         assertEquals(fnu.getDescription(), readedAugment.getDescription());
         assertEquals(fnu.getSerialNumber(), readedAugment.getSerialNumber());
-        
+
     }
 
     private void assertBindingIndependentVersion(
@@ -204,7 +204,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
     private Nodes checkForNodes() {
         return (Nodes) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
     }
-    
+
     @Override
     public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         receivedChangeEvent = change;

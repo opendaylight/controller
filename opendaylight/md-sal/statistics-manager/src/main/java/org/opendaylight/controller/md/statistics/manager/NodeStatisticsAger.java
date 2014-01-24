@@ -51,25 +51,25 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdenti
  *
  */
 public class NodeStatisticsAger {
-    
+
     private final int NUMBER_OF_WAIT_CYCLES =2;
 
     private final StatisticsProvider statisticsProvider;
 
     private final NodeKey targetNodeKey;
-    
+
     private final Map<GroupDescStats,Date> groupDescStatsUpdate
                 = new ConcurrentHashMap<GroupDescStats,Date>();
-    
+
     private final Map<MeterConfigStats,Date> meterConfigStatsUpdate
                 = new ConcurrentHashMap<MeterConfigStats,Date>();
-    
+
     private final Map<FlowEntry,Date> flowStatsUpdate
                 = new ConcurrentHashMap<FlowEntry,Date>();
-    
-    private final Map<QueueEntry,Date> queuesStatsUpdate 
+
+    private final Map<QueueEntry,Date> queuesStatsUpdate
                 = new ConcurrentHashMap<QueueEntry,Date>();
-    
+
     public NodeStatisticsAger(StatisticsProvider statisticsProvider, NodeKey nodeKey){
         this.targetNodeKey = nodeKey;
         this.statisticsProvider = statisticsProvider;
@@ -78,7 +78,7 @@ public class NodeStatisticsAger {
     public class FlowEntry{
         private final Short tableId;
         private final Flow flow;
-        
+
         public FlowEntry(Short tableId, Flow flow){
             this.tableId = tableId;
             this.flow = flow;
@@ -129,9 +129,9 @@ public class NodeStatisticsAger {
         private NodeStatisticsAger getOuterType() {
             return NodeStatisticsAger.this;
         }
-        
+
     }
-    
+
     public class QueueEntry{
         private final NodeConnectorId nodeConnectorId;
         private final QueueId queueId;
@@ -189,7 +189,7 @@ public class NodeStatisticsAger {
             return NodeStatisticsAger.this;
         }
     }
-    
+
     public NodeKey getTargetNodeKey() {
         return targetNodeKey;
     }
@@ -215,28 +215,28 @@ public class NodeStatisticsAger {
         for(GroupDescStats groupDescStats : list)
             this.groupDescStatsUpdate.put(groupDescStats, expiryTime);
     }
-    
+
     public void updateMeterConfigStats(List<MeterConfigStats> list){
         Date expiryTime = getExpiryTime();
         for(MeterConfigStats meterConfigStats: list)
             this.meterConfigStatsUpdate.put(meterConfigStats, expiryTime);
     }
-    
+
     public void  updateFlowStats(FlowEntry flowEntry){
         this.flowStatsUpdate.put(flowEntry, getExpiryTime());
     }
     public void updateQueueStats(QueueEntry queueEntry){
         this.queuesStatsUpdate.put(queueEntry, getExpiryTime());
     }
-    
+
     private Date getExpiryTime(){
         Date expires = new Date();
         expires.setTime(expires.getTime()+StatisticsProvider.STATS_THREAD_EXECUTION_TIME*NUMBER_OF_WAIT_CYCLES);
         return expires;
     }
-    
+
     public void cleanStaleStatistics(){
-        //Clean stale statistics related to group 
+        //Clean stale statistics related to group
         for (Iterator<GroupDescStats> it = this.groupDescStatsUpdate.keySet().iterator();it.hasNext();){
             GroupDescStats groupDescStats = it.next();
             Date now = new Date();
@@ -246,8 +246,8 @@ public class NodeStatisticsAger {
                 it.remove();
             }
         }
-        
-        //Clean stale statistics related to meter 
+
+        //Clean stale statistics related to meter
         for (Iterator<MeterConfigStats> it = this.meterConfigStatsUpdate.keySet().iterator();it.hasNext();){
             MeterConfigStats meterConfigStats = it.next();
             Date now = new Date();
@@ -255,10 +255,10 @@ public class NodeStatisticsAger {
             if(now.after(expiryTime)){
                 cleanMeterStatsFromDataStore(meterConfigStats);
                 it.remove();
-            }            
+            }
         }
-        
-        //Clean stale statistics related to flow 
+
+        //Clean stale statistics related to flow
         for (Iterator<FlowEntry> it = this.flowStatsUpdate.keySet().iterator();it.hasNext();){
             FlowEntry flowEntry = it.next();
             Date now = new Date();
@@ -266,7 +266,7 @@ public class NodeStatisticsAger {
             if(now.after(expiryTime)){
                 cleanFlowStatsFromDataStore(flowEntry);
                 it.remove();
-            }            
+            }
         }
 
         //Clean stale statistics related to queue
@@ -277,13 +277,13 @@ public class NodeStatisticsAger {
             if(now.after(expiryTime)){
                 cleanQueueStatsFromDataStore(queueEntry);
                 it.remove();
-            }            
+            }
         }
-        
+
     }
 
     private void cleanQueueStatsFromDataStore(QueueEntry queueEntry) {
-        InstanceIdentifier<?> queueRef 
+        InstanceIdentifier<?> queueRef
                         = InstanceIdentifier.builder(Nodes.class)
                                             .child(Node.class, this.targetNodeKey)
                                             .child(NodeConnector.class, new NodeConnectorKey(queueEntry.getNodeConnectorId()))
@@ -294,48 +294,48 @@ public class NodeStatisticsAger {
     }
 
     private void cleanFlowStatsFromDataStore(FlowEntry flowEntry) {
-        InstanceIdentifier<?> flowRef 
+        InstanceIdentifier<?> flowRef
                         = InstanceIdentifier.builder(Nodes.class).child(Node.class, this.targetNodeKey)
                                             .augmentation(FlowCapableNode.class)
                                             .child(Table.class, new TableKey(flowEntry.getTableId()))
                                             .child(Flow.class,flowEntry.getFlow().getKey())
                                             .augmentation(FlowStatisticsData.class).toInstance();
-        
+
         cleanStaleStatisticsFromDataStore(flowRef);
-        
+
     }
 
     private void cleanMeterStatsFromDataStore(MeterConfigStats meterConfigStats) {
-        InstanceIdentifierBuilder<Meter> meterRef 
+        InstanceIdentifierBuilder<Meter> meterRef
                         = InstanceIdentifier.builder(Nodes.class).child(Node.class,this.targetNodeKey)
                                             .augmentation(FlowCapableNode.class)
                                             .child(Meter.class,new MeterKey(meterConfigStats.getMeterId()));
-        
+
         InstanceIdentifier<?> nodeMeterConfigStatsAugmentation = meterRef.augmentation(NodeMeterConfigStats.class).toInstance();
-                                            
+
         cleanStaleStatisticsFromDataStore(nodeMeterConfigStatsAugmentation);
-        
+
         InstanceIdentifier<?> nodeMeterStatisticsAugmentation = meterRef.augmentation(NodeMeterStatistics.class).toInstance();
-        
+
         cleanStaleStatisticsFromDataStore(nodeMeterStatisticsAugmentation);
-        
+
     }
 
     private void cleanGroupStatsFromDataStore(GroupDescStats groupDescStats) {
-        InstanceIdentifierBuilder<Group> groupRef 
+        InstanceIdentifierBuilder<Group> groupRef
                         = InstanceIdentifier.builder(Nodes.class).child(Node.class,this.targetNodeKey)
                                             .augmentation(FlowCapableNode.class)
                                             .child(Group.class,new GroupKey(groupDescStats.getGroupId()));
-        
+
         InstanceIdentifier<?> nodeGroupDescStatsAugmentation = groupRef.augmentation(NodeGroupDescStats.class).toInstance();
-        
+
         cleanStaleStatisticsFromDataStore(nodeGroupDescStatsAugmentation);
 
         InstanceIdentifier<?> nodeGroupStatisticsAugmentation = groupRef.augmentation(NodeGroupStatistics.class).toInstance();
-        
+
         cleanStaleStatisticsFromDataStore(nodeGroupStatisticsAugmentation);
     }
-    
+
     private void cleanStaleStatisticsFromDataStore(InstanceIdentifier<? extends DataObject> ii){
         if(ii != null){
             DataModificationTransaction it = this.statisticsProvider.startChange();

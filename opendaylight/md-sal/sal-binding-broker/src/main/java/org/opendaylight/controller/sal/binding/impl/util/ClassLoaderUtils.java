@@ -66,7 +66,7 @@ public final class ClassLoaderUtils {
             String potentialOuter;
             int length = components.length;
             if (length > 2 && (potentialOuter = components[length - 2]) != null && Character.isUpperCase(potentialOuter.charAt(0))) {
-                
+
                     String outerName = Joiner.on(".").join(Arrays.asList(components).subList(0, length - 1));
                     String innerName = outerName + "$" + components[length-1];
                     return Thread.currentThread().getContextClassLoader().loadClass(innerName);

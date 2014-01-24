@@ -15,20 +15,20 @@ import org.opendaylight.yangtools.yang.common.QName;
 public class RpcRoutingContext implements Immutable, Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -9079324728075883325L;
-    
+
     private final QName context;
     private final QName rpc;
-    
-    
+
+
     private RpcRoutingContext(QName context, QName rpc) {
         super();
         this.context = context;
         this.rpc = rpc;
     }
-    
+
     public static final RpcRoutingContext create(QName context, QName rpc) {
         return new RpcRoutingContext(context, rpc);
     }

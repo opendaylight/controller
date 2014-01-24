@@ -44,7 +44,7 @@ public class SchemaServiceImpl implements //
     private static final Logger logger = LoggerFactory.getLogger(SchemaServiceImpl.class);
 
     private ListenerRegistry<SchemaServiceListener> listeners;
-    
+
     private BundleContext context;
     private BundleScanner scanner = new BundleScanner();
 

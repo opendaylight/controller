@@ -120,8 +120,8 @@ public class CrossBrokerMountPointTest {
         assertNotNull(bindingMountPoint);
 
         final BigInteger packetCount = BigInteger.valueOf(500L);
-        
-        
+
+
         DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> simpleReader = new DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>() {
 
             @Override
@@ -129,7 +129,7 @@ public class CrossBrokerMountPointTest {
                 return null;
             }
 
-            
+
             @Override
             public CompositeNode readOperationalData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
                 if (arg0.equals(GROUP_STATISTICS_ID_BI)) {
@@ -146,7 +146,7 @@ public class CrossBrokerMountPointTest {
 
         };
         domMountPoint.registerOperationalReader(NODE_INSTANCE_ID_BI, simpleReader);
-        
+
         GroupStatistics data = (GroupStatistics) bindingMountPoint.readOperationalData(GROUP_STATISTICS_ID_BA);
         assertNotNull(data);
         assertEquals(packetCount,data.getPacketCount().getValue());

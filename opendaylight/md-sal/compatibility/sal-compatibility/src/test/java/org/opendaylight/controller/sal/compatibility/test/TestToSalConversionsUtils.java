@@ -132,7 +132,7 @@ public class TestToSalConversionsUtils {
     private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) {
         switch (mt) {
         case other:
-            /*assertNotNull("DL_DST isn't equal.", "3C:A9:F4:00:E0:C8", 
+            /*assertNotNull("DL_DST isn't equal.", "3C:A9:F4:00:E0:C8",
                     new String((byte[]) match.getField(MatchType.DL_DST).getValue()));
             assertEquals("DL_SRC isn't equal.", "24:77:03:7C:C5:F1",
                     new String((byte[]) match.getField(MatchType.DL_SRC).getValue()));
@@ -378,14 +378,14 @@ public class TestToSalConversionsUtils {
         odActions.add(new ActionBuilder().setAction(setVlanPcpActionBuilder.build()).build());
         odActions.add(new ActionBuilder().setAction(swPathActionBuilder.build()).build());
 
-        
+
         ApplyActionsCase innerInst = new ApplyActionsCaseBuilder().setApplyActions(new ApplyActionsBuilder().setAction(odActions).build()).build();
         Instruction applyActions = new InstructionBuilder().setInstruction(innerInst).build();
         List<Instruction> instructions = Collections.singletonList(applyActions );
         InstructionsBuilder instBuilder = new InstructionsBuilder();
-        
+
         instBuilder.setInstruction(instructions);
-        
+
         return instBuilder.build();
     }
 
@@ -439,7 +439,7 @@ public class TestToSalConversionsUtils {
 
     private void prepareActionSetNwDst(List<Action> odActions) {
         // test case for IPv4
-        
+
         SetNwDstActionBuilder setNwDstActionBuilderIpv4 = new SetNwDstActionBuilder();
         setNwDstActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.101"));
         odActions.add(new ActionBuilder().setAction(new SetNwDstActionCaseBuilder().setSetNwDstAction(setNwDstActionBuilderIpv4.build()).build()).build());

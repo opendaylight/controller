@@ -15,7 +15,7 @@ public class BindingIndependentMountPointForwarder {
     private MountProvisionService domMountService;
     private MountProviderService baMountService;
     private BindingIndependentMappingService mappingService;
-    
+
     private final DomMountPointForwardingManager domForwardingManager = new DomMountPointForwardingManager();
     private final BindingMountPointForwardingManager bindingForwardingManager = new BindingMountPointForwardingManager();
 
@@ -57,11 +57,11 @@ public class BindingIndependentMountPointForwarder {
     private BindingIndependentConnector createForwarder(InstanceIdentifier<?> path, MountProviderInstance baMountPoint,
             MountProvisionInstance domMountPoint) {
         BindingIndependentConnector connector = new BindingIndependentConnector();
-        
+
         connector.setBindingDataService(baMountPoint);
         connector.setBindingRpcRegistry(baMountPoint);
         //connector.setBindingNotificationBroker(baMountPoint);
-        
+
         connector.setDomDataService(domMountPoint);
         connector.setDomRpcRegistry(domMountPoint);
         //connector.setDomNotificationBroker(domMountPoint);
@@ -78,7 +78,7 @@ public class BindingIndependentMountPointForwarder {
             }
             tryToDeployConnector(baPath,domPath);
         } catch (DeserializationException e) {
-            
+
         }
     }
 

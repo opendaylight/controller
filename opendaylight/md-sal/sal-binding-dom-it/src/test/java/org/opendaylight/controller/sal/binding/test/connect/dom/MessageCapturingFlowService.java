@@ -107,16 +107,16 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
         registration.unregisterPath(context, path);
         return this;
     }
-    
+
     public static MessageCapturingFlowService create() {
         return new MessageCapturingFlowService();
     }
-    
+
     public static MessageCapturingFlowService create(RpcProviderRegistry registry) {
         MessageCapturingFlowService ret = new MessageCapturingFlowService();
         ret.registerTo(registry);
         return ret;
     }
-    
-    
+
+
 }

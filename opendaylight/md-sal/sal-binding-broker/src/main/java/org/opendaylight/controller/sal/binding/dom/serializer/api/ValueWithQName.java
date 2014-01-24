@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 import org.opendaylight.yangtools.yang.common.QName;
 
 public class ValueWithQName<V> implements Entry<QName, V>{
-    
+
     final QName qname;
     final V value;
-    
+
     public ValueWithQName(QName qname, V value) {
         super();
         this.qname = qname;
@@ -22,12 +22,12 @@ public class ValueWithQName<V> implements Entry<QName, V>{
     public V getValue() {
         return value;
     }
-    
+
     @Override
     public QName getKey() {
         return qname;
     }
-    
+
     @Override
     public V setValue(V value) {
         throw new UnsupportedOperationException();

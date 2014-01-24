@@ -5,7 +5,7 @@ import org.opendaylight.yangtools.yang.binding.Identifier;
 public class ReferencableObjectKey implements Identifier<ReferencableObject> {
 
     final Integer value;
-    
+
     public ReferencableObjectKey(Integer _value) {
         this.value = _value;
     }
@@ -39,6 +39,6 @@ public class ReferencableObjectKey implements Identifier<ReferencableObject> {
     public String toString() {
         return "ReferencableObjectKey [value=" + value + "]";
     }
-    
-    
+
+
 }

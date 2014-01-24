@@ -69,12 +69,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        
+
         getDomRegistryDependency();
         NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
         String addressValue = getAddress();
-        
-        
+
+
         int attemptMsTimeout = 60*1000;
         int connectionAttempts = 5;
         /*
@@ -87,20 +87,20 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         */
         ReconnectStrategy strategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, attemptMsTimeout, 1000, 1.0, null,
                 Long.valueOf(connectionAttempts), null);
-        
+
         device.setReconnectStrategy(strategy);
-        
+
         InetAddress addr = InetAddresses.forString(addressValue);
         InetSocketAddress socketAddress = new InetSocketAddress(addr , getPort().intValue());
 
-        
+
         device.setProcessingExecutor(getGlobalProcessingExecutor());
-        
+
         device.setSocketAddress(socketAddress);
         device.setEventExecutor(getEventExecutorDependency());
         device.setDispatcher(createDispatcher());
         device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
-        
+
         getDomRegistryDependency().registerProvider(device, bundleContext);
         device.start();
         return device;
@@ -108,9 +108,9 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     private ExecutorService getGlobalProcessingExecutor() {
         if(GLOBAL_PROCESSING_EXECUTOR == null) {
-            
+
             GLOBAL_PROCESSING_EXECUTOR = Executors.newCachedThreadPool();
-            
+
         }
         return GLOBAL_PROCESSING_EXECUTOR;
     }

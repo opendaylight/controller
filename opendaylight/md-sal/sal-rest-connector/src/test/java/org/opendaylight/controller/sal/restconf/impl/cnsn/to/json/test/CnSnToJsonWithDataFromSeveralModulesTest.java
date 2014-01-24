@@ -50,12 +50,12 @@ public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataS
         regex.append(".*\"data\"");
         regex.append(".*:");
         regex.append(".*\\{");
-        
+
         regex.append(".*\"contB_m1\"");
         regex.append(".*:");
         regex.append(".*\\{");
         regex.append(".*\\}");
-        
+
         regex.append(".*\"cont_m1\"");
         regex.append(".*:");
         regex.append(".*\\{");
@@ -65,12 +65,12 @@ public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataS
         regex.append(".*:");
         regex.append(".*\\{");
         regex.append(".*\\}");
-        
+
         regex.append(".*\"cont_m2\"");
         regex.append(".*:");
         regex.append(".*\\{");
         regex.append(".*\\}");
-        
+
         regex.append(".*\\}");
 
         regex.append(".*");
@@ -91,7 +91,7 @@ public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataS
         SimpleNodeWrapper lf1_m1 = new SimpleNodeWrapper(uriModule1, "lf1_m1", "lf1 m1 value");
         cont_m1.addValue(lf1_m1);
         CompositeNodeWrapper contB_m1 = new CompositeNodeWrapper(uriModule1, "contB_m1");
-        
+
         data.addValue(contB_m1);
         data.addValue(cont_m1);
 

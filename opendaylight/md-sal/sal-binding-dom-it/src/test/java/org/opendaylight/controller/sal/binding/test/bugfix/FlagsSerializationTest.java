@@ -58,7 +58,7 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
     private static final FlowKey FLOW_KEY = new FlowKey(new FlowId(FLOW_ID));
     private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
-    
+
     private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
             NODE_ID);
 
@@ -76,7 +76,7 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
 
 //    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier FLOW_INSTANCE_ID_BI = //
 //    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-//            
+//
 //            .node(Flows.QNAME) //
 //            .nodeWithKey(Flow.QNAME, FLOW_KEY_BI) //
 //            .toInstance();
@@ -94,34 +94,34 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
         FlowModFlags checkOverlapFlags = new FlowModFlags(true,false,false,false,false);
         ImmutableSet<String> domCheckOverlapFlags = ImmutableSet.<String>of("CHECK_OVERLAP");
         testFlags(checkOverlapFlags,domCheckOverlapFlags);
-        
-        
-        
+
+
+
         FlowModFlags allFalseFlags = new FlowModFlags(false,false,false,false,false);
         ImmutableSet<String> domAllFalseFlags = ImmutableSet.<String>of();
         testFlags(allFalseFlags,domAllFalseFlags);
-        
+
         FlowModFlags allTrueFlags = new FlowModFlags(true,true,true,true,true);
         ImmutableSet<String> domAllTrueFlags = ImmutableSet.<String>of("CHECK_OVERLAP","NO_BYT_COUNTS", "NO_PKT_COUNTS", "RESET_COUNTS", "SEND_FLOW_REM");
         testFlags(allTrueFlags,domAllTrueFlags);
-        
+
         FlowModFlags nullFlags = null;
         ImmutableSet<String> domNullFlags = null;
         testFlags(null,null);
-        
-        
+
+
 
     }
 
     private void testFlags(FlowModFlags flagsToTest, ImmutableSet<String> domFlags) throws Exception {
         Flow flow = createFlow(flagsToTest);
         assertNotNull(flow);
-        
+
         CompositeNode domFlow = biDataService.readConfigurationData(mappingService.toDataDom(FLOW_INSTANCE_ID_BA));
-        
+
         assertNotNull(domFlow);
         org.opendaylight.yangtools.yang.data.api.Node<?> readedFlags = domFlow.getFirstSimpleByName(FLOW_FLAGS_QNAME);
-        
+
         if(domFlags != null) {
             assertNotNull(readedFlags);
             assertEquals(domFlags,readedFlags.getValue());
@@ -129,12 +129,12 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
             assertNull(readedFlags);
         }
         assertEquals(flagsToTest, flow.getFlags());
-        
+
         DataModificationTransaction transaction = baDataService.beginTransaction();
         transaction.removeConfigurationData(FLOW_INSTANCE_ID_BA);
         RpcResult<TransactionStatus> result = transaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-           
+
     }
 
     private Flow createFlow(FlowModFlags flagsToTest) throws Exception {
@@ -151,12 +151,12 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
 
         flow.setKey(FLOW_KEY);
         flow.setMatch(match.build());
-        
+
         flow.setFlags(flagsToTest);
-        
+
         InstructionsBuilder instructions = new InstructionsBuilder();
         InstructionBuilder instruction = new InstructionBuilder();
-        
+
         instruction.setOrder(10);
         ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
         List<Action> actionList = new ArrayList<>();

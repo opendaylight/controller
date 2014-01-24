@@ -66,10 +66,10 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
         Map<Class<? extends BaseIdentity>, RpcRoutingTableImpl<? extends BaseIdentity, T>> mutableRoutingTables = new HashMap<>();
         for (Class<? extends BaseIdentity> ctx : contexts) {
             RpcRoutingTableImpl<? extends BaseIdentity, T> table = new RpcRoutingTableImpl<>(name,ctx,type);
-            
+
             @SuppressWarnings("rawtypes")
             Map invokerView = table.getRoutes();
-            
+
             setRoutingTable((RpcService) invocationProxy, ctx, invokerView);
             mutableRoutingTables.put(ctx, table);
             table.registerRouteChangeListener(this);

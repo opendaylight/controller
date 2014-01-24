@@ -59,7 +59,7 @@ class NetconfDeviceListener extends NetconfClientSessionListener {
 
     /**
      * Method intended to customize notification processing.
-     * 
+     *
      * @param session
      *            {@see
      *            NetconfClientSessionListener#onMessage(NetconfClientSession,

@@ -189,7 +189,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like <lf11 xmlns="namespace1"
      * xmlns:x="namespace">identity</lf11>
      */
@@ -201,7 +201,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like <cont1 xmlns="namespace1"> <lf11
      * xmlns:x="namespace">identity</lf11> </cont1>
      */
@@ -212,7 +212,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like <cont1 xmlns="namespace1" xmlns:x="namespace">
      * <lf11>x:identity</lf11> </cont1>
      */
@@ -224,7 +224,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like (without namespace in xml) <cont1> <lf11>x:identity</lf11>
      * </cont1>
      */
@@ -235,7 +235,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like (without namespace in xml) <cont1> <lf11>identity</lf11>
      * </cont1>
      */

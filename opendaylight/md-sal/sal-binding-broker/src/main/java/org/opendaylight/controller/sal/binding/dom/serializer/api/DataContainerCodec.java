@@ -11,7 +11,7 @@ public interface DataContainerCodec<T extends DataContainer> extends  DomCodec<T
 
     @Override
     public ValueWithQName<T> deserialize(Node<?> input);
-    
+
     @Override
     public CompositeNode serialize(ValueWithQName<T> input);
 }

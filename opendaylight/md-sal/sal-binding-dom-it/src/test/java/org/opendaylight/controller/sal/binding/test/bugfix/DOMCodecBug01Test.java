@@ -175,7 +175,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         flow.setNode(NODE_REF);
         InstructionsBuilder instructions = new InstructionsBuilder();
         InstructionBuilder instruction = new InstructionBuilder();
-        
+
         instruction.setOrder(10);
         ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
         List<Action> actionList = new ArrayList<>();
@@ -197,7 +197,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         assertNotNull(ret);
         assertEquals(TransactionStatus.COMMITED, ret.getResult());
     }
-    
+
     private void createFlow2() throws Exception {
         DataModificationTransaction modification = baDataService.beginTransaction();
         long id = 123;
@@ -208,7 +208,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         MatchBuilder match = new MatchBuilder();
         match.setLayer4Match(new TcpMatchBuilder().build());
         flow.setMatch(match.build());
-        
+
         path1 = InstanceIdentifier.builder(Flows.class).child(Flow.class, key).toInstance();
        // DataObject cls = (DataObject) modification.readConfigurationData(path1);
         modification.putConfigurationData(path1, flow.build());

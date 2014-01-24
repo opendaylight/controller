@@ -7,7 +7,7 @@ public interface InstanceIdentifierCodec extends BindingCodec<org.opendaylight.y
 
     @Override
     public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier serialize(InstanceIdentifier<?> input);
-    
+
     @Override
     public InstanceIdentifier<?> deserialize(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier input);
 }

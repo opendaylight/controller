@@ -20,7 +20,7 @@ public class MountPointManagerImpl implements MountProviderService {
 
     private final ConcurrentMap<InstanceIdentifier<?>, BindingMountPointImpl> mountPoints;
     private final ListenerRegistry<MountProvisionListener> listeners = ListenerRegistry.create();
-    
+
     private ListeningExecutorService notificationExecutor;
     private ListeningExecutorService dataCommitExecutor;
 
@@ -111,7 +111,7 @@ public class MountPointManagerImpl implements MountProviderService {
             super(rpcRegistry, notificationBroker, dataBroker);
             this.identifier = identifier;
         }
-        
+
         @Override
         public InstanceIdentifier<?> getIdentifier() {
             return this.identifier;

@@ -25,15 +25,15 @@ public class ListenerRegistry<T extends EventListener> {
         return unmodifiableView;
     }
 
-    
+
     public ListenerRegistration<T> register(T listener) {
         checkNotNull(listener, "Listener should not be null.");
         ListenerRegistrationImpl<T> ret = new ListenerRegistrationImpl<T>(listener);
         listeners.add(ret);
         return ret;
     }
-    
-    
+
+
     @SuppressWarnings("rawtypes")
     private void remove(ListenerRegistrationImpl registration) {
         listeners.remove(registration);

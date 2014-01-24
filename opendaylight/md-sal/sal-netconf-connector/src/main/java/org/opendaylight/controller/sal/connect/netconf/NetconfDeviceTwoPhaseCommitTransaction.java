@@ -63,15 +63,15 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
         CompositeNodeBuilder<ImmutableCompositeNode> builder = configurationRpcBuilder();
         builder.setQName(NETCONF_EDIT_CONFIG_QNAME);
         builder.add(editStructure);
-        
+
         RpcResult<CompositeNode> rpcResult = device.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, builder.toInstance());
         Preconditions.checkState(rpcResult.isSuccessful(),"Rpc Result was unsuccessful");
-        
+
     }
 
     private CompositeNodeBuilder<ImmutableCompositeNode> configurationRpcBuilder() {
         CompositeNodeBuilder<ImmutableCompositeNode> ret = ImmutableCompositeNode.builder();
-        
+
         Node<?> targetNode;
         if(candidateSupported) {
             targetNode = ImmutableCompositeNode.create(NETCONF_CANDIDATE_QNAME, ImmutableList.<Node<?>>of());
@@ -99,7 +99,7 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
             for (Entry<QName, Object> entry : predicates.entrySet()) {
                 builder.addLeaf(entry.getKey(), entry.getValue());
             }
-            
+
             if (isLast) {
                 if (action.isPresent()) {
                     builder.setAttribute(NETCONF_ACTION_QNAME, action.get());
@@ -111,7 +111,7 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
                             builder.add(child);
                         }
                     }
-                    
+
                 }
             } else {
                 builder.add(previous);

@@ -40,7 +40,7 @@ public class BindingDomConnectorDeployer {
         connector.setMappingService(source.getMappingService());
         return connector;
     }
-    
+
     public static void startDataForwarding(BindingIndependentConnector connector, DataProviderService baService,
             ProviderSession domContext) {
         startDataForwarding(connector, baService,
@@ -52,7 +52,7 @@ public class BindingDomConnectorDeployer {
         startRpcForwarding(connector, rpcProviderRegistry, domProviderContext.getService(RpcProvisionRegistry.class));
 
     }
-    
+
     public static void startNotificationForwarding(BindingIndependentConnector connector, NotificationProviderService provider,ProviderSession domProviderContext) {
         startNotificationForwarding(connector, provider, domProviderContext.getService(NotificationPublishService.class));
     }
@@ -78,12 +78,12 @@ public class BindingDomConnectorDeployer {
         connector.setDomDataService(domService);
         connector.startDataForwarding();
     }
-    
+
     public static void startNotificationForwarding(BindingIndependentConnector connector, NotificationProviderService baService, NotificationPublishService domService) {
         if(connector.isNotificationForwarding()) {
             return;
         }
-        
+
         // FIXME
     }
 

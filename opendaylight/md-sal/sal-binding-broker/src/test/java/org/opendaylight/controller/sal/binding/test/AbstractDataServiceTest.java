@@ -52,7 +52,7 @@ public abstract class AbstractDataServiceTest {
         factory.setStartWithParsedSchema(getStartWithSchema());
         testContext = factory.getTestContext();
         testContext.start();
-        
+
         baDataService = testContext.getBindingDataBroker();
         biDataService = testContext.getDomDataBroker();
         dataStore = testContext.getDomDataStore();

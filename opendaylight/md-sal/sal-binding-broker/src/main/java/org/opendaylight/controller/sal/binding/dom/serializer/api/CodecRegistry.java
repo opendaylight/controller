@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 public interface CodecRegistry {
 
     InstanceIdentifierCodec getInstanceIdentifierCodec();
-    
+
     IdentitityCodec<?> getIdentityCodec();
 
     <T extends DataContainer> DataContainerCodec<T> getCodecForDataObject(Class<T> object);
@@ -26,14 +26,14 @@ public interface CodecRegistry {
     <T extends Identifier<?>> IdentifierCodec<T> getCodecForIdentifier(Class<T> object);
 
     <T extends Augmentation<?>> AugmentationCodec<T> getCodecForAugmentation(Class<T> object);
-    
+
     <T extends BaseIdentity> IdentitityCodec<T> getCodecForIdentity(Class<T> codec);
 
     Class<?> getClassForPath(List<QName> names);
 
     IdentifierCodec<?> getKeyCodecForPath(List<QName> names);
-    
-    
+
+
     void bindingClassEncountered(Class<?> cls);
 
     void putPathToClass(List<QName> names, Class<?> cls);

@@ -84,7 +84,7 @@ public class ExampleProvider extends AbstractProvider implements RpcImplementati
     }
     return false;
   }
-  
+
   // Adds a child SimpleNode containing the value "success" to the input CompositeNode
   private CompositeNode addSuccessNode(CompositeNode input) {
     List<Node<?>> list = new ArrayList<Node<?>>(input.getChildren());

@@ -71,14 +71,14 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
 
         /**
          * We create transaction no 2
-         * 
+         *
          */
         DataModificationTransaction removalTransaction = baDataService.beginTransaction();
         assertNotNull(transaction);
 
         /**
          * We remove node 1
-         * 
+         *
          */
         removalTransaction.removeConfigurationData(node1.getValue());
 

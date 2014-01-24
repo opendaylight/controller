@@ -65,7 +65,7 @@ public class ClusteredDataStoreManagerTest {
         ClusteredDataStoreManager clusteredDSManager = spy(new ClusteredDataStoreManager());
         doReturn(clusteredDSImpl).when(clusteredDSManager).createClusteredDataStore();
         Component c = mock(Component.class);
-        
+
         clusteredDSManager.start();
         clusteredDSManager.setClusterGlobalServices(icClusterGlbServices);
         CompositeNode o = mock(CompositeNode.class);
@@ -84,7 +84,7 @@ public class ClusteredDataStoreManagerTest {
 
         clusteredDSManager.start();
         clusteredDSManager.setClusterGlobalServices(icClusterGlbServices);
-        
+
         CompositeNode o = mock(CompositeNode.class);
 
         when(clusteredDSImpl.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(o);

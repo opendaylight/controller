@@ -15,11 +15,11 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 public interface Connector extends RpcImplementation, NotificationListener {
 
-    
-    
+
+
     Set<InstanceIdentifier> getConfigurationPrefixes();
     Set<InstanceIdentifier> getRuntimePrefixes();
-    
+
     void registerListener(ConnectorListener listener);
     void unregisterListener(ConnectorListener listener);
 }

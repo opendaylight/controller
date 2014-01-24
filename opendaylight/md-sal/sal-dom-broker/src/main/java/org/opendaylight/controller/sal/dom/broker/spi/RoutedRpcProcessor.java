@@ -17,11 +17,11 @@ public interface RoutedRpcProcessor extends RpcImplementation {
     public Set<QName> getSupportedRpcs();
 
     public QName getRpcType();
-    
+
     public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input);
 
     Map<InstanceIdentifier,RpcImplementation> getRoutes();
-    
+
     RpcImplementation getDefaultRoute();
 
 }

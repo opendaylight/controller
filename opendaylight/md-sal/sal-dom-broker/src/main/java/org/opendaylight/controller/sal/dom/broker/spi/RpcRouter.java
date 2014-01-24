@@ -16,14 +16,14 @@ public interface RpcRouter extends RpcProvisionRegistry, RpcImplementation {
 
     @Override
     public RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
-    
+
     @Override
     public RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
             throws IllegalArgumentException;
-    
+
     @Override
     public Set<QName> getSupportedRpcs();
-    
+
     @Override
     public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input);
 }

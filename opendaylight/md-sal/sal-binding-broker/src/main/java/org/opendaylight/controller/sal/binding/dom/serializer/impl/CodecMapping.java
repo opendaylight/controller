@@ -14,14 +14,14 @@ import org.slf4j.LoggerFactory;
 public class CodecMapping {
 
     private static final Logger LOG = LoggerFactory.getLogger(CodecMapping.class);
-    
+
     public static final String INSTANCE_IDENTIFIER_CODEC = "INSTANCE_IDENTIFIER_CODEC";
     public static final String IDENTITYREF_CODEC = "IDENTITYREF_CODEC";
-    
+
     public static final String CLASS_TO_CASE_MAP = "CLASS_TO_CASE";
     public static final String COMPOSITE_TO_CASE = "COMPOSITE_TO_CASE";
     public static final String AUGMENTATION_CODEC = "AUGMENTATION_CODEC";
-    
+
     public static void setIdentifierCodec(Class<?> obj,InstanceIdentifierCodec codec) {
         Field instanceIdField;
         try {
@@ -89,8 +89,8 @@ public class CodecMapping {
                 LOG.error("Augmentation codec could not be set for {}",dataCodec.getName(),e);
             }
     }
-    
-    
+
+
     public static BindingCodec<?,?> getAugmentationCodec(Class<? extends BindingCodec<?,?>> dataCodec) {
             Field instanceIdField;
             try {

@@ -105,11 +105,11 @@ public class RestCodec {
     public static class IdentityrefCodecImpl implements IdentityrefCodec<IdentityValuesDTO> {
 
         private final MountInstance mountPoint;
-        
+
         public IdentityrefCodecImpl(MountInstance mountPoint) {
             this.mountPoint = mountPoint;
         }
-        
+
         @Override
         public IdentityValuesDTO serialize(QName data) {
             return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix());
@@ -130,7 +130,7 @@ public class RestCodec {
             }
             return QName.create(validNamespace, null, valueWithNamespace.getValue());
         }
-        
+
     }
 
     public static class LeafrefCodecImpl implements LeafrefCodec<String> {

@@ -114,18 +114,18 @@ public class ClusteredDataStoreManager implements //
     public void setContext(BundleContext context) {
         this.context = context;
     }
-    
-    
+
+
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     public void start() {
         if (context != null) {
             clusterTracker = new ServiceTracker<>(context, IClusterGlobalServices.class, this);
             clusterTracker.open();
-            
+
             context.registerService(ClusteredDataStore.class, this, new Hashtable<String,Object>());
         }
     }

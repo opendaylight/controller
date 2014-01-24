@@ -52,7 +52,7 @@ class JsonMapper {
         Preconditions.checkNotNull(data);
         Preconditions.checkNotNull(schema);
         this.mountPoint = mountPoint;
-        
+
         writer.beginObject();
 
         if (schema instanceof ContainerSchemaNode) {

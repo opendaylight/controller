@@ -37,7 +37,7 @@ implements //
 
     private RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> listener;
     private S defaultRoute;
-    
+
     public RpcRoutingTableImpl(String routerName,Class<C> contextType, Class<S> serviceType) {
         super();
         this.routerName = routerName;
@@ -62,7 +62,7 @@ implements //
             L listener) {
         return (ListenerRegistration<L>) new SingletonListenerRegistration<L>(listener);
     }
-        
+
     @Override
     public Class<C> getIdentifier() {
         return contextType;
@@ -72,7 +72,7 @@ implements //
     @SuppressWarnings("unchecked")
     public void updateRoute(InstanceIdentifier<?> path, S service) {
         S previous = this.routes.put(path, service);
-        
+
         LOGGER.debug("Route {} updated to {} in routing table {}",path,service,this);
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
@@ -81,7 +81,7 @@ implements //
         }
     }
 
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public void removeRoute(InstanceIdentifier<?> path) {
@@ -93,7 +93,7 @@ implements //
             listenerCapture.onRouteChange(RoutingUtils.removalChange(contextType, path));
         }
     }
-    
+
     public void removeRoute(InstanceIdentifier<?> path, S service) {
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
@@ -116,12 +116,12 @@ implements //
     public Map<InstanceIdentifier<?>, S> getRoutes() {
         return unmodifiableRoutes;
     }
-    
+
     protected void removeAllReferences(S service) {
-        
+
     }
-    
-    
+
+
 
     @Override
     public String toString() {

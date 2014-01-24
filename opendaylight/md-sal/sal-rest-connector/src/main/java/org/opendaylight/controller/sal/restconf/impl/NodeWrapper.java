@@ -8,14 +8,14 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 public interface NodeWrapper<T extends Node<?>> {
 
     void setQname(QName name);
-    
+
     T unwrap();
-    
+
     boolean isChangeAllowed();
-    
+
     URI getNamespace();
 
     void setNamespace(URI namespace);
-    
+
     String getLocalName();
 }

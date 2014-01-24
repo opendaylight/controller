@@ -14,7 +14,7 @@ public class DomForwardingUtils {
         DomForwardedBroker forwardedSource = (DomForwardedBroker) source;
         DomForwardedBroker forwardedTarget = (DomForwardedBroker) target;
         reuseForwardingFrom(forwardedTarget, forwardedSource);
-        
+
     }
 
     private static void reuseForwardingFrom(DomForwardedBroker target, DomForwardedBroker source) {

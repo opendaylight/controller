@@ -20,7 +20,7 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
 
     private ProviderSession domProviderContext;
     private BindingIndependentConnector connector;
-    
+
     private MountProvisionService domMountService;
 
     private final DomMountPointForwardingManager domForwardingManager = new DomMountPointForwardingManager();

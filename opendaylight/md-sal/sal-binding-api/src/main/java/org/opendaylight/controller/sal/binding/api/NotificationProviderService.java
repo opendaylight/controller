@@ -17,7 +17,7 @@ public interface NotificationProviderService extends NotificationService, Notifi
 
     /**
      * Deprecated. Use {@link #publish(Notification)}.
-     * 
+     *
      * @param notification
      */
     @Deprecated
@@ -25,7 +25,7 @@ public interface NotificationProviderService extends NotificationService, Notifi
 
     /**
      * Deprecated. Use {@link #publish(Notification,ExecutorService)}.
-     * 
+     *
      * @param notification
      */
     @Deprecated
@@ -33,16 +33,16 @@ public interface NotificationProviderService extends NotificationService, Notifi
 
     /**
      * Publishes a notification.
-     * 
+     *
      * @param Notification notification to publish.
-     * 
+     *
      */
     @Override
     void publish(Notification notification);
 
     /**
      * Publishes a notification, listener calls are done in provided executor.
-     * 
+     *
      */
     @Override
     void publish(Notification notification, ExecutorService service);

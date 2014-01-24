@@ -17,34 +17,34 @@ public interface DataChange<P/* extends Path<P> */, D> {
 
     /**
      * Returns a map of paths and newly created objects
-     * 
+     *
      * @return map of paths and newly created objects
      */
     Map<P, D> getCreatedOperationalData();
 
     /**
      * Returns a map of paths and newly created objects
-     * 
+     *
      * @return map of paths and newly created objects
      */
     Map<P, D> getCreatedConfigurationData();
 
     /**
      * Returns a map of paths and respective updated objects after update.
-     * 
+     *
      * Original state of the object is in
      * {@link #getOriginalOperationalData()}
-     * 
+     *
      * @return map of paths and newly created objects
      */
     Map<P, D> getUpdatedOperationalData();
 
     /**
      * Returns a map of paths and respective updated objects after update.
-     * 
+     *
      * Original state of the object is in
      * {@link #getOriginalConfigurationData()}
-     * 
+     *
      * @return map of paths and newly created objects
      */
     Map<P, D> getUpdatedConfigurationData();
@@ -53,34 +53,34 @@ public interface DataChange<P/* extends Path<P> */, D> {
 
     /**
      * Returns a set of paths of removed objects.
-     * 
+     *
      * Original state of the object is in
      * {@link #getOriginalConfigurationData()}
-     * 
+     *
      * @return map of paths and newly created objects
      */
     Set<P> getRemovedConfigurationData();
 
     /**
      * Returns a set of paths of removed objects.
-     * 
+     *
      * Original state of the object is in
      * {@link #getOriginalOperationalData()}
-     * 
+     *
      * @return map of paths and newly created objects
      */
     Set<P> getRemovedOperationalData();
 
     /**
      * Return a map of paths and original state of updated and removed objectd.
-     * 
+     *
      * @return map of paths and original state of updated and removed objectd.
      */
     Map<P, D> getOriginalConfigurationData();
 
     /**
      * Return a map of paths and original state of updated and removed objectd.
-     * 
+     *
      * @return map of paths and original state of updated and removed objectd.
      */
     Map<P, D> getOriginalOperationalData();

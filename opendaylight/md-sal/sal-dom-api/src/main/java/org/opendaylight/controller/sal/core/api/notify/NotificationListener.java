@@ -21,21 +21,21 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 public interface NotificationListener extends Consumer.ConsumerFunctionality, EventListener {
     /**
      * A set of notification types supported by listeners.
-     * 
+     *
      * The set of notification {@link QName}s which are supported by this
      * listener. This set is used, when {@link Consumer} is registered to the
      * SAL, to automatically register the listener.
-     * 
+     *
      * @return Set of QNames identifying supported notifications.
      */
     Set<QName> getSupportedNotifications();
 
     /**
      * Fired when the notification occurs.
-     * 
+     *
      * The type of the notification could be learned by
      * <code>QName type = notification.getNodeType();</code>
-     * 
+     *
      * @param notification
      *            Notification content
      */

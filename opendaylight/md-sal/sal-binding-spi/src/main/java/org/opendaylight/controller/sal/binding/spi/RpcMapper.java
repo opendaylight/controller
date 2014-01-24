@@ -17,17 +17,17 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public interface RpcMapper<T extends RpcService> {
-    
+
     Set<QName> getRpcQNames();
-    
+
     /**
      * Returns a class object representing subinterface
      * to whom, this mapper is assigned.
-     * 
+     *
      * @return
      */
     Class<T> getServiceClass();
-    
+
     /**
      * Returns a Binding Mapper for Rpc Input Data
      * @return
@@ -35,22 +35,22 @@ public interface RpcMapper<T extends RpcService> {
     Mapper<?> getInputMapper();
     /**
      * Returns a Binding Mapper for Rpc Output Data
-     * 
+     *
      * @return
      */
     Mapper<?> getOutputMapper();
-    
+
     /**
      * Returns a consumer proxy, which is responsible
      * for invoking the rpc functionality of {@link BindingAwareBroker} implementation.
-     * 
+     *
      * @return Proxy of {@link RpcService} assigned to this mapper.
      */
     T getConsumerProxy(RpcProxyInvocationHandler handler);
-    
+
     /**
      * Invokes the method of RpcService representing the supplied rpc.
-     * 
+     *
      * @param rpc QName of Rpc
      * @param impl Implementation of RpcService on which the method should be invoked
      * @param baInput Input Data to RPC method
@@ -58,9 +58,9 @@ public interface RpcMapper<T extends RpcService> {
      */
     RpcResult<? extends DataObject> invokeRpcImplementation(QName rpc,
             RpcService impl, DataObject baInput);
-    
+
     public interface RpcProxyInvocationHandler {
-        
+
         Future<RpcResult<? extends DataObject>> invokeRpc(RpcService proxy, QName rpc, DataObject input);
     }
 }

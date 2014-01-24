@@ -10,20 +10,20 @@ package org.opendaylight.controller.sal.binding.api;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 
 /**
- * 
+ *
  * Session-specific instance of the broker functionality.
- * 
+ *
  * <p>
  * BindingAwareService is marker interface for infrastructure services provided
  * by the SAL. These services are session-specific, each
  * {@link BindingAwareConsumer} and {@link BindingAwareProvider} usually has own
  * instance of the service with it's own context.
- * 
+ *
  * <p>
  * The consumer's (or provider's) instance of specific service could be obtained
  * by invoking {@link ConsumerContext#getSALService(Class)} method on session
  * assigned to the consumer.
- * 
+ *
  * <p>
  * {@link BindingAwareService} and {@link BindingAwareProvider} may seem
  * similar, but provider provides YANG model-based functionality and
@@ -31,9 +31,9 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerCo
  * to implement specific functionality of YANG and to reuse it in the
  * development of {@link BindingAwareConsumer}s and {@link BindingAwareProvider}
  * s.
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public interface BindingAwareService {
 

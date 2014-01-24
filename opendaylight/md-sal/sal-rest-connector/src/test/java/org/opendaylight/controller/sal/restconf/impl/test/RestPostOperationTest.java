@@ -87,13 +87,13 @@ public class RestPostOperationTest extends JerseyTest {
         mockInvokeRpc(cnSnDataOutput, true);
         String uri = createUri("/operations/", "test-module:rpc-test");
         assertEquals(200, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-        
+
         mockInvokeRpc(null, true);
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-        
+
         mockInvokeRpc(null, false);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-        
+
         uri = createUri("/operations/", "test-module:rpc-wrongtest");
         assertEquals(404, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
     }
@@ -104,10 +104,10 @@ public class RestPostOperationTest extends JerseyTest {
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = createUri("/config", "");
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
-        
+
         mockCommitConfigurationDataPostMethod(null);
         assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
-        
+
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
     }
@@ -118,10 +118,10 @@ public class RestPostOperationTest extends JerseyTest {
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = createUri("/config/", "ietf-interfaces:interfaces");
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-        
+
         mockCommitConfigurationDataPostMethod(null);
         assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-        
+
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
     }
@@ -132,10 +132,10 @@ public class RestPostOperationTest extends JerseyTest {
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces");
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-        
+
         mockCommitConfigurationDataPostMethod(null);
         assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-        
+
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
     }
@@ -161,7 +161,7 @@ public class RestPostOperationTest extends JerseyTest {
         uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont");
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData3));
     }
-    
+
     private void mockInvokeRpc(CompositeNode result, boolean sucessful) {
         RpcResult<CompositeNode> rpcResult = new DummyRpcResult.Builder<CompositeNode>().result(result)
                 .isSuccessful(sucessful).build();
@@ -181,7 +181,7 @@ public class RestPostOperationTest extends JerseyTest {
         when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
     }
-    
+
     private int post(String uri, String mediaType, String data) {
         return target(uri).request(mediaType).post(Entity.entity(data, mediaType)).getStatus();
     }

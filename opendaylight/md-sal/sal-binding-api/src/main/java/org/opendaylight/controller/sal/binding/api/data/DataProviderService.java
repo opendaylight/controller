@@ -23,15 +23,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  */
 public interface DataProviderService extends DataBrokerService, DataProvisionService<InstanceIdentifier<? extends DataObject>, DataObject> {
 
-    
+
     /**
      * Registers a data reader for particular subtree of overal YANG data tree.
-     * 
-     * Registered data reader is called if anyone tries to read data from 
+     *
+     * Registered data reader is called if anyone tries to read data from
      * paths which are nested to provided path.
-     * 
+     *
      * @param path Subpath which is handled by registered data reader
-     * @param reader Instance of reader which 
+     * @param reader Instance of reader which
      * @return Registration object for reader. Invoking {@link Registration#close()} will unregister reader.
      */
     Registration<DataReader<InstanceIdentifier<? extends DataObject>,DataObject>> registerDataReader(InstanceIdentifier<? extends DataObject> path,DataReader<InstanceIdentifier<? extends DataObject>,DataObject> reader);

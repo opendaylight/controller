@@ -30,17 +30,17 @@ public class LLDPLinkAger {
     public static LLDPLinkAger getInstance() {
         return instance;
     }
-    
+
     public void put(LinkDiscovered link) {
         Date expires = new Date();
         expires.setTime(expires.getTime() + LLDPDiscoveryUtils.LLDP_EXPIRATION_TIME);
         linkToDate.put(link, expires);
     }
-    
+
     public void close() {
         timer.cancel();
     }
-    
+
     private class LLDPAgingTask extends TimerTask {
 
         @Override
@@ -57,9 +57,9 @@ public class LLDPLinkAger {
                     }
                 }
             }
-            
+
         }
-        
+
     }
 }
 

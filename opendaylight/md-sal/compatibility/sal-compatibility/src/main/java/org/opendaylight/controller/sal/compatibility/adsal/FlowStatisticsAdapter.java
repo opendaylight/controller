@@ -66,7 +66,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
     @Override
     public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> getAggregateFlowStatisticsFromFlowTableForAllFlows(
             GetAggregateFlowStatisticsFromFlowTableForAllFlowsInput input) {
-        //TODO: No supported API exist in AD-SAL, it can either be implemented by fetching all the stats of the flows and 
+        //TODO: No supported API exist in AD-SAL, it can either be implemented by fetching all the stats of the flows and
         // generating aggregate flow statistics out of those individual flow stats.
         return null;
     }
@@ -74,7 +74,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
     @Override
     public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutput>> getAggregateFlowStatisticsFromFlowTableForGivenMatch(
             GetAggregateFlowStatisticsFromFlowTableForGivenMatchInput input) {
-        //TODO: No supported API exist in AD-SAL, it can either be implemented by fetching all the stats of the flows and 
+        //TODO: No supported API exist in AD-SAL, it can either be implemented by fetching all the stats of the flows and
         // generating aggregate flow statistics out of those individual flow stats.
         return null;
     }
@@ -92,7 +92,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             GetAllFlowStatisticsFromFlowTableOutputBuilder builder = new GetAllFlowStatisticsFromFlowTableOutputBuilder();
             builder.setTransactionId(new TransactionId(new BigInteger("0")));
             rpcResultType = builder.setFlowAndStatisticsMapList(flowsStatistics).build();
-            
+
             rpcResultBool = true;
         } catch (ConstructionException e) {
             LOG.error(e.getMessage());
@@ -107,7 +107,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
     @Override
     public Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> getAllFlowsStatisticsFromAllFlowTables(
             GetAllFlowsStatisticsFromAllFlowTablesInput input) {
-        
+
         GetAllFlowsStatisticsFromAllFlowTablesOutput rpcResultType = null;
         boolean rpcResultBool = false;
 
@@ -118,7 +118,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder builder = new GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder();
             builder.setTransactionId(new TransactionId(new BigInteger("0")));
             rpcResultType = builder.setFlowAndStatisticsMapList(flowsStatistics).build();
-            
+
             rpcResultBool = true;
         } catch (ConstructionException e) {
             LOG.error(e.getMessage());
@@ -163,7 +163,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
     public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
         NodeConnectorStatisticsUpdateBuilder nodeConnectorStatisticsUpdateBuilder = new NodeConnectorStatisticsUpdateBuilder();
         List<NodeConnectorStatisticsAndPortNumberMap> nodeConnectorStatistics = toOdNodeConnectorStatistics(ncStatsList);
-        
+
         nodeConnectorStatisticsUpdateBuilder.setNodeConnectorStatisticsAndPortNumberMap(nodeConnectorStatistics);
         nodeConnectorStatisticsUpdateBuilder.setMoreReplies(false);
         nodeConnectorStatisticsUpdateBuilder.setTransactionId(null);
@@ -173,9 +173,9 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
 
     @Override
     public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList) {
-        
-        FlowTableStatisticsUpdateBuilder flowTableStatisticsUpdateBuilder = new FlowTableStatisticsUpdateBuilder();  
-        
+
+        FlowTableStatisticsUpdateBuilder flowTableStatisticsUpdateBuilder = new FlowTableStatisticsUpdateBuilder();
+
         List<FlowTableAndStatisticsMap>  flowTableStatistics = toOdFlowTableStatistics(tableStatsList);
         flowTableStatisticsUpdateBuilder.setFlowTableAndStatisticsMap(flowTableStatistics);
         flowTableStatisticsUpdateBuilder.setMoreReplies(false);
@@ -187,7 +187,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
         @Override
     public void descriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
             // TODO which *StatisticsUpdated interface should be used?
-        
+
     }
 
     private List<FlowAndStatisticsMapList> toOdFlowsStatistics(List<FlowOnNode> flowsOnNode) {
@@ -227,7 +227,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
     }
 
     private List<FlowTableAndStatisticsMap> toOdFlowTableStatistics(List<NodeTableStatistics> tableStatsList) {
-        
+
         List<FlowTableAndStatisticsMap> flowTableStatsMap = new ArrayList<FlowTableAndStatisticsMap>();
         for (NodeTableStatistics nodeTableStatistics : tableStatsList) {
             FlowTableAndStatisticsMapBuilder flowTableAndStatisticsMapBuilder = new FlowTableAndStatisticsMapBuilder();
@@ -238,7 +238,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             flowTableAndStatisticsMapBuilder.setTableId(new TableId((short)nodeTableStatistics.getNodeTable().getID()));
             flowTableStatsMap.add(flowTableAndStatisticsMapBuilder.build());
         }
-        
+
         return flowTableStatsMap;
     }
 
@@ -247,7 +247,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
         List<NodeConnectorStatisticsAndPortNumberMap> nodeConnectorStatisticsList = new ArrayList<NodeConnectorStatisticsAndPortNumberMap>();
         for(NodeConnectorStatistics ofNodeConnectorStatistics : ncStatsList){
             NodeConnectorStatisticsAndPortNumberMapBuilder nodeConnectorStatisticsAndPortNumberMapBuilder = new NodeConnectorStatisticsAndPortNumberMapBuilder();
-            
+
             nodeConnectorStatisticsAndPortNumberMapBuilder.setBytes(extractBytes(ofNodeConnectorStatistics));
             nodeConnectorStatisticsAndPortNumberMapBuilder.setCollisionCount(toBI(ofNodeConnectorStatistics.getCollisionCount()));
             nodeConnectorStatisticsAndPortNumberMapBuilder.setDuration(null);
@@ -261,7 +261,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             nodeConnectorStatisticsAndPortNumberMapBuilder.setTransmitErrors(toBI(ofNodeConnectorStatistics.getTransmitErrorCount()));
             nodeConnectorStatisticsList.add(nodeConnectorStatisticsAndPortNumberMapBuilder.build());
         }
-        
+
         return nodeConnectorStatisticsList;
     }
 

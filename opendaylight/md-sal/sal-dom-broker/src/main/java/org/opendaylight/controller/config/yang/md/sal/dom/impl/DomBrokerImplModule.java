@@ -38,14 +38,14 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         super.validate();
         checkArgument(getDataStore() != null, "Data Store needs to be provided for DomBroker");
     }
-    
+
     @Override
     public java.lang.AutoCloseable createInstance() {
         final BrokerImpl broker = new BrokerImpl();
         final BrokerConfigActivator activator = new BrokerConfigActivator();
         final DataStore store = getDataStoreDependency();
         activator.start(broker, store, getBundleContext());
-        
+
         final DomBrokerImplRuntimeMXBean domBrokerRuntimeMXBean = new DomBrokerRuntimeMXBeanImpl(activator.getDataService());
         getRootRuntimeBeanRegistratorWrapper().register(domBrokerRuntimeMXBean);
         return broker;

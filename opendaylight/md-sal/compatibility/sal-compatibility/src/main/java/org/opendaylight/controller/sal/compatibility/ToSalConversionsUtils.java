@@ -573,7 +573,7 @@ public class ToSalConversionsUtils {
         }
         return macAddress;
     }
-    
+
     public static byte[] bytesFromDpid(long dpid) {
         byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 

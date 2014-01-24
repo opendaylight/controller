@@ -8,7 +8,7 @@ public interface IdentifierCodec<I extends Identifier<?>> extends DomCodec<I> {
 
     @Override
     public ValueWithQName<I> deserialize(Node<?> input);
-    
+
     @Override
     public CompositeNode serialize(ValueWithQName<I> input);
 }

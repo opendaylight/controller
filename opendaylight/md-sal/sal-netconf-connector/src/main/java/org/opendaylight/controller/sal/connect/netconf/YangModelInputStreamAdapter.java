@@ -9,7 +9,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.common.QName;
 
 /**
- * 
+ *
  *
  */
 public class YangModelInputStreamAdapter extends InputStream implements Delegator<InputStream> {
@@ -17,9 +17,9 @@ public class YangModelInputStreamAdapter extends InputStream implements Delegato
     final String source;
     final QName moduleIdentifier;
     final InputStream delegate;
-    
-    
-    
+
+
+
     private YangModelInputStreamAdapter(String source, QName moduleIdentifier, InputStream delegate) {
         super();
         this.source = source;

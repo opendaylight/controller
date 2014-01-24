@@ -20,7 +20,7 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
 
     /**
      * Returns transaction identifier
-     * 
+     *
      * @return Transaction identifier
      */
     Object getIdentifier();
@@ -28,9 +28,9 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
     TransactionStatus getStatus();
 
     /**
-     * 
+     *
      * @deprecated Use {@link #putOperationalData(Object, Object)} instead.
-     * 
+     *
      * @param path
      * @param data
      */
@@ -43,7 +43,7 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
 
     /**
      * @deprecated Use {@link #removeOperationalData(Object)}
-     * 
+     *
      * @param path
      */
     @Deprecated
@@ -55,18 +55,18 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
 
     /**
      * Initiates a two-phase commit of modification.
-     * 
+     *
      * <p>
      * The successful commit changes the state of the system and may affect
      * several components.
-     * 
+     *
      * <p>
      * The effects of successful commit of data are described in the
      * specifications and YANG models describing the Provider components of
      * controller. It is assumed that Consumer has an understanding of this
      * changes.
-     * 
-     * 
+     *
+     *
      * @see DataCommitHandler for further information how two-phase commit is
      *      processed.
      * @param store
