@@ -2,17 +2,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
+		<groupId>org.opendaylight.controller</groupId>
 		<artifactId>sal-parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
-		<groupId>org.opendaylight.controller</groupId>
 	</parent>
-	<packaging>pom</packaging>
-	<artifactId>sal-samples</artifactId>
+
     <scm>
       <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
       <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
       <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
+
+	<groupId>org.opendaylight.controller.samples</groupId>
+	<artifactId>sal-samples</artifactId>
+	<packaging>pom</packaging>
 
 	<modules>
 		<module>toaster</module>
@@ -32,5 +35,4 @@
       </profile>
     </profiles>
 
-	<groupId>org.opendaylight.controller.samples</groupId>
 </project>

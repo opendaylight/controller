@@ -17,11 +17,6 @@
     <artifactId>model-parent</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bundle.plugin.version>2.4.0</bundle.plugin.version>
-    </properties>
-
     <modules>
         <module>model-inventory</module>
         <module>model-flow-base</module>
