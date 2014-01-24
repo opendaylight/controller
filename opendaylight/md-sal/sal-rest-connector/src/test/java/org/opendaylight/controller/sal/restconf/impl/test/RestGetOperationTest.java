@@ -13,13 +13,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.glassfish.jersey.test.TestProperties;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
@@ -63,10 +66,10 @@ public class RestGetOperationTest extends JerseyTest {
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//        enable(TestProperties.LOG_TRAFFIC);
-//        enable(TestProperties.DUMP_ENTITY);
-//        enable(TestProperties.RECORD_LOG_LEVEL);
-//        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+//         enable(TestProperties.LOG_TRAFFIC);
+//         enable(TestProperties.DUMP_ENTITY);
+//         enable(TestProperties.RECORD_LOG_LEVEL);
+//         set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
@@ -82,10 +85,10 @@ public class RestGetOperationTest extends JerseyTest {
         mockReadOperationalDataMethod();
         String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-        
+
         uri = createUri("/datastore/", "wrong-module:interfaces/interface/eth0");
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
-        
+
         // Test of request for not existing data. Returning status code 404
         uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
         when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
@@ -100,7 +103,7 @@ public class RestGetOperationTest extends JerseyTest {
         mockReadOperationalDataMethod();
         String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-        
+
         uri = createUri("/operational/", "wrong-module:interfaces/interface/eth0");
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
     }
@@ -113,7 +116,7 @@ public class RestGetOperationTest extends JerseyTest {
         mockReadConfigurationDataMethod();
         String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-        
+
         uri = createUri("/config/", "wrong-module:interfaces/interface/eth0");
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
     }
@@ -123,6 +126,26 @@ public class RestGetOperationTest extends JerseyTest {
      */
     @Test
     public void getDataWithUrlMountPoint() throws UnsupportedEncodingException, URISyntaxException {
+        when(
+                brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
+                        any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
+        MountInstance mountInstance = mock(MountInstance.class);
+        when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
+        MountService mockMountService = mock(MountService.class);
+        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+
+        ControllerContext.getInstance().setMountService(mockMountService);
+        
+        String uri = createUri("/config/",
+                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1");
+        assertEquals(200, get(uri, MediaType.APPLICATION_XML));
+
+        uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont/cont1");
+        assertEquals(200, get(uri, MediaType.APPLICATION_XML));
+    }
+
+    @Test
+    public void getDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
         when(brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
@@ -133,16 +156,10 @@ public class RestGetOperationTest extends JerseyTest {
         ControllerContext.getInstance().setMountService(mockMountService);
 
         String uri = createUri("/config/",
-                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1");
-        Response response = target(uri).request(Draft02.MediaTypes.DATA + XML).get();
-        assertEquals(200, response.getStatus());
-        
-        uri = createUri("/config/",
-                "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont/cont1");
-        response = target(uri).request(Draft02.MediaTypes.DATA + XML).get();
-        assertEquals(200, response.getStatus());
+                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+        assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
-    
+
     private int get(String uri, String mediaType) {
         return target(uri).request(mediaType).get().getStatus();
     }
