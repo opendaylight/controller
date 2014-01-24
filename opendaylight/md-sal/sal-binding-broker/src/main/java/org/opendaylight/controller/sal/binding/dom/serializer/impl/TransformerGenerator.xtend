@@ -352,7 +352,13 @@ class TransformerGenerator {
                 ]
                 method(Object, "deserialize", Object) [
                     bodyChecked = '''
-                        return fromDomStatic(QNAME,$1);
+                    {
+                        «QName.name» _qname = QNAME;
+                        if($1 instanceof java.util.Map.Entry) {
+                            _qname = («QName.name») ((java.util.Map.Entry) $1).getKey();
+                        }
+                        return fromDomStatic(_qname,$1);
+                    }
                     '''
                 ]
             ]
@@ -460,7 +466,13 @@ class TransformerGenerator {
                 ]
                 method(Object, "deserialize", Object) [
                     bodyChecked = '''
-                        return fromDomStatic(QNAME,$1);
+                        {
+                            «QName.name» _qname = QNAME;
+                            if($1 instanceof java.util.Map.Entry) {
+                                _qname = («QName.name») ((java.util.Map.Entry) $1).getKey();
+                            }
+                            return fromDomStatic(_qname,$1);
+                        }
                     '''
                 ]
             ]
