@@ -408,7 +408,7 @@ class TransformerGenerator {
                 method(Object, "deserialize", Object) [
                     bodyChecked = '''
                         {
-                            //System.out.println("«type.name»#deserialize: " +$1);
+                            //log.debug("«type.name»#deserialize: ", $1);
                             java.util.Map.Entry _input = (java.util.Map.Entry) $1;
                             return fromDomStatic((«QName.name»)_input.getKey(),_input.getValue());
                         }
@@ -492,14 +492,14 @@ class TransformerGenerator {
                     modifiers = PUBLIC + FINAL + STATIC
                     bodyChecked = '''
                         {
-                            ////System.out.println("Qname " + $1);
-                            ////System.out.println("Value " + $2);
+                            ////log.debug("Qname ", $1);
+                            ////log.debug("Value ", $2);
                             «QName.name» _resultName = «QName.name».create(QNAME,QNAME.getLocalName());
                             java.util.List _childNodes = new java.util.ArrayList();
                             «type.resolvedName» value = («type.resolvedName») $2;
                             «FOR child : node.childNodes»
                                 «var signature = properties.getFor(child)»
-                                ////System.out.println("«signature.key»" + value.«signature.key»());
+                                ////log.debug("«signature.key»", value.«signature.key»());
                                 «serializeProperty(child, signature.value, signature.key)»
                             «ENDFOR»
                             return ($r) _childNodes;
@@ -528,7 +528,7 @@ class TransformerGenerator {
                             return null;
                             }
                             java.util.Map _compositeNode = (java.util.Map) $2;
-                            //System.out.println(_localQName + " " + _compositeNode);
+                            //log.debug(_localQName, " ", _compositeNode);
                             «type.builderName» _builder = new «type.builderName»();
                             boolean _is_empty = true;
                             «FOR child : node.childNodes»
@@ -588,7 +588,7 @@ class TransformerGenerator {
                             }
                             java.util.Map.Entry _input = new «SimpleEntry.name»($1,_baValue);
                             Object _ret =  _codec.serialize(_input);
-                            ////System.out.println("«typeSpec.name»#toDomStatic: " + _ret);
+                            ////log.debug("«typeSpec.name»#toDomStatic: ", _ret);
                             return («List.name») _ret;
                         }
                     '''
@@ -676,7 +676,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            //System.out.println(_localQName + " " + _compositeNode);
+            //log.debug(_localQName, " ", _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeKey(type, node)»
             «deserializeDataNodeContainerBody(type, node)»
@@ -692,7 +692,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            //System.out.println(_localQName + " " + _compositeNode);
+            //log.debug(_localQName, " ", _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»
@@ -708,7 +708,7 @@ class TransformerGenerator {
                 return null;
             }
             java.util.Map _compositeNode = (java.util.Map) $2;
-            //System.out.println(_localQName + " " + _compositeNode);
+            //log.debug(_localQName, " ", _compositeNode);
             «type.builderName» _builder = new «type.builderName»();
             «deserializeDataNodeContainerBody(type, node)»
             «deserializeAugmentations»
@@ -741,7 +741,7 @@ class TransformerGenerator {
             «Iterator.name» _entries = _augmentation.entrySet().iterator();
             while(_entries.hasNext()) {
                 java.util.Map.Entry _entry = (java.util.Map.Entry) _entries.next();
-                ////System.out.println("Aug. key:" + _entry.getKey());
+                ////log.debug("Aug. key:", _entry.getKey());
                 Class _type = (Class) _entry.getKey();
                 «Augmentation.resolvedName» _value = («Augmentation.name») _entry.getValue();
                 if(_value != null) {
@@ -755,7 +755,7 @@ class TransformerGenerator {
         String propertyName) '''
         java.util.List _dom_«propertyName» = _compositeNode.get(«QName.name».create(_localQName,"«schema.QName.
             localName»"));
-        ////System.out.println("«propertyName»#deCode"+_dom_«propertyName»);
+        ////log.debug("«propertyName»#deCode", _dom_«propertyName»);
         java.util.List «propertyName» = new java.util.ArrayList();
         if(_dom_«propertyName» != null) {
             java.util.List _serialized = new java.util.ArrayList();
@@ -764,15 +764,15 @@ class TransformerGenerator {
             while(_hasNext) {
                 Object _listItem = _iterator.next();
                 _is_empty = false;
-                ////System.out.println("  item" + _listItem);
+                ////log.debug("  item", _listItem);
                 Object _value = «type.actualTypeArguments.get(0).serializer(schema).resolvedName».fromDomStatic(_localQName,_listItem);
-                ////System.out.println("  value" + _value);
+                ////log.debug("  value", _value);
                 «propertyName».add(_value);
                 _hasNext = _iterator.hasNext();
             }
         }
         
-        ////System.out.println(" list" + «propertyName»);
+        ////log.debug(" list", «propertyName»);
     '''
 
     private def dispatch CharSequence deserializeProperty(LeafListSchemaNode schema, ParameterizedType type,
@@ -861,15 +861,15 @@ class TransformerGenerator {
                     val ctSpec = typeSpec.asCtClass;
                     bodyChecked = '''
                         {
-                            ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                            ////log.debug("«inputType.simpleName»#toDomValue: ",$1);
                             
                             if($1 == null) {
                                 return null;
                             }
                             «typeSpec.resolvedName» _encapsulatedValue = («typeSpec.resolvedName») $1;
-                            ////System.out.println("«inputType.simpleName»#toDomValue:Enc: "+_encapsulatedValue);
+                            ////log.debug("«inputType.simpleName»#toDomValue:Enc: ",_encapsulatedValue);
                             «returnType.resolvedName» _value =  _encapsulatedValue.getValue();
-                            ////System.out.println("«inputType.simpleName»#toDomValue:DeEnc: "+_value);
+                            ////log.debug("«inputType.simpleName»#toDomValue:DeEnc: ",_value);
                             Object _domValue = «serializeValue(returnType, "_value", null)»;
                             return _domValue;
                         }
@@ -886,7 +886,7 @@ class TransformerGenerator {
                     modifiers = PUBLIC + FINAL + STATIC
                     bodyChecked = '''
                         {
-                            ////System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                            ////log.debug("«inputType.simpleName»#fromDomValue: ",$1);
                             
                             if($1 == null) {
                                 return null;
@@ -935,7 +935,7 @@ class TransformerGenerator {
                     
                     bodyChecked = '''
                         {
-                            ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                            ////log.debug("«inputType.simpleName»#toDomValue: ",$1);
                             
                             if($1 == null) {
                                 return null;
@@ -966,7 +966,7 @@ class TransformerGenerator {
                     modifiers = PUBLIC + FINAL + STATIC
                     bodyChecked = '''
                         {
-                            ////System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                            ////log.debug("«inputType.simpleName»#fromDomValue: ",$1);
                             
                             if($1 == null) {
                                 return null;
@@ -1015,14 +1015,14 @@ class TransformerGenerator {
                     val ctSpec = typeSpec.asCtClass;
                     bodyChecked = '''
                         {
-                            ////System.out.println("«inputType.simpleName»#toDomValue: "+$1);
+                            ////log.debug("«inputType.simpleName»#toDomValue: ",$1);
                             
                             if($1 == null) {
                                 return null;
                             }
                             «typeSpec.resolvedName» _encapsulatedValue = («typeSpec.resolvedName») $1;
                             «HashSet.resolvedName» _value = new «HashSet.resolvedName»();
-                            //System.out.println("«inputType.simpleName»#toDomValue:Enc: "+_encapsulatedValue);
+                            //log.debug("«inputType.simpleName»#toDomValue:Enc: ",_encapsulatedValue);
                             
                             «FOR bit : typeDef.bits»
                                 «val getter = bit.getterName()»
@@ -1031,7 +1031,7 @@ class TransformerGenerator {
                                 }
                             «ENDFOR»
                             «Set.resolvedName» _domValue =  «Collections.resolvedName».unmodifiableSet(_value);
-                            //System.out.println("«inputType.simpleName»#toDomValue:DeEnc: "+_domValue);
+                            //log.debug("«inputType.simpleName»#toDomValue:DeEnc: ",_domValue);
                             
                             return _domValue;
                         }
@@ -1049,7 +1049,7 @@ class TransformerGenerator {
                     val sortedBits = typeDef.bits.sort[o1, o2|o1.propertyName.compareTo(o2.propertyName)]
                     bodyChecked = '''
                         {
-                            //System.out.println("«inputType.simpleName»#fromDomValue: "+$1);
+                            //log.debug("«inputType.simpleName»#fromDomValue: ",$1);
                             
                             if($1 == null) {
                                 return null;
@@ -1337,7 +1337,7 @@ class TransformerGenerator {
             «FOR child : node.childNodes»
                 «val signature = properties.getFor(child)»
                 «IF signature !== null»
-                    ////System.out.println("«type.name»#«signature.key»" + value.«signature.key»());
+                    ////log.debug("«type.name»#«signature.key»", value.«signature.key»());
                     «serializeProperty(child, signature.value, signature.key)»
                 «ENDIF»
             «ENDFOR»
@@ -1379,7 +1379,7 @@ class TransformerGenerator {
     private def dispatch CharSequence serializeProperty(ListSchemaNode schema, ParameterizedType type,
         String propertyName) '''
         «type.resolvedName» «propertyName» = value.«propertyName»();
-        ////System.out.println("«propertyName»:" + «propertyName»);
+        ////log.debug("«propertyName»:", «propertyName»);
         if(«propertyName» != null) {
             java.util.Iterator _iterator = «propertyName».iterator();
             boolean _hasNext = _iterator.hasNext();
