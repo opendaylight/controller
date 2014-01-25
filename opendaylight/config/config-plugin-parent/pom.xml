@@ -16,6 +16,7 @@
 
     <properties>
         <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
+        <config.version>0.2.3-SNAPSHOT</config.version>
     </properties>
 
     <build>

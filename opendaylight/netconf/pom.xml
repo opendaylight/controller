@@ -50,6 +50,8 @@
         <maven.bundle.version>2.4.0</maven.bundle.version>
         <slf4j.version>1.7.2</slf4j.version>
         <netconf.netty.version>4.0.10.Final</netconf.netty.version>
+        <netconf.version>0.2.3-SNAPSHOT</netconf.version>
+        <config.version>0.2.3-SNAPSHOT</config.version>
     </properties>
 
     <dependencies>

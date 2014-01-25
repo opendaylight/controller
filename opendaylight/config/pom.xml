@@ -69,6 +69,7 @@
         <jacoco.version>0.6.2.201302030002</jacoco.version>
         <slf4j.version>1.7.2</slf4j.version>
         <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
+        <config.version>0.2.3-SNAPSHOT</config.version>
     </properties>
 
     <dependencies>
