@@ -203,7 +203,7 @@ public class JMXGenerator implements CodeGenerator {
 
     @Override
     public void setLog(Log log) {
-        StaticLoggerBinder.getSingleton().setLog(log);
+        StaticLoggerBinder.getSingleton().setMavenLog(log);
     }
 
     private static Map<String, String> extractNamespaceMapping(
