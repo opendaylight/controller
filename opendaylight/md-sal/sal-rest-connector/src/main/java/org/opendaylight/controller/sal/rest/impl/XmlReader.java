@@ -14,8 +14,8 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -148,12 +148,28 @@ public class XmlReader {
                 final Characters chars = innerEvent.asCharacters();
                 if (!chars.isWhiteSpace()) {
                     data = innerEvent.asCharacters().getData();
+                    data = data + getAdditionalData(eventReader.nextEvent());
                 }
             } else if (innerEvent.isEndElement()) {
                 if (startElement.getLocation().getCharacterOffset() == innerEvent.getLocation().getCharacterOffset()) {
                     data = null;
                 } else {
                     data = "";
+                }
+            }
+        }
+        return data;
+    }
+
+    private String getAdditionalData(XMLEvent event) throws XMLStreamException {
+        String data = "";
+        if (eventReader.hasNext()) {
+            final XMLEvent innerEvent = eventReader.peek();
+            if (innerEvent.isCharacters() && !innerEvent.isEndElement()) {
+                final Characters chars = innerEvent.asCharacters();
+                if (!chars.isWhiteSpace()) {
+                    data = innerEvent.asCharacters().getData();
+                    data = data + getAdditionalData(eventReader.nextEvent());
                 }
             }
         }
@@ -169,23 +185,23 @@ public class XmlReader {
         return namespaceURI.isEmpty() ? null : URI.create(namespaceURI);
     }
 
-    /**
-     * @param value
-     *            value of startElement
-     * @param startElement
-     *            element containing value
-     * @return if value is "prefix:value" then {@link IdentityValuesDTO} else the same
-     *         string as parameter "value"
-     */
     private Object resolveValueOfElement(String value, StartElement startElement) {
+        // it could be instance-identifier Built-In Type
+        if (value.startsWith("/")) {
+            IdentityValuesDTO iiValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(startElement));
+            if (iiValue != null) {
+                return iiValue;
+            }
+        }
+        // it could be identityref Built-In Type
         String[] namespaceAndValue = value.split(":");
-        if (namespaceAndValue.length != 2) { // it is not "prefix:value"
-            return value;
+        if (namespaceAndValue.length == 2) {
+            String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
+            if (namespace != null && !namespace.isEmpty()) {
+                return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0]);
+            }
         }
-        String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
-        if (namespace != null && !namespace.isEmpty()) {
-            return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0]);
-        }
+        // it is not "prefix:value" but just "value"
         return value;
     }
 

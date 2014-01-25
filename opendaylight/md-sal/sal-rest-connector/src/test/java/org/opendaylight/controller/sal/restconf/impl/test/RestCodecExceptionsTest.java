@@ -1,6 +1,6 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
@@ -24,10 +24,7 @@ public class RestCodecExceptionsTest {
         IdentityrefTypeDefinition mockedIidentityrefType = mock(IdentityrefTypeDefinition.class);
 
         Codec<Object, Object> codec = RestCodec.from(mockedIidentityrefType, null);
-        String serializedValue = (String) codec.deserialize("incorrect value"); // IdentityValuesDTO
-                                                                                // object
-        // expected
-        assertEquals("incorrect value", serializedValue);
+        assertNull(codec.deserialize("incorrect value"));
     }
 
 }
