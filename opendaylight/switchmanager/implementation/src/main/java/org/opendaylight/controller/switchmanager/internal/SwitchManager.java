@@ -1103,8 +1103,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     private void updateNode(Node node, Set<Property> props) {
         log.trace("{} updated, props: {}", node, props);
-        if (nodeProps == null || !nodeProps.containsKey(node) ||
-                props == null || props.isEmpty()) {
+        if (nodeProps == null || props == null) {
             return;
         }
 
