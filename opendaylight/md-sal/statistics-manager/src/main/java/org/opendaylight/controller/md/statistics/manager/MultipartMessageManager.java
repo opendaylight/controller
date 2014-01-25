@@ -116,7 +116,8 @@ public class MultipartMessageManager {
     }
     
     public void setTxIdAndTableIdMapEntry(NodeId nodeId, TransactionId id,Short tableId){
-        
+        if(id == null)
+            return;
         txIdTotableIdMap.put(new TxIdEntry(nodeId,id,null), tableId);
     }
     
@@ -129,6 +130,8 @@ public class MultipartMessageManager {
         }
     }
     public void addTxIdToRequestTypeEntry (NodeId nodeId, TransactionId id,StatsRequestType type){
+        if(id == null)
+            return;
         TxIdEntry entry = new TxIdEntry(nodeId,id,type);
         txIdToRequestTypeMap.put(entry, getExpiryTime());
     }

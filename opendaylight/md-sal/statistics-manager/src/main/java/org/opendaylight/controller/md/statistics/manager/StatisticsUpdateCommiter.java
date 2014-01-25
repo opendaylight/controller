@@ -688,25 +688,11 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if (statsFlow.getClass() != storedFlow.getClass()) {
             return false;
         }
-        if (statsFlow.getBufferId()== null) {
-            if (storedFlow.getBufferId() != null) {
-                return false;
-            }
-        } else if(!statsFlow.getBufferId().equals(storedFlow.getBufferId())) {
-            return false;
-        }
         if (statsFlow.getContainerName()== null) {
             if (storedFlow.getContainerName()!= null) {
                 return false;
             }
         } else if(!statsFlow.getContainerName().equals(storedFlow.getContainerName())) {
-            return false;
-        }
-        if (statsFlow.getCookie()== null) {
-            if (storedFlow.getCookie()!= null) {
-                return false;
-            }
-        } else if(!statsFlow.getCookie().equals(storedFlow.getCookie())) {
             return false;
         }
         if (statsFlow.getMatch()== null) {
@@ -715,20 +701,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             }
         } //else if(!statsFlow.getMatch().equals(storedFlow.getMatch())) {
         else if(!matchEquals(statsFlow.getMatch(), storedFlow.getMatch())) {
-            return false;
-        }
-        if (statsFlow.getHardTimeout() == null) {
-            if (storedFlow.getHardTimeout() != null) {
-                return false;
-            }
-        } else if(!statsFlow.getHardTimeout().equals(storedFlow.getHardTimeout() )) {
-            return false;
-        }
-        if (statsFlow.getIdleTimeout()== null) {
-            if (storedFlow.getIdleTimeout() != null) {
-                return false;
-            }
-        } else if(!statsFlow.getIdleTimeout().equals(storedFlow.getIdleTimeout())) {
             return false;
         }
         if (statsFlow.getPriority() == null) {
