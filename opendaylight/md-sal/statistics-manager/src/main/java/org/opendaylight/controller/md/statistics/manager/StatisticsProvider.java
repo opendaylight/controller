@@ -489,7 +489,7 @@ public class StatisticsProvider implements AutoCloseable {
         if(nodes == null)
             return null;
         
-        spLogger.info("Number of connected nodes : {}",nodes.getNode().size());
+        spLogger.debug("Number of connected nodes : {}",nodes.getNode().size());
         return nodes.getNode();
     }
     
@@ -499,7 +499,7 @@ public class StatisticsProvider implements AutoCloseable {
         FlowCapableNode node = (FlowCapableNode)dps.readOperationalData(nodesIdentifier);
         List<Short> tablesId = new ArrayList<Short>();
         if(node != null && node.getTable()!=null){
-            spLogger.info("Number of tables {} supported by node {}",node.getTable().size(),nodeKey);
+            spLogger.debug("Number of tables {} supported by node {}",node.getTable().size(),nodeKey);
             for(Table table: node.getTable()){
                 tablesId.add(table.getId());
             }
