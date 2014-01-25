@@ -71,9 +71,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.googlecode.slf4j-maven-plugin-log</groupId>
-            <artifactId>slf4j-maven-plugin-log</artifactId>
-            <version>1.0.0</version>
+            <groupId>com.jcabi</groupId>
+            <artifactId>jcabi-maven-slf4j</artifactId>
+            <version>0.8</version>
         </dependency>
 
         <dependency>
