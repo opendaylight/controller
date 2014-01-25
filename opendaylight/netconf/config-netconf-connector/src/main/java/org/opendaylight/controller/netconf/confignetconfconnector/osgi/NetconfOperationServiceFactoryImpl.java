@@ -21,6 +21,7 @@ import java.lang.management.ManagementFactory;
 public class NetconfOperationServiceFactoryImpl implements NetconfOperationServiceFactory {
 
     public static final int ATTEMPT_TIMEOUT_MS = 1000;
+    private static final int SILENT_ATTEMPTS = 30;
 
     private final YangStoreService yangStoreService;
     private final ConfigRegistryJMXClient jmxClient;
@@ -34,25 +35,35 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
     public NetconfOperationServiceFactoryImpl(YangStoreService yangStoreService, MBeanServer mBeanServer) {
         this.yangStoreService = yangStoreService;
 
+        ConfigRegistryJMXClient configRegistryJMXClient;
+        int i = 0;
         // Config registry might not be present yet, but will be eventually
         while(true) {
 
-            final ConfigRegistryJMXClient configRegistryJMXClient;
             try {
                 configRegistryJMXClient = new ConfigRegistryJMXClient(mBeanServer);
+                break;
             } catch (IllegalStateException e) {
-                logger.debug("Jmx client could not be created, reattempting");
+                ++i;
+                if (i > SILENT_ATTEMPTS) {
+                    logger.info("JMX client not created after {} attempts, still trying", i, e);
+                } else {
+                    logger.debug("JMX client could not be created, reattempting, try {}", i, e);
+                }
                 try {
                     Thread.sleep(ATTEMPT_TIMEOUT_MS);
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException(e1);
+                    throw new RuntimeException("Interrupted while reattempting connection", e1);
                 }
-                continue;
             }
+        }
 
-            jmxClient = configRegistryJMXClient;
-            break;
+        jmxClient = configRegistryJMXClient;
+        if (i > SILENT_ATTEMPTS) {
+            logger.info("Created JMX client after {} attempts", i);
+        } else {
+            logger.debug("Created JMX client after {} attempts", i);
         }
     }
 
