@@ -5,10 +5,7 @@ import java.util.Collections;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.ModifyAction;
-import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 import com.google.common.base.Preconditions;
@@ -40,6 +37,11 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
     public void setQname(QName name) {
         Preconditions.checkState(unwrapped == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
+    }
+    
+    @Override
+    public QName getQname() {
+        return name;
     }
     
     @Override

@@ -6,10 +6,11 @@ import java.net.URI;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.controller.sal.rest.impl.RestUtil.PrefixMapingFromJson;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
+import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -63,8 +64,7 @@ class JsonReader {
 
     private void addChildToParent(String childName, JsonElement childType, CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
-                    getLocalNameFor(childName));
+            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName));
             parent.addValue(child);
             for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
@@ -88,7 +88,8 @@ class JsonReader {
 
     private URI getNamespaceFor(String jsonElementName) {
         String[] moduleNameAndLocalName = jsonElementName.split(":");
-        if (moduleNameAndLocalName.length != 2) { // it is not "moduleName:localName"
+        // it is not "moduleName:localName"
+        if (moduleNameAndLocalName.length != 2) {
             return null;
         }
         return URI.create(moduleNameAndLocalName[0]);
@@ -96,21 +97,28 @@ class JsonReader {
 
     private String getLocalNameFor(String jsonElementName) {
         String[] moduleNameAndLocalName = jsonElementName.split(":");
-        if (moduleNameAndLocalName.length != 2) { // it is not "moduleName:localName"
+        // it is not "moduleName:localName"
+        if (moduleNameAndLocalName.length != 2) {
             return jsonElementName;
         }
         return moduleNameAndLocalName[1];
     }
 
-    /**
-     * @param value
-     *            value of json element
-     * @return if value is "moduleName:localName" then {@link IdentityValuesDTO} else
-     *         the same string as parameter "value"
-     */
     private Object resolveValueOfElement(String value) {
+        // it could be instance-identifier Built-In Type
+        if (value.startsWith("/")) {
+            IdentityValuesDTO resolvedValue = RestUtil.asInstanceIdentifier(value, new PrefixMapingFromJson());
+            if (resolvedValue != null) {
+                return resolvedValue;
+            }
+        }
+        // it could be identityref Built-In Type
         URI namespace = getNamespaceFor(value);
-        return namespace == null ? value : new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null);
+        if (namespace != null) {
+            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null);
+        }
+        // it is not "prefix:value" but just "value"
+        return value;
     }
 
 }
