@@ -176,13 +176,6 @@
           <version>${yangtools.version}</version>
         </dependency>
 
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>clustered-datastore-implementation</artifactId>
-          <version>0.4.1-SNAPSHOT</version>
-        </dependency>
-
-
         <!-- config-->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
@@ -466,18 +459,6 @@
         <dependency>
          <groupId>org.opendaylight.controller.thirdparty</groupId>
          <artifactId>ganymed</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-remoterpc-connector</artifactId>
-          <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>
-                  remoterpc-routingtable.implementation
-              </artifactId>
-              <version>0.4.1-SNAPSHOT</version>
         </dependency>
         <dependency>
               <groupId>org.zeromq</groupId>
