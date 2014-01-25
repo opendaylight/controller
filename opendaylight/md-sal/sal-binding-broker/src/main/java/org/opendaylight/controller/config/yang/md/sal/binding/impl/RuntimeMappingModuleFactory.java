@@ -45,13 +45,14 @@ public class RuntimeMappingModuleFactory extends
     @Override
     public Set<RuntimeMappingModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
             BundleContext bundleContext) {
-        if (SINGLETON == null) {
-            DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(IDENTIFIER);
-            SINGLETON = new RuntimeMappingModule(IDENTIFIER, dependencyResolver);
-            SINGLETON.setBundleContext(bundleContext);
-        }
-
-        return Collections.singleton(SINGLETON);
+        return Collections.emptySet();
+//        if (SINGLETON == null) {
+//            DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(IDENTIFIER);
+//            SINGLETON = new RuntimeMappingModule(IDENTIFIER, dependencyResolver);
+//            SINGLETON.setBundleContext(bundleContext);
+//        }
+//
+//        return Collections.singleton(SINGLETON);
     }
 
 }

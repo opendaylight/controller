@@ -118,6 +118,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                        <Bundle-Activator>org.opendaylight.controller.sal.dom.broker.osgi.SchemaServiceActivator</Bundle-Activator>
                         <Export-Package>
                             org.opendaylight.controller.sal.dom.broker.spi
                         </Export-Package>

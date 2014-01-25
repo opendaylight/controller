@@ -38,13 +38,13 @@ public class TestHelper {
 
     public static Option configMinumumBundles() {
         return new DefaultCompositeOption(
+                mavenBundle(CONTROLLER, "config-api").versionAsInProject(), // //
+                bindingAwareSalBundles(),
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
-                mavenBundle(CONTROLLER, "config-api").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "config-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-jmx-generator").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-store-api").versionAsInProject(), //
@@ -83,20 +83,16 @@ public class TestHelper {
 
     public static Option bindingAwareSalBundles() {
         return new DefaultCompositeOption( //
-                mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), // //
-                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), // //
-                mavenBundle(CONTROLLER, "sal-binding-util").versionAsInProject(), //
+                mdSalCoreBundles(),
+                
                 mavenBundle("org.javassist", "javassist").versionAsInProject(), // //
-                mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
-
+                
                 mavenBundle(YANGTOOLS, "yang-data-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-data-impl").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-model-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-model-util").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-parser-api").versionAsInProject(), //
                 mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(),
-
                 mavenBundle(YANGTOOLS, "binding-generator-spi").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "binding-model-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "binding-generator-util").versionAsInProject(), //
@@ -105,12 +101,20 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "binding-generator-api").versionAsInProject(), mavenBundle(YANGTOOLS,
                         "binding-generator-spi").versionAsInProject(), //
                 mavenBundle(YANGTOOLS, "binding-generator-impl").versionAsInProject(),
-
+                mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
+                
                 mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
+                mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "sal-binding-util").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
+
+
+                
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 
-                mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
 
                 systemProperty("netconf.tcp.address").value("0.0.0.0"), //
                 systemProperty("netconf.tcp.port").value("18383"), //

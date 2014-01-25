@@ -32,15 +32,4 @@ public class SchemaServiceImplSingletonModuleFactory extends
         throw new UnsupportedOperationException("Only default instance supported.");
     }
 
-    @Override
-    public Set<SchemaServiceImplSingletonModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
-            BundleContext bundleContext) {
-        DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(IDENTIFIER);
-
-        if (SINGLETON == null) {
-            SINGLETON = new SchemaServiceImplSingletonModule(IDENTIFIER, dependencyResolver);
-            SINGLETON.setBundleContext(bundleContext);
-        }
-        return Collections.singleton(SINGLETON);
-    }
 }

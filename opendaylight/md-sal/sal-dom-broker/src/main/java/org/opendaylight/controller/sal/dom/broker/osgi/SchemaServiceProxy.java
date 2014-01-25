@@ -1,7 +1,7 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -40,6 +40,6 @@ public class SchemaServiceProxy extends AbstractBrokerServiceProxy<SchemaService
         return registration;
     }
 
-    
-    
+
+
 }

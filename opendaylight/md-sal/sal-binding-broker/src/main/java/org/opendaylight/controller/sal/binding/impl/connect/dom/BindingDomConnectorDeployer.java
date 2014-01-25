@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
@@ -40,7 +41,7 @@ public class BindingDomConnectorDeployer {
         connector.setMappingService(source.getMappingService());
         return connector;
     }
-    
+
     public static void startDataForwarding(BindingIndependentConnector connector, DataProviderService baService,
             ProviderSession domContext) {
         startDataForwarding(connector, baService,
@@ -52,7 +53,7 @@ public class BindingDomConnectorDeployer {
         startRpcForwarding(connector, rpcProviderRegistry, domProviderContext.getService(RpcProvisionRegistry.class));
 
     }
-    
+
     public static void startNotificationForwarding(BindingIndependentConnector connector, NotificationProviderService provider,ProviderSession domProviderContext) {
         startNotificationForwarding(connector, provider, domProviderContext.getService(NotificationPublishService.class));
     }
@@ -78,12 +79,12 @@ public class BindingDomConnectorDeployer {
         connector.setDomDataService(domService);
         connector.startDataForwarding();
     }
-    
+
     public static void startNotificationForwarding(BindingIndependentConnector connector, NotificationProviderService baService, NotificationPublishService domService) {
         if(connector.isNotificationForwarding()) {
             return;
         }
-        
+
         // FIXME
     }
 
