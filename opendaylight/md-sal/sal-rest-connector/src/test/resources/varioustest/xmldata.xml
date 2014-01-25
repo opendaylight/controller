@@ -1,0 +1,5 @@
+<cont xmlns="generalnamespace">
+    <cont1>
+        <lf1 xmlns:prefix="prefix:name" xmlns:prefix2="prefix2:name">/prefix:somepath1/prefix2:somepath2</lf1>
+    </cont1>
+</cont>

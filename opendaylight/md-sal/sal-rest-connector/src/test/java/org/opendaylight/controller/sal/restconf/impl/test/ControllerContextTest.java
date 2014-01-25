@@ -45,8 +45,8 @@ public class ControllerContextTest {
                 .toInstanceIdentifier("simple-nodes:userWithoutClass/foo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "userWithoutClass");
 
-        instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:userWithoutClass/foo/full-name");
-        assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "full-name");
+        instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:userWithoutClass/foo");
+        assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "userWithoutClass");
 
         instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:user/foo/boo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "user");
@@ -54,8 +54,6 @@ public class ControllerContextTest {
         instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:user//boo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "user");
 
-        instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:users/user/foo");
-        assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "user");
     }
 
     @Test
@@ -83,8 +81,8 @@ public class ControllerContextTest {
     @Test
     public void testToInstanceIdentifierChoice() throws FileNotFoundException {
         InstanceIdWithSchemaNode instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:food/nonalcoholic/beer");
-        assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "beer");
+                .toInstanceIdentifier("simple-nodes:food/nonalcoholic");
+        assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "nonalcoholic");
     }
 
     @Test
