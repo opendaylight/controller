@@ -18,7 +18,7 @@ module opendaylight-sal-binding-broker-impl {
 
     identity binding-dom-mapping-service {
         base config:service-type;
-        config:java-class "org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService";
+        config:java-class "org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService";
     }
 
 

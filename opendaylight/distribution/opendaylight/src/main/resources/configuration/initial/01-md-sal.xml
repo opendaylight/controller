@@ -13,10 +13,6 @@
                     <name>hash-map-data-store</name>
                 </module>
                 <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:cluster:store">prefix:dom-clustered-store-impl</type>
-                    <name>cluster-data-store</name>
-                </module>
-                <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-broker-impl</type>
                     <name>dom-broker</name>
                     <data-store xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
@@ -82,10 +78,6 @@
 					<name>hash-map-data-store</name>
 					<provider>/modules/module[type='hash-map-data-store'][name='hash-map-data-store']</provider>
 				</instance>
-				<instance>
-					<name>cluster-data-store</name>
-					<provider>/modules/module[type='dom-clustered-store-impl'][name='cluster-data-store']</provider>
-				</instance>
 			</service>
 			<service>
 				<type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
@@ -136,7 +128,6 @@
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
-        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:cluster:store?module=odl-sal-dom-clustered-store-cfg&amp;revision=2013-10-28</capability>
     </required-capabilities>
 
 </snapshot>

@@ -9,11 +9,25 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import java.util.Map.Entry;
+import java.util.Set;
+
 import javassist.ClassPool;
 
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.dom.serializer.impl.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.yangtools.concepts.Delegator;
+import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.RpcService;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import com.google.common.base.Preconditions;
 
@@ -50,10 +64,23 @@ public final class RuntimeMappingModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
+        
+        RuntimeGeneratedMappingServiceProxy potential = tryToReuseGlobalInstance();
+        if(potential != null) {
+            return potential;
+        }
         RuntimeGeneratedMappingServiceImpl service = new RuntimeGeneratedMappingServiceImpl();
         service.setPool(SingletonHolder.CLASS_POOL);
-        service.start(getBundleContext());
+        service.init();
         return service;
+    }
+
+    private RuntimeGeneratedMappingServiceProxy tryToReuseGlobalInstance() {
+        ServiceReference<BindingIndependentMappingService> serviceRef = getBundleContext().getServiceReference(BindingIndependentMappingService.class);
+        if(serviceRef == null) {
+            return null;
+        }
+        return new RuntimeGeneratedMappingServiceProxy(getBundleContext(),serviceRef);
     }
 
     private BundleContext getBundleContext() {
@@ -62,5 +89,74 @@ public final class RuntimeMappingModule extends
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    private static final class RuntimeGeneratedMappingServiceProxy implements //
+    BindingIndependentMappingService, //
+    Delegator<BindingIndependentMappingService>, //
+    AutoCloseable {
+        
+        private BindingIndependentMappingService delegate;
+        private ServiceReference<BindingIndependentMappingService> reference;
+        private BundleContext bundleContext;
+
+        public RuntimeGeneratedMappingServiceProxy(BundleContext bundleContext,
+                ServiceReference<BindingIndependentMappingService> serviceRef) {
+            this.bundleContext = bundleContext;
+            this.reference = serviceRef;
+            this.delegate = bundleContext.getService(serviceRef);
+        }
+
+        public CodecRegistry getCodecRegistry() {
+            return delegate.getCodecRegistry();
+        }
+
+        public CompositeNode toDataDom(DataObject data) {
+            return delegate.toDataDom(data);
+        }
+
+        public Entry<InstanceIdentifier, CompositeNode> toDataDom(
+                Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> entry) {
+            return delegate.toDataDom(entry);
+        }
+
+        public InstanceIdentifier toDataDom(
+                org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path) {
+            return delegate.toDataDom(path);
+        }
+
+        public DataObject dataObjectFromDataDom(
+                org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path,
+                CompositeNode result) throws DeserializationException {
+            return delegate.dataObjectFromDataDom(path, result);
+        }
+
+        public org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> fromDataDom(InstanceIdentifier entry)
+                throws DeserializationException {
+            return delegate.fromDataDom(entry);
+        }
+
+        public Set<QName> getRpcQNamesFor(Class<? extends RpcService> service) {
+            return delegate.getRpcQNamesFor(service);
+        }
+
+        public DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput) {
+            return delegate.dataObjectFromDataDom(inputClass, domInput);
+        }
+        
+        @Override
+        public void close() throws Exception {
+            if(delegate != null) {
+                delegate = null;
+                bundleContext.ungetService(reference);
+                bundleContext= null;
+                reference = null;
+            }
+        }
+
+        @Override
+        public BindingIndependentMappingService getDelegate() {
+            return delegate;
+        }
     }
 }

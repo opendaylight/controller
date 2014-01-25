@@ -6,22 +6,6 @@
                 <capability>
                     urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:cluster:store?module=odl-sal-dom-clustered-store-cfg&amp;revision=2013-10-28
                 </capability>
-                <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom?module=opendaylight-md-sal-dom&amp;revision=2013-10-28</capability>
-                <capability>
-                    urn:opendaylight:params:xml:ns:yang:controller:config?module=config&amp;revision=2013-04-05
-                </capability>
-                <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
-                <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability>
-                <capability>urn:ietf:params:xml:ns:yang:rpc-context?module=rpc-context&amp;revision=2013-06-17
-                </capability>
-                <capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2010-09-24
-                </capability>
-                <capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
-                <capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2010-09-24
-                </capability>
-                <capability>
-                    urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28
-                </capability>
             </required-capabilities>
             <configuration>
 

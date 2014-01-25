@@ -8,6 +8,22 @@
 
 package org.opendaylight.controller.datastore;
 
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,23 +43,8 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
 @RunWith(PaxExam.class)
+//@ExamReactorStrategy(PerClass.class)
 public class ClusteredDataStoreIT {
     private Logger log = LoggerFactory.getLogger(ClusteredDataStoreIT.class);
     // get the OSGI bundle context
@@ -95,29 +96,9 @@ public class ClusteredDataStoreIT {
                 mavenBundle("org.opendaylight.controller", "sal.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "protocol_plugins.stub").versionAsInProject(),
 
-                // sal-common-impl
-                mavenBundle("org.eclipse.xtend", "org.eclipse.xtend.lib").versionAsInProject(),
-                mavenBundle("org.eclipse.xtext", "org.eclipse.xtext.xbase.lib").versionAsInProject(),
-
-                // clustered-data-store-implementation dependencies
-                mavenBundle("com.google.guava", "guava").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal-core-api").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal-common-api").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal-common-util").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal-common-impl").versionAsInProject(),
-                mavenBundle("org.opendaylight.yangtools", "yang-model-api").versionAsInProject(),
-                mavenBundle("org.opendaylight.yangtools", "yang-binding").versionAsInProject(),
-
-                // sal-common-api dependencies
-                mavenBundle("org.opendaylight.controller", "sal-common").versionAsInProject(),
-                mavenBundle("org.opendaylight.yangtools", "yang-common").versionAsInProject(),
-                mavenBundle("org.opendaylight.yangtools", "concepts").versionAsInProject(),
                 mavenBundle("org.osgi", "org.osgi.core").versionAsInProject(),
                 // adding new maven bundles
                 mavenBundle("org.mockito", "mockito-all").versionAsInProject(),
-
-                // yang-data-api
-                mavenBundle("org.opendaylight.yangtools", "yang-data-api").versionAsInProject(),
 
                 // needed by hosttracker
                 mavenBundle("org.opendaylight.controller", "clustered-datastore-implementation").versionAsInProject(),

@@ -9,11 +9,14 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import java.lang.management.ManagementFactory;
 
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -30,11 +33,28 @@ public class ConfigManagerActivator implements BundleActivator {
     private ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
     private ServiceRegistration configRegistryServiceRegistration;
 
+    private ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService> tracker;
+
     @Override
     public void start(BundleContext context) throws Exception {
+        BindingIndependentMappingServiceTracker mappingServiceTracker = new BindingIndependentMappingServiceTracker(
+                context, this);
+        tracker = new ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService>(
+                context, BindingIndependentMappingService.class, mappingServiceTracker);
+
+        logger.debug("Waiting for codec registry");
+
+        tracker.open();
+    }
+
+    void initConfigManager(BundleContext context, CodecRegistry codecRegistry) {
         BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
                 new BundleContextBackedModuleFactoriesResolver(context);
         MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
+
+
+        // TODO push codecRegistry/IdentityCodec to dependencyResolver
+
         configRegistry = new ConfigRegistryImpl(
                 bundleContextBackedModuleFactoriesResolver, configMBeanServer);
 
@@ -43,7 +63,11 @@ public class ConfigManagerActivator implements BundleActivator {
 
         // register config registry to jmx
         configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
-        configRegistryJMXRegistrator.registerToJMX(configRegistry);
+        try {
+            configRegistryJMXRegistrator.registerToJMX(configRegistry);
+        } catch (InstanceAlreadyExistsException e) {
+            throw new RuntimeException("Config Registry was already registered to JMX", e);
+        }
 
         // track bundles containing factories
         BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(configRegistry);
@@ -56,6 +80,11 @@ public class ConfigManagerActivator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        try {
+            tracker.close();
+        } catch (Exception e) {
+            logger.warn("Exception while closing tracker", e);
+        }
         try {
             configRegistry.close();
         } catch (Exception e) {

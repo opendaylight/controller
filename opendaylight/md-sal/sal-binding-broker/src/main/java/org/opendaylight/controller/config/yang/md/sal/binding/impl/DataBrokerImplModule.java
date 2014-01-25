@@ -10,25 +10,16 @@
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
-import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.RootDataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedDataBrokerImpl;
-import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.sal.core.api.data.DataProviderService;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.osgi.framework.BundleContext;
-
-import com.google.common.util.concurrent.MoreExecutors;
+import org.osgi.framework.ServiceReference;
 
 /**
 *
@@ -57,13 +48,13 @@ public final class DataBrokerImplModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         RootDataBrokerImpl dataBindingBroker;
-        
-        
+
+
         ExecutorService listeningExecutor = SingletonHolder.getDefaultCommitExecutor();
-        
-        if (getDomBrokerDependency() != null && getMappingServiceDependency() != null) {
-            
-            dataBindingBroker = createDomConnectedBroker(listeningExecutor);
+        BindingIndependentMappingService potentialMapping = resolveMappingServiceDependency();
+        if (getDomBrokerDependency() != null && potentialMapping != null) {
+
+            dataBindingBroker = createDomConnectedBroker(listeningExecutor,potentialMapping);
         } else {
             dataBindingBroker = createStandAloneBroker(listeningExecutor);
         }
@@ -71,16 +62,28 @@ public final class DataBrokerImplModule extends
 
         return dataBindingBroker;
     }
+    private BindingIndependentMappingService resolveMappingServiceDependency() {
+        if(getMappingService() != null) {
+            return getMappingServiceDependency();
+        }
+        
+        ServiceReference<BindingIndependentMappingService> potentialMappingService = bundleContext.getServiceReference(BindingIndependentMappingService.class);
+        if(potentialMappingService != null) {
+            return bundleContext.getService(potentialMappingService);
+        }
+        return null;
+    }
+
     private RootDataBrokerImpl createStandAloneBroker(ExecutorService listeningExecutor) {
         RootDataBrokerImpl broker = new RootDataBrokerImpl();
         broker.setExecutor(listeningExecutor);
         return broker;
     }
 
-    private RootDataBrokerImpl createDomConnectedBroker(ExecutorService listeningExecutor) {
+    private RootDataBrokerImpl createDomConnectedBroker(ExecutorService listeningExecutor, BindingIndependentMappingService mappingService) {
         DomForwardedDataBrokerImpl forwardedBroker = new DomForwardedDataBrokerImpl();
         forwardedBroker.setExecutor(listeningExecutor);
-        BindingIndependentConnector connector = BindingDomConnectorDeployer.createConnector(getMappingServiceDependency());
+        BindingIndependentConnector connector = BindingDomConnectorDeployer.createConnector(mappingService);
         getDomBrokerDependency().registerProvider(forwardedBroker, getBundleContext());
         ProviderSession domContext = forwardedBroker.getDomProviderContext();
         forwardedBroker.setConnector(connector);

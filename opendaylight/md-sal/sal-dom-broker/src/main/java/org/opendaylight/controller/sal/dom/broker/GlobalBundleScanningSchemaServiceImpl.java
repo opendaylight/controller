@@ -13,13 +13,13 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.opendaylight.yangtools.yang.parser.impl.util.URLSchemaContextResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -36,15 +36,15 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
-public class SchemaServiceImpl implements //
+public class GlobalBundleScanningSchemaServiceImpl implements //
         SchemaContextProvider, //
         SchemaService, //
         ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
         AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(SchemaServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
     private ListenerRegistry<SchemaServiceListener> listeners;
-    
+
     private BundleContext context;
     private BundleScanner scanner = new BundleScanner();
 
@@ -78,7 +78,7 @@ public class SchemaServiceImpl implements //
             listeners = new ListenerRegistry<>();
         }
 
-        listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, SchemaServiceImpl.this);
+        listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, GlobalBundleScanningSchemaServiceImpl.this);
         bundleTracker = new BundleTracker<ImmutableSet<Registration<URL>>>(context, BundleEvent.RESOLVED
                         | BundleEvent.UNRESOLVED, scanner);
         bundleTracker.open();
@@ -200,7 +200,7 @@ public class SchemaServiceImpl implements //
 
         SchemaServiceListener listener = context.getService(reference);
         SchemaContext _ctxContext = getGlobalContext();
-        if (_ctxContext != null) {
+        if (getContext() != null && _ctxContext != null) {
             listener.onGlobalContextUpdated(_ctxContext);
         }
         return listener;

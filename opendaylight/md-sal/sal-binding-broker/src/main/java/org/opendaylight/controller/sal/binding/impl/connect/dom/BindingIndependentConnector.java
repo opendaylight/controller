@@ -42,6 +42,8 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.GlobalRpcRegistrationListener;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.RouterInstantiationListener;
@@ -96,8 +98,8 @@ public class BindingIndependentConnector implements //
             .builder().toInstance();
 
     private final static Method EQUALS_METHOD;
-    
-    
+
+
     private BindingIndependentMappingService mappingService;
 
     private org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;
@@ -141,8 +143,8 @@ public class BindingIndependentConnector implements //
     private RpcProviderRegistryImpl baRpcRegistryImpl;
 
     private org.opendaylight.controller.sal.dom.broker.spi.RpcRouter biRouter;
-    
-    
+
+
     static {
         try {
         EQUALS_METHOD = Object.class.getMethod("equals", Object.class);
@@ -458,11 +460,11 @@ public class BindingIndependentConnector implements //
     }
 
     private class DomToBindingCommitHandler implements //
-            RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier<?>, DataObject>>, //
+            RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject>>, //
             DataCommitHandler<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> {
 
         @Override
-        public void onRegister(DataCommitHandlerRegistration<InstanceIdentifier<?>, DataObject> registration) {
+        public void onRegister(DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
 
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = mappingService.toDataDom(registration
                     .getPath());
@@ -470,7 +472,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public void onUnregister(DataCommitHandlerRegistration<InstanceIdentifier<?>, DataObject> registration) {
+        public void onUnregister(DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
             // NOOP for now
             // FIXME: do registration based on only active commit handlers.
         }
@@ -500,7 +502,7 @@ public class BindingIndependentConnector implements //
     /**
      * Manager responsible for instantiating forwarders responsible for
      * forwarding of RPC invocations from DOM Broker to Binding Aware Broker
-     * 
+     *
      */
     private class DomToBindingRpcForwardingManager implements
             RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>,
@@ -517,17 +519,17 @@ public class BindingIndependentConnector implements //
         public void setRegistryImpl(RpcProviderRegistryImpl registryImpl) {
             this.registryImpl = registryImpl;
         }
-        
+
         @Override
         public void onGlobalRpcRegistered(Class<? extends RpcService> cls) {
             getRpcForwarder(cls, null);
         }
-        
+
         @Override
         public void onGlobalRpcUnregistered(Class<? extends RpcService> cls) {
             // NOOP
         }
-        
+
         @Override
         public void onRpcRouterCreated(RpcRouter<?> router) {
             Class<? extends BaseIdentity> ctx = router.getContexts().iterator().next();
@@ -594,7 +596,7 @@ public class BindingIndependentConnector implements //
 
         /**
          * Constructor for Routed RPC Forwareder.
-         * 
+         *
          * @param service
          * @param context
          */
@@ -628,7 +630,7 @@ public class BindingIndependentConnector implements //
             }
         }
 
-        
+
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if(EQUALS_METHOD.equals(method)) {
@@ -666,7 +668,7 @@ public class BindingIndependentConnector implements //
                 Class<?> cls = rpcServiceType.get();
                 ClassLoader clsLoader = cls.getClassLoader();
                 RpcService proxy = (RpcService) Proxy.newProxyInstance(clsLoader, new Class<?>[] { cls }, this);
-                
+
                 RpcRouter rpcRouter = baRpcRegistryImpl.getRpcRouter(rpcServiceType.get());
                 rpcRouter.registerDefaultService(proxy);
             }
@@ -775,10 +777,10 @@ public class BindingIndependentConnector implements //
             RpcResult<?> bindingResult = result.get();
             return Rpcs.getRpcResult(true);
         }
-        
+
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
-            if(biRouter != null) { 
+            if(biRouter != null) {
                 CompositeNode xml = mappingService.toDataDom(input);
                 CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
                 RpcResult<CompositeNode> result = biRouter.invokeRpc(rpc, wrappedXml);
@@ -806,7 +808,7 @@ public class BindingIndependentConnector implements //
             RpcResult<Void> bindingResult = result.get();
             return Rpcs.getRpcResult(bindingResult.isSuccessful(), bindingResult.getErrors());
         }
-        
+
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
             return Futures.immediateFuture(null);

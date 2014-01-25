@@ -68,6 +68,11 @@
             <artifactId>concepts</artifactId>
             <version>${yangtools.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-data-impl</artifactId>
+            <version>${yangtools.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

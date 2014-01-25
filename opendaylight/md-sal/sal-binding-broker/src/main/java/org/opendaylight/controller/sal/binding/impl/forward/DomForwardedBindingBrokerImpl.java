@@ -7,8 +7,7 @@ import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentMappingService;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.DeserializationException;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
@@ -20,7 +19,7 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
 
     private ProviderSession domProviderContext;
     private BindingIndependentConnector connector;
-    
+
     private MountProvisionService domMountService;
 
     private final DomMountPointForwardingManager domForwardingManager = new DomMountPointForwardingManager();
