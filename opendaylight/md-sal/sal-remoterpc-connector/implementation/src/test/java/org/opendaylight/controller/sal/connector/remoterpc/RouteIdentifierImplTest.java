@@ -12,6 +12,7 @@ import java.net.URI;
 import com.fasterxml.jackson.core.JsonParseException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
@@ -40,7 +41,11 @@ public class RouteIdentifierImplTest {
     RouteIdentifierImpl rId = new RouteIdentifierImpl();
     rId.setType(QNAME);
 
-    _logger.debug("route: " + rId.fromString(rId.toString()));
+    String s = rId.toString();
+    _logger.debug("serialized route: {}", s);
+
+    RpcRouter.RouteIdentifier ref = new RouteIdentifierImpl().fromString(s);
+    _logger.debug("deserialized route: {}", ref);
 
     Assert.assertTrue(true);
   }
