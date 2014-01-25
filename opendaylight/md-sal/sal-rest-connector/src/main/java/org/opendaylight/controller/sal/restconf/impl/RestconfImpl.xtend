@@ -5,7 +5,6 @@ import java.net.URI
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
-import java.util.Set
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.core.api.mount.MountInstance
@@ -17,7 +16,6 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
@@ -26,11 +24,12 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.Module
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
+import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
+import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
-import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 class RestconfImpl implements RestconfService {
 
@@ -54,7 +53,8 @@ class RestconfImpl implements RestconfService {
     }
 
     override readAllData() {
-//        return broker.readOperationalData("".toInstanceIdentifier.getInstanceIdentifier);
+
+        //        return broker.readOperationalData("".toInstanceIdentifier.getInstanceIdentifier);
         throw new UnsupportedOperationException("Reading all data is currently not supported.")
     }
 
@@ -69,11 +69,11 @@ class RestconfImpl implements RestconfService {
     override invokeRpc(String identifier, CompositeNode payload) {
         return callRpc(identifier.rpcDefinition, payload)
     }
-    
+
     override invokeRpc(String identifier) {
         return callRpc(identifier.rpcDefinition, null)
     }
-    
+
     private def StructuredData callRpc(RpcDefinition rpc, CompositeNode payload) {
         if (rpc === null) {
             throw new ResponseException(NOT_FOUND, "RPC does not exist.");
@@ -164,7 +164,7 @@ class RestconfImpl implements RestconfService {
         if (payload.representsMountPointRootData) { // payload represents mount point data and URI represents path to the mount point
             if (identifier.endsWithMountPoint) {
                 throw new ResponseException(BAD_REQUEST,
-                "URI has bad format. URI should be without \"" + ControllerContext.MOUNT + "\" for POST operation.");
+                    "URI has bad format. URI should be without \"" + ControllerContext.MOUNT + "\" for POST operation.");
             }
             val completIdentifier = identifier.addMountPointIdentifier
             iiWithData = completIdentifier.toInstanceIdentifier
@@ -172,8 +172,11 @@ class RestconfImpl implements RestconfService {
         } else {
             val uncompleteInstIdWithData = identifier.toInstanceIdentifier
             val parentSchema = uncompleteInstIdWithData.schemaNode as DataNodeContainer
-            val namespace = uncompleteInstIdWithData.mountPoint.findModule(payload)?.namespace
-            val schemaNode = parentSchema.findInstanceDataChild(payload.name, namespace)
+            val module = uncompleteInstIdWithData.mountPoint.findModule(payload)
+            if (module === null) {
+                throw new ResponseException(BAD_REQUEST, "Module was not found for \"" + payload.namespace + "\"")
+            }
+            val schemaNode = parentSchema.findInstanceDataChildByNameAndNamespace(payload.name, module.namespace)
             value = normalizeNode(payload, schemaNode, uncompleteInstIdWithData.mountPoint)
             iiWithData = uncompleteInstIdWithData.addLastIdentifierFromData(value, schemaNode)
         }
@@ -192,7 +195,7 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
-    
+
     override createConfigurationData(CompositeNode payload) {
         if (payload.namespace === null) {
             throw new ResponseException(BAD_REQUEST,
@@ -203,7 +206,7 @@ class RestconfImpl implements RestconfService {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)");
         }
-        val schemaNode = module.findInstanceDataChild(payload.name, module.namespace)
+        val schemaNode = module.findInstanceDataChildByNameAndNamespace(payload.name, module.namespace)
         val value = normalizeNode(payload, schemaNode, null)
         val iiWithData = addLastIdentifierFromData(null, value, schemaNode)
         var RpcResult<TransactionStatus> status = null
@@ -221,7 +224,7 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
-    
+
     override deleteConfigurationData(String identifier) {
         val iiWithData = identifier.toInstanceIdentifier
         var RpcResult<TransactionStatus> status = null
@@ -236,19 +239,19 @@ class RestconfImpl implements RestconfService {
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
     }
-    
+
     private def dispatch URI namespace(CompositeNode data) {
         return data.nodeType.namespace
     }
-    
+
     private def dispatch URI namespace(CompositeNodeWrapper data) {
         return data.namespace
     }
-    
+
     private def dispatch String localName(CompositeNode data) {
         return data.nodeType.localName
     }
-    
+
     private def dispatch String localName(CompositeNodeWrapper data) {
         return data.localName
     }
@@ -277,15 +280,15 @@ class RestconfImpl implements RestconfService {
         }
         return module
     }
-    
+
     private def dispatch getName(CompositeNode data) {
         return data.nodeType.localName
     }
-    
+
     private def dispatch getName(CompositeNodeWrapper data) {
         return data.localName
     }
-    
+
     private def InstanceIdWithSchemaNode addLastIdentifierFromData(InstanceIdWithSchemaNode identifierWithSchemaNode,
         CompositeNode data, DataSchemaNode schemaOfData) {
         val iiOriginal = identifierWithSchemaNode?.instanceIdentifier
@@ -317,26 +320,27 @@ class RestconfImpl implements RestconfService {
         }
         return keyValues
     }
-    
+
     private def endsWithMountPoint(String identifier) {
         return (identifier.endsWith(ControllerContext.MOUNT) || identifier.endsWith(ControllerContext.MOUNT + "/"))
     }
-    
+
     private def representsMountPointRootData(CompositeNode data) {
         return ((data.namespace == SchemaContext.NAME.namespace || data.namespace == MOUNT_POINT_MODULE_NAME) &&
             data.localName == SchemaContext.NAME.localName)
     }
-    
+
     private def addMountPointIdentifier(String identifier) {
         if (identifier.endsWith("/")) {
             return identifier + ControllerContext.MOUNT
         }
         return identifier + "/" + ControllerContext.MOUNT
     }
-    
+
     private def CompositeNode normalizeNode(CompositeNode node, DataSchemaNode schema, MountInstance mountPoint) {
         if (schema === null) {
-            throw new ResponseException(INTERNAL_SERVER_ERROR, "Data schema node was not found for " + node?.nodeType?.localName)
+            throw new ResponseException(INTERNAL_SERVER_ERROR,
+                "Data schema node was not found for " + node?.nodeType?.localName)
         }
         if (!(schema instanceof DataNodeContainer)) {
             throw new ResponseException(BAD_REQUEST, "Root element has to be container or list yang datatype.");
@@ -349,44 +353,59 @@ class RestconfImpl implements RestconfService {
         }
         return node
     }
-    
+
     private def void normalizeNode(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment,
         MountInstance mountPoint) {
         if (schema === null) {
             throw new ResponseException(BAD_REQUEST,
                 "Data has bad format.\n\"" + nodeBuilder.localName + "\" does not exist in yang schema.");
         }
-        var validQName = schema.QName
-        var currentAugment = previousAugment;
-        if (schema.augmenting) {
-            currentAugment = schema.QName
-        } else if (previousAugment !== null && schema.QName.namespace !== previousAugment.namespace) {
-            validQName = QName.create(currentAugment, schema.QName.localName);
-        }
-        var String moduleName = null;
-        if (mountPoint === null) {
-            moduleName = controllerContext.findModuleNameByNamespace(validQName.namespace);
+
+        var QName currentAugment;
+        if (nodeBuilder.qname !== null) {
+            currentAugment = previousAugment
         } else {
-            moduleName = controllerContext.findModuleNameByNamespace(mountPoint, validQName.namespace)
-        }
-        if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
-            nodeBuilder.namespace.toString == moduleName || nodeBuilder.namespace == MOUNT_POINT_MODULE_NAME) {
-            nodeBuilder.qname = validQName
-        } else {
-            throw new ResponseException(BAD_REQUEST,
-                "Data has bad format.\nIf data is in XML format then namespace for \"" + nodeBuilder.localName +
-                    "\" should be \"" + schema.QName.namespace + "\".\nIf data is in Json format then module name for \"" +
-                    nodeBuilder.localName + "\" should be \"" + moduleName + "\".");
+            currentAugment = normalizeNodeName(nodeBuilder, schema, previousAugment, mountPoint)
+            if (nodeBuilder.qname === null) {
+                throw new ResponseException(BAD_REQUEST,
+                    "Data has bad format.\nIf data is in XML format then namespace for \"" + nodeBuilder.localName +
+                        "\" should be \"" + schema.QName.namespace + "\".\n" +
+                        "If data is in JSON format then module name for \"" + nodeBuilder.localName +
+                         "\" should be corresponding to namespace \"" + schema.QName.namespace + "\".");
+            }
         }
 
         if (nodeBuilder instanceof CompositeNodeWrapper) {
             val List<NodeWrapper<?>> children = (nodeBuilder as CompositeNodeWrapper).getValues
             for (child : children) {
-                normalizeNode(child,
-                    findFirstSchemaByLocalName(child.localName, (schema as DataNodeContainer).childNodes),
-                    currentAugment, mountPoint)
+                val potentialSchemaNodes = (schema as DataNodeContainer).findInstanceDataChildrenByName(child.localName)
+                if (potentialSchemaNodes.size > 1 && child.namespace === null) {
+                    val StringBuilder namespacesOfPotentialModules = new StringBuilder;
+                    for (potentialSchemaNode : potentialSchemaNodes) {
+                        namespacesOfPotentialModules.append("   ").append(potentialSchemaNode.QName.namespace.toString).append("\n")
+                    }
+                    throw new ResponseException(BAD_REQUEST,
+                        "Node \"" + child.localName + "\" is added as augment from more than one module. " 
+                        + "Therefore node must have namespace (XML format) or module name (JSON format)."
+                        + "\nThe node is added as augment from modules with namespaces:\n" + namespacesOfPotentialModules)
+                }
+                var rightNodeSchemaFound = false
+                for (potentialSchemaNode : potentialSchemaNodes) {
+                    if (!rightNodeSchemaFound) {
+                        val potentialCurrentAugment = normalizeNodeName(child, potentialSchemaNode, currentAugment,
+                            mountPoint)
+                        if (child.qname !== null) {
+                            normalizeNode(child, potentialSchemaNode, potentialCurrentAugment, mountPoint)
+                            rightNodeSchemaFound = true
+                        }
+                    }
+                }
+                if (!rightNodeSchemaFound) {
+                    throw new ResponseException(BAD_REQUEST,
+                        "Schema node \"" + child.localName + "\" was not found in module.")
+                }
             }
-            if(schema instanceof ListSchemaNode) {
+            if (schema instanceof ListSchemaNode) {
                 val listKeys = (schema as ListSchemaNode).keyDefinition
                 for (listKey : listKeys) {
                     var foundKey = false
@@ -397,7 +416,8 @@ class RestconfImpl implements RestconfService {
                     }
                     if (!foundKey) {
                         throw new ResponseException(BAD_REQUEST,
-                            "Missing key in URI \"" + listKey.localName + "\" of list \"" + schema.QName.localName + "\"")
+                            "Missing key in URI \"" + listKey.localName + "\" of list \"" + schema.QName.localName +
+                                "\"")
                     }
                 }
             }
@@ -405,11 +425,11 @@ class RestconfImpl implements RestconfService {
             val simpleNode = (nodeBuilder as SimpleNodeWrapper)
             val value = simpleNode.value
             var inputValue = value;
-            
+
             if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
                 if (value instanceof String) {
-                    inputValue = new IdentityValuesDTO(validQName.namespace.toString, value as String, null)
-                } // else value is instance of ValuesDTO
+                    inputValue = new IdentityValuesDTO(nodeBuilder.namespace.toString, value as String, null)
+                } // else value is already instance of IdentityValuesDTO
             }
             
             val outputValue = RestCodec.from(schema.typeDefinition, mountPoint)?.deserialize(inputValue);
@@ -441,25 +461,61 @@ class RestconfImpl implements RestconfService {
         }
         baseType
     }
-
-    private def DataSchemaNode findFirstSchemaByLocalName(String localName, Set<DataSchemaNode> schemas) {
-        for (schema : schemas) {
-            if (schema instanceof ChoiceNode) {
-                for (caze : (schema as ChoiceNode).cases) {
-                    val result = findFirstSchemaByLocalName(localName, caze.childNodes)
-                    if (result !== null) {
-                        return result
-                    }
-                }
-            } else {
-                val result = schemas.findFirst[n|n.QName.localName.equals(localName)]
-                if (result !== null) {
-                    return result;
-
-                }
-            }
+    
+    private def QName normalizeNodeName(NodeWrapper<?> nodeBuilder, DataSchemaNode schema, QName previousAugment,
+        MountInstance mountPoint) {
+        var validQName = schema.QName
+        var currentAugment = previousAugment;
+        if (schema.augmenting) {
+            currentAugment = schema.QName
+        } else if (previousAugment !== null && schema.QName.namespace !== previousAugment.namespace) {
+            validQName = QName.create(currentAugment, schema.QName.localName);
         }
-        return null
+        var String moduleName = null;
+        if (mountPoint === null) {
+            moduleName = controllerContext.findModuleNameByNamespace(validQName.namespace);
+        } else {
+            moduleName = controllerContext.findModuleNameByNamespace(mountPoint, validQName.namespace)
+        }
+        if (nodeBuilder.namespace === null || nodeBuilder.namespace == validQName.namespace ||
+            nodeBuilder.namespace.toString == moduleName || nodeBuilder.namespace == MOUNT_POINT_MODULE_NAME) {
+            nodeBuilder.qname = validQName
+        }
+        return currentAugment
     }
+
+//    private def void collectInstanceDataChildren(List<DataSchemaNode> potentialNodeSchemas, DataNodeContainer container,
+//        String name) {
+//        val nodes = container.childNodes.filter[n|n.QName.localName == name]
+//        for (potentialNode : nodes) {
+//            if (potentialNode.instantiatedDataSchema) {
+//                potentialNodeSchemas.add(potentialNode)
+//            }
+//        }
+//        val allCases = container.childNodes.filter(ChoiceNode).map[cases].flatten
+//        for (caze : allCases) {
+//            collectInstanceDataChildren(potentialNodeSchemas, caze, name)
+//        }
+//    }
+
+//    private def DataSchemaNode findFirstSchemaByLocalName(String localName, Set<DataSchemaNode> schemas) {
+//        for (schema : schemas) {
+//            if (schema instanceof ChoiceNode) {
+//                for (caze : (schema as ChoiceNode).cases) {
+//                    val result = findFirstSchemaByLocalName(localName, caze.childNodes)
+//                    if (result !== null) {
+//                        return result
+//                    }
+//                }
+//            } else {
+//                val result = schemas.findFirst[n|n.QName.localName.equals(localName)]
+//                if (result !== null) {
+//                    return result;
+//
+//                }
+//            }
+//        }
+//        return null
+//    }
 
 }

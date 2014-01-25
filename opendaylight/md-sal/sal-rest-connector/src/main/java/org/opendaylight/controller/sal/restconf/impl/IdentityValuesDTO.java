@@ -11,10 +11,19 @@ public final class IdentityValuesDTO {
     public IdentityValuesDTO(String namespace, String value, String prefix) {
         elementData.add(new IdentityValue(namespace, value, prefix));
     }
+    
+    public IdentityValuesDTO() {
+        
+    }
 
     public void add(String namespace, String value, String prefix) {
         elementData.add(new IdentityValue(namespace, value, prefix));
     }
+    
+    public void add(IdentityValue identityValue) {
+        elementData.add(identityValue);
+    }
+    
 
     public List<IdentityValue> getValuesWithNamespaces() {
         return Collections.unmodifiableList(elementData);
@@ -22,9 +31,10 @@ public final class IdentityValuesDTO {
 
     public static final class IdentityValue {
 
-        private String namespace;
-        private String value;
-        private String prefix;
+        private final String namespace;
+        private final String value;
+        private final String prefix;
+        private List<Predicate> predicates;
 
         public IdentityValue(String namespace, String value, String prefix) {
             this.namespace = namespace;
@@ -36,25 +46,42 @@ public final class IdentityValuesDTO {
             return namespace;
         }
 
-        public void setNamespace(String namespace) {
-            this.namespace = namespace;
-        }
-
         public String getValue() {
             return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
         }
 
         public String getPrefix() {
             return prefix;
         }
 
-        public void setPrefix(String prefix) {
-            this.prefix = prefix;
+        public List<Predicate> getPredicates() {
+            return predicates;
         }
 
+        public void setPredicates(List<Predicate> predicates) {
+            this.predicates = predicates;
+        }
+
+    }
+    
+    public static final class Predicate {
+        
+        private final IdentityValue name;
+        private final String value;
+        
+        public Predicate(IdentityValue name, String value) {
+            super();
+            this.name = name;
+            this.value = value;
+        }
+        
+        public IdentityValue getName() {
+            return name;
+        }
+        
+        public String getValue() {
+            return value;
+        }
+        
     }
 }

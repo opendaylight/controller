@@ -1,16 +1,19 @@
 package org.opendaylight.controller.sal.restconf.impl
 
+import com.google.common.base.Preconditions
 import com.google.common.collect.BiMap
 import com.google.common.collect.FluentIterable
 import com.google.common.collect.HashBiMap
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
+import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
 import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
 import org.opendaylight.controller.sal.core.api.model.SchemaServiceListener
+import org.opendaylight.controller.sal.core.api.mount.MountInstance
 import org.opendaylight.controller.sal.core.api.mount.MountService
 import org.opendaylight.controller.sal.rest.impl.RestUtil
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider
@@ -37,7 +40,6 @@ import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
 import static javax.ws.rs.core.Response.Status.*
-import org.opendaylight.controller.sal.core.api.mount.MountInstance
 
 class ControllerContext implements SchemaServiceListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
@@ -336,19 +338,33 @@ class ControllerContext implements SchemaServiceListener {
                         "URI has bad format. \"" + moduleName + "\" module does not exist in mount point.")
                 }
             }
-            targetNode = parentNode.findInstanceDataChild(nodeName, module.namespace)
+            targetNode = parentNode.findInstanceDataChildByNameAndNamespace(nodeName, module.namespace)
+//            targetNode = parentNode.findInstanceDataChild(nodeName, module.namespace)
             if (targetNode === null) {
                 throw new ResponseException(BAD_REQUEST, "URI has bad format. Possible reasons:\n" + 
                     "1. \"" + strings.head + "\" was not found in parent data node.\n" + 
                     "2. \"" + strings.head + "\" is behind mount point. Then it should be in format \"/" + MOUNT + "/" + strings.head + "\".")
             }
         } else { // string without module name
-            targetNode = parentNode.findInstanceDataChild(nodeName, null)
+            val potentialSchemaNodes = parentNode.findInstanceDataChildrenByName(nodeName)
+            if (potentialSchemaNodes.size > 1) {
+                val StringBuilder namespacesOfPotentialModules = new StringBuilder;
+                for (potentialNodeSchema : potentialSchemaNodes) {
+                    namespacesOfPotentialModules.append("   ").append(potentialNodeSchema.QName.namespace.toString).append("\n")
+                }
+                throw new ResponseException(BAD_REQUEST, "URI has bad format. Node \"" + nodeName + "\" is added as augment from more than one module. " 
+                        + "Therefore the node must have module name and it has to be in format \"moduleName:nodeName\"."
+                        + "\nThe node is added as augment from modules with namespaces:\n" + namespacesOfPotentialModules)
+            }
+            targetNode = potentialSchemaNodes.head
             if (targetNode === null) {
                 throw new ResponseException(BAD_REQUEST, "URI has bad format. \"" + nodeName + "\" was not found in parent data node.\n")
             }
         }
         
+        if (!(targetNode instanceof ListSchemaNode) && !(targetNode instanceof ContainerSchemaNode)) {
+            throw new ResponseException(BAD_REQUEST,"URI has bad format. Node \"" + strings.head + "\" must be Container or List yang type.")
+        }
         // Number of consumed elements
         var consumed = 1;
         if (targetNode instanceof ListSchemaNode) {
@@ -390,28 +406,68 @@ class ControllerContext implements SchemaServiceListener {
         return new InstanceIdWithSchemaNode(builder.toInstance, targetNode, mountPoint)
     }
 
-    def DataSchemaNode findInstanceDataChild(DataNodeContainer container, String name, URI moduleNamespace) {
-        var DataSchemaNode potentialNode = null
-        if (moduleNamespace === null) {
-            potentialNode = container.getDataChildByName(name);
-        } else {
-            potentialNode = container.childNodes.filter[n|n.QName.localName == name && n.QName.namespace == moduleNamespace].head
-        }
-        
-        if (potentialNode.instantiatedDataSchema) {
-            return potentialNode;
+//    def DataSchemaNode findInstanceDataChild(DataNodeContainer container, String name, URI moduleNamespace) {
+//        var DataSchemaNode potentialNode = null
+//        if (moduleNamespace === null) {
+//            potentialNode = container.getDataChildByName(name);
+//        } else {
+//            potentialNode = container.childNodes.filter[n|n.QName.localName == name && n.QName.namespace == moduleNamespace].head
+//        }
+//        
+//        if (potentialNode.instantiatedDataSchema) {
+//            return potentialNode;
+//        }
+//        val allCases = container.childNodes.filter(ChoiceNode).map[cases].flatten
+//        for (caze : allCases) {
+//            potentialNode = caze.findInstanceDataChild(name, moduleNamespace);
+//            if (potentialNode !== null) {
+//                return potentialNode;
+//            }
+//        }
+//        return null;
+//    }
+    
+    // TODO replace with isInstantiatedDataNodeContainer ?
+//    def boolean isInstantiatedDataSchema(DataSchemaNode node) {
+//        switch node {
+//            LeafSchemaNode: return true
+//            LeafListSchemaNode: return true
+//            ContainerSchemaNode: return true
+//            ListSchemaNode: return true
+//            default: return false
+//        }
+//    }
+
+    def DataSchemaNode findInstanceDataChildByNameAndNamespace(DataNodeContainer container,
+        String name, URI namespace) {
+        Preconditions.checkNotNull(namespace)
+        val potentialSchemaNodes = container.findInstanceDataChildrenByName(name)
+        return potentialSchemaNodes.filter[n|n.QName.namespace == namespace].head
+    }
+    
+    def List<DataSchemaNode> findInstanceDataChildrenByName(DataNodeContainer container, String name) {
+        Preconditions.checkNotNull(container)
+        Preconditions.checkNotNull(name)
+        val instantiatedDataNodeContainers = new ArrayList
+        instantiatedDataNodeContainers.collectInstanceDataNodeContainers(container, name)
+        return instantiatedDataNodeContainers
+    }
+    
+    private def void collectInstanceDataNodeContainers(List<DataSchemaNode> potentialSchemaNodes, DataNodeContainer container,
+        String name) {
+        val nodes = container.childNodes.filter[n|n.QName.localName == name]
+        for (potentialNode : nodes) {
+            if (potentialNode.isInstantiatedDataSchema) {
+                potentialSchemaNodes.add(potentialNode)
+            }
         }
         val allCases = container.childNodes.filter(ChoiceNode).map[cases].flatten
         for (caze : allCases) {
-            potentialNode = caze.findInstanceDataChild(name, moduleNamespace);
-            if (potentialNode !== null) {
-                return potentialNode;
-            }
+            collectInstanceDataNodeContainers(potentialSchemaNodes, caze, name)
         }
-        return null;
     }
     
-    static def boolean isInstantiatedDataSchema(DataSchemaNode node) {
+    def boolean isInstantiatedDataSchema(DataSchemaNode node) {
         switch node {
             LeafSchemaNode: return true
             LeafListSchemaNode: return true
@@ -420,7 +476,7 @@ class ControllerContext implements SchemaServiceListener {
             default: return false
         }
     }
-
+    
     private def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {
         checkNotNull(uriValue);
         checkArgument(node instanceof LeafSchemaNode);
