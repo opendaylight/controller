@@ -29,7 +29,6 @@ class FlowConfigMapping {
     }
 
     static def toFlowConfig(Flow sourceCfg) {
-        val flow = toFlow(sourceCfg);
         val it = new FlowConfig;
         name = String.valueOf(sourceCfg.id);
         node = sourceCfg.node.toADNode();
