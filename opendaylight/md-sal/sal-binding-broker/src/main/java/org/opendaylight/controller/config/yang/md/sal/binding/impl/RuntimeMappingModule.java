@@ -80,7 +80,12 @@ public final class RuntimeMappingModule extends
         if(serviceRef == null) {
             return null;
         }
-        return new RuntimeGeneratedMappingServiceProxy(getBundleContext(),serviceRef);
+
+        BindingIndependentMappingService delegate = bundleContext.getService(serviceRef);
+        if (delegate == null) {
+            return null;
+        }
+        return new RuntimeGeneratedMappingServiceProxy(getBundleContext(),serviceRef,delegate);
     }
 
     private BundleContext getBundleContext() {
@@ -101,10 +106,11 @@ public final class RuntimeMappingModule extends
         private BundleContext bundleContext;
 
         public RuntimeGeneratedMappingServiceProxy(BundleContext bundleContext,
-                ServiceReference<BindingIndependentMappingService> serviceRef) {
-            this.bundleContext = bundleContext;
-            this.reference = serviceRef;
-            this.delegate = bundleContext.getService(serviceRef);
+                ServiceReference<BindingIndependentMappingService> serviceRef,
+                BindingIndependentMappingService delegate) {
+            this.bundleContext = Preconditions.checkNotNull(bundleContext);
+            this.reference = Preconditions.checkNotNull(serviceRef);
+            this.delegate = Preconditions.checkNotNull(delegate);
         }
 
         public CodecRegistry getCodecRegistry() {
