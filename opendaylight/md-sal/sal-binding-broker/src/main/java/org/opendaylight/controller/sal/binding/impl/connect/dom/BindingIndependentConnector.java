@@ -89,6 +89,8 @@ public class BindingIndependentConnector implements //
         Provider, //
         AutoCloseable {
 
+
+
     private final Logger LOG = LoggerFactory.getLogger(BindingIndependentConnector.class);
 
     @SuppressWarnings( "deprecation")
@@ -589,7 +591,7 @@ public class BindingIndependentConnector implements //
                 }
 
             } catch (Exception e) {
-                LOG.error("Could not forward Rpcs of type {}", service.getName());
+                LOG.error("Could not forward Rpcs of type {}", service.getName(),e);
             }
             registrations = ImmutableSet.of();
         }
@@ -721,8 +723,10 @@ public class BindingIndependentConnector implements //
                         } else {
                             strategy = new NoInputNoOutputInvocationStrategy(rpc,targetMethod);
                         }
+                    } else if(inputClass.isPresent()){
+                        strategy = new NoOutputInvocationStrategy(rpc,targetMethod, inputClass.get());
                     } else {
-                        strategy = null;
+                        strategy = new NoInputNoOutputInvocationStrategy(rpc,targetMethod);
                     }
                     return strategy;
                 }
@@ -814,6 +818,46 @@ public class BindingIndependentConnector implements //
             return Futures.immediateFuture(null);
         }
     }
+    
+    private class NoOutputInvocationStrategy extends RpcInvocationStrategy {
+
+        
+        @SuppressWarnings("rawtypes")
+        private WeakReference<Class> inputClass;
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        public NoOutputInvocationStrategy(QName rpc, Method targetMethod, 
+                Class<? extends DataContainer> inputClass) {
+            super(rpc,targetMethod);
+            this.inputClass = new WeakReference(inputClass);
+        }
+        
+        
+        @Override
+        public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
+            DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
+            Future<RpcResult<?>> result = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
+            if (result == null) {
+                return Rpcs.getRpcResult(false);
+            }
+            RpcResult<?> bindingResult = result.get();
+            return Rpcs.getRpcResult(true);
+        }
+
+        @Override
+        public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
+            if(biRouter != null) {
+                CompositeNode xml = mappingService.toDataDom(input);
+                CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
+                RpcResult<CompositeNode> result = biRouter.invokeRpc(rpc, wrappedXml);
+                Object baResultValue = null;
+                RpcResult<?> baResult = Rpcs.<Void>getRpcResult(result.isSuccessful(), null, result.getErrors());
+                return Futures.<RpcResult<?>>immediateFuture(baResult);
+            }
+            return Futures.<RpcResult<?>>immediateFuture(Rpcs.getRpcResult(false));
+        }
+
+    }
 
     public boolean isRpcForwarding() {
         return rpcForwarding;
@@ -824,7 +868,6 @@ public class BindingIndependentConnector implements //
     }
 
     public boolean isNotificationForwarding() {
-        // TODO Auto-generated method stub
         return notificationForwarding;
     }
 

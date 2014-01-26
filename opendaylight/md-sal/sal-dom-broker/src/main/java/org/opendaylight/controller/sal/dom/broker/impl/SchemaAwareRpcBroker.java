@@ -119,6 +119,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String> {
         RpcDefinition definition = findRpcDefinition(rpcType);
         checkArgument(!isRoutedRpc(definition), "RPC Type must not be routed.");
         GlobalRpcRegistration reg = new GlobalRpcRegistration(rpcType, implementation, this);
+        implementations.putIfAbsent(rpcType, implementation);
         return reg;
     }
 
