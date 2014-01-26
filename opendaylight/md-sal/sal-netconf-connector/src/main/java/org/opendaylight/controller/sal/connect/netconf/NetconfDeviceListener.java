@@ -78,17 +78,11 @@ class NetconfDeviceListener extends NetconfClientSessionListener {
      */
     public void onNotification(final NetconfClientSession session, final NetconfMessage message) {
         this.device.logger.debug("Received NETCONF notification.", message);
-        CompositeNode _notificationBody = null;
-        CompositeNode _compositeNode = null;
+        CompositeNode domNotification = null;
         if (message != null) {
-            _compositeNode = NetconfMapping.toCompositeNode(message,device.getSchemaContext());
+            domNotification = NetconfMapping.toNotificationNode(message, device.getSchemaContext());
         }
-        if (_compositeNode != null) {
-            _notificationBody = NetconfDeviceListener.getNotificationBody(_compositeNode);
-        }
-        final CompositeNode domNotification = _notificationBody;
-        boolean _notEquals = (!Objects.equal(domNotification, null));
-        if (_notEquals) {
+        if (domNotification != null) {
             MountProvisionInstance _mountInstance = null;
             if (this.device != null) {
                 _mountInstance = this.device.getMountInstance();

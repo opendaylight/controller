@@ -80,12 +80,14 @@ public class BindingDomConnectorDeployer {
         connector.startDataForwarding();
     }
 
-    public static void startNotificationForwarding(BindingIndependentConnector connector, NotificationProviderService baService, NotificationPublishService domService) {
+    public static void startNotificationForwarding(BindingIndependentConnector connector, 
+            NotificationProviderService baService, NotificationPublishService domService) {
         if(connector.isNotificationForwarding()) {
             return;
         }
-
-        // FIXME
+        connector.setBindingNotificationService(baService);
+        connector.setDomNotificationService(domService);
+        connector.startNotificationForwarding();
     }
 
     //
