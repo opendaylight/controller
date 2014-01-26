@@ -34,11 +34,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 public class NotificationRouterImpl implements NotificationRouter {
     private static Logger log = LoggerFactory.getLogger(NotificationRouterImpl.class);
 
-    private Multimap<QName, Registration<NotificationListener>> listeners = HashMultimap.create();
+    private Multimap<QName, Registration<NotificationListener>> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.<QName, Registration<NotificationListener>>create());
 
     private void sendNotification(CompositeNode notification) {
         QName type = notification.getNodeType();
