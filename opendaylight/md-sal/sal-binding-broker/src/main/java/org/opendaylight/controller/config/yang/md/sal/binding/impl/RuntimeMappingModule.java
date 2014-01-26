@@ -104,7 +104,7 @@ public final class RuntimeMappingModule extends
                 ServiceReference<BindingIndependentMappingService> serviceRef) {
             this.bundleContext = bundleContext;
             this.reference = serviceRef;
-            this.delegate = bundleContext.getService(serviceRef);
+            this.delegate = Preconditions.checkNotNull(bundleContext.getService(serviceRef), "Failed to resolve service %s", serviceRef);
         }
 
         public CodecRegistry getCodecRegistry() {
