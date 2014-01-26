@@ -16,7 +16,6 @@
     <version>1.0.1-SNAPSHOT</version>
     <relativePath>opendaylight/commons/parent</relativePath>
   </parent>
-
   <artifactId>releasepom</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
