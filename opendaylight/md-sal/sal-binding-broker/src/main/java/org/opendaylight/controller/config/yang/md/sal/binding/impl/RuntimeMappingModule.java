@@ -9,6 +9,7 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -72,6 +74,7 @@ public final class RuntimeMappingModule extends
         RuntimeGeneratedMappingServiceImpl service = new RuntimeGeneratedMappingServiceImpl();
         service.setPool(SingletonHolder.CLASS_POOL);
         service.init();
+        bundleContext.registerService(SchemaServiceListener.class, service, new Hashtable<String,String>());
         return service;
     }
 
