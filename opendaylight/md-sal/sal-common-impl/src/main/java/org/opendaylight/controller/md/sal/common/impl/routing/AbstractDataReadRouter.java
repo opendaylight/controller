@@ -12,6 +12,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 /**
  * Base abstract implementation of DataReadRouter, which performs
@@ -22,8 +23,8 @@ import com.google.common.collect.Multimap;
  */
 public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements DataReader<P, D> {
 
-    Multimap<P, DataReaderRegistration<P, D>> configReaders = HashMultimap.create();
-    Multimap<P, DataReaderRegistration<P, D>> operationalReaders = HashMultimap.create();
+    Multimap<P, DataReaderRegistration<P, D>> configReaders = Multimaps.synchronizedSetMultimap(HashMultimap.<P, DataReaderRegistration<P, D>>create());
+    Multimap<P, DataReaderRegistration<P, D>> operationalReaders = Multimaps.synchronizedSetMultimap(HashMultimap.<P, DataReaderRegistration<P, D>>create());
 
     @Override
     public D readConfigurationData(P path) {

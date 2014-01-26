@@ -37,6 +37,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult
 import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
+import com.google.common.collect.Multimaps
 
 abstract class AbstractDataBroker<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> implements DataModificationTransactionFactory<P, D>, //
 DataReader<P, D>, //
@@ -60,8 +61,8 @@ DataProvisionService<P, D> {
     @Property
     private val AtomicLong finishedTransactionsCount = new AtomicLong
 
-    Multimap<P, DataChangeListenerRegistration<P, D, DCL>> listeners = HashMultimap.create();
-    Multimap<P, DataCommitHandlerRegistrationImpl<P, D>> commitHandlers = HashMultimap.create();
+    Multimap<P, DataChangeListenerRegistration<P, D, DCL>> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.create());
+    Multimap<P, DataCommitHandlerRegistrationImpl<P, D>> commitHandlers = Multimaps.synchronizedSetMultimap(HashMultimap.create());
     
     val ListenerRegistry<RegistrationListener<DataCommitHandlerRegistration<P,D>>> commitHandlerRegistrationListeners = new ListenerRegistry();
     public new() {
