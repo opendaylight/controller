@@ -293,23 +293,27 @@ public class StatisticsProvider implements AutoCloseable {
         NodeRef targetNodeRef = new NodeRef(targetInstanceId);
     
         try{
-            sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
-        
-            sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
-
-            sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
-        
-            sendAllFlowTablesStatisticsRequest(targetNodeRef);
-        
-            sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
-
-            sendAllGroupStatisticsRequest(targetNodeRef);
-            
-            sendAllMeterStatisticsRequest(targetNodeRef);
-            
-            sendGroupDescriptionRequest(targetNodeRef);
-            
-            sendMeterConfigStatisticsRequest(targetNodeRef);
+            if(flowStatsService != null){
+                sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
+                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
+            }
+            if(flowTableStatsService != null){
+                sendAllFlowTablesStatisticsRequest(targetNodeRef);
+            }
+            if(portStatsService != null){
+                sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
+            }
+            if(groupStatsService != null){
+                sendAllGroupStatisticsRequest(targetNodeRef);
+                sendGroupDescriptionRequest(targetNodeRef);
+            }
+            if(meterStatsService != null){
+                sendAllMeterStatisticsRequest(targetNodeRef);
+                sendMeterConfigStatisticsRequest(targetNodeRef);
+            }
+            if(queueStatsService != null){
+                sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
+            }
         }catch(Exception e){
             spLogger.error("Exception occured while sending statistics requests : {}", e);
         }
@@ -366,22 +370,27 @@ public class StatisticsProvider implements AutoCloseable {
         if(tablesId.size() != 0){
             for(Short id : tablesId){
                 
-                spLogger.debug("Send aggregate stats request for flow table {} to node {}",id,targetNodeKey);
-                GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input = 
-                        new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
-                
-                input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
-                input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(id));
-                Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response = 
-                        flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());
-                
-                multipartMessageManager.setTxIdAndTableIdMapEntry(targetNodeKey.getId(), response.get().getResult().getTransactionId(), id);
-                this.multipartMessageManager.addTxIdToRequestTypeEntry(targetNodeKey.getId(), response.get().getResult().getTransactionId()
-                        , StatsRequestType.AGGR_FLOW);
+                sendAggregateFlowsStatsFromTableRequest(targetNodeKey,id);
             }
         }else{
             spLogger.debug("No details found in data store for flow tables associated with Node {}",targetNodeKey);
         }
+    }
+    
+    public void sendAggregateFlowsStatsFromTableRequest(NodeKey targetNodeKey,Short tableId) throws InterruptedException, ExecutionException{
+        
+        spLogger.debug("Send aggregate stats request for flow table {} to node {}",tableId,targetNodeKey);
+        GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input = 
+                new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+                
+        input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
+        input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(tableId));
+        Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response = 
+                flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());
+                
+        multipartMessageManager.setTxIdAndTableIdMapEntry(targetNodeKey.getId(), response.get().getResult().getTransactionId(), tableId);
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(targetNodeKey.getId(), response.get().getResult().getTransactionId()
+                , StatsRequestType.AGGR_FLOW);
     }
 
     public void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
