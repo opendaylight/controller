@@ -141,7 +141,12 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     }
     
     override onFlowRemoved(FlowRemoved notification) {
-        flowProgrammerPublisher.flowRemoved(notification.node.toADNode,notification.toFlow(notification.node.toADNode));
+        if(notification != null && notification.node != null) {
+            val adNode = notification.node.toADNode
+            if(adNode != null) {
+                flowProgrammerPublisher.flowRemoved(adNode,notification.toFlow(adNode));
+            }
+        } 
     }
     
     override onFlowUpdated(FlowUpdated notification) {
