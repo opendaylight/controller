@@ -77,7 +77,10 @@ public class ConfigPusher {
         // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder: configs){
             netconfClient = pushSnapshotWithRetries(configSnapshotHolder, Optional.of(netconfClient));
+            logger.debug("Config snapshot pushed successfully: {}", configSnapshotHolder);
         }
+
+        logger.debug("All configuration snapshots have been pushed successfully.");
         return netconfClient;
     }
 

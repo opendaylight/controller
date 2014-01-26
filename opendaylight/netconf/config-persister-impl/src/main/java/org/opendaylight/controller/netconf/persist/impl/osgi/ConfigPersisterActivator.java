@@ -90,6 +90,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                     // uncaught exception handler will deal with this failure
                     throw new RuntimeException("Interrupted while waiting for netconf connection", e);
                 }
+                logger.info("Configuration Persister initialization completed.");
             }
         };
         initializationThread = new Thread(initializationRunnable, "ConfigPersister-registrator");
