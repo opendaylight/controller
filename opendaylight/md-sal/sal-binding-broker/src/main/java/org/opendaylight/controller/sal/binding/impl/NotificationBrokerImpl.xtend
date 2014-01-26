@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.yangtools.concepts.Registration
 import org.opendaylight.yangtools.yang.binding.Notification
 import org.slf4j.LoggerFactory
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolderimport com.google.common.collect.Multimaps
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
 
@@ -31,12 +31,12 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
     var ExecutorService executor;
 
     new() {
-        listeners = HashMultimap.create()
+        listeners = Multimaps.synchronizedSetMultimap(HashMultimap.create())
     }
 
     @Deprecated
     new(ExecutorService executor) {
-        listeners = HashMultimap.create()
+        listeners = Multimaps.synchronizedSetMultimap(HashMultimap.create())
         this.executor = executor;
     }
 
