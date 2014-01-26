@@ -500,7 +500,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                         .child(Flow.class,newFlowKey).toInstance();
                 flowBuilder.setKey(newFlowKey);
                 flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                sucLogger.info("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",flowBuilder.build());
+                sucLogger.debug("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",flowBuilder.build());
                 it.putOperationalData(flowRef, flowBuilder.build());
                 it.commit();
             }
