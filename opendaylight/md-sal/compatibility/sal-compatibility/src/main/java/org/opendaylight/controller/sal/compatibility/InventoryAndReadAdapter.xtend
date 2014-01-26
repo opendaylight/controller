@@ -367,7 +367,10 @@ class InventoryAndReadAdapter implements IPluginInReadService,
         
         for (statsPublisher : statisticsPublisher){
 			val nodeRef = InstanceIdentifier.builder(Nodes).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(notification.id)).toInstance;
-			statsPublisher.descriptionStatisticsUpdated(nodeRef.toADNode,toNodeDescription(notification.nodeRef));
+            val description = notification.nodeRef.toNodeDescription
+            if(description != null) {
+			  statsPublisher.descriptionStatisticsUpdated(nodeRef.toADNode,description);
+			}
 		}
     }
 
@@ -434,9 +437,12 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 
     private def FlowCapableNode readFlowCapableNode(NodeRef ref) {
         val dataObject = dataService.readOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
-        val node = dataObject.checkInstanceOf(
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node);
-        return node.getAugmentation(FlowCapableNode);
+        if(dataObject != null) {
+            val node = dataObject.checkInstanceOf(
+                org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node);
+            return node.getAugmentation(FlowCapableNode);
+        }
+        return null;
     }
 
     private def FlowCapableNodeConnector readFlowCapableNodeConnector(NodeConnectorRef ref) {
@@ -492,14 +498,16 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 	
 	private def toNodeDescription(NodeRef nodeRef){
 		val capableNode = readFlowCapableNode(nodeRef);
-
-        val it = new NodeDescription()
-        manufacturer = capableNode.manufacturer
-        serialNumber = capableNode.serialNumber
-        software = capableNode.software
-        description = capableNode.description
-        
-        return it;
+        if(capableNode !=null) {
+            val it = new NodeDescription()
+            manufacturer = capableNode.manufacturer
+            serialNumber = capableNode.serialNumber
+            software = capableNode.software
+            description = capableNode.description
+            
+            return it;
+         }
+         return null;
 	}
     
     
