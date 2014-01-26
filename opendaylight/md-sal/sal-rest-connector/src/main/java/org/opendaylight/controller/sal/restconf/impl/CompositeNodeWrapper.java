@@ -41,6 +41,11 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
         Preconditions.checkState(compositeNode == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
+    
+    @Override
+    public QName getQname() {
+        return name;
+    }
 
     @Override
     public String getLocalName() {

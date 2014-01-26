@@ -1,15 +1,20 @@
 package org.opendaylight.controller.sal.restconf.impl.xml.to.cnsn.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,11 +221,11 @@ public class XmlLeafrefToCnSnTest {
      * Test case like <cont1 xmlns="namespace1" xmlns:x="namespace">
      * <lf11>x:identity</lf11> </cont1>
      */
+    @Ignore
     @Test
     public void testIdentityrefNmspcInParrentElement() {
         testIdentityrefToCnSn("/xml-to-cnsn/identityref/xml/data-nmspc-in-parrent-element.xml",
                 "/xml-to-cnsn/identityref", "identityref-module", "cont", 2, "iden", "z:namespace");
-
     }
 
     /**
