@@ -12,6 +12,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.runtime.RuntimeBean;
@@ -35,6 +37,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Anno
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.IdentityRefModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDeclaration;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
@@ -42,6 +45,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQual
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 
 import javax.management.openmbean.SimpleType;
 import java.util.ArrayList;
@@ -153,12 +157,12 @@ public class TemplateFactory {
     }
 
     // FIXME: put into Type.toString
-    static String serializeType(Type type) {
+    static String serializeType(Type type, boolean addWildcards) {
         if (type instanceof ParameterizedType){
             ParameterizedType parameterizedType = (ParameterizedType) type;
             StringBuffer sb = new StringBuffer();
             sb.append(parameterizedType.getRawType().getFullyQualifiedName());
-            sb.append("<");
+            sb.append(addWildcards ? "<? extends " : "<");
             boolean first = true;
             for(Type parameter: parameterizedType.getActualTypeArguments()) {
                 if (first) {
@@ -173,6 +177,14 @@ public class TemplateFactory {
         } else {
             return type.getFullyQualifiedName();
         }
+    }
+
+    static String serializeType(Type type) {
+        return serializeType(type, false);
+    }
+
+    private static boolean isIdentityRefType(Type type) {
+        return type instanceof IdentityrefTypeDefinition;
     }
 
 
@@ -424,9 +436,18 @@ public class TemplateFactory {
                 processAttrs(attrs, packageName);
             }
 
+            private final static String dependencyResolverVarName = "dependencyResolver";
+            private final static String dependencyResolverInjectMethodName = "injectDependencyResolver";
+
             private void processAttrs(Map<String, AttributeIfc> attrs, String packageName) {
                 fields = Lists.newArrayList();
                 methods = Lists.newArrayList();
+
+                // FIXME conflict if "dependencyResolver" field from yang
+                Field depRes = new Field(DependencyResolver.class.getName(), dependencyResolverVarName);
+                fields.add(depRes);
+                methods.add(new MethodDefinition("void", dependencyResolverInjectMethodName, Lists.newArrayList(depRes),
+                        "this." + dependencyResolverVarName + " = " + dependencyResolverVarName + ";"));
 
                 for (Entry<String, AttributeIfc> attrEntry : attrs.entrySet()) {
                     String innerName = attrEntry.getKey();
@@ -436,15 +457,23 @@ public class TemplateFactory {
                     String fullyQualifiedName, nullableDefault = null;
                     if (attrEntry.getValue() instanceof TypedAttribute) {
                         Type type = ((TypedAttribute) attrEntry.getValue()).getType();
-                        fullyQualifiedName = serializeType(type);
                         if(attrEntry.getValue() instanceof JavaAttribute) {
                             nullableDefault = ((JavaAttribute)attrEntry.getValue()).getNullableDefaultWrappedForCode();
+                            if(((JavaAttribute)attrEntry.getValue()).isIdentityRef()) {
+
+                                String fieldType = serializeType(type, true);
+                                String innerType = getInnerTypeFromIdentity(type);
+                                methods.add(new MethodDefinition(fieldType, "resolve" + attrEntry.getKey(), Collections.<Field>emptyList(),
+                                        "return " + varName + ".resolveIdentity(" + dependencyResolverVarName + "," +  innerType + ".class);"));
+                                type = identityRefType;
+                            }
                         }
+                        fullyQualifiedName = serializeType(type);
                     } else {
                         fullyQualifiedName = FullyQualifiedNameHelper
                                 .getFullyQualifiedName(packageName, attrEntry.getValue().getUpperCaseCammelCase());
                     }
-                    fields.add(new Field(fullyQualifiedName, varName, nullableDefault));
+                    fields.add(new Field(fullyQualifiedName, varName, nullableDefault, needsDepResolver(attrEntry.getValue())));
 
                     String getterName = "get" + innerName;
                     MethodDefinition getter = new MethodDefinition(
@@ -481,6 +510,7 @@ public class TemplateFactory {
         }
     }
 
+
     private static class MXBeanInterfaceAttributesProcessor {
         private final List<MethodDeclaration> methods = Lists.newArrayList();
 
@@ -489,9 +519,15 @@ public class TemplateFactory {
                 String returnType;
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
+                boolean isIdentityRef = false;
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     returnType = serializeType(typedAttribute.getType());
+
+                    if (attributeIfc instanceof JavaAttribute && ((JavaAttribute)attrEntry.getValue()).isIdentityRef()) {
+                        returnType = serializeType(identityRefType);
+                    }
+
                 } else {
                     throw new UnsupportedOperationException(
                             "Attribute not supported: "
@@ -510,6 +546,7 @@ public class TemplateFactory {
                 MethodDeclaration setter = new MethodDeclaration("void",
                         setterName, Lists.newArrayList(new Field(returnType,
                                 varName)));
+
                 methods.add(getter);
                 methods.add(setter);
 
@@ -525,10 +562,28 @@ public class TemplateFactory {
         }
     }
 
+    private static final Type identityRefType = new Type() {
+        public final Class<IdentityAttributeRef> IDENTITY_ATTRIBUTE_REF_CLASS = IdentityAttributeRef.class;
+
+        @Override
+        public String getPackageName() {
+            return IDENTITY_ATTRIBUTE_REF_CLASS.getPackage().getName();
+        }
+
+        @Override
+        public String getName() {
+            return IDENTITY_ATTRIBUTE_REF_CLASS.getSimpleName();
+        }
+
+        @Override
+        public String getFullyQualifiedName() {
+            return IDENTITY_ATTRIBUTE_REF_CLASS.getName();
+        }
+    };
+
     private static class AbstractFactoryAttributesProcessor {
 
         private final List<Field> fields = Lists.newArrayList();
-        private static final String STRING_FULLY_QUALIFIED_NAME = "java.util.List";
 
         void processAttributes(Map<String, AttributeIfc> attributes,
                 String packageName) {
@@ -540,27 +595,6 @@ public class TemplateFactory {
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     type = serializeType(typedAttribute.getType());
-                } else if (attributeIfc instanceof TOAttribute) {
-                    String fullyQualifiedName = FullyQualifiedNameHelper
-                            .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
-
-                    type = fullyQualifiedName;
-                } else if (attributeIfc instanceof ListAttribute) {  //FIXME: listAttribute might extend TypedAttribute
-                    String fullyQualifiedName = null;
-                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
-                            .getInnerAttribute();
-                    if (innerAttr instanceof JavaAttribute) {
-                        fullyQualifiedName = ((JavaAttribute) innerAttr)
-                                .getType().getFullyQualifiedName();
-                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
-                    } else if (innerAttr instanceof TOAttribute) {
-                        fullyQualifiedName = FullyQualifiedNameHelper
-                                .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
-                    }
-
-                    type = STRING_FULLY_QUALIFIED_NAME.concat("<")
-                            .concat(fullyQualifiedName).concat(">");
-
                 } else {
                     throw new UnsupportedOperationException(
                             "Attribute not supported: "
@@ -579,8 +613,6 @@ public class TemplateFactory {
 
     private static class AbstractModuleAttributesProcessor {
 
-        private static final String STRING_FULLY_QUALIFIED_NAME = "java.util.List";
-
         private final List<ModuleField> moduleFields = Lists.newArrayList();
         private final List<MethodDefinition> methods = Lists.newArrayList();
 
@@ -589,34 +621,19 @@ public class TemplateFactory {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 String type, nullableDefaultWrapped = null;
                 AttributeIfc attributeIfc = attrEntry.getValue();
+                boolean isIdentity = false;
+                boolean needsDepResolver = needsDepResolver(attrEntry.getValue());
 
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     type = serializeType(typedAttribute.getType());
                     if (attributeIfc instanceof JavaAttribute) {
                         nullableDefaultWrapped = ((JavaAttribute) attributeIfc).getNullableDefaultWrappedForCode();
+                        if(((JavaAttribute)attrEntry.getValue()).isIdentityRef()) {
+                            isIdentity = true;
+                            type = serializeType(typedAttribute.getType(), true);
+                        }
                     }
-
-                } else if (attributeIfc instanceof TOAttribute) {
-                    String fullyQualifiedName = FullyQualifiedNameHelper
-                            .getFullyQualifiedName(packageName, attributeIfc.getUpperCaseCammelCase());
-
-                    type = fullyQualifiedName;
-                } else if (attributeIfc instanceof ListAttribute) {
-                    String fullyQualifiedName = null;
-                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
-                            .getInnerAttribute();
-                    if (innerAttr instanceof JavaAttribute) {
-                        fullyQualifiedName = ((JavaAttribute) innerAttr)
-                                .getType().getFullyQualifiedName();
-                        nullableDefaultWrapped = ((JavaAttribute) innerAttr).getNullableDefaultWrappedForCode();
-                    } else if (innerAttr instanceof TOAttribute) {
-                        fullyQualifiedName = FullyQualifiedNameHelper
-                                .getFullyQualifiedName(packageName, innerAttr.getUpperCaseCammelCase());
-                    }
-
-                    type = STRING_FULLY_QUALIFIED_NAME.concat("<")
-                            .concat(fullyQualifiedName).concat(">");
                 } else {
                     throw new UnsupportedOperationException(
                             "Attribute not supported: "
@@ -644,15 +661,49 @@ public class TemplateFactory {
 
                 String varName = BindingGeneratorUtil
                         .parseToValidParamName(attrEntry.getKey());
-                moduleFields.add(new ModuleField(type, varName, attributeIfc
-                        .getUpperCaseCammelCase(), nullableDefaultWrapped, isDependency, dependency, isListOfDependencies));
+
+                ModuleField field;
+
+                if (isIdentity) {
+                    String identityBaseClass = getInnerTypeFromIdentity(((TypedAttribute) attributeIfc).getType());
+                    IdentityRefModuleField identityField = new IdentityRefModuleField(type, varName,
+                            attributeIfc.getUpperCaseCammelCase(), identityBaseClass);
+
+                    String getterName = "get"
+                            + attributeIfc.getUpperCaseCammelCase() + "Identity";
+                    MethodDefinition additionalGetter = new MethodDefinition(type, getterName, Collections.<Field> emptyList(),
+                            Collections.<Annotation> emptyList(), "return " + identityField.getIdentityClassName()
+                                    + ";");
+                    methods.add(additionalGetter);
+
+                    String setterName = "set"
+                            + attributeIfc.getUpperCaseCammelCase();
+
+                    String setterBody = "this." + identityField.getIdentityClassName() + " = " + identityField.getIdentityClassName() + ";";
+                    MethodDefinition additionalSetter = new MethodDefinition("void",
+                            setterName,
+                            Lists.newArrayList(new Field(type, identityField.getIdentityClassName())),
+                            Collections.<Annotation> emptyList(), setterBody);
+                    additionalSetter.setJavadoc(attributeIfc.getNullableDescription());
+
+                    methods.add(additionalSetter);
+
+                    type = serializeType(identityRefType);
+                    field = identityField;
+                } else {
+                    field = new ModuleField(type, varName, attributeIfc.getUpperCaseCammelCase(),
+                            nullableDefaultWrapped, isDependency, dependency, isListOfDependencies, needsDepResolver);
+                }
+                moduleFields.add(field);
 
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();
                 MethodDefinition getter = new MethodDefinition(type,
                         getterName, Collections.<Field> emptyList(),
                         Lists.newArrayList(overrideAnnotation), "return "
-                                + varName + ";");
+                        + varName + ";");
+
+                methods.add(getter);
 
                 String setterName = "set"
                         + attributeIfc.getUpperCaseCammelCase();
@@ -674,7 +725,6 @@ public class TemplateFactory {
                         annotations, setterBody);
                 setter.setJavadoc(attributeIfc.getNullableDescription());
 
-                methods.add(getter);
                 methods.add(setter);
             }
         }
@@ -689,4 +739,22 @@ public class TemplateFactory {
 
     }
 
+
+    private static boolean needsDepResolver(AttributeIfc value) {
+        if(value instanceof TOAttribute)
+            return true;
+        if(value instanceof ListAttribute) {
+            AttributeIfc innerAttribute = ((ListAttribute) value).getInnerAttribute();
+            return needsDepResolver(innerAttribute);
+        }
+
+        return false;
+    }
+
+    private static String getInnerTypeFromIdentity(Type type) {
+        Preconditions.checkArgument(type instanceof ParameterizedType);
+        Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+        Preconditions.checkArgument(args.length ==1);
+        return serializeType(args[0]);
+    }
 }

@@ -44,7 +44,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>

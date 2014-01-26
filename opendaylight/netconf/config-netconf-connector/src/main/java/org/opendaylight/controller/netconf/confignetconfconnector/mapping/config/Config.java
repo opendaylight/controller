@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -27,6 +28,7 @@ import org.w3c.dom.Element;
 import javax.management.ObjectName;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +45,20 @@ public class Config {
             Map<String /* Name of module entry from yang file */, ModuleConfig>> moduleConfigs;
     private final Map<String, ModuleConfig> moduleNamesToConfigs;
 
+    private final Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap;
+
     public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs) {
+        this(moduleConfigs, Collections.<String, Map<Date, EditConfig.IdentityMapping>>emptyMap());
+    }
+
+    public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
         this.moduleConfigs = moduleConfigs;
         Map<String, ModuleConfig> moduleNamesToConfigs = new HashMap<>();
         for (Entry<String, Map<String, ModuleConfig>> entry : moduleConfigs.entrySet()) {
             moduleNamesToConfigs.putAll(entry.getValue());
         }
         this.moduleNamesToConfigs = Collections.unmodifiableMap(moduleNamesToConfigs);
+        this.identityMap = identityMap;
     }
 
     public static Map<String, Map<String, Collection<ObjectName>>> getMappedInstances(Set<ObjectName> instancesToMap,
@@ -149,7 +158,7 @@ public class Config {
                 @Override
                 public ModuleElementResolved resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker, String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) {
                     return moduleMapping.fromXml(moduleElement, serviceTracker,
-                            instanceName, moduleNamespace, defaultStrategy);
+                            instanceName, moduleNamespace, defaultStrategy, identityMap);
                 }
             };
 

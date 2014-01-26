@@ -67,7 +67,7 @@ public class ConfigRegistryImplLookupTest extends
     @Before
     public void setUp() throws Exception {
         configRegistryImpl = new ConfigRegistryImpl(null,
-                ManagementFactory.getPlatformMBeanServer());
+                ManagementFactory.getPlatformMBeanServer(), null);
         Field field = configRegistryImpl.getClass().getDeclaredField(
                 "baseJMXRegistrator");
         field.setAccessible(true);

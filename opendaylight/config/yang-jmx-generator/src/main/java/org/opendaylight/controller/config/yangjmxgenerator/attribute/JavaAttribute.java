@@ -8,11 +8,13 @@
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 
 import javax.management.openmbean.ArrayType;
@@ -36,6 +38,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             TypeProviderWrapper typeProviderWrapper) {
         super(leaf);
         this.type = typeProviderWrapper.getType(leaf);
+
         this.typeDefinition = leaf.getType();
         this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = leaf.getDefault();
@@ -147,9 +150,15 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             return getCompositeTypeForUnion(baseTypeDefinition);
         } else if (isDerivedType(baseType, getType())) {
             return getCompositeType(baseType, baseTypeDefinition);
+        } else if (isIdentityRef()) {
+            return getCompositeTypeForIdentity();
         }
 
         return getSimpleType(getType());
+    }
+
+    public boolean isIdentityRef() {
+        return typeDefinition instanceof IdentityrefTypeDefinition;
     }
 
     private OpenType<?> getCompositeTypeForUnion(TypeDefinition<?> baseTypeDefinition) {
@@ -233,6 +242,19 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         }
     }
 
+    public OpenType<?> getCompositeTypeForIdentity() {
+        String[] itemNames = new String[]{IdentityAttributeRef.QNAME_ATTR_NAME};
+        String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
+        OpenType<?>[] itemTypes = new OpenType[]{SimpleType.STRING};
+
+        try {
+            return new CompositeType(getUpperCaseCammelCase(), description, itemNames, itemNames, itemTypes);
+        } catch (OpenDataException e) {
+            throw new RuntimeException("Unable to create " + CompositeType.class + " with inner element of type "
+                    + itemTypes, e);
+        }
+    }
+
     private OpenType<?> getArrayType() {
         String innerTypeFullyQName = getInnerType(getType());
         SimpleType<?> innerSimpleType = SimpleTypeResolver.getSimpleType(innerTypeFullyQName);
@@ -263,7 +285,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     private boolean isDerivedType(Type baseType, Type currentType) {
-        return  baseType.equals(currentType) == false;
+        return baseType.equals(currentType) == false;
     }
 
     private static String getInnerType(Type type) {

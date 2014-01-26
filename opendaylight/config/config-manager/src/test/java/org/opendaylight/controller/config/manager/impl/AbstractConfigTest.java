@@ -23,6 +23,7 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -97,7 +98,7 @@ public abstract class AbstractConfigTest extends
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
         configRegistry = new ConfigRegistryImpl(resolver,
-                platformMBeanServer, baseJmxRegistrator);
+                platformMBeanServer, baseJmxRegistrator, getCodecRegistry());
 
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
@@ -208,6 +209,10 @@ public abstract class AbstractConfigTest extends
         return new ClassBasedModuleFactory(implementationName, configBeanClass);
     }
 
+    protected CodecRegistry getCodecRegistry() {
+        return mock(CodecRegistry.class);
+    }
+
 
     public static interface BundleContextServiceRegistrationHandler {
 
@@ -215,10 +220,10 @@ public abstract class AbstractConfigTest extends
 
     }
 
-    private class RegisterServiceAnswer implements Answer {
+    private class RegisterServiceAnswer implements Answer<ServiceRegistration<?>> {
 
         @Override
-        public Object answer(InvocationOnMock invocation) throws Throwable {
+        public ServiceRegistration<?> answer(InvocationOnMock invocation) throws Throwable {
             Object[] args = invocation.getArguments();
 
             Preconditions.checkArgument(args.length == 3, "Unexpected arguments size (expected 3 was %s)", args.length);

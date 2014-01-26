@@ -17,9 +17,12 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectXmlReader;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.AttributeResolvingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.ObjectResolver;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import javax.management.openmbean.OpenType;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -67,7 +70,9 @@ public final class InstanceRuntimeRpc {
     public Map<String, AttributeConfigElement> fromXml(XmlElement configRootNode) {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
-        Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig);
+        // FIXME add identity map to runtime data
+        Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig,
+                Collections.<String, Map<Date, EditConfig.IdentityMapping>> emptyMap());
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
             List<XmlElement> configNodes = configRootNode.getChildElements(readStratEntry.getKey());

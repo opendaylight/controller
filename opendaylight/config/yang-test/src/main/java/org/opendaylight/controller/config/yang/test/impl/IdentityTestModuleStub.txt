@@ -1,0 +1,15 @@
+        System.err.println(getAfi());
+        System.err.println(getAfiIdentity());
+
+        getAfiIdentity();
+        for (Identities identities : getIdentities()) {
+            identities.resolveAfi();
+            identities.resolveSafi();
+        }
+        getIdentitiesContainer().resolveAfi();
+
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+            }
+        };

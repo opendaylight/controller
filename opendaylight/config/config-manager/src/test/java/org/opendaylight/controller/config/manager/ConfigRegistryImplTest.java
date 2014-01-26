@@ -40,7 +40,7 @@ public class ConfigRegistryImplTest extends
                     factory, factory);
 
             configRegistry = new ConfigRegistryImpl(resolver,
-                    ManagementFactory.getPlatformMBeanServer());
+                    ManagementFactory.getPlatformMBeanServer(), null);
 
             configRegistry.beginConfig();
             fail();

@@ -56,7 +56,7 @@ public class ConfigManagerActivator implements BundleActivator {
         // TODO push codecRegistry/IdentityCodec to dependencyResolver
 
         configRegistry = new ConfigRegistryImpl(
-                bundleContextBackedModuleFactoriesResolver, configMBeanServer);
+                bundleContextBackedModuleFactoriesResolver, configMBeanServer, codecRegistry);
 
         // register config registry to OSGi
         configRegistryServiceRegistration = context.registerService(ConfigRegistryImpl.class, configRegistry, null);

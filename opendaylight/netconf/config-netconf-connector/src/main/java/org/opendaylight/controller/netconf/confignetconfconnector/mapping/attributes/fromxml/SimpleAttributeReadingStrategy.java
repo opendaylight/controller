@@ -31,7 +31,7 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
 
         String textContent = "";
         try{
-            textContent = xmlElement.getTextContent();
+            textContent = readElementContent(xmlElement);
         }catch(IllegalStateException | NullPointerException e) {
             // yuma sends <attribute /> for empty value instead of <attribute></attribute>
             logger.warn("Ignoring exception caused by failure to read text element", e);
@@ -40,6 +40,10 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
         Preconditions.checkNotNull(textContent, "This element should contain text %s", xmlElement);
         return AttributeConfigElement.create(postprocessNullableDefault(getNullableDefault()),
                 postprocessParsedValue(textContent));
+    }
+
+    protected String readElementContent(XmlElement xmlElement) {
+        return xmlElement.getTextContent();
     }
 
     @Override

@@ -1,17 +1,25 @@
 package org.opendaylight.controller.config.yang.test.impl;
 
 import com.google.common.collect.Lists;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.test.impl.rev130403.TestIdentity1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.test.impl.rev130403.TestIdentity2;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
@@ -32,7 +42,31 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
         factory = new NetconfTestImplModuleFactory();
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
-                new DepTestImplModuleFactory()));
+                new DepTestImplModuleFactory(), new IdentityTestModuleFactory()));
+    }
+
+    @Override
+    protected CodecRegistry getCodecRegistry() {
+        final IdentityCodec<?> codec = mock(IdentityCodec.class);
+        doReturn(TestIdentity1.class).when(codec).deserialize(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(codec).deserialize(TestIdentity2.QNAME);
+
+        final CodecRegistry ret = super.getCodecRegistry();
+        doReturn(codec).when(ret).getIdentityCodec();
+        return ret;
+    }
+
+    @Test
+    public void testIdentities() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+
+        ObjectName nameCreated = transaction.createModule(IdentityTestModuleFactory.NAME, instanceName);
+        IdentityTestModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, IdentityTestModuleMXBean.class);
+
+        final IdentitiesContainer c = new IdentitiesContainer();
+        c.setAfi(new IdentityAttributeRef(TestIdentity2.QNAME.toString()));
+        mxBean.setIdentitiesContainer(c);
+        transaction.commit();
     }
 
     @Test
