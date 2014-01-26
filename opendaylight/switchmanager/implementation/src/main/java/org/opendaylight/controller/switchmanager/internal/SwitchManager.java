@@ -1436,7 +1436,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         if (macAddress == null) {
             log.warn("Failed to acquire controller MAC: No physical interface found");
             // This happens when running controller on windows VM, for example
-            // Try parsing the OS command output
+            // TODO: Try parsing the OS command output
+            // For now provide a quick fix for the release
+            macAddress = new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0x0c, (byte) 0x60, (byte) 0x0D, (byte) 0x10 };
+            log.debug("Assigning custom MAC address to controller");
         }
         return macAddress;
     }
