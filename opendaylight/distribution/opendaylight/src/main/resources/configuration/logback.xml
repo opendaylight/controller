@@ -86,6 +86,10 @@
     <appender-ref ref="opendaylight.log"/>
   </logger>
 
+  <!-- To debug MD-SAL schema loading issues, uncomment this -->
+  <!--logger name="org.opendaylight.yangtools.yang.parser.impl.util.URLSchemaContextResolver" level="DEBUG"/>
+  <logger name="org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl" level="TRACE"/-->
+
   <!-- additivity=false ensures analytics data only goes to the analytics log -->
   <logger name="audit" level="INFO" additivity="false">
        <appender-ref ref="audit-file"/>
