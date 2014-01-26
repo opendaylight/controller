@@ -146,7 +146,7 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 			
 			for(flow : table.flow){
 				
-				val adsalFlow = ToSalConversionsUtils.toFlow(flow);
+				val adsalFlow = ToSalConversionsUtils.toFlow(flow,node);
 				val statsFromDataStore = flow.getAugmentation(FlowStatisticsData);
 				
 				if(statsFromDataStore != null){
@@ -517,14 +517,14 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 	override onFlowsStatisticsUpdate(FlowsStatisticsUpdate notification) {
 		
 		val adsalFlowsStatistics = new ArrayList<FlowOnNode>();
+		val nodeRef = InstanceIdentifier.builder(Nodes).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(notification.id)).toInstance;
 		
 		for(flowStats : notification.flowAndStatisticsMapList){
 			if(flowStats.tableId == 0)
-				adsalFlowsStatistics.add(toFlowOnNode(flowStats));
+				adsalFlowsStatistics.add(toFlowOnNode(flowStats,nodeRef.toADNode));
 		}
 		
 		for (statsPublisher : statisticsPublisher){
-			val nodeRef = InstanceIdentifier.builder(Nodes).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,new NodeKey(notification.id)).toInstance;
 			statsPublisher.nodeFlowStatisticsUpdated(nodeRef.toADNode,adsalFlowsStatistics);
 		}
 		
@@ -569,9 +569,9 @@ class InventoryAndReadAdapter implements IPluginInReadService,
 		
 	}
 	
-	private static def toFlowOnNode (FlowAndStatisticsMapList flowAndStatsMap){
+	private static def toFlowOnNode (FlowAndStatisticsMapList flowAndStatsMap,Node node){
 		
-		val it = new FlowOnNode(ToSalConversionsUtils.toFlow(flowAndStatsMap));
+		val it = new FlowOnNode(ToSalConversionsUtils.toFlow(flowAndStatsMap,node));
 		
 		byteCount = flowAndStatsMap.byteCount.value.longValue;
 		packetCount = flowAndStatsMap.packetCount.value.longValue;

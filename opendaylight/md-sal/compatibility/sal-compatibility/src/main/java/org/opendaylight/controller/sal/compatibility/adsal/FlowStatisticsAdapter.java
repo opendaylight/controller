@@ -135,7 +135,7 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
 
         try {
             Node node = NodeMapping.toADNode(input.getNode());
-            Flow flow = ToSalConversionsUtils.toFlow(input);
+            Flow flow = ToSalConversionsUtils.toFlow(input, null);
             FlowOnNode readFlow = readDelegate.readFlow(node, flow);
             List<FlowAndStatisticsMapList> flowOnNodeToFlowStatistics = new ArrayList<FlowAndStatisticsMapList>();
             flowOnNodeToFlowStatistics.add(toOdFlowStatistics(readFlow));

@@ -43,7 +43,8 @@ import org.opendaylight.controller.sal.action.SetVlanCfi;
 import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.action.SetVlanPcp;
 import org.opendaylight.controller.sal.action.SwPath;
-import org.opendaylight.controller.sal.core.Capabilities;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
@@ -86,7 +87,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FeatureCapability;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
@@ -116,7 +116,7 @@ public class ToSalConversionsUtils {
 
     }
 
-    public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
+    public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source, Node node) {
         final Flow target = new Flow();
 
         Integer hardTimeout = source.getHardTimeout();
@@ -138,7 +138,7 @@ public class ToSalConversionsUtils {
 
         List<Action> actions = getAction(source);
         if (actions != null) {
-            target.setActions(actionFrom(actions));
+            target.setActions(actionFrom(actions, node));
         }
 
         target.setId(source.getCookie().longValue());
@@ -158,7 +158,7 @@ public class ToSalConversionsUtils {
         return Collections.emptyList();
     }
 
-    public static List<org.opendaylight.controller.sal.action.Action> actionFrom(List<Action> actions) {
+    public static List<org.opendaylight.controller.sal.action.Action> actionFrom(List<Action> actions, Node node) {
         List<org.opendaylight.controller.sal.action.Action> targetAction = new ArrayList<>();
         for (Action action : actions) {
         	org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action sourceAction = action
@@ -171,7 +171,7 @@ public class ToSalConversionsUtils {
                 Uri nodeConnector = ((OutputActionCase) sourceAction).getOutputAction().getOutputNodeConnector();
                 if (nodeConnector != null) {
                     //for (Uri uri : nodeConnectors) {
-                        targetAction.add(new Output(fromNodeConnectorRef(nodeConnector)));
+                        targetAction.add(new Output(fromNodeConnectorRef(nodeConnector, node)));
                     //}
                 }
             } else if (sourceAction instanceof PopMplsActionCase) {
@@ -339,9 +339,14 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    private static NodeConnector fromNodeConnectorRef(Uri uri) {
-        // TODO: Define mapping
-        return null;
+    private static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
+        NodeConnector nodeConnector = null;
+        try {
+            nodeConnector = new NodeConnector(NodeMapping.MD_SAL_TYPE,node.getNodeIDString()+":"+uri.getValue(),node);
+        } catch (ConstructionException e) {
+            e.printStackTrace();
+        }
+        return nodeConnector;
     }
 
     public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match source) {

@@ -56,7 +56,7 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
     @Override
     public Future<RpcResult<AddFlowOutput>> addFlow(AddFlowInput input) {
 
-        Flow flow = ToSalConversionsUtils.toFlow(input);
+        Flow flow = ToSalConversionsUtils.toFlow(input, null);
         @SuppressWarnings("unchecked")
         org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
                 .getNode().getValue());
@@ -70,7 +70,7 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
     @Override
     public Future<RpcResult<RemoveFlowOutput>> removeFlow(RemoveFlowInput input) {
 
-        Flow flow = ToSalConversionsUtils.toFlow(input);
+        Flow flow = ToSalConversionsUtils.toFlow(input, null);
         @SuppressWarnings("unchecked")
         org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
                 .getNode().getValue());
@@ -87,8 +87,8 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
         @SuppressWarnings("unchecked")
         org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
                 .getNode().getValue());
-        Flow originalFlow = ToSalConversionsUtils.toFlow(input.getOriginalFlow());
-        Flow updatedFlow = ToSalConversionsUtils.toFlow(input.getUpdatedFlow());
+        Flow originalFlow = ToSalConversionsUtils.toFlow(input.getOriginalFlow(), null);
+        Flow updatedFlow = ToSalConversionsUtils.toFlow(input.getUpdatedFlow(), null);
         Status status = delegate.modifyFlowAsync(node, originalFlow, updatedFlow);
         UpdateFlowOutputBuilder builder = new UpdateFlowOutputBuilder();
         builder.setTransactionId(new TransactionId(BigInteger.valueOf(status.getRequestId())));
