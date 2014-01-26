@@ -32,7 +32,8 @@
                     <instructions>
                         <Export-Package>
                             org.opendaylight.controller.config.shutdown,
-                            org.opendaylight.controller.config.yang.shutdown
+                            org.opendaylight.controller.config.yang.shutdown,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.shutdown.rev131218
                         </Export-Package>
                     </instructions>
                 </configuration>
