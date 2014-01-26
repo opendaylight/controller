@@ -102,7 +102,7 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
         BindingDomConnectorDeployer.startRpcForwarding(mountConnector, baMountPoint, domMountPoint);
         BindingDomConnectorDeployer.startNotificationForwarding(mountConnector, baMountPoint, domMountPoint);
         // connector.setDomNotificationBroker(domMountPoint);
-        return connector;
+        return mountConnector;
     }
 
     public synchronized void tryToDeployDomForwarder(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath) {

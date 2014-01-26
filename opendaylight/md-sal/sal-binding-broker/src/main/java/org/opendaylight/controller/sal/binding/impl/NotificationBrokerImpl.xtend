@@ -21,14 +21,19 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.yangtools.concepts.Registration
 import org.opendaylight.yangtools.yang.binding.Notification
 import org.slf4j.LoggerFactory
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolderimport org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListener
+import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
-
+    
+    val ListenerRegistry<NotificationInterestListener> interestListeners = ListenerRegistry.create;
+    
     val Multimap<Class<? extends Notification>, NotificationListener<?>> listeners;
 
     @Property
     var ExecutorService executor;
+    
+    val logger = LoggerFactory.getLogger(NotificationBrokerImpl)
 
     new() {
         listeners = HashMultimap.create()
@@ -101,7 +106,18 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
         NotificationListener<T> listener) {
         val reg = new GenericNotificationRegistration<T>(notificationType, listener, this);
         listeners.put(notificationType, listener);
+        announceNotificationSubscription(notificationType);
         return reg;
+    }
+    
+    def announceNotificationSubscription(Class<? extends Notification> notification) {
+        for (listener : interestListeners) {
+            try {
+                listener.instance.onNotificationSubscribtion(notification);
+            } catch (Exception e) {
+                logger.error("", e.message)
+            }
+        }
     }
 
     override registerNotificationListener(
@@ -109,6 +125,7 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
         val invoker = SingletonHolder.INVOKER_FACTORY.invokerFor(listener);
         for (notifyType : invoker.supportedNotifications) {
             listeners.put(notifyType, invoker.invocationProxy)
+            announceNotificationSubscription(notifyType)
         }
         val registration = new GeneratedListenerRegistration(listener, invoker,this);
         return registration as Registration<org.opendaylight.yangtools.yang.binding.NotificationListener>;
@@ -128,6 +145,14 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
         //FIXME: implement properly.
     }
     
+    override registerInterestListener(NotificationInterestListener interestListener) {
+        val registration = interestListeners.register(interestListener);
+        
+        for(notification : listeners.keySet) {
+            interestListener.onNotificationSubscribtion(notification);
+        }
+        return registration
+    }
 }
 
 class GenericNotificationRegistration<T extends Notification> extends AbstractObjectRegistration<NotificationListener<T>> implements ListenerRegistration<NotificationListener<T>> {

@@ -17,6 +17,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,6 +38,8 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListener;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
@@ -52,6 +55,8 @@ import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
+import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
+import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.concepts.util.ClassLoaderUtils;
@@ -62,6 +67,7 @@ import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -88,15 +94,14 @@ public class BindingIndependentConnector implements //
 
     private final Logger LOG = LoggerFactory.getLogger(BindingIndependentConnector.class);
 
-    @SuppressWarnings( "deprecation")
+    @SuppressWarnings("deprecation")
     private static final InstanceIdentifier<? extends DataObject> ROOT = InstanceIdentifier.builder().toInstance();
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier ROOT_BI = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
             .builder().toInstance();
 
     private final static Method EQUALS_METHOD;
-    
-    
+
     private BindingIndependentMappingService mappingService;
 
     private org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;
@@ -140,11 +145,14 @@ public class BindingIndependentConnector implements //
     private RpcProviderRegistryImpl baRpcRegistryImpl;
 
     private org.opendaylight.controller.sal.dom.broker.spi.RpcRouter biRouter;
-    
-    
+
+    private NotificationProviderService baNotifyService;
+
+    private NotificationPublishService domNotificationService;
+
     static {
         try {
-        EQUALS_METHOD = Object.class.getMethod("equals", Object.class);
+            EQUALS_METHOD = Object.class.getMethod("equals", Object.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -300,7 +308,7 @@ public class BindingIndependentConnector implements //
                 baRpcRegistryImpl = (RpcProviderRegistryImpl) baRpcRegistry;
                 baRpcRegistryImpl.registerRouterInstantiationListener(domToBindingRpcManager.getInstance());
             }
-            if(biRpcRegistry instanceof org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) {
+            if (biRpcRegistry instanceof org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) {
                 biRouter = (org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) biRpcRegistry;
             }
             rpcForwarding = true;
@@ -309,7 +317,11 @@ public class BindingIndependentConnector implements //
 
     public void startNotificationForwarding() {
         checkState(!notificationForwarding, "Connector is already forwarding notifications.");
-        notificationForwarding = true;
+        if (baNotifyService != null && domNotificationService != null) {
+            baNotifyService.registerInterestListener(new DomToBindingNotificationForwarder());
+
+            notificationForwarding = true;
+        }
     }
 
     protected void setMappingService(BindingIndependentMappingService mappingService) {
@@ -496,8 +508,7 @@ public class BindingIndependentConnector implements //
      * 
      */
     private class DomToBindingRpcForwardingManager implements
-            RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>,
-            RouterInstantiationListener {
+            RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>, RouterInstantiationListener {
 
         private final Map<Class<? extends RpcService>, DomToBindingRpcForwarder> forwarders = new WeakHashMap<>();
         private RpcProviderRegistryImpl registryImpl;
@@ -509,8 +520,7 @@ public class BindingIndependentConnector implements //
         public void setRegistryImpl(RpcProviderRegistryImpl registryImpl) {
             this.registryImpl = registryImpl;
         }
-        
-        
+
         @Override
         public void onRpcRouterCreated(RpcRouter<?> router) {
             Class<? extends BaseIdentity> ctx = router.getContexts().iterator().next();
@@ -595,7 +605,7 @@ public class BindingIndependentConnector implements //
                 }
                 createDefaultDomForwarder();
             } catch (Exception e) {
-                LOG.error("Could not forward Rpcs of type {}", service.getName(),e);
+                LOG.error("Could not forward Rpcs of type {}", service.getName(), e);
             }
             registrations = registrationsBuilder.build();
         }
@@ -611,16 +621,15 @@ public class BindingIndependentConnector implements //
             }
         }
 
-        
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if(EQUALS_METHOD.equals(method)) {
+            if (EQUALS_METHOD.equals(method)) {
                 return false;
             }
             RpcInvocationStrategy strategy = strategiesByMethod.get(method);
             checkState(strategy != null);
             checkArgument(args.length <= 2);
-            if(args.length == 1) {
+            if (args.length == 1) {
                 checkArgument(args[0] instanceof DataObject);
                 return strategy.forwardToDomBroker((DataObject) args[0]);
             }
@@ -649,7 +658,7 @@ public class BindingIndependentConnector implements //
                 Class<?> cls = rpcServiceType.get();
                 ClassLoader clsLoader = cls.getClassLoader();
                 RpcService proxy = (RpcService) Proxy.newProxyInstance(clsLoader, new Class<?>[] { cls }, this);
-                
+
                 RpcRouter rpcRouter = baRpcRegistryImpl.getRpcRouter(rpcServiceType.get());
                 rpcRouter.registerDefaultService(proxy);
             }
@@ -698,9 +707,10 @@ public class BindingIndependentConnector implements //
                     RpcInvocationStrategy strategy = null;
                     if (outputClass.isPresent()) {
                         if (inputClass.isPresent()) {
-                            strategy = new DefaultInvocationStrategy(rpc,targetMethod, outputClass.get(), inputClass.get());
+                            strategy = new DefaultInvocationStrategy(rpc, targetMethod, outputClass.get(), inputClass
+                                    .get());
                         } else {
-                            strategy = new NoInputNoOutputInvocationStrategy(rpc,targetMethod);
+                            strategy = new NoInputNoOutputInvocationStrategy(rpc, targetMethod);
                         }
                     } else {
                         strategy = null;
@@ -717,7 +727,7 @@ public class BindingIndependentConnector implements //
         protected final Method targetMethod;
         protected final QName rpc;
 
-        public RpcInvocationStrategy(QName rpc,Method targetMethod) {
+        public RpcInvocationStrategy(QName rpc, Method targetMethod) {
             this.targetMethod = targetMethod;
             this.rpc = rpc;
         }
@@ -743,11 +753,12 @@ public class BindingIndependentConnector implements //
         @SuppressWarnings({ "rawtypes", "unchecked" })
         public DefaultInvocationStrategy(QName rpc, Method targetMethod, Class<?> outputClass,
                 Class<? extends DataContainer> inputClass) {
-            super(rpc,targetMethod);
+            super(rpc, targetMethod);
             this.outputClass = new WeakReference(outputClass);
             this.inputClass = new WeakReference(inputClass);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
             DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
@@ -758,21 +769,21 @@ public class BindingIndependentConnector implements //
             RpcResult<?> bindingResult = result.get();
             return Rpcs.getRpcResult(true);
         }
-        
+
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
-            if(biRouter != null) { 
+            if (biRouter != null) {
                 CompositeNode xml = mappingService.toDataDom(input);
-                CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
+                CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
                 RpcResult<CompositeNode> result = biRouter.invokeRpc(rpc, wrappedXml);
                 Object baResultValue = null;
-                if(result.getResult() != null) {
+                if (result.getResult() != null) {
                     baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(), result.getResult());
                 }
                 RpcResult<?> baResult = Rpcs.getRpcResult(result.isSuccessful(), baResultValue, result.getErrors());
-                return Futures.<RpcResult<?>>immediateFuture(baResult);
+                return Futures.<RpcResult<?>> immediateFuture(baResult);
             }
-            return Futures.<RpcResult<?>>immediateFuture(Rpcs.getRpcResult(false));
+            return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
         }
 
     }
@@ -780,7 +791,7 @@ public class BindingIndependentConnector implements //
     private class NoInputNoOutputInvocationStrategy extends RpcInvocationStrategy {
 
         public NoInputNoOutputInvocationStrategy(QName rpc, Method targetMethod) {
-            super(rpc,targetMethod);
+            super(rpc, targetMethod);
         }
 
         public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
@@ -789,7 +800,7 @@ public class BindingIndependentConnector implements //
             RpcResult<Void> bindingResult = result.get();
             return Rpcs.getRpcResult(bindingResult.isSuccessful(), bindingResult.getErrors());
         }
-        
+
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
             return Futures.immediateFuture(null);
@@ -805,11 +816,60 @@ public class BindingIndependentConnector implements //
     }
 
     public boolean isNotificationForwarding() {
-        // TODO Auto-generated method stub
         return notificationForwarding;
     }
 
     public BindingIndependentMappingService getMappingService() {
         return mappingService;
+    }
+
+    public void setBindingNotificationService(NotificationProviderService baService) {
+        this.baNotifyService = baService;
+
+    }
+
+    public void setDomNotificationService(NotificationPublishService domService) {
+        this.domNotificationService = domService;
+    }
+    
+    private class DomToBindingNotificationForwarder implements NotificationInterestListener, NotificationListener {
+
+        private ConcurrentMap<QName, WeakReference<Class<? extends Notification>>> notifications = new ConcurrentHashMap<>();
+        private Set<QName> supportedNotifications = new HashSet<>();
+        
+        @Override
+        public Set<QName> getSupportedNotifications() {
+            return Collections.unmodifiableSet(supportedNotifications);
+        }
+
+        @Override
+        public void onNotification(CompositeNode notification) {
+            QName qname = notification.getNodeType();
+            WeakReference<Class<? extends Notification>> potential = notifications.get(qname);
+            if (potential != null) {
+                Class<? extends Notification> potentialClass = potential.get();
+                if (potentialClass != null) {
+                    final DataContainer baNotification = mappingService.dataObjectFromDataDom(potentialClass,
+                            notification);
+                    
+                    if (baNotification instanceof Notification) {
+                        baNotifyService.publish((Notification) baNotification);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationSubscribtion(Class<? extends Notification> notificationType) {
+            QName qname = BindingReflections.findQName(notificationType);
+            if (qname != null) {
+                WeakReference<Class<? extends Notification>> already = notifications.putIfAbsent(qname,
+                        new WeakReference<Class<? extends Notification>>(notificationType));
+                if (already == null) {
+                    domNotificationService.addNotificationListener(qname, this);
+                    supportedNotifications.add(qname);
+                }
+            }
+        }
     }
 }

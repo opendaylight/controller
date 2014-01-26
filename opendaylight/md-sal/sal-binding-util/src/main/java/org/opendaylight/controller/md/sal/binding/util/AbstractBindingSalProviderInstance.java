@@ -92,4 +92,10 @@ public abstract class AbstractBindingSalProviderInstance<D extends DataProviderS
             L listener) {
         return getRpcRegistryChecked().registerRouteChangeListener(listener);
     }
+    
+    @Override
+    public ListenerRegistration<NotificationInterestListener> registerInterestListener(
+            NotificationInterestListener interestListener) {
+        return getNotificationBrokerChecked().registerInterestListener(interestListener);
+    }
 }
