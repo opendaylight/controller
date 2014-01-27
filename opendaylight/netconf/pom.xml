@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.opendaylight</artifactId>
-        <version>1.4.1</version>
+        <version>1.4.2-SNAPSHOT</version>
         <relativePath>../commons/opendaylight</relativePath>
     </parent>
 
-    <version>0.2.3</version>
+    <version>0.2.4-SNAPSHOT</version>
     <artifactId>netconf-subsystem</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
@@ -48,8 +48,8 @@
         <maven.bundle.version>2.4.0</maven.bundle.version>
         <slf4j.version>1.7.2</slf4j.version>
         <netconf.netty.version>4.0.10.Final</netconf.netty.version>
-        <netconf.version>0.2.3</netconf.version>
-        <config.version>0.2.3</config.version>
+        <netconf.version>0.2.4-SNAPSHOT</netconf.version>
+        <config.version>0.2.4-SNAPSHOT</config.version>
     </properties>
 
     <dependencies>

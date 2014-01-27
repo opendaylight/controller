@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-subsystem</artifactId>
-        <version>0.2.3</version>
+        <version>0.2.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>config-plugin-parent</artifactId>
@@ -16,7 +16,7 @@
 
     <properties>
         <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
-        <config.version>0.2.3</config.version>
+        <config.version>0.2.4-SNAPSHOT</config.version>
     </properties>
 
     <build>
