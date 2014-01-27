@@ -371,6 +371,18 @@ one.lib.nav = {
     }
 }
 
+one.lib.helper = {
+	parseInt : 	function(value) {
+		return (value != null && value != '') ?
+                parseInt(value) : ''
+	},
+	parseFloat : function(value) {
+		return (value != null && value != '') ?
+                parseFloat(value) : ''
+	}
+}
+
+
 /** ALERT */
 one.lib.alert = function(alert) {
     $("#alert p").text(alert);
