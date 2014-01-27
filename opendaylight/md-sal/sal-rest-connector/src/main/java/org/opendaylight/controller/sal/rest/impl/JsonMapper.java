@@ -134,7 +134,7 @@ class JsonMapper {
 
     private DataSchemaNode findFirstSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
         for (DataSchemaNode dsn : dataSchemaNode) {
-            if (node.getNodeType().getLocalName().equals(dsn.getQName().getLocalName())) {
+            if (node.getNodeType().equals(dsn.getQName())) {
                 return dsn;
             } else if (dsn instanceof ChoiceNode) {
                 for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
@@ -300,10 +300,16 @@ class JsonMapper {
         String nameForOutput = node.getNodeType().getLocalName();
         if (schema.isAugmenting()) {
             ControllerContext contContext = ControllerContext.getInstance();
-            CharSequence moduleName;
-            moduleName = contContext.toRestconfIdentifier(schema.getQName());
+            CharSequence moduleName = null;
+            if (mountPoint == null) {
+                moduleName = contContext.toRestconfIdentifier(schema.getQName());
+            } else {
+                moduleName = contContext.toRestconfIdentifier(mountPoint, schema.getQName());
+            }
             if (moduleName != null) {
                 nameForOutput = moduleName.toString();
+            } else {
+                logger.info("Module '{}' was not found in schema from mount point", schema.getQName());
             }
         }
         writer.name(nameForOutput);
