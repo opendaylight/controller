@@ -21,7 +21,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>opendaylight/distribution/opendaylight</module>
-    <module>opendaylight/archetypes</module>
     <module>opendaylight/forwarding/staticrouting</module>
     <module>opendaylight/clustering/services</module>
     <module>opendaylight/clustering/services_implementation</module>
@@ -56,7 +55,7 @@
     <!-- <module>third-party/net.sf.jung2</module> -->
     <!-- <module>third-party/jersey-servlet</module> -->
     <!-- <module>third-party/org.apache.catalina.filters.CorsFilter</module> -->
-    <!-- <module>third-party/ganymed</module> -->
+    <module>third-party/ganymed</module>
 
     <module>third-party/commons/thirdparty</module>
 
