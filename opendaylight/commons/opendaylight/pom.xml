@@ -58,11 +58,11 @@
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
     <guava.version>14.0.1</guava.version>
     <osgi.core.version>5.0.0</osgi.core.version>
-    <ietf-inet-types.version>2010.09.24.2-SNAPSHOT</ietf-inet-types.version>
-    <ietf-yang-types.version>2010.09.24.2-SNAPSHOT</ietf-yang-types.version>
-    <ietf-topology.version>2013.10.21.0-SNAPSHOT</ietf-topology.version>
-    <opendaylight-l2-types.version>2013.08.27.2-SNAPSHOT</opendaylight-l2-types.version>
-    <yang-ext.version>2013.09.07.2-SNAPSHOT</yang-ext.version>
+    <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
+    <ietf-yang-types.version>2010.09.24.3</ietf-yang-types.version>
+    <ietf-topology.version>2013.10.21.1</ietf-topology.version>
+    <opendaylight-l2-types.version>2013.08.27.3</opendaylight-l2-types.version>
+    <yang-ext.version>2013.09.07.3</yang-ext.version>
     <javassist.version>3.17.1-GA</javassist.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
@@ -70,7 +70,7 @@
     <enforcer.version>1.3.1</enforcer.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <junit.version>4.8.1</junit.version>
-    <yangtools.version>0.6.0-SNAPSHOT</yangtools.version>
+    <yangtools.version>0.6.1</yangtools.version>
     <!--versions for bits of the controller -->
     <controller.version>0.4.1-SNAPSHOT</controller.version>
     <hosttracker.api.version>0.5.1-SNAPSHOT</hosttracker.api.version>
