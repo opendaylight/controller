@@ -1,19 +1,24 @@
 package org.opendaylight.controller.test.sal.binding.it;
 
-import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.*;
-
-import javax.inject.Inject;
-
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.Filter;
-import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.BundleContext;
+
+import javax.inject.Inject;
+
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 @RunWith(PaxExam.class)
 public abstract class AbstractTest {
@@ -25,7 +30,7 @@ public abstract class AbstractTest {
     public static final String YANGTOOLS_MODELS = "org.opendaylight.yangtools.model";
 
     @Inject
-    @Filter(timeout=60*1000)
+    @Filter(timeout=120*1000)
     BindingAwareBroker broker;
 
     @Inject
