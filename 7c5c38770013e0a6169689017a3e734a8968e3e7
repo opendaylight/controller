@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_969c9b10",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DeadlockInCommitDetector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-27T14:24:11Z",
+      "side": 1,
+      "message": "Let\u0027s use a normal call and let\u0027s not interrupt the thread needlessly. Just recording that the transaction complete should be okay for suppressing logs.",
+      "revId": "7c5c38770013e0a6169689017a3e734a8968e3e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_56a2a34b",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DeadlockInCommitDetector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-27T14:24:11Z",
+      "side": 1,
+      "message": "we can calculate sleep time directly...",
+      "revId": "7c5c38770013e0a6169689017a3e734a8968e3e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f69077ee",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DeadlockInCommitDetector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-27T14:24:11Z",
+      "side": 1,
+      "message": "A multiline log, please don\u0027t :) We should add traces to track how long it took for each module to complete. Also we should record which module is holding us up.",
+      "revId": "7c5c38770013e0a6169689017a3e734a8968e3e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b6979feb",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DeadlockInCommitDetector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-01-27T14:24:11Z",
+      "side": 1,
+      "message": "TimeUnit.NANOSECONDS.toMillis()",
+      "revId": "7c5c38770013e0a6169689017a3e734a8968e3e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
