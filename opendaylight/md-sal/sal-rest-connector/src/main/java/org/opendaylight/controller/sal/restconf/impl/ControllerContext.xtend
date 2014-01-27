@@ -79,7 +79,15 @@ class ControllerContext implements SchemaServiceListener {
         onGlobalContextUpdated(schemas)
     }
 
-    public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
+    def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
+        return restconfInstance.toIdentifier(false)
+    }
+
+    def InstanceIdWithSchemaNode toMountPointIdentifier(String restconfInstance) {
+        return restconfInstance.toIdentifier(true)
+    }
+
+    private def InstanceIdWithSchemaNode toIdentifier(String restconfInstance, boolean toMountPointIdentifier) {
         checkPreconditions
         val pathArgs = restconfInstance.split("/");
         if (pathArgs.empty) {
@@ -92,8 +100,14 @@ class ControllerContext implements SchemaServiceListener {
         if (startModule === null) {
             throw new ResponseException(BAD_REQUEST, "First node in URI has to be in format \"moduleName:nodeName\"")
         }
-        val iiWithSchemaNode = collectPathArguments(InstanceIdentifier.builder(), pathArgs,
-            globalSchema.getLatestModule(startModule), null);
+        var InstanceIdWithSchemaNode iiWithSchemaNode = null;
+        if (toMountPointIdentifier) {
+            iiWithSchemaNode = collectPathArguments(InstanceIdentifier.builder(), pathArgs,
+            globalSchema.getLatestModule(startModule), null, true);
+        } else {
+            iiWithSchemaNode = collectPathArguments(InstanceIdentifier.builder(), pathArgs,
+            globalSchema.getLatestModule(startModule), null, false);
+        }
         if (iiWithSchemaNode === null) {
             throw new ResponseException(BAD_REQUEST, "URI has bad format")
         }
@@ -141,6 +155,18 @@ class ControllerContext implements SchemaServiceListener {
         val mountPointSchema = mountPoint.schemaContext;
         val moduleSchemas = mountPointSchema?.findModuleByNamespace(namespace)
         return moduleSchemas?.filterLatestModule
+    }
+
+    def findModuleByNameAndRevision(QName module) {
+        checkPreconditions
+        checkArgument(module !== null && module.localName !== null && module.revision !== null)
+        return globalSchema.findModuleByName(module.localName, module.revision)
+    }
+
+    def findModuleByNameAndRevision(MountInstance mountPoint, QName module) {
+        checkPreconditions
+        checkArgument(module !== null && module.localName !== null && module.revision !== null && mountPoint !== null)
+        return mountPoint.schemaContext?.findModuleByName(module.localName, module.revision)
     }
 
     def String toFullRestconfIdentifier(InstanceIdentifier path) {
@@ -202,6 +228,16 @@ class ControllerContext implements SchemaServiceListener {
     def findNamespaceByModuleName(MountInstance mountPoint, String moduleName) {
         val module = mountPoint.findModuleByName(moduleName)
         return module?.namespace
+    }
+
+    def getAllModules(MountInstance mountPoint) {
+        checkPreconditions
+        return mountPoint?.schemaContext?.modules
+    }
+    
+    def getAllModules() {
+        checkPreconditions
+        return globalSchema.modules
     }
 
     def CharSequence toRestconfIdentifier(QName qname) {
@@ -267,7 +303,7 @@ class ControllerContext implements SchemaServiceListener {
     }
     
     private def InstanceIdWithSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
-        DataNodeContainer parentNode, MountInstance mountPoint) {
+        DataNodeContainer parentNode, MountInstance mountPoint, boolean returnJustMountPoint) {
         checkNotNull(strings)
         if (parentNode === null) {
             return null;
@@ -304,6 +340,10 @@ class ControllerContext implements SchemaServiceListener {
                     throw new ResponseException(BAD_REQUEST, "Mount point does not contain any schema with modules.")
                 }
                 
+                if (returnJustMountPoint) {
+                    return new InstanceIdWithSchemaNode(InstanceIdentifier.builder().toInstance, mountPointSchema, mount)
+                }
+                
                 if (strings.size == 1) { // any data node is not behind mount point
                     return new InstanceIdWithSchemaNode(InstanceIdentifier.builder().toInstance, mountPointSchema, mount)
                 }
@@ -321,7 +361,7 @@ class ControllerContext implements SchemaServiceListener {
                 }
                 
                 return collectPathArguments(InstanceIdentifier.builder(), strings.subList(1, strings.size),
-                    moduleBehindMountPoint, mount);
+                    moduleBehindMountPoint, mount, returnJustMountPoint);
             }
             
             var Module module = null;
@@ -398,7 +438,7 @@ class ControllerContext implements SchemaServiceListener {
         }
         if (targetNode instanceof DataNodeContainer) {
             val remaining = strings.subList(consumed, strings.length);
-            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer, mountPoint);
+            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer, mountPoint, returnJustMountPoint);
             return result
         }
 

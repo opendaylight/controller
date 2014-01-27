@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import java.util.concurrent.Future;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -36,7 +34,6 @@ import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
-import org.opendaylight.controller.sal.rest.impl.XmlMapper;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
@@ -137,20 +134,6 @@ public class RestPostOperationTest extends JerseyTest {
         controllerContext.setSchemas(schemaContextYangsIetf);
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = createUri("/config/", "ietf-interfaces:interfaces");
-        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-
-        mockCommitConfigurationDataPostMethod(null);
-        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-
-        mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
-        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-    }
-
-    @Test
-    public void postDatastoreStatusCodes() throws UnsupportedEncodingException {
-        controllerContext.setSchemas(schemaContextYangsIetf);
-        mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
-        String uri = createUri("/datastore/", "ietf-interfaces:interfaces");
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
 
         mockCommitConfigurationDataPostMethod(null);
