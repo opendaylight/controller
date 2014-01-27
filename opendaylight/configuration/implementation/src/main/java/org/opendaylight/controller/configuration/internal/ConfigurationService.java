@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.configuration.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -189,7 +190,12 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
         }
         String source = String.format("%s%s", ROOT, fileName);
         Object obj = objReader.read(reader, source);
-        return (obj == null || !(obj instanceof List)) ? Collections.<ConfigurationObject> emptyList()
-                : (List<ConfigurationObject>) obj;
+        if (obj == null) {
+            return Collections.<ConfigurationObject> emptyList();
+        }
+        if (obj instanceof ConcurrentMap) {
+            return new ArrayList<ConfigurationObject>(((ConcurrentMap)obj).values());
+        }
+        return (List<ConfigurationObject>) obj;
     }
 }
