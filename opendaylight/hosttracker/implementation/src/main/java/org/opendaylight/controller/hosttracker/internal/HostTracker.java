@@ -480,7 +480,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
              * Host replacement has failed, do the recovery
              */
             hostsDB.put(id, newHost);
-            logger.error("Host replacement failed. Overwrite the host. Repalced Host: {}, New Host: {}", removedHost,
+            logger.error("Host replacement failed. Overwrite the host. Replaced Host: {}, New Host: {}", removedHost,
                     newHost);
         }
         notifyHostLearnedOrRemoved(removedHost, false);
