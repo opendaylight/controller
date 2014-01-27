@@ -10,6 +10,7 @@
 package org.opendaylight.controller.configuration.internal;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -219,7 +220,12 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
         }
         String source = String.format("%s%s", root, fileName);
         Object obj = objReader.read(reader, source);
-        return (obj == null || !(obj instanceof List)) ? Collections.<ConfigurationObject> emptyList()
-                : (List<ConfigurationObject>) obj;
+        if (obj == null) {
+            return Collections.<ConfigurationObject> emptyList();
+        }
+        if (obj instanceof ConcurrentMap) {
+            return new ArrayList<ConfigurationObject>(((ConcurrentMap)obj).values());
+        }
+        return (List<ConfigurationObject>) obj;
     }
 }
