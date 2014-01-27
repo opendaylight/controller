@@ -32,15 +32,15 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * 
  */
 public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoader {
-    
+
     @BeforeClass
     public static void initialization() throws URISyntaxException {
-        dataLoad("/instanceidentifier/yang", 3, "instance-identifier-module", "cont");
+        dataLoad("/instanceidentifier/yang", 4, "instance-identifier-module", "cont");
     }
 
     @Test
     public void snAsYangInstanceIdentifier() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSnData = prepareCnStructForYangData( );
+        CompositeNode cnSnData = prepareCnStructForYangData();
         String xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSnData, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         assertNotNull(xmlOutput);

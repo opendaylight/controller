@@ -38,18 +38,19 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialize() {
-        dataLoad("/instanceidentifier/yang", 3, "instance-identifier-module", "cont");
+        dataLoad("/instanceidentifier/yang", 4, "instance-identifier-module", "cont");
     }
 
     @Test
     public void saveCnSnToXml() throws WebApplicationException, IOException, URISyntaxException, XMLStreamException {
-        CompositeNode cnSn = prepareCnSn();
+        CompositeNode cnSn = prepareCnSn(createInstanceIdentifier());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         validateXmlOutput(output);
@@ -58,13 +59,48 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     }
 
     @Test
+    public void saveCnSnWithLeafListInstIdentifierToXml() throws WebApplicationException, IOException,
+            URISyntaxException, XMLStreamException {
+        CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
+                StructuredDataToXmlProvider.INSTANCE);
+        validateXmlOutputWithLeafList(output);
+        // System.out.println(output);
+    }
+
+    @Test
     public void saveCnSnToJson() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = prepareCnSn();
+        CompositeNode cnSn = prepareCnSn(createInstanceIdentifier());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
-        assertTrue(output
-                .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11[augment-module:keyvalue111=\\\"value1\\\"][augment-module:keyvalue112=\\\"value2\\\"]/augment-augment-module:lf112\""));
+        boolean strInOutput = false;
+        strInOutput = output
+                .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11[augment-module:keyvalue111=\\\"value1\\\"][augment-module:keyvalue112=\\\"value2\\\"]/augment-augment-module:lf112\"");
+
+        if (!strInOutput) {
+            strInOutput = output
+                    .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11[augment-module:keyvalue111='value1'][augment-module:keyvalue112='value2']/augment-augment-module:lf112\"");
+        }
+        assertTrue(strInOutput);
         // System.out.println(output);
+    }
+
+    @Test
+    public void saveCnSnWithLeafListInstIdentifierToJson() throws WebApplicationException, IOException,
+            URISyntaxException {
+        CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
+                StructuredDataToJsonProvider.INSTANCE);
+        // System.out.println(output);
+        boolean strInOutput = false;
+        strInOutput = output
+                .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lf11[.='lflst11_1']\"");
+        if (!strInOutput) {
+            strInOutput = output
+                    .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lf11[.=\\\"lflst11_1\\\"]\"");
+        }
+
+        assertTrue(strInOutput);
     }
 
     private void validateXmlOutput(String xml) throws XMLStreamException {
@@ -104,16 +140,50 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
                 + ":lst11[" + aModulePrefix + ":keyvalue111='value1'][" + aModulePrefix + ":keyvalue112='value2']/"
                 + aaModulePrefix + ":lf112";
 
-//        System.out.println(xml);
         assertTrue(xml.contains(instanceIdentifierValue));
 
     }
 
-    private CompositeNode prepareCnSn() throws URISyntaxException {
+    private void validateXmlOutputWithLeafList(String xml) throws XMLStreamException {
+        XMLInputFactory xmlInFactory = XMLInputFactory.newInstance();
+        XMLEventReader eventReader;
+
+        eventReader = xmlInFactory.createXMLEventReader(new ByteArrayInputStream(xml.getBytes()));
+        String aModuleLfLstPrefix = null;
+        String iiModulePrefix = null;
+        while (eventReader.hasNext()) {
+            XMLEvent nextEvent = eventReader.nextEvent();
+            if (nextEvent.isStartElement()) {
+                StartElement startElement = (StartElement) nextEvent;
+                if (startElement.getName().getLocalPart().equals("lf111")) {
+                    Iterator prefixes = startElement.getNamespaceContext().getPrefixes("augment:module:leaf:list");
+
+                    while (prefixes.hasNext() && aModuleLfLstPrefix == null) {
+                        String prefix = (String) prefixes.next();
+                        if (!prefix.isEmpty()) {
+                            aModuleLfLstPrefix = prefix;
+                        }
+                    }
+                    iiModulePrefix = startElement.getNamespaceContext().getPrefix("instance:identifier:module");
+                    break;
+                }
+            }
+        }
+
+        assertNotNull(aModuleLfLstPrefix);
+        assertNotNull(iiModulePrefix);
+
+        String instanceIdentifierValue = "/" + iiModulePrefix + ":cont/" + iiModulePrefix + ":cont1/"
+                + aModuleLfLstPrefix + ":lf11[.='lflst11_1']";
+
+        assertTrue(xml.contains(instanceIdentifierValue));
+
+    }
+
+    private CompositeNode prepareCnSn(InstanceIdentifier instanceIdentifier) throws URISyntaxException {
         CompositeNodeWrapper cont = new CompositeNodeWrapper(new URI("instance:identifier:module"), "cont");
         CompositeNodeWrapper cont1 = new CompositeNodeWrapper(new URI("instance:identifier:module"), "cont1");
         CompositeNodeWrapper lst11 = new CompositeNodeWrapper(new URI("augment:module"), "lst11");
-        InstanceIdentifier instanceIdentifier = createInstanceIdentifier();
         SimpleNodeWrapper lf111 = new SimpleNodeWrapper(new URI("augment:augment:module"), "lf111", instanceIdentifier);
 
         lst11.addValue(lf111);
@@ -136,6 +206,15 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         pathArguments.add(nodeIdentifierWithPredicates);
 
         pathArguments.add(new NodeIdentifier(new QName(new URI("augment:augment:module"), "lf112")));
+
+        return new InstanceIdentifier(pathArguments);
+    }
+
+    private InstanceIdentifier createInstanceIdentifierWithLeafList() throws URISyntaxException {
+        List<PathArgument> pathArguments = new ArrayList<>();
+        pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont")));
+        pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont1")));
+        pathArguments.add(new NodeWithValue(new QName(new URI("augment:module:leaf:list"), "lf11"), "lflst11_1"));
 
         return new InstanceIdentifier(pathArguments);
     }

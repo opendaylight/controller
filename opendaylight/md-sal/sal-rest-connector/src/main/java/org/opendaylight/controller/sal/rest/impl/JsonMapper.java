@@ -252,15 +252,23 @@ class JsonMapper {
             result.append("/");
 
             writeModuleNameAndIdentifier(result, identityValue);
-            if (identityValue.getPredicates() != null) {
-                for (Predicate predicate : identityValue.getPredicates()) {
-                    IdentityValue identityValuePredicate = predicate.getName();
-                    result.append("[");
-                    writeModuleNameAndIdentifier(result, identityValuePredicate);
-                    result.append("=\"");
+            if (!identityValue.getPredicates().isEmpty()) {
+                if (identityValue.getPredicates().get(0).getName() == null) {
+                    Predicate predicate = identityValue.getPredicates().get(0);
+                    result.append("[.='");
                     result.append(predicate.getValue());
-                    result.append("\"");
+                    result.append("'");
                     result.append("]");
+                } else {
+                    for (Predicate predicate : identityValue.getPredicates()) {
+                        IdentityValue identityValuePredicate = predicate.getName();
+                        result.append("[");
+                        writeModuleNameAndIdentifier(result, identityValuePredicate);
+                    result.append("=\"");
+                        result.append(predicate.getValue());
+                    result.append("\"");
+                        result.append("]");
+                    }
                 }
             }
         }
