@@ -207,13 +207,38 @@ one.f.troubleshooting.existingNodes = {
                             item["statistics"] = "<a href=\"javascript:one.f.troubleshooting.existingNodes.load.flows('" + item["nodeId"] + "');\">Flows</a>" + 
                             " <a href=\"javascript:one.f.troubleshooting.existingNodes.load.ports('" + item["nodeId"] + "');\">Ports</a>";
                         });
-
                     },
                     delay: 0
                 });
                 return source;
             },
             portsGrid: function(data) {
+                $.each(data.nodeData, function(index, item) {
+                    item['rxPkts'] = (item['rxPkts'] != null && item['rxPkts'] != '') ?
+                            parseInt(item['rxPkts']) : '';
+                    item['txPkts'] = (item['txPkts'] != null && item['txPkts'] != '') ?
+                            parseInt(item['txPkts']) : '';
+                    item['rxBytes'] = (item['rxBytes'] != null && item['rxBytes'] != '') ?
+                            parseInt(item['rxBytes']) : '';
+                    item['txBytes'] = (item['txBytes'] != null && item['txBytes'] != '') ?
+                            parseInt(item['txBytes']) : '';
+                    item['rxDrops'] = (item['rxDrops'] != null && item['rxDrops'] != '') ?
+                            parseInt(item['rxDrops']) : '';
+                    item['txDrops'] = (item['txDrops'] != null && item['txDrops'] != '') ?
+                            parseInt(item['txDrops']) : '';
+                    item['rxErrors'] = (item['rxErrors'] != null && item['rxErrors'] != '') ?
+                            parseInt(item['rxErrors']) : '';
+                    item['txErrors'] = (item['txErrors'] != null && item['txErrors'] != '') ?
+                            parseInt(item['txErrors']) : '';
+                    item['rxFrameErrors'] = (item['rxFrameErrors'] != null && item['rxFrameErrors'] != '') ?
+                            parseInt(item['rxFrameErrors']) : '';
+                    item['rxOverRunErrors'] = (item['rxOverRunErrors'] != null && item['rxOverRunErrors'] != '') ?
+                            parseInt(item['rxOverRunErrors']) : '';
+                    item['rxCRCErrors'] = (item['rxCRCErrors'] != null && item['rxCRCErrors'] != '') ?
+                            parseInt(item['rxCRCErrors']) : '';
+                    item['collisions'] = (item['collisions'] != null && item['collisions'] != '') ?
+                            parseInt(item['collisions']) : '';
+                });
                 var source = new StaticDataSource({
                     columns: [
                         {
@@ -311,6 +336,18 @@ one.f.troubleshooting.existingNodes = {
                 return result;
             },
             flowsGrid: function(data) {
+                $.each(data.nodeData, function(index, item) {
+                    item['byteCount'] = (item['byteCount'] != null && item['byteCount'] != '') ?
+                            parseInt(item['byteCount']) : '';
+                    item['packetCount'] = (item['packetCount'] != null && item['packetCount'] != '') ?
+                            parseInt(item['packetCount']) : '';
+                    item['durationSeconds'] = (item['durationSeconds'] != null && item['durationSeconds'] != '') ?
+                            parseInt(item['durationSeconds']) : '';
+                    item['idleTimeout'] = (item['idleTimeout'] != null && item['idleTimeout'] != '') ?
+                            parseInt(item['idleTimeout']) : '';
+                    item['priority'] = (item['priority'] != null && item['priority'] != '') ?
+                            parseInt(item['priority']) : '';
+                });
                 var source = new StaticDataSource({
                     columns: [
                         {
