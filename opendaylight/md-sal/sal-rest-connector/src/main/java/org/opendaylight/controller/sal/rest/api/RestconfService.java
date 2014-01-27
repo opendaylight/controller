@@ -55,11 +55,36 @@ public interface RestconfService {
 
     @GET
     @Path("/modules")
-    @Produces({Draft02.MediaTypes.API+JSON,Draft02.MediaTypes.API+XML})
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData getModules();
 
+    @GET
+    @Path("/modules/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getModules(@PathParam("identifier") String identifier);
+
+    @GET
+    @Path("/modules/module/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getModule(@PathParam("identifier") String identifier);
+
+    @GET
+    @Path("/operations")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getOperations();
+
+    @GET
+    @Path("/operations/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getOperations(@PathParam("identifier") String identifier);
+
     @POST
-    @Path("/operations/{identifier}")
+    @Path("/operations/{identifier:.+}")
     @Produces({Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+XML,
                Draft02.MediaTypes.DATA+JSON, Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
@@ -69,7 +94,7 @@ public interface RestconfService {
     public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
     
     @POST
-    @Path("/operations/{identifier}")
+    @Path("/operations/{identifier:.+}")
     @Produces({Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+XML,
                Draft02.MediaTypes.DATA+JSON, Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})

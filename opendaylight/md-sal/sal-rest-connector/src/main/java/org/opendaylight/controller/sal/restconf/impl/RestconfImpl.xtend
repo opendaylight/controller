@@ -9,9 +9,12 @@ package org.opendaylight.controller.sal.restconf.impl
 
 import com.google.common.base.Preconditions
 import java.net.URI
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
+import java.util.Set
 import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.core.api.mount.MountInstance
@@ -36,11 +39,25 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 
 import static javax.ws.rs.core.Response.Status.*
+import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder
+import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder
+import org.opendaylight.yangtools.yang.model.util.EmptyType
+import com.google.common.base.Splitter
+import com.google.common.collect.Lists
 
 class RestconfImpl implements RestconfService {
 
     val static RestconfImpl INSTANCE = new RestconfImpl
     val static MOUNT_POINT_MODULE_NAME = "ietf-netconf"
+    val static REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
+    val static RESTCONF_MODULE_DRAFT02_REVISION = "2013-10-19"
+    val static RESTCONF_MODULE_DRAFT02_NAME = "ietf-restconf"
+    val static RESTCONF_MODULE_DRAFT02_NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-restconf"
+    val static RESTCONF_MODULE_DRAFT02_RESTCONF_GROUPING_SCHEMA_NODE = "restconf"
+    val static RESTCONF_MODULE_DRAFT02_RESTCONF_CONTAINER_SCHEMA_NODE = "restconf"
+    val static RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE = "modules"
+    val static RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE = "module"
+    val static RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE = "operations"
 
     @Property
     BrokerFacade broker
@@ -59,7 +76,152 @@ class RestconfImpl implements RestconfService {
     }
 
     override getModules() {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        val restconfModule = getRestconfModule()
+        val List<Node<?>> modulesAsData = new ArrayList
+        val moduleSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE)
+        for (module : allModules) {
+            modulesAsData.add(module.toModuleCompositeNode(moduleSchemaNode))
+        }
+        val modulesSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE)
+        val modulesNode = NodeFactory.createImmutableCompositeNode(modulesSchemaNode.QName, null, modulesAsData)
+        return new StructuredData(modulesNode, modulesSchemaNode, null)
+    }
+
+    override getModules(String identifier) {
+        var Set<Module> modules = null
+        var MountInstance mountPoint = null
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            mountPoint = identifier.toMountPointIdentifier.mountPoint
+            modules = mountPoint.allModules
+        } else {
+            throw new ResponseException(BAD_REQUEST, "URI has bad format. If modules behind mount point should be showed, URI has to end with " + ControllerContext.MOUNT)
+        }
+        val List<Node<?>> modulesAsData = new ArrayList
+        val moduleSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE)
+        for (module : modules) {
+            modulesAsData.add(module.toModuleCompositeNode(moduleSchemaNode))
+        }
+        val modulesSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE)
+        val modulesNode = NodeFactory.createImmutableCompositeNode(modulesSchemaNode.QName, null, modulesAsData)
+        return new StructuredData(modulesNode, modulesSchemaNode, mountPoint)
+    }
+
+    override getModule(String identifier) {
+        val moduleNameAndRevision = identifier.moduleNameAndRevision
+        var Module module = null
+        var MountInstance mountPoint = null
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            mountPoint = identifier.toMountPointIdentifier.mountPoint
+            module = mountPoint.findModuleByNameAndRevision(moduleNameAndRevision)
+        } else {
+            module = findModuleByNameAndRevision(moduleNameAndRevision)
+        }
+        if (module === null) {
+            throw new ResponseException(BAD_REQUEST,
+                "Module with name '" + moduleNameAndRevision.localName + "' and revision '" +
+                    moduleNameAndRevision.revision + "' was not found.")
+        }
+        val moduleSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE)
+        val moduleNode = module.toModuleCompositeNode(moduleSchemaNode)
+        return new StructuredData(moduleNode, moduleSchemaNode, mountPoint)
+    }
+
+    override getOperations() {
+        val List<Node<?>> operationsAsData = new ArrayList
+        val operationsSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE)
+        val fakeOperationsSchemaNode = new ContainerSchemaNodeBuilder(RESTCONF_MODULE_DRAFT02_NAME, 0, operationsSchemaNode.QName, operationsSchemaNode.path)
+        for (module : allModules) {
+            for (rpc : module.rpcs) {
+                operationsAsData.add(NodeFactory.createImmutableSimpleNode(rpc.QName, null, null))
+                val fakeRpcSchemaNode = new LeafSchemaNodeBuilder(module.name, 0, rpc.QName, null)
+                fakeRpcSchemaNode.setAugmenting(true)
+                fakeRpcSchemaNode.setType(EmptyType.instance)
+                fakeOperationsSchemaNode.addChildNode(fakeRpcSchemaNode.build)
+            }
+        }
+        val operationsNode = NodeFactory.createImmutableCompositeNode(operationsSchemaNode.QName, null, operationsAsData)
+        return new StructuredData(operationsNode, fakeOperationsSchemaNode.build, null)
+    }
+    
+    override getOperations(String identifier) {
+        var Set<Module> modules = null
+        var MountInstance mountPoint = null
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            mountPoint = identifier.toMountPointIdentifier.mountPoint
+            modules = mountPoint.allModules
+        } else {
+            throw new ResponseException(BAD_REQUEST, "URI has bad format. If operations behind mount point should be showed, URI has to end with " + ControllerContext.MOUNT)
+        }
+        val List<Node<?>> operationsAsData = new ArrayList
+        for (module : modules) {
+            for (rpc : module.rpcs) {
+                operationsAsData.add(NodeFactory.createImmutableSimpleNode(rpc.QName, null, null))
+            }
+        }
+        val operationsSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE)
+        val operationsNode = NodeFactory.createImmutableCompositeNode(operationsSchemaNode.QName, null, operationsAsData)
+        return new StructuredData(operationsNode, operationsSchemaNode, mountPoint)
+    }
+
+    private def Module getRestconfModule() {
+        val restconfModule = findModuleByNameAndRevision(
+            QName.create(RESTCONF_MODULE_DRAFT02_NAMESPACE, RESTCONF_MODULE_DRAFT02_REVISION,
+                RESTCONF_MODULE_DRAFT02_NAME))
+        if (restconfModule === null) {
+            throw new ResponseException(INTERNAL_SERVER_ERROR, "Restconf module was not found.")
+        }
+        return restconfModule
+    }
+
+    private def QName getModuleNameAndRevision(String identifier) {
+        val indexOfMountPointFirstLetter = identifier.indexOf(ControllerContext.MOUNT)
+        var moduleNameAndRevision = "";
+        if (indexOfMountPointFirstLetter !== -1) { // module and revision is behind mount point string
+            moduleNameAndRevision = identifier.substring(indexOfMountPointFirstLetter + ControllerContext.MOUNT.length)
+        } else (
+            moduleNameAndRevision = identifier
+        )
+        val  pathArgs = Lists.newArrayList(Splitter.on("/").omitEmptyStrings.split(moduleNameAndRevision))
+        if (pathArgs.length < 2) {
+            throw new ResponseException(BAD_REQUEST,
+                "URI has bad format. End of URI should be in format 'moduleName/yyyy-MM-dd'")
+        }
+        try {
+            val moduleName = pathArgs.head
+            val moduleRevision = REVISION_FORMAT.parse(pathArgs.get(1))
+            return QName.create(null, moduleRevision, moduleName)
+        } catch(ParseException e) {
+            throw new ResponseException(BAD_REQUEST, "URI has bad format. It should be 'moduleName/yyyy-MM-dd'")
+        }
+    }
+
+    private def CompositeNode toModuleCompositeNode(Module module, DataSchemaNode moduleSchemaNode) {
+        val List<Node<?>> moduleNodeValues = new ArrayList
+        val nameSchemaNode = (moduleSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("name").head
+        moduleNodeValues.add(NodeFactory.createImmutableSimpleNode(nameSchemaNode.QName, null, module.name))
+        val revisionSchemaNode = (moduleSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("revision").head
+        moduleNodeValues.add(NodeFactory.createImmutableSimpleNode(revisionSchemaNode.QName, null, REVISION_FORMAT.format(module.revision)))
+        val namespaceSchemaNode = (moduleSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("namespace").head
+        moduleNodeValues.add(NodeFactory.createImmutableSimpleNode(namespaceSchemaNode.QName, null, module.namespace.toString))
+        val featureSchemaNode = (moduleSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("feature").head
+        for (feature : module.features) {
+            moduleNodeValues.add(NodeFactory.createImmutableSimpleNode(featureSchemaNode.QName, null, feature.QName.localName))
+        }
+        return NodeFactory.createImmutableCompositeNode(moduleSchemaNode.QName, null, moduleNodeValues)
+    }
+
+    private def DataSchemaNode getSchemaNode(Module restconfModule, String schemaNodeName) {
+        val restconfGrouping = restconfModule.groupings.filter[g|g.QName.localName == RESTCONF_MODULE_DRAFT02_RESTCONF_GROUPING_SCHEMA_NODE].head
+        val restconfContainer = restconfGrouping.findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_RESTCONF_CONTAINER_SCHEMA_NODE).head
+        if (schemaNodeName == RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE) {
+            return (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE).head
+        } else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE) {
+            return (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE).head
+        } else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE) {
+            val modules = (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE).head
+            return (modules as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE).head
+        }
+        return null
     }
 
     override getRoot() {
