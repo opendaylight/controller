@@ -213,7 +213,6 @@ public abstract class AbstractConfigTest extends
         return mock(CodecRegistry.class);
     }
 
-
     public static interface BundleContextServiceRegistrationHandler {
 
        void handleServiceRegistration(Object serviceInstance);

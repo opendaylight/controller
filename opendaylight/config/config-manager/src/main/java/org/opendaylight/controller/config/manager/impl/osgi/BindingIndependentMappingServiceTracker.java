@@ -15,11 +15,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Every time factory is added or removed, blank transaction is triggered to handle
- * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory, org.osgi.framework.BundleContext)}
- * functionality.
- */
 public class BindingIndependentMappingServiceTracker implements ServiceTrackerCustomizer<BindingIndependentMappingService, BindingIndependentMappingService> {
     private static final Logger logger = LoggerFactory.getLogger(BindingIndependentMappingServiceTracker.class);
 
@@ -48,7 +43,7 @@ public class BindingIndependentMappingServiceTracker implements ServiceTrackerCu
         BindingIndependentMappingService service = ctx.getService(moduleFactoryServiceReference);
         this.service = service;
         CodecRegistry codecRegistry = service.getCodecRegistry();
-        logger.warn("Codec registry acquired {}", codecRegistry);
+        logger.debug("Codec registry acquired {}", codecRegistry);
         activator.initConfigManager(ctx, codecRegistry);
         return service;
     }
@@ -59,7 +54,7 @@ public class BindingIndependentMappingServiceTracker implements ServiceTrackerCu
     }
 
     @Override
-    public void removedService(ServiceReference<BindingIndependentMappingService> moduleFactoryServiceReference, BindingIndependentMappingService    o) {
+    public void removedService(ServiceReference<BindingIndependentMappingService> moduleFactoryServiceReference, BindingIndependentMappingService o) {
         // TODO crash
     }
 }
