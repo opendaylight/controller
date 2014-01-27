@@ -539,6 +539,12 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sanitytest</artifactId>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 
