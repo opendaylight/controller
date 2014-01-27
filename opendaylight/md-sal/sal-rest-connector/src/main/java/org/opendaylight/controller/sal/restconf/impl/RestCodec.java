@@ -205,6 +205,11 @@ public class RestCodec {
                     List<Predicate> predicates = keyValuesToPredicateList(((NodeIdentifierWithPredicates) pathArgument)
                             .getKeyValues());
                     identityValue.setPredicates(predicates);
+                } else if (pathArgument instanceof NodeWithValue && identityValue != null) {
+                    List<Predicate> predicates = new ArrayList<>();
+                    String value = String.valueOf(((NodeWithValue) pathArgument).getValue());
+                    predicates.add(new Predicate(null, value));
+                    identityValue.setPredicates(predicates);
                 }
                 identityValuesDTO.add(identityValue);
             }
