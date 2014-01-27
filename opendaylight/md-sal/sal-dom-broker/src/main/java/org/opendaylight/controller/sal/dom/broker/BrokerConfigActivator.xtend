@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.osgi.framework.BundleContext
 import org.osgi.framework.ServiceRegistration
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
 
 class BrokerConfigActivator implements AutoCloseable {
 
@@ -29,12 +30,12 @@ class BrokerConfigActivator implements AutoCloseable {
     @Property
     private var DataBrokerImpl dataService;
 
-    private var ServiceRegistration<SchemaService> schemaReg;
     private var ServiceRegistration<DataBrokerService> dataReg;
     private var ServiceRegistration<DataProviderService> dataProviderReg;
     private var ServiceRegistration<MountService> mountReg;
     private var ServiceRegistration<MountProvisionService> mountProviderReg;
     private var SchemaService schemaService;
+    private var ServiceRegistration<RpcProvisionRegistry> rpcProvisionRegistryReg;
     private var MountPointManagerImpl mountService;
 
     SchemaAwareDataStoreAdapter wrappedStore
@@ -45,7 +46,6 @@ class BrokerConfigActivator implements AutoCloseable {
 
         val serviceRef = context.getServiceReference(SchemaService);
         schemaService = context.getService(serviceRef);
-        schemaReg = context.registerService(SchemaService, schemaService, emptyProperties);
 
         broker.setRouter(new SchemaAwareRpcBroker("/", SchemaContextProviders.fromSchemaService(schemaService)));
 
@@ -70,14 +70,16 @@ class BrokerConfigActivator implements AutoCloseable {
 
         mountReg = context.registerService(MountService, mountService, emptyProperties);
         mountProviderReg = context.registerService(MountProvisionService, mountService, emptyProperties);
+
+        rpcProvisionRegistryReg = context.registerService(RpcProvisionRegistry, broker.getRouter(), emptyProperties);
     }
 
     override def close() {
-        schemaReg?.unregister();
         dataReg?.unregister();
         dataProviderReg?.unregister();
         mountReg?.unregister();
         mountProviderReg?.unregister();
+        rpcProvisionRegistryReg?.unregister();
     }
 
 }
