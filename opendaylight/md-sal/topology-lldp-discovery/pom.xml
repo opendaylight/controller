@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
         <relativePath>../</relativePath>
     </parent>
     <groupId>org.opendaylight.controller.md</groupId>
@@ -13,7 +12,8 @@
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    </scm>
+      <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
+  </scm>
     <properties>
         <guava.version>14.0.1</guava.version>
         <xtend.version>2.4.3</xtend.version>
@@ -28,27 +28,27 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>    
 	    <dependency>
 	      <groupId>org.opendaylight.controller.model</groupId>
 	      <artifactId>model-flow-base</artifactId>
-	      <version>1.0-SNAPSHOT</version>
+	      <version>1.0</version>
 	    </dependency>
 	   <dependency>
 	      <groupId>org.opendaylight.controller.model</groupId>
 	      <artifactId>model-flow-management</artifactId>
-	      <version>1.0-SNAPSHOT</version>
+	      <version>1.0</version>
 	    </dependency>    
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-inventory</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.xtend</groupId>
@@ -76,7 +76,7 @@
     <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.7.0-SNAPSHOT</version>
+            <version>0.7.0</version>
         </dependency>
 	      
     </dependencies>
@@ -91,7 +91,7 @@
                     <instructions>
                         <Bundle-Activator>org.opendaylight.md.controller.topology.lldp.LLDPActivator</Bundle-Activator>
                         <Export-Package>org.opendaylight.md.controller.topology.lldp.utils</Export-Package>
-                        <Embed-Dependency>commons-lang</Embed-Dependency>>
+                        <Embed-Dependency>commons-lang</Embed-Dependency>&gt;
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                     </instructions>
                     <manifestLocation>${project.basedir}/META-INF</manifestLocation>

@@ -8,12 +8,12 @@
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
+    <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
   </scm>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.1</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
@@ -145,7 +145,7 @@
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-topology</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
          <groupId>org.opendaylight.yangtools.model</groupId>
@@ -154,7 +154,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-util</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
@@ -556,7 +556,7 @@
   </profiles>
 
   <artifactId>distribution.opendaylight</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.1.1</version>
   <packaging>pom</packaging>
 
   <dependencies>
