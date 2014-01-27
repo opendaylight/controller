@@ -216,10 +216,17 @@ class ControllerContext implements SchemaServiceListener {
         var module = uriToModuleName.get(qname.namespace)
         if (module === null) {
             val moduleSchema = globalSchema.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
-            if(moduleSchema === null) throw new IllegalArgumentException()
+            if(moduleSchema === null) return null
             uriToModuleName.put(qname.namespace, moduleSchema.name)
             module = moduleSchema.name;
         }
+        return '''«module»:«qname.localName»''';
+    }
+
+    def CharSequence toRestconfIdentifier(MountInstance mountPoint, QName qname) {
+        val moduleSchema = mountPoint?.schemaContext.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
+        if(moduleSchema === null) return null
+        val module = moduleSchema.name;
         return '''«module»:«qname.localName»''';
     }
 
