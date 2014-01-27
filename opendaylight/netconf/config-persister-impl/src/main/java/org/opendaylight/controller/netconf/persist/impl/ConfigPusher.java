@@ -88,7 +88,7 @@ public class ConfigPusher {
                                                                Optional<NetconfClient> oldClientForPossibleReuse)
             throws InterruptedException {
 
-        ConflictingVersionException lastException = null;
+        Exception lastException = null;
         int maxAttempts = 30;
         for(int i = 0 ; i < maxAttempts; i++) {
             NetconfClient netconfClient = makeNetconfConnection(configSnapshotHolder.getCapabilities(), oldClientForPossibleReuse);
@@ -96,11 +96,11 @@ public class ConfigPusher {
             try {
                 pushLastConfig(configSnapshotHolder, netconfClient);
                 return netconfClient;
-            } catch(ConflictingVersionException e) {
+            } catch (ConflictingVersionException | IOException e) {
                 Util.closeClientAndDispatcher(netconfClient);
                 lastException = e;
                 Thread.sleep(1000);
-            } catch (SAXException | IOException e) {
+            } catch (SAXException e) {
                 throw new IllegalStateException("Unable to load last config", e);
             }
         }
@@ -192,16 +192,16 @@ public class ConfigPusher {
         logger.trace("Detailed message {}", response);
     }
 
-    private static NetconfMessage getResponse(NetconfMessage request, NetconfClient netconfClient) {
+    private static NetconfMessage getResponse(NetconfMessage request, NetconfClient netconfClient) throws IOException {
         try {
             return netconfClient.sendMessage(request, NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
-        } catch(RuntimeException e) {
-            logger.error("Error while sending message {} to {}", request, netconfClient);
-            throw e;
+        } catch (RuntimeException e) {
+            logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
+            throw new IOException("Failed to execute netconf transaction", e);
         }
     }
 
-    private static NetconfMessage createEditConfigMessage(Element dataElement, String editConfigResourcename) {
+    private static NetconfMessage createEditConfigMessage(Element dataElement, String editConfigResourcename) throws IOException, SAXException {
         try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcename)) {
             Preconditions.checkNotNull(stream, "Unable to load resource " + editConfigResourcename);
 
@@ -217,16 +217,18 @@ public class ConfigPusher {
             editConfigElement.appendChild(configWrapper.getDomElement());
             return new NetconfMessage(doc);
         } catch (IOException | SAXException e) {
-            throw new RuntimeException("Unable to parse message from resources " + editConfigResourcename, e);
+            logger.debug("Failed to create edit-config message for resource {}", editConfigResourcename, e);
+            throw e;
         }
     }
 
-    private static NetconfMessage getNetconfMessageFromResource(String resource) {
+    private static NetconfMessage getNetconfMessageFromResource(String resource) throws IOException, SAXException {
         try (InputStream stream = ConfigPusher.class.getResourceAsStream(resource)) {
             Preconditions.checkNotNull(stream, "Unable to load resource " + resource);
             return new NetconfMessage(XmlUtil.readXmlToDocument(stream));
         } catch (SAXException | IOException e) {
-            throw new RuntimeException("Unable to parse message from resources " + resource, e);
+            logger.debug("Failed to parse netconf message for resource {}", resource, e);
+            throw e;
         }
     }
 }
