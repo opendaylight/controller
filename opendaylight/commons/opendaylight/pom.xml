@@ -64,14 +64,12 @@
     <opendaylight-l2-types.version>2013.08.27.2-SNAPSHOT</opendaylight-l2-types.version>
     <yang-ext.version>2013.09.07.2-SNAPSHOT</yang-ext.version>
     <javassist.version>3.17.1-GA</javassist.version>
-    <sample-toaster.version>1.0-SNAPSHOT</sample-toaster.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
     <jacoco.version>0.5.3.201107060350</jacoco.version>
     <enforcer.version>1.3.1</enforcer.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <junit.version>4.8.1</junit.version>
-    <bgpcep.version>0.3.0-SNAPSHOT</bgpcep.version>
     <yangtools.version>0.6.0-SNAPSHOT</yangtools.version>
     <!--versions for bits of the controller -->
     <controller.version>0.4.1-SNAPSHOT</controller.version>
@@ -93,7 +91,6 @@
     <sal.connection.version>0.1.1-SNAPSHOT</sal.connection.version>
     <networkconfig.bridgedomain.northbound.version>0.0.2-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <commons.httpclient.version>0.1.1-SNAPSHOT</commons.httpclient.version>
-    <concepts.version>0.5.1-SNAPSHOT</concepts.version>
     <protocol-framework.version>0.4.0-SNAPSHOT</protocol-framework.version>
     <netty.version>4.0.10.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>

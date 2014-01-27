@@ -216,7 +216,7 @@ public class ServiceProviderController {
                 mavenBundle(ODL, "netconf-impl").versionAsInProject(),
                 mavenBundle(ODL, "netconf-client").versionAsInProject(),
                 mavenBundle(ODL, "netconf-util").versionAsInProject(),
-                mavenBundle(ODL + ".thirdparty", "ganymed", "1.0-SNAPSHOT"),
+                mavenBundle(ODL + ".thirdparty", "ganymed").versionAsInProject(),
                 mavenBundle(ODL, "netconf-mapping-api").versionAsInProject(),
                 mavenBundle(ODL, "config-netconf-connector").versionAsInProject(),
                 mavenBundle(ODL, "config-persister-impl").versionAsInProject(),
