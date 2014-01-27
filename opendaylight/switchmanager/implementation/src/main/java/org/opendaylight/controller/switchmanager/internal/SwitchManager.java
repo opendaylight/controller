@@ -1397,7 +1397,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             } catch (SocketException e) {
                 log.error("Failed to acquire controller MAC: ", e);
             }
-            if (macAddress != null) {
+            if (macAddress != null && macAddress.length != 0) {
                 break;
             }
         }
