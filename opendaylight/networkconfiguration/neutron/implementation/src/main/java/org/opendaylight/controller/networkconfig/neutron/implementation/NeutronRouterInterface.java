@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -27,13 +26,12 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +39,11 @@ import org.slf4j.LoggerFactory;
 public class NeutronRouterInterface implements INeutronRouterCRUD, IConfigurationContainerAware,
                                                IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronRouterInterface.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String FILENAME ="neutron.router";
-    private static String fileName;
+    private static final String FILE_NAME ="neutron.router.conf";
     private String containerName = null;
 
     private IClusterContainerServices clusterContainerService = null;
+    private IConfigurationContainerService configurationService;
     private ConcurrentMap<String, NeutronRouter> routerDB;
     // methods needed for creating caches
 
@@ -62,7 +59,16 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
         }
     }
 
-    @SuppressWarnings("deprecation")
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service set: {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service removed: {}", service);
+        this.configurationService = null;
+    }
+
     private void allocateCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't create cache");
@@ -81,7 +87,7 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
         logger.debug("Cache successfully created for Neutron Routers");
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't retrieve cache");
@@ -97,7 +103,6 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
         logger.debug("Cache was successfully retrieved for Neutron Routers");
     }
 
-    @SuppressWarnings("deprecation")
     private void destroyCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterMger, can't destroy cache");
@@ -110,10 +115,7 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
     private void startUp() {
         allocateCache();
         retrieveCache();
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadConfiguration();
-        }
-
+        loadConfiguration();
     }
 
     /**
@@ -130,7 +132,6 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
-        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -198,8 +199,9 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
 
     @Override
     public NeutronRouter getRouter(String uuid) {
-        if (!routerExists(uuid))
+        if (!routerExists(uuid)) {
             return null;
+        }
         return routerDB.get(uuid);
     }
 
@@ -218,55 +220,51 @@ public class NeutronRouterInterface implements INeutronRouterCRUD, IConfiguratio
 
     @Override
     public boolean addRouter(NeutronRouter input) {
-        if (routerExists(input.getID()))
+        if (routerExists(input.getID())) {
             return false;
+        }
         routerDB.putIfAbsent(input.getID(), input);
         return true;
     }
 
     @Override
     public boolean removeRouter(String uuid) {
-        if (!routerExists(uuid))
+        if (!routerExists(uuid)) {
             return false;
+        }
         routerDB.remove(uuid);
         return true;
     }
 
     @Override
     public boolean updateRouter(String uuid, NeutronRouter delta) {
-        if (!routerExists(uuid))
+        if (!routerExists(uuid)) {
             return false;
+        }
         NeutronRouter target = routerDB.get(uuid);
         return overwrite(target, delta);
     }
 
     @Override
     public boolean routerInUse(String routerUUID) {
-        if (!routerExists(routerUUID))
+        if (!routerExists(routerUUID)) {
             return true;
+        }
         NeutronRouter target = routerDB.get(routerUUID);
         return (target.getInterfaces().size() > 0);
     }
 
-    @SuppressWarnings("unchecked")
     private void loadConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, NeutronRouter> confList = (ConcurrentMap<String, NeutronRouter>)
-                                                            objReader.read(this, fileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (String key : confList.keySet()) {
-            routerDB.put(key, confList.get(key));
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, FILE_NAME)) {
+            NeutronRouter nr = (NeutronRouter) conf;
+            routerDB.put(nr.getID(), nr);
         }
     }
 
     @Override
     public Status saveConfiguration() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(new ConcurrentHashMap<String, NeutronRouter>(routerDB), fileName);
+        return configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(routerDB.values()),
+                FILE_NAME);
     }
 
     @Override

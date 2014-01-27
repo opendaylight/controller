@@ -31,15 +31,14 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationAware;
+import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.IResourceAuthorization;
 import org.opendaylight.controller.sal.authorization.UserLevel;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.AuthResponse;
@@ -76,11 +75,10 @@ public class UserManager implements IUserManager, IObjectReader,
     private static final String DEFAULT_ADMIN = "admin";
     private static final String DEFAULT_ADMIN_PASSWORD = "admin";
     private static final String DEFAULT_ADMIN_ROLE = UserLevel.NETWORKADMIN.toString();
-    private static final String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String USERS_FILE_NAME = ROOT + "users.conf";
-    private static final String SERVERS_FILE_NAME = ROOT + "servers.conf";
-    private static final String AUTH_FILE_NAME = ROOT + "authorization.conf";
-    private static final String RECOVERY_FILE = ROOT + "NETWORK_ADMIN_PASSWORD_RECOVERY";
+    private static final String USERS_FILE_NAME = "users.conf";
+    private static final String SERVERS_FILE_NAME = "servers.conf";
+    private static final String AUTH_FILE_NAME = "authorization.conf";
+    private static final String RECOVERY_FILE = "NETWORK_ADMIN_PASSWORD_RECOVERY";
     private ConcurrentMap<String, UserConfig> localUserConfigList;
     private ConcurrentMap<String, ServerConfig> remoteServerConfigList;
     // local authorization info for remotely authenticated users
@@ -88,6 +86,7 @@ public class UserManager implements IUserManager, IObjectReader,
     private ConcurrentMap<String, AuthenticatedUser> activeUsers;
     private ConcurrentMap<String, IAAAProvider> authProviders;
     private IClusterGlobalServices clusterGlobalService = null;
+    private IConfigurationService configurationService;
     private SecurityContextRepository securityContextRepo = new UserSecurityContextRepository();
     private IContainerAuthorization containerAuthorizationClient;
     private Set<IResourceAuthorization> applicationAuthorizationClients;
@@ -204,11 +203,9 @@ public class UserManager implements IUserManager, IObjectReader,
         /*
          * Do not load local startup file if we are not the coordinator
          */
-        if ((clusterGlobalService != null) && (clusterGlobalService.amICoordinator())) {
-            loadUserConfig();
-            loadServerConfig();
-            loadAuthConfig();
-        }
+        loadUserConfig();
+        loadServerConfig();
+        loadAuthConfig();
     }
 
     private void loadSecurityKeys() {
@@ -408,9 +405,8 @@ public class UserManager implements IUserManager, IObjectReader,
     }
 
     private Status saveLocalUserListInternal() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(new ConcurrentHashMap<String, UserConfig>(
-                localUserConfigList), USERS_FILE_NAME);
+        return configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(localUserConfigList.values()), USERS_FILE_NAME);
     }
 
     @Override
@@ -419,9 +415,8 @@ public class UserManager implements IUserManager, IObjectReader,
     }
 
     private Status saveAAAServerListInternal() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(new ConcurrentHashMap<String, ServerConfig>(
-                remoteServerConfigList), SERVERS_FILE_NAME);
+        return configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(remoteServerConfigList.values()), SERVERS_FILE_NAME);
     }
 
     @Override
@@ -430,10 +425,8 @@ public class UserManager implements IUserManager, IObjectReader,
     }
 
     private Status saveAuthorizationListInternal() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(
-                new ConcurrentHashMap<String, AuthorizationConfig>(
-                        authorizationConfList), AUTH_FILE_NAME);
+        return configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(authorizationConfList.values()), AUTH_FILE_NAME);
     }
 
     @Override
@@ -444,48 +437,21 @@ public class UserManager implements IUserManager, IObjectReader,
         return ois.readObject();
     }
 
-    @SuppressWarnings("unchecked")
     private void loadUserConfig() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, UserConfig> confList = (ConcurrentMap<String, UserConfig>) objReader
-                .read(this, USERS_FILE_NAME);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (UserConfig conf : confList.values()) {
-            addRemoveLocalUserInternal(conf, false);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, USERS_FILE_NAME)) {
+            addRemoveLocalUserInternal((UserConfig) conf, false);
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadServerConfig() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, ServerConfig> confList = (ConcurrentMap<String, ServerConfig>) objReader
-                .read(this, SERVERS_FILE_NAME);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (ServerConfig conf : confList.values()) {
-            addAAAServer(conf);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, SERVERS_FILE_NAME)) {
+            addAAAServer((ServerConfig) conf);
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadAuthConfig() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, AuthorizationConfig> confList = (ConcurrentMap<String, AuthorizationConfig>) objReader
-                .read(this, AUTH_FILE_NAME);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (AuthorizationConfig conf : confList.values()) {
-            addAuthInfo(conf);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, AUTH_FILE_NAME)) {
+            addAuthInfo((AuthorizationConfig) conf);
         }
     }
 
@@ -815,6 +781,16 @@ public class UserManager implements IUserManager, IObjectReader,
             logger.debug("Cluster Service Global removed!");
             this.clusterGlobalService = null;
         }
+    }
+
+    public void setConfigurationService(IConfigurationService service) {
+        logger.trace("Got configuration service set request {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationService(IConfigurationService service) {
+        logger.trace("Got configuration service UNset request");
+        this.configurationService = null;
     }
 
     void unsetContainerAuthClient(IContainerAuthorization s) {

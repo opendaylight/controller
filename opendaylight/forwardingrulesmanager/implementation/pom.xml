@@ -36,8 +36,6 @@
               org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.configuration,
               org.opendaylight.controller.containermanager,
-              org.opendaylight.controller.hosttracker,
-              org.opendaylight.controller.hosttracker.hostAware,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.sal.action,
               org.opendaylight.controller.sal.core,
@@ -73,10 +71,6 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>hosttracker</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
@@ -107,10 +101,6 @@
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

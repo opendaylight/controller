@@ -36,7 +36,9 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Node;
@@ -47,11 +49,8 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -80,9 +79,11 @@ public class TopologyManagerImpl implements
     protected static final String TOPOHOSTSDB = "topologymanager.hostsDB";
     protected static final String TOPONODECONNECTORDB = "topologymanager.nodeConnectorDB";
     protected static final String TOPOUSERLINKSDB = "topologymanager.userLinksDB";
+    private static final String USER_LINKS_FILE_NAME = "userTopology.conf";
     private static final Logger log = LoggerFactory.getLogger(TopologyManagerImpl.class);
     private ITopologyService topoService;
     private IClusterContainerServices clusterContainerService;
+    private IConfigurationContainerService configurationService;
     private ISwitchManager switchManager;
     // DB of all the Edges with properties which constitute our topology
     private ConcurrentMap<Edge, Set<Property>> edgesDB;
@@ -97,8 +98,6 @@ public class TopologyManagerImpl implements
     // Topology Manager Aware listeners - for clusterwide updates
     private Set<ITopologyManagerClusterWideAware> topologyManagerClusterWideAware =
             new CopyOnWriteArraySet<ITopologyManagerClusterWideAware>();
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private String userLinksFileName;
     private ConcurrentMap<String, TopologyUserLinkConfig> userLinksDB;
     private BlockingQueue<TopoEdgeUpdate> notifyQ = new LinkedBlockingQueue<TopoEdgeUpdate>();
     private volatile Boolean shuttingDown = false;
@@ -164,6 +163,16 @@ public class TopologyManagerImpl implements
         }
     }
 
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service set request {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service UNset request");
+        this.configurationService = null;
+    }
+
     void setSwitchManager(ISwitchManager s) {
         log.debug("Adding ISwitchManager: {}", s);
         this.switchManager = s;
@@ -193,11 +202,9 @@ public class TopologyManagerImpl implements
             containerName = "UNKNOWN";
         }
 
-        userLinksFileName = ROOT + "userTopology_" + containerName + ".conf";
         registerWithOSGIConsole();
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadConfiguration();
-        }
+        loadConfiguration();
+
         // Restore the shuttingDown status on init of the component
         shuttingDown = false;
         notifyThread = new Thread(new TopologyNotify(notifyQ));
@@ -292,16 +299,9 @@ public class TopologyManagerImpl implements
         notifyThread = null;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, TopologyUserLinkConfig> confList =
-                (ConcurrentMap<String, TopologyUserLinkConfig>) objReader.read(this, userLinksFileName);
-
-        if (confList != null) {
-            for (TopologyUserLinkConfig conf : confList.values()) {
-                addUserLink(conf);
-            }
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, USER_LINKS_FILE_NAME)) {
+            addUserLink((TopologyUserLinkConfig) conf);
         }
     }
 
@@ -311,12 +311,10 @@ public class TopologyManagerImpl implements
     }
 
     public Status saveConfigInternal() {
-        ObjectWriter objWriter = new ObjectWriter();
+        Status saveStatus = configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(userLinksDB.values()), USER_LINKS_FILE_NAME);
 
-        Status saveStatus = objWriter.write(
-                new ConcurrentHashMap<String, TopologyUserLinkConfig>(userLinksDB), userLinksFileName);
-
-        if (! saveStatus.isSuccess()) {
+        if (!saveStatus.isSuccess()) {
             return new Status(StatusCode.INTERNALERROR, "Topology save failed: " + saveStatus.getDescription());
         }
         return saveStatus;

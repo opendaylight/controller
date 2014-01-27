@@ -18,6 +18,7 @@ import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
@@ -101,6 +102,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IClusterContainerServices.class).setCallbacks(
                     "setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
+
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
     }
 }

@@ -19,6 +19,7 @@ import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
+import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainer;
@@ -129,6 +130,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IClusterGlobalServices.class)
                     .setCallbacks("setClusterServices", "unsetClusterServices")
                     .setRequired(true));
+
+            c.add(createServiceDependency().setService(
+                    IConfigurationService.class).setCallbacks(
+                    "setConfigurationService",
+                    "unsetConfigurationService").setRequired(true));
 
             // Key kick-starter for container creation in each component
             c.add(createServiceDependency().setService(IContainerAware.class)

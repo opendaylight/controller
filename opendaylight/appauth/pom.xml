@@ -59,34 +59,5 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>usermanager</artifactId>
       </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>equinoxSDK381</groupId>
-          <artifactId>javax.servlet</artifactId>
-        </dependency>
-        <!-- Spring security -->
-        <dependency>
-          <groupId>org.springframework.security</groupId>
-          <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework.security</groupId>
-          <artifactId>spring-security-core</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework.security</groupId>
-          <artifactId>spring-security-web</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework.security</groupId>
-          <artifactId>spring-security-taglibs</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>org.springframework.transaction</artifactId>
-        </dependency>
     </dependencies>
 </project>

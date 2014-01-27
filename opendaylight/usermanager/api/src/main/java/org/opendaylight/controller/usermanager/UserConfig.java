@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.packet.BitBufferHelper;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class UserConfig implements Serializable {
+public class UserConfig extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
     private static Logger log = LoggerFactory.getLogger(UserConfig.class);
     private static final boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");

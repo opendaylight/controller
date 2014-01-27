@@ -34,14 +34,10 @@
       <Import-Package>
        org.opendaylight.controller.sal.core,
        org.opendaylight.controller.sal.utils,
-       org.opendaylight.controller.topologymanager,
        org.opendaylight.controller.sal.packet.address,
-       org.opendaylight.controller.switchmanager,
-       org.opendaylight.controller.clustering.services,
        javax.xml.bind.annotation,
        javax.xml.bind,
        org.apache.felix.dm,
-       org.apache.commons.lang3.builder,
        org.osgi.service.component,
        org.slf4j,
        org.eclipse.osgi.framework.console,
@@ -54,18 +50,6 @@
   </plugins>
  </build>
  <dependencies>
-  <dependency>
-   <groupId>org.opendaylight.controller</groupId>
-   <artifactId>topologymanager</artifactId>
-  </dependency>
-  <dependency>
-   <groupId>org.opendaylight.controller</groupId>
-   <artifactId>switchmanager</artifactId>
-  </dependency>
-  <dependency>
-   <groupId>org.opendaylight.controller</groupId>
-   <artifactId>clustering.services</artifactId>
-  </dependency>
   <dependency>
    <groupId>org.opendaylight.controller</groupId>
    <artifactId>sal</artifactId>

@@ -33,7 +33,9 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
@@ -66,8 +68,6 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
@@ -98,14 +98,15 @@ public class ForwardingRulesManager implements
     private static final String PORT_REMOVED = "Port removed";
     private static final String NODE_DOWN = "Node is Down";
     private static final String INVALID_FLOW_ENTRY = "Invalid FlowEntry";
-    private String frmFileName;
-    private String portGroupFileName;
+    private static final String STATIC_FLOWS_FILE_NAME = "frm_staticflows.conf";
+    private static final String PORT_GROUP_FILE_NAME = "portgroup.conf";
     private ConcurrentMap<Integer, FlowConfig> staticFlows;
     private ConcurrentMap<Integer, Integer> staticFlowsOrdinal;
     private ConcurrentMap<String, PortGroupConfig> portGroupConfigs;
     private ConcurrentMap<PortGroupConfig, Map<Node, PortGroup>> portGroupData;
     private ConcurrentMap<String, Object> TSPolicies;
     private IContainerManager containerManager;
+    private IConfigurationContainerService configurationService;
     private boolean inContainerMode; // being used by global instance only
     protected boolean stopping;
 
@@ -1945,22 +1946,7 @@ public class ForwardingRulesManager implements
 
     @Override
     public List<FlowConfig> getStaticFlows() {
-        return getStaticFlowsOrderedList(staticFlows, staticFlowsOrdinal.get(0).intValue());
-    }
-
-    // TODO: need to come out with a better algorithm for maintaining the order
-    // of the configuration entries
-    // with actual one, index associated to deleted entries cannot be reused and
-    // map grows...
-    private List<FlowConfig> getStaticFlowsOrderedList(ConcurrentMap<Integer, FlowConfig> flowMap, int maxKey) {
-        List<FlowConfig> orderedList = new ArrayList<FlowConfig>();
-        for (int i = 0; i <= maxKey; i++) {
-            FlowConfig entry = flowMap.get(i);
-            if (entry != null) {
-                orderedList.add(entry);
-            }
-        }
-        return orderedList;
+        return new ArrayList<FlowConfig>(staticFlows.values());
     }
 
     @Override
@@ -2003,34 +1989,13 @@ public class ForwardingRulesManager implements
         return new ArrayList<Node>(set);
     }
 
-    @SuppressWarnings("unchecked")
     private void loadFlowConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<Integer, FlowConfig> confList = (ConcurrentMap<Integer, FlowConfig>) objReader.read(this,
-                frmFileName);
-
-        ConcurrentMap<String, PortGroupConfig> pgConfig = (ConcurrentMap<String, PortGroupConfig>) objReader.read(this,
-                portGroupFileName);
-
-        if (pgConfig != null) {
-            for (ConcurrentMap.Entry<String, PortGroupConfig> entry : pgConfig.entrySet()) {
-                addPortGroupConfig(entry.getKey(), entry.getValue().getMatchString(), true);
-            }
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, PORT_GROUP_FILE_NAME)) {
+            addPortGroupConfig(((PortGroupConfig) conf).getName(), ((PortGroupConfig) conf).getMatchString(), true);
         }
 
-        if (confList == null) {
-            return;
-        }
-
-        int maxKey = 0;
-        for (Integer key : confList.keySet()) {
-            if (key.intValue() > maxKey) {
-                maxKey = key.intValue();
-            }
-        }
-
-        for (FlowConfig conf : getStaticFlowsOrderedList(confList, maxKey)) {
-            addStaticFlowInternal(conf, true);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, STATIC_FLOWS_FILE_NAME)) {
+            addStaticFlowInternal((FlowConfig) conf, true);
         }
     }
 
@@ -2045,19 +2010,22 @@ public class ForwardingRulesManager implements
     }
 
     private Status saveConfigInternal() {
-        ObjectWriter objWriter = new ObjectWriter();
-        ConcurrentMap<Integer, FlowConfig> nonDynamicFlows = new ConcurrentHashMap<Integer, FlowConfig>();
+        List<ConfigurationObject> nonDynamicFlows = new ArrayList<ConfigurationObject>();
+
         for (Integer ordinal : staticFlows.keySet()) {
             FlowConfig config = staticFlows.get(ordinal);
             // Do not save dynamic and controller generated static flows
             if (config.isDynamic() || config.isInternalFlow()) {
                 continue;
             }
-            nonDynamicFlows.put(ordinal, config);
+            nonDynamicFlows.add(config);
         }
-        objWriter.write(nonDynamicFlows, frmFileName);
-        objWriter.write(new ConcurrentHashMap<String, PortGroupConfig>(portGroupConfigs), portGroupFileName);
-        return new Status(StatusCode.SUCCESS, null);
+
+        configurationService.persistConfiguration(nonDynamicFlows, STATIC_FLOWS_FILE_NAME);
+        configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(portGroupConfigs.values()),
+                PORT_GROUP_FILE_NAME);
+
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -2432,6 +2400,16 @@ public class ForwardingRulesManager implements
         }
     }
 
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service set request {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service UNset request");
+        this.configurationService = null;
+    }
+
     @Override
     public PortGroupProvider getPortGroupProvider() {
         return portGroupProvider;
@@ -2482,8 +2460,6 @@ public class ForwardingRulesManager implements
      *
      */
     void init() {
-        frmFileName = GlobalConstants.STARTUPHOME.toString() + "frm_staticflows_" + this.getContainerName() + ".conf";
-        portGroupFileName = GlobalConstants.STARTUPHOME.toString() + "portgroup_" + this.getContainerName() + ".conf";
 
         inContainerMode = false;
 
@@ -2655,9 +2631,7 @@ public class ForwardingRulesManager implements
         /*
          * Read startup and build database if we are the coordinator
          */
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadFlowConfiguration();
-        }
+        loadFlowConfiguration();
     }
 
     /**

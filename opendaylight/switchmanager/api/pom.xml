@@ -47,18 +47,13 @@
               org.opendaylight.controller.switchmanager
             </Export-Package>
             <Import-Package>
-              org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.configuration,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.inventory,
               org.slf4j,
-              org.apache.felix.dm,
-              org.eclipse.osgi.framework.console,
-              org.osgi.framework,
-              javax.xml.bind.annotation,
-              org.apache.commons.lang3.builder
+              javax.xml.bind.annotation
             </Import-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
@@ -89,10 +84,6 @@
     </plugins>
   </build>
   <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>

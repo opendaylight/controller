@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.GUIField;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The class represents a Span Port configuration for a network node.
  */
-public class SpanConfig implements Serializable {
+public class SpanConfig extends ConfigurationObject implements Serializable {
     protected static final Logger logger = LoggerFactory
     .getLogger(SpanConfig.class);
     private static final long serialVersionUID = 1L;
@@ -73,23 +74,30 @@ public class SpanConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SpanConfig other = (SpanConfig) obj;
         if (nodeId == null) {
-            if (other.nodeId != null)
+            if (other.nodeId != null) {
                 return false;
-        } else if (!nodeId.equals(other.nodeId))
+            }
+        } else if (!nodeId.equals(other.nodeId)) {
             return false;
+        }
         if (spanPort == null) {
-            if (other.spanPort != null)
+            if (other.spanPort != null) {
                 return false;
-        } else if (!spanPort.equals(other.spanPort))
+            }
+        } else if (!spanPort.equals(other.spanPort)) {
             return false;
+        }
         return true;
     }
 

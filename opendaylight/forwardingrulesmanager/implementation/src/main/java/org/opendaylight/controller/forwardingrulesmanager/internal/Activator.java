@@ -17,6 +17,7 @@ import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
@@ -98,6 +99,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setIContainer", "unsetIContainer").setRequired(true));
             c.add(createServiceDependency().setService(IConnectionManager.class)
                     .setCallbacks("setIConnectionManager", "unsetIConnectionManager").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
             if (GlobalConstants.DEFAULT.toString().equals(containerName)) {
                 c.add(createServiceDependency().setService(IContainerManager.class)
                         .setCallbacks("setIContainerManager", "unsetIContainerManager").setRequired(true));

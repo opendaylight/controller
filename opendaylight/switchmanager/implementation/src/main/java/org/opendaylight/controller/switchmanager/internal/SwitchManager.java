@@ -35,7 +35,9 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -56,8 +58,6 @@ import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
@@ -86,8 +86,9 @@ import org.slf4j.LoggerFactory;
 public class SwitchManager implements ISwitchManager, IConfigurationContainerAware,
                                       IObjectReader, IListenInventoryUpdates, CommandProvider {
     private static Logger log = LoggerFactory.getLogger(SwitchManager.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private String subnetFileName, spanFileName, switchConfigFileName;
+    private static final String SUBNETS_FILE_NAME = "subnets.conf";
+    private static final String SPAN_FILE_NAME = "spanPorts.conf";
+    private static final String SWITCH_CONFIG_FILE_NAME = "switchConfig.conf";
     private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
     // Collection of Subnets keyed by the InetAddress
     private ConcurrentMap<InetAddress, Subnet> subnets;
@@ -101,6 +102,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     private ConcurrentMap<String, Property> controllerProps;
     private IInventoryService inventoryService;
     private IStatisticsManager statisticsManager;
+    private IConfigurationContainerService configurationService;
     private final Set<ISwitchManagerAware> switchManagerAware = Collections
             .synchronizedSet(new HashSet<ISwitchManagerAware>());
     private final Set<IInventoryListener> inventoryListeners = Collections
@@ -116,9 +118,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
      * only subnet returned. As soon as a user-configured subnet is created this one will
      * vanish.
      */
-    protected static SubnetConfig DEFAULT_SUBNETCONFIG;
-    protected static Subnet DEFAULT_SUBNET;
-    protected static String DEFAULT_SUBNET_NAME = "default (cannot be modifed)";
+    protected static final SubnetConfig DEFAULT_SUBNETCONFIG;
+    protected static final Subnet DEFAULT_SUBNET;
+    protected static final String DEFAULT_SUBNET_NAME = "default (cannot be modifed)";
     static{
         DEFAULT_SUBNETCONFIG = new SubnetConfig(DEFAULT_SUBNET_NAME, "0.0.0.0/0", new ArrayList<String>());
         DEFAULT_SUBNET = new Subnet(DEFAULT_SUBNETCONFIG);
@@ -164,24 +166,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     public void startUp() {
-        String container = this.getContainerName();
-        // Initialize configuration file names
-        subnetFileName = ROOT + "subnets_" + container + ".conf";
-        spanFileName = ROOT + "spanPorts_" + container + ".conf";
-        switchConfigFileName = ROOT + "switchConfig_" + container + ".conf";
-
         // Instantiate cluster synced variables
         allocateCaches();
         retrieveCaches();
-
-        /*
-         * Read startup and build database if we are the coordinator
-         */
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadSubnetConfiguration();
-            loadSpanConfiguration();
-            loadSwitchConfiguration();
-        }
 
         // Add controller MAC, if first node in the cluster
         if (!controllerProps.containsKey(MacAddress.name)) {
@@ -189,7 +176,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             if (controllerMac != null) {
                 Property existing = controllerProps.putIfAbsent(MacAddress.name, new MacAddress(controllerMac));
                 if (existing == null && log.isTraceEnabled()) {
-                    log.trace("Container {}: Setting controller MAC address in the cluster: {}", container,
+                    log.trace("Container {}: Setting controller MAC address in the cluster: {}", getContainerName(),
                             HexEncode.bytesToHexStringFormat(controllerMac));
                 }
             }
@@ -365,14 +352,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public List<Switch> getNetworkDevices() {
-        Set<Node> nodeSet = getNodes();
         List<Switch> swList = new ArrayList<Switch>();
-        if (nodeSet != null) {
-            for (Node node : nodeSet) {
-                swList.add(getSwitchByNode(node));
-            }
+        for (Node node : getNodes()) {
+            swList.add(getSwitchByNode(node));
         }
-
         return swList;
     }
 
@@ -702,48 +685,21 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         return ois.readObject();
     }
 
-    @SuppressWarnings("unchecked")
     private void loadSubnetConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, SubnetConfig> confList = (ConcurrentMap<String, SubnetConfig>) objReader
-                .read(this, subnetFileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (SubnetConfig conf : confList.values()) {
-            addSubnet(conf);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, SUBNETS_FILE_NAME)) {
+            addSubnet((SubnetConfig) conf);
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadSpanConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<Integer, SpanConfig> confList = (ConcurrentMap<Integer, SpanConfig>) objReader
-                .read(this, spanFileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (SpanConfig conf : confList.values()) {
-            addSpanConfig(conf);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, SPAN_FILE_NAME)) {
+            addSpanConfig((SpanConfig) conf);
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadSwitchConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, SwitchConfig> confList = (ConcurrentMap<String, SwitchConfig>) objReader
-                .read(this, switchConfigFileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (SwitchConfig conf : confList.values()) {
-            updateNodeConfig(conf);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, SWITCH_CONFIG_FILE_NAME)) {
+            updateNodeConfig((SwitchConfig) conf);
         }
     }
 
@@ -944,24 +900,36 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     public Status saveSwitchConfigInternal() {
-        Status retS = null, retP = null;
-        ObjectWriter objWriter = new ObjectWriter();
-
-        retS = objWriter.write(new ConcurrentHashMap<String, SubnetConfig>(
-                subnetsConfigList), subnetFileName);
-        retP = objWriter.write(new ConcurrentHashMap<SpanConfig, SpanConfig>(
-                spanConfigList), spanFileName);
-        retS = objWriter.write(new ConcurrentHashMap<String, SwitchConfig>(
-                nodeConfigList), switchConfigFileName);
-        if (retS.equals(retP)) {
-            if (retS.isSuccess()) {
-                return retS;
-            } else {
-                return new Status(StatusCode.INTERNALERROR, "Save failed");
-            }
+        Status status;
+        short number = 0;
+        status = configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(subnetsConfigList.values()), SUBNETS_FILE_NAME);
+        if (status.isSuccess()) {
+            number++;
         } else {
+            log.warn("Failed to save subnet gateway configurations: " + status.getDescription());
+        }
+        status = configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(spanConfigList.values()),
+                SPAN_FILE_NAME);
+        if (status.isSuccess()) {
+            number++;
+        } else {
+            log.warn("Failed to save span port configurations: " + status.getDescription());
+        }
+        status = configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(nodeConfigList.values()),
+                SWITCH_CONFIG_FILE_NAME);
+        if (status.isSuccess()) {
+            number++;
+        } else {
+            log.warn("Failed to save node configurations: " + status.getDescription());
+        }
+        if (number == 0) {
+            return new Status(StatusCode.INTERNALERROR, "Save failed");
+        }
+        if (number < 3) {
             return new Status(StatusCode.INTERNALERROR, "Partial save failure");
         }
+        return status;
     }
 
     @Override
@@ -1436,10 +1404,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         if (macAddress == null) {
             log.warn("Failed to acquire controller MAC: No physical interface found");
             // This happens when running controller on windows VM, for example
-            // TODO: Try parsing the OS command output
-            // For now provide a quick fix for the release
-            macAddress = new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0x0c, (byte) 0x60, (byte) 0x0D, (byte) 0x10 };
-            log.debug("Assigning custom MAC address to controller");
+            // Try parsing the OS command output
         }
         return macAddress;
     }
@@ -1655,7 +1620,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
                 .toString());
 
-        startUp();
     }
 
     /**
@@ -1674,6 +1638,15 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
      *
      */
     void start() {
+        startUp();
+
+        /*
+         * Read startup and build database if we are the coordinator
+         */
+        loadSubnetConfiguration();
+        loadSpanConfiguration();
+        loadSwitchConfiguration();
+
         // OSGI console
         registerWithOSGIConsole();
     }
@@ -1693,6 +1666,16 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
      *
      */
     void stop() {
+    }
+
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service set request {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service UNset request");
+        this.configurationService = null;
     }
 
     public void setInventoryService(IInventoryService service) {
@@ -2169,9 +2152,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         if (configuredNotConnectedNodes != null) {
             for (Node node : configuredNotConnectedNodes) {
                 Switch sw = getSwitchByNode(node);
-                if (sw != null) {
-                    configuredNotConnectedSwitches.add(sw);
-                }
+                configuredNotConnectedSwitches.add(sw);
             }
         }
         return configuredNotConnectedSwitches;

@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -28,7 +27,9 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
@@ -37,10 +38,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +46,11 @@ import org.slf4j.LoggerFactory;
 public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationContainerAware,
                                              IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronPortInterface.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String FILENAME ="neutron.port";
-    private static String fileName;
+    private static final String FILE_NAME ="neutron.port.conf";
     private String containerName = null;
 
     private IClusterContainerServices clusterContainerService = null;
+    private IConfigurationContainerService configurationService;
     private ConcurrentMap<String, NeutronPort> portDB;
 
     // methods needed for creating caches
@@ -70,7 +67,16 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
         }
     }
 
-    @SuppressWarnings("deprecation")
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service set: {}", service);
+        configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service removed: {}", service);
+        configurationService = null;
+    }
+
     private void allocateCache() {
         if (clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't create cache");
@@ -89,7 +95,7 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
         logger.debug("Cache successfully created for OpenDOVE");
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCache() {
         if (clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't retrieve cache");
@@ -105,7 +111,6 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
         logger.debug("Cache was successfully retrieved for Neutron Ports");
     }
 
-    @SuppressWarnings("deprecation")
     private void destroyCache() {
         if (clusterContainerService == null) {
             logger.error("un-initialized clusterMger, can't destroy cache");
@@ -118,10 +123,7 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
     private void startUp() {
         allocateCache();
         retrieveCache();
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadConfiguration();
-        }
-
+        loadConfiguration();
     }
 
     /**
@@ -138,7 +140,6 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
             // In the Global instance case the containerName is empty
             containerName = "";
         }
-        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -348,25 +349,17 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, NeutronPort> confList = (ConcurrentMap<String, NeutronPort>)
-                                                            objReader.read(this, fileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (String key : confList.keySet()) {
-            portDB.put(key, confList.get(key));
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, FILE_NAME)) {
+            NeutronPort nn = (NeutronPort) conf;
+            portDB.put(nn.getID(), nn);
         }
     }
 
     @Override
     public Status saveConfiguration() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(new ConcurrentHashMap<String, NeutronPort>(portDB), fileName);
+        return configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(portDB.values()),
+                FILE_NAME);
     }
 
     @Override

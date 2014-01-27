@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 
@@ -35,6 +36,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { StaticRoutingImplementation.class };
         return res;
@@ -53,6 +55,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(StaticRoutingImplementation.class)) {
             c.setInterface(new String[] {
@@ -74,6 +77,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IStaticRoutingAware.class).setCallbacks(
                     "setStaticRoutingAware", "unsetStaticRoutingAware")
                     .setRequired(false));
+
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
     }
 }

@@ -26,8 +26,8 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.configuration,
+              org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.packet,
@@ -102,5 +102,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
+
   </dependencies>
 </project>

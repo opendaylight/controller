@@ -33,11 +33,9 @@
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.action,
-              org.opendaylight.controller.sal.flowprogrammer,
               org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.reader,
-              org.apache.commons.lang3.builder,
               org.slf4j,
               javax.xml.bind.annotation,
               javax.xml.bind

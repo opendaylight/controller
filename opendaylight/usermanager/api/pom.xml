@@ -26,25 +26,21 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.configuration,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.utils,
-              org.opendaylight.controller.containermanager,
               org.slf4j,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
               org.apache.felix.dm,
-              org.apache.commons.lang3.builder,
               org.apache.commons.logging,
               javax.servlet,
               javax.servlet.http,
               org.springframework.security.web.context,
               org.springframework.security.core,
               org.springframework.security.core.context,
-              org.apache.commons.lang3,
               org.springframework.security.authentication,
               org.springframework.security.core.authority,
               org.springframework.security.core.userdetails,
@@ -64,14 +60,6 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>containermanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
     </dependency>
     <dependency>
@@ -89,23 +77,11 @@
     <!-- Spring security -->
     <dependency>
       <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-taglibs</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>org.springframework.transaction</artifactId>
     </dependency>
   </dependencies>
 </project>

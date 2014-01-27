@@ -12,6 +12,7 @@ package org.opendaylight.controller.configuration.internal;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,10 +22,15 @@ import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.ConfigurationEvent;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.configuration.IConfigurationService;
-import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +45,13 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
     private static final Logger logger = LoggerFactory
             .getLogger(ConfigurationService.class);
     public static final String SAVE_EVENT_CACHE = "config.event.save";
+    private static final Object ROOT = GlobalConstants.STARTUPHOME.toString();
     private IClusterGlobalServices clusterServices;
     private ConcurrentMap <ConfigurationEvent, String> configEvent;
     private Set<IConfigurationAware> configurationAwareList = Collections
             .synchronizedSet(new HashSet<IConfigurationAware>());
+    private ObjectReader objReader;
+    private ObjectWriter objWriter;
 
 
     public int getConfigurationAwareListSize() {
@@ -78,6 +87,8 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
     public void start() {
         allocateCache();
         retrieveCache();
+        objReader = new ObjectReader();
+        objWriter = new ObjectWriter();
     }
 
     public void destroy() {
@@ -163,5 +174,22 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
         if (configEvent == null) {
             logger.error("Failed to retrieve configuration Cache");
         }
+    }
+
+    @Override
+    public Status persistConfiguration(List<ConfigurationObject> config, String fileName) {
+        String destination = String.format("%s%s", ROOT, fileName);
+        return objWriter.write(config, destination);
+    }
+
+    @Override
+    public List<ConfigurationObject> retrieveConfiguration(IObjectReader reader, String fileName) {
+        if (!clusterServices.amICoordinator()) {
+            return Collections.emptyList();
+        }
+        String source = String.format("%s%s", ROOT, fileName);
+        Object obj = objReader.read(reader, source);
+        return (obj == null || !(obj instanceof List)) ? Collections.<ConfigurationObject> emptyList()
+                : (List<ConfigurationObject>) obj;
     }
 }

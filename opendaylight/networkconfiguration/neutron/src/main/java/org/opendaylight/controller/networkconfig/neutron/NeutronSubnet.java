@@ -20,11 +20,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronSubnet implements Serializable {
+public class NeutronSubnet extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // See OpenStack Network API v2.0 Reference for description of

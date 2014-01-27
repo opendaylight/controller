@@ -12,6 +12,7 @@ package org.opendaylight.controller.usermanager.internal;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
+import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.authorization.IResourceAuthorization;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -101,6 +102,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IClusterGlobalServices.class).setCallbacks(
                     "setClusterGlobalService", "unsetClusterGlobalService")
                     .setRequired(true));
+
+            c.add(createServiceDependency().setService(
+                    IConfigurationService.class).setCallbacks(
+                    "setConfigurationService",
+                    "unsetConfigurationService").setRequired(true));
 
             c.add(createServiceDependency().setService(IAAAProvider.class)
                     .setCallbacks("addAAAProvider", "removeAAAProvider")

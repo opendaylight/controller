@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.ForwardingMode;
 import org.opendaylight.controller.sal.core.Property;
@@ -22,7 +23,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 /**
  * The class describes a switch configuration
  */
-public class SwitchConfig implements Cloneable, Serializable {
+public class SwitchConfig extends ConfigurationObject implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
     private final String nodeId;
     private final Map<String, Property> nodeProperties;

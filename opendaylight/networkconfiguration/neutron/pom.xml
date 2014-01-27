@@ -48,6 +48,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.opendaylight.controller.configuration,
               org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
@@ -67,6 +68,10 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>configuration</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

@@ -56,6 +56,10 @@
     </plugins>
   </build>
   <dependencies>
+  <dependency>
+   <groupId>org.opendaylight.controller</groupId>
+   <artifactId>clustering.services</artifactId>
+  </dependency>
    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>

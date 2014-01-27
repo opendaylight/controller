@@ -11,11 +11,13 @@ package org.opendaylight.controller.usermanager;
 
 import java.io.Serializable;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
+
 /**
  * Configuration Java Object which represents a Remote AAA server configuration
  * information for User Manager.
  */
-public class ServerConfig implements Serializable {
+public class ServerConfig extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Order matters: JSP file expects following fields in the following order
@@ -57,28 +59,37 @@ public class ServerConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ServerConfig other = (ServerConfig) obj;
         if (ip == null) {
-            if (other.ip != null)
+            if (other.ip != null) {
                 return false;
-        } else if (!ip.equals(other.ip))
+            }
+        } else if (!ip.equals(other.ip)) {
             return false;
+        }
         if (protocol == null) {
-            if (other.protocol != null)
+            if (other.protocol != null) {
                 return false;
-        } else if (!protocol.equals(other.protocol))
+            }
+        } else if (!protocol.equals(other.protocol)) {
             return false;
+        }
         if (secret == null) {
-            if (other.secret != null)
+            if (other.secret != null) {
                 return false;
-        } else if (!secret.equals(other.secret))
+            }
+        } else if (!secret.equals(other.secret)) {
             return false;
+        }
         return true;
     }
 

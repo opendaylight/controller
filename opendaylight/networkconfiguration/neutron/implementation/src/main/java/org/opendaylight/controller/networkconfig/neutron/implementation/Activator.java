@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
@@ -93,6 +94,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
         if (imp.equals(NeutronRouterInterface.class)) {
             // export the service
@@ -105,6 +110,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
         if (imp.equals(NeutronPortInterface.class)) {
             // export the service
@@ -117,6 +126,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
         if (imp.equals(NeutronSubnetInterface.class)) {
             // export the service
@@ -129,6 +142,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
         if (imp.equals(NeutronNetworkInterface.class)) {
             // export the service
@@ -141,6 +158,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
     }
 }

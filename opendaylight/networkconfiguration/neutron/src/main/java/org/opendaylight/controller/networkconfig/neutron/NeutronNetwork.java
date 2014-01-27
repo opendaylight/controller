@@ -18,10 +18,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
+
 @XmlRootElement(name = "network")
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronNetwork implements Serializable {
+public class NeutronNetwork extends ConfigurationObject implements Serializable {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 

@@ -13,6 +13,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
+
 /**
  * PortGroupConfig class represents the User's Configuration with a Opaque
  * Regular Expression String that is parsed and handled by PortGroupProvider.
@@ -23,7 +25,7 @@ import java.util.List;
  *
  *
  */
-public class PortGroupConfig implements Serializable {
+public class PortGroupConfig extends ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String prettyFields[] = { "Name", "Match Criteria" };
 
@@ -136,23 +138,30 @@ public class PortGroupConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         PortGroupConfig other = (PortGroupConfig) obj;
         if (matchString == null) {
-            if (other.matchString != null)
+            if (other.matchString != null) {
                 return false;
-        } else if (!matchString.equals(other.matchString))
+            }
+        } else if (!matchString.equals(other.matchString)) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
+        }
         return true;
     }
 

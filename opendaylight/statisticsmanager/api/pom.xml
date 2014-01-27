@@ -28,7 +28,6 @@
           <instructions>
             <Import-Package>
               org.opendaylight.controller.forwardingrulesmanager,
-              org.opendaylight.controller.containermanager,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.flowprogrammer, org.slf4j,
               org.opendaylight.controller.sal.reader,
@@ -50,15 +49,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>containermanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
     </dependency>
   </dependencies>
 </project>

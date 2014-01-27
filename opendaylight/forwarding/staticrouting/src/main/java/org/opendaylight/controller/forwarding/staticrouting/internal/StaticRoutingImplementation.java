@@ -14,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -23,7 +24,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,7 +36,9 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRouting;
 import org.opendaylight.controller.forwarding.staticrouting.IStaticRoutingAware;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRoute;
@@ -46,10 +48,7 @@ import org.opendaylight.controller.hosttracker.IHostId;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.slf4j.Logger;
@@ -61,13 +60,13 @@ import org.slf4j.LoggerFactory;
 public class StaticRoutingImplementation implements IfNewHostNotify, IForwardingStaticRouting, IObjectReader,
         IConfigurationContainerAware {
     private static Logger log = LoggerFactory.getLogger(StaticRoutingImplementation.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
+    private static final String STATIC_ROUTES_FILE_NAME = "staticRouting.conf";
     ConcurrentMap<String, StaticRoute> staticRoutes;
     ConcurrentMap<String, StaticRouteConfig> staticRouteConfigs;
     private IfIptoHost hostTracker;
     private Timer gatewayProbeTimer;
-    private String staticRoutesFileName = null;
     private IClusterContainerServices clusterContainerService = null;
+    private IConfigurationContainerService configurationService;
     private Set<IStaticRoutingAware> staticRoutingAware = Collections
             .synchronizedSet(new HashSet<IStaticRoutingAware>());
     private ExecutorService executor;
@@ -95,6 +94,16 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
         }
     }
 
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service set request {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        log.trace("Got configuration service UNset request");
+        this.configurationService = null;
+    }
+
     @Override
     public ConcurrentMap<String, StaticRouteConfig> getStaticRouteConfigs() {
         return staticRouteConfigs;
@@ -107,18 +116,10 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
         return ois.readObject();
     }
 
-    @SuppressWarnings("unchecked")
+
     private void loadConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, StaticRouteConfig> confList = (ConcurrentMap<String, StaticRouteConfig>) objReader.read(
-                this, staticRoutesFileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (StaticRouteConfig conf : confList.values()) {
-            addStaticRoute(conf);
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, STATIC_ROUTES_FILE_NAME)) {
+            addStaticRoute((StaticRouteConfig) conf);
         }
     }
 
@@ -127,11 +128,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
     }
 
     public Status saveConfigInternal() {
-        Status status;
-        ObjectWriter objWriter = new ObjectWriter();
-
-        status = objWriter.write(new ConcurrentHashMap<String, StaticRouteConfig>(staticRouteConfigs),
-                staticRoutesFileName);
+        Status status = configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(staticRouteConfigs.values()), STATIC_ROUTES_FILE_NAME);
 
         if (status.isSuccess()) {
             return status;
@@ -140,7 +138,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (this.clusterContainerService == null) {
             log.trace("un-initialized clusterContainerService, can't create cache");
@@ -159,7 +156,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
             log.warn("un-initialized clusterContainerService, can't retrieve cache");
@@ -421,15 +418,11 @@ public class StaticRoutingImplementation implements IfNewHostNotify, IForwarding
             containerName = "";
         }
 
-        staticRoutesFileName = ROOT + "staticRouting_" + containerName + ".conf";
-
         log.debug("forwarding.staticrouting starting on container {}", containerName);
         allocateCaches();
         retrieveCaches();
         this.executor = Executors.newFixedThreadPool(1);
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadConfiguration();
-        }
+        loadConfiguration();
 
         /*
          * Slow probe to identify any gateway that might have silently appeared

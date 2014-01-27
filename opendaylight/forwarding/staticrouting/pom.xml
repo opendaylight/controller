@@ -33,18 +33,15 @@
        org.opendaylight.controller.sal.utils,
        org.opendaylight.controller.sal.core,
        org.opendaylight.controller.configuration,
-       org.opendaylight.controller.forwardingrulesmanager,
        org.opendaylight.controller.hosttracker,
        org.opendaylight.controller.hosttracker.hostAware,
        org.opendaylight.controller.clustering.services,
        org.opendaylight.controller.sal.packet,
        org.opendaylight.controller.sal.routing,
-       org.opendaylight.controller.topologymanager,
        org.eclipse.osgi.framework.console,
        org.osgi.framework,
        org.slf4j,
-       org.apache.felix.dm,
-       org.apache.commons.lang3.builder
+       org.apache.felix.dm
       </Import-Package>
       <Export-Package>
        org.opendaylight.controller.forwarding.staticrouting
@@ -61,11 +58,7 @@
  <dependencies>
   <dependency>
    <groupId>org.opendaylight.controller</groupId>
-   <artifactId>topologymanager</artifactId>
-  </dependency>
-  <dependency>
-   <groupId>org.opendaylight.controller</groupId>
-   <artifactId>forwardingrulesmanager</artifactId>
+   <artifactId>clustering.services</artifactId>
   </dependency>
   <dependency>
    <groupId>org.opendaylight.controller</groupId>

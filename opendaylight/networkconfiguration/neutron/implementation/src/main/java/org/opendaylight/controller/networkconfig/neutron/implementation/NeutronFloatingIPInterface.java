@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -27,7 +26,9 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
@@ -36,10 +37,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +45,11 @@ import org.slf4j.LoggerFactory;
 public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConfigurationContainerAware,
                                                    IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronFloatingIPInterface.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String FILENAME ="neutron.floatingip";
-    private static String fileName;
+    private static final String FILE_NAME = "neutron.floatingip.conf";
     private String containerName = null;
 
     private IClusterContainerServices clusterContainerService = null;
+    private IConfigurationContainerService configurationService;
     private ConcurrentMap<String, NeutronFloatingIP> floatingIPDB;
 
     // methods needed for creating caches
@@ -69,7 +66,16 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
         }
     }
 
-    @SuppressWarnings("deprecation")
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service set: {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service removed: {}", service);
+        this.configurationService = null;
+    }
+
     private void allocateCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't create cache");
@@ -88,7 +94,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
         logger.debug("Cache successfully created for NeutronFloatingIps");
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't retrieve cache");
@@ -104,7 +110,6 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
         logger.debug("Cache was successfully retrieved for Neutron FloatingIPs");
     }
 
-    @SuppressWarnings("deprecation")
     private void destroyCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterMger, can't destroy cache");
@@ -117,9 +122,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
     private void startUp() {
         allocateCache();
         retrieveCache();
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadConfiguration();
-        }
+        loadConfiguration();
     }
 
     /**
@@ -136,7 +139,6 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
-        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
@@ -169,6 +171,7 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
 
     // this method uses reflection to update an object from it's delta.
 
+    @SuppressWarnings("unused")
     private boolean overwrite(Object target, Object delta) {
         Method[] methods = target.getClass().getMethods();
 
@@ -203,8 +206,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
 
     @Override
     public NeutronFloatingIP getFloatingIP(String uuid) {
-        if (!floatingIPExists(uuid))
+        if (!floatingIPExists(uuid)) {
             return null;
+        }
         return floatingIPDB.get(uuid);
     }
 
@@ -227,12 +231,14 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
         INeutronSubnetCRUD subnetCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
-        if (floatingIPExists(input.getID()))
+        if (floatingIPExists(input.getID())) {
             return false;
+        }
         //if floating_ip_address isn't there, allocate from the subnet pool
         NeutronSubnet subnet = subnetCRUD.getSubnet(networkCRUD.getNetwork(input.getFloatingNetworkUUID()).getSubnets().get(0));
-        if (input.getFloatingIPAddress() == null)
+        if (input.getFloatingIPAddress() == null) {
             input.setFloatingIPAddress(subnet.getLowAddr());
+        }
         subnet.allocateIP(input.getFloatingIPAddress());
 
         //if port_id is there, bind port to this floating ip
@@ -251,8 +257,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
         INeutronSubnetCRUD subnetCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
-        if (!floatingIPExists(uuid))
+        if (!floatingIPExists(uuid)) {
             return false;
+        }
         NeutronFloatingIP floatIP = getFloatingIP(uuid);
         //if floating_ip_address isn't there, allocate from the subnet pool
         NeutronSubnet subnet = subnetCRUD.getSubnet(networkCRUD.getNetwork(floatIP.getFloatingNetworkUUID()).getSubnets().get(0));
@@ -269,8 +276,9 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
     public boolean updateFloatingIP(String uuid, NeutronFloatingIP delta) {
         INeutronPortCRUD portCRUD = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
 
-        if (!floatingIPExists(uuid))
+        if (!floatingIPExists(uuid)) {
             return false;
+        }
         NeutronFloatingIP target = floatingIPDB.get(uuid);
         if (target.getPortUUID() != null) {
             NeutronPort port = portCRUD.getPort(target.getPortUUID());
@@ -288,25 +296,17 @@ public class NeutronFloatingIPInterface implements INeutronFloatingIPCRUD, IConf
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, NeutronFloatingIP> confList = (ConcurrentMap<String, NeutronFloatingIP>)
-                                                            objReader.read(this, fileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (String key : confList.keySet()) {
-            floatingIPDB.put(key, confList.get(key));
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, FILE_NAME)) {
+            NeutronFloatingIP nfIP = (NeutronFloatingIP) conf;
+            floatingIPDB.put(nfIP.getID(), nfIP);
         }
     }
 
     @Override
     public Status saveConfiguration() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(new ConcurrentHashMap<String, NeutronFloatingIP>(floatingIPDB), fileName);
+        return configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(floatingIPDB.values()),
+                FILE_NAME);
     }
 
     @Override

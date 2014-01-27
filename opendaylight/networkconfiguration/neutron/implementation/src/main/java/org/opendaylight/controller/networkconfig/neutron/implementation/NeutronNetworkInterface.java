@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
@@ -27,13 +26,12 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,13 +39,12 @@ import org.slf4j.LoggerFactory;
 public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurationContainerAware,
                                                 IObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(NeutronNetworkInterface.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String FILENAME ="neutron.network";
-    private static String fileName;
+    private static final String FILE_NAME ="neutron.network.conf";
     private String containerName = null;
 
     private ConcurrentMap<String, NeutronNetwork> networkDB;
     private IClusterContainerServices clusterContainerService = null;
+    private IConfigurationContainerService configurationService;
 
     // methods needed for creating caches
 
@@ -63,7 +60,16 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
         }
     }
 
-    @SuppressWarnings("deprecation")
+    public void setConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service set: {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationContainerService(IConfigurationContainerService service) {
+        logger.trace("Configuration service removed: {}", service);
+        this.configurationService = null;
+    }
+
     private void allocateCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't create cache");
@@ -82,7 +88,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
         logger.debug("Cache successfully created for Neutron Networks");
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterContainerService, can't retrieve cache");
@@ -99,9 +105,7 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
     private void startUp() {
         allocateCache();
         retrieveCache();
-        if ((clusterContainerService != null) && (clusterContainerService.amICoordinator())) {
-            loadConfiguration();
-        }
+        loadConfiguration();
     }
 
     /**
@@ -118,11 +122,9 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
             // In the Global instance case the containerName is empty
             this.containerName = "";
         }
-        fileName = ROOT + FILENAME + "_" + containerName + ".conf";
         startUp();
     }
 
-    @SuppressWarnings("deprecation")
     private void destroyCache() {
         if (this.clusterContainerService == null) {
             logger.error("un-initialized clusterMger, can't destroy cache");
@@ -195,8 +197,9 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
 
     @Override
     public NeutronNetwork getNetwork(String uuid) {
-        if (!networkExists(uuid))
+        if (!networkExists(uuid)) {
             return null;
+        }
         return networkDB.get(uuid);
     }
 
@@ -215,8 +218,9 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
 
     @Override
     public boolean addNetwork(NeutronNetwork input) {
-        if (networkExists(input.getID()))
+        if (networkExists(input.getID())) {
             return false;
+        }
         networkDB.putIfAbsent(input.getID(), input);
       //TODO: add code to find INeutronNetworkAware services and call newtorkCreated on them
         return true;
@@ -224,8 +228,9 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
 
     @Override
     public boolean removeNetwork(String uuid) {
-        if (!networkExists(uuid))
+        if (!networkExists(uuid)) {
             return false;
+        }
         networkDB.remove(uuid);
       //TODO: add code to find INeutronNetworkAware services and call newtorkDeleted on them
         return true;
@@ -233,41 +238,36 @@ public class NeutronNetworkInterface implements INeutronNetworkCRUD, IConfigurat
 
     @Override
     public boolean updateNetwork(String uuid, NeutronNetwork delta) {
-        if (!networkExists(uuid))
+        if (!networkExists(uuid)) {
             return false;
+        }
         NeutronNetwork target = networkDB.get(uuid);
         return overwrite(target, delta);
     }
 
     @Override
     public boolean networkInUse(String netUUID) {
-        if (!networkExists(netUUID))
+        if (!networkExists(netUUID)) {
             return true;
+        }
         NeutronNetwork target = networkDB.get(netUUID);
-        if (target.getPortsOnNetwork().size() > 0)
+        if (target.getPortsOnNetwork().size() > 0) {
             return true;
+        }
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadConfiguration() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, NeutronNetwork> confList = (ConcurrentMap<String, NeutronNetwork>)
-                                                            objReader.read(this, fileName);
-
-        if (confList == null) {
-            return;
-        }
-
-        for (String key : confList.keySet()) {
-            networkDB.put(key, confList.get(key));
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, FILE_NAME)) {
+            NeutronNetwork nn = (NeutronNetwork) conf;
+            networkDB.put(nn.getID(), nn);
         }
     }
 
     @Override
     public Status saveConfiguration() {
-        ObjectWriter objWriter = new ObjectWriter();
-        return objWriter.write(new ConcurrentHashMap<String, NeutronNetwork>(networkDB), fileName);
+        return configurationService.persistConfiguration(new ArrayList<ConfigurationObject>(networkDB.values()),
+                FILE_NAME);
     }
 
     @Override

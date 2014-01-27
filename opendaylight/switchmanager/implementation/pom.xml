@@ -45,9 +45,9 @@
             <Export-Package>
             </Export-Package>
             <Import-Package>
+              org.opendaylight.controller.configuration,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.configuration,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
@@ -96,11 +96,11 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
+      <artifactId>configuration</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>configuration</artifactId>
+      <artifactId>clustering.services</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -120,11 +120,11 @@
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
-      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>commons.logback_settings</artifactId>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
     </dependency>
   </dependencies>
 </project>

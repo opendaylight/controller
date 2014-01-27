@@ -67,6 +67,10 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>containermanager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>
     </dependency>
     <dependency>
@@ -82,17 +86,7 @@
       <artifactId>bundlescanner</artifactId>
     </dependency>
 
-    <dependency>
-       <groupId>com.fasterxml.jackson.core</groupId>
-       <artifactId>jackson-annotations</artifactId>
-    </dependency>
-
-    <dependency>
-       <groupId>com.fasterxml.jackson.core</groupId>
-       <artifactId>jackson-core</artifactId>
-    </dependency>
-
-    <dependency>
+     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>

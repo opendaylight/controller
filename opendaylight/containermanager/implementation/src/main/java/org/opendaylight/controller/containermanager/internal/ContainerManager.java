@@ -24,7 +24,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -36,6 +35,7 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.containermanager.ContainerChangeEvent;
@@ -63,8 +63,6 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.sal.utils.ObjectReader;
-import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -76,10 +74,10 @@ public class ContainerManager extends Authorization<String> implements IContaine
         CommandProvider, ICacheUpdateAware<String, Object>, IContainerInternal, IContainerAuthorization,
         IConfigurationAware {
     private static final Logger logger = LoggerFactory.getLogger(ContainerManager.class);
-    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static String containersFileName = ROOT + "containers.conf";
+    private static String CONTAINERS_FILE_NAME = "containers.conf";
     private static final String allContainersGroup = "allContainers";
     private IClusterGlobalServices clusterServices;
+    private IConfigurationService configurationService;
     /*
      * Collection containing the configuration objects. This is configuration
      * world: container names (also the map key) are maintained as they were
@@ -169,6 +167,16 @@ public class ContainerManager extends Authorization<String> implements IContaine
             this.clusterServices = null;
             logger.debug("IClusterServices Unset");
         }
+    }
+
+    public void setConfigurationService(IConfigurationService service) {
+        logger.trace("Got configuration service set request {}", service);
+        this.configurationService = service;
+    }
+
+    public void unsetConfigurationService(IConfigurationService service) {
+        logger.trace("Got configuration service UNset request");
+        this.configurationService = null;
     }
 
     private void allocateCaches() {
@@ -290,7 +298,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
         createDefaultAuthorizationGroups();
 
         // Read startup configuration and create local database
-        loadConfigurations();
+        loadContainerConfig();
     }
 
     public void destroy() {
@@ -728,29 +736,19 @@ public class ContainerManager extends Authorization<String> implements IContaine
         return flowSpecConfig;
     }
 
-    private void loadConfigurations() {
-        /*
-         * Read containers, container flows and finally containers' entries from file
-         * and program the database accordingly
-         */
-        if ((clusterServices != null) && (clusterServices.amICoordinator())) {
-            loadContainerConfig();
-        }
-    }
-
     private Status saveContainerConfig() {
         return saveContainerConfigLocal();
     }
 
     public Status saveContainerConfigLocal() {
-        ObjectWriter objWriter = new ObjectWriter();
+        Status status = configurationService.persistConfiguration(
+                new ArrayList<ConfigurationObject>(containerConfigs.values()), CONTAINERS_FILE_NAME);
 
-        Status status = objWriter.write(new ConcurrentHashMap<String, ContainerConfig>(containerConfigs), containersFileName);
         if (!status.isSuccess()) {
             return new Status(StatusCode.INTERNALERROR, "Failed to save container configurations: "
                     + status.getDescription());
         }
-        return new Status(StatusCode.SUCCESS);
+        return status;
     }
 
     private void removeComponentsStartUpfiles(String containerName) {
@@ -1335,18 +1333,9 @@ public class ContainerManager extends Authorization<String> implements IContaine
         return ois.readObject();
     }
 
-    @SuppressWarnings("unchecked")
     private void loadContainerConfig() {
-        ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, ContainerConfig> configMap = (ConcurrentMap<String, ContainerConfig>) objReader.read(this,
-                containersFileName);
-
-        if (configMap == null) {
-            return;
-        }
-
-        for (Map.Entry<String, ContainerConfig> configEntry : configMap.entrySet()) {
-            addContainer(configEntry.getValue());
+        for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, CONTAINERS_FILE_NAME)) {
+            addContainer((ContainerConfig) conf);
         }
     }
 

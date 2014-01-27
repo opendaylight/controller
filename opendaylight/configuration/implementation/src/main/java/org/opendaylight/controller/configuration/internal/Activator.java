@@ -128,8 +128,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(
                     new String[] { IConfigurationService.class.getName(),
-                            ICacheUpdateAware.class.getName()},
-                            props);
+                            ICacheUpdateAware.class.getName() }, props);
 
             c.add(createServiceDependency().setService(
                     IClusterGlobalServices.class).setCallbacks(

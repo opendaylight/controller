@@ -43,7 +43,6 @@
           <instructions>
             <Import-Package>
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.containermanager,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.flowprogrammer,
               org.opendaylight.controller.sal.reader,
@@ -102,7 +101,11 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>containermanager</artifactId>
+      <artifactId>sal.connection</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>switchmanager</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -119,10 +122,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>commons.logback_settings</artifactId>
     </dependency>
   </dependencies>
 </project>
