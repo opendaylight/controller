@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -35,6 +36,7 @@ public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataS
         dataLoad("/xml-to-cnsn/data-of-several-modules/yang",2,"module1","cont_m1");
     }
 
+    @Ignore
     @Test
     public void dataFromSeveralModulesToJsonTest() throws WebApplicationException, IOException, URISyntaxException {
         SchemaContext schemaContext = TestUtils.loadSchemaContext(modules);
