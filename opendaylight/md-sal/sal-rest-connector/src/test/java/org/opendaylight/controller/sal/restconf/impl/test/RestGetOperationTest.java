@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
@@ -13,21 +12,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import org.glassfish.jersey.test.TestProperties;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
-import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -75,24 +69,6 @@ public class RestGetOperationTest extends JerseyTest {
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
         return resourceConfig;
-    }
-
-    /**
-     * Tests of status codes for "/datastore/{identifier}".
-     */
-    @Test
-    public void getDatastoreStatusCodes() throws FileNotFoundException, UnsupportedEncodingException {
-        mockReadOperationalDataMethod();
-        String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
-        assertEquals(200, get(uri, MediaType.APPLICATION_XML));
-
-        uri = createUri("/datastore/", "wrong-module:interfaces/interface/eth0");
-        assertEquals(400, get(uri, MediaType.APPLICATION_XML));
-
-        // Test of request for not existing data. Returning status code 404
-        uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
-        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(null);
-        assertEquals(404, get(uri, MediaType.APPLICATION_XML));
     }
 
     /**
