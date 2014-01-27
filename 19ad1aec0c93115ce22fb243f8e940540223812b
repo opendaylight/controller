@@ -16,6 +16,24 @@
       "revId": "19ad1aec0c93115ce22fb243f8e940540223812b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_221fed09",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1853,
+      "author": {
+        "id": 1545
+      },
+      "writtenOn": "2014-01-27T05:58:45Z",
+      "side": 1,
+      "message": "Hi Alessandro,\n\nIt\u0027s correct that I can get whether user requested uninstall or an install from target.installInHw() and the existing code flow is also correct. \n\nThe issue that I found out is, when the uninstallFlowEntry() function is called, toggleInstallation() function is called which sets the value of installInHw as false. \n\nAfter coming out of this function, based on the success, toggleInstallation() is called again which reverses the value of installInHW as true. This is incorrect.\n\nThus, the button on UI is not changed from Uninstall Flow -\u003e Install Flow though it is uninstalled because the value of installInHW is still true. \n\nThe change that I made works on the basis of explicitly setting the installInHw in the case of uninstall and install flow.\n\nThus, if the operation is uninstall the value of installInHW -\u003e false  and true otherwise. Apart from improving readibility it resolves the issue that I mentioned above.",
+      "parentUuid": "da6255ed_0ff0928f",
+      "revId": "19ad1aec0c93115ce22fb243f8e940540223812b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
