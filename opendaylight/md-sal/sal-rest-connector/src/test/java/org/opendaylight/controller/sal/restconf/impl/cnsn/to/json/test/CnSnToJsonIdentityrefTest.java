@@ -17,13 +17,15 @@ import java.util.regex.Pattern;
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
@@ -33,7 +35,7 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         dataLoad("/cnsn-to-json/identityref", 2, "identityref-module", "cont");
     }
 
-    @Ignore
+    
     @Test
     public void identityrefToJsonTest() {
         String json = null;
@@ -53,7 +55,6 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         assertTrue(mtch.matches());
     }
 
-    @Ignore
     @Test
     public void identityrefToJsonWithoutQNameTest() {
         String json = null;
@@ -74,13 +75,13 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     private CompositeNode prepareCompositeNode(Object value) {
-        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
+        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont","identityref:module","2013-12-2"), null, null,
                 ModifyAction.CREATE, null);
-        MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont1"), cont, null,
+        MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont1","identityref:module","2013-12-2"), cont, null,
                 ModifyAction.CREATE, null);
         cont.getChildren().add(cont1);
 
-        MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1"), cont1, value,
+        MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1","identityref:module","2013-12-2"), cont1, value,
                 ModifyAction.CREATE, null);
 
         cont1.getChildren().add(lf1);

@@ -253,9 +253,16 @@ class JsonMapper {
 
             writeModuleNameAndIdentifier(result, identityValue);
             if (identityValue.getPredicates() != null && !identityValue.getPredicates().isEmpty()) {
-                for (Predicate predicate : identityValue.getPredicates()) {
-                    IdentityValue identityValuePredicate = predicate.getName();
-                    result.append("[");
+                if (identityValue.getPredicates().get(0).getName() == null) {
+                    Predicate predicate = identityValue.getPredicates().get(0);
+                    result.append("[.='");
+                    result.append(predicate.getValue());
+                    result.append("'");
+                    result.append("]");
+                } else {
+                    for (Predicate predicate : identityValue.getPredicates()) {
+                        IdentityValue identityValuePredicate = predicate.getName();
+                        result.append("[");
                     if (identityValuePredicate == null) {
                         result.append(".");
                     } else {
@@ -265,6 +272,7 @@ class JsonMapper {
                     result.append(predicate.getValue());
                     result.append("'");
                     result.append("]");
+                    }
                 }
             }
         }
