@@ -522,7 +522,7 @@ public class TopologyManagerImpl implements
     }
 
     @Override
-    public void updateHostLink(NodeConnector port, Host h, UpdateType t, Set<Property> props) {
+    public synchronized void updateHostLink(NodeConnector port, Host h, UpdateType t, Set<Property> props) {
 
         // Clone the property set in case non null else just
         // create an empty one. Caches allocated via infinispan
