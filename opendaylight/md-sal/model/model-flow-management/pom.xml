@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>opendaylight-l2-types</artifactId>
-            <version>2013.08.27.2-SNAPSHOT</version>
+            <version>2013.08.27.3</version>
         </dependency>
     </dependencies>
     <packaging>bundle</packaging>
