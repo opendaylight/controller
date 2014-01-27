@@ -209,7 +209,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // non recoverable from here:
         try {
             return secondPhaseCommit(
-                    configTransactionController, commitInfo);
+                    new DeadlockInCommitDetector(configTransactionController), commitInfo);
         } catch (Throwable t) { // some libs throw Errors: e.g.
                                 // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
@@ -224,7 +224,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         }
     }
 
-    private CommitStatus secondPhaseCommit(ConfigTransactionControllerInternal configTransactionController,
+    private CommitStatus secondPhaseCommit(DeadlockInCommitDetector configTransactionController,
                                            CommitInfo commitInfo) {
 
         // close instances which were destroyed by the user, including
