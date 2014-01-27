@@ -1,0 +1,8 @@
+<cont xmlns="instance:identifier:module">
+    <cont1>
+        <lflst11 xmlns="augment:module:leaf:list">lflst11_1</lflst11>
+        <lflst11 xmlns="augment:module:leaf:list">lflst11_2</lflst11>
+        <lflst11 xmlns="augment:module:leaf:list">lflst11_3</lflst11>
+        <lf11 xmlns:a="instance:identifier:module" xmlns:b="augment:module:leaf:list" xmlns="augment:module:leaf:list">/a:cont/a:cont1/b:lflst11[.="lflst11_1"]</lf11>
+    </cont1>
+</cont>

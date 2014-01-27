@@ -21,7 +21,6 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -52,7 +51,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
      * Test of json output when as input are specified composite node with empty
      * data + YANG file
      */
-    @Ignore
+
     @Test
     public void compositeNodeAndYangWithJsonReaderEmptyDataTest() {
         CompositeNode compositeNode = prepareCompositeNodeWithEmpties();
@@ -540,49 +539,49 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
                 TestUtils.buildQName("cont1", "simple:yang:types", "2013-11-5"), null, null, ModifyAction.CREATE, null);
 
         // lst11_1
-        MutableCompositeNode lst11_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11"), cont1,
+        MutableCompositeNode lst11_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11","simple:yang:types","2013-11-5"), cont1,
                 null, ModifyAction.CREATE, null);
         cont1.getChildren().add(lst11_1);
 
-        MutableSimpleNode<?> lf111_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111"), lst11_1,
+        MutableSimpleNode<?> lf111_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111","simple:yang:types","2013-11-5"), lst11_1,
                 (short) 1, ModifyAction.CREATE, null);
         lst11_1.getChildren().add(lf111_1);
 
         // lst111_1_1
-        MutableCompositeNode lst111_1_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111"),
+        MutableCompositeNode lst111_1_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
         lst11_1.getChildren().add(lst111_1_1);
-        MutableSimpleNode<?> lf1111_1_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111"),
+        MutableSimpleNode<?> lf1111_1_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111","simple:yang:types","2013-11-5"),
                 lst111_1_1, (int) 34, ModifyAction.CREATE, null);
         lst111_1_1.getChildren().add(lf1111_1_1);
         lst111_1_1.init();
         // :lst111_1_1
 
         // lst111_1_2
-        MutableCompositeNode lst111_1_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111"),
+        MutableCompositeNode lst111_1_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
         lst11_1.getChildren().add(lst111_1_2);
-        MutableSimpleNode<?> lf1111_1_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111"),
+        MutableSimpleNode<?> lf1111_1_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111","simple:yang:types","2013-11-5"),
                 lst111_1_2, (int) 35, ModifyAction.CREATE, null);
         lst111_1_2.getChildren().add(lf1111_1_2);
         lst111_1_2.init();
         // :lst111_1_2
 
         // lst111_1_3
-        MutableCompositeNode lst111_1_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111"),
+        MutableCompositeNode lst111_1_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
         lst11_1.getChildren().add(lst111_1_3);
         lst111_1_2.init();
         // :lst111_1_3
 
         // lst111_1_4
-        MutableCompositeNode lst111_1_4 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111"),
+        MutableCompositeNode lst111_1_4 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
         lst11_1.getChildren().add(lst111_1_4);
         lst111_1_2.init();
         // :lst111_1_4
 
-        MutableCompositeNode cont111_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111"),
+        MutableCompositeNode cont111_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
         lst11_1.getChildren().add(cont111_1);
 
@@ -590,39 +589,39 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         // :lst11_1
 
         // lst11_2
-        MutableCompositeNode lst11_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11"), cont1,
+        MutableCompositeNode lst11_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11","simple:yang:types","2013-11-5"), cont1,
                 null, ModifyAction.CREATE, null);
         cont1.getChildren().add(lst11_2);
 
-        MutableSimpleNode<?> lf111_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111"), lst11_2,
+        MutableSimpleNode<?> lf111_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111","simple:yang:types","2013-11-5"), lst11_2,
                 (short) 2, ModifyAction.CREATE, null);
         lst11_2.getChildren().add(lf111_2);
 
         // cont111_2
-        MutableCompositeNode cont111_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111"),
+        MutableCompositeNode cont111_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111","simple:yang:types","2013-11-5"),
                 lst11_2, null, ModifyAction.CREATE, null);
         lst11_2.getChildren().add(cont111_2);
 
-        MutableSimpleNode<?> lflst1111_2_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lflst1111"),
+        MutableSimpleNode<?> lflst1111_2_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lflst1111","simple:yang:types","2013-11-5"),
                 cont111_2, (int) 1024, ModifyAction.CREATE, null);
         cont111_2.getChildren().add(lflst1111_2_2);
-        MutableSimpleNode<?> lflst1111_2_3 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lflst1111"),
+        MutableSimpleNode<?> lflst1111_2_3 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lflst1111","simple:yang:types","2013-11-5"),
                 cont111_2, (int) 4096, ModifyAction.CREATE, null);
         cont111_2.getChildren().add(lflst1111_2_3);
 
         // lst1111_2
-        MutableCompositeNode lst1111_2_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111"),
+        MutableCompositeNode lst1111_2_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_2, null, ModifyAction.CREATE, null);
         cont111_2.getChildren().add(lst1111_2_1);
-        MutableSimpleNode<?> lf1111B_2_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111B"),
+        MutableSimpleNode<?> lf1111B_2_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111B","simple:yang:types","2013-11-5"),
                 lst1111_2_1, (short) 4, ModifyAction.CREATE, null);
         lst1111_2_1.getChildren().add(lf1111B_2_1);
         lst1111_2_1.init();
 
-        MutableCompositeNode lst1111_2_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111"),
+        MutableCompositeNode lst1111_2_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_2, null, ModifyAction.CREATE, null);
         cont111_2.getChildren().add(lst1111_2_2);
-        MutableSimpleNode<?> lf1111A_2_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111A"),
+        MutableSimpleNode<?> lf1111A_2_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111A","simple:yang:types","2013-11-5"),
                 lst1111_2_2, "lf1111A str12", ModifyAction.CREATE, null);
         lst1111_2_2.getChildren().add(lf1111A_2_2);
         lst1111_2_2.init();
@@ -631,7 +630,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         cont111_2.init();
         // :cont111_2
 
-        MutableCompositeNode lst112_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst112"), lst11_2,
+        MutableCompositeNode lst112_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst112","simple:yang:types","2013-11-5"), lst11_2,
                 null, ModifyAction.CREATE, null);
         lst11_2.getChildren().add(lst112_2);
         lst112_2.init();
@@ -640,25 +639,25 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         // :lst11_2
 
         // lst11_3
-        MutableCompositeNode lst11_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11"), cont1,
+        MutableCompositeNode lst11_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11","simple:yang:types","2013-11-5"), cont1,
                 null, ModifyAction.CREATE, null);
         cont1.getChildren().add(lst11_3);
 
-        MutableSimpleNode<?> lf111_3 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111"), lst11_3,
+        MutableSimpleNode<?> lf111_3 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111","simple:yang:types","2013-11-5"), lst11_3,
                 (short) 3, ModifyAction.CREATE, null);
         lst11_3.getChildren().add(lf111_3);
 
         // cont111_3
-        MutableCompositeNode cont111_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111"),
+        MutableCompositeNode cont111_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111","simple:yang:types","2013-11-5"),
                 lst11_3, null, ModifyAction.CREATE, null);
         lst11_3.getChildren().add(cont111_3);
 
-        MutableCompositeNode lst1111_3_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111"),
+        MutableCompositeNode lst1111_3_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_3, null, ModifyAction.CREATE, null);
         cont111_3.getChildren().add(lst1111_3_1);
         lst1111_3_1.init();
 
-        MutableCompositeNode lst1111_3_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111"),
+        MutableCompositeNode lst1111_3_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_3, null, ModifyAction.CREATE, null);
         cont111_3.getChildren().add(lst1111_3_2);
         lst1111_3_2.init();
