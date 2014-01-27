@@ -245,14 +245,18 @@ class JsonMapper {
             result.append("/");
 
             writeModuleNameAndIdentifier(result, identityValue);
-            if (identityValue.getPredicates() != null) {
+            if (identityValue.getPredicates() != null && !identityValue.getPredicates().isEmpty()) {
                 for (Predicate predicate : identityValue.getPredicates()) {
                     IdentityValue identityValuePredicate = predicate.getName();
                     result.append("[");
-                    writeModuleNameAndIdentifier(result, identityValuePredicate);
-                    result.append("=\"");
+                    if (identityValuePredicate == null) {
+                        result.append(".");
+                    } else {
+                        writeModuleNameAndIdentifier(result, identityValuePredicate);
+                    }
+                    result.append("='");
                     result.append(predicate.getValue());
-                    result.append("\"");
+                    result.append("'");
                     result.append("]");
                 }
             }
