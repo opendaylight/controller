@@ -412,8 +412,6 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                 cache.put(notification.getId(), new NodeStatisticsAger(statisticsManager,key));
             }
             NodeStatisticsAger nsa = cache.get(notification.getId());
-            FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flowRule);
-            cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
                 
             //Augment the data to the flow node
 
@@ -466,6 +464,11 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                         flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
                         sucLogger.debug("Found matching flow in the datastore, augmenting statistics");
                         foundOriginalFlow = true;
+                        // Update entry with timestamp of latest response 
+                        flow.setKey(existingFlow.getKey());
+                        FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flow.build());
+                        cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
+
                         it.putOperationalData(flowRef, flowBuilder.build());
                         it.commit();
                     }
@@ -490,6 +493,11 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                             flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
                             sucLogger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
                             foundOriginalFlow = true;
+                            // Update entry with timestamp of latest response 
+                            flow.setKey(existingFlow.getKey());
+                            FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flow.build());
+                            cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
+
                             it.putOperationalData(flowRef, flowBuilder.build());
                             it.commit();
                             break;
@@ -498,9 +506,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                 }
             }
             if(!foundOriginalFlow){
-                long flowKey = Long.parseLong(new String("1"+Short.toString(tableId)+"0"+Integer.toString(this.unaccountedFlowsCounter)));
+                String flowKey = "#UF$TABLE*"+Short.toString(tableId)+"*"+Integer.toString(this.unaccountedFlowsCounter);
                 this.unaccountedFlowsCounter++;
-                FlowKey newFlowKey = new FlowKey(new FlowId(Long.toString(flowKey)));
+                FlowKey newFlowKey = new FlowKey(new FlowId(flowKey));
                 InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                         .augmentation(FlowCapableNode.class)
                         .child(Table.class, new TableKey(tableId))
@@ -508,6 +516,12 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                 flowBuilder.setKey(newFlowKey);
                 flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
                 sucLogger.debug("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",flowBuilder.build());
+                
+                // Update entry with timestamp of latest response 
+                flow.setKey(newFlowKey);
+                FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flow.build());
+                cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
+
                 it.putOperationalData(flowRef, flowBuilder.build());
                 it.commit();
             }
