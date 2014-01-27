@@ -9,8 +9,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <yang.version>0.6.0-SNAPSHOT</yang.version>
-    <yang.codegen.version>0.6.0-SNAPSHOT</yang.codegen.version>
+    <yang.version>0.6.1</yang.version>
+    <yang.codegen.version>0.6.1</yang.codegen.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
   </properties>
   <scm>
