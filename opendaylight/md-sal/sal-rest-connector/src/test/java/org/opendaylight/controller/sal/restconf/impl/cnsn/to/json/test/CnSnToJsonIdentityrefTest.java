@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
@@ -25,6 +26,7 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         dataLoad("/cnsn-to-json/identityref", 2, "identityref-module", "cont");
     }
 
+    @Ignore
     @Test
     public void identityrefToJsonTest() {
         String json = null;
@@ -44,6 +46,7 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         assertTrue(mtch.matches());
     }
 
+    @Ignore
     @Test
     public void identityrefToJsonWithoutQNameTest() {
         String json = null;
