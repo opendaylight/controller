@@ -27,7 +27,6 @@
         <module>netconf-mapping-api</module>
         <module>netconf-client</module>
         <module>netconf-ssh</module>
-        <module>../../third-party/ganymed</module>
         <module>netconf-monitoring</module>
         <module>ietf-netconf-monitoring</module>
         <module>ietf-netconf-monitoring-extension</module>
