@@ -49,7 +49,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  *     </ul>
  */
 @Path("/")
-public interface RestconfService extends RestconfServiceLegacy {
+public interface RestconfService {
 
     public static final String XML = "+xml";
     public static final String JSON = "+json";
@@ -59,24 +59,45 @@ public interface RestconfService extends RestconfServiceLegacy {
 
     @GET
     @Path("/modules")
-    @Produces({Draft01.MediaTypes.API+JSON,Draft01.MediaTypes.API+XML,
-               Draft02.MediaTypes.API+JSON,Draft02.MediaTypes.API+XML})
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData getModules();
 
-    @POST
-    @Path("/operations/{identifier}")
-    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
-               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+    @GET
+    @Path("/modules/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    @Consumes({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
-               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+    public StructuredData getModules(@PathParam("identifier") String identifier);
+
+    @GET
+    @Path("/modules/module/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getModule(@PathParam("identifier") String identifier);
+
+    @GET
+    @Path("/operations")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getOperations();
+
+    @GET
+    @Path("/operations/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getOperations(@PathParam("identifier") String identifier);
+
+    @POST
+    @Path("/operations/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+               MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
     
     @POST
-    @Path("/operations/{identifier}")
-    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
-               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+    @Path("/operations/{identifier:.+}")
+    @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData invokeRpc(@PathParam("identifier") String identifier);
     
