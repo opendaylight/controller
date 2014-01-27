@@ -4,18 +4,18 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.integrationtest</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.1</version>
     <relativePath>../../commons/integrationtest</relativePath>
   </parent>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
+    <tag>master-tagforprepareonly-controller-bulk-release-prepare-only-2-12</tag>
   </scm>
 
   <artifactId>clustering.services.integrationtest</artifactId>
-  <version>0.4.1-SNAPSHOT</version>
+  <version>0.4.1</version>
 
   <dependencies>
     <dependency>

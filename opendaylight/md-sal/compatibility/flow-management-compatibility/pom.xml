@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
      <groupId>org.opendaylight.controller</groupId>
     <artifactId>compatibility-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
   <artifactId>flow-management-compatibility</artifactId>
   <packaging>bundle</packaging>
@@ -12,6 +11,7 @@
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+    <tag>master-tagforprepareonly-controller-bulk-release-prepare-only-2-12</tag>
   </scm>
 
   <build>
@@ -40,12 +40,12 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-util</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -72,17 +72,17 @@
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-management</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.5.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-compatibility</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
 
   </dependencies>
