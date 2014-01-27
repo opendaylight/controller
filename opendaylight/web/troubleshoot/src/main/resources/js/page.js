@@ -207,13 +207,26 @@ one.f.troubleshooting.existingNodes = {
                             item["statistics"] = "<a href=\"javascript:one.f.troubleshooting.existingNodes.load.flows('" + item["nodeId"] + "');\">Flows</a>" + 
                             " <a href=\"javascript:one.f.troubleshooting.existingNodes.load.ports('" + item["nodeId"] + "');\">Ports</a>";
                         });
-
                     },
                     delay: 0
                 });
                 return source;
             },
             portsGrid: function(data) {
+                $.each(data.nodeData, function(index, item) {
+                    item.rxPkts = one.lib.helper.parseInt(item.rxPkts);
+                    item.txPkts = one.lib.helper.parseInt(item.txPkts);
+                    item.rxBytes = one.lib.helper.parseInt(item.rxBytes);
+                    item.txBytes = one.lib.helper.parseInt(item.txBytes);
+                    item.rxDrops = one.lib.helper.parseInt(item.rxDrops);
+                    item.txDrops = one.lib.helper.parseInt(item.txDrops);
+                    item.rxErrors = one.lib.helper.parseInt(item.rxErrors);
+                    item.txErrors = one.lib.helper.parseInt(item.txErrors);
+                    item.rxFrameErrors = one.lib.helper.parseInt(item.rxFrameErrors);
+                    item.rxOverRunErrors = one.lib.helper.parseInt(item.rxOverRunErrors);
+                    item.rxCRCErrors = one.lib.helper.parseInt(item.rxCRCErrors);
+                    item.collisions = one.lib.helper.parseInt(item.collisions);
+                });
                 var source = new StaticDataSource({
                     columns: [
                         {
@@ -311,6 +324,13 @@ one.f.troubleshooting.existingNodes = {
                 return result;
             },
             flowsGrid: function(data) {
+                $.each(data.nodeData, function(index, item) {
+                    item.byteCount = one.lib.helper.parseInt(item.byteCount);
+                    item.packetCount = one.lib.helper.parseInt(item.packetCount);
+                    item.durationSeconds = one.lib.helper.parseInt(item.durationSeconds);
+                    item.idleTimeout = one.lib.helper.parseInt(item.idleTimeout);
+                    item.priority = one.lib.helper.parseInt(item.priority);
+                });
                 var source = new StaticDataSource({
                     columns: [
                         {
