@@ -58,7 +58,7 @@ public class TestHelper {
 
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
-                mavenBundle(CONTROLLER + ".thirdparty", "ganymed", "1.0-SNAPSHOT"), //
+                mavenBundle(CONTROLLER + ".thirdparty", "ganymed").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //
