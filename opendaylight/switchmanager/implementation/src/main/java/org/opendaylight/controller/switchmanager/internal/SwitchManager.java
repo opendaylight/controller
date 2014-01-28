@@ -839,9 +839,14 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             String prop = entry.getKey();
             if (!updateProperties.containsKey(prop)) {
                 if (prop.equals(Description.propertyName)) {
-                    if (!advertisedDesc.isEmpty()) {
-                        Property desc = new Description(advertisedDesc);
-                        propMap.put(Description.propertyName, desc);
+                    if (advertisedDesc != null) {
+                        if (!advertisedDesc.isEmpty()) {
+                            Property desc = new Description(advertisedDesc);
+                            propMap.put(Description.propertyName, desc);
+                        }
+                    }
+                    else {
+                        propMap.remove(prop);
                     }
                     continue;
                 } else if (prop.equals(ForwardingMode.name)) {
