@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c43db8c5",
+        "filename": "opendaylight/web/root/src/main/resources/js/lib.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 20
+      },
+      "writtenOn": "2014-01-28T01:42:53Z",
+      "side": 1,
+      "message": "[minor]\n\nPlease use strict comparisons\n\n !\u003d\u003d instead of !\u003d",
+      "revId": "0e3656f8224dd980de976ae7f10025caf2ca0068",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4451c80d",
+        "filename": "opendaylight/web/root/src/main/resources/js/lib.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 20
+      },
+      "writtenOn": "2014-01-28T01:42:53Z",
+      "side": 1,
+      "message": "[minor]\n\nChange to strict comparisons",
+      "revId": "0e3656f8224dd980de976ae7f10025caf2ca0068",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
