@@ -1850,12 +1850,17 @@ public class ForwardingRulesManager implements
                 log.warn(status.getDescription());
                 return status;
             }
+            boolean wasInstalled = target.installInHw();
             status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry()) : this
                                     .installFlowEntry(target.getFlowEntry());
             if (status.isSuccess()) {
                 // Update Configuration database
                 target.setStatus(StatusCode.SUCCESS.toString());
-                target.toggleInstallation();
+                if (wasInstalled) {
+                    target.setInstallInHw(false);
+                } else {
+                     target.setInstallInHw(true);
+                }
                 staticFlows.put(key, target);
             }
             return status;
