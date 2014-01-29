@@ -62,7 +62,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class Troubleshoot implements IDaylightWeb {
     private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private static final List<String> flowStatsColumnNames = Arrays.asList("Node", "In Port",
-            "DL Src", "DL Dst", "DL Type", "DL Vlan", "NW Src", "NW Dst",
+            "DL Src", "DL Dst", "DL Type", "DL Vlan", "NW Src", "NW Dst","ToS Bits",
             "NW Proto", "TP Src", "TP Dst", "Actions", "Bytes", "Packets",
             "Time (s)", "Timeout (s)",
             "Priority");
@@ -229,6 +229,7 @@ public class Troubleshoot implements IDaylightWeb {
 
     private Map<String, String> convertPortsStatistics(
             NodeConnectorStatistics ncStats, String containerName) {
+
         Map<String, String> row = new HashMap<String, String>();
 
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
@@ -324,6 +325,12 @@ public class Troubleshoot implements IDaylightWeb {
                     .getField(MatchType.NW_DST).getValue()).getHostAddress());
         } else {
             row.put(MatchType.NW_DST.id(), "*");
+        }
+        if (match.isPresent(MatchType.NW_TOS)) {
+            row.put(MatchType.NW_TOS.id(), ((Byte) flow.getMatch()
+                        .getField(MatchType.NW_TOS).getValue()).toString());
+        } else {
+            row.put(MatchType.NW_TOS.id(), "*");
         }
         if (match.isPresent(MatchType.NW_PROTO)) {
             row.put(MatchType.NW_PROTO.id(),
