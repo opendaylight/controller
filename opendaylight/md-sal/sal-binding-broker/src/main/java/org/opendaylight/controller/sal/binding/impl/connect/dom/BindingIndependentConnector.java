@@ -788,11 +788,16 @@ public class BindingIndependentConnector implements //
         @Override
         public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
             DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
-            Future<RpcResult<?>> result = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
-            if (result == null) {
+            Future<RpcResult<?>> futureResult = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
+            if (futureResult == null) {
                 return Rpcs.getRpcResult(false);
             }
-            RpcResult<?> bindingResult = result.get();
+            RpcResult<?> bindingResult = futureResult.get();
+            final Object resultObj = bindingResult.getResult();
+            if (resultObj instanceof DataObject) {
+                final CompositeNode output = mappingService.toDataDom((DataObject)resultObj);
+                return Rpcs.getRpcResult(true, output, Collections.<RpcError>emptySet());
+            }
             return Rpcs.getRpcResult(true);
         }
 
