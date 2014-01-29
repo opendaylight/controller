@@ -102,7 +102,7 @@
     </profiles>
 
     <properties>
-        <yangtools.version>0.6.1</yangtools.version>
+        <yangtools.version>0.6.1-SNAPSHOT</yangtools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
         <!-- Java Versions -->
