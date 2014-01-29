@@ -40,14 +40,15 @@ public class NotificationRouterImpl implements NotificationRouter {
     private static Logger log = LoggerFactory.getLogger(NotificationRouterImpl.class);
 
     private Multimap<QName, Registration<NotificationListener>> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.<QName, Registration<NotificationListener>>create());
-
+//    private Registration<NotificationListener> defaultListener;
+    
     private void sendNotification(CompositeNode notification) {
-        QName type = notification.getNodeType();
-        Collection<Registration<NotificationListener>> toNotify = listeners.get(type);
+        final QName type = notification.getNodeType();
+        final Collection<Registration<NotificationListener>> toNotify = listeners.get(type);
         log.trace("Publishing notification " + type);
 
-        if (toNotify == null) {
-            // No listeners were registered - returns.
+        if ((toNotify == null) || toNotify.isEmpty()) {
+            log.debug("No listener registered for handling of notification {}", type);
             return;
         }
 
@@ -59,17 +60,17 @@ public class NotificationRouterImpl implements NotificationRouter {
                 log.error("Uncaught exception in NotificationListener", e);
             }
         }
-
     }
 
     @Override
     public void publish(CompositeNode notification) {
         sendNotification(notification);
     }
-
+    
     @Override
     public Registration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
         ListenerRegistration ret = new ListenerRegistration(notification, listener);
+        listeners.put(notification, ret);
         return ret;
     }
 
