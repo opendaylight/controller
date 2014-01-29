@@ -7,13 +7,16 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import java.util.EventListener;
 import java.util.concurrent.ExecutorService;
 
 import org.opendaylight.controller.md.sal.common.api.notify.NotificationPublishService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {
+
 
     /**
      * Deprecated. Use {@link #publish(Notification)}.
@@ -34,7 +37,8 @@ public interface NotificationProviderService extends NotificationService, Notifi
     /**
      * Publishes a notification.
      * 
-     * @param Notification notification to publish.
+     * @param Notification
+     *            notification to publish.
      * 
      */
     @Override
@@ -46,4 +50,12 @@ public interface NotificationProviderService extends NotificationService, Notifi
      */
     @Override
     void publish(Notification notification, ExecutorService service);
+
+    ListenerRegistration<NotificationInterestListener> registerInterestListener(
+            NotificationInterestListener interestListener);
+
+    public interface NotificationInterestListener extends EventListener {
+
+        void onNotificationSubscribtion(Class<? extends Notification> notificationType);
+    }
 }
