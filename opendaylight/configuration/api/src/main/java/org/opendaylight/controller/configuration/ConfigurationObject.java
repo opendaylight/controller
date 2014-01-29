@@ -31,7 +31,7 @@ public abstract class ConfigurationObject implements Serializable {
      *         resource name regular expression, false otherwise
      */
     protected boolean isValidResourceName(String name) {
-        return (name != null) ? name.matches(regex) : false;
+        return name != null && name.matches(regex);
     }
 
     /**
