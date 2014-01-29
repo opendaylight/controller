@@ -539,7 +539,7 @@ public class FlowConverter {
                         salMatch.setField(new MatchField(MatchType.DL_VLAN,
                                 vlan));
                     }
-                    if (ofMatch.getDataLayerVirtualLanPriorityCodePoint() != 0) {
+                    if ((ofMatch.getWildcards() & OFMatch.OFPFW_DL_VLAN_PCP) == 0) {
                         salMatch.setField(MatchType.DL_VLAN_PR, ofMatch
                                 .getDataLayerVirtualLanPriorityCodePoint());
                     }
@@ -612,7 +612,7 @@ public class FlowConverter {
                         salMatch.setField(new MatchField(MatchType.DL_VLAN,
                                 vlan));
                     }
-                    if (v6Match.getDataLayerVirtualLanPriorityCodePoint() != 0) {
+                    if ((v6Match.getWildcards() & OFMatch.OFPFW_DL_VLAN_PCP) == 0) {
                         salMatch.setField(MatchType.DL_VLAN_PR, v6Match
                                 .getDataLayerVirtualLanPriorityCodePoint());
                     }
