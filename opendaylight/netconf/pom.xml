@@ -50,6 +50,7 @@
         <netconf.netty.version>4.0.10.Final</netconf.netty.version>
         <netconf.version>0.2.4-1-SNAPSHOT</netconf.version>
         <config.version>0.2.4-1-SNAPSHOT</config.version>
+        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
     </properties>
 
     <dependencies>
