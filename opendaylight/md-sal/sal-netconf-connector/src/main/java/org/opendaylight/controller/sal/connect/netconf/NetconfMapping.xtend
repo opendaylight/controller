@@ -33,6 +33,8 @@ import com.google.common.base.Preconditions
 import com.google.common.base.Optional
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils
+import org.opendaylight.yangtools.yang.model.api.NotificationDefinition
+import java.util.Set
 
 class NetconfMapping {
 
@@ -103,7 +105,19 @@ class NetconfMapping {
     }
 
     static def CompositeNode toCompositeNode(NetconfMessage message,Optional<SchemaContext> ctx) {
-        return null//message.toRpcResult().result;
+        //TODO: implement general normalization to normalize incoming Netconf Message 
+        // for Schema Context counterpart
+        return null
+    }
+    
+    static def CompositeNode toNotificationNode(NetconfMessage message,Optional<SchemaContext> ctx) {
+        if (ctx.present) {
+            val schemaContext = ctx.get
+            val notifications = schemaContext.notifications
+            val document = message.document
+            return XmlDocumentUtils.notificationToDomNodes(document, Optional.<Set<NotificationDefinition>>fromNullable(notifications))
+        }
+        return null
     }
 
     static def NetconfMessage toRpcMessage(QName rpc, CompositeNode node,Optional<SchemaContext> ctx) {
@@ -134,11 +148,11 @@ class NetconfMapping {
             if(isDataRetrievalReply(rpc)) {
                 
                 val xmlData = message.document.dataSubtree
-                val dataNodes = XmlDocumentUtils.toDomNodes(xmlData,Optional.of(context.get.dataDefinitions))
+                val dataNodes = XmlDocumentUtils.toDomNodes(xmlData, Optional.of(context.get.dataDefinitions))
                 
                 val it = ImmutableCompositeNode.builder()
                 setQName(NETCONF_RPC_REPLY_QNAME)
-                add(ImmutableCompositeNode.create(NETCONF_DATA_QNAME,dataNodes));
+                add(ImmutableCompositeNode.create(NETCONF_DATA_QNAME, dataNodes));
                 
                 rawRpc = it.toInstance;
                 //sys(xmlData)
