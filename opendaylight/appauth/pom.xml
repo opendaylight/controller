@@ -27,6 +27,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            org.opendaylight.controller.configuration,
                             org.opendaylight.controller.containermanager,
                             org.opendaylight.controller.sal.authorization,
                             org.opendaylight.controller.sal.utils,
@@ -47,6 +48,10 @@
     </build>
 
     <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>configuration</artifactId>
+      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal</artifactId>
