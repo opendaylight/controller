@@ -216,7 +216,7 @@ public class V6Match extends OFMatch implements Cloneable {
             this.dlVlanIDState = MatchFieldState.MATCH_ABSENT;
         }
 
-        if (match.getDataLayerVirtualLanPriorityCodePoint() != 0) {
+        if ((match.getWildcards() & OFMatch.OFPFW_DL_VLAN_PCP) == 0) {
             this.setDataLayerVirtualLanPriorityCodePoint(
                     match.getDataLayerVirtualLanPriorityCodePoint(), (byte) 0);
         } else {
@@ -839,14 +839,12 @@ public class V6Match extends OFMatch implements Cloneable {
                     // extract the vlan id
                     super.setDataLayerVirtualLan(getVlanID(firstByte,
                             secondByte));
-                } else {
                     this.wildcards ^= (1 << 1); // Sync with 0F 1.0 Match
                 }
                 if ((this.dataLayerVirtualLanTCIMask & 0xe000) != 0) {
                     // else if its a vlan pcp mask
                     // extract the vlan pcp
                     super.setDataLayerVirtualLanPriorityCodePoint(getVlanPCP(firstByte));
-                } else {
                     this.wildcards ^= (1 << 20);
                 }
                 this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
@@ -864,6 +862,8 @@ public class V6Match extends OFMatch implements Cloneable {
                 super.setDataLayerVirtualLan(getVlanID(firstByte, secondByte));
                 this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
                 this.match_len += 6;
+                this.wildcards ^= (1 << 1); // Sync with 0F 1.0 Match
+                this.wildcards ^= (1 << 20);
             }
         }
     }
@@ -1216,8 +1216,6 @@ public class V6Match extends OFMatch implements Cloneable {
                 // ipv4 dest processing
                 this.wildcards ^= (((1 << 5) - 1) << 14);
             }
-        } else {
-            this.wildcards = 0;
         }
     }
 
