@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.authorization.AppRoleLevel;
 import org.opendaylight.controller.sal.authorization.IResourceAuthorization;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Authorization<T> implements IResourceAuthorization {
 private static final Logger logger = LoggerFactory.getLogger(Authorization.class);
-    private static final String namesRegex = "^[a-zA-Z0-9]+[{\\.|\\_|\\-}[a-zA-Z0-9]]*$";
+    private static final String namesRegex = ConfigurationObject.getRegularExpression();
     /*
      * The configured resource groups
      */
