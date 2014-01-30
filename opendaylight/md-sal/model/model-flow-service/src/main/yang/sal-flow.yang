@@ -4,7 +4,9 @@ module sal-flow {
 
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
-    import opendaylight-flow-types {prefix types;revision-date "2013-10-26";}
+    import opendaylight-flow-types {prefix types;revision-date "2013-10-26";}    
+    import opendaylight-group-types {prefix group-type;revision-date 2013-10-18;}
+    import opendaylight-meter-types {prefix meter-type;revision-date "2013-09-18";}
     import flow-capable-transaction {prefix tr;}
     import flow-errors {prefix error;}
 
@@ -122,6 +124,28 @@ module sal-flow {
         uses error:error-message;
         uses tr:transaction-aware;
         uses tr:transaction-metadata;
+        choice object-reference {
+        case flow-ref{
+                   leaf flow-ref {
+            type types:flow-ref;
+         }
+       }
+        case group-ref{
+                   leaf group-ref {
+            type group-type:group-ref;
+         }
+       }
+        case meter-ref{
+                   leaf meter-ref {
+            type meter-type:meter-ref;
+         }
+       }
+     }
+        leaf node {
+            ext:context-reference "inv:node-context";
+            type inv:node-ref;
+        }
+        
     }
     
     notification node-experimenter-error-notification {
