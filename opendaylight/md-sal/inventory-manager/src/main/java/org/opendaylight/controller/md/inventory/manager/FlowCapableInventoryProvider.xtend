@@ -12,6 +12,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorUpdated
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeUpdated
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.yangtools.concepts.Registration
@@ -78,6 +80,8 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
         val it = manager.startChange()
         removeOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
+        val pub = new NotificationPublisher() 
+        pub.publishNodeConnectorRemoveNotification(ref)
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated connector) {
@@ -95,6 +99,8 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         putOperationalData(ref.value as InstanceIdentifier<NodeConnector>, data.build());
         commit()
+        val pub = new NotificationPublisher() 
+        pub.publishNodeConnectorUpdatedNotification(ref,connector.id)
     }
 
     override onNodeRemoved(NodeRemoved node) {
@@ -103,6 +109,8 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         removeOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
+        val pub = new NotificationPublisher() 
+        pub.publishNodeRemovedNotification(ref)
     }
 
     override onNodeUpdated(NodeUpdated node) {
@@ -119,5 +127,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         putOperationalData(ref.value as InstanceIdentifier<Node>, data.build())
         commit()
+        val pub = new NotificationPublisher()
+        pub.publishNodeUpdatedNotification(ref,node.id)
     }
 }

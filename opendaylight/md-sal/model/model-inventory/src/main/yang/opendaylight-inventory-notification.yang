@@ -1,0 +1,51 @@
+module opendaylight-inventory-notification {
+    namespace "urn:opendaylight:inventory:notification";
+    prefix inv-notify;
+
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
+
+
+    revision "2013-08-19" {
+        description "Initial revision of Inventory model notification from Inventory manager";
+    }
+    
+	 identity node-notification-context {
+        description "Identity used to mark node context notification from inventory-manager";
+    }
+
+    identity node-connector-notification-context {
+        description "Identity used to mark node connector context notification from inventory-manager";
+    }
+
+    notification node-updated-notification {
+        leaf node-ref {
+            ext:context-reference "node-notification-context";
+            type inv:node-ref;
+        }
+        uses inv:node;
+    }
+
+    notification node-connector-updated-notification {
+        leaf node-connector-ref {
+            ext:context-reference "node-connector-notification-context";
+            type inv:node-connector-ref;
+        }
+        uses inv:node-connector;
+    }
+
+    notification node-removed-notification {
+        leaf node-ref {
+            ext:context-reference "node-notification-context";
+            type inv:node-ref;
+        }
+    }
+
+    notification node-connector-removed-notification {
+        leaf node-connector-ref {
+            ext:context-reference "node-connector-notification-context";
+            type inv:node-connector-ref;
+        }
+    }
+}

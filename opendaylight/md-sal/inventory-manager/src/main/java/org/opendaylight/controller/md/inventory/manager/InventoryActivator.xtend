@@ -16,11 +16,14 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService
 class InventoryActivator extends AbstractBindingAwareProvider {
 
     static var FlowCapableInventoryProvider provider = new FlowCapableInventoryProvider();
+   
 
     override onSessionInitiated(ProviderContext session) {
         provider.dataService = session.getSALService(DataProviderService)
         provider.notificationService = session.getSALService(NotificationProviderService)
         provider.start();
+        var NotificationPublisher pub = new NotificationPublisher();
+        pub.onSessionInitiated(session)
     }
 
     override protected stopImpl(BundleContext context) {
