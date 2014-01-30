@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -448,5 +447,25 @@ public class NetUtilsTest {
         Assert.assertTrue(NetUtils.isIPAddressValid("1.1.1.1/32"));
         Assert.assertTrue(NetUtils
                 .isIPAddressValid("2001:420:281:1004:407a:57f4:4d15:c355"));
+    }
+
+    @Test
+    public void testGetUnsignedByte() {
+        Assert.assertEquals(0,   NetUtils.getUnsignedByte((byte) 0x00));
+        Assert.assertEquals(1,   NetUtils.getUnsignedByte((byte) 0x01));
+        Assert.assertEquals(127, NetUtils.getUnsignedByte((byte) 0x7f));
+
+        Assert.assertEquals(128, NetUtils.getUnsignedByte((byte) 0x80));
+        Assert.assertEquals(255, NetUtils.getUnsignedByte((byte) 0xff));
+    }
+
+    @Test
+    public void testGetUnsignedShort() {
+        Assert.assertEquals(0,     NetUtils.getUnsignedShort((short) 0x0000));
+        Assert.assertEquals(1,     NetUtils.getUnsignedShort((short) 0x0001));
+        Assert.assertEquals(32767, NetUtils.getUnsignedShort((short) 0x7fff));
+
+        Assert.assertEquals(32768, NetUtils.getUnsignedShort((short) 0x8000));
+        Assert.assertEquals(65535, NetUtils.getUnsignedShort((short) 0xffff));
     }
 }
