@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
@@ -24,17 +23,14 @@ import java.util.concurrent.Future;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
-import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -107,19 +103,6 @@ public class RestPutOperationTest extends JerseyTest {
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
 
-    /**
-     * Tests of status codes for "/datastore/{identifier}".
-     */
-    @Test
-    public void putDatastoreStatusCodes() throws UnsupportedEncodingException {
-        String uri = createUri("/datastore/", "ietf-interfaces:interfaces/interface/eth0");
-        mockCommitConfigurationDataPutMethod(TransactionStatus.COMMITED);
-        assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
-
-        mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
-        assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
-    }
-
     @Test
     public void testRpcResultCommitedToStatusCodesWithMountPoint() throws UnsupportedEncodingException,
             FileNotFoundException, URISyntaxException {
@@ -130,10 +113,6 @@ public class RestPutOperationTest extends JerseyTest {
         when(
                 brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
-
-        InputStream xmlStream = RestconfImplTest.class.getResourceAsStream("/full-versions/test-data2/data2.xml");
-        String xml = TestUtils.getDocumentInPrintableForm(TestUtils.loadDocumentFrom(xmlStream));
-        Entity<String> entity = Entity.entity(xml, Draft02.MediaTypes.DATA + XML);
 
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
