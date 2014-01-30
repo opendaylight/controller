@@ -17,6 +17,7 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openflow.protocol.OFMatch;
+import org.openflow.util.U32;
 
 public class V6ExtensionTest {
 
@@ -52,20 +53,18 @@ public class V6ExtensionTest {
         match.fromString("input_port=1");
         match.fromString("dl_dst=20:A0:11:10:00:99");
         match.fromString("dl_src=00:10:08:22:12:75");
-
         match.fromString("ip_src=10.1.1.1");
         match.fromString("ip_dst=1.2.3.4");
         match.fromString("eth_type=0x800");
         match.fromString("dl_vlan=10");
-        match.fromString("dl_vpcp=1");
         match.fromString("nw_proto=6");
         match.fromString("nw_tos=100");
         match.fromString("tp_dst=8080");
         match.fromString("tp_src=60");
+        match.fromString("dl_vpcp=1");
 
         Assert.assertTrue(match.getInputPort() == 1);
         // Assert.assertTrue(match.getIPv6MatchLen()==6);
-
         ofm.setInputPort((short) 1);
         // V6Match is meant for IPv6, but if using OFMatch, it will be set to
         // IPv4 values, as OF1.0 doesn't support IPv6.
@@ -89,6 +88,13 @@ public class V6ExtensionTest {
         ofm.setTransportSource((short) 60);
         ofm.setTransportDestination((short) 8080);
 
+        // this v6match ctor now looks at the wildcard field to
+        // determine if vlan pcp has been set
+        // so set the wildcards appropriately to reflect that vlan pcp
+        // has been set.
+        int wildcards = OFMatch.OFPFW_ALL;
+        wildcards &= ~OFMatch.OFPFW_DL_VLAN_PCP;
+        ofm.setWildcards(U32.t(Long.valueOf(wildcards)));
         V6Match match3 = new V6Match(ofm);
 
         Assert.assertTrue(match.getInputPort() == match3.getInputPort());
