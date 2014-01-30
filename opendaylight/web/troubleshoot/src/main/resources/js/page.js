@@ -364,6 +364,11 @@ one.f.troubleshooting.existingNodes = {
                             sortable: true
                         },
                         {
+                            property: 'dlVlanPriority',
+                            label: 'Vlan PCP',
+                            sortable: true
+                        },
+                        {
                             property: 'nwSrc',
                             label: 'NW Src',
                             sortable: true
