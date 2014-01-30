@@ -58,12 +58,6 @@ class RestconfImpl implements RestconfService {
         return INSTANCE
     }
 
-    override readAllData() {
-
-        //        return broker.readOperationalData("".toInstanceIdentifier.getInstanceIdentifier);
-        throw new UnsupportedOperationException("Reading all data is currently not supported.")
-    }
-
     override getModules() {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
@@ -103,17 +97,6 @@ class RestconfImpl implements RestconfService {
         return new StructuredData(rpcResult.result, rpc.output, null)
     }
 
-    override readData(String identifier) {
-        val iiWithData = identifier.toInstanceIdentifier
-        var CompositeNode data = null;
-        if (iiWithData.mountPoint !== null) {
-            data = broker.readOperationalDataBehindMountPoint(iiWithData.mountPoint, iiWithData.instanceIdentifier)
-        } else {
-            data = broker.readOperationalData(iiWithData.getInstanceIdentifier);
-        }
-        return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
-    }
-
     override readConfigurationData(String identifier) {
         val iiWithData = identifier.toInstanceIdentifier
         var CompositeNode data = null;
@@ -136,10 +119,6 @@ class RestconfImpl implements RestconfService {
         return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
     }
 
-    override updateConfigurationDataLegacy(String identifier, CompositeNode payload) {
-        updateConfigurationData(identifier, payload);
-    }
-
     override updateConfigurationData(String identifier, CompositeNode payload) {
         val iiWithData = identifier.toInstanceIdentifier
         val value = normalizeNode(payload, iiWithData.schemaNode, iiWithData.mountPoint)
@@ -154,10 +133,6 @@ class RestconfImpl implements RestconfService {
             case TransactionStatus.COMMITED: Response.status(OK).build
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
-    }
-
-    override createConfigurationDataLegacy(String identifier, CompositeNode payload) {
-        createConfigurationData(identifier, payload);
     }
 
     override createConfigurationData(String identifier, CompositeNode payload) {
