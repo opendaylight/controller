@@ -40,6 +40,7 @@ public class AutodetectDirectoryPersisterTest {
 
         Assert.assertEquals(configs.get(0).getCapabilities(), configs.get(1).getCapabilities());
     }
+
     @Test(expected = IllegalStateException.class )
     public void testInvalidXml() throws Exception {
         File resourcePath = FileTypeTest.getResourceAsFile("/combined/bad_controller.xml.config");
@@ -52,6 +53,7 @@ public class AutodetectDirectoryPersisterTest {
         AutodetectDirectoryPersister persister = (AutodetectDirectoryPersister) adapter.instantiate(pp);
         List<ConfigSnapshotHolder> configs = persister.loadLastConfigs();
     }
+
     @Test(expected = IllegalStateException.class )
     public void testPersistConfig() throws IOException {
         File resourcePath = FileTypeTest.getResourceAsFile("/combined/1controller.txt.config");

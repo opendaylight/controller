@@ -10,6 +10,8 @@ package org.opendaylight.controller.config.persist.storage.file.xml;
 
 import com.google.common.base.Charsets;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.SortedSet;
@@ -29,6 +31,8 @@ public class FileStorageAdapterTest {
 
     private static int i;
     private File file;
+    private static final String NON_EXISTENT_DIRECTORY = "./nonExistentDir/";
+    private static final String NON_EXISTENT_FILE = "nonExistent.txt";
 
     @Before
     public void setUp() throws Exception {
@@ -39,6 +43,32 @@ public class FileStorageAdapterTest {
         i = 1;
     }
 
+    @Test
+    public void testNewFile() throws Exception {
+        XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
+        PropertiesProviderTest pp = new PropertiesProviderTest();
+        pp.addProperty("fileStorage",NON_EXISTENT_DIRECTORY+NON_EXISTENT_FILE);
+        pp.addProperty("numberOfBackups",Integer.toString(Integer.MAX_VALUE));
+        storage.instantiate(pp);
+
+        final ConfigSnapshotHolder holder = new ConfigSnapshotHolder() {
+            @Override
+            public String getConfigSnapshot() {
+                return createConfig();
+            }
+
+            @Override
+            public SortedSet<String> getCapabilities() {
+                return createCaps();
+            }
+        };
+        storage.persistConfig(holder);
+
+        storage.persistConfig(holder);
+
+        Assert.assertEquals(storage.toString().replace("\\","/"),"XmlFileStorageAdapter [storage="+NON_EXISTENT_DIRECTORY+NON_EXISTENT_FILE+"]");
+        delete(new File(NON_EXISTENT_DIRECTORY));
+    }
     @Test
     public void testFileAdapter() throws Exception {
         XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
@@ -191,4 +221,12 @@ public class FileStorageAdapterTest {
         return "<config>" + i++ + "</config>";
     }
 
+    private void delete(File f) throws IOException {
+        if (f.isDirectory()) {
+            for (File c : f.listFiles())
+                delete(c);
+        }
+        if (!f.delete())
+            throw new FileNotFoundException("Failed to delete file: " + f);
+    }
 }
