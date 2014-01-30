@@ -70,7 +70,10 @@ class RestconfImpl implements RestconfService {
         return callRpc(identifier.rpcDefinition, payload)
     }
 
-    override invokeRpc(String identifier) {
+    override invokeRpc(String identifier, String noPayload) {
+        if (!noPayload.nullOrEmpty) {
+            throw new ResponseException(UNSUPPORTED_MEDIA_TYPE, "Content-Type contains unsupported Media Type.");
+        }
         return callRpc(identifier.rpcDefinition, null)
     }
 
