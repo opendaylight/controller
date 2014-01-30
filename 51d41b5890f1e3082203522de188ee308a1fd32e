@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_704366af",
+        "filename": "opendaylight/md-sal/sal-rest-connector/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-01-30T11:23:27Z",
+      "side": 1,
+      "message": "useless dependecy",
+      "revId": "51d41b5890f1e3082203522de188ee308a1fd32e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_501622a9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-01-30T11:23:27Z",
+      "side": 1,
+      "message": "useless dependecy",
+      "revId": "51d41b5890f1e3082203522de188ee308a1fd32e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_100c2a93",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-01-30T11:23:27Z",
+      "side": 1,
+      "message": "this \"if\" way is useless, isn\u0027t it?",
+      "revId": "51d41b5890f1e3082203522de188ee308a1fd32e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f00e368b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/cnsn/to/json/test/CnSnJsonBasicYangTypesTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-01-30T11:23:27Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "51d41b5890f1e3082203522de188ee308a1fd32e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d029f2e6",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/cnsn/to/json/test/CnSnToJsonIdentityrefTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-01-30T11:23:27Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "51d41b5890f1e3082203522de188ee308a1fd32e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
