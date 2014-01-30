@@ -62,7 +62,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class Troubleshoot implements IDaylightWeb {
     private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private static final List<String> flowStatsColumnNames = Arrays.asList("Node", "In Port",
-            "DL Src", "DL Dst", "DL Type", "DL Vlan", "NW Src", "NW Dst","ToS Bits",
+            "DL Src", "DL Dst", "DL Type", "DL Vlan","Vlan Priority", "NW Src", "NW Dst","ToS Bits",
             "NW Proto", "TP Src", "TP Dst", "Actions", "Bytes", "Packets",
             "Time (s)", "Timeout (s)",
             "Priority");
@@ -314,6 +314,19 @@ public class Troubleshoot implements IDaylightWeb {
         } else {
             row.put(MatchType.DL_VLAN.id(), "*");
         }
+        //Vlan Priority
+        if (match.isPresent(MatchType.DL_VLAN_PR)) {
+            if (((Byte) flow.getMatch().getField(MatchType.DL_VLAN_PR).getValue())
+                    .shortValue() < 0) {
+                row.put(MatchType.DL_VLAN_PR.id(), "0");
+            } else {
+                row.put(MatchType.DL_VLAN_PR.id(), ((Byte) flow.getMatch()
+                        .getField(MatchType.DL_VLAN_PR).getValue()).toString());
+            }
+        } else {
+            row.put(MatchType.DL_VLAN_PR.id(), "*");
+        }
+
         if (match.isPresent(MatchType.NW_SRC)) {
             row.put(MatchType.NW_SRC.id(), ((InetAddress) flow.getMatch()
                     .getField(MatchType.NW_SRC).getValue()).getHostAddress());
