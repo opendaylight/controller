@@ -198,6 +198,9 @@ public class LLDP extends Packet {
         while (lldpSize > 0) {
             LLDPTLV tlv = new LLDPTLV();
             tlv.deserialize(data, lldpOffset, lldpSize);
+            if (tlv.getType() == 0 && tlv.getLength() == 0) {
+               break;
+            }
             int tlvSize = tlv.getTLVSize(); // Size of current TLV in bits
             lldpOffset += tlvSize;
             lldpSize -= tlvSize;
