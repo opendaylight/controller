@@ -31,7 +31,6 @@ import org.opendaylight.yangtools.yang.model.api.Status;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
-import org.opendaylight.yangtools.yang.model.api.YangNode;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -126,11 +125,6 @@ public class YangSchemaUtils {
     
         public NetconfDataRootNode(SchemaContext schema) {
             // TODO Auto-generated constructor stub
-        }
-
-        public YangNode getParent() {
-            // TODO Auto-generated method stub
-            return null;
         }
     
         @Override
