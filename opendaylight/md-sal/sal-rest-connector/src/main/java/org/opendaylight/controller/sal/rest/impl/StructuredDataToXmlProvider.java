@@ -26,7 +26,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.opendaylight.controller.sal.rest.api.Draft01;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.ResponseException;
@@ -38,8 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 @Provider
-@Produces({ Draft01.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
-        MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+@Produces({ Draft02.MediaTypes.DATA + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
 
