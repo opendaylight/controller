@@ -429,17 +429,24 @@ class RestconfImpl implements RestconfService {
             }
         } else if (nodeBuilder instanceof SimpleNodeWrapper) {
             val simpleNode = (nodeBuilder as SimpleNodeWrapper)
-            val value = simpleNode.value
-            var inputValue = value;
-
-            if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
-                if (value instanceof String) {
-                    inputValue = new IdentityValuesDTO(nodeBuilder.namespace.toString, value as String, null)
-                } // else value is already instance of IdentityValuesDTO
+            if(simpleNode.localName=="id"){
+            	val localValue = ""+simpleNode.value.toString.replaceAll("/","");
+            	val value = localValue;
+            	var inputValue = value;
+                val outputValue = RestCodec.from(schema.typeDefinition, mountPoint)?.deserialize(inputValue);
+            	simpleNode.setValue(outputValue)
             }
-            
+            else{
+            	val value = simpleNode.value
+            	var inputValue = value;
+            	if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
+                	if (value instanceof String) {
+                    inputValue = new IdentityValuesDTO(nodeBuilder.namespace.toString, value as String, null)
+                	} // else value is already instance of IdentityValuesDTO
+            	}
             val outputValue = RestCodec.from(schema.typeDefinition, mountPoint)?.deserialize(inputValue);
             simpleNode.setValue(outputValue)
+            }
         } else if (nodeBuilder instanceof EmptyNodeWrapper) {
             val emptyNodeBuilder = nodeBuilder as EmptyNodeWrapper
             if (schema instanceof LeafSchemaNode) {
