@@ -147,7 +147,7 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
     Preconditions.checkNotNull(route, "removeRoute: route cannot be null!");
 
     LinkedHashSet<R> routes = rpcCache.get(routeId);
-    if ((routes == null) || routes.isEmpty()) return; //nothing to remove
+    if (routes == null) return;
 
     try {
       log.debug("removeRoute: removing  a new route with k/v [{}/{}]", routeId, route);
@@ -174,11 +174,11 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
 
   /**
    * This method guarantees that no 2 thread over write each other's changes.
-   * Just so that we dont end up in infinite loop, it tries for 10 times then throw
+   * Just so that we dont end up in infinite loop, it tries for 100 times then throw
    */
   private void threadSafeAdd(I routeId, R route) {
 
-    for (int i=0;i<10;i++){
+    for (int i=0;i<100;i++){
 
       LinkedHashSet<R> updatedRoutes = new LinkedHashSet<>();
       updatedRoutes.add(route);
@@ -202,10 +202,18 @@ public class RoutingTableImpl<I, R> implements RoutingTable<I, R>, ICacheUpdateA
     LinkedHashSet<R> updatedRoutes = null;
     for (int i=0;i<10;i++){
       LinkedHashSet<R> oldRoutes = rpcCache.get(routeId);
+
+      // if route to be deleted is the only entry in the set then remove routeId from the cache
+      if ((oldRoutes.size() == 1) && oldRoutes.contains(route)){
+        rpcCache.remove(routeId);
+        return;
+      }
+
+      // if there are multiple routes for this routeId, remove the route to be deleted only from the set.
       updatedRoutes = new LinkedHashSet<>(oldRoutes);
       updatedRoutes.remove(route);
-
       if (rpcCache.replace(routeId, oldRoutes, updatedRoutes)) return;
+
     }
     //the method did not already return means it failed to remove route in 10 attempts
     throw new IllegalStateException("Failed to remove route [" + routeId + "]");
