@@ -8,7 +8,6 @@
         <relativePath>../commons/opendaylight</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
     <version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -102,7 +101,6 @@
     </profiles>
 
     <properties>
-        <yangtools.version>0.6.1</yangtools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
         <!-- Java Versions -->
@@ -115,7 +113,6 @@
 
         <!-- Dependency Versions -->
         <slf4j.version>1.7.2</slf4j.version>
-	<yang.codegen.version>${yangtools.version}</yang.codegen.version>
         <guava.version>14.0.1</guava.version>
         <osgi.core.version>5.0.0</osgi.core.version>
         <junit.version>4.8.1</junit.version>
