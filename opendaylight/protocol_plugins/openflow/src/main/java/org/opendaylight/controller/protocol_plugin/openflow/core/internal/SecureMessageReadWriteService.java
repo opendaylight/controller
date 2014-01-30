@@ -407,9 +407,9 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
         this.myAppData = ByteBuffer
                 .allocate(session.getApplicationBufferSize());
         this.peerAppData = ByteBuffer.allocate(session
-                .getApplicationBufferSize());
+                .getApplicationBufferSize() * 2);
         this.myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
-        this.peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
+        this.peerNetData = ByteBuffer.allocate(session.getPacketBufferSize() * 2);
     }
 
     @Override
