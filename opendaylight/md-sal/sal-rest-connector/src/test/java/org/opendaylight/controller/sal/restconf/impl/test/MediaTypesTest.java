@@ -72,9 +72,9 @@ public class MediaTypesTest extends JerseyTest {
       String uriPath = "ietf-interfaces:interfaces";
       String uri = createUri(uriPrefix, uriPath);
       when(restconfService.invokeRpc(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
-      post(uri, Draft02.MediaTypes.DATA+JSON, Draft02.MediaTypes.DATA+JSON, jsonData);
+      post(uri, Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+JSON, jsonData);
       verify(restconfService, times(1)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, Draft02.MediaTypes.DATA+XML, Draft02.MediaTypes.DATA+XML, xmlData);
+      post(uri, Draft02.MediaTypes.OPERATION+XML, Draft02.MediaTypes.OPERATION+XML, xmlData);
       verify(restconfService, times(2)).invokeRpc(eq(uriPath), any(CompositeNode.class));
       post(uri, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, jsonData);
       verify(restconfService, times(3)).invokeRpc(eq(uriPath), any(CompositeNode.class));

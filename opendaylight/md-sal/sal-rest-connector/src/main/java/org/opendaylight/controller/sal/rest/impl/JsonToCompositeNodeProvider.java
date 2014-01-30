@@ -25,7 +25,8 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 @Provider
-@Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, MediaType.APPLICATION_JSON })
+@Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
+        MediaType.APPLICATION_JSON })
 public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 

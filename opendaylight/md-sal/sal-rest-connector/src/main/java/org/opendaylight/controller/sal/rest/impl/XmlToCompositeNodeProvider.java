@@ -27,7 +27,8 @@ import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 @Provider
-@Consumes({ Draft02.MediaTypes.DATA + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+@Consumes({ Draft02.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.OPERATION + RestconfService.XML,
+        MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 
