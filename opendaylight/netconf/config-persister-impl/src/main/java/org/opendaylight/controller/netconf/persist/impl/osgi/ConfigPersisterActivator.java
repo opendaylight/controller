@@ -10,11 +10,9 @@ package org.opendaylight.controller.netconf.persist.impl.osgi;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
-import org.opendaylight.controller.netconf.persist.impl.Util;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -25,7 +23,6 @@ import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.regex.Pattern;
-import java.util.concurrent.TimeUnit;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
@@ -34,7 +31,7 @@ public class ConfigPersisterActivator implements BundleActivator {
     private final static MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
     private static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
 
-    private static final String PUSH_TIMEOUT = "pushTimeout";
+    private static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS = "maxWaitForCapabilitiesMillis";
 
     public static final String NETCONF_CONFIG_PERSISTER = "netconf.config.persister";
 
@@ -44,9 +41,8 @@ public class ConfigPersisterActivator implements BundleActivator {
 
 
     private volatile ConfigPersisterNotificationHandler jmxNotificationHandler;
-    private volatile NetconfClient netconfClient;
     private Thread initializationThread;
-    private EventLoopGroup nettyThreadgroup;
+    private EventLoopGroup nettyThreadGroup;
     private PersisterAggregator persisterAggregator;
 
     @Override
@@ -63,15 +59,22 @@ public class ConfigPersisterActivator implements BundleActivator {
             regex = DEFAULT_IGNORED_REGEX;
         }
 
-        String timeoutProperty = propertiesProvider.getProperty(PUSH_TIMEOUT);
-        long timeout = timeoutProperty == null ? ConfigPusher.DEFAULT_TIMEOUT_NANOS : TimeUnit.SECONDS.toNanos(Integer.valueOf(timeoutProperty));
+        String timeoutProperty = propertiesProvider.getProperty(MAX_WAIT_FOR_CAPABILITIES_MILLIS);
+        long maxWaitForCapabilitiesMillis;
+        if (timeoutProperty == null) {
+            maxWaitForCapabilitiesMillis = ConfigPusher.DEFAULT_MAX_WAIT_FOR_CAPABILITIES_MILLIS;
+        } else {
+            maxWaitForCapabilitiesMillis = Integer.valueOf(timeoutProperty);
+        }
 
         final Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
-        nettyThreadgroup = new NioEventLoopGroup();
+        nettyThreadGroup = new NioEventLoopGroup();
 
         persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
-        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context, "Netconf is not configured, persister is not operational", true);
-        final ConfigPusher configPusher = new ConfigPusher(address, nettyThreadgroup);
+        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
+                "Netconf is not configured, persister is not operational", true);
+        final ConfigPusher configPusher = new ConfigPusher(address, nettyThreadGroup, maxWaitForCapabilitiesMillis,
+                ConfigPusher.DEFAULT_CONNECTION_TIMEOUT_MILLIS);
 
 
         // offload initialization to another thread in order to stop blocking activator
@@ -79,11 +82,9 @@ public class ConfigPersisterActivator implements BundleActivator {
             @Override
             public void run() {
                 try {
-                    netconfClient = configPusher.init(persisterAggregator.loadLastConfigs());
-                    jmxNotificationHandler = new ConfigPersisterNotificationHandler(
-                            platformMBeanServer, netconfClient, persisterAggregator,
+                    configPusher.pushConfigs(persisterAggregator.loadLastConfigs());
+                    jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator,
                             ignoredMissingCapabilityRegex);
-                    jmxNotificationHandler.init();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     logger.error("Interrupted while waiting for netconf connection");
@@ -103,15 +104,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         if (jmxNotificationHandler != null) {
             jmxNotificationHandler.close();
         }
-        if (netconfClient != null) {
-            netconfClient = jmxNotificationHandler.getNetconfClient();
-            try {
-                Util.closeClientAndDispatcher(netconfClient);
-            } catch (Exception e) {
-                logger.warn("Unable to close connection to netconf {}", netconfClient, e);
-            }
-        }
-        nettyThreadgroup.shutdownGracefully();
+        nettyThreadGroup.shutdownGracefully();
         persisterAggregator.close();
     }
 }

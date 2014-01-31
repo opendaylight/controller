@@ -12,7 +12,6 @@ import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
 import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
-import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,38 +26,58 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
- * Responsible for listening for notifications from netconf containing latest
+ * Responsible for listening for notifications from netconf (via JMX) containing latest
  * committed configuration that should be persisted, and also for loading last
  * configuration.
  */
 @ThreadSafe
-public class ConfigPersisterNotificationHandler implements NotificationListener, Closeable {
+public class ConfigPersisterNotificationHandler implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
     private final MBeanServerConnection mBeanServerConnection;
-    private final NetconfClient netconfClient;
-    private final Persister persisterAggregator;
-    private final Pattern ignoredMissingCapabilityRegex;
+    private final ConfigPersisterNotificationListener listener;
 
-    public ConfigPersisterNotificationHandler(MBeanServerConnection mBeanServerConnection, NetconfClient netconfClient,
+
+    public ConfigPersisterNotificationHandler(MBeanServerConnection mBeanServerConnection,
                                               Persister persisterAggregator, Pattern ignoredMissingCapabilityRegex) {
         this.mBeanServerConnection = mBeanServerConnection;
-        this.netconfClient = netconfClient;
-        this.persisterAggregator = persisterAggregator;
-        this.ignoredMissingCapabilityRegex = ignoredMissingCapabilityRegex;
+        listener = new ConfigPersisterNotificationListener(persisterAggregator, ignoredMissingCapabilityRegex);
+        registerAsJMXListener(mBeanServerConnection, listener);
+
     }
 
-    public void init() {
-        registerAsJMXListener();
-    }
-
-    private void registerAsJMXListener() {
+    private static void registerAsJMXListener(MBeanServerConnection mBeanServerConnection, ConfigPersisterNotificationListener listener) {
         logger.trace("Called registerAsJMXListener");
         try {
-            mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.objectName, this, null, null);
+            mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.objectName, listener, null, null);
         } catch (InstanceNotFoundException | IOException e) {
             throw new RuntimeException("Cannot register as JMX listener to netconf", e);
         }
+    }
+
+    @Override
+    public synchronized void close() {
+        // unregister from JMX
+        ObjectName on = DefaultCommitOperationMXBean.objectName;
+        try {
+            if (mBeanServerConnection.isRegistered(on)) {
+                mBeanServerConnection.removeNotificationListener(on, listener);
+            }
+        } catch (Exception e) {
+            logger.warn("Unable to unregister {} as listener for {}", listener, on, e);
+        }
+    }
+}
+
+class ConfigPersisterNotificationListener implements NotificationListener {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationListener.class);
+
+    private final Persister persisterAggregator;
+    private final Pattern ignoredMissingCapabilityRegex;
+
+    ConfigPersisterNotificationListener(Persister persisterAggregator, Pattern ignoredMissingCapabilityRegex) {
+        this.persisterAggregator = persisterAggregator;
+        this.ignoredMissingCapabilityRegex = ignoredMissingCapabilityRegex;
     }
 
     @Override
@@ -92,22 +111,4 @@ public class ConfigPersisterNotificationHandler implements NotificationListener,
             throw new RuntimeException("Unable to persist configuration snapshot", e);
         }
     }
-
-    @Override
-    public synchronized void close() {
-        // unregister from JMX
-        ObjectName on = DefaultCommitOperationMXBean.objectName;
-        try {
-            if (mBeanServerConnection.isRegistered(on)) {
-                mBeanServerConnection.removeNotificationListener(on, this);
-            }
-        } catch (Exception e) {
-            logger.warn("Unable to unregister {} as listener for {}", this, on, e);
-        }
-    }
-
-    public NetconfClient getNetconfClient() {
-        return netconfClient;
-    }
-
 }
