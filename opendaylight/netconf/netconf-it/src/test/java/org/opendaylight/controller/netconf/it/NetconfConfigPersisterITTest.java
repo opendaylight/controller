@@ -128,22 +128,22 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         VerifyingPersister mockedAggregator = mockAggregator();
 
         try (NetconfClient persisterClient = new NetconfClient("persister", tcpAddress, 4000, clientDispatcher)) {
-            ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
-                    platformMBeanServer, persisterClient, mockedAggregator,
-                    Pattern.compile(""));
-            configPersisterNotificationHandler.init();
+            try (ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
+                    platformMBeanServer, mockedAggregator, Pattern.compile(""))) {
 
-            try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
-                NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
-                assertResponse(response, "<modules");
-                assertResponse(response, "<services");
-                response = netconfClient.sendMessage(loadCommitMessage());
-                assertResponse(response, "ok");
 
-                response = netconfClient.sendMessage(loadEditConfigMessage());
-                assertResponse(response, "ok");
-                response = netconfClient.sendMessage(loadCommitMessage());
-                assertResponse(response, "ok");
+                try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
+                    NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
+                    assertResponse(response, "<modules");
+                    assertResponse(response, "<services");
+                    response = netconfClient.sendMessage(loadCommitMessage());
+                    assertResponse(response, "ok");
+
+                    response = netconfClient.sendMessage(loadEditConfigMessage());
+                    assertResponse(response, "ok");
+                    response = netconfClient.sendMessage(loadCommitMessage());
+                    assertResponse(response, "ok");
+                }
             }
         }
 
