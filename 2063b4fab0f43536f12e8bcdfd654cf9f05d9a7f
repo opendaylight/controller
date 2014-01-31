@@ -16,6 +16,24 @@
       "revId": "2063b4fab0f43536f12e8bcdfd654cf9f05d9a7f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_aa05e614",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-01-31T23:06:28Z",
+      "side": 1,
+      "message": "Yes, in fact this function is no longer called on the executor. It is only called on the FRM which receives the request from upper layers. If you look at the bottom of the diff set, the FRM executor will now only call install/modify/removeEntryInHw().",
+      "parentUuid": "da6255ed_2a6d7604",
+      "revId": "2063b4fab0f43536f12e8bcdfd654cf9f05d9a7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
