@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-subsystem</artifactId>
+    <version>0.2.4-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>config-module-archetype</artifactId>
+  <name>config-module-archetype</name>
+  <description>Archetype for new module managed by configuration subsystem</description>
+
+</project>
