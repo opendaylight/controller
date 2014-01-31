@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_76a7dea7",
+        "filename": "opendaylight/config/config-persister-directory-autodetect-adapter/src/test/java/org/opendaylight/controller/config/persist/storage/directory/autodetect/AutodetectDirectoryPersisterTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-01-31T07:34:22Z",
+      "side": 1,
+      "message": "Using try{} catch{} fail(); is more suitable for negative tests. \"Expected\" does not provide any useful information in case expected exception does not occur or a different type of exception is thrown.",
+      "revId": "7550a1f0ce3c7f84ec1d46d0bc04dc8ed3000052",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
