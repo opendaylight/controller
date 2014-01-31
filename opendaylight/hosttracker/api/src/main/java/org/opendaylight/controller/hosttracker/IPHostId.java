@@ -61,4 +61,19 @@ public class IPHostId implements IHostId, Serializable {
         return new IPHostId(addr);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("IP=[");
+        if (this.ipAddress != null) {
+            builder.append(this.ipAddress.getHostAddress());
+        }
+        builder.append("]");
+        return (builder.toString());
+    }
 }

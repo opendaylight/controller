@@ -948,6 +948,10 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
     }
 
+    /*
+     * This thread runs every 4 seconds
+     */
+
     class OutStandingARPHandler extends TimerTask {
         @Override
         public void run() {
@@ -955,53 +959,55 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 return;
             }
             ARPPending arphost;
-            /* This routine runs every 4 seconds */
-            logger.trace("Number of Entries in ARP Pending/Failed Lists: ARPPendingList = {}, failedARPReqList = {}",
-                    ARPPendingList.size(), failedARPReqList.size());
-            for (Entry<IHostId, ARPPending> entry : ARPPendingList.entrySet()) {
-                arphost = entry.getValue();
+            try {
+                for (Entry<IHostId, ARPPending> entry : ARPPendingList.entrySet()) {
+                    arphost = entry.getValue();
 
-                if (hostsDB.containsKey(arphost.getHostId())) {
-                    // this host is already learned, shouldn't be in
-                    // ARPPendingList
-                    // Remove it and continue
-                    logger.warn("Learned Host {} found in ARPPendingList", decodeIPFromId(arphost.getHostId()));
-                    ARPPendingList.remove(entry.getKey());
-                    continue;
-                }
-                if (arphost.getSent_count() < hostRetryCount) {
-                    /*
-                     * No reply has been received of first ARP Req, send the
-                     * next one. Before sending the ARP, check if ARPHandler is
-                     * available or not
-                     */
-                    if (hostFinder == null) {
-                        logger.warn("ARPHandler Services are not available for Outstanding ARPs");
+                    if (hostsDB.containsKey(arphost.getHostId())) {
+                        // this host is already learned, shouldn't be in
+                        // ARPPendingList
+                        // Remove it and continue
+                        logger.warn("Learned Host {} found in ARPPendingList", decodeIPFromId(arphost.getHostId()));
+                        ARPPendingList.remove(entry.getKey());
                         continue;
                     }
-                    for (IHostFinder hf : hostFinder) {
-                        hf.find(decodeIPFromId(arphost.getHostId()));
-                    }
-                    arphost.sent_count++;
-                    logger.debug("ARP Sent from ARPPending List, IP: {}", decodeIPFromId(arphost.getHostId()));
-                } else if (arphost.getSent_count() >= hostRetryCount) {
-                    /*
-                     * ARP requests have been sent without receiving a reply,
-                     * remove this from the pending list
-                     */
-                    ARPPendingList.remove(entry.getKey());
-                    logger.debug("ARP reply not received after multiple attempts, removing from Pending List IP: {}",
-                            decodeIPFromId(arphost.getHostId()));
-                    /*
-                     * Add this host to a different list which will be processed
-                     * on link up events
-                     */
-                    logger.debug("Adding the host to FailedARPReqList IP: {}", decodeIPFromId(arphost.getHostId()));
-                    failedARPReqList.put(entry.getKey(), arphost);
+                    if (arphost.getSent_count() < hostRetryCount) {
+                        /*
+                         * No reply has been received of first ARP Req, send the
+                         * next one. Before sending the ARP, check if ARPHandler
+                         * is available or not
+                         */
+                        if (hostFinder == null) {
+                            logger.warn("ARPHandler Services are not available for Outstanding ARPs");
+                            continue;
+                        }
+                        for (IHostFinder hf : hostFinder) {
+                            hf.find(decodeIPFromId(arphost.getHostId()));
+                        }
+                        arphost.sent_count++;
+                        logger.debug("ARP Sent from ARPPending List, IP: {}", decodeIPFromId(arphost.getHostId()));
+                    } else if (arphost.getSent_count() >= hostRetryCount) {
+                        /*
+                         * ARP requests have been sent without receiving a
+                         * reply, remove this from the pending list
+                         */
+                        ARPPendingList.remove(entry.getKey());
+                        logger.debug(
+                                "ARP reply not received after multiple attempts, removing from Pending List IP: {}",
+                                decodeIPFromId(arphost.getHostId()));
+                        /*
+                         * Add this host to a different list which will be
+                         * processed on link up events
+                         */
+                        logger.debug("Adding the host to FailedARPReqList IP: {}", decodeIPFromId(arphost.getHostId()));
+                        failedARPReqList.put(entry.getKey(), arphost);
 
-                } else {
-                    logger.error("Inavlid arp_sent count for entry: {}", entry);
+                    } else {
+                        logger.error("Inavlid arp_sent count for entry: {}", entry);
+                    }
                 }
+            } catch (IllegalStateException e) {
+                logger.debug("IllegalStateException Received by OutStandingARPHandler from: {}", e.getMessage());
             }
         }
     }
@@ -1009,10 +1015,10 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private class ARPRefreshHandler extends TimerTask {
         @Override
         public void run() {
-            if (stopping) {
+            if ((clusterContainerService != null) && !clusterContainerService.amICoordinator()) {
                 return;
             }
-            if ((clusterContainerService != null) && !clusterContainerService.amICoordinator()) {
+            if (stopping) {
                 return;
             }
             if (!hostRefresh) {
@@ -1026,49 +1032,54 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 logger.error("ARPRefreshHandler(): hostsDB is not allocated yet:");
                 return;
             }
-            for (Entry<IHostId, HostNodeConnector> entry : hostsDB.entrySet()) {
-                HostNodeConnector host = entry.getValue();
-                if (host.isStaticHost()) {
-                    /* this host was learned via API3, don't age it out */
-                    continue;
-                }
-
-                short arp_cntdown = host.getArpSendCountDown();
-                arp_cntdown--;
-                if (arp_cntdown > hostRetryCount) {
-                    host.setArpSendCountDown(arp_cntdown);
-                } else if (arp_cntdown <= 0) {
-                    /*
-                     * No ARP Reply received in last 2 minutes, remove this host
-                     * and inform applications
-                     */
-                    removeKnownHost(entry.getKey());
-                    notifyHostLearnedOrRemoved(host, false);
-                } else if (arp_cntdown <= hostRetryCount) {
-                    /*
-                     * Use the services of arphandler to check if host is still
-                     * there
-                     */
-                    if (logger.isTraceEnabled()) {
-                        logger.trace(
-                                "ARP Probing ({}) for {}({})",
-                                new Object[] { arp_cntdown, host.getNetworkAddress().getHostAddress(),
-                                        HexEncode.bytesToHexString(host.getDataLayerAddressBytes()) });
-                    }
-                    host.setArpSendCountDown(arp_cntdown);
-                    if (hostFinder == null) {
-                        /*
-                         * If hostfinder is not available, then can't send the
-                         * probe. However, continue the age out the hosts since
-                         * we don't know if the host is indeed out there or not.
-                         */
-                        logger.trace("ARPHandler is not avaialable, can't send the probe");
+            try {
+                for (Entry<IHostId, HostNodeConnector> entry : hostsDB.entrySet()) {
+                    HostNodeConnector host = entry.getValue();
+                    if (host.isStaticHost()) {
+                        /* this host was learned via API3, don't age it out */
                         continue;
                     }
-                    for (IHostFinder hf : hostFinder) {
-                        hf.probe(host);
+
+                    short arp_cntdown = host.getArpSendCountDown();
+                    arp_cntdown--;
+                    if (arp_cntdown > hostRetryCount) {
+                        host.setArpSendCountDown(arp_cntdown);
+                    } else if (arp_cntdown <= 0) {
+                        /*
+                         * No ARP Reply received in last 2 minutes, remove this
+                         * host and inform applications
+                         */
+                        removeKnownHost(entry.getKey());
+                        notifyHostLearnedOrRemoved(host, false);
+                    } else if (arp_cntdown <= hostRetryCount) {
+                        /*
+                         * Use the services of arphandler to check if host is
+                         * still there
+                         */
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(
+                                    "ARP Probing ({}) for {}({})",
+                                    new Object[] { arp_cntdown, host.getNetworkAddress().getHostAddress(),
+                                            HexEncode.bytesToHexString(host.getDataLayerAddressBytes()) });
+                        }
+                        host.setArpSendCountDown(arp_cntdown);
+                        if (hostFinder == null) {
+                            /*
+                             * If hostfinder is not available, then can't send
+                             * the probe. However, continue the age out the
+                             * hosts since we don't know if the host is indeed
+                             * out there or not.
+                             */
+                            logger.trace("ARPHandler is not avaialable, can't send the probe");
+                            continue;
+                        }
+                        for (IHostFinder hf : hostFinder) {
+                            hf.probe(host);
+                        }
                     }
                 }
+            } catch (IllegalStateException e) {
+                logger.debug("IllegalStateException  Received by ARPRefreshHandler from: {}", e.getMessage());
             }
         }
     }
