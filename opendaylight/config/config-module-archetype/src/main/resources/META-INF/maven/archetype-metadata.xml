@@ -1,0 +1,46 @@
+<archetype>
+    <id>config-module-archetype</id>
+
+    <allowPartial>true</allowPartial>
+
+    <requiredProperties>
+        <requiredProperty key="module-name">
+        </requiredProperty>
+        <requiredProperty key="module-name-java-prefix">
+        </requiredProperty>
+        <requiredProperty key="module-implementation-name">
+            <defaultValue>impl</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="config-api-yang-revision">
+            <defaultValue>2013-04-05</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="config-api-version">
+            <defaultValue>0.2.4-SNAPSHOT</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="yang-maven-plugin-version">
+            <defaultValue>0.6.2-SNAPSHOT</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="revision">
+            <defaultValue>2014-01-31</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="service-java-class">
+            <defaultValue>java.lang.AutoCloseable</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="maven-bundle-plugin-version">
+            <defaultValue>2.4.0</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="yang-namespace-mapping-from">
+            <defaultValue>urn:opendaylight:params:xml:ns:yang:controller</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="yang-namespace-mapping-to">
+            <defaultValue>org.opendaylight.controller.config.yang</defaultValue>
+        </requiredProperty>
+
+    </requiredProperties>
+
+    <fileSets>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>src/main/yang</directory>
+        </fileSet>
+    </fileSets>
+</archetype>
