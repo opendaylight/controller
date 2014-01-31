@@ -564,13 +564,13 @@ public class ForwardingRulesManager implements
      *         contain the unique id assigned to this request
      */
     private Status modifyEntryInternal(FlowEntryInstall currentEntries, FlowEntryInstall newEntries, boolean async) {
+        Status status = new Status(StatusCode.UNDEFINED);
         FlowEntryDistributionOrderFutureTask futureStatus =
                 distributeWorkOrder(currentEntries, newEntries, UpdateType.CHANGED);
         if (futureStatus != null) {
-            Status retStatus = new Status(StatusCode.UNDEFINED);
             try {
-                retStatus = futureStatus.get();
-                if (retStatus.getCode()
+                status = futureStatus.get();
+                if (status.getCode()
                         .equals(StatusCode.TIMEOUT)) {
                     // A timeout happened, lets cleanup the workMonitor
                     workMonitor.remove(futureStatus.getOrder());
@@ -580,30 +580,31 @@ public class ForwardingRulesManager implements
             } catch (ExecutionException e) {
                 log.error("", e);
             }
-            return retStatus;
         } else {
             // Modify the flow on the network node
-            Status status = async ? programmer.modifyFlowAsync(currentEntries.getNode(), currentEntries.getInstall()
-                    .getFlow(), newEntries.getInstall()
-                    .getFlow()) : programmer.modifyFlow(currentEntries.getNode(), currentEntries.getInstall()
-                    .getFlow(), newEntries.getInstall()
-                    .getFlow());
+            status = modifyEntryInHw(currentEntries, newEntries, async);
+        }
 
-            if (!status.isSuccess()) {
-                log.trace("SDN Plugin failed to program the flow: {}. The failure is: {}", newEntries.getInstall(),
-                        status.getDescription());
-                return status;
-            }
-
-            log.trace("Modified {} => {}", currentEntries.getInstall(), newEntries.getInstall());
-
-            // Update DB
-            newEntries.setRequestId(status.getRequestId());
-            updateSwViews(currentEntries, false);
-            updateSwViews(newEntries, true);
-
+        if (!status.isSuccess()) {
+            log.trace("SDN Plugin failed to program the flow: {}. The failure is: {}", newEntries.getInstall(),
+                    status.getDescription());
             return status;
         }
+
+        log.trace("Modified {} => {}", currentEntries.getInstall(), newEntries.getInstall());
+
+        // Update DB
+        newEntries.setRequestId(status.getRequestId());
+        updateSwViews(currentEntries, false);
+        updateSwViews(newEntries, true);
+
+        return status;
+    }
+
+    private Status modifyEntryInHw(FlowEntryInstall currentEntries, FlowEntryInstall newEntries, boolean async) {
+        return async ? programmer.modifyFlowAsync(currentEntries.getNode(), currentEntries.getInstall().getFlow(),
+                newEntries.getInstall().getFlow()) : programmer.modifyFlow(currentEntries.getNode(), currentEntries
+                .getInstall().getFlow(), newEntries.getInstall().getFlow());
     }
 
     /**
@@ -681,13 +682,12 @@ public class ForwardingRulesManager implements
      *         contain the unique id assigned to this request
      */
     private Status removeEntryInternal(FlowEntryInstall entry, boolean async) {
+        Status status = new Status(StatusCode.UNDEFINED);
         FlowEntryDistributionOrderFutureTask futureStatus = distributeWorkOrder(entry, null, UpdateType.REMOVED);
         if (futureStatus != null) {
-            Status retStatus = new Status(StatusCode.UNDEFINED);
             try {
-                retStatus = futureStatus.get();
-                if (retStatus.getCode()
-                        .equals(StatusCode.TIMEOUT)) {
+                status = futureStatus.get();
+                if (status.getCode().equals(StatusCode.TIMEOUT)) {
                     // A timeout happened, lets cleanup the workMonitor
                     workMonitor.remove(futureStatus.getOrder());
                 }
@@ -696,28 +696,31 @@ public class ForwardingRulesManager implements
             } catch (ExecutionException e) {
                 log.error("", e);
             }
-            return retStatus;
         } else {
             // Mark the entry to be deleted (for CC just in case we fail)
             entry.toBeDeleted();
 
             // Remove from node
-            Status status = async ? programmer.removeFlowAsync(entry.getNode(), entry.getInstall()
-                    .getFlow()) : programmer.removeFlow(entry.getNode(), entry.getInstall()
-                    .getFlow());
+            status = removeEntryInHw(entry, async);
+        }
 
-            if (!status.isSuccess()) {
-                log.trace("SDN Plugin failed to remove the flow: {}. The failure is: {}", entry.getInstall(),
-                        status.getDescription());
-                return status;
-            }
-            log.trace("Removed  {}", entry.getInstall());
-
-            // Update DB
-            updateSwViews(entry, false);
-
+        if (!status.isSuccess()) {
+            log.trace("SDN Plugin failed to remove the flow: {}. The failure is: {}", entry.getInstall(),
+                    status.getDescription());
             return status;
         }
+
+        log.trace("Removed  {}", entry.getInstall());
+
+        // Update DB
+        updateSwViews(entry, false);
+
+        return status;
+    }
+
+    private Status removeEntryInHw(FlowEntryInstall entry, boolean async) {
+        return async ? programmer.removeFlowAsync(entry.getNode(), entry.getInstall().getFlow()) : programmer
+                .removeFlow(entry.getNode(), entry.getInstall().getFlow());
     }
 
     /**
@@ -734,13 +737,12 @@ public class ForwardingRulesManager implements
      *         contain the unique id assigned to this request
      */
     private Status addEntriesInternal(FlowEntryInstall entry, boolean async) {
+        Status status = new Status(StatusCode.UNDEFINED);
         FlowEntryDistributionOrderFutureTask futureStatus = distributeWorkOrder(entry, null, UpdateType.ADDED);
         if (futureStatus != null) {
-            Status retStatus = new Status(StatusCode.UNDEFINED);
             try {
-                retStatus = futureStatus.get();
-                if (retStatus.getCode()
-                        .equals(StatusCode.TIMEOUT)) {
+                status = futureStatus.get();
+                if (status.getCode().equals(StatusCode.TIMEOUT)) {
                     // A timeout happened, lets cleanup the workMonitor
                     workMonitor.remove(futureStatus.getOrder());
                 }
@@ -749,27 +751,29 @@ public class ForwardingRulesManager implements
             } catch (ExecutionException e) {
                 log.error("", e);
             }
-            return retStatus;
         } else {
-            // Install the flow on the network node
-            Status status = async ? programmer.addFlowAsync(entry.getNode(), entry.getInstall()
-                    .getFlow()) : programmer.addFlow(entry.getNode(), entry.getInstall()
-                    .getFlow());
+            status = addEntriesInHw(entry, async);
+        }
 
-            if (!status.isSuccess()) {
-                log.trace("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
-                        status.getDescription());
-                return status;
-            }
-
-            log.trace("Added    {}", entry.getInstall());
-
-            // Update DB
-            entry.setRequestId(status.getRequestId());
-            updateSwViews(entry, true);
-
+        if (!status.isSuccess()) {
+            log.trace("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
+                    status.getDescription());
             return status;
         }
+
+        log.trace("Added    {}", entry.getInstall());
+
+        // Update DB
+        entry.setRequestId(status.getRequestId());
+        updateSwViews(entry, true);
+
+        return status;
+    }
+
+    private Status addEntriesInHw(FlowEntryInstall entry, boolean async) {
+        // Install the flow on the network node
+        return async ? programmer.addFlowAsync(entry.getNode(), entry.getInstall().getFlow()) : programmer.addFlow(
+                entry.getNode(), entry.getInstall().getFlow());
     }
 
     /**
@@ -2526,13 +2530,13 @@ public class ForwardingRulesManager implements
                                         FlowEntryInstall feiNew = workOrder.get(fe);
                                         switch (fe.getUpType()) {
                                         case ADDED:
-                                            gotStatus = addEntriesInternal(feiCurrent, false);
+                                            gotStatus = addEntriesInHw(feiCurrent, false);
                                             break;
                                         case CHANGED:
-                                            gotStatus = modifyEntryInternal(feiCurrent, feiNew, false);
+                                            gotStatus = modifyEntryInHw(feiCurrent, feiNew, false);
                                             break;
                                         case REMOVED:
-                                            gotStatus = removeEntryInternal(feiCurrent, false);
+                                            gotStatus = removeEntryInHw(feiCurrent, false);
                                             break;
                                         }
                                         // Remove the Order
