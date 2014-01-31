@@ -68,7 +68,7 @@ public class NetconfOperationServiceImplTest {
             NetconfOperationServiceImpl.checkConsistencyBetweenYangStoreAndConfig(mockJmxClient("qname1"),
                     mockYangStoreSnapshot("qname2", "qname1"));
             fail("An exception of type " + IllegalArgumentException.class + " was expected");
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             String message = e.getMessage();
             Assert.assertThat(
                     message,
