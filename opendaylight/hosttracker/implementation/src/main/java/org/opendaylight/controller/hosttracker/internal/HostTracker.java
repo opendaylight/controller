@@ -951,13 +951,18 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     class OutStandingARPHandler extends TimerTask {
         @Override
         public void run() {
+            Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    logger.error("InfiniSpan or some other Uncaught Exception Received by ARPRefreshHandler");
+                }
+            }) ;
+
             if (stopping) {
                 return;
             }
             ARPPending arphost;
             /* This routine runs every 4 seconds */
-            logger.trace("Number of Entries in ARP Pending/Failed Lists: ARPPendingList = {}, failedARPReqList = {}",
-                    ARPPendingList.size(), failedARPReqList.size());
             for (Entry<IHostId, ARPPending> entry : ARPPendingList.entrySet()) {
                 arphost = entry.getValue();
 
@@ -1009,10 +1014,17 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private class ARPRefreshHandler extends TimerTask {
         @Override
         public void run() {
-            if (stopping) {
+            Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    logger.error("InfiniSpan or some other Uncaught Exception Received by ARPRefreshHandler");
+                }
+            }) ;
+
+            if ((clusterContainerService != null) && !clusterContainerService.amICoordinator()) {
                 return;
             }
-            if ((clusterContainerService != null) && !clusterContainerService.amICoordinator()) {
+            if (stopping) {
                 return;
             }
             if (!hostRefresh) {
