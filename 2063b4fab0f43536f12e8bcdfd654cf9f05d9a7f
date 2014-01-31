@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_2a6d7604",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-01-31T21:57:29Z",
+      "side": 1,
+      "message": "Alessandro, shouldn\u0027t we just update the view on the requestor hence on the one that got the DistributionOrder request back? This one seems like is called on all the controllers that actually perform the action as well on the requestor.",
+      "revId": "2063b4fab0f43536f12e8bcdfd654cf9f05d9a7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
