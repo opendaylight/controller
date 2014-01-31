@@ -38,9 +38,23 @@ public class SingletonHolder {
         return NOTIFICATION_EXECUTOR;
     }
 
+    /**
+     * @deprecated This method is only used from configuration modules and thus callers of it
+     *             should use service injection to make the executor configurable.
+     */
+    @Deprecated
     public static synchronized final ListeningExecutorService getDefaultCommitExecutor() {
         if (COMMIT_EXECUTOR == null) {
-            COMMIT_EXECUTOR = createNamedExecutor("md-sal-binding-commit-%d");
+            ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-commit-%d").build();
+	    /*
+	     * FIXME: this used to be newCacheThreadPool(), but MD-SAL does not have transaction
+	     *        ordering guarantees, which means that using a concurrent threadpool results
+	     *        in application data being committed in random order, potentially resulting
+	     *        in inconsistent data being present. Once proper primitives are introduced,
+	     *        concurrency can be reintroduced.
+	     */
+            ExecutorService executor = Executors.newSingleThreadExecutor(factory);
+            COMMIT_EXECUTOR = MoreExecutors.listeningDecorator(executor);
         }
 
         return COMMIT_EXECUTOR;
@@ -50,7 +64,5 @@ public class SingletonHolder {
         ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat(format).build();
         ExecutorService executor = Executors.newCachedThreadPool(factory);
         return MoreExecutors.listeningDecorator(executor);
-
     }
-
 }
