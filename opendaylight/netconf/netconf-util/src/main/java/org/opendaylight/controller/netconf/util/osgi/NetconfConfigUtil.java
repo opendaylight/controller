@@ -57,7 +57,12 @@ public class NetconfConfigUtil {
         if (inetSocketAddressOptional.isPresent() == false) {
             throw new IllegalStateException("Netconf tcp address not found." + exceptionMessageIfNotFound);
         }
-        return inetSocketAddressOptional.get();
+        InetSocketAddress inetSocketAddress = inetSocketAddressOptional.get();
+        if (inetSocketAddress.getAddress().isAnyLocalAddress()) {
+            logger.warn("Unprotected netconf TCP address is configured to ANY local address. This is a security risk. " +
+                    "Consider changing {} to 127.0.0.1", PREFIX_PROP + InfixProp.tcp + ADDRESS_SUFFIX_PROP);
+        }
+        return inetSocketAddress;
     }
 
     public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context, String exceptionMessage) {
