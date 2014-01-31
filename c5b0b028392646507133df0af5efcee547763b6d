@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0a299236",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-01-31T15:58:08Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this comment be removed ?",
+      "revId": "c5b0b028392646507133df0af5efcee547763b6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
