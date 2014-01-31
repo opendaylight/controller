@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_76711e0b",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/NetconfOperationServiceImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-01-31T09:54:35Z",
+      "side": 1,
+      "message": "it should be IllegalState both in catch and in fail message.\nThis will fail",
+      "revId": "7ae0c68ff4a610e48cff1cc4ea328e867b0cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
