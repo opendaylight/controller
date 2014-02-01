@@ -47,10 +47,6 @@
             <artifactId>netty-handler</artifactId>
             <version>${netconf.netty.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>com.siemens.ct.exi</groupId>
-            <artifactId>exificient</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.opendaylight.controller.thirdparty</groupId>
             <artifactId>ganymed</artifactId>
