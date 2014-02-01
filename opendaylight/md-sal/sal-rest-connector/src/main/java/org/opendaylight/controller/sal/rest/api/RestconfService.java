@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.rest.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -23,33 +24,28 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
  *   The URI hierarchy for the RESTCONF resources consists of an entry
- *   point container, 3 top-level resources, and 1 field.  Refer to
- *  Section 5 for details on each URI.
- *    <ul>
+ *   point container, 4 top-level resources, and 1 field.
+ *   <ul>
  *    <li><b>/restconf</b> - {@link #getRoot()}
- *     <ul><li><b>/config</b> 
- *         <li><b>/operational</b> - {@link #readAllData()} - Added in Draft02
- *         <li><b>/datastore</b> - {@link #readAllData()}
- *         <ul>
- *            <li>/(top-level-data-nodes) (config=true or false)
- *         </ul>
- *         <li>/modules
- *          <ul><li>/module
- *              <li>/name
- *              <li>/revision
- *              <li>/namespace
- *              <li>/feature
- *             <li>/deviation
- *          </ul>
- *          <li>/operations
- *          <ul>
- *             <li>/(custom protocol operations)
- *          </ul>
- *         <li>/version (field)
+ *     <ul>
+ *      <li><b>/config</b> - {@link #readConfigurationData(String)} 
+ *                              {@link #updateConfigurationData(String, CompositeNode)}
+ *                              {@link #createConfigurationData(CompositeNode)}
+ *                              {@link #createConfigurationData(String, CompositeNode)}
+ *                              {@link #deleteConfigurationData(String)}
+ *      <li><b>/operational</b> - {@link #readOperationalData(String)} 
+ *      <li>/modules - {@link #getModules()}
+ *       <ul>
+ *        <li>/module
+ *       </ul>
+ *      <li><b>/operations</b> - {@link #invokeRpc(String, CompositeNode)}
+ *                               {@link #invokeRpc(String, CompositeNode)}
+ *      <li>/version (field)
  *     </ul>
+ *   </ul>
  */
 @Path("/")
-public interface RestconfService extends RestconfServiceLegacy {
+public interface RestconfService {
 
     public static final String XML = "+xml";
     public static final String JSON = "+json";
@@ -59,26 +55,25 @@ public interface RestconfService extends RestconfServiceLegacy {
 
     @GET
     @Path("/modules")
-    @Produces({Draft01.MediaTypes.API+JSON,Draft01.MediaTypes.API+XML,
-               Draft02.MediaTypes.API+JSON,Draft02.MediaTypes.API+XML})
+    @Produces({Draft02.MediaTypes.API+JSON,Draft02.MediaTypes.API+XML})
     public StructuredData getModules();
 
     @POST
     @Path("/operations/{identifier}")
-    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
-               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+    @Produces({Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+XML,
+               Draft02.MediaTypes.DATA+JSON, Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    @Consumes({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
-               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+    @Consumes({Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+XML,
+               Draft02.MediaTypes.DATA+JSON, Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public StructuredData invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
     
     @POST
     @Path("/operations/{identifier}")
-    @Produces({Draft01.MediaTypes.DATA+JSON,Draft01.MediaTypes.DATA+XML,
-               Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
+    @Produces({Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+XML,
+               Draft02.MediaTypes.DATA+JSON, Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public StructuredData invokeRpc(@PathParam("identifier") String identifier);
+    public StructuredData invokeRpc(@PathParam("identifier") String identifier, @DefaultValue("") String noPayload);
     
     @GET
     @Path("/config/{identifier:.+}")

@@ -35,7 +35,7 @@ public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoad
     
     @BeforeClass
     public static void initialization() throws URISyntaxException {
-        dataLoad("/instanceidentifier/yang", 3, "instance-identifier-module", "cont");
+        dataLoad("/instanceidentifier/yang", 4, "instance-identifier-module", "cont");
     }
 
     @Test

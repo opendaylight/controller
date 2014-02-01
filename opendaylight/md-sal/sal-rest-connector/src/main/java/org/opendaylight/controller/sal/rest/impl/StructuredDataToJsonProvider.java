@@ -21,7 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.opendaylight.controller.sal.rest.api.Draft01;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.ResponseException;
@@ -32,7 +31,7 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import com.google.gson.stream.JsonWriter;
 
 @Provider
-@Produces({ Draft01.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
+@Produces({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
         MediaType.APPLICATION_JSON })
 public enum StructuredDataToJsonProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;

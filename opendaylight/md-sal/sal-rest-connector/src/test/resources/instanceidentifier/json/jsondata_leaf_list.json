@@ -1,0 +1,7 @@
+{
+    "instance-identifier-module:cont": {
+        "cont1": {
+            "augment-module-leaf-list:lf11" : "/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lflst11[.=\"lflst11_1\"]"
+        }
+    }
+}

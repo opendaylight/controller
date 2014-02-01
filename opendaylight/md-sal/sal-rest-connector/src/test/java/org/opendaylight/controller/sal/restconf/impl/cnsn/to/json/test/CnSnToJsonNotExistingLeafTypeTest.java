@@ -20,8 +20,13 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.restconf.impl.test.*;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.controller.sal.restconf.impl.test.DummyType;
+import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
+import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -39,20 +44,13 @@ public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLo
         dataLoad("/cnsn-to-json/simple-data-types");
     }
 
-    // FIXME
-    @Ignore
     @Test
-    public void incorrectTopLevelElementTest() {
-
+    public void incorrectTopLevelElementTest() throws WebApplicationException, IOException {
         String jsonOutput = null;
-        try {
-            jsonOutput = TestUtils
-                    .writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                            (Set<Module>) Collections.EMPTY_SET, prepareDataSchemaNode(),
-                            StructuredDataToJsonProvider.INSTANCE);
-        } catch (WebApplicationException | IOException e) {
-            LOG.error("WebApplicationException or IOException was raised");
-        }
+        jsonOutput = TestUtils
+                .writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
+                        (Set<Module>) Collections.EMPTY_SET, prepareDataSchemaNode(),
+                        StructuredDataToJsonProvider.INSTANCE);
         assertNotNull(jsonOutput);
         assertTrue(jsonOutput.contains("\"lf1\": \"\""));
     }
