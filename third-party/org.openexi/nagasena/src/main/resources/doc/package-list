@@ -1,0 +1,7 @@
+org.openexi.proc
+org.openexi.proc.common
+org.openexi.proc.grammars
+org.openexi.proc.io
+org.openexi.sax
+org.openexi.schema
+org.openexi.scomp
