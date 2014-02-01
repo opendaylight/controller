@@ -8,16 +8,11 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Set;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
@@ -25,8 +20,13 @@ import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class NetconfClient implements Closeable {
 
@@ -103,7 +103,7 @@ public class NetconfClient implements Closeable {
     }
 
     public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) {
-        long startTime = System.currentTimeMillis();
+        Stopwatch stopwatch = new Stopwatch().start();
         Preconditions.checkState(clientSession.isUp(), "Session was not up yet");
         //logger.debug("Sending message: {}",XmlUtil.toString(message.getDocument()));
         clientSession.sendMessage(message);
@@ -115,8 +115,8 @@ public class NetconfClient implements Closeable {
         } catch (IllegalStateException e) {
             throw new IllegalStateException(this + " Cannot read message from " + address, e);
         } finally {
-            long diffMillis = System.currentTimeMillis() - startTime;
-            logger.debug("Total time spent waiting for response {}", diffMillis);
+            stopwatch.stop();
+            logger.debug("Total time spent waiting for response {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         }
     }
 
