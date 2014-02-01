@@ -10,17 +10,14 @@ package org.opendaylight.controller.netconf.it;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -35,9 +32,6 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
-import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
@@ -63,7 +57,6 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static junit.framework.Assert.assertEquals;
@@ -74,15 +67,17 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class NetconfConfigPersisterITTest extends AbstractConfigTest {
+public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     private static final Logger logger =  LoggerFactory.getLogger(NetconfConfigPersisterITTest.class);
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
 
-    private EventLoopGroup nettyThreadgroup;
+
 
     private NetconfClientDispatcher clientDispatcher;
+
+    DefaultCommitNotificationProducer commitNotifier;
 
     @Before
     public void setUp() throws Exception {
@@ -97,13 +92,18 @@ public class NetconfConfigPersisterITTest extends AbstractConfigTest {
                 .onAddNetconfOperationServiceFactory(new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
                         new NetconfMonitoringOperationService(monitoringService)));
 
-        nettyThreadgroup = new NioEventLoopGroup();
 
-        NetconfServerDispatcher dispatch = createDispatcher(factoriesListener);
+        commitNotifier = new DefaultCommitNotificationProducer(platformMBeanServer);
+        NetconfServerDispatcher dispatch = createDispatcher(factoriesListener, mockSessionMonitoringService(), commitNotifier);
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup);
+        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
+    }
+
+    @After
+    public void cleanUp(){
+        commitNotifier.close();
     }
 
     private HardcodedYangStoreService getYangStore() throws YangStoreException, IOException {
@@ -111,26 +111,15 @@ public class NetconfConfigPersisterITTest extends AbstractConfigTest {
         return new HardcodedYangStoreService(yangDependencies);
     }
 
-    private NetconfServerDispatcher createDispatcher(
-                                                     NetconfOperationServiceFactoryListenerImpl factoriesListener) {
-        SessionIdProvider idProvider = new SessionIdProvider();
-        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                new HashedWheelTimer(5000, TimeUnit.MILLISECONDS), factoriesListener, idProvider);
 
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, new DefaultCommitNotificationProducer(platformMBeanServer), idProvider, mockSessionMonitoringService());
-
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
-                serverNegotiatorFactory, listenerFactory);
-        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
-    }
-
-    private SessionMonitoringService mockSessionMonitoringService() {
+    protected SessionMonitoringService mockSessionMonitoringService() {
         SessionMonitoringService mockedSessionMonitor = mock(SessionMonitoringService.class);
         doNothing().when(mockedSessionMonitor).onSessionUp(any(NetconfManagementSession.class));
         doNothing().when(mockedSessionMonitor).onSessionDown(any(NetconfManagementSession.class));
         return mockedSessionMonitor;
     }
+
+
 
     @Test
     public void testNetconfCommitNotifications() throws Exception {

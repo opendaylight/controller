@@ -7,18 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 
+import com.google.common.net.InetAddresses;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-
-import java.io.File;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.net.ssl.SSLContext;
-
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfSshClientDispatcher;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
@@ -31,17 +22,25 @@ import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingPr
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static com.google.common.base.Preconditions.*;
+import java.io.File;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import com.google.common.base.Optional;
-import com.google.common.net.InetAddresses;
+import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
+import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
 /**
 *
 */
 public final class NetconfConnectorModule extends org.opendaylight.controller.config.yang.md.sal.connector.netconf.AbstractNetconfConnectorModule
 {
+    private static final Logger logger = LoggerFactory.getLogger(NetconfConnectorModule.class);
 
     private static ExecutorService GLOBAL_PROCESSING_EXECUTOR = null;
     private static AbstractCachingSchemaSourceProvider<String, InputStream> GLOBAL_NETCONF_SOURCE_PROVIDER = null;
@@ -56,14 +55,20 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     }
 
     @Override
-    public void validate(){
-        super.validate();
-        checkState(getAddress() != null,"Address must be set.");
+    protected void customValidation() {
+        checkNotNull(getAddress(), addressJmxAttribute);
         //checkState(getAddress().getIpv4Address() != null || getAddress().getIpv6Address() != null,"Address must be set.");
-        checkState(getPort() != null,"Port must be set.");
-        checkState(getDomRegistry() != null,"Dom Registry must be provided.");
-    }
+        checkNotNull(getPort(), portJmxAttribute);
+        checkNotNull(getDomRegistry(), portJmxAttribute);
+        checkNotNull(getDomRegistry(), domRegistryJmxAttribute);
 
+        checkNotNull(getConnectionTimeoutMillis(), connectionTimeoutMillisJmxAttribute);
+        checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", connectionTimeoutMillisJmxAttribute);
+
+        checkNotNull(getBetweenAttemptsTimeoutMillis(), betweenAttemptsTimeoutMillisJmxAttribute);
+        checkCondition(getBetweenAttemptsTimeoutMillis() > 0, "must be > 0", betweenAttemptsTimeoutMillisJmxAttribute);
+
+    }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
@@ -71,10 +76,15 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         getDomRegistryDependency();
         NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
         String addressValue = getAddress();
-        
-        
-        int attemptMsTimeout = 60*1000;
-        int connectionAttempts = 5;
+
+        Long connectionAttempts;
+        if (getMaxConnectionAttempts() != null && getMaxConnectionAttempts() > 0) {
+            connectionAttempts = getMaxConnectionAttempts();
+        } else {
+            logger.trace("Setting {} on {} to infinity", maxConnectionAttemptsJmxAttribute, this);
+            connectionAttempts = null;
+        }
+        long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
         /*
          * Uncomment after Switch to IP Address
         if(getAddress().getIpv4Address() != null) {
@@ -83,8 +93,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             addressValue = getAddress().getIpv6Address().getValue();
         }
         */
-        ReconnectStrategy strategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, attemptMsTimeout, 1000, 1.0, null,
-                Long.valueOf(connectionAttempts), null);
+        double sleepFactor = 1.0;
+        int minSleep = 1000;
+        Long maxSleep = null;
+        Long deadline = null;
+        ReconnectStrategy strategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, getBetweenAttemptsTimeoutMillis(),
+                minSleep, sleepFactor, maxSleep, connectionAttempts, deadline);
         
         device.setReconnectStrategy(strategy);
         
@@ -96,7 +110,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         
         device.setSocketAddress(socketAddress);
         device.setEventExecutor(getEventExecutorDependency());
-        device.setDispatcher(createDispatcher());
+        device.setDispatcher(createDispatcher(clientConnectionTimeoutMillis));
         device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
         
         getDomRegistryDependency().registerProvider(device, bundleContext);
@@ -124,14 +138,14 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         return GLOBAL_NETCONF_SOURCE_PROVIDER;
     }
 
-    private NetconfClientDispatcher createDispatcher() {
+    private NetconfClientDispatcher createDispatcher(long clientConnectionTimeoutMillis) {
         EventLoopGroup bossGroup = getBossThreadGroupDependency();
         EventLoopGroup workerGroup = getWorkerThreadGroupDependency();
         if(getTcpOnly()) {
-            return new NetconfClientDispatcher( bossGroup, workerGroup);
+            return new NetconfClientDispatcher( bossGroup, workerGroup, clientConnectionTimeoutMillis);
         } else {
             AuthenticationHandler authHandler = new LoginPassword(getUsername(),getPassword());
-            return new NetconfSshClientDispatcher(authHandler , bossGroup, workerGroup);
+            return new NetconfSshClientDispatcher(authHandler , bossGroup, workerGroup, clientConnectionTimeoutMillis);
         }
     }
 
