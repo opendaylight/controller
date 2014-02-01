@@ -85,7 +85,7 @@ class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, Compos
             val simpleNode = node.getSimpleNodesByName(keyValue.key);
             if(simpleNode !== null && !simpleNode.empty) {
                 checkState(simpleNode.size <= 1,"Only one simple node for key $s is allowed in node $s",keyValue.key,node);
-                checkState(simpleNode.get(0).value == keyValue.value,"Key node must equals to instance identifier value");
+                checkState(simpleNode.get(0).value == keyValue.value,"Key node must equal to instance identifier value in node $s",node);
                 ret.put(keyValue.key,simpleNode.get(0));
             }
             val compositeNode = node.getCompositesByName(keyValue.key);
