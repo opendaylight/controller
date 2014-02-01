@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opendaylight.controller.thirdparty</groupId>
+        <artifactId>org.openexi</artifactId>
+        <version>0000.0002.0027.0</version>
+    </parent>
+
+    <groupId>org.opendaylight.controller.thirdparty</groupId>
+    <artifactId>nagasena</artifactId>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <archive>${project.artifactId}-${project.version}.jar</archive>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>truezip-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extract</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <fileset>
+                                <!-- note how the archive is treated as a normal file directory -->
+                                <directory>${archive}</directory>
+                                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                <includes>
+                                    <include>**</include>
+                                </includes>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>   
+            <plugin>   
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                    </instructions>
+                </configuration>
+            </plugin>   
+        </plugins>
+    </build>
+</project>
+
