@@ -51,8 +51,13 @@
       <version>2.2.4</version>
     </dependency>
     <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-parser-impl</artifactId>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-parser-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.0.10.Final</version>
     </dependency>
     
     <!-- Testing Dependencies -->

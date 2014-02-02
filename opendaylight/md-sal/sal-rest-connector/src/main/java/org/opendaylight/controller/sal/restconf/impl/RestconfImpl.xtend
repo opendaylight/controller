@@ -8,6 +8,8 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import com.google.common.base.Preconditions
+import com.google.common.base.Splitter
+import com.google.common.collect.Lists
 import java.net.URI
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -16,9 +18,12 @@ import java.util.HashMap
 import java.util.List
 import java.util.Set
 import javax.ws.rs.core.Response
+import javax.ws.rs.core.UriInfo
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.sal.core.api.mount.MountInstance
 import org.opendaylight.controller.sal.rest.api.RestconfService
+import org.opendaylight.controller.sal.streams.listeners.Notificator
+import org.opendaylight.controller.sal.streams.websockets.WebSocketServer
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
@@ -37,13 +42,11 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
+import org.opendaylight.yangtools.yang.model.util.EmptyType
+import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder
+import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder
 
 import static javax.ws.rs.core.Response.Status.*
-import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder
-import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder
-import org.opendaylight.yangtools.yang.model.util.EmptyType
-import com.google.common.base.Splitter
-import com.google.common.collect.Lists
 
 class RestconfImpl implements RestconfService {
 
@@ -58,6 +61,8 @@ class RestconfImpl implements RestconfService {
     val static RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE = "modules"
     val static RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE = "module"
     val static RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE = "operations"
+    val static SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote"
+    val static SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription"
 
     @Property
     BrokerFacade broker
@@ -229,6 +234,36 @@ class RestconfImpl implements RestconfService {
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
+        val rpc = identifier.rpcDefinition
+        if (rpc === null) {
+            throw new ResponseException(NOT_FOUND, "RPC does not exist.");
+        }
+        if (rpc.QName.namespace.toString == SAL_REMOTE_NAMESPACE && rpc.QName.localName == SAL_REMOTE_RPC_SUBSRCIBE) {
+            val value = normalizeNode(payload, rpc.input, null)
+            val pathNode = value?.getFirstSimpleByName(QName.create(rpc.QName, "path"))
+            val pathValue = pathNode?.value
+            if (pathValue === null && !(pathValue instanceof InstanceIdentifier)) {
+                throw new ResponseException(INTERNAL_SERVER_ERROR, "Instance identifier was not normalized correctly.");
+            }
+            val pathIdentifier = (pathValue as InstanceIdentifier)
+            var String streamName = null
+            if (!pathIdentifier.path.nullOrEmpty) {
+                streamName = Notificator.createStreamNameFromUri(pathIdentifier.toFullRestconfIdentifier)
+            }
+            if (streamName.nullOrEmpty) {
+                throw new ResponseException(BAD_REQUEST, "Path is empty or contains data node which is not Container or List build-in type.");
+            }
+            val streamNameNode = NodeFactory.createImmutableSimpleNode(QName.create(rpc.output.QName, "stream-name"), null, streamName)
+            val List<Node<?>> output = new ArrayList
+            output.add(streamNameNode)
+            val responseData = NodeFactory.createMutableCompositeNode(rpc.output.QName, null, output, null, null)
+
+            if (!Notificator.existListenerFor(pathIdentifier)) {
+                Notificator.createListener(pathIdentifier, streamName)
+            }
+
+            return new StructuredData(responseData, rpc.output, null)
+        }
         return callRpc(identifier.rpcDefinition, payload)
     }
 
@@ -384,6 +419,25 @@ class RestconfImpl implements RestconfService {
             case TransactionStatus.COMMITED: Response.status(OK).build
             default: Response.status(INTERNAL_SERVER_ERROR).build
         }
+    }
+
+    override subscribeToStream(String identifier, UriInfo uriInfo) {
+        val streamName = Notificator.createStreamNameFromUri(identifier)
+        if (streamName.nullOrEmpty) {
+            throw new ResponseException(BAD_REQUEST, "Stream name is empty.")
+        }
+        val listener = Notificator.getListenerFor(streamName);
+        if (listener === null) {
+            throw new ResponseException(BAD_REQUEST, "Stream was not found.")
+        }
+        broker.registerToListenDataChanges(listener)
+        val uriBuilder = uriInfo.getAbsolutePathBuilder()
+        val uriToWebsocketServer = uriBuilder.port(WebSocketServer.PORT).replacePath(streamName).build()
+        return Response.status(OK).location(uriToWebsocketServer).build
+    }
+
+    override readStreams() {
+        // FIXME  implement
     }
 
     private def dispatch URI namespace(CompositeNode data) {
