@@ -182,25 +182,29 @@ class ControllerContext implements SchemaServiceListener {
         val ret = new StringBuilder();
         val startQName = elements.get(0).nodeType;
         val initialModule = globalSchema.findModuleByNamespaceAndRevision(startQName.namespace, startQName.revision)
-        var node = initialModule as DataSchemaNode;
+        var node = initialModule as DataNodeContainer;
         for (element : elements) {
-            node = node.childByQName(element.nodeType);
-            ret.append(element.toRestconfIdentifier(node));
+            val potentialNode = node.childByQName(element.nodeType);
+            if (!potentialNode.listOrContainer) {
+                return null
+            }
+            node = potentialNode as DataNodeContainer
+            ret.append(element.convertToRestconfIdentifier(node));
         }
         return ret.toString
     }
 
-    private def dispatch CharSequence toRestconfIdentifier(NodeIdentifier argument, DataSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifier argument, ContainerSchemaNode node) {
         '''/«argument.nodeType.toRestconfIdentifier()»'''
     }
 
-    private def dispatch CharSequence toRestconfIdentifier(NodeIdentifierWithPredicates argument, ListSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifierWithPredicates argument, ListSchemaNode node) {
         val nodeIdentifier = argument.nodeType.toRestconfIdentifier();
         val keyValues = argument.keyValues;
         return '''/«nodeIdentifier»/«FOR key : node.keyDefinition SEPARATOR "/"»«keyValues.get(key).toUriString»«ENDFOR»'''
     }
 
-    private def dispatch CharSequence toRestconfIdentifier(PathArgument argument, DataSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(PathArgument argument, DataNodeContainer node) {
         throw new IllegalArgumentException("Conversion of generic path argument is not supported");
     }
 
@@ -286,6 +290,10 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     private static dispatch def DataSchemaNode childByQName(ListSchemaNode container, QName name) {
+        return container.dataNodeChildByQName(name);
+    }
+
+    private static dispatch def DataSchemaNode childByQName(Module container, QName name) {
         return container.dataNodeChildByQName(name);
     }
 
@@ -415,7 +423,7 @@ class ControllerContext implements SchemaServiceListener {
             }
         }
         
-        if (!(targetNode instanceof ListSchemaNode) && !(targetNode instanceof ContainerSchemaNode)) {
+        if (!targetNode.isListOrContainer) {
             throw new ResponseException(BAD_REQUEST,"URI has bad format. Node \"" + strings.head + "\" must be Container or List yang type.")
         }
         // Number of consumed elements
@@ -542,6 +550,10 @@ class ControllerContext implements SchemaServiceListener {
             .transform[QName.create(namespace,revision,it.name)].findFirst[module == localName]
         ;
         return QName.create(namespace,node);
+    }
+
+    private def boolean isListOrContainer(DataSchemaNode node) {
+        return ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode))
     }
 
     def getRpcDefinition(String name) {

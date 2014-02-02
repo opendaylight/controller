@@ -11,13 +11,14 @@ import javax.ws.rs.core.Response
 import org.opendaylight.controller.md.sal.common.api.data.DataReader
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService
+import org.opendaylight.controller.sal.core.api.mount.MountInstance
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider
+import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.slf4j.LoggerFactory
-import org.opendaylight.controller.sal.core.api.mount.MountInstance
 
 class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
@@ -131,6 +132,12 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
         LOG.info("Delete Configuration via Restconf: {}", path)
         transaction.removeConfigurationData(path)
         return transaction.commit
+    }
+
+	def registerToListenDataChanges(ListenerAdapter listener) {
+        checkPreconditions
+        val registration = dataService.registerDataChangeListener(listener.path, listener)
+        listener.setRegistration(registration)
     }
 
 }
