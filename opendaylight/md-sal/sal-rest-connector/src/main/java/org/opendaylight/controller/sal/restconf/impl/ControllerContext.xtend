@@ -8,9 +8,11 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import com.google.common.base.Preconditions
+import com.google.common.base.Splitter
 import com.google.common.collect.BiMap
 import com.google.common.collect.FluentIterable
 import com.google.common.collect.HashBiMap
+import com.google.common.collect.Lists
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -96,12 +98,10 @@ class ControllerContext implements SchemaServiceListener {
 
     private def InstanceIdWithSchemaNode toIdentifier(String restconfInstance, boolean toMountPointIdentifier) {
         checkPreconditions
-        val pathArgs = restconfInstance.split("/");
+        val pathArgs = Lists.newArrayList(Splitter.on("/").split(restconfInstance))
+        pathArgs.omitFirstAndLastEmptyString
         if (pathArgs.empty) {
             return null;
-        }
-        if (pathArgs.head.empty) {
-            pathArgs.remove(0)
         }
         val startModule = pathArgs.head.toModuleName();
         if (startModule === null) {
@@ -119,6 +119,22 @@ class ControllerContext implements SchemaServiceListener {
             throw new ResponseException(BAD_REQUEST, "URI has bad format")
         }
         return iiWithSchemaNode
+    }
+
+    private def omitFirstAndLastEmptyString(List<String> list) {
+        if (list.empty) {
+            return list;
+        }
+        if (list.head.empty) {
+            list.remove(0)
+        }
+        if (list.empty) {
+            return list;
+        }
+        if (list.last.empty) {
+            list.remove(list.indexOf(list.last))
+        }
+        return list;
     }
 
     private def getLatestModule(SchemaContext schema, String moduleName) {
@@ -176,31 +192,51 @@ class ControllerContext implements SchemaServiceListener {
         return mountPoint.schemaContext?.findModuleByName(module.localName, module.revision)
     }
 
+    def getDataNodeContainerFor(InstanceIdentifier path) {
+        checkPreconditions
+        val elements = path.path;
+        val startQName = elements.head.nodeType;
+        val initialModule = globalSchema.findModuleByNamespaceAndRevision(startQName.namespace, startQName.revision)
+        var node = initialModule as DataNodeContainer;
+        for (element : elements) {
+            val potentialNode = node.childByQName(element.nodeType);
+            if (potentialNode === null || !potentialNode.listOrContainer) {
+                return null
+            }
+            node = potentialNode as DataNodeContainer
+        }
+        return node
+    }
+
     def String toFullRestconfIdentifier(InstanceIdentifier path) {
         checkPreconditions
         val elements = path.path;
         val ret = new StringBuilder();
-        val startQName = elements.get(0).nodeType;
+        val startQName = elements.head.nodeType;
         val initialModule = globalSchema.findModuleByNamespaceAndRevision(startQName.namespace, startQName.revision)
-        var node = initialModule as DataSchemaNode;
+        var node = initialModule as DataNodeContainer;
         for (element : elements) {
-            node = node.childByQName(element.nodeType);
-            ret.append(element.toRestconfIdentifier(node));
+            val potentialNode = node.childByQName(element.nodeType);
+            if (!potentialNode.listOrContainer) {
+                return null
+            }
+            node = potentialNode as DataNodeContainer
+            ret.append(element.convertToRestconfIdentifier(node));
         }
         return ret.toString
     }
 
-    private def dispatch CharSequence toRestconfIdentifier(NodeIdentifier argument, DataSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifier argument, ContainerSchemaNode node) {
         '''/«argument.nodeType.toRestconfIdentifier()»'''
     }
 
-    private def dispatch CharSequence toRestconfIdentifier(NodeIdentifierWithPredicates argument, ListSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifierWithPredicates argument, ListSchemaNode node) {
         val nodeIdentifier = argument.nodeType.toRestconfIdentifier();
         val keyValues = argument.keyValues;
         return '''/«nodeIdentifier»/«FOR key : node.keyDefinition SEPARATOR "/"»«keyValues.get(key).toUriString»«ENDFOR»'''
     }
 
-    private def dispatch CharSequence toRestconfIdentifier(PathArgument argument, DataSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(PathArgument argument, DataNodeContainer node) {
         throw new IllegalArgumentException("Conversion of generic path argument is not supported");
     }
 
@@ -286,6 +322,10 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     private static dispatch def DataSchemaNode childByQName(ListSchemaNode container, QName name) {
+        return container.dataNodeChildByQName(name);
+    }
+
+    private static dispatch def DataSchemaNode childByQName(Module container, QName name) {
         return container.dataNodeChildByQName(name);
     }
 
@@ -415,7 +455,7 @@ class ControllerContext implements SchemaServiceListener {
             }
         }
         
-        if (!(targetNode instanceof ListSchemaNode) && !(targetNode instanceof ContainerSchemaNode)) {
+        if (!targetNode.isListOrContainer) {
             throw new ResponseException(BAD_REQUEST,"URI has bad format. Node \"" + strings.head + "\" must be Container or List yang type.")
         }
         // Number of consumed elements
@@ -538,14 +578,24 @@ class ControllerContext implements SchemaServiceListener {
     private def QName toQName(String name) {
         val module = name.toModuleName;
         val node = name.toNodeName;
-        val namespace = FluentIterable.from(globalSchema.modules.sort[o1,o2 | o1.revision.compareTo(o2.revision)]) //
+        val namespace = FluentIterable.from(globalSchema.modules.sort[o1,o2 | o1.revision.compareTo(o2.revision)])
             .transform[QName.create(namespace,revision,it.name)].findFirst[module == localName]
-        ;
-        return QName.create(namespace,node);
+        if (namespace === null) {
+            return null
+        }
+        return QName.create(namespace, node);
+    }
+
+    private def boolean isListOrContainer(DataSchemaNode node) {
+        return ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode))
     }
 
     def getRpcDefinition(String name) {
-        return qnameToRpc.get(name.toQName)
+        val validName = name.toQName
+        if (validName === null) {
+            return null
+        }
+        return qnameToRpc.get(validName)
     }
 
     override onGlobalContextUpdated(SchemaContext context) {
