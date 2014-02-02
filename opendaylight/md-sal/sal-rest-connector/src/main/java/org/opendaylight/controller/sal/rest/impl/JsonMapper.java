@@ -203,7 +203,6 @@ class JsonMapper {
                     + baseType.getClass().getSimpleName() + ".");
         }
 
-        // TODO check InstanceIdentifierTypeDefinition
         if (baseType instanceof IdentityrefTypeDefinition) {
             if (node.getValue() instanceof QName) {
                 IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType, mountPoint).serialize(
