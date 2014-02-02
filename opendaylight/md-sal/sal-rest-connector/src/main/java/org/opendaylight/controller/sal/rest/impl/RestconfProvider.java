@@ -18,6 +18,7 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleActivator;
@@ -34,6 +35,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
     private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;
     private ProviderSession session;
+	private Thread webSocketServerThread;
 
     @Override
     public void onSessionInitiated(ProviderSession session) {
@@ -53,6 +55,9 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         bundleContext = context;
         brokerServiceTrancker = new ServiceTracker<>(context, Broker.class, this);
         brokerServiceTrancker.open();
+		webSocketServerThread = new Thread(new WebSocketServer());
+		webSocketServerThread.setName("Web socket server");
+        webSocketServerThread.start();
     }
 
     @Override
@@ -64,6 +69,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
                 e.printStackTrace();
             }
         }
+        webSocketServerThread.interrupt();
         session.close();
         brokerServiceTrancker.close();
     }
