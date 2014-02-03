@@ -70,7 +70,7 @@ class YangDataOperations {
         
         if(node.keyDefinition === null || node.keyDefinition.empty) {
             return modified;
-        } 
+        }
         val originalMap = (original as List).toIndexMap(node.keyDefinition);
         val modifiedMap = (modified as List).toIndexMap(node.keyDefinition);
         
@@ -80,7 +80,8 @@ class YangDataOperations {
             if(originalEntry != null) {
                 originalMap.remove(entry.key);
                 mergedNodes.add(merge(node,originalEntry,entry.value,configurational));
-                
+            } else {
+                mergedNodes.add(entry.value);
             }
         }
         mergedNodes.addAll(originalMap.values);
