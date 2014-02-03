@@ -16,6 +16,24 @@
       "revId": "0542b73166182d0b654c62a654001f2fc82675a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4351b534",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 69
+      },
+      "writtenOn": "2014-02-03T20:04:08Z",
+      "side": 1,
+      "message": "As you know the exception consists of message and the trace. Ideally we want to display the \"message\" only, not the trace. Is there a way to extract only the message from the exception, and not the trace?\n\nIf I were to replace \n\nlog.error(\"Uncaught exception ...\") \n\nwith \n\nlog.error(\"Uncaught exception ...\", e)\n\nthen entire trace will be printed along with the message. And that is exactly what this DDTS wants to avoid.",
+      "parentUuid": "da6255ed_83668db9",
+      "revId": "0542b73166182d0b654c62a654001f2fc82675a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
