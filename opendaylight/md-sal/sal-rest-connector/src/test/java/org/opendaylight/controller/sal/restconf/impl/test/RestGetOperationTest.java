@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
@@ -19,13 +21,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.ws.rs.core.Response;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
@@ -51,6 +56,9 @@ public class RestGetOperationTest extends JerseyTest {
     private static SchemaContext schemaContextTestModule;
     private static CompositeNode answerFromGet;
 
+    private static SchemaContext schemaContextModules;
+    private static SchemaContext schemaContextBehindMountPoint;
+
     @BeforeClass
     public static void init() throws FileNotFoundException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
@@ -62,15 +70,18 @@ public class RestGetOperationTest extends JerseyTest {
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
         answerFromGet = prepareCompositeNodeWithIetfInterfacesInterfacesData();
+
+        schemaContextModules = TestUtils.loadSchemaContext("/modules");
+        schemaContextBehindMountPoint = TestUtils.loadSchemaContext("/modules/modules-behind-mount-point");
     }
 
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//         enable(TestProperties.LOG_TRAFFIC);
-//         enable(TestProperties.DUMP_ENTITY);
-//         enable(TestProperties.RECORD_LOG_LEVEL);
-//         set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        // enable(TestProperties.LOG_TRAFFIC);
+        // enable(TestProperties.DUMP_ENTITY);
+        // enable(TestProperties.RECORD_LOG_LEVEL);
+        // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
@@ -118,7 +129,7 @@ public class RestGetOperationTest extends JerseyTest {
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
-        
+
         String uri = createUri("/config/",
                 "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
@@ -129,7 +140,8 @@ public class RestGetOperationTest extends JerseyTest {
 
     @Test
     public void getDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
-        when(brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
+        when(
+                brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
@@ -138,9 +150,340 @@ public class RestGetOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/",
-                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
+    }
+
+    // /modules
+    @Test
+    public void getModulesTest() throws UnsupportedEncodingException, FileNotFoundException {
+        ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
+
+        String uri = createUri("/modules", "");
+
+        Response response = target(uri).request("application/yang.api+json").get();
+        validateModulesResponseJson(response);
+
+        response = target(uri).request("application/yang.api+xml").get();
+        validateModulesResponseXml(response);
+    }
+
+    // /modules/module
+    @Test
+    public void getModuleTest() throws FileNotFoundException, UnsupportedEncodingException {
+        ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
+
+        String uri = createUri("/modules/module/module2/2014-01-02", "");
+
+        Response response = target(uri).request("application/yang.api+xml").get();
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+        assertTrue("Module2 in xml wasn't found", prepareXmlRegex("module2", "2014-01-02", "module:2", responseBody)
+                .find());
+        String[] split = responseBody.split("<module");
+        assertEquals("<module element is returned more then once",2,split.length);
+
+        response = target(uri).request("application/yang.api+json").get();
+        assertEquals(200, response.getStatus());
+        responseBody = response.readEntity(String.class);
+        assertTrue("Module2 in json wasn't found", prepareJsonRegex("module2", "2014-01-02", "module:2", responseBody)
+                .find());
+        split = responseBody.split("\"module\"");
+        assertEquals("\"module\" element is returned more then once",2,split.length);
+
+    }
+
+    // /operations
+    @Test
+    public void getOperationsTest() throws FileNotFoundException, UnsupportedEncodingException {
+        ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
+
+        String uri = createUri("/operations", "");
+
+        Response response = target(uri).request("application/yang.api+xml").get();
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+        assertTrue("Xml response for /operations dummy-rpc1-module1 is incorrect",
+                validateOperationsResponseXml(responseBody, "dummy-rpc1-module1", "module:1").find());
+        assertTrue("Xml response for /operations dummy-rpc2-module1 is incorrect",
+                validateOperationsResponseXml(responseBody, "dummy-rpc2-module1", "module:1").find());
+        assertTrue("Xml response for /operations dummy-rpc1-module2 is incorrect",
+                validateOperationsResponseXml(responseBody, "dummy-rpc1-module2", "module:2").find());
+        assertTrue("Xml response for /operations dummy-rpc2-module2 is incorrect",
+                validateOperationsResponseXml(responseBody, "dummy-rpc2-module2", "module:2").find());
+
+        response = target(uri).request("application/yang.api+json").get();
+        assertEquals(200, response.getStatus());
+        responseBody = response.readEntity(String.class);
+        assertTrue("Json response for /operations dummy-rpc1-module1 is incorrect",
+                validateOperationsResponseJson(responseBody, "dummy-rpc1-module1", "module1").find());
+        assertTrue("Json response for /operations dummy-rpc2-module1 is incorrect",
+                validateOperationsResponseJson(responseBody, "dummy-rpc2-module1", "module1").find());
+        assertTrue("Json response for /operations dummy-rpc1-module2 is incorrect",
+                validateOperationsResponseJson(responseBody, "dummy-rpc1-module2", "module2").find());
+        assertTrue("Json response for /operations dummy-rpc2-module2 is incorrect",
+                validateOperationsResponseJson(responseBody, "dummy-rpc2-module2", "module2").find());
+
+    }
+
+    // /operations/pathToMountPoint/yang-ext:mount
+    @Test
+    public void getOperationsBehindMountPointTest() throws FileNotFoundException, UnsupportedEncodingException {
+        ControllerContext controllerContext = ControllerContext.getInstance();
+        controllerContext.setGlobalSchema(schemaContextModules);
+
+        MountInstance mountInstance = mock(MountInstance.class);
+        when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
+        MountService mockMountService = mock(MountService.class);
+        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+
+        controllerContext.setMountService(mockMountService);
+
+        String uri = createUri("/operations/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+
+        Response response = target(uri).request("application/yang.api+xml").get();
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+        assertTrue("Xml response for /operations/mount_point rpc-behind-module1 is incorrect",
+                validateOperationsResponseXml(responseBody, "rpc-behind-module1", "module:1:behind:mount:point").find());
+        assertTrue("Xml response for /operations/mount_point rpc-behind-module2 is incorrect",
+                validateOperationsResponseXml(responseBody, "rpc-behind-module2", "module:2:behind:mount:point").find());
+
+        response = target(uri).request("application/yang.api+json").get();
+        assertEquals(200, response.getStatus());
+        responseBody = response.readEntity(String.class);
+        assertTrue("Json response for /operations/mount_point rpc-behind-module1 is incorrect",
+                validateOperationsResponseJson(responseBody, "rpc-behind-module1", "module1-behind-mount-point").find());
+        assertTrue("Json response for /operations/mount_point rpc-behind-module2 is incorrect",
+                validateOperationsResponseJson(responseBody, "rpc-behind-module2", "module2-behind-mount-point").find());
+
+    }
+
+    private Matcher validateOperationsResponseJson(String searchIn, String rpcName, String moduleName) {
+        StringBuilder regex = new StringBuilder();
+        regex.append("^");
+
+        regex.append(".*\\{");
+        regex.append(".*\"");
+
+        // operations prefix optional
+        regex.append("(");
+        regex.append("ietf-restconf:");
+        regex.append("|)");
+        // :operations prefix optional
+
+        regex.append("operations\"");
+        regex.append(".*:");
+        regex.append(".*\\{");
+
+        regex.append(".*\"" + moduleName);
+        regex.append(":");
+        regex.append(rpcName + "\"");
+        regex.append(".*\\[");
+        regex.append(".*null");
+        regex.append(".*\\]");
+
+        regex.append(".*\\}");
+        regex.append(".*\\}");
+
+        regex.append(".*");
+        regex.append("$");
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(searchIn);
+
+    }
+
+    private Matcher validateOperationsResponseXml(String searchIn, String rpcName, String namespace) {
+        StringBuilder regex = new StringBuilder();
+
+        regex.append("^");
+
+        regex.append(".*<operations");
+        regex.append(".*xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\"");
+        regex.append(".*>");
+
+        regex.append(".*<");
+        regex.append(".*" + rpcName);
+        regex.append(".*" + namespace);
+        regex.append(".*/");
+        regex.append(".*>");
+
+        regex.append(".*</operations.*");
+        regex.append(".*>");
+
+        regex.append(".*");
+        regex.append("$");
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(searchIn);
+    }
+
+    // /restconf/modules/pathToMountPoint/yang-ext:mount
+    @Test
+    public void getModulesBehindMountPoint() throws FileNotFoundException, UnsupportedEncodingException {
+        ControllerContext controllerContext = ControllerContext.getInstance();
+        controllerContext.setGlobalSchema(schemaContextModules);
+
+        MountInstance mountInstance = mock(MountInstance.class);
+        when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
+        MountService mockMountService = mock(MountService.class);
+        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+
+        controllerContext.setMountService(mockMountService);
+
+        String uri = createUri("/modules/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+
+        Response response = target(uri).request("application/yang.api+json").get();
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+
+        assertTrue(
+                "module1-behind-mount-point in json wasn't found",
+                prepareJsonRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point",
+                        responseBody).find());
+        assertTrue(
+                "module2-behind-mount-point in json wasn't found",
+                prepareJsonRegex("module2-behind-mount-point", "2014-02-04", "module:2:behind:mount:point",
+                        responseBody).find());
+
+        response = target(uri).request("application/yang.api+xml").get();
+        assertEquals(200, response.getStatus());
+        responseBody = response.readEntity(String.class);
+        assertTrue(
+                "module1-behind-mount-point in json wasn't found",
+                prepareXmlRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point", responseBody)
+                        .find());
+        assertTrue(
+                "module2-behind-mount-point in json wasn't found",
+                prepareXmlRegex("module2-behind-mount-point", "2014-02-04", "module:2:behind:mount:point", responseBody)
+                        .find());
+
+    }
+
+    // /restconf/modules/module/pathToMountPoint/yang-ext:mount/moduleName/revision
+    @Test
+    public void getModuleBehindMountPoint() throws FileNotFoundException, UnsupportedEncodingException {
+        ControllerContext controllerContext = ControllerContext.getInstance();
+        controllerContext.setGlobalSchema(schemaContextModules);
+
+        MountInstance mountInstance = mock(MountInstance.class);
+        when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
+        MountService mockMountService = mock(MountService.class);
+        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+
+        controllerContext.setMountService(mockMountService);
+
+        String uri = createUri("/modules/module/",
+                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/module1-behind-mount-point/2014-02-03");
+
+        Response response = target(uri).request("application/yang.api+json").get();
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+
+        assertTrue(
+                "module1-behind-mount-point in json wasn't found",
+                prepareJsonRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point",
+                        responseBody).find());
+        String[] split = responseBody.split("\"module\"");
+        assertEquals("\"module\" element is returned more then once",2,split.length);
+        
+
+        response = target(uri).request("application/yang.api+xml").get();
+        assertEquals(200, response.getStatus());
+        responseBody = response.readEntity(String.class);
+        assertTrue(
+                "module1-behind-mount-point in json wasn't found",
+                prepareXmlRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point", responseBody)
+                        .find());
+        split = responseBody.split("<module");
+        assertEquals("<module element is returned more then once",2,split.length);
+        
+        
+        
+
+    }
+
+    private void validateModulesResponseXml(Response response) {
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+
+        assertTrue("Module1 in xml wasn't found", prepareXmlRegex("module1", "2014-01-01", "module:1", responseBody)
+                .find());
+        assertTrue("Module2 in xml wasn't found", prepareXmlRegex("module2", "2014-01-02", "module:2", responseBody)
+                .find());
+        assertTrue("Module3 in xml wasn't found", prepareXmlRegex("module3", "2014-01-03", "module:3", responseBody)
+                .find());
+    }
+
+    private void validateModulesResponseJson(Response response) {
+        assertEquals(200, response.getStatus());
+        String responseBody = response.readEntity(String.class);
+
+        assertTrue("Module1 in json wasn't found", prepareJsonRegex("module1", "2014-01-01", "module:1", responseBody)
+                .find());
+        assertTrue("Module2 in json wasn't found", prepareJsonRegex("module2", "2014-01-02", "module:2", responseBody)
+                .find());
+        assertTrue("Module3 in json wasn't found", prepareJsonRegex("module3", "2014-01-03", "module:3", responseBody)
+                .find());
+    }
+
+    private Matcher prepareJsonRegex(String module, String revision, String namespace, String searchIn) {
+        StringBuilder regex = new StringBuilder();
+        regex.append("^");
+
+        regex.append(".*\\{");
+        regex.append(".*\"name\"");
+        regex.append(".*:");
+        regex.append(".*\"" + module + "\",");
+
+        regex.append(".*\"revision\"");
+        regex.append(".*:");
+        regex.append(".*\"" + revision + "\",");
+
+        regex.append(".*\"namespace\"");
+        regex.append(".*:");
+        regex.append(".*\"" + namespace + "\"");
+
+        regex.append(".*\\}");
+
+        regex.append(".*");
+        regex.append("$");
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(searchIn);
+
+    }
+
+    private Matcher prepareXmlRegex(String module, String revision, String namespace, String searchIn) {
+        StringBuilder regex = new StringBuilder();
+        regex.append("^");
+
+        regex.append(".*<module.*");
+        regex.append(".*>");
+
+        regex.append(".*<name>");
+        regex.append(".*" + module);
+        regex.append(".*<\\/name>");
+
+        regex.append(".*<revision>");
+        regex.append(".*" + revision);
+        regex.append(".*<\\/revision>");
+
+        regex.append(".*<namespace>");
+        regex.append(".*" + namespace);
+        regex.append(".*<\\/namespace>");
+
+        regex.append(".*<\\/module.*>");
+
+        regex.append(".*");
+        regex.append("$");
+
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(searchIn);
+    }
+
+    private void prepareMockForModulesTest(ControllerContext mockedControllerContext) throws FileNotFoundException {
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
+        mockedControllerContext.setGlobalSchema(schemaContext);
+        // when(mockedControllerContext.getGlobalSchema()).thenReturn(schemaContext);
     }
 
     private int get(String uri, String mediaType) {

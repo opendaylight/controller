@@ -50,6 +50,10 @@
       <artifactId>gson</artifactId>
       <version>2.2.4</version>
     </dependency>
+    <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-parser-impl</artifactId>
+    </dependency>
     
     <!-- Testing Dependencies -->
     <dependency>
@@ -66,11 +70,6 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.0.9</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-parser-impl</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
