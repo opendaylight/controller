@@ -34,6 +34,24 @@
       "revId": "0542b73166182d0b654c62a654001f2fc82675a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c35c854d",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-03T20:10:27Z",
+      "side": 1,
+      "message": "Hi Maurice, I think we should not log as error, given we expect these may happen as the log message says. \nI think we should log them as debug.",
+      "parentUuid": "da6255ed_4351b534",
+      "revId": "0542b73166182d0b654c62a654001f2fc82675a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
