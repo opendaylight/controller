@@ -37,8 +37,46 @@ public interface DataModification<P/* extends Path<P> */, D> extends DataChange<
     @Deprecated
     void putRuntimeData(P path, D data);
 
+    /**
+     * Store a piece of data at specified path. This acts as a merge operation,
+     * which is to say that any pre-existing data which is not explicitly
+     * overwritten will be preserved. This means that if you store a container,
+     * its child lists will be merged. Performing the following put operations:
+     *
+     * 1) container { list [ a ] }
+     * 2) container { list [ b ] }
+     *
+     * will result in the following data being present:
+     *
+     * container { list [ a, b ] }
+     *
+     * This also means that storing the container will preserve any augmentations
+     * which have been attached to it.
+     *
+     * If you require an explicit replace operation, perform
+     * {@link removeOperationalData} first.
+     */
     void putOperationalData(P path, D data);
 
+    /**
+     * Store a piece of data at specified path. This acts as a merge operation,
+     * which is to say that any pre-existing data which is not explicitly
+     * overwritten will be preserved. This means that if you store a container,
+     * its child lists will be merged. Performing the following put operations:
+     *
+     * 1) container { list [ a ] }
+     * 2) container { list [ b ] }
+     *
+     * will result in the following data being present:
+     *
+     * container { list [ a, b ] }
+     *
+     * This also means that storing the container will preserve any augmentations
+     * which have been attached to it.
+     *
+     * If you require an explicit replace operation, perform
+     * {@link removeConfigurationData} first.
+     */
     void putConfigurationData(P path, D data);
 
     /**
