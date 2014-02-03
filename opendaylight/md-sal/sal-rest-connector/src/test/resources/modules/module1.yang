@@ -1,0 +1,12 @@
+module module1 {
+    namespace "module:1";
+    prefix "mod1";
+    revision "2014-01-01";
+    
+    rpc dummy-rpc1-module1 {
+    }
+    
+    rpc dummy-rpc2-module1 {
+    }
+    
+}
