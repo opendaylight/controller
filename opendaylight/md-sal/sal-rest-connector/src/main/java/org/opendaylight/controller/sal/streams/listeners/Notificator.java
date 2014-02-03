@@ -30,10 +30,13 @@ public class Notificator {
 
     public static ListenerAdapter createListener(InstanceIdentifier path, String streamName) {
         ListenerAdapter listener = new ListenerAdapter(path, streamName);
-        lock.lock();
-        listenersByInstanceIdentifier.put(path, listener);
-        listenersByStreamName.put(streamName, listener);
-        lock.unlock();
+        try {
+            lock.lock();
+            listenersByInstanceIdentifier.put(path, listener);
+            listenersByStreamName.put(streamName, listener);
+        } finally {
+            lock.unlock();
+        }
         return listener;
     }
 
@@ -63,10 +66,13 @@ public class Notificator {
             } catch (Exception e) {
             }
         }
-        lock.lock();
-        listenersByStreamName = new ConcurrentHashMap<>();
-        listenersByInstanceIdentifier = new ConcurrentHashMap<>();
-        lock.unlock();
+        try {
+            lock.lock();
+            listenersByStreamName = new ConcurrentHashMap<>();
+            listenersByInstanceIdentifier = new ConcurrentHashMap<>();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public static void removeListenerIfNoSubscriberExists(ListenerAdapter listener) {
@@ -81,10 +87,13 @@ public class Notificator {
                 listener.close();
             } catch (Exception e) {
             }
-            lock.lock();
-            listenersByInstanceIdentifier.remove(listener.getPath());
-            listenersByStreamName.remove(listener).getStreamName();
-            lock.unlock();
+            try {
+                lock.lock();
+                listenersByInstanceIdentifier.remove(listener.getPath());
+                listenersByStreamName.remove(listener.getStreamName());
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
