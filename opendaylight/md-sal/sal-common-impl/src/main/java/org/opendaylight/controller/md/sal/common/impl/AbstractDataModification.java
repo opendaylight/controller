@@ -75,7 +75,6 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
         }
 
         configurationUpdate.put(path, mergeConfigurationData(path,original, data));
-        configurationRemove.remove(path);
     }
 
     @Override
@@ -86,7 +85,6 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
             operationalCreated.put(path, data);
         }
         operationalUpdate.put(path, mergeOperationalData(path,original,data));
-        operationalRemove.remove(path);
     }
 
     @Override

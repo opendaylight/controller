@@ -64,15 +64,15 @@ class HashMapDataStore implements DataStore, AutoCloseable {
 
     def RpcResult<Void> finish(HashMapDataStoreTransaction transaction) {
         val modification = transaction.modification;
-        configuration.putAll(modification.updatedConfigurationData);
-        operational.putAll(modification.updatedOperationalData);
-
         for (removal : modification.removedConfigurationData) {
             remove(configuration,removal);
         }
         for (removal : modification.removedOperationalData) {
             remove(operational,removal);
         }
+        configuration.putAll(modification.updatedConfigurationData);
+        operational.putAll(modification.updatedOperationalData);
+
         return Rpcs.getRpcResult(true, null, Collections.emptySet);
     }
     
