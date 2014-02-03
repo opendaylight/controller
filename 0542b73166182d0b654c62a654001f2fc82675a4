@@ -70,6 +70,24 @@
       "revId": "0542b73166182d0b654c62a654001f2fc82675a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c32365bb",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 69
+      },
+      "writtenOn": "2014-02-03T21:26:35Z",
+      "side": 1,
+      "message": "Since our default loglevel to most of the bundles (including hosttracker) is set to \"INFO\", if for some reason the cache is deleted accidently due to a bug, this problem will be hidden if we were to use debug instead of error. As the hostsDB is central to hosttracker, I feel little uncomfortable it being nulled out and not knowing about it.\n\nHow about we continue to use error, and as Yev suggested, supplement the log message with the exception message using e.message method. This will allow infispan and any other exceptions to be detected.",
+      "parentUuid": "da6255ed_c35c854d",
+      "revId": "0542b73166182d0b654c62a654001f2fc82675a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
