@@ -57,11 +57,47 @@ package ${packageName};
     }
 
     public ${moduleInstanceType} instantiateModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${moduleInstanceType} oldModule, ${instanceType} oldInstance, ${bundleContextType} bundleContext) {
-        return new ${moduleInstanceType}(new ${moduleNameType}(NAME, instanceName), dependencyResolver, oldModule, oldInstance);
+        // Workaround for backwards compatibility
+        // Try to find new constructor with BundleContext
+        try {
+            java.lang.reflect.Constructor<${moduleInstanceType}> constructor = ${moduleInstanceType}.class.getConstructor(${moduleNameType}.class, ${dependencyResolverType}.class, ${moduleInstanceType}.class, ${instanceType}.class, ${bundleContextType}.class);
+            try {
+                return constructor.newInstance(new ${moduleNameType}(NAME, instanceName), dependencyResolver, oldModule, oldInstance, bundleContext);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (NoSuchMethodException e) {
+            // If new constructor is not present, try the old one
+            try {
+                java.lang.reflect.Constructor<${moduleInstanceType}> constructor = ${moduleInstanceType}.class.getConstructor(${moduleNameType}.class, ${dependencyResolverType}.class, ${moduleInstanceType}.class, ${instanceType}.class);
+                return constructor.newInstance(new ${moduleNameType}(NAME, instanceName), dependencyResolver, oldModule, oldInstance);
+            } catch (Exception eI) {
+                eI.addSuppressed(e);
+                throw new RuntimeException(eI);
+            }
+        }
     }
 
     public ${moduleInstanceType} instantiateModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {
-        return new ${moduleInstanceType}(new ${moduleNameType}(NAME, instanceName), dependencyResolver);
+        // Workaround for backwards compatibility
+        // Try to find new constructor with BundleContext
+        try {
+            java.lang.reflect.Constructor<${moduleInstanceType}> constructor = ${moduleInstanceType}.class.getConstructor(${moduleNameType}.class, ${dependencyResolverType}.class, ${bundleContextType}.class);
+            try {
+                return constructor.newInstance(new ${moduleNameType}(NAME, instanceName), dependencyResolver, bundleContext);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (NoSuchMethodException e) {
+            // If new constructor is not present, try the old one
+            try {
+                java.lang.reflect.Constructor<${moduleInstanceType}> constructor = ${moduleInstanceType}.class.getConstructor(${moduleNameType}.class, ${dependencyResolverType}.class);
+                return constructor.newInstance(new ${moduleNameType}(NAME, instanceName), dependencyResolver);
+            } catch (Exception eI) {
+                eI.addSuppressed(e);
+                throw new RuntimeException(eI);
+            }
+        }
     }
 
     @Override

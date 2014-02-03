@@ -11,6 +11,7 @@ package ${packageName};
 
     private static final ${loggerType} logger = ${loggerFactoryType}.getLogger(${typeDeclaration.name}.class);
 
+    private final ${bundleContextType} bundleContext;
     private final ${typeDeclaration.name} oldModule;
     private final ${instanceType} oldInstance;
     private ${instanceType} instance;
@@ -20,18 +21,43 @@ package ${packageName};
     private ${registratorType} rootRuntimeBeanRegistratorWrapper;
     </#if>
 
+    /**
+     Constructor with bundle context should be used instead
+     */
+    @Deprecated()
     public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver) {
+        this(identifier, dependencyResolver, null);
+    }
+
+    public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {
         this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldInstance = null;
         this.oldModule = null;
+        this.bundleContext = bundleContext;
     }
 
+    /**
+     Constructor with bundle context should be used instead
+     */
+    @Deprecated()
     public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver, ${typeDeclaration.name} oldModule, ${instanceType} oldInstance) {
+        this(identifier, dependencyResolver, oldModule, oldInstance, null);
+    }
+
+    public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver, ${typeDeclaration.name} oldModule, ${instanceType} oldInstance, ${bundleContextType} bundleContext) {
         this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldInstance = oldInstance;
         this.oldModule = oldModule;
+        this.bundleContext = bundleContext;
+    }
+
+    protected ${bundleContextType} getBundleContext() {
+        if(bundleContext == null)
+            throw new java.lang.IllegalStateException(
+                    "Bundle context was not injected, probably using deprecated constructor from abstract module");
+        return bundleContext;
     }
 
     // getters and setters exported into MXBean

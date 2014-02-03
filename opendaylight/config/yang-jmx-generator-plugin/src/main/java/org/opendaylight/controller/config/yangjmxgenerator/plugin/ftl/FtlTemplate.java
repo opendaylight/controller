@@ -44,4 +44,6 @@ public interface FtlTemplate {
      * @return ftl template location
      */
     public String getFtlTempleteLocation();
+
+    String getBundleContextType();
 }

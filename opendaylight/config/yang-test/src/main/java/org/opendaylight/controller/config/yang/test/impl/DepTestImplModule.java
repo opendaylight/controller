@@ -14,18 +14,18 @@ package org.opendaylight.controller.config.yang.test.impl;
 public final class DepTestImplModule extends org.opendaylight.controller.config.yang.test.impl.AbstractDepTestImplModule
  {
 
-    public DepTestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
-        super(identifier, dependencyResolver);
+    public DepTestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            org.osgi.framework.BundleContext bundleContext) {
+        super(identifier, dependencyResolver, bundleContext);
     }
 
     public DepTestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            DepTestImplModule oldModule, java.lang.AutoCloseable oldInstance) {
-
-        super(identifier, dependencyResolver, oldModule, oldInstance);
+            DepTestImplModule oldModule, java.lang.AutoCloseable oldInstance, org.osgi.framework.BundleContext bundleContext) {
+        super(identifier, dependencyResolver, oldModule, oldInstance, bundleContext);
     }
 
     @Override
-    protected void customValidation(){
+    protected void customValidation() {
         // Add custom validation for module attributes here.
     }
 

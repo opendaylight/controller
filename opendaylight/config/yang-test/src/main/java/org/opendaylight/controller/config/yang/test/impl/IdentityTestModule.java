@@ -14,18 +14,18 @@ package org.opendaylight.controller.config.yang.test.impl;
 public final class IdentityTestModule extends org.opendaylight.controller.config.yang.test.impl.AbstractIdentityTestModule
  {
 
-    public IdentityTestModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
-        super(identifier, dependencyResolver);
+    public IdentityTestModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            org.osgi.framework.BundleContext bundleContext) {
+        super(identifier, dependencyResolver, bundleContext);
     }
 
     public IdentityTestModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            IdentityTestModule oldModule, java.lang.AutoCloseable oldInstance) {
-
-        super(identifier, dependencyResolver, oldModule, oldInstance);
+            IdentityTestModule oldModule, java.lang.AutoCloseable oldInstance, org.osgi.framework.BundleContext bundleContext) {
+        super(identifier, dependencyResolver, oldModule, oldInstance, bundleContext);
     }
 
     @Override
-    protected void customValidation(){
+    protected void customValidation() {
         // Add custom validation for module attributes here.
     }
 

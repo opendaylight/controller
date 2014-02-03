@@ -19,7 +19,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Cons
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
-import org.osgi.framework.BundleContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -84,10 +83,6 @@ public class AbstractFactoryTemplate extends GeneralClassTemplate {
 
     public String getDynamicMBeanWithInstanceType() {
         return DynamicMBeanWithInstance.class.getCanonicalName();
-    }
-
-    public String getBundleContextType() {
-        return BundleContext.class.getCanonicalName();
     }
 
     @Override

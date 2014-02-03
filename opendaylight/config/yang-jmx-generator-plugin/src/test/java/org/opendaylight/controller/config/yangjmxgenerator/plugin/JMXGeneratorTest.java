@@ -525,7 +525,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                         + ".threads.ScheduledThreadPoolServiceInterface",
                 PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                         + ".threads.ThreadPoolServiceInterface");
-        assertEquals(2, visitor.constructors.size());
+        assertEquals(2 + 2/*Deprecated*/, visitor.constructors.size());
         Set<String> fieldDeclarations = visitor.fieldDeclarations;
         assertDeclaredField(fieldDeclarations,
                 "private java.lang.Long maximumSize");
@@ -538,7 +538,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertDeclaredField(fieldDeclarations,
                 "private java.lang.Long coreSize");
         assertDeclaredField(fieldDeclarations, "private byte[] binary");
-        assertEquals(22, fieldDeclarations.size());
+        assertEquals(22 + 1/*Bundle Context*/, fieldDeclarations.size());
 
         assertEquals(1, visitor.requireIfc.size());
         String reqIfc = visitor.requireIfc.get("setThreadfactory");
@@ -546,7 +546,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertContains(reqIfc, PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.ThreadFactoryServiceInterface");
 
-        assertEquals("Incorrenct number of generated methods", 27,
+        assertEquals("Incorrenct number of generated methods", 27 + 1 /*BundleContext*/,
                 visitor.methods.size());
         assertEquals("Incorrenct number of generated method descriptions", 3,
                 visitor.methodDescriptions.size());

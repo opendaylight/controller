@@ -18,6 +18,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Type
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 
 import com.google.common.collect.Lists;
+import org.osgi.framework.BundleContext;
 
 public abstract class AbstractFtlTemplate implements FtlTemplate {
     private final String packageName;
@@ -93,6 +94,11 @@ public abstract class AbstractFtlTemplate implements FtlTemplate {
     @Override
     public String getFtlTempleteLocation() {
         return "abstract_ftl_file.ftl";
+    }
+
+    @Override
+    public String getBundleContextType() {
+        return BundleContext.class.getCanonicalName();
     }
 
     @Override

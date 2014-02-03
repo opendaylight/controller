@@ -64,7 +64,7 @@ public final class RuntimeMappingModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        
+
         RuntimeGeneratedMappingServiceProxy potential = tryToReuseGlobalInstance();
         if(potential != null) {
             return potential;
@@ -77,7 +77,7 @@ public final class RuntimeMappingModule extends
     }
 
     private RuntimeGeneratedMappingServiceProxy tryToReuseGlobalInstance() {
-        ServiceReference<BindingIndependentMappingService> serviceRef = getBundleContext().getServiceReference(BindingIndependentMappingService.class);
+        ServiceReference<BindingIndependentMappingService> serviceRef = bundleContext.getServiceReference(BindingIndependentMappingService.class);
         if(serviceRef == null) {
             return null;
         }
@@ -86,11 +86,7 @@ public final class RuntimeMappingModule extends
         if (delegate == null) {
             return null;
         }
-        return new RuntimeGeneratedMappingServiceProxy(getBundleContext(),serviceRef,delegate);
-    }
-
-    private BundleContext getBundleContext() {
-        return bundleContext;
+        return new RuntimeGeneratedMappingServiceProxy(bundleContext,serviceRef,delegate);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
@@ -101,7 +97,7 @@ public final class RuntimeMappingModule extends
     BindingIndependentMappingService, //
     Delegator<BindingIndependentMappingService>, //
     AutoCloseable {
-        
+
         private BindingIndependentMappingService delegate;
         private ServiceReference<BindingIndependentMappingService> reference;
         private BundleContext bundleContext;
@@ -150,7 +146,7 @@ public final class RuntimeMappingModule extends
         public DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput) {
             return delegate.dataObjectFromDataDom(inputClass, domInput);
         }
-        
+
         @Override
         public void close() throws Exception {
             if(delegate != null) {

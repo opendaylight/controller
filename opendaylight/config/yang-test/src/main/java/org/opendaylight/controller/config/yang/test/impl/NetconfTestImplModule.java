@@ -14,18 +14,18 @@ package org.opendaylight.controller.config.yang.test.impl;
 public final class NetconfTestImplModule extends org.opendaylight.controller.config.yang.test.impl.AbstractNetconfTestImplModule
  {
 
-    public NetconfTestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
-        super(identifier, dependencyResolver);
+    public NetconfTestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            org.osgi.framework.BundleContext bundleContext) {
+        super(identifier, dependencyResolver, bundleContext);
     }
 
     public NetconfTestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            NetconfTestImplModule oldModule, java.lang.AutoCloseable oldInstance) {
-
-        super(identifier, dependencyResolver, oldModule, oldInstance);
+            NetconfTestImplModule oldModule, java.lang.AutoCloseable oldInstance, org.osgi.framework.BundleContext bundleContext) {
+        super(identifier, dependencyResolver, oldModule, oldInstance, bundleContext);
     }
 
     @Override
-    protected void customValidation(){
+    protected void customValidation() {
         // Add custom validation for module attributes here.
     }
 
