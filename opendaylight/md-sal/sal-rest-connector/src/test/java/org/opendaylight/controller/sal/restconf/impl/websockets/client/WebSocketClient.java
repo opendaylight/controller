@@ -24,6 +24,8 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 
 import org.slf4j.Logger;
@@ -81,8 +83,9 @@ public class WebSocketClient  {
         clientChannel.writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer(new byte[]{1, 2, 3, 4, 5, 6})));
     }
 
-    public void close() throws InterruptedException {
-        clientChannel.writeAndFlush(new CloseWebSocketFrame());
+    public void close(String reasonText) throws InterruptedException {
+        CloseWebSocketFrame closeWebSocketFrame = new CloseWebSocketFrame(1000,reasonText);        
+        clientChannel.writeAndFlush(closeWebSocketFrame);
 
         // WebSocketClientHandler will close the connection when the server
         // responds to the CloseWebSocketFrame.
@@ -95,17 +98,32 @@ public class WebSocketClient  {
         if (args.length > 0) {
             uri = new URI(args[0]);
         } else {
-            uri = new URI("http://192.168.11.1:8181/opendaylight-inventory:nodes");
+            uri = new URI("http://192.168.1.101:8181/opendaylight-inventory:nodes");
         }
         IClientMessageCallback messageCallback = new ClientMessageCallback();
         WebSocketClient webSocketClient = new WebSocketClient(uri, messageCallback);
         webSocketClient.connect();
+        
+        while (true) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            String input = br.readLine();
+            if (input.equals("q")) {
+                System.out.print("Would you like to close stream? (Y = yes, empty = yes)\n");
+                input = br.readLine();
+                if (input.equals("yes") || input.isEmpty()) {
+                    webSocketClient.close("opendaylight-inventory:nodes");
+                    break;
+                }
+            }
+        }
     }
 
     private static class ClientMessageCallback implements IClientMessageCallback {
         @Override
         public void onMessageReceived(Object message) {
-            logger.info("received message {}", ((TextWebSocketFrame)message).text());
+            if (message instanceof TextWebSocketFrame) {
+                logger.info("received message {}"+ ((TextWebSocketFrame)message).text());
+            }
         }
     }
 
