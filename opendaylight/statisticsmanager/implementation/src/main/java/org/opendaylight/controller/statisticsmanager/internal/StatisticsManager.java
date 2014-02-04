@@ -467,11 +467,8 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
 
     @Override
     public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList) {
-        List<FlowOnNode> currentStat = this.flowStatistics.get(node);
-        // Update cache only if changed to avoid unnecessary cache sync operations
-        if (! flowStatsList.equals(currentStat)){
-            this.flowStatistics.put(node, flowStatsList);
-        }
+        // No equality check because duration fields change constantly
+        this.flowStatistics.put(node, flowStatsList);
     }
 
     @Override
