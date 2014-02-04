@@ -9,8 +9,8 @@ module sal-remote {
     contact "Martin Bobak <mbobak@cisco.com>";
 
     description
-          "This module contains the definition of types related to
-           Internet Assigned Numbers Authority.
+          "This module contains the definition of methods related to
+           sal remote model.
 
            Copyright (c)2013 Cisco Systems, Inc. All rights reserved.
 
@@ -48,8 +48,27 @@ module sal-remote {
 
     notification data-changed-notification {
         description "Data change notification.";
-        leaf data-change-event {
-            type instance-identifier;
+        list data-change-event {
+            key path;
+            leaf path {
+                type instance-identifier;
+            }
+            leaf store {
+                type enumeration {
+                    enum config;
+                    enum operation;
+                }
+            }
+            leaf operation {
+                type enumeration {
+                    enum created;
+                    enum updated;
+                    enum deleted;
+                }
+            }
+            anyxml data{
+                description "DataObject ";
+            }
          }
     }
 
