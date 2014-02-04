@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_de521c66",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-04T18:23:14Z",
+      "side": 1,
+      "message": "not sure if it means the one on which the IFRM call is executed or the one that programs the flow on node (and I know what it supposed to mean :) )",
+      "revId": "755a0bc98065786b93b91b5292e821df5374c994",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
