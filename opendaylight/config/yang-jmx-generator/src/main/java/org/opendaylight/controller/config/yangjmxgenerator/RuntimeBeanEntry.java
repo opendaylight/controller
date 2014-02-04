@@ -272,7 +272,7 @@ public class RuntimeBeanEntry {
                 }
                 // convert RpcDefinition to Rpc
                 for (RpcDefinition rpcDefinition : rpcDefinitions) {
-                    String name = ModuleMXBeanEntry
+                    String name = TypeProviderWrapper
                             .findJavaParameter(rpcDefinition);
                     AttributeIfc returnType;
                     if (rpcDefinition.getOutput() == null
@@ -376,7 +376,7 @@ public class RuntimeBeanEntry {
                     "More than one key is not supported in " + listSchemaNode);
         }
 
-        String javaNamePrefix = ModuleMXBeanEntry
+        String javaNamePrefix = TypeProviderWrapper
                 .findJavaNamePrefix(listSchemaNode);
 
         RuntimeBeanEntry rbFromAttributes = new RuntimeBeanEntry(packageName,
