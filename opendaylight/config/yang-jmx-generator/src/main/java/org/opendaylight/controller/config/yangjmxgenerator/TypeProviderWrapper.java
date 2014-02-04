@@ -7,18 +7,54 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 public class TypeProviderWrapper {
     private final TypeProvider typeProvider;
 
     public TypeProviderWrapper(TypeProvider typeProvider) {
         this.typeProvider = typeProvider;
+    }
+
+    /**
+     * For input node, find if it contains config:java-name-prefix extension. If
+     * not found, convert local name of node converted to cammel case.
+     */
+    public static String findJavaNamePrefix(SchemaNode schemaNode) {
+        return convertToJavaName(schemaNode, true);
+    }
+
+    public static String findJavaParameter(SchemaNode schemaNode) {
+        return convertToJavaName(schemaNode, false);
+    }
+
+    public static String convertToJavaName(SchemaNode schemaNode,
+                                           boolean capitalizeFirstLetter) {
+        for (UnknownSchemaNode unknownNode : schemaNode.getUnknownSchemaNodes()) {
+            if (ConfigConstants.JAVA_NAME_PREFIX_EXTENSION_QNAME
+                    .equals(unknownNode.getNodeType())) {
+                String value = unknownNode.getNodeParameter();
+                return convertToJavaName(value, capitalizeFirstLetter);
+            }
+        }
+        return convertToJavaName(schemaNode.getQName().getLocalName(),
+                capitalizeFirstLetter);
+    }
+
+    public static String convertToJavaName(String localName,
+                                           boolean capitalizeFirstLetter) {
+        if (capitalizeFirstLetter) {
+            return BindingGeneratorUtil.parseToClassName(localName);
+        } else {
+            return BindingGeneratorUtil.parseToValidParamName(localName);
+        }
     }
 
     public Type getType(LeafSchemaNode leaf) {

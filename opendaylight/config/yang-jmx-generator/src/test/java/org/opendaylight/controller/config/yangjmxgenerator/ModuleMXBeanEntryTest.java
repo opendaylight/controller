@@ -113,6 +113,9 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                         , PACKAGE_NAME);
         Map<String, AttributeIfc> attributes = namesToMBEs.get("impl-netconf")
                 .getAttributes();
+
+        assertCorrectAttributesSize(namesToMBEs, attributes);
+
         //
         DependencyAttribute threadFactoryAttribute = (DependencyAttribute) attributes
                 .get("thread-factory");
@@ -130,6 +133,16 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
         assertNull(threadFactoryAttribute.getNullableDefault());
         assertNull(threadFactoryAttribute.getNullableDescription());
         assertThat(threadFactoryAttribute.getType().getName(), is("ObjectName"));
+    }
+
+    private void assertCorrectAttributesSize(Map<String, ModuleMXBeanEntry> namesToMBEs, Map<String, AttributeIfc> attributes) {
+        assertEquals(14, attributes.size());
+        assertEquals(1, namesToMBEs.get("impl-netconf").getRuntimeBeans().size());
+        assertEquals(2, namesToMBEs.get("impl-netconf").getRuntimeBeans().iterator().next().getAttributes().size());
+
+        assertEquals(4, namesToMBEs.get("impl").getAttributes().size());
+        assertEquals(1, namesToMBEs.get("impl").getRuntimeBeans().size());
+        assertEquals(1, namesToMBEs.get("impl").getRuntimeBeans().iterator().next().getAttributes().size());
     }
 
     protected RuntimeBeanEntry findFirstByYangName(
@@ -155,7 +168,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
     private void assertMatches(String prefix, String input) {
         RevisionAwareXPath whenConstraint = mock(RevisionAwareXPath.class);
         doReturn(input).when(whenConstraint).toString();
-        Matcher output = ModuleMXBeanEntry.getWhenConditionMatcher(prefix,
+        Matcher output = ModuleMXBeanEntryBuilder.getWhenConditionMatcher(prefix,
                 whenConstraint);
         assertTrue(output.matches());
         assertEquals("threadpool-dynamic", output.group(1));
