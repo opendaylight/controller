@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_1eeb1479",
+        "filename": "opendaylight/statisticsmanager/implementation/src/main/java/org/opendaylight/controller/statisticsmanager/internal/StatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-04T18:25:26Z",
+      "side": 1,
+      "message": "\"every nanosecond\" can be safely translated into \"constantly\" rather than \"pretty often\"",
+      "revId": "9666e15c1319d86703d31f9dc1e0bfdb13096fed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
