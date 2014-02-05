@@ -61,18 +61,18 @@ public class NetconfClient implements Closeable {
         try {
             return clientFuture.get();
         } catch (CancellationException e) {
-            throw new RuntimeException("Netconf client interrupted", e);
+            throw new RuntimeException("Cancelling " + this, e);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Unable to create netconf client", e);
+            throw new IllegalStateException("Unable to create " + this, e);
         }
     }
 
-    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        return new NetconfClient(clientLabelForLogging,address,strat,netconfClientDispatcher);
+    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strategy, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
+        return new NetconfClient(clientLabelForLogging,address,strategy,netconfClientDispatcher);
     }
 
-    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher,NetconfClientSessionListener listener) throws InterruptedException {
-        return new NetconfClient(clientLabelForLogging,address,strat,netconfClientDispatcher,listener);
+    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strategy, NetconfClientDispatcher netconfClientDispatcher,NetconfClientSessionListener listener) throws InterruptedException {
+        return new NetconfClient(clientLabelForLogging,address,strategy,netconfClientDispatcher,listener);
     }
 
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
@@ -87,12 +87,12 @@ public class NetconfClient implements Closeable {
                 DEFAULT_CONNECT_TIMEOUT), netconfClientDispatcher);
     }
 
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat,
+    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strategy,
             NetconfClientDispatcher netconfClientDispatcher, NetconfClientSessionListener listener) throws InterruptedException{
         this.label = clientLabelForLogging;
         dispatch = netconfClientDispatcher;
         sessionListener = listener;
-        Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strat);
+        Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strategy);
         this.address = address;
         clientSession = get(clientFuture);
         this.sessionId = clientSession.getSessionId();
