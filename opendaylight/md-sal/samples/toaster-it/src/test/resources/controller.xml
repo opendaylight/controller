@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persisted-snapshots>
+    <snapshots>
+        <snapshot>
+            <required-capabilities>
+                <capability>urn:opendaylight:l2:types?module=opendaylight-l2-types&amp;revision=2013-08-27</capability>
+                <capability>
+                    urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28
+                </capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom?module=opendaylight-md-sal-dom&amp;revision=2013-10-28</capability>
+                <capability>
+                    urn:opendaylight:params:xml:ns:yang:controller:config?module=config&amp;revision=2013-04-05
+                </capability>
+                <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
+                <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability>
+                <capability>urn:ietf:params:xml:ns:yang:rpc-context?module=rpc-context&amp;revision=2013-06-17
+                </capability>
+                <capability>
+                    urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28
+                </capability>
+                <capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2010-09-24
+                </capability>
+                <capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
+                <capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2010-09-24
+                </capability>
+                <capability>
+                    urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28
+                </capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:logback:config?module=config-logging&amp;revision=2013-07-16</capability>
+                <capability>urn:opendaylight:yang:extension:yang-ext?module=yang-ext&amp;revision=2013-07-09
+                </capability>
+                <capability>
+                    urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28
+                </capability>
+                <capability>http://netconfcentral.org/ns/toaster?module=toaster&amp;revision=2009-11-20</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer?module=toaster-consumer&amp;revision=2014-01-31</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer:impl?module=toaster-consumer-impl&amp;revision=2014-01-31</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider?module=toaster-provider&amp;revision=2014-01-31</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider:impl?module=toaster-provider-impl&amp;revision=2014-01-31</capability>
+
+            </required-capabilities>
+            <configuration>
+
+                <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+                    <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider:impl">
+                                prefix:toaster-provider-impl
+                            </type>
+                            <name>toaster-provider-impl</name>
+
+                            <rpc-registry>
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                                <name>binding-rpc-broker</name>
+                            </rpc-registry>
+
+                            <notification-service>
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                    binding:binding-notification-service
+                                </type>
+                                <name>ref_binding-notification-broker</name>
+                            </notification-service>
+                        </module>
+
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer:impl">
+                                prefix:toaster-consumer-impl
+                            </type>
+                            <name>toaster-consumer-impl</name>
+
+                            <rpc-registry>
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                                <name>binding-rpc-broker</name>
+                            </rpc-registry>
+
+                            <notification-service>
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                    binding:binding-notification-service
+                                </type>
+                                <name>ref_binding-notification-broker</name>
+                            </notification-service>
+                        </module>
+
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
+                                prefix:schema-service-singleton
+                            </type>
+                            <name>yang-schema-service</name>
+                        </module>
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
+                                prefix:hash-map-data-store
+                            </type>
+                            <name>hash-map-data-store</name>
+                        </module>
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
+                                prefix:dom-broker-impl
+                            </type>
+                            <name>dom-broker</name>
+                            <data-store xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
+                                <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">
+                                    dom:dom-data-store
+                                </type>
+                                <name>ref_hash-map-data-store</name>
+                            </data-store>
+                        </module>
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                prefix:binding-broker-impl
+                            </type>
+                            <name>binding-broker-impl</name>
+                            <notification-service
+                                    xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                    binding:binding-notification-service
+                                </type>
+                                <name>ref_binding-notification-broker</name>
+                            </notification-service>
+                            <data-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                    binding:binding-data-broker
+                                </type>
+                                <name>ref_binding-data-broker</name>
+                            </data-broker>
+                        </module>
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                prefix:runtime-generated-mapping
+                            </type>
+                            <name>runtime-mapping-singleton</name>
+                        </module>
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                prefix:binding-notification-broker
+                            </type>
+                            <name>binding-notification-broker</name>
+                        </module>
+                        <module>
+                            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                prefix:binding-data-broker
+                            </type>
+                            <name>binding-data-broker</name>
+                            <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">
+                                    dom:dom-broker-osgi-registry
+                                </type>
+                                <name>ref_dom-broker</name>
+                            </dom-broker>
+                            <mapping-service xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                    binding:binding-dom-mapping-service
+                                </type>
+                                <name>ref_runtime-mapping-singleton</name>
+                            </mapping-service>
+                        </module>
+                    </modules>
+
+                    <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                        <service>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">
+                                dom:schema-service
+                            </type>
+                            <instance>
+                                <name>ref_yang-schema-service</name>
+                                <provider>
+                                    /config/modules/module[name='schema-service-singleton']/instance[name='yang-schema-service']
+                                </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                binding:binding-notification-service
+                            </type>
+                            <instance>
+                                <name>ref_binding-notification-broker</name>
+                                <provider>
+                                    /config/modules/module[name='binding-notification-broker']/instance[name='binding-notification-broker']
+                                </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">
+                                dom:dom-data-store
+                            </type>
+                            <instance>
+                                <name>ref_hash-map-data-store</name>
+                                <provider>
+                                    /config/modules/module[name='hash-map-data-store']/instance[name='hash-map-data-store']
+                                </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                            <instance>
+                                <name>binding-rpc-broker</name>
+                                <provider>/modules/module[type='binding-broker-impl'][name='binding-broker-impl']</provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                binding:binding-broker-osgi-registry
+                            </type>
+                            <instance>
+                                <name>ref_binding-broker-impl</name>
+                                <provider>
+                                    /config/modules/module[name='binding-broker-impl']/instance[name='binding-broker-impl']
+                                </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                                binding-impl:binding-dom-mapping-service
+                            </type>
+                            <instance>
+                                <name>ref_runtime-mapping-singleton</name>
+                                <provider>
+                                    /config/modules/module[name='runtime-generated-mapping']/instance[name='runtime-mapping-singleton']
+                                </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">
+                                dom:dom-broker-osgi-registry
+                            </type>
+                            <instance>
+                                <name>ref_dom-broker</name>
+                                <provider>/config/modules/module[name='dom-broker-impl']/instance[name='dom-broker']
+                                </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                                binding:binding-data-broker
+                            </type>
+                            <instance>
+                                <name>ref_binding-data-broker</name>
+                                <provider>
+                                    /config/modules/module[name='binding-data-broker']/instance[name='binding-data-broker']
+                                </provider>
+                            </instance>
+                        </service>
+                    </services>
+                </data>
+
+            </configuration>
+        </snapshot>
+
+    </snapshots>
+</persisted-snapshots>
