@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 /**
@@ -150,7 +151,12 @@ public final class RuntimeMappingModule extends
         public DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput) {
             return delegate.dataObjectFromDataDom(inputClass, domInput);
         }
-        
+
+        @Override
+        public Optional<Class<? extends RpcService>> getRpcServiceClassFor(String namespace, String revision) {
+            return delegate.getRpcServiceClassFor(namespace, revision);
+        }
+
         @Override
         public void close() throws Exception {
             if(delegate != null) {
