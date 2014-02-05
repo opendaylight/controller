@@ -13,7 +13,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.opendaylight.controller.config.yang.config.toaster_provider.impl.ToasterProviderRuntimeMXBean;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.common.util.Futures;
 import org.opendaylight.controller.sal.common.util.Rpcs;
@@ -31,7 +33,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpendaylightToaster implements ToasterData, ToasterService {
+public class OpendaylightToaster implements ToasterData, ToasterService, ToasterProviderRuntimeMXBean {
 
     private static final Logger log = LoggerFactory.getLogger(OpendaylightToaster.class);
 
@@ -102,6 +104,13 @@ public class OpendaylightToaster implements ToasterData, ToasterService {
         log.trace("Toast: {} doneness: {}", toastType, toastDoneness);
     }
 
+    private final AtomicLong toastsMade = new AtomicLong(0);
+
+    @Override
+    public Long getToastsMade() {
+        return toastsMade.get();
+    }
+
     private class MakeToastTask implements Callable<RpcResult<Void>> {
 
         final MakeToastInput toastRequest;
@@ -120,6 +129,9 @@ public class OpendaylightToaster implements ToasterData, ToasterService {
             log.trace("Toast Done");
             logToastInput(toastRequest);
             currentTask = null;
+
+            toastsMade.incrementAndGet();
+
             return Rpcs.<Void> getRpcResult(true, null, Collections.<RpcError> emptySet());
         }
     }
