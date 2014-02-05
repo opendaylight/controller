@@ -140,13 +140,11 @@
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>xtend-lib-osgi</artifactId>
             <version>2.4.3</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
             <version>1.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
@@ -164,7 +162,6 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-netconf-connector</artifactId>
             <version>${netconf.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -250,13 +247,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
             <version>1.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -267,7 +262,6 @@
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-management</artifactId>
             <version>1.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
