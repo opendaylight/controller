@@ -16,7 +16,7 @@ module packet-processing {
     }
 
     typedef cookie {
-        type uint32;
+        type uint64;
     }
 
     grouping raw-packet {
