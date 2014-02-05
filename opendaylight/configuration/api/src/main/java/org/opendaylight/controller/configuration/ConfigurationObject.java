@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 public abstract class ConfigurationObject implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final String DEFAULT_REGEX = "^[\\w-\\+\\*\\/\\.\\(\\)\\[\\]\\@]{1,256}$";
+    private static final String DEFAULT_REGEX = "^[\\w-\\+\\*\\/\\.\\(\\)\\[\\]\\@\\|]{1,256}$";
     private static final String REGEX_PROP_NAME = "resourceNameRegularExpression";
     private static String regex;
 
@@ -31,7 +31,7 @@ public abstract class ConfigurationObject implements Serializable {
      *         resource name regular expression, false otherwise
      */
     protected boolean isValidResourceName(String name) {
-        return (name != null) ? name.matches(regex) : false;
+        return name != null && name.matches(regex);
     }
 
     /**
