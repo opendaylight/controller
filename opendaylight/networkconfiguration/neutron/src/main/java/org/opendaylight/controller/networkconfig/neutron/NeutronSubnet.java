@@ -269,22 +269,26 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable {
         }
         gatewayIPAssigned = false;
         dnsNameservers = new ArrayList<String>();
-        allocationPools = new ArrayList<NeutronSubnet_IPAllocationPool>();
-        hostRoutes = new ArrayList<NeutronSubnet_HostRoute>();
-        try {
-            SubnetUtils util = new SubnetUtils(cidr);
-            SubnetInfo info = util.getInfo();
-            if (gatewayIP == null) {
-                gatewayIP = info.getLowAddress();
+        if (hostRoutes == null) {
+            hostRoutes = new ArrayList<NeutronSubnet_HostRoute>();
+        }
+        if (allocationPools == null) {
+            allocationPools = new ArrayList<NeutronSubnet_IPAllocationPool>();
+            try {
+                SubnetUtils util = new SubnetUtils(cidr);
+                SubnetInfo info = util.getInfo();
+                if (gatewayIP == null) {
+                    gatewayIP = info.getLowAddress();
+                }
+                if (allocationPools.size() < 1) {
+                    NeutronSubnet_IPAllocationPool source =
+                        new NeutronSubnet_IPAllocationPool(info.getLowAddress(),
+                                info.getHighAddress());
+                    allocationPools = source.splitPool(gatewayIP);
+                }
+            } catch (Exception e) {
+                return false;
             }
-            if (allocationPools.size() < 1) {
-                NeutronSubnet_IPAllocationPool source =
-                    new NeutronSubnet_IPAllocationPool(info.getLowAddress(),
-                            info.getHighAddress());
-                allocationPools = source.splitPool(gatewayIP);
-            }
-        } catch (Exception e) {
-            return false;
         }
         return true;
     }
