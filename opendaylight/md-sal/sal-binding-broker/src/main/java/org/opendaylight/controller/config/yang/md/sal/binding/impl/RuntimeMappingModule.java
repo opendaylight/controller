@@ -150,7 +150,12 @@ public final class RuntimeMappingModule extends
         public DataContainer dataObjectFromDataDom(Class<? extends DataContainer> inputClass, CompositeNode domInput) {
             return delegate.dataObjectFromDataDom(inputClass, domInput);
         }
-        
+
+        @Override
+        public Optional<Class<? extends RpcService>> getRpcServiceClassFor(String namespace, String revision) {
+            return delegate.getRpcServiceClassFor(namespace, revision);
+        }
+
         @Override
         public void close() throws Exception {
             if(delegate != null) {
