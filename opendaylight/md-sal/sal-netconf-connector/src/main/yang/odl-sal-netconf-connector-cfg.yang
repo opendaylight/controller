@@ -92,7 +92,7 @@ module odl-sal-netconf-connector-cfg {
             leaf connection-timeout-millis {
                 description "Specifies timeout in milliseconds after which connection must be established.";
                 type uint32;
-                default 5000;
+                default 20000;
             }
 
             leaf max-connection-attempts {
