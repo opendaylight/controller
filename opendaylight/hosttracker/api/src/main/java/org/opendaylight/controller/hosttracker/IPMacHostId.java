@@ -80,4 +80,24 @@ public class IPMacHostId implements IHostId, Serializable {
         return new IPMacHostId(ip, mac);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("IP=[");
+        if (this.ipAddress != null) {
+            builder.append(this.ipAddress.getHostAddress());
+        }
+        builder.append("]")
+               .append("MAC=[");
+        if (this.macAddr != null) {
+            builder.append(this.macAddr.toString());
+        }
+        builder.append("]");
+        return (builder.toString());
+    }
 }
