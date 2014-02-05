@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.config.api;
 
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.yangtools.concepts.Identifier;
+
+import javax.management.ObjectName;
 
 public class ModuleIdentifier implements Identifier {
     private static final long serialVersionUID = 1L;
@@ -22,6 +25,12 @@ public class ModuleIdentifier implements Identifier {
                     "Parameter 'instanceName' is null");
         this.factoryName = factoryName;
         this.instanceName = instanceName;
+    }
+
+    public static ModuleIdentifier from(ObjectName objectName) {
+        String factoryName = ObjectNameUtil.getFactoryName(objectName);
+        String instanceName = ObjectNameUtil.getInstanceName(objectName);
+        return new ModuleIdentifier(factoryName, instanceName);
     }
 
     public String getFactoryName() {

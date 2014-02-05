@@ -12,6 +12,8 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 
 import javax.management.ObjectName;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Each new {@link org.opendaylight.controller.config.spi.Module} can receive
@@ -32,8 +34,8 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
      *            ObjectName of dependent module without transaction name
      *            (platformON).
      * @param jmxAttribute
-     * @throws {@link IllegalArgumentException} when module is not found
-     * @throws {@link IllegalStateException} if module does not export this
+     * @throws IllegalArgumentException when module is not found
+     * @throws IllegalStateException if module does not export this
      *         service interface.
      */
     void validateDependency(
@@ -45,7 +47,7 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
      *
      * @return dependency instance using
      *         {@link org.opendaylight.controller.config.spi.Module#getInstance()}
-     * @throws {@link IllegalArgumentException} when module is not found
+     * @throws IllegalArgumentException when module is not found
      */
     <T> T resolveInstance(Class<T> expectedType, ObjectName objectName,
             JmxAttribute jmxAttribute);
@@ -60,5 +62,35 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
     <T extends BaseIdentity> Class<? extends T> resolveIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass);
 
     <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass, JmxAttribute jmxAttribute);
+
+    /**
+     * Method that can be used during validation phase, to obtain dependencies of certain service interface dynamically.
+     * Calling this method is advised before using @{#resolveInstances} as possible cycles will be detected sooner.
+     *
+     * @param expectedServiceInterface service interface that must be implemented. This class must be annotated with {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation}
+     * @return all modules currently registered in transaction
+     */
+    Set<ModuleIdentifier> validateDependencies(Class<? extends AbstractServiceInterface> expectedServiceInterface);
+
+    /**
+     * During second phase commit, resolve dependencies that implement service interface dynamically.
+     *
+     * @param expectedServiceInterface service interface that must be implemented. This class must be annotated with {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation}
+     * @return resolved instances indexed by their module identifier
+     */
+    Map<ModuleIdentifier, AutoCloseable> resolveInstances(
+            Class<? extends AbstractServiceInterface> expectedServiceInterface);
+
+
+    /**
+     * Type safe wrapper around {@link #resolveInstances(Class)}
+     * @param expectedServiceInterface service interface that must be implemented. This class must be annotated with {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation}
+     * @param expectedInstanceInterface type to which each instance should be cast. It is advised to use what {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation#osgiRegistrationType()} announces
+     * @param <T>
+     * @return resolved instances indexed by their module identifier
+     */
+    <T> Map<ModuleIdentifier, T> resolveInstances(
+            Class<? extends AbstractServiceInterface> expectedServiceInterface,
+            Class<T> expectedInstanceInterface);
 
 }
