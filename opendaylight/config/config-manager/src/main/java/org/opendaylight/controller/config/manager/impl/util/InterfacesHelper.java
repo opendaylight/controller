@@ -34,7 +34,6 @@ public class InterfacesHelper {
             clazz = clazz.getSuperclass();
         }
         return getAllSuperInterfaces(toBeInspected);
-
     }
 
     private static Set<Class<?>> getAllSuperInterfaces(Set<Class<?>> ifcs) {
@@ -70,25 +69,41 @@ public class InterfacesHelper {
     }
 
     /**
+     * Get OSGi registration types under which config bean instance should be
+     * registered. This is specified in
+     * {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation#osgiRegistrationType()}
+     */
+    public static Set<Class<?>> getOsgiRegistrationTypes(Class<? extends Module> configBeanClass) {
+        Set<Class<? extends AbstractServiceInterface>> serviceInterfaces = getServiceInterfaces(configBeanClass);
+        Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = getServiceInterfaceAnnotations(serviceInterfaces);
+
+        Set<Class<?>> result = new HashSet<>();
+        for (ServiceInterfaceAnnotation annotation: serviceInterfaceAnnotations) {
+            result.add(annotation.osgiRegistrationType());
+        }
+        return result;
+    }
+
+    /**
      * Get all implemented interfaces that have
      * {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation}
      * annotation.
      */
-    public static Set<Class<?>> getServiceInterfaces(
+    private static Set<Class<? extends AbstractServiceInterface>> getServiceInterfaces(
             Class<? extends Module> configBeanClass) {
         Set<Class<?>> allInterfaces = getAllInterfaces(configBeanClass);
-        Set<Class<?>> result = new HashSet<>();
+        Set<Class<? extends AbstractServiceInterface>> result = new HashSet<>();
         for (Class<?> clazz : allInterfaces) {
             if (AbstractServiceInterface.class.isAssignableFrom(clazz)) {
-                ServiceInterfaceAnnotation annotation = clazz
-                        .getAnnotation(ServiceInterfaceAnnotation.class);
+                ServiceInterfaceAnnotation annotation = clazz.getAnnotation(ServiceInterfaceAnnotation.class);
                 if (annotation != null) {
-                    result.add(clazz);
+                    result.add((Class<? extends AbstractServiceInterface>) clazz);
                 }
             }
         }
         return result;
     }
+
 
     public static Set<Class<? extends AbstractServiceInterface>> getAllAbstractServiceClasses(Class<? extends Module> configBeanClass) {
 
@@ -101,28 +116,14 @@ public class InterfacesHelper {
         return getAllAbstractServiceInterfaceClasses(foundGeneratedSIClasses);
     }
 
-
-    /**
-     * Get OSGi registration types under which config bean instance should be
-     * registered. This is specified in
-     * {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation#osgiRegistrationType()}
-     */
-    public static Set<Class<?>> getOsgiRegistrationTypes(
-            Class<? extends Module> configBeanClass) {
-        // TODO test with service interface hierarchy
-        Set<Class<?>> serviceInterfaces = getServiceInterfaces(configBeanClass);
-        Set<Class<?>> result = new HashSet<>();
-        for (Class<?> clazz : serviceInterfaces) {
-            ServiceInterfaceAnnotation annotation = clazz
-                    .getAnnotation(ServiceInterfaceAnnotation.class);
-            result.add(annotation.osgiRegistrationType());
-        }
-        return result;
-    }
-
-
     public static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(ModuleFactory factory) {
         Set<Class<? extends AbstractServiceInterface>> implementedServiceIntefaces = Collections.unmodifiableSet(factory.getImplementedServiceIntefaces());
+        return getServiceInterfaceAnnotations(implementedServiceIntefaces);
+    }
+
+    public static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(Class<? extends AbstractServiceInterface> serviceInterface) {
+        Set<Class<? extends AbstractServiceInterface>> implementedServiceIntefaces = new HashSet<>();
+        implementedServiceIntefaces.add(serviceInterface);
         return getServiceInterfaceAnnotations(implementedServiceIntefaces);
     }
 

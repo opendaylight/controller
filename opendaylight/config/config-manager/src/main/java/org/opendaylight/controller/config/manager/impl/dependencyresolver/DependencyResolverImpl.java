@@ -14,8 +14,11 @@ import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
+import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
@@ -27,8 +30,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.ObjectName;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -39,7 +45,7 @@ import static java.lang.String.format;
  * during validation. Tracks dependencies for ordering purposes.
  */
 final class DependencyResolverImpl implements DependencyResolver,
-       Comparable<DependencyResolverImpl> {
+        Comparable<DependencyResolverImpl> {
     private static final Logger logger = LoggerFactory.getLogger(DependencyResolverImpl.class);
 
     private final ModulesHolder modulesHolder;
@@ -82,7 +88,6 @@ final class DependencyResolverImpl implements DependencyResolver,
                         + expectedServiceInterface, jmxAttribute);
 
 
-
         // check that objectName belongs to this transaction - this should be
         // stripped
         // in DynamicWritableWrapper
@@ -118,7 +123,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
     }
 
-    // transalate from serviceref to module ON
+    // translate from serviceref to module ON
     private ObjectName translateServiceRefIfPossible(ObjectName dependentReadOnlyON) {
         if (ObjectNameUtil.isServiceReference(dependentReadOnlyON)) {
             String serviceQName = ObjectNameUtil.getServiceQName(dependentReadOnlyON);
@@ -135,7 +140,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     //TODO: check for cycles
     @Override
     public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentReadOnlyON,
-            JmxAttribute jmxAttribute) {
+                                 JmxAttribute jmxAttribute) {
         if (expectedType == null || dependentReadOnlyON == null || jmxAttribute == null) {
             throw new IllegalArgumentException(format(
                     "Null parameters not allowed, got %s %s %s", expectedType,
@@ -194,7 +199,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     public <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass, JmxAttribute jmxAttribute) {
         try {
             resolveIdentity(identityRef, expectedBaseClass);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw JmxAttributeValidationException.wrap(e, jmxAttribute);
         }
     }
@@ -224,8 +229,8 @@ final class DependencyResolverImpl implements DependencyResolver,
     }
 
     private static int getMaxDepth(DependencyResolverImpl impl,
-            DependencyResolverManager manager,
-            LinkedHashSet<ModuleIdentifier> chainForDetectingCycles) {
+                                   DependencyResolverManager manager,
+                                   LinkedHashSet<ModuleIdentifier> chainForDetectingCycles) {
         int maxDepth = 0;
         LinkedHashSet<ModuleIdentifier> chainForDetectingCycles2 = new LinkedHashSet<>(
                 chainForDetectingCycles);
@@ -257,5 +262,64 @@ final class DependencyResolverImpl implements DependencyResolver,
     @Override
     public ModuleIdentifier getIdentifier() {
         return name;
+    }
+
+    @Override
+    public Set<ModuleIdentifier> validateDependencies(Class<? extends AbstractServiceInterface> expectedServiceInterface) {
+        assertIsServiceInterface(expectedServiceInterface);
+        transactionStatus.checkNotCommitted();
+
+        Set<ModuleIdentifier> set = new HashSet<>();
+        for (ModuleInternalTransactionalInfo info : modulesHolder.getAllInfos()) {
+            if (expectedServiceInterface.isInstance(info.getModule()) &&
+                    info.getModuleFactory().isModuleImplementingServiceInterface(expectedServiceInterface)) {
+                set.add(info.getIdentifier());
+            }
+        }
+        return set;
+    }
+
+    private void assertIsServiceInterface(Class<? extends AbstractServiceInterface> expectedServiceInterface) {
+        if (expectedServiceInterface == null) {
+            throw new NullPointerException("Parameter 'expectedServiceInterface' is null");
+        }
+        // parameter should be service interface and should contain SI annotation
+        if (InterfacesHelper.getServiceInterfaceAnnotations(expectedServiceInterface).isEmpty()) {
+            throw new IllegalArgumentException("Expected service interface, but no annotations found of type "
+                    + ServiceInterfaceAnnotation.class + " in " + expectedServiceInterface);
+        }
+    }
+
+    @Override
+    public Map<ModuleIdentifier, AutoCloseable> resolveInstances(
+            Class<? extends AbstractServiceInterface> expectedServiceInterface) {
+        assertIsServiceInterface(expectedServiceInterface);
+        transactionStatus.checkCommitStarted();
+        transactionStatus.checkNotCommitted();
+
+        Map<ModuleIdentifier, AutoCloseable> map = new HashMap<>();
+        for (ModuleInternalTransactionalInfo info : modulesHolder.getAllInfos()) {
+            if (expectedServiceInterface.isInstance(info.getModule()) &&
+                    info.getModuleFactory().isModuleImplementingServiceInterface(expectedServiceInterface)) {
+                map.put(info.getIdentifier(), info.getModule().getInstance());
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public <T> Map<ModuleIdentifier, T> resolveInstances(
+            Class<? extends AbstractServiceInterface> expectedServiceInterface, Class<T> expectedInstanceInterface) {
+        Map<ModuleIdentifier, AutoCloseable> map = resolveInstances(expectedServiceInterface);
+        Map<ModuleIdentifier, T> result = new HashMap<>();
+        for (Entry<ModuleIdentifier, AutoCloseable> entry : map.entrySet()) {
+            try {
+                T cast = expectedInstanceInterface.cast(entry.getValue());
+                result.put(entry.getKey(), cast);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException("Cannot cast instance of " + entry.getValue(), e);
+            }
+        }
+        return result;
     }
 }

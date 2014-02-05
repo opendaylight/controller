@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
+import org.opendaylight.controller.config.manager.impl.util.AnnotationsHelper;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;

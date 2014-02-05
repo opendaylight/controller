@@ -17,7 +17,7 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 
 public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
-    protected final String fixed1 = "fixed1";
+    public static final String fixed1 = "fixed1";
     protected final String apsp1 = "apsp-parallel";
 
     protected abstract String getThreadPoolImplementationName();
@@ -35,10 +35,16 @@ public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
     }
 
     protected ObjectName createFixed1(ConfigTransactionJMXClient transaction,
-            int numberOfThreads) throws InstanceAlreadyExistsException {
+                                      int numberOfThreads) throws InstanceAlreadyExistsException {
+        return createFixedTP(transaction, numberOfThreads, getThreadPoolImplementationName(), fixed1);
+    }
+
+    public static ObjectName createFixedTP(ConfigTransactionJMXClient transaction,
+                                           int numberOfThreads,
+                                           String threadPoolImplName, String instanceName) throws InstanceAlreadyExistsException {
 
         ObjectName name = transaction.createModule(
-                getThreadPoolImplementationName(), fixed1);
+                threadPoolImplName, instanceName);
 
         TestingFixedThreadPoolConfigMXBean fixedConfigProxy = transaction
                 .newMXBeanProxy(name, TestingFixedThreadPoolConfigMXBean.class);

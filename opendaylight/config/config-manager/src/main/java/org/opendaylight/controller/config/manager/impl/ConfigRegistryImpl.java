@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
@@ -565,6 +566,11 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     @Override
     public Set<String> getAvailableModuleFactoryQNames() {
         return ModuleQNameUtil.getQNames(resolver.getAllFactories());
+    }
+
+    @VisibleForTesting
+    ConfigHolder getCurrentConfig() {
+        return currentConfig;
     }
 
     @Override

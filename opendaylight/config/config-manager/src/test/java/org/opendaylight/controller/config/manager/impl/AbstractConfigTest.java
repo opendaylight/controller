@@ -13,6 +13,7 @@ import org.junit.After;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver;
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -282,6 +284,17 @@ public abstract class AbstractConfigTest extends
             }
         });
         return (T) proxy;
+    }
+
+    protected AutoCloseable getInstanceFromCurrentConfig(ModuleIdentifier moduleIdentifier) {
+        ConfigHolder currentConfig = configRegistry.getCurrentConfig();
+        for(ModuleInternalInfo entry : currentConfig.getEntries()) {
+            assertTrue(entry + " has no readable module. Was it committed?", entry.hasReadableModule());
+            if (moduleIdentifier.equals(entry.getIdentifier())) {
+                return entry.getReadableModule().getInstance();
+            }
+        }
+        throw new IllegalArgumentException("Cannot find entry for " + moduleIdentifier);
     }
 
 }

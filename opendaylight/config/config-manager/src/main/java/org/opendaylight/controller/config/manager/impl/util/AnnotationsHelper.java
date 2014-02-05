@@ -5,7 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.config.manager.impl.dynamicmbean;
+package org.opendaylight.controller.config.manager.impl.util;
+
+import org.opendaylight.controller.config.api.annotations.Description;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -13,9 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.opendaylight.controller.config.api.annotations.Description;
-
-class AnnotationsHelper {
+public class AnnotationsHelper {
 
     /**
      * Look for annotation specified by annotationType on method. First observe
@@ -26,7 +26,7 @@ class AnnotationsHelper {
      *            generic type of annotation
      * @return list of found annotations
      */
-    static <T extends Annotation> List<T> findMethodAnnotationInSuperClassesAndIfcs(
+    public static <T extends Annotation> List<T> findMethodAnnotationInSuperClassesAndIfcs(
             final Method setter, Class<T> annotationType,
             Set<Class<?>> inspectedInterfaces) {
         List<T> result = new ArrayList<T>();
@@ -71,7 +71,7 @@ class AnnotationsHelper {
      *
      * @return list of found annotations
      */
-    static <T extends Annotation> List<T> findClassAnnotationInSuperClassesAndIfcs(
+    public static <T extends Annotation> List<T> findClassAnnotationInSuperClassesAndIfcs(
             Class<?> clazz, Class<T> annotationType, Set<Class<?>> interfaces) {
         List<T> result = new ArrayList<T>();
         Class<?> declaringClass = clazz;
@@ -99,7 +99,7 @@ class AnnotationsHelper {
      * @return empty string if no annotation is found, or list of descriptions
      *         separated by newline
      */
-    static String aggregateDescriptions(List<Description> descriptions) {
+    public static String aggregateDescriptions(List<Description> descriptions) {
         StringBuilder builder = new StringBuilder();
         for (Description d : descriptions) {
             if (builder.length() != 0) {
