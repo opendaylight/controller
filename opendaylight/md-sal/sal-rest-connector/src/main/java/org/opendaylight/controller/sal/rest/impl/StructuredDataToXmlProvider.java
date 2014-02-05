@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 @Provider
-@Produces({ Draft02.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.OPERATION + RestconfService.XML,
-        MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+@Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
+        Draft02.MediaTypes.OPERATION + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
 
