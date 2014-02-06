@@ -59,7 +59,49 @@
         </dependency>
     </dependencies>
 
+
+
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.opendaylight.controller
+                                        </groupId>
+                                        <artifactId>
+                                            yang-test-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [0.2.3,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                delete-sources
+                                            </goal>
+                                            <goal>
+                                                process-sources
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
