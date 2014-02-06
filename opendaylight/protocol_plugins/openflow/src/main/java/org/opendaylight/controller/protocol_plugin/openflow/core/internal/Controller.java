@@ -48,6 +48,7 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
             .getLogger(Controller.class);
     private ControllerIO controllerIO;
     private Thread switchEventThread;
+    private volatile boolean shutdownSwitchEventThread;// default to false
     private ConcurrentHashMap<Long, ISwitch> switches;
     private PriorityBlockingQueue<SwitchEvent> switchEvents;
     // only 1 message listener per OFType
@@ -69,6 +70,12 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
 
             while (true) {
                 try {
+                    if(shutdownSwitchEventThread) {
+                        // break out of the infinite loop
+                        // if you are shutting down
+                        logger.info("Switch Event Thread is shutting down");
+                        break;
+                    }
                     SwitchEvent ev = switchEvents.take();
                     SwitchEvent.SwitchEventType eType = ev.getEventType();
                     ISwitch sw = ev.getSwitch();
@@ -104,12 +111,14 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
                         logger.error("Unknown switch event {}", eType.ordinal());
                     }
                 } catch (InterruptedException e) {
-                    switchEvents.clear();
-                    return;
+                    // nothing to do except retry
+                } catch (Exception e) {
+                    // log the exception and retry
+                    logger.warn("Exception in Switch Event Thread is {}" ,e);
                 }
             }
+            switchEvents.clear();
         }
-
     }
 
     /**
@@ -167,6 +176,7 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
             ((SwitchHandler) entry.getValue()).stop();
             it.remove();
         }
+        shutdownSwitchEventThread = true;
         switchEventThread.interrupt();
         try {
             controllerIO.shutDown();
