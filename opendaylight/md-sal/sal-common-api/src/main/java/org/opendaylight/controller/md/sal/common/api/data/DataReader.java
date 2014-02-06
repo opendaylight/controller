@@ -10,6 +10,9 @@ package org.opendaylight.controller.md.sal.common.api.data;
 // FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
 // import org.opendaylight.yangtools.concepts.Path;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
+
 /**
  * Reader for reading YANG subtrees based on their path.
  * 
@@ -27,7 +30,7 @@ public interface DataReader<P/* extends Path<P> */,D> {
      * @param path Path to data
      * @return
      */
-    D readOperationalData(P path);
+    ListenableFuture<Optional<D>> readOperationalData(P path);
 
-    D readConfigurationData(P path);
+    ListenableFuture<Optional<D>> readConfigurationData(P path);
 }
