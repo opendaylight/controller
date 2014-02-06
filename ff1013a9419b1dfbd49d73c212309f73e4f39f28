@@ -16,6 +16,24 @@
       "revId": "ff1013a9419b1dfbd49d73c212309f73e4f39f28",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b45429ca",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/resources/freeMarker/module_abs_template_new.ftl",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-02-06T08:16:08Z",
+      "side": 1,
+      "message": "To preserve backwards compatibility, Concrete module classes in src/main use \u0027super(identifier, dependencyResolver)\u0027 constructor. The re-generation of abstract module would break the code in src/main if the old constructor suddenly disappeared.",
+      "parentUuid": "da6255ed_591f666c",
+      "revId": "ff1013a9419b1dfbd49d73c212309f73e4f39f28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
