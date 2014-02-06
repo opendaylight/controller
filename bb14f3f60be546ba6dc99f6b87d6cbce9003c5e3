@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_944fe533",
+        "filename": "opendaylight/config/yang-jmx-generator/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/ModuleMXBeanEntryBuilder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-02-06T08:15:44Z",
+      "side": 1,
+      "message": "Please review here. \n\nThis code used to process only auguments that have exactly 1 case statement. Now it processes multiple cases in 1 augument. As tested on (opendaylight/config/yang-jmx-generator/src/test/resources/config-jmx-it-impl.yang)\n\nThis new class contains all the static code that was previously in ModuleMXBeanEntry Class.",
+      "revId": "bb14f3f60be546ba6dc99f6b87d6cbce9003c5e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
