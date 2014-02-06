@@ -16,7 +16,7 @@ module packet-processing {
     }
 
     typedef cookie {
-        type uint32;
+        type uint64;
     }
 
     grouping raw-packet {
@@ -58,10 +58,18 @@ module packet-processing {
     }
 
     notification packet-received {
+        leaf buffer-id {
+            type uint32;
+        }
+
+        leaf total-length {
+            type uint16;
+        }
+
     	leaf cookie {
                 type cookie;
         }
-        
+
         leaf table-id {
         	type table-type:table-id;
         }
