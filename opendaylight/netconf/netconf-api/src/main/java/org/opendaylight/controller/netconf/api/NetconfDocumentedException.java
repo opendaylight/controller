@@ -11,13 +11,11 @@ package org.opendaylight.controller.netconf.api;
 import java.util.Collections;
 import java.util.Map;
 
-import org.opendaylight.protocol.framework.DocumentedException;
-
 /**
  * Checked exception to communicate an error that needs to be sent to the
  * netconf client.
  */
-public class NetconfDocumentedException extends DocumentedException {
+public class NetconfDocumentedException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
