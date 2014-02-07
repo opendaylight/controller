@@ -18,7 +18,6 @@ import org.opendaylight.controller.sal.binding.impl.util.BindingAwareDataReaderR
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -28,7 +27,7 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
 
     private final AtomicLong nextTransaction = new AtomicLong();
     private final AtomicLong createdTransactionsCount = new AtomicLong();
-    
+
     public AtomicLong getCreatedTransactionsCount() {
         return createdTransactionsCount;
     }
@@ -104,13 +103,12 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
             DataChangeListener changeListener) {
         throw new UnsupportedOperationException("Deprecated");
     }
-    
+
     @Override
     public void close() throws Exception {
-        
+
     }
-    
-    
+
     @Override
     protected boolean isAffectedBy(InstanceIdentifier<? extends DataObject> key,
             Set<InstanceIdentifier<? extends DataObject>> paths) {

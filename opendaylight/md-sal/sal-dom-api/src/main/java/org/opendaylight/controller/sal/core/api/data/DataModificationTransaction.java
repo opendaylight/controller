@@ -8,8 +8,6 @@
 package org.opendaylight.controller.sal.core.api.data;
 
 import java.util.EventListener;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -23,31 +21,28 @@ public interface DataModificationTransaction extends DataModification<InstanceId
 
     /**
      * Returns transaction identifier
-     * 
+     *
      * @return Transaction identifier
      */
-    Object getIdentifier();
-    
-    TransactionStatus getStatus();
-    
+    @Override
+	Object getIdentifier();
+
+    @Override
+	TransactionStatus getStatus();
+
     /**
      * Commits transaction to be stored in global data repository.
-     * 
-     * 
-     * @return  Future object which returns RpcResult with TransactionStatus 
+     *
+     *
+     * @return  Future object which returns RpcResult with TransactionStatus
      *          when transaction is processed by store.
      */
-    Future<RpcResult<TransactionStatus>> commit();
-    
+    @Override
+	Future<RpcResult<TransactionStatus>> commit();
+
     ListenerRegistration<DataTransactionListener> registerListener(DataTransactionListener listener);
-    
-    
+
     public interface DataTransactionListener extends EventListener {
-        
         void onStatusUpdated(DataModificationTransaction transaction,TransactionStatus status);
-        
     }
-    
-    
-    
 }
