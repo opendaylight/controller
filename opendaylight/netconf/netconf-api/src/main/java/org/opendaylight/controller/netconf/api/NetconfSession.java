@@ -8,26 +8,29 @@
 package org.opendaylight.controller.netconf.api;
 
 import io.netty.channel.Channel;
+
+import java.io.IOException;
+
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public abstract class NetconfSession extends AbstractProtocolSession<NetconfMessage> {
-    protected final Channel channel;
-    private final SessionListener sessionListener;
+    private static final Logger logger = LoggerFactory.getLogger(NetconfSession.class);
+    private final SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> sessionListener;
     private final long sessionId;
     private boolean up = false;
-    private static final Logger logger = LoggerFactory.getLogger(NetconfSession.class);
 
-    protected NetconfSession(SessionListener sessionListener, Channel channel, long sessionId) {
+    protected final Channel channel;
+
+    protected NetconfSession(SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> sessionListener, Channel channel, long sessionId) {
         this.sessionListener = sessionListener;
         this.channel = channel;
         this.sessionId = sessionId;
         logger.debug("Session {} created", toString());
     }
+
     @Override
     public void close() {
         channel.close();
@@ -69,11 +72,11 @@ public abstract class NetconfSession extends AbstractProtocolSession<NetconfMess
         return sb.toString();
     }
 
-    public boolean isUp() {
+    public final boolean isUp() {
         return up;
     }
 
-    public long getSessionId() {
+    public final long getSessionId() {
         return sessionId;
     }
 }
