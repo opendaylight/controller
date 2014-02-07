@@ -103,7 +103,7 @@ one.topology.init = function(json) {
                     offsetY: 15,
                     onShow : function(tip, node) {
                         if (node.name != undefined)
-                            tip.innerHTML = "Name : " + node.name + "<br>";
+                            tip.innerHTML = "Node ID : " + node.name + "<br>";
                         if(node.data["$type"]!=undefined)
                             tip.innerHTML = tip.innerHTML + "Type : " + node.data["$type"] + "<br>";
                         if(node.data["$desc"]!=undefined)
