@@ -91,7 +91,7 @@
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
-    <protocol-framework.version>0.4.1-SNAPSHOT</protocol-framework.version>
+    <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
     <netty.version>4.0.10.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
