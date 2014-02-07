@@ -119,7 +119,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
             public void run(final Timeout timeout) throws Exception {
                 synchronized (this) {
                     if (state != State.ESTABLISHED) {
-                        logger.debug("Connection timeout after {}", timeout);
+                        logger.debug("Connection timeout after {}, session is in state {}", timeout, state);
                         final IllegalStateException cause = new IllegalStateException(
                                 "Session was not established after " + timeout);
                         negotiationFailed(cause);
@@ -181,7 +181,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         return true;
     }
 
-    private void changeState(final State newState) {
+    private synchronized void changeState(final State newState) {
         logger.debug("Changing state from : {} to : {}", state, newState);
         Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s", state,
                 newState);
@@ -206,6 +206,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         if (state == State.OPEN_WAIT && newState == State.FAILED)
             return true;
 
+        logger.debug("Transition from {} to {} is not allowed", state, newState);
         return false;
     }
 }
