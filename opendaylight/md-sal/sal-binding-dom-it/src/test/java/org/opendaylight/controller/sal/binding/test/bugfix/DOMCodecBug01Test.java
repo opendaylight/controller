@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,17 +19,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
-
-
-
-
-
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopMplsActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.mpls.action._case.PopMplsActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
@@ -40,15 +37,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -62,8 +57,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
-import static org.junit.Assert.*;
 
 public class DOMCodecBug01Test extends AbstractDataServiceTest {
 
@@ -182,7 +175,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         flow.setNode(NODE_REF);
         InstructionsBuilder instructions = new InstructionsBuilder();
         InstructionBuilder instruction = new InstructionBuilder();
-        
+
         instruction.setOrder(10);
         ApplyActionsBuilder applyActions = new ApplyActionsBuilder();
         List<Action> actionList = new ArrayList<>();
@@ -204,7 +197,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         assertNotNull(ret);
         assertEquals(TransactionStatus.COMMITED, ret.getResult());
     }
-    
+
     private void createFlow2() throws Exception {
         DataModificationTransaction modification = baDataService.beginTransaction();
         long id = 123;
@@ -215,7 +208,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
         MatchBuilder match = new MatchBuilder();
         match.setLayer4Match(new TcpMatchBuilder().build());
         flow.setMatch(match.build());
-        
+
         path1 = InstanceIdentifier.builder(Flows.class).child(Flow.class, key).toInstance();
        // DataObject cls = (DataObject) modification.readConfigurationData(path1);
         modification.putConfigurationData(path1, flow.build());

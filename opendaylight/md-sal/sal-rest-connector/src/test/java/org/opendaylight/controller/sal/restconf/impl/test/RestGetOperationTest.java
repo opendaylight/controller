@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
@@ -23,14 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.ws.rs.core.Response;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
@@ -385,7 +384,7 @@ public class RestGetOperationTest extends JerseyTest {
                         responseBody).find());
         String[] split = responseBody.split("\"module\"");
         assertEquals("\"module\" element is returned more then once",2,split.length);
-        
+
 
         response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -396,9 +395,9 @@ public class RestGetOperationTest extends JerseyTest {
                         .find());
         split = responseBody.split("<module");
         assertEquals("<module element is returned more then once",2,split.length);
-        
-        
-        
+
+
+
 
     }
 

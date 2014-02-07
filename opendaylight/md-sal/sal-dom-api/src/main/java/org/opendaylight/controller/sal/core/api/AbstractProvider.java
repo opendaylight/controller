@@ -10,9 +10,6 @@ package org.opendaylight.controller.sal.core.api;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.naming.Context;
-
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -59,18 +56,18 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
             broker.registerProvider(this, context);
             return broker;
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void modifiedService(ServiceReference<Broker> reference, Broker service) {
         // NOOP
     }
-    
+
     @Override
     public void removedService(ServiceReference<Broker> reference, Broker service) {
         stopImpl(context);
     }
-    
+
 }

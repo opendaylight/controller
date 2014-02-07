@@ -10,13 +10,12 @@ package org.opendaylight.controller.sal.connect.netconf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
-import java.io.StringReader;
 
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.common.QName;
 
 /**
- * 
+ *
  *
  */
 public class YangModelInputStreamAdapter extends InputStream implements Delegator<InputStream> {
@@ -24,9 +23,9 @@ public class YangModelInputStreamAdapter extends InputStream implements Delegato
     final String source;
     final QName moduleIdentifier;
     final InputStream delegate;
-    
-    
-    
+
+
+
     private YangModelInputStreamAdapter(String source, QName moduleIdentifier, InputStream delegate) {
         super();
         this.source = source;
@@ -34,46 +33,57 @@ public class YangModelInputStreamAdapter extends InputStream implements Delegato
         this.delegate = delegate;
     }
 
+    @Override
     public int read() throws IOException {
         return delegate.read();
     }
 
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
 
+    @Override
     public int read(byte[] b) throws IOException {
         return delegate.read(b);
     }
 
+    @Override
     public boolean equals(Object obj) {
         return delegate.equals(obj);
     }
 
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         return delegate.read(b, off, len);
     }
 
+    @Override
     public long skip(long n) throws IOException {
         return delegate.skip(n);
     }
 
+    @Override
     public int available() throws IOException {
         return delegate.available();
     }
 
+    @Override
     public void close() throws IOException {
         delegate.close();
     }
 
+    @Override
     public void mark(int readlimit) {
         delegate.mark(readlimit);
     }
 
+    @Override
     public void reset() throws IOException {
         delegate.reset();
     }
 
+    @Override
     public boolean markSupported() {
         return delegate.markSupported();
     }
