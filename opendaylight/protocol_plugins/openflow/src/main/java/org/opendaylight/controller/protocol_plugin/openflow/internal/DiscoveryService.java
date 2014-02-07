@@ -391,7 +391,12 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
             updateProdEdge(edge, props);
         } catch (Exception e) {
-            logger.warn("Caught exception ", e);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "Caught exception while attempting to snoop non controller generated or malformed LLDP frame sent by {} and received on {}: {}",
+                        HexEncode.bytesToHexStringFormat(ethPkt.getSourceMACAddress()), dstNodeConnector,
+                        e.getMessage());
+            }
         }
     }
 
