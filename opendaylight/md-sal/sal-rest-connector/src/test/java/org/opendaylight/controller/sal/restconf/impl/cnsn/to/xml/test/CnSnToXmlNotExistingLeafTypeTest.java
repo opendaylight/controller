@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.xml.test;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -21,10 +19,12 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.DummyType;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class CnSnToXmlNotExistingLeafTypeTest {
         boolean nullPointerExceptionRaised = false;
         try {
             TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                    (Set<Module>) Collections.EMPTY_SET, prepareDataSchemaNode(), StructuredDataToXmlProvider.INSTANCE);
+                    Collections.EMPTY_SET, prepareDataSchemaNode(), StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             LOG.error("WebApplicationException or IOException was raised");
         } catch (NullPointerException e) {

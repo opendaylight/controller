@@ -7,24 +7,21 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
-import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
-import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.md.sal.common.impl.routing.RoutingUtils;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
-import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Mutable;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +41,7 @@ implements //
 
     private RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> listener;
     private S defaultRoute;
-    
+
     public RpcRoutingTableImpl(String routerName,Class<C> contextType, Class<S> serviceType) {
         super();
         this.routerName = routerName;
@@ -67,9 +64,9 @@ implements //
     @Override
     public <L extends RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
             L listener) {
-        return (ListenerRegistration<L>) new SingletonListenerRegistration<L>(listener);
+        return new SingletonListenerRegistration<L>(listener);
     }
-        
+
     @Override
     public Class<C> getIdentifier() {
         return contextType;
@@ -79,7 +76,7 @@ implements //
     @SuppressWarnings("unchecked")
     public void updateRoute(InstanceIdentifier<?> path, S service) {
         S previous = this.routes.put(path, service);
-        
+
         LOGGER.debug("Route {} updated to {} in routing table {}",path,service,this);
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
@@ -88,7 +85,7 @@ implements //
         }
     }
 
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public void removeRoute(InstanceIdentifier<?> path) {
@@ -100,7 +97,7 @@ implements //
             listenerCapture.onRouteChange(RoutingUtils.removalChange(contextType, path));
         }
     }
-    
+
     public void removeRoute(InstanceIdentifier<?> path, S service) {
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
@@ -123,12 +120,12 @@ implements //
     public Map<InstanceIdentifier<?>, S> getRoutes() {
         return unmodifiableRoutes;
     }
-    
+
     protected void removeAllReferences(S service) {
-        
+
     }
-    
-    
+
+
 
     @Override
     public String toString() {

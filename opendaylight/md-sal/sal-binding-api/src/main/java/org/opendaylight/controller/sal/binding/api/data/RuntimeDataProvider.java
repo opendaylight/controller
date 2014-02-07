@@ -7,23 +7,19 @@
  */
 package org.opendaylight.controller.sal.binding.api.data;
 
-import java.util.Set;
-
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * Utility interface which does type capture for BindingAware DataReader. 
- * 
- * @author 
+ * Utility interface which does type capture for BindingAware DataReader.
+ *
+ * @author
  *
  */
 public interface RuntimeDataProvider extends ProviderFunctionality,DataReader<InstanceIdentifier<? extends DataObject>, DataObject> {
-    
-    
+
+
 
 }

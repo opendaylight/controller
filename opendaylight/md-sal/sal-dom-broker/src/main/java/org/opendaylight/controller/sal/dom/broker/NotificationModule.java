@@ -9,14 +9,13 @@ package org.opendaylight.controller.sal.dom.broker;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer.ConsumerFunctionality;
 import org.opendaylight.controller.sal.core.api.Provider.ProviderFunctionality;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
@@ -37,7 +36,7 @@ public class NotificationModule implements BrokerModule {
     private static Logger log = LoggerFactory
             .getLogger(NotificationModule.class);
 
-    private Multimap<QName, NotificationListener> listeners = HashMultimap
+    private final Multimap<QName, NotificationListener> listeners = HashMultimap
             .create();
 
     private static final Set<Class<? extends BrokerService>> PROVIDED_SERVICE_TYPE = ImmutableSet
@@ -114,11 +113,12 @@ public class NotificationModule implements BrokerModule {
     private class NotificationConsumerSessionImpl implements
             NotificationService {
 
-        private Multimap<QName, NotificationListener> consumerListeners = HashMultimap
+        private final Multimap<QName, NotificationListener> consumerListeners = HashMultimap
                 .create();
         private boolean closed = false;
 
 
+        @Override
         public Registration<NotificationListener> addNotificationListener(QName notification,
                 NotificationListener listener) {
             checkSessionState();

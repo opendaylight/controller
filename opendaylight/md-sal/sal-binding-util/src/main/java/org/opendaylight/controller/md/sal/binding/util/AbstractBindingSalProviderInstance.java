@@ -19,7 +19,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistr
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -99,7 +98,7 @@ public abstract class AbstractBindingSalProviderInstance<D extends DataProviderS
             L listener) {
         return getRpcRegistryChecked().registerRouteChangeListener(listener);
     }
-    
+
     @Override
     public ListenerRegistration<NotificationInterestListener> registerInterestListener(
             NotificationInterestListener interestListener) {

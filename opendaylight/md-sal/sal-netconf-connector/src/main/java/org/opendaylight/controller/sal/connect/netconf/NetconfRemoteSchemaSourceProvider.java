@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.connect.netconf;
 
 import java.util.Set;
 
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -19,7 +18,6 @@ import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> {
 
