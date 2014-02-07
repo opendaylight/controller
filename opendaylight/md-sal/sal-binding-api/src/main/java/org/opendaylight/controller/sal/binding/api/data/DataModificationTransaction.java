@@ -11,9 +11,9 @@ import java.util.EventListener;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -22,28 +22,28 @@ public interface DataModificationTransaction extends DataModification<InstanceId
 
     /**
      * Returns an unique identifier for transaction
-     * 
+     *
      */
     @Override
     public Object getIdentifier();
-    
+
     /**
      * Initiates a two-phase commit of candidate data.
-     * 
+     *
      * <p>
      * The {@link Consumer} could initiate a commit of candidate data
-     * 
+     *
      * <p>
      * The successful commit changes the state of the system and may affect
      * several components.
-     * 
+     *
      * <p>
      * The effects of successful commit of data are described in the
      * specifications and YANG models describing the {@link Provider} components
      * of controller. It is assumed that {@link Consumer} has an understanding
      * of this changes.
-     * 
-     * 
+     *
+     *
      * @see DataCommitHandler for further information how two-phase commit is
      *      processed.
      * @param store
@@ -53,12 +53,12 @@ public interface DataModificationTransaction extends DataModification<InstanceId
      */
     @Override
     public Future<RpcResult<TransactionStatus>> commit();
-    
-    
-    
+
+
+
     /**
      * Register a listener for transaction
-     * 
+     *
      * @param listener
      * @return
      */
@@ -68,13 +68,13 @@ public interface DataModificationTransaction extends DataModification<InstanceId
 
     /**
      * Listener for transaction state changes
-     * 
+     *
      *
      */
     public interface DataTransactionListener extends EventListener {
         /**
          * Callback is invoked after each transaction status change.
-         * 
+         *
          * @param transaction Transaction
          * @param status New status
          */

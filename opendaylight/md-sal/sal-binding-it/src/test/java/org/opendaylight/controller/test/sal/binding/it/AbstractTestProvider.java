@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 

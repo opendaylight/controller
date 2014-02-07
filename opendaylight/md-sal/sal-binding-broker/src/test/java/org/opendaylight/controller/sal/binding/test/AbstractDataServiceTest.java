@@ -10,12 +10,11 @@ package org.opendaylight.controller.sal.binding.test;
 import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
-import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

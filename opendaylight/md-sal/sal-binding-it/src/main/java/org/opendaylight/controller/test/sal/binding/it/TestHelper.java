@@ -10,8 +10,6 @@ package org.opendaylight.controller.test.sal.binding.it;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.repository;
-import static org.ops4j.pax.exam.CoreOptions.repositories;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.ops4j.pax.exam.Option;
@@ -91,9 +89,9 @@ public class TestHelper {
     public static Option bindingAwareSalBundles() {
         return new DefaultCompositeOption( //
                 mdSalCoreBundles(),
-                
+
                 mavenBundle("org.javassist", "javassist").versionAsInProject(), // //
-                
+
                 mavenBundle(YANGTOOLS, "yang-data-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-data-impl").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-model-api").versionAsInProject(), // //
@@ -109,7 +107,7 @@ public class TestHelper {
                         "binding-generator-spi").versionAsInProject(), //
                 mavenBundle(YANGTOOLS, "binding-generator-impl").versionAsInProject(),
                 mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
-                
+
                 mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
                 mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
@@ -118,7 +116,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
 
 
-                
+
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 

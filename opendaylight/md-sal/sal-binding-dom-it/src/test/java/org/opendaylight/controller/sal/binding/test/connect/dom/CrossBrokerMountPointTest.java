@@ -14,11 +14,8 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.management.Notification;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
@@ -27,11 +24,8 @@ import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupId;
@@ -42,14 +36,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
 
 public class CrossBrokerMountPointTest {
@@ -127,8 +118,8 @@ public class CrossBrokerMountPointTest {
         assertNotNull(bindingMountPoint);
 
         final BigInteger packetCount = BigInteger.valueOf(500L);
-        
-        
+
+
         DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> simpleReader = new DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>() {
 
             @Override
@@ -136,7 +127,7 @@ public class CrossBrokerMountPointTest {
                 return null;
             }
 
-            
+
             @Override
             public CompositeNode readOperationalData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
                 if (arg0.equals(GROUP_STATISTICS_ID_BI)) {
@@ -153,7 +144,7 @@ public class CrossBrokerMountPointTest {
 
         };
         domMountPoint.registerOperationalReader(NODE_INSTANCE_ID_BI, simpleReader);
-        
+
         GroupStatistics data = (GroupStatistics) bindingMountPoint.readOperationalData(GROUP_STATISTICS_ID_BA);
         assertNotNull(data);
         assertEquals(packetCount,data.getPacketCount().getValue());

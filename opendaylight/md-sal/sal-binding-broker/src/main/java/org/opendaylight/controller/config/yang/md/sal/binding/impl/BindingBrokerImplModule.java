@@ -23,8 +23,6 @@ import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBindingB
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardingUtils;
 import org.osgi.framework.BundleContext;
 
-import com.google.common.util.concurrent.MoreExecutors;
-
 /**
 *
 */

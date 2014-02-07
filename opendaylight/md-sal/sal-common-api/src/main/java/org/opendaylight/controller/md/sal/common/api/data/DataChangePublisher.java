@@ -9,10 +9,9 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+
 // FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
 // import org.opendaylight.yangtools.concepts.Path;
-import org.opendaylight.yangtools.concepts.Registration;
-
 public interface DataChangePublisher<P/* extends Path<P> */,D, L extends DataChangeListener<P,D>> {
 
     ListenerRegistration<L> registerDataChangeListener(P path, L listener);
