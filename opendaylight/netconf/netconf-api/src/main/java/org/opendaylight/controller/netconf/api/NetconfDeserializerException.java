@@ -8,14 +8,12 @@
 
 package org.opendaylight.controller.netconf.api;
 
-import org.opendaylight.protocol.framework.DeserializerException;
-
 /**
  * This exception is thrown by
  * {@link NetconfSessionListener#onMessage(NetconfMessage)} to indicate fatal
  * communication problem after which the session should be closed.
  */
-public class NetconfDeserializerException extends DeserializerException {
+public class NetconfDeserializerException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public NetconfDeserializerException(final String message) {
