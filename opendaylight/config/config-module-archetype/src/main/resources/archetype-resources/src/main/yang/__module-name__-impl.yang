@@ -1,0 +1,54 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module ${module-name}-${module-implementation-name} {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:${module-name}:${module-implementation-name}";
+    prefix "${module-name}-${module-implementation-name}";
+
+    import config { prefix config; revision-date ${config-api-yang-revision}; }
+    import ${module-name} { prefix ${module-name}; revision-date ${revision}; }
+
+    description
+        "This module contains the base YANG definitions for
+        ${module-name} ${module-implementation-name} implementation.";
+
+    revision "${revision}" {
+        description
+            "Initial revision.";
+    }
+
+    // This is the definition of a service implementation
+    identity ${module-name}-${module-implementation-name} {
+            base config:module-type;
+            config:provided-service ${module-name}:${module-name};
+            config:java-name-prefix ${module-name-java-prefix};
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case ${module-name}-${module-implementation-name} {
+            when "/config:modules/config:module/config:type = '${module-name}-${module-implementation-name}'";
+
+            leaf simple-attribute {
+                type uint32;
+            }
+
+            container dto-attribute {
+                leaf inner-attribute {
+                    type string;
+                }
+            }
+
+            // Dependency attribute demonstration, the config:required-identity points to a service type
+            // In this case it is the same service type as this implementation provides: ${module-name}
+            container dependency-attribute {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity ${module-name}:${module-name};
+                    }
+                }
+            }
+
+        }
+    }
+}

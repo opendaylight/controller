@@ -1,0 +1,27 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module ${module-name} {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:${module-name}";
+    prefix "${module-name}";
+
+    import config { prefix config; revision-date ${config-api-yang-revision}; }
+
+    description
+        "This module contains the base YANG definitions for
+        ${module-name} services.";
+
+    revision "${revision}" {
+        description
+            "Initial revision.";
+    }
+
+    // This is the definition of a service
+    identity ${module-name} {
+
+        base "config:service-type";
+
+        // TODO modify the java class
+        config:java-class " ${service-java-class}";
+    }
+}
