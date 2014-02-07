@@ -100,12 +100,15 @@ public class SchemaContextTest extends AbstractYangTest {
 
     @Test
     public void testReadingIdentities_threadsJavaModule() {
-        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = new HashMap(){{
+        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = new HashMap<String, Optional<QName>>(){
+            private static final long serialVersionUID = 1L;
+
+        {
             put(ModuleMXBeanEntryTest.EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
             put(ModuleMXBeanEntryTest.ASYNC_EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
             put(ModuleMXBeanEntryTest.THREADFACTORY_NAMING_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
             put(ModuleMXBeanEntryTest.THREADPOOL_DYNAMIC_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-            put("thread-rpc-context", Optional.absent());
+            put("thread-rpc-context", Optional.<QName>absent());
             put(ModuleMXBeanEntryTest.THREADPOOL_REGISTRY_IMPL_NAME, Optional.of(MODULE_TYPE_Q_NAME));
         }};
 
