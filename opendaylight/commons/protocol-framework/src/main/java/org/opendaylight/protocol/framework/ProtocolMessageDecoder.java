@@ -52,4 +52,6 @@ public final class ProtocolMessageDecoder<T> extends ByteToMessageDecoder {
         }
         in.discardReadBytes();
     }
+
 }
+
