@@ -8,18 +8,18 @@
 
 package org.opendaylight.controller.netconf.util.handler;
 
-import java.nio.charset.Charset;
-import java.util.List;
-
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
-import org.opendaylight.protocol.framework.DeserializerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+
+import java.nio.charset.Charset;
+import java.util.List;
+
+import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
 
@@ -40,7 +40,7 @@ public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
                     in.readBytes(byteBufMsg, chunkSize);
                     isParsed = false;
                 } else {
-                    throw new DeserializerException("Unable to parse chunked data or header.");
+                    throw new NetconfDeserializerException("Unable to parse chunked data or header.");
                 }
             } catch (Exception e) {
                 logger.error("Failed to decode chunked message.", e);
