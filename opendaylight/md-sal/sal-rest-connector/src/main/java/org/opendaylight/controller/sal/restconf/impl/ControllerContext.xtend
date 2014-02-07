@@ -233,7 +233,7 @@ class ControllerContext implements SchemaServiceListener {
     private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifierWithPredicates argument, ListSchemaNode node) {
         val nodeIdentifier = argument.nodeType.toRestconfIdentifier();
         val keyValues = argument.keyValues;
-        return '''/«nodeIdentifier»/«FOR key : node.keyDefinition SEPARATOR "/"»«keyValues.get(key).toUriString»«ENDFOR»'''
+        return '''/«nodeIdentifier»/«FOR key : node.keyDefinition SEPARATOR "/"»«keyValues.get(key)»«ENDFOR»'''
     }
 
     private def dispatch CharSequence convertToRestconfIdentifier(PathArgument argument, DataNodeContainer node) {
