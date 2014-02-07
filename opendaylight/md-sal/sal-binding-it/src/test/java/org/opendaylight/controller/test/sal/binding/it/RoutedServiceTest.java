@@ -15,7 +15,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigInteger;
-import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +25,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -36,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class RoutedServiceTest extends AbstractTest {
 
@@ -71,7 +67,7 @@ public class RoutedServiceTest extends AbstractTest {
         /**
          * Register provider 1 with first implementation of SalFlowService -
          * service1
-         * 
+         *
          */
         broker.registerProvider(provider1, getBundleContext());
         assertNotNull("Registration should not be null", firstReg);
@@ -89,7 +85,7 @@ public class RoutedServiceTest extends AbstractTest {
         /**
          * Register provider 2 with first implementation of SalFlowService -
          * service2
-         * 
+         *
          */
         broker.registerProvider(provider2, getBundleContext());
         assertNotNull("Registration should not be null", firstReg);
@@ -117,7 +113,7 @@ public class RoutedServiceTest extends AbstractTest {
         /**
          * Consumer creates addFlow message for node one and sends it to the
          * MD-SAL
-         * 
+         *
          */
         AddFlowInput addFlowFirstMessage = createSampleAddFlow(nodeOne, 1);
         consumerService.addFlow(addFlowFirstMessage);
@@ -125,19 +121,19 @@ public class RoutedServiceTest extends AbstractTest {
         /**
          * Verifies that implementation of the first provider received the same
          * message from MD-SAL.
-         * 
+         *
          */
         verify(salFlowService1).addFlow(addFlowFirstMessage);
 
         /**
          * Verifies that second instance was not invoked with first message
-         * 
+         *
          */
         verify(salFlowService2, times(0)).addFlow(addFlowFirstMessage);
 
         /**
          * Provider 2 registers path of node 2
-         * 
+         *
          */
         NodeRef nodeTwo = createNodeRef("foo:node:2");
         secondReg.registerPath(NodeContext.class, nodeTwo.getValue());
@@ -154,26 +150,26 @@ public class RoutedServiceTest extends AbstractTest {
         /**
          * Verifies that second instance was invoked 3 times with second message
          * and first instance wasn't invoked.
-         * 
+         *
          */
         verify(salFlowService2, times(3)).addFlow(AddFlowSecondMessage);
         verify(salFlowService1, times(0)).addFlow(AddFlowSecondMessage);
 
         /**
          * Unregisteration of the path for the node one in the first provider
-         * 
+         *
          */
         firstReg.unregisterPath(NodeContext.class, nodeOne.getValue());
 
         /**
          * Provider 2 registers path of node 1
-         * 
+         *
          */
         secondReg.registerPath(NodeContext.class, nodeOne.getValue());
 
         /**
          * A consumer sends third message to node 1
-         * 
+         *
          */
         AddFlowInput AddFlowThirdMessage = createSampleAddFlow(nodeOne, 3);
         consumerService.addFlow(AddFlowThirdMessage);
@@ -189,7 +185,7 @@ public class RoutedServiceTest extends AbstractTest {
 
     /**
      * Returns node reference from string which represents path
-     * 
+     *
      * @param string
      *            string with key(path)
      * @return instance of the type NodeRef
@@ -204,7 +200,7 @@ public class RoutedServiceTest extends AbstractTest {
 
     /**
      * Creates flow AddFlowInput for which only node and cookie are set
-     * 
+     *
      * @param node
      *            NodeRef value
      * @param cookie

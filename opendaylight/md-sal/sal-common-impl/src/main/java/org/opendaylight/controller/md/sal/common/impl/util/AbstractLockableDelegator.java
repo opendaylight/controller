@@ -8,8 +8,6 @@
 package org.opendaylight.controller.md.sal.common.impl.util;
 
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -23,8 +21,8 @@ public class AbstractLockableDelegator<T> implements Delegator<T> {
     private final ReentrantReadWriteLock delegateLock = new ReentrantReadWriteLock();
     private final ReadLock delegateReadLock = delegateLock.readLock();
     private final WriteLock delegateWriteLock = delegateLock.writeLock();
-    
-    
+
+
     protected Lock getDelegateReadLock() {
         return delegateReadLock;
     }
@@ -60,7 +58,7 @@ public class AbstractLockableDelegator<T> implements Delegator<T> {
     }
 
     /**
-     * 
+     *
      * @param newDelegate
      * @return oldDelegate
      */
@@ -75,8 +73,8 @@ public class AbstractLockableDelegator<T> implements Delegator<T> {
             delegateWriteLock.unlock();
         }
     }
-    
-    
+
+
     protected void onDelegateChanged(T oldDelegate, T newDelegate) {
         // NOOP in abstract calss;
     }

@@ -15,7 +15,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
@@ -28,7 +27,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketClientHandler.class.toString());
     private final WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;
-    private IClientMessageCallback messageListener;
+    private final IClientMessageCallback messageListener;
 
 
     public WebSocketClientHandler(WebSocketClientHandshaker handshaker,IClientMessageCallback listener) {
