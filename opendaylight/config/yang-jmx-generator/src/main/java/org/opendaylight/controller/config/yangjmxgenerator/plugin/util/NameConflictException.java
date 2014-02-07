@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.util;
 import org.opendaylight.yangtools.yang.common.QName;
 
 public class NameConflictException extends RuntimeException {
-
+    private static final long serialVersionUID = 1L;
     private static final String messageBlueprint = "Name conflict for name: %s, first defined in: %s, then defined in: %s";
     private final String conflictingName;
     private final QName secondParentQName;

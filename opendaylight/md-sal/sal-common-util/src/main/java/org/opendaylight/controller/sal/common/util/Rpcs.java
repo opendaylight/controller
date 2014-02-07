@@ -36,7 +36,7 @@ public class Rpcs {
     }
     
     private static class RpcResultTO<T> implements RpcResult<T>, Serializable, Immutable {
-
+        private static final long serialVersionUID = 1L;
         private final Collection<RpcError> errors;
         private final T result;
         private final boolean successful;

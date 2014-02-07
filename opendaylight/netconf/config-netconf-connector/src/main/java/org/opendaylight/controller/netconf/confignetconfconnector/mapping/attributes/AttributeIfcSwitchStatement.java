@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes;
 
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
@@ -15,11 +20,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.yangtools.yang.model.api.type.BinaryTypeDefinition;
-
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
 
 public abstract class AttributeIfcSwitchStatement<T> {
 
@@ -102,6 +102,8 @@ public abstract class AttributeIfcSwitchStatement<T> {
     protected abstract T caseListDependeciesAttribute(ArrayType<?> openType);
 
     private static class UnknownOpenTypeException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public UnknownOpenTypeException(String message) {
             super(message);
         }
