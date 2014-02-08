@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.api;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 
 import java.io.IOException;
 
@@ -44,8 +45,8 @@ public abstract class NetconfSession extends AbstractProtocolSession<NetconfMess
         sessionListener.onMessage(this, netconfMessage);
     }
 
-    public void sendMessage(NetconfMessage netconfMessage) {
-        channel.writeAndFlush(netconfMessage);
+    public ChannelFuture sendMessage(NetconfMessage netconfMessage) {
+        return channel.writeAndFlush(netconfMessage);
     }
 
     @Override
