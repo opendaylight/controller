@@ -33,11 +33,13 @@ import com.google.common.collect.ImmutableList;
 public final class NetconfXMLToMessageDecoder extends ByteToMessageDecoder {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfXMLToMessageDecoder.class);
 
-    // FIXME: this is funky way of creating arrays
     private static final List<byte[]> POSSIBLE_ENDS = ImmutableList.of(
-            "]\n".getBytes(Charsets.UTF_8), "]\r\n".getBytes(Charsets.UTF_8));
+            new byte[] { ']', '\n' },
+            new byte[] { ']', '\r', '\n' });
     private static final List<byte[]> POSSIBLE_STARTS = ImmutableList.of(
-            "[".getBytes(Charsets.UTF_8), "\r\n[".getBytes(Charsets.UTF_8), "\n[".getBytes(Charsets.UTF_8));
+            new byte[] { '[' },
+            new byte[] { '\r', '\n', '[' },
+            new byte[] { '\n', '[' });
 
     @Override
     @VisibleForTesting
@@ -57,6 +59,10 @@ public final class NetconfXMLToMessageDecoder extends ByteToMessageDecoder {
 
             String additionalHeader = null;
 
+            // FIXME: this has to be moved into the negotiator and explained as to what the heck
+            // is going on. This is definitely not specified in NETCONF and has no place here. It
+            // requires reading all data and incurs inefficiency by being unable to pipe the ByteBuf
+            // directly into the XML decoder.
             if (startsWithAdditionalHeader(bytes)) {
                 // Auth information containing username, ip address... extracted for monitoring
                 int endOfAuthHeader = getAdditionalHeaderEndIndex(bytes);
