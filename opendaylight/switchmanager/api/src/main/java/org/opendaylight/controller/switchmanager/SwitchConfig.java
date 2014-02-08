@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 
 /**
- * The class describes a switch configuration
+ * The class describes a switch configuration as a collection of properties
  */
 public class SwitchConfig extends ConfigurationObject implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
@@ -123,15 +123,20 @@ public class SwitchConfig extends ConfigurationObject implements Cloneable, Seri
     }
 
     private Status validateNodeId() {
-        if (!isValidResourceName(nodeId)) {
-            return new Status(StatusCode.BADREQUEST, "Invalid NodeId");
+        if (nodeId == null || nodeId.trim().isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "Invalid node id");
         }
         return new Status(StatusCode.SUCCESS);
     }
 
     private Status validateNodeProperties() {
         if (nodeProperties == null) {
-            return new Status(StatusCode.BADREQUEST, "nodeProperties cannot be null");
+            return new Status(StatusCode.BADREQUEST, "Node properties must be specified");
+        }
+        if (nodeProperties.containsKey(Description.propertyName)) {
+            if (!isValidResourceName(((Description)nodeProperties.get(Description.propertyName)).getValue())) {
+                return new Status(StatusCode.BADREQUEST, "Invalid node description");
+            }
         }
         return new Status(StatusCode.SUCCESS);
     }
