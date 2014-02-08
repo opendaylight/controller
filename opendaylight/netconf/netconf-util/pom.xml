@@ -54,6 +54,10 @@
             <groupId>xmlunit</groupId>
             <artifactId>xmlunit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
