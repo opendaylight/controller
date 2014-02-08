@@ -50,6 +50,11 @@
             <groupId>org.opendaylight.controller.thirdparty</groupId>
             <artifactId>ganymed</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+            <version>0000.0002.0027.0</version>
+        </dependency>
     </dependencies>
 
     <build>
