@@ -15,7 +15,9 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
@@ -44,7 +46,7 @@ public class NetconfServerSession extends NetconfSession implements NetconfManag
     private Date loginTime;
     private long inRpcSuccess, inRpcFail, outRpcError;
 
-    public NetconfServerSession(SessionListener sessionListener, Channel channel, long sessionId,
+    public NetconfServerSession(SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> sessionListener, Channel channel, long sessionId,
             NetconfServerSessionNegotiator.AdditionalHeader header) {
         super(sessionListener, channel, sessionId);
         this.header = header;
