@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-public class NetconfServerSession extends NetconfSession implements NetconfManagementSession {
+public class NetconfServerSession extends AbstractNetconfSession implements NetconfManagementSession {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfServerSession.class);
 
@@ -108,9 +109,9 @@ public class NetconfServerSession extends NetconfSession implements NetconfManag
 
     private Class<? extends Transport> getTransportForString(String transport) {
         switch(transport) {
-            case "ssh" : return NetconfSsh.class;
-            case "tcp" : return NetconfTcp.class;
-            default: throw new IllegalArgumentException("Unknown transport type " + transport);
+        case "ssh" : return NetconfSsh.class;
+        case "tcp" : return NetconfTcp.class;
+        default: throw new IllegalArgumentException("Unknown transport type " + transport);
         }
     }
 

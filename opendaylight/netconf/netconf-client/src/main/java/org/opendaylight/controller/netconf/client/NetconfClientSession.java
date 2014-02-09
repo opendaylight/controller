@@ -12,6 +12,7 @@ import io.netty.channel.Channel;
 
 import java.util.Collection;
 
+import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -19,7 +20,7 @@ import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetconfClientSession extends NetconfSession {
+public class NetconfClientSession extends AbstractNetconfSession {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClientSession.class);
     private final Collection<String> capabilities;
