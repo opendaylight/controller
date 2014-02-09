@@ -15,11 +15,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
+import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
-import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.NetconfTcp;
@@ -37,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-public class NetconfServerSession extends NetconfSession implements NetconfManagementSession {
+public final class NetconfServerSession extends AbstractNetconfSession<NetconfServerSession, NetconfServerSessionListener> implements NetconfManagementSession {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfServerSession.class);
 
@@ -46,7 +43,7 @@ public class NetconfServerSession extends NetconfSession implements NetconfManag
     private Date loginTime;
     private long inRpcSuccess, inRpcFail, outRpcError;
 
-    public NetconfServerSession(SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> sessionListener, Channel channel, long sessionId,
+    public NetconfServerSession(NetconfServerSessionListener sessionListener, Channel channel, long sessionId,
             NetconfServerSessionNegotiator.AdditionalHeader header) {
         super(sessionListener, channel, sessionId);
         this.header = header;
@@ -108,9 +105,9 @@ public class NetconfServerSession extends NetconfSession implements NetconfManag
 
     private Class<? extends Transport> getTransportForString(String transport) {
         switch(transport) {
-            case "ssh" : return NetconfSsh.class;
-            case "tcp" : return NetconfTcp.class;
-            default: throw new IllegalArgumentException("Unknown transport type " + transport);
+        case "ssh" : return NetconfSsh.class;
+        case "tcp" : return NetconfTcp.class;
+        default: throw new IllegalArgumentException("Unknown transport type " + transport);
         }
     }
 
@@ -119,4 +116,8 @@ public class NetconfServerSession extends NetconfSession implements NetconfManag
         return dateFormat.format(loginTime);
     }
 
+    @Override
+    protected NetconfServerSession thisInstance() {
+        return this;
+    }
 }

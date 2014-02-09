@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.netconf.util;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,8 +18,12 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
+
+import java.util.concurrent.TimeUnit;
+
+import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
@@ -31,23 +33,23 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.AbstractSessionNegotiator;
-import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
-public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends NetconfSession>
-        extends AbstractSessionNegotiator<NetconfMessage, S> {
+public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends AbstractNetconfSession<S, L>, L extends NetconfSessionListener<S>>
+extends AbstractSessionNegotiator<NetconfMessage, S> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
 
     protected final P sessionPreferences;
 
-    private final SessionListener sessionListener;
+    private final L sessionListener;
     private Timeout timeout;
 
     /**
@@ -62,7 +64,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
     private final long connectionTimeoutMillis;
 
     protected AbstractNetconfSessionNegotiator(P sessionPreferences, Promise<S> promise, Channel channel, Timer timer,
-            SessionListener sessionListener, long connectionTimeoutMillis) {
+            L sessionListener, long connectionTimeoutMillis) {
         super(promise, channel);
         this.sessionPreferences = sessionPreferences;
         this.timer = timer;
@@ -168,7 +170,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         }
     }
 
-    protected abstract S getSession(SessionListener sessionListener, Channel channel, NetconfMessage message);
+    protected abstract S getSession(L sessionListener, Channel channel, NetconfMessage message);
 
     private boolean isHelloMessage(Document doc) {
         try {
