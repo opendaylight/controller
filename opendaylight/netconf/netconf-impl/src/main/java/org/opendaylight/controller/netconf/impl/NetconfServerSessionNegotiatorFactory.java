@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
+import java.io.InputStream;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
@@ -27,11 +32,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import java.io.InputStream;
+import com.google.common.base.Preconditions;
 
-public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory {
+public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfServerSession, NetconfServerSessionListener> {
 
     public static final String SERVER_HELLO_XML_LOCATION = "/server_hello.xml";
 
@@ -59,8 +62,8 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     @Override
-    public SessionNegotiator getSessionNegotiator(SessionListenerFactory sessionListenerFactory, Channel channel,
-            Promise promise) {
+    public SessionNegotiator<NetconfServerSession> getSessionNegotiator(SessionListenerFactory<NetconfServerSessionListener> sessionListenerFactory, Channel channel,
+            Promise<NetconfServerSession> promise) {
         long sessionId = idProvider.getNextSessionId();
 
         NetconfServerSessionPreferences proposal = new NetconfServerSessionPreferences(createHelloMessage(sessionId),
@@ -97,6 +100,6 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     private synchronized Document getHelloTemplateClone() {
-        return (Document) this.helloMessageTemplate.cloneNode(true);
+        return (Document) helloMessageTemplate.cloneNode(true);
     }
 }
