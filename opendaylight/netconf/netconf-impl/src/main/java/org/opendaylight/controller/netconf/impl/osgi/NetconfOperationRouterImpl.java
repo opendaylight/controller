@@ -7,12 +7,18 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.opendaylight.controller.netconf.api.NetconfSession;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
@@ -31,14 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
@@ -55,24 +56,19 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     public NetconfOperationRouterImpl(NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
             CapabilityProvider capabilityProvider, DefaultCommitNotificationProducer commitNotifier) {
 
-        this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
+        this.netconfOperationServiceSnapshot = Preconditions.checkNotNull(netconfOperationServiceSnapshot);
+        this.capabilityProvider = Preconditions.checkNotNull(capabilityProvider);
 
-        this.capabilityProvider = capabilityProvider;
-
-        Set<NetconfOperation> defaultNetconfOperations = Sets.newHashSet();
-        defaultNetconfOperations.add(new DefaultGetSchema(capabilityProvider, netconfOperationServiceSnapshot
-                .getNetconfSessionIdForReporting()));
-        defaultNetconfOperations.add(new DefaultCloseSession(netconfOperationServiceSnapshot
-                .getNetconfSessionIdForReporting()));
-        defaultNetconfOperations.add(new DefaultStartExi(netconfOperationServiceSnapshot
-                .getNetconfSessionIdForReporting()));
-        defaultNetconfOperations.add(new DefaultStopExi(netconfOperationServiceSnapshot
-                .getNetconfSessionIdForReporting()));
+        final String sessionId = netconfOperationServiceSnapshot.getNetconfSessionIdForReporting();
+        final Set<NetconfOperation> defaultNetconfOperations = Sets.newHashSet();
+        defaultNetconfOperations.add(new DefaultGetSchema(capabilityProvider, sessionId));
+        defaultNetconfOperations.add(new DefaultCloseSession(sessionId));
+        defaultNetconfOperations.add(new DefaultStartExi(sessionId));
+        defaultNetconfOperations.add(new DefaultStopExi(sessionId));
 
         allNetconfOperations = getAllNetconfOperations(defaultNetconfOperations, netconfOperationServiceSnapshot);
 
-        DefaultCommit defaultCommit = new DefaultCommit(commitNotifier, capabilityProvider,
-                netconfOperationServiceSnapshot.getNetconfSessionIdForReporting());
+        DefaultCommit defaultCommit = new DefaultCommit(commitNotifier, capabilityProvider, sessionId);
         Set<NetconfOperationFilter> defaultFilters = Sets.<NetconfOperationFilter> newHashSet(defaultCommit);
         allSortedFilters = getAllNetconfFilters(defaultFilters, netconfOperationServiceSnapshot);
     }
