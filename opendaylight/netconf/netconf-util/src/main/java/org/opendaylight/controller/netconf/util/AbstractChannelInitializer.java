@@ -18,9 +18,9 @@ import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncod
 import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 
-public abstract class AbstractChannelInitializer {
+public abstract class AbstractChannelInitializer<S extends NetconfSession> {
 
-    public void initialize(SocketChannel ch, Promise<? extends NetconfSession> promise){
+    public void initialize(SocketChannel ch, Promise<S> promise){
         ch.pipeline().addLast("aggregator", new NetconfMessageAggregator(FramingMechanism.EOM));
         ch.pipeline().addLast(new NetconfXMLToMessageDecoder());
         initializeAfterDecoder(ch, promise);
@@ -28,6 +28,6 @@ public abstract class AbstractChannelInitializer {
         ch.pipeline().addLast(new NetconfMessageToXMLEncoder());
     }
 
-    protected abstract void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise);
+    protected abstract void initializeAfterDecoder(SocketChannel ch, Promise<S> promise);
 
 }

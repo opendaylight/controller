@@ -8,11 +8,13 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -21,18 +23,17 @@ import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
-public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory {
-
-    private final Timer timer;
+public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfClientSession, NetconfClientSessionListener> {
 
     private final Optional<String> additionalHeader;
     private final long connectionTimeoutMillis;
+    private final Timer timer;
 
     public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<String> additionalHeader, long connectionTimeoutMillis) {
-        this.timer = timer;
+        this.timer = Preconditions.checkNotNull(timer);
         this.additionalHeader = additionalHeader;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
@@ -48,8 +49,8 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     @Override
-    public SessionNegotiator getSessionNegotiator(SessionListenerFactory sessionListenerFactory, Channel channel,
-            Promise promise) {
+    public SessionNegotiator<NetconfClientSession> getSessionNegotiator(SessionListenerFactory<NetconfClientSessionListener> sessionListenerFactory, Channel channel,
+            Promise<NetconfClientSession> promise) {
         // Hello message needs to be recreated every time
         NetconfMessage helloMessage = loadHelloMessageTemplate();
         if(this.additionalHeader.isPresent()) {
@@ -59,5 +60,4 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
                 sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
     }
-
 }

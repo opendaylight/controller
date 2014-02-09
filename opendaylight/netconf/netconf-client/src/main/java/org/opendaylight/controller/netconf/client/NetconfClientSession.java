@@ -12,19 +12,16 @@ import io.netty.channel.Channel;
 
 import java.util.Collection;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
-import org.opendaylight.protocol.framework.SessionListener;
+import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetconfClientSession extends NetconfSession {
+public final class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClientSession.class);
     private final Collection<String> capabilities;
 
-    public NetconfClientSession(SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> sessionListener, Channel channel, long sessionId,
+    public NetconfClientSession(NetconfClientSessionListener sessionListener, Channel channel, long sessionId,
             Collection<String> capabilities) {
         super(sessionListener,channel,sessionId);
         this.capabilities = capabilities;
@@ -35,4 +32,8 @@ public class NetconfClientSession extends NetconfSession {
         return capabilities;
     }
 
+    @Override
+    protected NetconfClientSession thisInstance() {
+        return this;
+    }
 }
