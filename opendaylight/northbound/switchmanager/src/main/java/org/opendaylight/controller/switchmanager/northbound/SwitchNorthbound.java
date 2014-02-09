@@ -416,7 +416,7 @@ public class SwitchNorthbound {
      *         {@link org.opendaylight.controller.sal.core.Property} attached to
      *         it.
      *
-     *         <pre>
+     * <pre>
      *
      * Example:
      *
@@ -540,8 +540,10 @@ public class SwitchNorthbound {
      *            Type of the node connector being programmed (Eg. 'OF')
      * @param nodeConnectorId
      *            NodeConnector Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.NodeConnector}
-     *            (Eg. '2')
+     *            {@link org.opendaylight.controller.sal.core.NodeConnector}.
+     *            (Eg. '2'). If nodeConnecterId contains forward slash(/),
+     *            replace forward slash with underscore(_) in the URL. (Eg. for
+     *            Ethernet1/2, use Ethernet1_2)
      * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
@@ -552,7 +554,7 @@ public class SwitchNorthbound {
      *            extended classes
      * @return Response as dictated by the HTTP Response Status code
      *
-     *         <pre>
+     * <pre>
      *
      * Example:
      *
@@ -592,6 +594,10 @@ public class SwitchNorthbound {
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
 
+        if (nodeConnectorId.contains("_")) {
+            nodeConnectorId = nodeConnectorId.replace("_", "/");
+        }
+
         handleNodeConnectorAvailability(containerName, node, nodeConnectorType, nodeConnectorId);
         NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
 
@@ -625,14 +631,16 @@ public class SwitchNorthbound {
      * @param nodeConnectorId
      *            NodeConnector Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
-     *            (Eg. '1')
+     *            (Eg. '1'). If nodeConnecterId contains forward slash(/),
+     *            replace forward slash with underscore(_) in the URL. (Eg. for
+     *            Ethernet1/2, use Ethernet1_2)
      * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
      *            extended classes. Property that can be deleted is bandwidth
      * @return Response as dictated by the HTTP Response Status code
      *
-     *         <pre>
+     * <pre>
      *
      * Example:
      *
@@ -669,6 +677,10 @@ public class SwitchNorthbound {
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
+
+        if (nodeConnectorId.contains("_")) {
+            nodeConnectorId = nodeConnectorId.replace("_", "/");
+        }
 
         handleNodeConnectorAvailability(containerName, node, nodeConnectorType, nodeConnectorId);
         NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
