@@ -21,6 +21,7 @@ import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,20 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
 
             private void initialize(SocketChannel ch, Promise<NetconfClientSession> promise) {
                 new ClientChannelInitializer( negotatorFactory, sessionListener).initialize(ch, promise);
+            }
+        });
+    }
+
+    public Future<Void> createReconnectingClient(final InetSocketAddress address,
+            final NetconfClientSessionListener listener,
+            final ReconnectStrategyFactory connectStrategyFactory, final ReconnectStrategy reestablishStrategy) {
+        final ClientChannelInitializer init = new ClientChannelInitializer(negotatorFactory, listener);
+
+        return super.createReconnectingClient(address, connectStrategyFactory, reestablishStrategy,
+                new PipelineInitializer<NetconfClientSession>() {
+            @Override
+            public void initializeChannel(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+                init.initialize(ch, promise);
             }
         });
     }
