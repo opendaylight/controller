@@ -17,15 +17,12 @@ import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.util.handler.ssh.SshHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
-import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 import com.google.common.base.Optional;
@@ -92,9 +89,9 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 
         @Override
         protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
-            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(new SessionListenerFactory() {
+            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(new SessionListenerFactory<NetconfClientSessionListener>() {
                 @Override
-                public SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> getSessionListener() {
+                public NetconfClientSessionListener getSessionListener() {
                     return sessionListener;
                 }
             }, ch, promise));

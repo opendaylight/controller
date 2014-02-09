@@ -8,25 +8,24 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Optional;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
+
+import java.io.Closeable;
+import java.net.InetSocketAddress;
+
 import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
-import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-import java.net.InetSocketAddress;
+import com.google.common.base.Optional;
 
 public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener> implements Closeable {
 
@@ -69,24 +68,25 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
         private final NetconfClientSessionListener sessionListener;
 
         private ClientChannelInitializer(NetconfClientSessionNegotiatorFactory negotiatorFactory,
-                                            NetconfClientSessionListener sessionListener) {
+                NetconfClientSessionListener sessionListener) {
             this.negotiatorFactory = negotiatorFactory;
             this.sessionListener = sessionListener;
         }
 
         @Override
         public void initialize(SocketChannel ch, Promise<? extends NetconfSession> promise) {
-                super.initialize(ch,promise);
+            super.initialize(ch,promise);
         }
 
         @Override
         protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
-            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(new SessionListenerFactory() {
-                @Override
-                public SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> getSessionListener() {
-                    return sessionListener;
-                }
-            }, ch, promise));
+            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(
+                    new SessionListenerFactory<NetconfClientSessionListener>() {
+                        @Override
+                        public NetconfClientSessionListener getSessionListener() {
+                            return sessionListener;
+                        }
+                    }, ch, promise));
         }
 
     }
