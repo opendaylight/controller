@@ -8,17 +8,8 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.protocol.framework.NeverReconnectStrategy;
-import org.opendaylight.protocol.framework.ReconnectStrategy;
-import org.opendaylight.protocol.framework.TimedReconnectStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -27,6 +18,18 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.TimedReconnectStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 
 public class NetconfClient implements Closeable {
 
@@ -98,25 +101,31 @@ public class NetconfClient implements Closeable {
         this.sessionId = clientSession.getSessionId();
     }
 
-    public NetconfMessage sendMessage(NetconfMessage message) {
+    public Future<NetconfMessage> sendRequest(NetconfMessage message) {
+        return sessionListener.sendRequest(message);
+    }
+
+    /**
+     * @deprecated Use {@link sendRequest} instead
+     */
+    @Deprecated
+    public NetconfMessage sendMessage(NetconfMessage message) throws ExecutionException, InterruptedException, TimeoutException {
         return sendMessage(message, 5, 1000);
     }
 
-    public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) {
-        Stopwatch stopwatch = new Stopwatch().start();
-        Preconditions.checkState(clientSession.isUp(), "Session was not up yet");
+    /**
+     * @deprecated Use {@link sendRequest} instead
+     */
+    @Deprecated
+    public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) throws ExecutionException, InterruptedException, TimeoutException {
         //logger.debug("Sending message: {}",XmlUtil.toString(message.getDocument()));
-        clientSession.sendMessage(message);
+        final Stopwatch stopwatch = new Stopwatch().start();
+
         try {
-            return sessionListener.getLastMessage(attempts, attemptMsDelay);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(this + " Cannot read message from " + address, e);
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException(this + " Cannot read message from " + address, e);
+            return sessionListener.sendRequest(message).get(attempts * attemptMsDelay, TimeUnit.MILLISECONDS);
         } finally {
             stopwatch.stop();
-            logger.debug("Total time spent waiting for response {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+            logger.debug("Total time spent waiting for response from {}: {} ms", address, stopwatch.elapsed(TimeUnit.MILLISECONDS));
         }
     }
 
