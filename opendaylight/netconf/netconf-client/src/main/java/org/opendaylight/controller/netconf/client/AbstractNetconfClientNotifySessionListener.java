@@ -31,7 +31,7 @@ public abstract class AbstractNetconfClientNotifySessionListener extends Netconf
      * @param message {@see NetconfClientSessionListener#onMessage(NetconfClientSession, NetconfMessage)}
      */
     @Override
-    public final synchronized void onMessage(NetconfClientSession session, NetconfMessage message) {
+    public final void onMessage(NetconfClientSession session, NetconfMessage message) {
         if (isNotification(message)) {
             onNotification(session, message);
         } else {

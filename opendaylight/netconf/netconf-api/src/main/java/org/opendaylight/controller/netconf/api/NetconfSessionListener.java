@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.api;
 
 import org.opendaylight.protocol.framework.SessionListener;
 
-public interface NetconfSessionListener extends
-        SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> {
+public interface NetconfSessionListener<S extends NetconfSession> extends SessionListener<NetconfMessage, S, NetconfTerminationReason> {
 
 }

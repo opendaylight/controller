@@ -8,9 +8,22 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import io.netty.channel.EventLoopGroup;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.annotation.concurrent.Immutable;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -27,16 +40,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.annotation.concurrent.Immutable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 @Immutable
 public class ConfigPusher {
@@ -59,7 +64,7 @@ public class ConfigPusher {
     }
 
     public ConfigPusher(InetSocketAddress address, EventLoopGroup nettyThreadGroup,
-                        long maxWaitForCapabilitiesMillis, long connectionTimeoutMillis) {
+            long maxWaitForCapabilitiesMillis, long connectionTimeoutMillis) {
         this.address = address;
         this.nettyThreadGroup = nettyThreadGroup;
         this.maxWaitForCapabilitiesMillis = maxWaitForCapabilitiesMillis;
@@ -224,12 +229,11 @@ public class ConfigPusher {
             NetconfMessage netconfMessage = netconfClient.sendMessage(request, NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
             NetconfUtil.checkIsMessageOk(netconfMessage);
             return netconfMessage;
-        } catch (RuntimeException e) { // TODO: change NetconfClient#sendMessage to throw checked exceptions
+        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) {
             logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
             throw new IOException("Failed to execute netconf transaction", e);
         }
     }
-
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
     private static NetconfMessage createEditConfigMessage(Element dataElement) {
