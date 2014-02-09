@@ -15,7 +15,7 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 /**
  * Class extending {@link NetconfClientSessionListener} to provide notification capability.
  */
-public abstract class AbstractNetconfClientNotifySessionListener extends NetconfClientSessionListener {
+public abstract class AbstractNetconfClientNotifySessionListener extends SimpleNetconfClientSessionListener {
     /*
      * Maybe some capabilities could be expressed as internal NetconfClientSessionListener handlers.
      * It would enable NetconfClient functionality to be extended by using namespace handlers.
