@@ -527,7 +527,7 @@ public class SwitchNorthbound {
      * Add node-connector property to a node connector. This method returns a
      * non-successful response if a node connector by the given name already
      * exists.
-     *
+     * 
      * @param containerName
      *            Name of the Container (Eg. 'default')
      * @param nodeType
@@ -540,8 +540,10 @@ public class SwitchNorthbound {
      *            Type of the node connector being programmed (Eg. 'OF')
      * @param nodeConnectorId
      *            NodeConnector Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.NodeConnector}
-     *            (Eg. '2')
+     *            {@link org.opendaylight.controller.sal.core.NodeConnector}.
+     *            (Eg. '2'). If nodeConnecterId contains forward slash(/),
+     *            replace forward slash with underscore(_) in the URL. (Eg. for
+     *            Ethernet1/2, use Ethernet1_2)
      * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
@@ -551,14 +553,14 @@ public class SwitchNorthbound {
      *            {@link org.opendaylight.controller.sal.core.Property} and its
      *            extended classes
      * @return Response as dictated by the HTTP Response Status code
-     *
-     *         <pre>
-     *
+     * 
+     * <pre>
+     * 
      * Example:
-     *
+     * 
      * Request URL:
      * http://localhost:8080/controller/nb/v2/switchmanager/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth/1
-     *
+     * 
      * </pre>
      */
 
@@ -592,6 +594,10 @@ public class SwitchNorthbound {
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
 
+        if (nodeConnectorId.contains("_")) {
+            nodeConnectorId = nodeConnectorId.replace("_", "/");
+        }
+
         handleNodeConnectorAvailability(containerName, node, nodeConnectorType, nodeConnectorId);
         NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
 
@@ -611,7 +617,7 @@ public class SwitchNorthbound {
 
     /**
      * Delete a property of a node connector
-     *
+     * 
      * @param containerName
      *            Name of the Container (Eg. 'default')
      * @param nodeType
@@ -625,20 +631,22 @@ public class SwitchNorthbound {
      * @param nodeConnectorId
      *            NodeConnector Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
-     *            (Eg. '1')
+     *            (Eg. '1'). If nodeConnecterId contains forward slash(/),
+     *            replace forward slash with underscore(_) in the URL. (Eg. for
+     *            Ethernet1/2, use Ethernet1_2)
      * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
      *            extended classes. Property that can be deleted is bandwidth
      * @return Response as dictated by the HTTP Response Status code
-     *
-     *         <pre>
-     *
+     * 
+     * <pre>
+     * 
      * Example:
-     *
+     * 
      * Request URL:
      * http://localhost:8080/controller/nb/v2/switchmanager/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth
-     *
+     * 
      * </pre>
      */
 
@@ -669,6 +677,10 @@ public class SwitchNorthbound {
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
+
+        if (nodeConnectorId.contains("_")) {
+            nodeConnectorId = nodeConnectorId.replace("_", "/");
+        }
 
         handleNodeConnectorAvailability(containerName, node, nodeConnectorType, nodeConnectorId);
         NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
