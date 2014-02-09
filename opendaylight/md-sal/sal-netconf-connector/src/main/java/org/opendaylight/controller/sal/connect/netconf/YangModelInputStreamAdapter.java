@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.common.QName;
+
+import com.google.common.base.Charsets;
 
 /**
  *
@@ -23,8 +25,6 @@ public class YangModelInputStreamAdapter extends InputStream implements Delegato
     final String source;
     final QName moduleIdentifier;
     final InputStream delegate;
-
-
 
     private YangModelInputStreamAdapter(String source, QName moduleIdentifier, InputStream delegate) {
         super();
@@ -99,7 +99,6 @@ public class YangModelInputStreamAdapter extends InputStream implements Delegato
     }
 
     public static YangModelInputStreamAdapter create(QName name, String module) {
-        InputStream stringInput = new StringBufferInputStream(module);
-        return new YangModelInputStreamAdapter(null, name, stringInput );
+        return new YangModelInputStreamAdapter(null, name, new ByteArrayInputStream(module.getBytes(Charsets.UTF_8)));
     }
 }
