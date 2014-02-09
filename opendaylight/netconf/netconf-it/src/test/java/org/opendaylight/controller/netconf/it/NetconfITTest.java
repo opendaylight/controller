@@ -8,12 +8,33 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static java.util.Collections.emptyList;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import io.netty.channel.ChannelFuture;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+
 import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -52,26 +73,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
 
-import static java.util.Collections.emptyList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class NetconfITTest extends AbstractNetconfConfigTest {
 
@@ -85,7 +91,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     private static final String PASSWORD = "netconf";
 
     private NetconfMessage getConfig, getConfigCandidate, editConfig,
-            closeSession, startExi, stopExi;
+    closeSession, startExi, stopExi;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
@@ -304,7 +310,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
         }
     }
-    */
+     */
 
     @Test
     public void testCloseSession() throws Exception {
@@ -350,12 +356,12 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
     }
 
-    private Document assertGetConfigWorks(final NetconfClient netconfClient) throws InterruptedException {
+    private Document assertGetConfigWorks(final NetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException {
         return assertGetConfigWorks(netconfClient, this.getConfig);
     }
 
     private Document assertGetConfigWorks(final NetconfClient netconfClient, final NetconfMessage getConfigMessage)
-            throws InterruptedException {
+            throws InterruptedException, ExecutionException, TimeoutException {
         final NetconfMessage rpcReply = netconfClient.sendMessage(getConfigMessage);
         assertNotNull(rpcReply);
         assertEquals("data", XmlElement.fromDomDocument(rpcReply.getDocument()).getOnlyChildElement().getName());
@@ -423,19 +429,20 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         sess.getStdin().write(XmlUtil.toString(this.getConfig.getDocument()).getBytes());
 
         new Thread(){
-           public void run(){
-               while (true){
-                 byte[] bytes = new byte[1024];
-                   int c = 0;
-                   try {
-                       c = sess.getStdout().read(bytes);
-                   } catch (IOException e) {
-                       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                   }
-                   logger.info("got data:"+bytes);
-                 if (c == 0) break;
-               }
-           }
+            @Override
+            public void run(){
+                while (true){
+                    byte[] bytes = new byte[1024];
+                    int c = 0;
+                    try {
+                        c = sess.getStdout().read(bytes);
+                    } catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    logger.info("got data:"+bytes);
+                    if (c == 0) break;
+                }
+            }
         }.join();
     }
 
