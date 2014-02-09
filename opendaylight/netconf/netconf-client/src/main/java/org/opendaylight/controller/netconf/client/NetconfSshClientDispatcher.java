@@ -17,12 +17,12 @@ import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.util.handler.ssh.SshHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 import com.google.common.base.Optional;
@@ -62,7 +62,22 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         });
     }
 
-    private static final class NetconfSshClientInitializer extends AbstractChannelInitializer {
+    @Override
+    public Future<Void> createReconnectingClient(final InetSocketAddress address,
+            final NetconfClientSessionListener listener,
+            final ReconnectStrategyFactory connectStrategyFactory, final ReconnectStrategy reestablishStrategy) {
+        final NetconfSshClientInitializer init = new NetconfSshClientInitializer(authHandler, negotatorFactory, listener);
+
+        return super.createReconnectingClient(address, connectStrategyFactory, reestablishStrategy,
+                new PipelineInitializer<NetconfClientSession>() {
+            @Override
+            public void initializeChannel(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+                init.initialize(ch, promise);
+            }
+        });
+    }
+
+    private static final class NetconfSshClientInitializer extends AbstractChannelInitializer<NetconfClientSession> {
 
         private final AuthenticationHandler authenticationHandler;
         private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
@@ -77,7 +92,7 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         }
 
         @Override
-        public void initialize(SocketChannel ch, Promise<? extends NetconfSession> promise) {
+        public void initialize(SocketChannel ch, Promise<NetconfClientSession> promise) {
             try {
                 Invoker invoker = Invoker.subsystem("netconf");
                 ch.pipeline().addFirst(new SshHandler(authenticationHandler, invoker));
@@ -88,7 +103,7 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         }
 
         @Override
-        protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
+        protected void initializeAfterDecoder(SocketChannel ch, Promise<NetconfClientSession> promise) {
             ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(new SessionListenerFactory<NetconfClientSessionListener>() {
                 @Override
                 public NetconfClientSessionListener getSessionListener() {

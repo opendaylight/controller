@@ -31,6 +31,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 
+/**
+ * @deprecated Use {@link NetconfClientDispatcher.createClient()} or {@link NetconfClientDispatcher.createReconnectingClient()} instead.
+ */
+@Deprecated
 public class NetconfClient implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClient.class);
@@ -53,7 +57,7 @@ public class NetconfClient implements Closeable {
     private NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
         this.label = clientLabelForLogging;
         dispatch = netconfClientDispatcher;
-        sessionListener = new NetconfClientSessionListener();
+        sessionListener = new SimpleNetconfClientSessionListener();
         Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strat);
         this.address = address;
         clientSession = get(clientFuture);
@@ -74,7 +78,8 @@ public class NetconfClient implements Closeable {
         return new NetconfClient(clientLabelForLogging,address,strategy,netconfClientDispatcher);
     }
 
-    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strategy, NetconfClientDispatcher netconfClientDispatcher,NetconfClientSessionListener listener) throws InterruptedException {
+    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address,
+            ReconnectStrategy strategy, NetconfClientDispatcher netconfClientDispatcher, NetconfClientSessionListener listener) throws InterruptedException {
         return new NetconfClient(clientLabelForLogging,address,strategy,netconfClientDispatcher,listener);
     }
 
@@ -102,7 +107,7 @@ public class NetconfClient implements Closeable {
     }
 
     public Future<NetconfMessage> sendRequest(NetconfMessage message) {
-        return sessionListener.sendRequest(message);
+        return ((SimpleNetconfClientSessionListener)sessionListener).sendRequest(message);
     }
 
     /**
@@ -122,7 +127,7 @@ public class NetconfClient implements Closeable {
         final Stopwatch stopwatch = new Stopwatch().start();
 
         try {
-            return sessionListener.sendRequest(message).get(attempts * attemptMsDelay, TimeUnit.MILLISECONDS);
+            return sendRequest(message).get(attempts * attemptMsDelay, TimeUnit.MILLISECONDS);
         } finally {
             stopwatch.stop();
             logger.debug("Total time spent waiting for response from {}: {} ms", address, stopwatch.elapsed(TimeUnit.MILLISECONDS));
