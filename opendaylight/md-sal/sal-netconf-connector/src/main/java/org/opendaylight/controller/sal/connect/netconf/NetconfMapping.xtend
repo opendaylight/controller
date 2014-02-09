@@ -7,34 +7,33 @@
  */
 package org.opendaylight.controller.sal.connect.netconf
 
+import com.google.common.base.Optional
+import com.google.common.base.Preconditions
+import com.google.common.collect.ImmutableList
+import java.net.URI
+import java.util.ArrayList
+import java.util.Collections
+import java.util.List
+import java.util.Set
+import java.util.concurrent.atomic.AtomicInteger
 import org.opendaylight.controller.netconf.api.NetconfMessage
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.controller.sal.common.util.Rpcs
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
-import java.net.URI
-import java.util.Collections
-import org.opendaylight.yangtools.yang.data.api.Node
-import org.opendaylight.yangtools.yang.data.impl.NodeUtils
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
-import java.util.ArrayList
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
-import java.util.concurrent.atomic.AtomicInteger
-import org.w3c.dom.Document
-import org.w3c.dom.Element
-import org.opendaylight.controller.sal.common.util.Rpcs
-import java.util.List
-import com.google.common.collect.ImmutableList
-import org.opendaylight.yangtools.yang.data.api.SimpleNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
+import org.opendaylight.yangtools.yang.data.api.Node
+import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode
-import com.google.common.base.Preconditions
-import com.google.common.base.Optional
-import org.opendaylight.yangtools.yang.model.api.SchemaContext
+import org.opendaylight.yangtools.yang.data.impl.NodeUtils
+import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition
-import java.util.Set
+import org.opendaylight.yangtools.yang.model.api.SchemaContext
+import org.w3c.dom.Document
+import org.w3c.dom.Element
 
 class NetconfMapping {
 

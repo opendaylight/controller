@@ -7,9 +7,18 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 
-import com.google.common.net.InetAddresses;
+import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
+import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfSshClientDispatcher;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
@@ -25,19 +34,11 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
-import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
+import com.google.common.net.InetAddresses;
 
 /**
-*
-*/
+ *
+ */
 public final class NetconfConnectorModule extends org.opendaylight.controller.config.yang.md.sal.connector.netconf.AbstractNetconfConnectorModule
 {
     private static final Logger logger = LoggerFactory.getLogger(NetconfConnectorModule.class);
@@ -72,7 +73,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        
+
         getDomRegistryDependency();
         NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
         String addressValue = getAddress();
@@ -92,27 +93,27 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         } else {
             addressValue = getAddress().getIpv6Address().getValue();
         }
-        */
+         */
         double sleepFactor = 1.0;
         int minSleep = 1000;
         Long maxSleep = null;
         Long deadline = null;
         ReconnectStrategy strategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, getBetweenAttemptsTimeoutMillis(),
                 minSleep, sleepFactor, maxSleep, connectionAttempts, deadline);
-        
+
         device.setReconnectStrategy(strategy);
-        
+
         InetAddress addr = InetAddresses.forString(addressValue);
         InetSocketAddress socketAddress = new InetSocketAddress(addr , getPort().intValue());
 
-        
+
         device.setProcessingExecutor(getGlobalProcessingExecutor());
-        
+
         device.setSocketAddress(socketAddress);
         device.setEventExecutor(getEventExecutorDependency());
         device.setDispatcher(createDispatcher(clientConnectionTimeoutMillis));
         device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
-        
+
         getDomRegistryDependency().registerProvider(device, bundleContext);
         device.start();
         return device;
@@ -120,9 +121,9 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     private ExecutorService getGlobalProcessingExecutor() {
         if(GLOBAL_PROCESSING_EXECUTOR == null) {
-            
+
             GLOBAL_PROCESSING_EXECUTOR = Executors.newCachedThreadPool();
-            
+
         }
         return GLOBAL_PROCESSING_EXECUTOR;
     }
@@ -130,8 +131,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider(BundleContext bundleContext) {
         if(GLOBAL_NETCONF_SOURCE_PROVIDER == null) {
             String storageFile = "cache/schema";
-//            File directory = bundleContext.getDataFile(storageFile);
-            File directory = new File("cache/schema");
+            //            File directory = bundleContext.getDataFile(storageFile);
+            File directory = new File(storageFile);
             SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
             GLOBAL_NETCONF_SOURCE_PROVIDER = FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
         }
