@@ -93,7 +93,6 @@ public class RpcProviderRegistryImpl implements //
     @Override
     public final <T extends RpcService> T getRpcService(Class<T> type) {
 
-        @SuppressWarnings("unchecked")
         T potentialProxy = (T) publicProxies.get(type);
         if (potentialProxy != null) {
             return potentialProxy;
@@ -151,7 +150,7 @@ public class RpcProviderRegistryImpl implements //
 
     }
 
-    private void notifyListenersRoutedCreated(RpcRouter router) {
+    private void notifyListenersRoutedCreated(RpcRouter<?> router) {
 
         for (ListenerRegistration<RouterInstantiationListener> listener : routerInstantiationListener) {
             try {

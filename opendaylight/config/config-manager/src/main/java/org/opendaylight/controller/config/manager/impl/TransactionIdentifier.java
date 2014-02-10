@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.manager.impl;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public class TransactionIdentifier implements Identifier {
-
+    private static final long serialVersionUID = 1L;
     private final String name;
 
     public TransactionIdentifier(String name) {

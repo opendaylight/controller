@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
 final class PersistException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
     public PersistException(String s, Exception e) {
         super(s, e);
