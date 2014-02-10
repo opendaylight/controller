@@ -8,13 +8,15 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Optional;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -22,22 +24,17 @@ import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.util.handler.ssh.SshHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageFactory;
-import org.opendaylight.protocol.framework.ProtocolHandlerFactory;
-import org.opendaylight.protocol.framework.ProtocolMessageDecoder;
-import org.opendaylight.protocol.framework.ProtocolMessageEncoder;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import com.google.common.base.Optional;
 
 public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 
-    private AuthenticationHandler authHandler;
-    private HashedWheelTimer timer;
-    private NetconfClientSessionNegotiatorFactory negotatorFactory;
+    private final AuthenticationHandler authHandler;
+    private final HashedWheelTimer timer;
+    private final NetconfClientSessionNegotiatorFactory negotatorFactory;
 
     public NetconfSshClientDispatcher(AuthenticationHandler authHandler, EventLoopGroup bossGroup,
             EventLoopGroup workerGroup, long connectionTimeoutMillis) {
@@ -55,6 +52,7 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader), socketTimeoutMillis);
     }
 
+    @Override
     public Future<NetconfClientSession> createClient(InetSocketAddress address,
             final NetconfClientSessionListener sessionListener, ReconnectStrategy strat) {
         return super.createClient(address, strat, new PipelineInitializer<NetconfClientSession>() {
@@ -69,7 +67,6 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
 
     private static final class NetconfSshClientInitializer extends AbstractChannelInitializer {
 
-        private final NetconfHandlerFactory handlerFactory;
         private final AuthenticationHandler authenticationHandler;
         private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
         private final NetconfClientSessionListener sessionListener;
@@ -77,7 +74,6 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         public NetconfSshClientInitializer(AuthenticationHandler authHandler,
                 NetconfClientSessionNegotiatorFactory negotiatorFactory,
                 final NetconfClientSessionListener sessionListener) {
-            this.handlerFactory = new NetconfHandlerFactory(new NetconfMessageFactory());
             this.authenticationHandler = authHandler;
             this.negotiatorFactory = negotiatorFactory;
             this.sessionListener = sessionListener;
@@ -103,23 +99,6 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
                 }
             }, ch, promise));
 
-        }
-    }
-
-    private static final class NetconfHandlerFactory extends ProtocolHandlerFactory<NetconfMessage> {
-
-        public NetconfHandlerFactory(final NetconfMessageFactory msgFactory) {
-            super(msgFactory);
-        }
-
-        @Override
-        public ChannelHandler[] getEncoders() {
-            return new ChannelHandler[] { new ProtocolMessageEncoder(this.msgFactory) };
-        }
-
-        @Override
-        public ChannelHandler[] getDecoders() {
-            return new ChannelHandler[] { new ProtocolMessageDecoder(this.msgFactory) };
         }
     }
 }
