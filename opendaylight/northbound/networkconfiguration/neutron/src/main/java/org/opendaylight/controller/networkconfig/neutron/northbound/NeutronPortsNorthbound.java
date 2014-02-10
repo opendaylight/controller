@@ -60,6 +60,8 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 @Path("/ports")
 public class NeutronPortsNorthbound {
 
+    String final mac_regex="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
+
     private NeutronPort extractFields(NeutronPort o, List<String> fields) {
         return o.extractFields(fields);
     }
@@ -207,7 +209,7 @@ public class NeutronPortsNorthbound {
                 return Response.status(404).build();
             }
             if (singleton.getMacAddress() == null ||
-                    !singleton.getMacAddress().matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")) {
+                    !singleton.getMacAddress().matches(mac_regex)) {
                 return Response.status(400).build();
             }
             if (portInterface.macInUse(singleton.getMacAddress())) {
@@ -298,7 +300,7 @@ public class NeutronPortsNorthbound {
                 if (!networkInterface.networkExists(test.getNetworkUUID())) {
                     return Response.status(404).build();
                 }
-                if (!test.getMacAddress().matches("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$")) {
+                if (!test.getMacAddress().matches(mac_regex)) {
                     return Response.status(400).build();
                 }
                 if (portInterface.macInUse(test.getMacAddress())) {
