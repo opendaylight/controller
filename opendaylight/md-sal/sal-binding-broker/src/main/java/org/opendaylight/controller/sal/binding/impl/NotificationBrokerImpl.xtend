@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolderimport com.google.common.collect.Multimaps
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListenerimport java.util.Set
+import java.util.Set
 import com.google.common.collect.ImmutableSet
 import java.util.concurrent.Future
 
@@ -112,7 +113,7 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
         }
         return ret.build();
     }
-
+    
     override <T extends Notification> registerNotificationListener(Class<T> notificationType,
         NotificationListener<T> listener) {
         val reg = new GenericNotificationRegistration<T>(notificationType, listener, this);
