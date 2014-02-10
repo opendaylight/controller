@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_ACTION_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_CANDIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_COMMIT_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_CONFIG_QNAME;
@@ -52,7 +52,7 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
 
     public void prepare() {
         for (InstanceIdentifier toRemove : modification.getRemovedConfigurationData()) {
-            sendRemove(toRemove);
+            sendDelete(toRemove);
         }
         for(Entry<InstanceIdentifier, CompositeNode> toUpdate : modification.getUpdatedConfigurationData().entrySet()) {
             sendMerge(toUpdate.getKey(),toUpdate.getValue());
@@ -64,8 +64,8 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
         sendEditRpc(createEditStructure(key, Optional.<String>absent(), Optional.of(value)));
     }
 
-    private void sendRemove(InstanceIdentifier toRemove) {
-        sendEditRpc(createEditStructure(toRemove, Optional.of("remove"), Optional.<CompositeNode> absent()));
+    private void sendDelete(InstanceIdentifier toDelete) {
+        sendEditRpc(createEditStructure(toDelete, Optional.of("delete"), Optional.<CompositeNode> absent()));
     }
 
     private void sendEditRpc(CompositeNode editStructure) {
@@ -92,7 +92,7 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
         return ret;
     }
 
-    private CompositeNode createEditStructure(InstanceIdentifier dataPath, Optional<String> action,
+    private CompositeNode createEditStructure(InstanceIdentifier dataPath, Optional<String> operation,
             Optional<CompositeNode> lastChildOverride) {
         List<PathArgument> path = dataPath.getPath();
         List<PathArgument> reversed = Lists.reverse(path);
@@ -110,8 +110,8 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
             }
 
             if (isLast) {
-                if (action.isPresent()) {
-                    builder.setAttribute(NETCONF_ACTION_QNAME, action.get());
+                if (operation.isPresent()) {
+                    builder.setAttribute(NETCONF_OPERATION_QNAME, operation.get());
                 }
                 if (lastChildOverride.isPresent()) {
                     List<Node<?>> children = lastChildOverride.get().getChildren();
