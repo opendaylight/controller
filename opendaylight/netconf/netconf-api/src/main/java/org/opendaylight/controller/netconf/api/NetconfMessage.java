@@ -17,12 +17,8 @@ import com.google.common.base.Optional;
  * implementing ProtocolMessage interface.
  */
 public final class NetconfMessage {
-
-    private static final long serialVersionUID = 462175939836367285L;
-
+    private final String additionalHeader;
     private final Document doc;
-
-    private String additionalHeader;
 
     public NetconfMessage(final Document doc) {
         this(doc, null);
