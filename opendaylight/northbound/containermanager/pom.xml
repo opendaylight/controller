@@ -14,7 +14,6 @@
     <tag>HEAD</tag>
   </scm>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>containermanager.northbound</artifactId>
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
