@@ -127,13 +127,17 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         OpendaylightFlowTableStatisticsListener,
         OpendaylightQueueStatisticsListener{
     
-    public final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
+    private final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
 
     private final StatisticsProvider statisticsManager;
     private final MultipartMessageManager messageManager;
     
     private int unaccountedFlowsCounter = 1;
 
+    /**
+     * default ctor
+     * @param manager
+     */
     public StatisticsUpdateCommiter(final StatisticsProvider manager){
 
         this.statisticsManager = manager;
@@ -701,7 +705,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         
     }
 
-    private NodeRef getNodeRef(NodeKey nodeKey){
+    private static NodeRef getNodeRef(NodeKey nodeKey){
         InstanceIdentifierBuilder<?> builder = InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeKey);
         return new NodeRef(builder.toInstance());
     }
@@ -861,34 +865,65 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         return true;
     }
 
-    private boolean layer3MatchEquals(Layer3Match statsLayer3Match, Layer3Match storedLayer3Match){
-
+    protected static boolean layer3MatchEquals(Layer3Match statsLayer3Match, Layer3Match storedLayer3Match){
+        boolean verdict = true; 
         if(statsLayer3Match instanceof Ipv4Match && storedLayer3Match instanceof Ipv4Match){
             Ipv4Match statsIpv4Match = (Ipv4Match)statsLayer3Match;
             Ipv4Match storedIpv4Match = (Ipv4Match)storedLayer3Match;
-            
-            if (storedIpv4Match.getIpv4Destination()== null) {
-                if (statsIpv4Match.getIpv4Destination()!= null) {
-                    return false;
-                }
-            } else if(!IpAddressEquals(statsIpv4Match.getIpv4Destination(),storedIpv4Match.getIpv4Destination())){
-                return false;
+
+            if (verdict) {
+                verdict = compareNullSafe(
+                        storedIpv4Match.getIpv4Destination(), statsIpv4Match.getIpv4Destination());
             }
-            if (storedIpv4Match.getIpv4Source() == null) {
-                if (statsIpv4Match.getIpv4Source() != null) {
-                    return false;
-                }
-            } else if(!IpAddressEquals(statsIpv4Match.getIpv4Source(),storedIpv4Match.getIpv4Source())) {
-                return false;
+            if (verdict) {
+                verdict = compareNullSafe(
+                        statsIpv4Match.getIpv4Source(), storedIpv4Match.getIpv4Source());
             }
-            
-            return true;
-        }else{
-            return storedLayer3Match.equals(statsLayer3Match);
+        } else {
+            Boolean nullCheckOut = checkNullValues(storedLayer3Match, statsLayer3Match);
+            if (nullCheckOut != null) {
+                verdict = nullCheckOut;
+            } else {
+                verdict = storedLayer3Match.equals(statsLayer3Match);
+            }
         }
+        
+        return verdict;
     }
     
-    private boolean IpAddressEquals(Ipv4Prefix statsIpAddress, Ipv4Prefix storedIpAddress) {
+    private static boolean compareNullSafe(Ipv4Prefix statsIpv4, Ipv4Prefix storedIpv4) {
+        boolean verdict = true;
+        Boolean checkDestNullValuesOut = checkNullValues(storedIpv4, statsIpv4);
+        if (checkDestNullValuesOut != null) {
+            verdict = checkDestNullValuesOut;
+        } else if(!IpAddressEquals(statsIpv4, storedIpv4)){
+            verdict = false;
+        }
+        
+        return verdict;
+    }
+    
+    private static Boolean checkNullValues(Object v1, Object v2) {
+        Boolean verdict = null;
+        if (v1 == null && v2 != null) {
+            verdict = Boolean.FALSE;
+        } else if (v1 != null && v2 == null) {
+            verdict = Boolean.FALSE;
+        } else if (v1 == null && v2 == null) {
+            verdict = Boolean.TRUE;
+        }
+        
+        return verdict;
+    }
+    
+    /**
+     * TODO: why don't we use the default Ipv4Prefix.equals()?
+     * 
+     * @param statsIpAddress
+     * @param storedIpAddress
+     * @return true if IPv4prefixes equals 
+     */
+    private static boolean IpAddressEquals(Ipv4Prefix statsIpAddress, Ipv4Prefix storedIpAddress) {
         IntegerIpAddress statsIpAddressInt = StrIpToIntIp(statsIpAddress.getValue());
         IntegerIpAddress storedIpAddressInt = StrIpToIntIp(storedIpAddress.getValue());
 
@@ -901,19 +936,19 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         return false;
     }
 
-    private boolean IpAndMaskBasedMatch(IntegerIpAddress statsIpAddressInt,IntegerIpAddress storedIpAddressInt){
+    private static boolean IpAndMaskBasedMatch(IntegerIpAddress statsIpAddressInt,IntegerIpAddress storedIpAddressInt){
         return ((statsIpAddressInt.getIp() & statsIpAddressInt.getMask()) ==  (storedIpAddressInt.getIp() & storedIpAddressInt.getMask()));
     }
 
-    private boolean IpBasedMatch(IntegerIpAddress statsIpAddressInt,IntegerIpAddress storedIpAddressInt){
+    private static boolean IpBasedMatch(IntegerIpAddress statsIpAddressInt,IntegerIpAddress storedIpAddressInt){
         return (statsIpAddressInt.getIp() == storedIpAddressInt.getIp());
     }
     
-    /*
+    /**
      * Method return integer version of ip address. Converted int will be mask if 
      * mask specified
      */
-    private IntegerIpAddress StrIpToIntIp(String ipAddresss){
+    private static IntegerIpAddress StrIpToIntIp(String ipAddresss){
         
         String[] parts = ipAddresss.split("/");
         String ip = parts[0];
@@ -925,23 +960,26 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             prefix = Integer.parseInt(parts[1]);
         }
 
-        Inet4Address addr =null;
+        IntegerIpAddress integerIpAddress = null;
         try {
-            addr = (Inet4Address) InetAddress.getByName(ip);
-        } catch (UnknownHostException e){}
+            Inet4Address addr = (Inet4Address) InetAddress.getByName(ip);
+            byte[] addrBytes = addr.getAddress();
+            int ipInt = ((addrBytes[0] & 0xFF) << 24) |
+                    ((addrBytes[1] & 0xFF) << 16) |
+                    ((addrBytes[2] & 0xFF) << 8)  |
+                    ((addrBytes[3] & 0xFF) << 0);
+            
+            int mask = 0xffffffff << 32 - prefix;
+            
+            integerIpAddress = new IntegerIpAddress(ipInt, mask);
+        } catch (UnknownHostException e){
+            sucLogger.error("Failed to determine host IP address by name: {}", e.getMessage(), e);
+        }
 
-        byte[] addrBytes = addr.getAddress();
-        int ipInt = ((addrBytes[0] & 0xFF) << 24) |
-                         ((addrBytes[1] & 0xFF) << 16) |
-                         ((addrBytes[2] & 0xFF) << 8)  |
-                         ((addrBytes[3] & 0xFF) << 0);
-
-        int mask = 0xffffffff << 32 - prefix;
-
-        return new IntegerIpAddress(ipInt, mask);
+        return integerIpAddress;
     }
     
-    class IntegerIpAddress{
+    static class IntegerIpAddress{
         int ip;
         int mask;
         public IntegerIpAddress(int ip, int mask) {
