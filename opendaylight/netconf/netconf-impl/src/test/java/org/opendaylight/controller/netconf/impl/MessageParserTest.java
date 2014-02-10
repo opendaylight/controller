@@ -13,11 +13,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.embedded.EmbeddedChannel;
 
 import java.util.Queue;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.embedded.EmbeddedChannel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,18 +25,16 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageFactory;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.protocol.framework.ProtocolMessageDecoder;
-import org.opendaylight.protocol.framework.ProtocolMessageEncoder;
 
 public class MessageParserTest {
 
     private NetconfMessage msg;
-    private NetconfMessageFactory msgFactory = new NetconfMessageFactory();
 
     @Before
     public void setUp() throws Exception {
@@ -47,16 +45,20 @@ public class MessageParserTest {
     public void testChunkedFramingMechanismOnPipeline() throws Exception {
         EmbeddedChannel testChunkChannel = new EmbeddedChannel(
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK),
-                new ProtocolMessageEncoder<NetconfMessage>(msgFactory),
+                new NetconfMessageToXMLEncoder(),
 
                 new NetconfMessageAggregator(FramingMechanism.CHUNK), new NetconfMessageChunkDecoder(),
-                new ProtocolMessageDecoder<NetconfMessage>(msgFactory));
+                new NetconfXMLToMessageDecoder());
 
         testChunkChannel.writeOutbound(this.msg);
         Queue<Object> messages = testChunkChannel.outboundMessages();
         assertFalse(messages.isEmpty());
 
-        int msgLength = this.msgFactory.put(this.msg).length;
+        final NetconfMessageToXMLEncoder enc = new NetconfMessageToXMLEncoder();
+        final ByteBuf out = Unpooled.buffer();
+        enc.encode(null, msg, out);
+        int msgLength = out.readableBytes();
+
         int chunkCount = msgLength / NetconfMessageConstants.MAX_CHUNK_SIZE;
         if ((msgLength % NetconfMessageConstants.MAX_CHUNK_SIZE) != 0) {
             chunkCount++;
@@ -92,8 +94,8 @@ public class MessageParserTest {
     public void testEOMFramingMechanismOnPipeline() throws Exception {
         EmbeddedChannel testChunkChannel = new EmbeddedChannel(
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.EOM),
-                new ProtocolMessageEncoder<NetconfMessage>(msgFactory), new NetconfMessageAggregator(
-                        FramingMechanism.EOM), new ProtocolMessageDecoder<NetconfMessage>(msgFactory));
+                new NetconfMessageToXMLEncoder(), new NetconfMessageAggregator(
+                        FramingMechanism.EOM), new NetconfXMLToMessageDecoder());
 
         testChunkChannel.writeOutbound(this.msg);
         ByteBuf recievedOutbound = (ByteBuf) testChunkChannel.readOutbound();
