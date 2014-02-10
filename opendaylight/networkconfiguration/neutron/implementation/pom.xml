@@ -34,7 +34,6 @@
       <url>${sitedeploy}</url>
     </site>
   </distributionManagement>
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>networkconfig.neutron.implementation</artifactId>
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>

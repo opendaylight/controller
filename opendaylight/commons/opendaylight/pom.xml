@@ -4,7 +4,6 @@
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.opendaylight</artifactId>
   <version>1.4.2-SNAPSHOT</version>
   <packaging>pom</packaging>
