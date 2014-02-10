@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.configuration.internal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -26,10 +27,12 @@ import org.opendaylight.controller.configuration.ConfigurationEvent;
 import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.configuration.IConfigurationService;
+import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.slf4j.Logger;
@@ -115,6 +118,31 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
                         configurationAware.getClass().getName());
             }
         }
+        // Remove startup directories of containers that were removed from
+        // the configuration but not saved
+        IContainerManager containerManager = (IContainerManager) ServiceHelper.getGlobalInstance(
+                IContainerManager.class, this);
+        List<String> containerNames = containerManager.getContainerNameList();
+        File startupDir = new File(ROOT.toString());
+        File fileList[] = startupDir.listFiles();
+        for (File file : fileList) {
+            if (file.getName().equals("README") || file.getName().endsWith(".conf")
+               || file.getName().endsWith(".sav")) {
+                continue;
+            }
+            if (!containerNames.contains(file.getName())) {
+                File[] containerFiles = file.listFiles();
+                for (File containerFile : containerFiles) {
+                    containerFile.delete();
+                }
+                success = file.delete();
+                if (!success) {
+                    logger.warn("Failed to save config for {}",
+                            file.getName());
+                }
+            }
+        }
+
         if (success) {
             return new Status(StatusCode.SUCCESS);
         } else {

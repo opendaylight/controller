@@ -52,6 +52,12 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
     private static final Logger logger = LoggerFactory.getLogger(ContainerConfigurationService.class);
     private IClusterContainerServices clusterServices;
     private ConcurrentMap <ConfigurationEvent, String> containerConfigEvent;
+    private static final String ROOT = GlobalConstants.STARTUPHOME.toString();
+    // Name of the container that the current instance belongs to
+    private String containerName;
+    // Path to file that belongs to the container that the current instance belongs to
+    private String containerFilePath;
+
     /*
      * Collection containing the configuration objects.
      * This is configuration world: container names (also the map key)
@@ -93,12 +99,14 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
 
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
-        String containerName = (props != null) ? (String) props.get("containerName") : GlobalConstants.DEFAULT.toString();
-        root = String.format("%s%s/", GlobalConstants.STARTUPHOME.toString(), containerName);
-        if (!new File(root).exists()) {
-            boolean created = new File(root).mkdir();
-            if (!created) {
-                logger.error("Failed to create startup config directory for container {}", containerName);
+        containerName = (props != null) ? (String) props.get("containerName") : GlobalConstants.DEFAULT.toString();
+        containerFilePath =  String.format("%s%s/", ROOT, containerName);
+        if (containerName.equals(GlobalConstants.DEFAULT.toString())) {
+            if (!new File(containerFilePath).exists()) {
+                boolean created = new File(containerFilePath).mkdir();
+                if (!created) {
+                    logger.error("Failed to create startup config directory for default container");
+                }
             }
         }
     }
@@ -119,17 +127,22 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
      * Function called by the dependency manager before Container is Stopped and Destroyed.
      */
     public void containerStop() {
-        // Remove container directory along with its startup files
-        File[] files = new File(root).listFiles();
-        for (File file : files) {
-            file.delete();
-        }
-        new File(root).delete();
+        // Do nothing
     }
 
     @Override
     public Status saveConfiguration() {
         boolean success = true;
+
+        if (!new File(containerFilePath).exists()) {
+            boolean created = new File(containerFilePath).mkdir();
+            if (!created) {
+                String msg = "Failed to create startup config directory for container {} " + containerName;
+                logger.error(msg);
+                return new Status(StatusCode.INTERNALERROR, msg);
+            }
+        }
+
         for (IConfigurationContainerAware configurationAware : configurationAwareList) {
             logger.trace("Save Config triggered for {}", configurationAware.getClass().getSimpleName());
 
@@ -209,7 +222,7 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
 
     @Override
     public Status persistConfiguration(List<ConfigurationObject> config, String fileName) {
-        String destination = String.format("%s%s", root, fileName);
+        String destination = String.format("%s%s", containerFilePath, fileName);
         return objWriter.write(config, destination);
     }
 
