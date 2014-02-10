@@ -16,19 +16,21 @@ import java.util.Collections
 import java.util.List
 import java.util.Set
 import java.util.concurrent.atomic.AtomicInteger
-import org.opendaylight.controller.netconf.api.NetconfMessage
 import org.opendaylight.controller.sal.common.util.Rpcs
-import org.opendaylight.yangtools.yang.common.QName
-import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
+import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode
+import java.util.Collections
+import java.util.List
+import java.util.Set
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
 import org.opendaylight.yangtools.yang.data.api.Node
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode
-import org.opendaylight.yangtools.yang.data.impl.NodeUtils
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
@@ -50,7 +52,7 @@ class NetconfMapping {
     public static val NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
     public static val NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
     public static val NETCONF_DELETE_CONFIG_QNAME = QName.create(NETCONF_QNAME, "delete-config");
-    public static val NETCONF_ACTION_QNAME = QName.create(NETCONF_QNAME, "action");
+    public static val NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
     public static val NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
     
     public static val NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
@@ -92,6 +94,9 @@ class NetconfMapping {
         for (arg : argument.keyValues.entrySet) {
             list.add = new SimpleNodeTOImpl(arg.key, null, arg.value);
         }
+        if (node != null) {
+            list.add(node);
+        }
         return new CompositeNodeTOImpl(argument.nodeType, null, list)
     }
 
@@ -120,9 +125,9 @@ class NetconfMapping {
     }
 
     static def NetconfMessage toRpcMessage(QName rpc, CompositeNode node,Optional<SchemaContext> ctx) {
-        val rpcPayload = wrap(NETCONF_RPC_QNAME, flattenInput(node));
-        val w3cPayload = NodeUtils.buildShadowDomTree(rpcPayload);
-        w3cPayload.documentElement.setAttribute("message-id", "m-" + messageId.andIncrement);
+        val rpcPayload = wrap(NETCONF_RPC_QNAME, flattenInput(node))
+        val w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, XmlDocumentUtils.defaultValueCodecProvider)
+        w3cPayload.documentElement.setAttribute("message-id", "m-" + messageId.andIncrement)
         return new NetconfMessage(w3cPayload);
     }
     
