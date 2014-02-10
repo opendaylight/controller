@@ -11,16 +11,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +22,7 @@ public class ToasterProvider extends AbstractBindingAwareProvider {
     private static final Logger log = LoggerFactory.getLogger(ToasterProvider.class);
 
     private ProviderContext providerContext;
-    private OpendaylightToaster toaster;
+    private final OpendaylightToaster toaster;
 
     public ToasterProvider() {
         toaster = new OpendaylightToaster();
