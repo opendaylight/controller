@@ -9,8 +9,9 @@ package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+
+import javassist.ClassPool;
 
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
@@ -18,8 +19,6 @@ import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import javassist.ClassPool;
 
 public class SingletonHolder {
 

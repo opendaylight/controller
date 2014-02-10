@@ -7,22 +7,20 @@
  */
 package org.opendaylight.controller.sal.binding.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javassist.ClassPool;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.*;
-
-import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
 import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator;
@@ -30,12 +28,10 @@ import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
 import org.opendaylight.controller.sal.binding.test.mock.BarListener;
 import org.opendaylight.controller.sal.binding.test.mock.BarUpdate;
-import org.opendaylight.controller.sal.binding.test.mock.CompositeListener;
 import org.opendaylight.controller.sal.binding.test.mock.FlowDelete;
 import org.opendaylight.controller.sal.binding.test.mock.FooListener;
 import org.opendaylight.controller.sal.binding.test.mock.FooService;
 import org.opendaylight.controller.sal.binding.test.mock.FooUpdate;
-import org.opendaylight.controller.sal.binding.test.mock.InheritedContextInput;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObject;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObjectKey;
 import org.opendaylight.controller.sal.binding.test.mock.SimpleInput;
@@ -46,8 +42,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
-
-import static org.mockito.Mockito.*;
 
 public class RuntimeCodeGeneratorTest {
 
@@ -84,7 +78,7 @@ public class RuntimeCodeGeneratorTest {
 
         NotificationInvoker invokerFoo = invokerFactory.invokerFor(fooListener);
 
-        
+
         assertSame(fooListener,invokerFoo.getDelegate());
         assertNotNull(invokerFoo.getSupportedNotifications());
         assertEquals(1, invokerFoo.getSupportedNotifications().size());

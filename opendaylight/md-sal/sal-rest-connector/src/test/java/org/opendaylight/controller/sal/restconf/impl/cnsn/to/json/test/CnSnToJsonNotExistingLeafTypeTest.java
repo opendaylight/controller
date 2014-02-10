@@ -12,12 +12,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.DummyType;
@@ -29,7 +27,6 @@ import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.slf4j.Logger;
@@ -49,7 +46,7 @@ public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLo
         String jsonOutput = null;
         jsonOutput = TestUtils
                 .writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                        (Set<Module>) Collections.EMPTY_SET, prepareDataSchemaNode(),
+                        Collections.EMPTY_SET, prepareDataSchemaNode(),
                         StructuredDataToJsonProvider.INSTANCE);
         assertNotNull(jsonOutput);
         assertTrue(jsonOutput.contains("\"lf1\": \"\""));

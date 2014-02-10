@@ -7,29 +7,28 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import javax.swing.tree.ExpandVetoException;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.md.sal.common.impl.routing.RoutingUtils;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
-import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
@@ -37,8 +36,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.common.base.Preconditions.*;
 
 public class RpcProviderRegistryImpl implements //
         RpcProviderRegistry, //
@@ -56,7 +53,7 @@ public class RpcProviderRegistryImpl implements //
 
     private final String name;
 
-    private ListenerRegistry<GlobalRpcRegistrationListener> globalRpcListeners = ListenerRegistry.create();
+    private final ListenerRegistry<GlobalRpcRegistrationListener> globalRpcListeners = ListenerRegistry.create();
 
     public String getName() {
         return name;
@@ -109,7 +106,7 @@ public class RpcProviderRegistryImpl implements //
 
             potentialProxy = (T) publicProxies.get(type);
             if (potentialProxy != null) {
-                return (T) potentialProxy;
+                return potentialProxy;
             }
             T proxy = rpcFactory.getDirectProxyFor(type);
             LOG.debug("Created {} as public proxy for {} in {}", proxy, type.getSimpleName(), this);
@@ -151,7 +148,7 @@ public class RpcProviderRegistryImpl implements //
                 LOG.error("Unhandled exception during invoking listener {}", e);
             }
         }
-        
+
     }
 
     private void notifyListenersRoutedCreated(RpcRouter router) {
@@ -196,7 +193,7 @@ public class RpcProviderRegistryImpl implements //
     public interface RouterInstantiationListener extends EventListener {
         void onRpcRouterCreated(RpcRouter<?> router);
     }
-    
+
     public ListenerRegistration<GlobalRpcRegistrationListener> registerGlobalRpcRegistrationListener(GlobalRpcRegistrationListener listener) {
         return globalRpcListeners.register(listener);
     }
@@ -204,7 +201,7 @@ public class RpcProviderRegistryImpl implements //
     public interface GlobalRpcRegistrationListener extends EventListener {
         void onGlobalRpcRegistered(Class<? extends RpcService> cls);
         void onGlobalRpcUnregistered(Class<? extends RpcService> cls);
-        
+
     }
 
     private class RouteChangeForwarder<T extends RpcService> implements

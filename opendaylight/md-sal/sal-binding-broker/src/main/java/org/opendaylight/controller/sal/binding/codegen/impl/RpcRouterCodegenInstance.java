@@ -7,29 +7,26 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
-import org.opendaylight.yangtools.yang.binding.RpcService;
+import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.setRoutingTable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper;
-import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.*;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-
-import org.opendaylight.yangtools.yang.binding.DataContainer;
-import org.opendaylight.yangtools.yang.binding.RpcImplementation;
-import org.opendaylight.controller.md.sal.common.api.routing.MutableRoutingTable;
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,11 +63,11 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
         Map<Class<? extends BaseIdentity>, RpcRoutingTableImpl<? extends BaseIdentity, T>> mutableRoutingTables = new HashMap<>();
         for (Class<? extends BaseIdentity> ctx : contexts) {
             RpcRoutingTableImpl<? extends BaseIdentity, T> table = new RpcRoutingTableImpl<>(name,ctx,type);
-            
+
             @SuppressWarnings("rawtypes")
             Map invokerView = table.getRoutes();
-            
-            setRoutingTable((RpcService) invocationProxy, ctx, invokerView);
+
+            setRoutingTable(invocationProxy, ctx, invokerView);
             mutableRoutingTables.put(ctx, table);
             table.registerRouteChangeListener(this);
         }
