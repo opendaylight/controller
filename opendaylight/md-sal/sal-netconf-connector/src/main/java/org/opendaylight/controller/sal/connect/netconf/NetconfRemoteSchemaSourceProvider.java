@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.yangtools.yang.common.QName;
@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> {
 
@@ -27,11 +28,10 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
     public static final QName GET_SCHEMA_QNAME = QName.create(IETF_NETCONF_MONITORING, "get-schema");
     public static final QName GET_DATA_QNAME = QName.create(IETF_NETCONF_MONITORING, "data");
 
-    NetconfDevice device;
+    private final NetconfDevice device;
 
     public NetconfRemoteSchemaSourceProvider(NetconfDevice device) {
-        super();
-        this.device = device;
+        this.device = Preconditions.checkNotNull(device);
     }
 
     @Override
@@ -73,7 +73,7 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
         return null;
     }
 
-    public static final boolean isSupportedFor(Set<QName> capabilities) {
+    public static final boolean isSupportedFor(Collection<QName> capabilities) {
         return capabilities.contains(IETF_NETCONF_MONITORING);
     }
 }
