@@ -23,6 +23,10 @@ one.f.dashlet = {
     flowsOrPorts: {
         id: "flowsOrPorts",
         name: "Statistics"
+    },
+    java : {
+      id: 'java',
+      name: 'Controller JVM'
     }
 };
 
@@ -38,7 +42,8 @@ one.f.menu = {
     right : {
         top : [],
         bottom : [
-            one.f.dashlet.flowsOrPorts
+            one.f.dashlet.flowsOrPorts,
+            one.f.dashlet.java
         ]
     }
 };
@@ -599,6 +604,80 @@ one.f.troubleshooting.statistics = {
     }
 };
 
+one.f.troubleshooting.jvm = {
+  dashlet: function($dashlet) {
+    one.lib.dashlet.empty($dashlet);
+    $dashlet.append(one.lib.dashlet.header('Controller JVM Statistics'));
+    
+    // jolokia colors
+    var colorsRed = ['#FDBE85', '#FEEDDE', '#FD8D3C', '#E6550D', '#A63603', '#FDBE85', '#FEEDDE', '#FD8D3C', '#E6550D', '#A63603' ],
+      colorsGreen = [ '#E5F5F9', '#99D8C9', '#2CA25F', '#E5F5F9', '#99D8C9', '#2CA25F'],
+      colorsBlue = [ '#ECE7F2', '#A6BDDB', '#2B8CBE', '#ECE7F2', '#A6BDDB', '#2B8CBE'];
+
+    // jolokia setup
+    var j4p = new Jolokia({url:'/controller/nb/v2/jolokia',fetchInterval:1000});
+    var context = cubism.context().serverDelay(0).clientDelay(0).step(1000).size(594);
+    var jolokia = context.jolokia(j4p);
+
+    // metrics
+    var memory = jolokia.metric(
+      function(resp1, resp2) {
+        return Number(resp1.value) / Number(resp2.value);
+      },
+      {type:'read',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage',path:'used'},
+      {type:'read',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage',path:'max'},
+      'Heap-Memory'
+    );
+    var gcCount = jolokia.metric(
+      {type:'read',mbean:'java.lang:name=PS MarkSweep,type=GarbageCollector',attribute:'CollectionCount'},
+      {delta:1000,name:'GC Old'}
+    );
+    var gcCount2 = jolokia.metric(
+      {type:'read',mbean:'java.lang:name=PS Scavenge,type=GarbageCollector',attribute:'CollectionCount'},
+      {delta:1000,name:'GC Young'}
+    );
+
+    // charts
+    var $charts = $(document.createElement('div'))
+    .attr('id', 'charts');
+    $dashlet.append($charts);
+    d3.select('#charts').call(function(div) {
+
+      div.append('div')
+        .attr('class', 'axis')
+        .call(context.axis().orient('top'));
+
+      div.selectAll('.horizon')
+        .data([memory])
+        .enter().append('div')
+        .call(context.horizon()
+          .colors(colorsRed)
+          .format(d3.format('.4p'))
+        );
+
+      div.selectAll('.horizon-gc')
+        .data([gcCount2, gcCount])
+        .enter().append('div')
+        .attr('class', 'horizon horizon-gc')
+        .call(
+        context.horizon().colors(colorsRed).height(10)
+      );
+
+      div.append('div')
+        .attr('class', 'rule')
+        .call(context.rule());
+
+    });
+
+    context.on('focus', function(i) {
+      d3.selectAll('#memory .value').style('right', i == null ? null : context.size() - i + 'px');
+    });
+
+    // jolokia start
+    j4p.start();
+  }
+}
+
 // bind dashlet nav
 $('.dash .nav a', '#main').click(function() {
     // de/activation
@@ -621,6 +700,9 @@ $('.dash .nav a', '#main').click(function() {
             break;
         case menu.flowsOrPorts.id:
             one.f.troubleshooting.statistics.dashlet($dashlet);
+            break;
+        case menu.java.id:
+            one.f.troubleshooting.jvm.dashlet($dashlet);
             break;
     };
 });

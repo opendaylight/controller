@@ -36,8 +36,15 @@
 %>
 
 <title>${name}</title>
+
 <!-- jQuery - 1 -->
 <script src="/js/jquery-1.9.1.min.js"></script>
+
+<!-- jolokia -->
+<script src="/js/ext/d3.min.js"></script>
+<script src="/js/ext/jolokia.js"></script>
+<script src="/js/ext/cubism.v1.js""></script>
+<script src="/js/ext/jolokia-cubism.js"></script>
 
 <!-- Bootstrap JS - 2 -->
 <script src="/js/underscore-min.js"></script>
@@ -189,6 +196,7 @@
 
  <!-- Topology JS - 8 -->
  <script src="/js/open-topology.js"></script>
+
  <%
      }
  %>
