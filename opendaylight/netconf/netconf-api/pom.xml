@@ -52,6 +52,7 @@
                             javax.management,
                             org.opendaylight.controller.config.api,
                             org.opendaylight.controller.config.api.jmx,
+                            org.opendaylight.controller.config.api,
                             org.opendaylight.protocol.framework,
                             io.netty.channel,
                             io.netty.util.concurrent,
