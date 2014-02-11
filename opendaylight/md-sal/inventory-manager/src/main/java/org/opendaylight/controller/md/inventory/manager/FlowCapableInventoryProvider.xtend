@@ -64,6 +64,8 @@ class FlowCapableInventoryProvider implements AutoCloseable {
 
 class NodeChangeCommiter implements OpendaylightInventoryListener {
 
+    static val LOG = LoggerFactory.getLogger(NodeChangeCommiter);
+
     @Property
     val FlowCapableInventoryProvider manager;
 
@@ -76,6 +78,9 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         // Check path
         val it = manager.startChange()
+
+        LOG.debug("removing node connector : " + ref.value.toString());
+
         removeOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
     }
@@ -93,6 +98,8 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
             data.addAugmentation(FlowCapableNodeConnector, augment)
         }
 
+        LOG.debug("updating node connector : " + ref.value.toString());
+
         putOperationalData(ref.value as InstanceIdentifier<NodeConnector>, data.build());
         commit()
     }
@@ -100,6 +107,8 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
     override onNodeRemoved(NodeRemoved node) {
         val ref = node.nodeRef;
         val it = manager.startChange()
+
+        LOG.debug("removing node : " + ref.value.toString());
 
         removeOperationalData(ref.value as InstanceIdentifier<? extends DataObject>);
         commit()
@@ -116,6 +125,8 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
             val augment = flowNode.toInventoryAugment();
             data.addAugmentation(FlowCapableNode, augment)
         }
+
+        LOG.debug("updating node : " + ref.value.toString());
 
         putOperationalData(ref.value as InstanceIdentifier<Node>, data.build())
         commit()
