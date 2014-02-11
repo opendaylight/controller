@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
+import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
@@ -79,7 +80,7 @@ public class EditConfigTest {
     }
 
     @Test
-    public void test() throws NetconfDocumentedException {
+    public void test() throws NetconfDocumentedException, ValidationException {
         EditConfig edit = new EditConfig(yangStoreSnapshot, provider, configRegistry,
                 ValidateTest.NETCONF_SESSION_ID_FOR_REPORTING);
         EditConfigStrategy editStrat = mock(EditConfigStrategy.class);

@@ -66,12 +66,14 @@ public class Validate extends AbstractConfigNetconfOperation {
         try {
             checkXml(xml);
         } catch (IllegalStateException e) {
+            //FIXME where can IllegalStateException  be thrown? I see precondition that guards for programming bugs..
             logger.warn("Rpc error: {}", ErrorTag.missing_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.missing_attribute.name(), "Missing value of datastore attribute");
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.missing_attribute,
                     ErrorSeverity.error, errorInfo);
         } catch (final IllegalArgumentException e) {
+            // FIXME use checked exception if it has domain meaning
             logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
@@ -83,10 +85,7 @@ public class Validate extends AbstractConfigNetconfOperation {
             transactionProvider.validateTransaction();
         } catch (ValidationException e) {
             logger.warn("Validation failed", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_failed.name(), "Validation failed");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
-                    ErrorSeverity.error, errorInfo);
+            throw NetconfDocumentedException.wrap(e);
         } catch (IllegalStateException e) {
             logger.warn("Validation failed", e);
             final Map<String, String> errorInfo = new HashMap<>();

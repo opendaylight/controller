@@ -5,9 +5,7 @@
         <artifactId>sal-parent</artifactId>
         <version>1.1-SNAPSHOT</version>
     </parent>
-    <properties>
-        <netconf.version>0.2.4-SNAPSHOT</netconf.version>
-    </properties>
+
     <artifactId>sal-netconf-connector</artifactId>
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
@@ -234,12 +232,12 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
-                        <version>0.2.4-SNAPSHOT</version>
+                        <version>${config.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-			<version>${yangtools.version}</version>
+                        <version>${yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>

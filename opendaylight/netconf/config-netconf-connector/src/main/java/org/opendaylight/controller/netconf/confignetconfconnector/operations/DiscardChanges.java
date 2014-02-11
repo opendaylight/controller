@@ -8,9 +8,6 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
@@ -23,6 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiscardChanges extends AbstractConfigNetconfOperation {
 
@@ -53,6 +53,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             fromXml(xml);
         } catch (final IllegalArgumentException e) {
+            //FIXME where can IllegalStateException  be thrown?
             logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
@@ -63,6 +64,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             this.transactionProvider.abortTransaction();
         } catch (final IllegalStateException e) {
+            //FIXME where can IllegalStateException  be thrown?
             logger.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
