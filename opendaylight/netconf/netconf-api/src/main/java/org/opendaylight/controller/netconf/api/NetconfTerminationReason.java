@@ -22,4 +22,9 @@ public class NetconfTerminationReason implements TerminationReason {
     public String getErrorMessage() {
         return reason;
     }
+
+    @Override
+    public String toString() {
+        return reason;
+    }
 }

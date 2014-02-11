@@ -41,13 +41,15 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
 
     private final NetconfDevice device;
     private final DataModification<InstanceIdentifier, CompositeNode> modification;
-    private final boolean candidateSupported = true;
+    private final boolean candidateSupported;
 
     public NetconfDeviceTwoPhaseCommitTransaction(NetconfDevice device,
-            DataModification<InstanceIdentifier, CompositeNode> modification) {
+            DataModification<InstanceIdentifier, CompositeNode> modification,
+            boolean candidateSupported) {
         super();
         this.device = device;
         this.modification = modification;
+        this.candidateSupported = candidateSupported;
     }
 
     public void prepare() {
