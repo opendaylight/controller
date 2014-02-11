@@ -10,6 +10,9 @@ package org.opendaylight.controller.netconf.monitoring;
 public class MonitoringConstants {
 
     public static final String NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring";
+    public static final String EXTENSION_NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring-extension";
+    public static final String EXTENSION_NAMESPACE_PREFIX = "ncme";
+
     public static final String MODULE_NAME = "ietf-netconf-monitoring";
     public static final String MODULE_REVISION = "2010-10-04";
 

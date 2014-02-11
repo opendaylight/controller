@@ -7,14 +7,16 @@
  */
 @XmlSchema(
         elementFormDefault = XmlNsForm.QUALIFIED,
-//        xmlns = {
-//                @XmlNs(namespaceURI = MonitoringConstants.NAMESPACE, prefix = "")
-//        }
+        xmlns = {
+                @XmlNs(namespaceURI = MonitoringConstants.EXTENSION_NAMESPACE, prefix = MonitoringConstants.EXTENSION_NAMESPACE_PREFIX),
+                @XmlNs(namespaceURI = MonitoringConstants.NAMESPACE, prefix = "")
+        },
         namespace = MonitoringConstants.NAMESPACE
 )
 package org.opendaylight.controller.netconf.monitoring.xml.model;
 
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 
+import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;
