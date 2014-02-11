@@ -17,6 +17,7 @@ import java.util.concurrent.Future;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -71,6 +72,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Following are main responsibilities of the class:
  * 1) Invoke statistics request thread to send periodic statistics request to all the
@@ -84,14 +87,16 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class StatisticsProvider implements AutoCloseable {
+    public static final int STATS_THREAD_EXECUTION_TIME= 15000;
 
-    public final static Logger spLogger = LoggerFactory.getLogger(StatisticsProvider.class);
+    private static final Logger spLogger = LoggerFactory.getLogger(StatisticsProvider.class);
 
-    private DataProviderService dps;
+    private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
+    private final InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).toInstance();
+    private final DataProviderService dps;
 
-    private DataBrokerService dbs;
-
-    private NotificationProviderService nps;
+    //Local caching of stats
+    private final ConcurrentMap<NodeId,NodeStatisticsAger> statisticsCache = new ConcurrentHashMap<>();
 
     private OpendaylightGroupStatisticsService groupStatsService;
 
@@ -105,44 +110,15 @@ public class StatisticsProvider implements AutoCloseable {
 
     private OpendaylightQueueStatisticsService queueStatsService;
 
-    private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
-
     private StatisticsUpdateHandler statsUpdateHandler;
 
     private Thread statisticsRequesterThread;
 
     private Thread statisticsAgerThread;
 
-    private final  InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).toInstance();
 
-    public static final int STATS_THREAD_EXECUTION_TIME= 15000;
-    //Local caching of stats
-
-    private final ConcurrentMap<NodeId,NodeStatisticsAger> statisticsCache =
-            new ConcurrentHashMap<NodeId,NodeStatisticsAger>();
-
-    public DataProviderService getDataService() {
-      return this.dps;
-    }
-
-    public void setDataService(final DataProviderService dataService) {
-      this.dps = dataService;
-    }
-
-    public DataBrokerService getDataBrokerService() {
-        return this.dbs;
-    }
-
-    public void setDataBrokerService(final DataBrokerService dataBrokerService) {
-        this.dbs = dataBrokerService;
-    }
-
-    public NotificationProviderService getNotificationService() {
-      return this.nps;
-    }
-
-    public void setNotificationService(final NotificationProviderService notificationService) {
-      this.nps = notificationService;
+    public StatisticsProvider(final DataProviderService dataService) {
+        this.dps = Preconditions.checkNotNull(dataService);
     }
 
     public MultipartMessageManager getMultipartMessageManager() {
@@ -153,34 +129,20 @@ public class StatisticsProvider implements AutoCloseable {
 
     private Registration<NotificationListener> listenerRegistration;
 
-    public void start() {
+    public void start(final DataBrokerService dbs, final NotificationProviderService nps, final RpcConsumerRegistry rpcRegistry) {
 
-        NotificationProviderService nps = this.getNotificationService();
-        Registration<NotificationListener> registerNotificationListener = nps.registerNotificationListener(this.updateCommiter);
-        this.listenerRegistration = registerNotificationListener;
+        this.listenerRegistration = nps.registerNotificationListener(this.updateCommiter);
 
         statsUpdateHandler = new StatisticsUpdateHandler(StatisticsProvider.this);
-
-        registerDataStoreUpdateListener(this.getDataBrokerService());
+        registerDataStoreUpdateListener(dbs);
 
         // Get Group/Meter statistics service instance
-        groupStatsService = StatisticsManagerActivator.getProviderContext().
-                getRpcService(OpendaylightGroupStatisticsService.class);
-
-        meterStatsService = StatisticsManagerActivator.getProviderContext().
-                getRpcService(OpendaylightMeterStatisticsService.class);
-
-        flowStatsService = StatisticsManagerActivator.getProviderContext().
-                getRpcService(OpendaylightFlowStatisticsService.class);
-
-        portStatsService = StatisticsManagerActivator.getProviderContext().
-                getRpcService(OpendaylightPortStatisticsService.class);
-
-        flowTableStatsService = StatisticsManagerActivator.getProviderContext().
-                getRpcService(OpendaylightFlowTableStatisticsService.class);
-
-        queueStatsService = StatisticsManagerActivator.getProviderContext().
-                getRpcService(OpendaylightQueueStatisticsService.class);
+        groupStatsService = rpcRegistry.getRpcService(OpendaylightGroupStatisticsService.class);
+        meterStatsService = rpcRegistry.getRpcService(OpendaylightMeterStatisticsService.class);
+        flowStatsService = rpcRegistry.getRpcService(OpendaylightFlowStatisticsService.class);
+        portStatsService = rpcRegistry.getRpcService(OpendaylightPortStatisticsService.class);
+        flowTableStatsService = rpcRegistry.getRpcService(OpendaylightFlowTableStatisticsService.class);
+        queueStatsService = rpcRegistry.getRpcService(OpendaylightQueueStatisticsService.class);
 
         statisticsRequesterThread = new Thread( new Runnable(){
 
@@ -263,8 +225,6 @@ public class StatisticsProvider implements AutoCloseable {
     }
 
     protected DataModificationTransaction startChange() {
-
-        DataProviderService dps = this.getDataService();
         return dps.beginTransaction();
     }
 
