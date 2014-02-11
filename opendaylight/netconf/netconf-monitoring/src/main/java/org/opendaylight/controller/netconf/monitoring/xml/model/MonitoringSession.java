@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.monitoring.xml.model;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import com.google.common.base.Joiner;
+import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -69,13 +71,18 @@ final class MonitoringSession {
     public String getTransport() {
         try {
             QName qName = (QName) managementSession.getTransport().getField("QNAME").get(null);
-            return qName.getLocalName();
+            // Add extension prefix if transport type is from extension yang module
+            if (qName.getNamespace().toString().equals(MonitoringConstants.EXTENSION_NAMESPACE)) {
+                return Joiner.on(':').join(MonitoringConstants.EXTENSION_NAMESPACE_PREFIX, qName.getLocalName());
+            } else {
+                return qName.getLocalName();
+            }
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             throw new IllegalArgumentException("Unknown transport type " + managementSession.getTransport(), e);
         }
     }
 
-    @XmlElement(name= "session-identifier")
+    @XmlElement(name= "session-identifier", namespace = MonitoringConstants.EXTENSION_NAMESPACE)
     public String getSessionType() {
         return managementSession.getAugmentation(Session1.class).getSessionIdentifier();
     }
