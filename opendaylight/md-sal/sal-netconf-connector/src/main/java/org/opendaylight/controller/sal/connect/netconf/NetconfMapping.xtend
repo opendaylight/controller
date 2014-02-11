@@ -39,8 +39,8 @@ class NetconfMapping {
     public static val NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0")
     public static val NETCONF_MONITORING_URI = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"
     public static val NETCONF_NOTIFICATION_URI = URI.create("urn:ietf:params:xml:ns:netconf:notification:1.0")
-    
-    
+
+
     public static val NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
     public static val NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
     public static val NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
@@ -51,15 +51,15 @@ class NetconfMapping {
     public static val NETCONF_DELETE_CONFIG_QNAME = QName.create(NETCONF_QNAME, "delete-config");
     public static val NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
     public static val NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
-    
+
     public static val NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
     public static val NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
     public static val NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
-    
+
     public static val NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
     public static val NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
-    
-    
+
+
     public static val NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
     public static val NETCONF_OK_QNAME = QName.create(NETCONF_QNAME, "ok");
     public static val NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
@@ -78,7 +78,7 @@ class NetconfMapping {
         if(identifier.path.empty) {
             return null;
         }
-        
+
         for (component : identifier.path.reverseView) {
             val Node<?> current = component.toNode(previous);
             previous = current;
@@ -106,11 +106,11 @@ class NetconfMapping {
     }
 
     static def CompositeNode toCompositeNode(NetconfMessage message,Optional<SchemaContext> ctx) {
-        //TODO: implement general normalization to normalize incoming Netconf Message 
+        //TODO: implement general normalization to normalize incoming Netconf Message
         // for Schema Context counterpart
         return null
     }
-    
+
     static def CompositeNode toNotificationNode(NetconfMessage message,Optional<SchemaContext> ctx) {
         if (ctx.present) {
             val schemaContext = ctx.get
@@ -127,56 +127,53 @@ class NetconfMapping {
         w3cPayload.documentElement.setAttribute("message-id", "m-" + messageId.andIncrement)
         return new NetconfMessage(w3cPayload);
     }
-    
+
     def static flattenInput(CompositeNode node) {
         val inputQName = QName.create(node.nodeType,"input");
         val input = node.getFirstCompositeByName(inputQName);
         if(input == null) return node;
         if(input instanceof CompositeNode) {
-            
+
             val nodes = ImmutableList.builder() //
                 .addAll(input.children) //
                 .addAll(node.children.filter[nodeType != inputQName]) //
                 .build()
             return ImmutableCompositeNode.create(node.nodeType,nodes);
-        } 
-        
+        }
+
     }
 
     static def RpcResult<CompositeNode> toRpcResult(NetconfMessage message,QName rpc,Optional<SchemaContext> context) {
         var CompositeNode rawRpc;
         if(context.present) {
             if(isDataRetrievalReply(rpc)) {
-                
+
                 val xmlData = message.document.dataSubtree
                 val dataNodes = XmlDocumentUtils.toDomNodes(xmlData, Optional.of(context.get.dataDefinitions))
-                
+
                 val it = ImmutableCompositeNode.builder()
                 setQName(NETCONF_RPC_REPLY_QNAME)
                 add(ImmutableCompositeNode.create(NETCONF_DATA_QNAME, dataNodes));
-                
+
                 rawRpc = it.toInstance;
                 //sys(xmlData)
             } else {
                 val rpcSchema = context.get.operations.findFirst[QName == rpc]
                 rawRpc = message.document.toCompositeNode() as CompositeNode;
             }
-            
-            
-            
         } else {
             rawRpc = message.document.toCompositeNode() as CompositeNode;
         }
         //rawRpc.
         return Rpcs.getRpcResult(true, rawRpc, Collections.emptySet());
     }
-    
+
     def static Element getDataSubtree(Document doc) {
         doc.getElementsByTagNameNS(NETCONF_URI.toString,"data").item(0) as Element
     }
-    
+
     def static boolean isDataRetrievalReply(QName it) {
-        return NETCONF_URI == namespace && ( localName == NETCONF_GET_CONFIG_QNAME.localName || localName == NETCONF_GET_QNAME.localName) 
+        return NETCONF_URI == namespace && ( localName == NETCONF_GET_CONFIG_QNAME.localName || localName == NETCONF_GET_QNAME.localName)
     }
 
     static def wrap(QName name, Node<?> node) {
@@ -209,12 +206,12 @@ class NetconfMapping {
     public static def Node<?> toCompositeNode(Document document) {
         return XmlDocumentUtils.toDomNode(document) as Node<?>
     }
-    
+
     public static def checkValidReply(NetconfMessage input, NetconfMessage output) {
         val inputMsgId = input.document.documentElement.getAttribute("message-id")
         val outputMsgId = output.document.documentElement.getAttribute("message-id")
         Preconditions.checkState(inputMsgId == outputMsgId,"Rpc request and reply message IDs must be same.");
-        
+
     }
-    
+
 }

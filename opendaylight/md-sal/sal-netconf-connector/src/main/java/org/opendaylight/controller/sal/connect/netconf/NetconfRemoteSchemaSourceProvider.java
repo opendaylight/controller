@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.yangtools.yang.common.QName;
@@ -73,7 +73,7 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
         return null;
     }
 
-    public static final boolean isSupportedFor(Set<QName> capabilities) {
+    public static final boolean isSupportedFor(Collection<QName> capabilities) {
         return capabilities.contains(IETF_NETCONF_MONITORING);
     }
 }

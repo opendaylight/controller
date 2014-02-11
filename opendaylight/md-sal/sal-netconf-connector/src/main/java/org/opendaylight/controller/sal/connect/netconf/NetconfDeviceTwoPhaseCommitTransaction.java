@@ -44,15 +44,17 @@ import com.google.common.collect.Lists;
 
 public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<InstanceIdentifier, CompositeNode> {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceTwoPhaseCommitTransaction.class);
-    private final NetconfDevice device;
     private final DataModification<InstanceIdentifier, CompositeNode> modification;
-    private final boolean candidateSupported = true;
+    private final NetconfDevice device;
+    private final boolean candidateSupported;
 
     public NetconfDeviceTwoPhaseCommitTransaction(NetconfDevice device,
-            DataModification<InstanceIdentifier, CompositeNode> modification) {
+            DataModification<InstanceIdentifier, CompositeNode> modification,
+            boolean candidateSupported) {
         super();
         this.device = device;
         this.modification = modification;
+        this.candidateSupported = candidateSupported;
     }
 
     void prepare() throws InterruptedException, ExecutionException {
@@ -62,7 +64,6 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
         for(Entry<InstanceIdentifier, CompositeNode> toUpdate : modification.getUpdatedConfigurationData().entrySet()) {
             sendMerge(toUpdate.getKey(),toUpdate.getValue());
         }
-
     }
 
     private void sendMerge(InstanceIdentifier key, CompositeNode value) throws InterruptedException, ExecutionException {
@@ -80,7 +81,6 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
 
         RpcResult<CompositeNode> rpcResult = device.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, builder.toInstance()).get();
         Preconditions.checkState(rpcResult.isSuccessful(),"Rpc Result was unsuccessful");
-
     }
 
     private CompositeNodeBuilder<ImmutableCompositeNode> configurationRpcBuilder() {
