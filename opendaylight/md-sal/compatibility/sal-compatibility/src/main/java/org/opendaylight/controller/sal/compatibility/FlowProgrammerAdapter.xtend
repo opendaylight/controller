@@ -199,9 +199,11 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     }
 
     private def Future<RpcResult<TransactionStatus>> internalModifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
-        val flowId = getCache().remove(oldFlow);
+        var flowId = getCache().remove(oldFlow);
         if(flowId == null){
-            throw new IllegalArgumentException("oldFlow is unknown");
+            LOG.error("oldFlow not found in cache : " + oldFlow.hashCode);
+            flowId = UUID.randomUUID();
+            getCache().put(oldFlow, flowId);
         }
 
         getCache().put(newFlow, flowId);
@@ -212,7 +214,9 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     private def Future<RpcResult<TransactionStatus>> internalRemoveFlowAsync(Node node, Flow adflow, long rid){
         val flowId = getCache().remove(adflow);
         if(flowId == null){
-            throw new IllegalArgumentException("adflow is unknown");
+            //throw new IllegalArgumentException("adflow not found in cache : " + adflow.hashCode);
+            LOG.error("adflow not found in cache : " + adflow.hashCode);
+            return null;
         }
         val flow = adflow.toMDFlow(flowId.toString());
         val modification = this._dataBrokerService.beginTransaction();
@@ -227,6 +231,10 @@ class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, SalFlowLi
     }
 
     private def toFutureStatus(Future<RpcResult<TransactionStatus>> future){
+        if(future == null){
+            return toStatus(true);
+        }
+
         try {
             val result = future.get();
             return toStatus(result);
