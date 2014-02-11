@@ -14,7 +14,7 @@ package org.opendaylight.controller.config.api;
  * transaction was committed after creating this transaction. Clients can create
  * new transaction and merge the changes.
  */
-public class ConflictingVersionException extends RuntimeException {
+public class ConflictingVersionException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public ConflictingVersionException() {

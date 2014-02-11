@@ -7,24 +7,23 @@
  */
 package org.opendaylight.controller.config.util;
 
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.Attribute;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
-import javax.management.JMX;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.RuntimeMBeanException;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+
+import javax.management.Attribute;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.JMX;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.util.Map;
+import java.util.Set;
 
 public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     private final ConfigRegistryMXBean configRegistryMXBeanProxy;
@@ -234,10 +233,15 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
             throws ValidationException {
         try {
             configMBeanServer.invoke(configBeanON, "validate", null, null);
+        } catch (MBeanException e) {
+            Exception targetException = e.getTargetException();
+            if (targetException instanceof ValidationException){
+                throw (ValidationException) targetException;
+            } else {
+                throw new RuntimeException(e);
+            }
         } catch (JMException e) {
             throw new RuntimeException(e);
-        } catch (RuntimeMBeanException e) {
-            throw e.getTargetException();
         }
     }
 
