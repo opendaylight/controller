@@ -1,0 +1,39 @@
+<configuration>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>mem [%d{HH:mm:ss.SSS}] [%thread] %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="MEMORY" class="org.opendaylight.controller.config.yang.logback.memoryappender.MemoryAppender">
+
+    </appender>
+
+    <logger name="w" level="WARN"/>
+
+    <logger name="w.e" level="ERROR"/>
+
+    <logger name="stdout" level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="ignore.ignore" level="INFO" >
+        <!-- catch: 'ignore' will be another logger with empty appenders, see
+        org.opendaylight.controller.config.yang.logback.config.LoggerExtractorTest
+         -->
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="MEMORY"/>
+
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="MEMORY"/>
+    </root>
+
+</configuration>

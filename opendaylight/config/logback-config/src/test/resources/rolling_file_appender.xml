@@ -1,0 +1,52 @@
+<!--
+  ~ Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<configuration>
+
+    <appender name="VARLOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>target/osgi.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>varlogfile %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>target/osgi.log.%i.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>50MB</maxFileSize>
+        </triggeringPolicy>
+
+    </appender>
+
+    <appender name="BGPDUMPFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>target/bgp.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>[%d{HH:mm:ss.SSS}] [%thread] %-5level %logger - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>target/bgp.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>5MB</maxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="VARLOGFILE"/>
+        <appender-ref ref="BGPDUMPFILE"/>
+    </root>
+
+</configuration>

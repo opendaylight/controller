@@ -1253,6 +1253,11 @@
       <artifactId>netty-codec-http</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>xom</groupId>
+      <artifactId>xom</artifactId>
+    </dependency>
+
     <!-- testing dependencies I'm pretty sure we should trim -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

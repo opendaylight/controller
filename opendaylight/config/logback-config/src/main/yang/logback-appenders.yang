@@ -1,0 +1,176 @@
+module config-logback-appenders {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:logback:appender";
+    prefix "appender";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import logback { prefix logback; }
+
+    description
+        "This module contains the base YANG definitions for following Logback appenders:
+        console appender, file appender, rolling file appender. ";
+
+    revision "2013-12-10" {
+        description
+            "Initial revision.";
+    }
+
+
+    
+    identity console-appender {
+        base config:module-type;
+        config:provided-service logback:appender;
+        config:java-name-prefix ConsoleAppender;
+    }
+
+    identity file-appender {
+    	base config:module-type;
+        config:provided-service logback:appender;
+        config:java-name-prefix FileAppender;
+    }
+
+    identity rolling-file-appender {
+    	base config:module-type;
+    	config:provided-service logback:appender;
+    	config:java-name-prefix RollingFileAppender;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case rolling-file-appender {
+            when "/config:modules/config:module/config:type = 'rolling-file-appender'";
+
+            list rolling-file-appenderTO {
+
+                leaf file {
+                    type string;
+                    mandatory true;
+                }
+
+
+                leaf encoder-pattern {
+                    type string;
+                    mandatory true;
+                }
+
+                // TODO: both rolling policies should be modeled as case statements
+                container time-based-rolling-policy {
+                    config:java-name-prefix TimeBasedRollingPolicyTO;
+
+                    leaf file-name-pattern {
+                        type string;
+                        mandatory true;
+                    }
+
+                    leaf max-history {
+                        type int32;
+                        mandatory true;
+                    }
+
+                    leaf clean-history-on-start {
+                        type boolean;
+                        default false;
+                    }
+                }
+
+                container fixed-window-rolling-policy {
+                    config:java-name-prefix FixedWindowRollingPolicyTO;
+
+                    leaf file-name-pattern {
+                        type string;
+                        mandatory true;
+                    }
+
+                    leaf min-index {
+                        type int32;
+                        mandatory true;
+                    }
+
+                    leaf max-index {
+                        type int32;
+                        mandatory true;
+                    }
+                }
+
+                container size-based-triggering-policy {
+                    config:java-name-prefix SizeBasedTriggeringPolicyTO;
+
+                    leaf max-file-size {
+                        type string;
+                        mandatory true;
+                    }
+                }
+
+
+
+                leaf name {
+                    type string;
+                    mandatory true;
+                }
+                key name;
+
+                leaf threshold-filter {
+                    type string;
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+
+        case console-appender {
+            when "/config:modules/config:module/config:type = 'console-appender'";
+
+            list console-appenderTO {
+                leaf encoder-pattern {
+                    type string;
+                    mandatory true;
+                }
+
+                leaf name {
+                    type string;
+                    mandatory true;
+                }
+                key name;
+
+                leaf threshold-filter {
+                    type string;
+                }
+            }
+        }
+
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+
+        case file-appender {
+            when "/config:modules/config:module/config:type = 'file-appender'";
+
+            list file-appenderTO {
+                leaf append {
+                    type boolean;
+                    mandatory false;
+                }
+
+                leaf file {
+                    type string;
+                    mandatory true;
+                }
+
+                leaf encoder-pattern {
+                    type string;
+                    mandatory true;
+                }
+
+                leaf name {
+                    type string;
+                    mandatory true;
+                }
+                key name;
+
+                leaf threshold-filter {
+                    type string;
+                }
+            }
+        }
+    }
+}

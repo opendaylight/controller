@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.test.sal.binding.it;
 
-import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.repository;
-import static org.ops4j.pax.exam.CoreOptions.repositories;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.PathUtils;
+
+import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 public class TestHelper {
 
@@ -84,7 +82,9 @@ public class TestHelper {
 
                 mavenBundle(CONTROLLER, "config-persister-file-xml-adapter").versionAsInProject().noStart(),
                 mavenBundle("org.eclipse.persistence", "org.eclipse.persistence.moxy").versionAsInProject(),
-                mavenBundle("org.eclipse.persistence", "org.eclipse.persistence.core").versionAsInProject());
+                mavenBundle("org.eclipse.persistence", "org.eclipse.persistence.core").versionAsInProject(),
+                mavenBundle("xom", "xom").versionAsInProject()
+        );
 
     }
 
