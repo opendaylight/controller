@@ -9,19 +9,22 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
+
+import java.util.Collection;
+
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
 
 public class NetconfClientSession extends NetconfSession {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClientSession.class);
     private final Collection<String> capabilities;
 
-    public NetconfClientSession(SessionListener sessionListener, Channel channel, long sessionId,
+    public NetconfClientSession(SessionListener<NetconfMessage, NetconfSession, NetconfTerminationReason> sessionListener, Channel channel, long sessionId,
             Collection<String> capabilities) {
         super(sessionListener,channel,sessionId);
         this.capabilities = capabilities;
