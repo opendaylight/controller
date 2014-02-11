@@ -21,10 +21,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -36,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.F
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsDataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.aggregate.flow.statistics.AggregateFlowStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.aggregate.flow.statistics.AggregateFlowStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
@@ -45,9 +44,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GroupDescStatsUpdated;
@@ -66,13 +65,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.desc.stats.reply.GroupDescStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.statistics.reply.GroupStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
@@ -168,22 +165,20 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         DataModificationTransaction it = this.statisticsManager.startChange();
 
         for(MeterConfigStats meterConfigStats : meterConfigStatsList){
-            MeterBuilder meterBuilder = new MeterBuilder();
             MeterKey meterKey = new MeterKey(meterConfigStats.getMeterId());
-            meterBuilder.setKey(meterKey);
-
-            InstanceIdentifier<Meter> meterRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
+            InstanceIdentifier<NodeMeterConfigStats> meterRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
                                                                                         .augmentation(FlowCapableNode.class)
-                                                                                        .child(Meter.class,meterKey).toInstance();
+                                                                                        .child(Meter.class,meterKey)
+                                                                                        .augmentation(NodeMeterConfigStats.class)
+                                                                                        .build();
 
-            NodeMeterConfigStatsBuilder meterConfig= new NodeMeterConfigStatsBuilder();
-            MeterConfigStatsBuilder stats = new MeterConfigStatsBuilder();
-            stats.fieldsFrom(meterConfigStats);
+            NodeMeterConfigStatsBuilder meterConfig = new NodeMeterConfigStatsBuilder();
+            MeterConfigStatsBuilder stats = new MeterConfigStatsBuilder(meterConfigStats);
             meterConfig.setMeterConfigStats(stats.build());
 
             //Update augmented data
-            meterBuilder.addAugmentation(NodeMeterConfigStats.class, meterConfig.build());
-            it.putOperationalData(meterRef, meterBuilder.build());
+            it.removeOperationalData(meterRef);
+            it.putOperationalData(meterRef, meterConfig.build());
         }
         it.commit();
     }
@@ -202,23 +197,20 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         DataModificationTransaction it = this.statisticsManager.startChange();
 
         for(MeterStats meterStats : meterStatsList){
-
-            MeterBuilder meterBuilder = new MeterBuilder();
             MeterKey meterKey = new MeterKey(meterStats.getMeterId());
-            meterBuilder.setKey(meterKey);
-
-            InstanceIdentifier<Meter> meterRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
+            InstanceIdentifier<NodeMeterStatistics> meterRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
                                                                                         .augmentation(FlowCapableNode.class)
-                                                                                        .child(Meter.class,meterKey).toInstance();
+                                                                                        .child(Meter.class,meterKey)
+                                                                                        .augmentation(NodeMeterStatistics.class)
+                                                                                        .build();
 
-            NodeMeterStatisticsBuilder meterStatsBuilder= new NodeMeterStatisticsBuilder();
-            MeterStatisticsBuilder stats = new MeterStatisticsBuilder();
-            stats.fieldsFrom(meterStats);
+            NodeMeterStatisticsBuilder meterStatsBuilder = new NodeMeterStatisticsBuilder();
+            MeterStatisticsBuilder stats = new MeterStatisticsBuilder(meterStats);
             meterStatsBuilder.setMeterStatistics(stats.build());
 
             //Update augmented data
-            meterBuilder.addAugmentation(NodeMeterStatistics.class, meterStatsBuilder.build());
-            it.putOperationalData(meterRef, meterBuilder.build());
+            it.removeOperationalData(meterRef);
+            it.putOperationalData(meterRef, meterStatsBuilder.build());
         }
         it.commit();
     }
@@ -244,24 +236,19 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         DataModificationTransaction it = this.statisticsManager.startChange();
 
         for(GroupDescStats groupDescStats : groupDescStatsList){
-
-            GroupBuilder groupBuilder = new GroupBuilder();
             GroupKey groupKey = new GroupKey(groupDescStats.getGroupId());
-            groupBuilder.setKey(groupKey);
-
-            InstanceIdentifier<Group> groupRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
+            InstanceIdentifier<NodeGroupDescStats> groupRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
                                                                                         .augmentation(FlowCapableNode.class)
-                                                                                        .child(Group.class,groupKey).toInstance();
+                                                                                        .child(Group.class, groupKey)
+                                                                                        .augmentation(NodeGroupDescStats.class)
+                                                                                        .build();
 
-            NodeGroupDescStatsBuilder groupDesc= new NodeGroupDescStatsBuilder();
-            GroupDescBuilder stats = new GroupDescBuilder();
-            stats.fieldsFrom(groupDescStats);
+            NodeGroupDescStatsBuilder groupDesc = new NodeGroupDescStatsBuilder();
+            GroupDescBuilder stats = new GroupDescBuilder(groupDescStats);
             groupDesc.setGroupDesc(stats.build());
 
-            //Update augmented data
-            groupBuilder.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
-
-            it.putOperationalData(groupRef, groupBuilder.build());
+            it.removeOperationalData(groupRef);
+            it.putOperationalData(groupRef, groupDesc.build());
         }
         it.commit();
     }
@@ -279,23 +266,20 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         DataModificationTransaction it = this.statisticsManager.startChange();
 
         for(GroupStats groupStats : groupStatsList){
-
-            GroupBuilder groupBuilder = new GroupBuilder();
             GroupKey groupKey = new GroupKey(groupStats.getGroupId());
-            groupBuilder.setKey(groupKey);
-
-            InstanceIdentifier<Group> groupRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
+            InstanceIdentifier<NodeGroupStatistics> groupRef = InstanceIdentifier.builder(Nodes.class).child(Node.class,key)
                                                                                         .augmentation(FlowCapableNode.class)
-                                                                                        .child(Group.class,groupKey).toInstance();
+                                                                                        .child(Group.class,groupKey)
+                                                                                        .augmentation(NodeGroupStatistics.class)
+                                                                                        .build();
 
-            NodeGroupStatisticsBuilder groupStatisticsBuilder= new NodeGroupStatisticsBuilder();
-            GroupStatisticsBuilder stats = new GroupStatisticsBuilder();
-            stats.fieldsFrom(groupStats);
+            NodeGroupStatisticsBuilder groupStatisticsBuilder = new NodeGroupStatisticsBuilder();
+            GroupStatisticsBuilder stats = new GroupStatisticsBuilder(groupStats);
             groupStatisticsBuilder.setGroupStatistics(stats.build());
 
             //Update augmented data
-            groupBuilder.addAugmentation(NodeGroupStatistics.class, groupStatisticsBuilder.build());
-            it.putOperationalData(groupRef, groupBuilder.build());
+            it.removeOperationalData(groupRef);
+            it.putOperationalData(groupRef, groupStatisticsBuilder.build());
         }
         it.commit();
     }
@@ -318,7 +302,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(key);
 
-        NodeMeterFeaturesBuilder nodeMeterFeatures= new NodeMeterFeaturesBuilder();
+        NodeMeterFeaturesBuilder nodeMeterFeatures = new NodeMeterFeaturesBuilder();
         nodeMeterFeatures.setMeterFeatures(meterFeature.build());
 
         //Update augmented data
@@ -542,24 +526,22 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
 
             DataModificationTransaction it = this.statisticsManager.startChange();
 
-            InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
-                    .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
+            InstanceIdentifier<AggregateFlowStatisticsData> statsRef = InstanceIdentifier.builder(Nodes.class)
+                    .child(Node.class, key)
+                    .augmentation(FlowCapableNode.class)
+                    .child(Table.class, new TableKey(tableId))
+                    .augmentation(AggregateFlowStatisticsData.class).build();
 
             AggregateFlowStatisticsDataBuilder aggregateFlowStatisticsDataBuilder = new AggregateFlowStatisticsDataBuilder();
-            AggregateFlowStatisticsBuilder aggregateFlowStatisticsBuilder = new AggregateFlowStatisticsBuilder();
-            aggregateFlowStatisticsBuilder.setByteCount(notification.getByteCount());
-            aggregateFlowStatisticsBuilder.setFlowCount(notification.getFlowCount());
-            aggregateFlowStatisticsBuilder.setPacketCount(notification.getPacketCount());
+            AggregateFlowStatisticsBuilder aggregateFlowStatisticsBuilder = new AggregateFlowStatisticsBuilder(notification);
             aggregateFlowStatisticsDataBuilder.setAggregateFlowStatistics(aggregateFlowStatisticsBuilder.build());
 
-            sucLogger.debug("Augment aggregate statistics: {} for table {} on Node {}",aggregateFlowStatisticsBuilder.build().toString(),tableId,key);
+            AggregateFlowStatistics stats = aggregateFlowStatisticsBuilder.build();
+            sucLogger.debug("Augment aggregate statistics: {} for table {} on Node {}",stats,tableId,key);
 
-            TableBuilder tableBuilder = new TableBuilder();
-            tableBuilder.setKey(new TableKey(tableId));
-            tableBuilder.addAugmentation(AggregateFlowStatisticsData.class, aggregateFlowStatisticsDataBuilder.build());
-            it.putOperationalData(tableRef, tableBuilder.build());
+            it.removeOperationalData(statsRef);
+            it.putOperationalData(statsRef, stats);
             it.commit();
-
         }
     }
 
@@ -577,18 +559,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         for(NodeConnectorStatisticsAndPortNumberMap portStats : portsStats){
 
             FlowCapableNodeConnectorStatisticsBuilder statisticsBuilder
-                                            = new FlowCapableNodeConnectorStatisticsBuilder();
-            statisticsBuilder.setBytes(portStats.getBytes());
-            statisticsBuilder.setCollisionCount(portStats.getCollisionCount());
-            statisticsBuilder.setDuration(portStats.getDuration());
-            statisticsBuilder.setPackets(portStats.getPackets());
-            statisticsBuilder.setReceiveCrcError(portStats.getReceiveCrcError());
-            statisticsBuilder.setReceiveDrops(portStats.getReceiveDrops());
-            statisticsBuilder.setReceiveErrors(portStats.getReceiveErrors());
-            statisticsBuilder.setReceiveFrameError(portStats.getReceiveFrameError());
-            statisticsBuilder.setReceiveOverRunError(portStats.getReceiveOverRunError());
-            statisticsBuilder.setTransmitDrops(portStats.getTransmitDrops());
-            statisticsBuilder.setTransmitErrors(portStats.getTransmitErrors());
+                                            = new FlowCapableNodeConnectorStatisticsBuilder(portStats);
 
             //Augment data to the node-connector
             FlowCapableNodeConnectorStatisticsDataBuilder statisticsDataBuilder =
@@ -601,10 +572,16 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             NodeConnector nodeConnector = (NodeConnector)it.readOperationalData(nodeConnectorRef);
 
             if(nodeConnector != null){
-                sucLogger.debug("Augmenting port statistics {} to port {}",statisticsDataBuilder.build().toString(),nodeConnectorRef.toString());
-                NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder();
-                nodeConnectorBuilder.addAugmentation(FlowCapableNodeConnectorStatisticsData.class, statisticsDataBuilder.build());
-                it.putOperationalData(nodeConnectorRef, nodeConnectorBuilder.build());
+                FlowCapableNodeConnectorStatisticsData stats = statisticsDataBuilder.build();
+                sucLogger.debug("Augmenting port statistics {} to port {}",stats,nodeConnectorRef.toString());
+
+                InstanceIdentifier<FlowCapableNodeConnectorStatisticsData> statsRef = InstanceIdentifier.builder(Nodes.class)
+                        .child(Node.class, key)
+                        .child(NodeConnector.class, new NodeConnectorKey(portStats.getNodeConnectorId()))
+                        .augmentation(FlowCapableNodeConnectorStatisticsData.class).build();
+
+                it.removeOperationalData(statsRef);
+                it.putOperationalData(statsRef, stats);
             }
         }
         it.commit();
@@ -623,24 +600,20 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
 
         for (FlowTableAndStatisticsMap ftStats : flowTablesStatsList){
 
-            InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
-                    .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(ftStats.getTableId().getValue())).toInstance();
-
             FlowTableStatisticsDataBuilder statisticsDataBuilder = new FlowTableStatisticsDataBuilder();
 
-            FlowTableStatisticsBuilder statisticsBuilder = new FlowTableStatisticsBuilder();
-            statisticsBuilder.setActiveFlows(ftStats.getActiveFlows());
-            statisticsBuilder.setPacketsLookedUp(ftStats.getPacketsLookedUp());
-            statisticsBuilder.setPacketsMatched(ftStats.getPacketsMatched());
+            FlowTableStatisticsBuilder statisticsBuilder = new FlowTableStatisticsBuilder(ftStats);
+            FlowTableStatistics stats = statisticsBuilder.build();
+            statisticsDataBuilder.setFlowTableStatistics(stats);
 
-            statisticsDataBuilder.setFlowTableStatistics(statisticsBuilder.build());
+            sucLogger.debug("Augment flow table statistics: {} for table {} on Node {}",stats,ftStats.getTableId(),key);
 
-            sucLogger.debug("Augment flow table statistics: {} for table {} on Node {}",statisticsBuilder.build().toString(),ftStats.getTableId(),key);
+            InstanceIdentifier<FlowTableStatisticsData> statsRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
+                    .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(ftStats.getTableId().getValue()))
+                    .augmentation(FlowTableStatisticsData.class).build();
 
-            TableBuilder tableBuilder = new TableBuilder();
-            tableBuilder.setKey(new TableKey(ftStats.getTableId().getValue()));
-            tableBuilder.addAugmentation(FlowTableStatisticsData.class, statisticsDataBuilder.build());
-            it.putOperationalData(tableRef, tableBuilder.build());
+            it.removeOperationalData(statsRef);
+            it.putOperationalData(statsRef, statisticsDataBuilder.build());
         }
         it.commit();
     }
@@ -677,24 +650,23 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             queueStatisticsBuilder.fieldsFrom(swQueueStats);
 
             queueStatisticsDataBuilder.setFlowCapableNodeConnectorQueueStatistics(queueStatisticsBuilder.build());
+            FlowCapableNodeConnectorQueueStatisticsData stats = queueStatisticsDataBuilder.build();
 
-            InstanceIdentifier<Queue> queueRef
+            InstanceIdentifier<FlowCapableNodeConnectorQueueStatisticsData> statsRef
                     = InstanceIdentifier.builder(Nodes.class)
                                         .child(Node.class, key)
                                         .child(NodeConnector.class, new NodeConnectorKey(swQueueStats.getNodeConnectorId()))
                                         .augmentation(FlowCapableNodeConnector.class)
-                                        .child(Queue.class, new QueueKey(swQueueStats.getQueueId())).toInstance();
+                                        .child(Queue.class, new QueueKey(swQueueStats.getQueueId()))
+                                        .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class).build();
 
-            QueueBuilder queueBuilder = new QueueBuilder();
-            queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, queueStatisticsDataBuilder.build());
-            queueBuilder.setKey(new QueueKey(swQueueStats.getQueueId()));
-
-            sucLogger.debug("Augmenting queue statistics {} of queue {} to port {}"
-                                        ,queueStatisticsDataBuilder.build().toString(),
+            sucLogger.debug("Augmenting queue statistics {} of queue {} to port {}",
+                                        stats,
                                         swQueueStats.getQueueId(),
                                         swQueueStats.getNodeConnectorId());
 
-            it.putOperationalData(queueRef, queueBuilder.build());
+            it.removeOperationalData(statsRef);
+            it.putOperationalData(statsRef, stats);
         }
         it.commit();
     }
