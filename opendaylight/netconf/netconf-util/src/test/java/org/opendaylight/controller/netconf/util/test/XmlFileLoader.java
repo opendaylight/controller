@@ -45,7 +45,7 @@ public class XmlFileLoader {
     public static Document xmlFileToDocument(final String fileName) throws IOException, SAXException,
             ParserConfigurationException {
         try (InputStream resourceAsStream = XmlFileLoader.class.getClassLoader().getResourceAsStream(fileName)) {
-            Preconditions.checkNotNull(resourceAsStream);
+            Preconditions.checkNotNull(resourceAsStream, fileName);
             final Document doc = XmlUtil.readXmlToDocument(resourceAsStream);
             return doc;
         }
