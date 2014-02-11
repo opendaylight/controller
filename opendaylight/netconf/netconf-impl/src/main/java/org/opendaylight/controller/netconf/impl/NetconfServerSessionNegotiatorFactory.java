@@ -12,11 +12,11 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -74,7 +74,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private static final XPathExpression capabilitiesXPath = XMLNetconfUtil
             .compileXPath("/netconf:hello/netconf:capabilities");
 
-    private NetconfMessage createHelloMessage(long sessionId) {
+    private NetconfHelloMessage createHelloMessage(long sessionId) {
         Document helloMessageTemplate = getHelloTemplateClone();
 
         // change session ID
@@ -93,7 +93,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
             capabilityElement.setTextContent(capability);
             capabilitiesElement.appendChild(capabilityElement);
         }
-        return new NetconfMessage(helloMessageTemplate);
+        return new NetconfHelloMessage(helloMessageTemplate);
     }
 
     private synchronized Document getHelloTemplateClone() {

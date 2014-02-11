@@ -24,6 +24,7 @@ import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.util.handler.ssh.SshHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.handler.ssh.client.Invoker;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
@@ -41,15 +42,17 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         super(bossGroup, workerGroup, connectionTimeoutMillis);
         this.authHandler = authHandler;
         this.timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.<String>absent(), connectionTimeoutMillis);
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer,
+                Optional.<NetconfHelloMessageAdditionalHeader> absent(), connectionTimeoutMillis);
     }
 
     public NetconfSshClientDispatcher(AuthenticationHandler authHandler, EventLoopGroup bossGroup,
-            EventLoopGroup workerGroup, String additionalHeader, long socketTimeoutMillis) {
+            EventLoopGroup workerGroup, NetconfHelloMessageAdditionalHeader additionalHeader, long socketTimeoutMillis) {
         super(bossGroup, workerGroup, additionalHeader, socketTimeoutMillis);
         this.authHandler = authHandler;
         this.timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader), socketTimeoutMillis);
+        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader),
+                socketTimeoutMillis);
     }
 
     @Override
@@ -91,14 +94,15 @@ public class NetconfSshClientDispatcher extends NetconfClientDispatcher {
         }
 
         @Override
-        protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
-            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(new SessionListenerFactory() {
-                @Override
-                public SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> getSessionListener() {
-                    return sessionListener;
-                }
-            }, ch, promise));
-
+        protected void initializeSessionNegotiator(SocketChannel ch,
+                Promise<? extends NetconfSession> promise) {
+            ch.pipeline().addAfter(NETCONF_MESSAGE_DECODER,  AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR,
+                    negotiatorFactory.getSessionNegotiator(new SessionListenerFactory() {
+                        @Override
+                        public SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> getSessionListener() {
+                            return sessionListener;
+                        }
+                    }, ch, promise));
         }
     }
 }

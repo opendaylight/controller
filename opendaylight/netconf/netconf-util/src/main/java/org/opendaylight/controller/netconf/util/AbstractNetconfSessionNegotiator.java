@@ -8,8 +8,29 @@
 
 package org.opendaylight.controller.netconf.util;
 
+import java.util.concurrent.TimeUnit;
+
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
+import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
+import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.protocol.framework.AbstractSessionNegotiator;
+import org.opendaylight.protocol.framework.SessionListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,30 +41,13 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
-import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
-import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.protocol.framework.AbstractSessionNegotiator;
-import org.opendaylight.protocol.framework.SessionListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends NetconfSession>
         extends AbstractSessionNegotiator<NetconfMessage, S> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
+    public static final String CHUNK_DECODER_CHANNEL_HANDLER_KEY = "chunkDecoder";
 
     protected final P sessionPreferences;
 
@@ -148,17 +152,18 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
     protected void handleMessage(NetconfMessage netconfMessage) {
         final Document doc = netconfMessage.getDocument();
 
-        if (isHelloMessage(doc)) {
-            if (containsBase11Capability(doc)
-                    && containsBase11Capability(sessionPreferences.getHelloMessage().getDocument())) {
-                channel.pipeline().replace("frameEncoder", "frameEncoder",
-                        FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK));
-                channel.pipeline().replace("aggregator", "aggregator",
-                        new NetconfMessageAggregator(FramingMechanism.CHUNK));
-                channel.pipeline().addAfter("aggregator", "chunkDecoder", new NetconfMessageChunkDecoder());
+        // Only Hello message should arrive during negotiation
+        if (netconfMessage instanceof NetconfHelloMessage) {
+
+            replaceHelloMessageHandlers();
+
+            if (shouldUseChunkFraming(doc)) {
+                insertChunkFramingToPipeline();
             }
+
             changeState(State.ESTABLISHED);
-            S session = getSession(sessionListener, channel, netconfMessage);
+            S session = getSession(sessionListener, channel, (NetconfHelloMessage)netconfMessage);
+
             negotiationSuccessful(session);
         } else {
             final IllegalStateException cause = new IllegalStateException(
@@ -168,18 +173,36 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         }
     }
 
-    protected abstract S getSession(SessionListener sessionListener, Channel channel, NetconfMessage message);
-
-    private boolean isHelloMessage(Document doc) {
-        try {
-            XmlElement.fromDomElementWithExpected(doc.getDocumentElement(), "hello",
-                    XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return false;
-        }
-        return true;
+    /**
+     * Insert chunk framing handlers into the pipeline
+     */
+    private void insertChunkFramingToPipeline() {
+        replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_FRAME_ENCODER,
+                FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK));
+        replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_AGGREGATOR,
+                new NetconfMessageAggregator(FramingMechanism.CHUNK));
+        channel.pipeline().addAfter(AbstractChannelInitializer.NETCONF_MESSAGE_AGGREGATOR,
+                CHUNK_DECODER_CHANNEL_HANDLER_KEY, new NetconfMessageChunkDecoder());
     }
+
+    private boolean shouldUseChunkFraming(Document doc) {
+        return containsBase11Capability(doc)
+                && containsBase11Capability(sessionPreferences.getHelloMessage().getDocument());
+    }
+
+    /**
+     * Remove special handlers for hello message. Insert regular netconf xml message (en|de)coders.
+     */
+    private void replaceHelloMessageHandlers() {
+        replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_DECODER, new NetconfXMLToMessageDecoder());
+        replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_ENCODER, new NetconfMessageToXMLEncoder());
+    }
+
+    private static ChannelHandler replaceChannelHandler(Channel channel, String handlerKey, ChannelHandler decoder) {
+        return channel.pipeline().replace(handlerKey, handlerKey, decoder);
+    }
+
+    protected abstract S getSession(SessionListener sessionListener, Channel channel, NetconfHelloMessage message);
 
     private synchronized void changeState(final State newState) {
         logger.debug("Changing state from : {} to : {}", state, newState);
