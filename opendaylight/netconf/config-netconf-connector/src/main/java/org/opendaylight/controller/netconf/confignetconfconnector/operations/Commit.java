@@ -57,7 +57,8 @@ public class Commit extends AbstractConfigNetconfOperation {
         try {
             status = this.transactionProvider.commitTransaction();
         } catch (final IllegalStateException e) {
-            // FIXME: when can IllegalStateException occur?
+            // TODO Illegal state thrown when no transaction yet for user
+            // Throw other exception type, or create transaction automatically
             logger.warn("Commit failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(),

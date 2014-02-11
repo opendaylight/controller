@@ -134,7 +134,7 @@ public final class PersisterAggregator implements Persister {
     public static PersisterAggregator createFromProperties(PropertiesProviderBaseImpl propertiesProvider) {
         List<PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
         String prefixes = propertiesProvider.getProperty("active");
-        if (prefixes.isEmpty() == false) {
+        if (prefixes!=null && prefixes.isEmpty() == false) {
             String [] keys = prefixes.split(",");
             for (String index: keys) {
                 persisterWithConfigurations.add(PersisterAggregator.loadConfiguration(index, propertiesProvider));
