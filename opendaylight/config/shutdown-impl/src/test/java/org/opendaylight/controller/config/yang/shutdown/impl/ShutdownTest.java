@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
@@ -92,7 +94,7 @@ public class ShutdownTest extends AbstractConfigTest {
         shutdownViaRuntimeJMX(secret);
     }
 
-    private void setSecret(String secret) throws InstanceNotFoundException {
+    private void setSecret(String secret) throws InstanceNotFoundException, ValidationException, ConflictingVersionException {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName on = transaction.lookupConfigBean(NAME, NAME);
         ShutdownModuleMXBean proxy = transaction.newMXBeanProxy(on, ShutdownModuleMXBean.class);

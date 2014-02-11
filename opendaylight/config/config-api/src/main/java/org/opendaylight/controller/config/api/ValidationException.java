@@ -16,9 +16,11 @@ import java.util.Map.Entry;
 
 /**
  * This exception is not intended to be used while implementing modules,
- * itaggregates validation exceptions and sends them back to the user.
+ * it aggregates validation exceptions and sends them back to the user.
+ * Use {@link org.opendaylight.controller.config.api.JmxAttributeValidationException} for
+ * validating modules instead.
  */
-public class ValidationException extends RuntimeException {
+public class ValidationException extends Exception {
     private static final long serialVersionUID = -6072893219820274247L;
 
     private final Map<String/* module name */, Map<String/* instance name */, ExceptionMessageWithStackTrace>> failedValidations;

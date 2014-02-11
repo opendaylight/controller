@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
@@ -87,7 +86,11 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         try {
             set(configRegistryClient, editConfigExecution);
-        } catch (IllegalStateException | JmxAttributeValidationException | ValidationException e) {
+
+        } catch (IllegalStateException e) {
+            //FIXME: when can IllegalStateException be thrown?
+            // JmxAttributeValidationException is wrapped in DynamicWritableWrapper with ValidationException
+            // ValidationException is not thrown until validate or commit is issued
             logger.warn("Set phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
@@ -101,7 +104,8 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         try {
             test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
-        } catch (IllegalStateException | JmxAttributeValidationException | ValidationException e) {
+        } catch (IllegalStateException | ValidationException e) {
+            //FIXME: when can IllegalStateException be thrown?
             logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
@@ -112,7 +116,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void test(ConfigRegistryClient configRegistryClient, EditConfigExecution execution,
-            EditStrategyType editStrategyType) {
+            EditStrategyType editStrategyType) throws ValidationException {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
 
@@ -237,6 +241,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             return identityNameToSchemaNode.containsKey(idName);
         }
 
+        // FIXME method never used
         public IdentitySchemaNode getIdentitySchemaNode(String idName) {
             Preconditions.checkState(identityNameToSchemaNode.containsKey(idName), "No identity under name %s", idName);
             return identityNameToSchemaNode.get(idName);
