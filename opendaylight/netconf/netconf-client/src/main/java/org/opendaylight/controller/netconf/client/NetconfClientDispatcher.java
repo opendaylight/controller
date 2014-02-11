@@ -18,6 +18,7 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.SessionListener;
@@ -32,19 +33,23 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClient.class);
 
-    private final NetconfClientSessionNegotiatorFactory negotatorFactory;
+    private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
     private final HashedWheelTimer timer;
 
-    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup, long clientConnectionTimeoutMillis) {
+    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup,
+            long clientConnectionTimeoutMillis) {
         super(bossGroup, workerGroup);
         timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.<String>absent(), clientConnectionTimeoutMillis);
+        this.negotiatorFactory = new NetconfClientSessionNegotiatorFactory(timer,
+                Optional.<NetconfHelloMessageAdditionalHeader> absent(), clientConnectionTimeoutMillis);
     }
 
-    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup, String additionalHeader, long connectionTimeoutMillis) {
+    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup,
+            NetconfHelloMessageAdditionalHeader additionalHeader, long connectionTimeoutMillis) {
         super(bossGroup, workerGroup);
         timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader), connectionTimeoutMillis);
+        this.negotiatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader),
+                connectionTimeoutMillis);
     }
 
     public Future<NetconfClientSession> createClient(InetSocketAddress address,
@@ -58,7 +63,7 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
             }
 
             private void initialize(SocketChannel ch, Promise<NetconfClientSession> promise) {
-                new ClientChannelInitializer( negotatorFactory, sessionListener).initialize(ch, promise);
+                new ClientChannelInitializer(negotiatorFactory, sessionListener).initialize(ch, promise);
             }
         });
     }
@@ -80,16 +85,19 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
         }
 
         @Override
-        protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
-            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(new SessionListenerFactory() {
-                @Override
-                public SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> getSessionListener() {
-                    return sessionListener;
-                }
-            }, ch, promise));
+        protected void initializeSessionNegotiator(SocketChannel ch,
+                Promise<? extends NetconfSession> promise) {
+            ch.pipeline().addAfter(NETCONF_MESSAGE_DECODER,  AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR,
+                    negotiatorFactory.getSessionNegotiator(new SessionListenerFactory() {
+                        @Override
+                        public SessionListener<NetconfMessage, NetconfClientSession, NetconfTerminationReason> getSessionListener() {
+                            return sessionListener;
+                        }
+                    }, ch, promise));
         }
 
     }
+
     @Override
     public void close() {
         try {

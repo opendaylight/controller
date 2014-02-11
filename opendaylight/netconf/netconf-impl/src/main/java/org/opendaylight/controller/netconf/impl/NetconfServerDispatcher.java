@@ -41,6 +41,8 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
 
     public static class ServerChannelInitializer extends AbstractChannelInitializer {
 
+        public static final String DESERIALIZER_EX_HANDLER_KEY = "deserializerExHandler";
+
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
         private final NetconfServerSessionListenerFactory listenerFactory;
 
@@ -51,11 +53,15 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         }
 
         @Override
-        protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
-            ch.pipeline().addLast("deserializerExHandler", new DeserializerExceptionHandler());
-            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(listenerFactory, ch, promise));
+        protected void initializeMessageDecoder(SocketChannel ch) {
+            super.initializeMessageDecoder(ch);
+            ch.pipeline().addLast(DESERIALIZER_EX_HANDLER_KEY, new DeserializerExceptionHandler());
         }
 
+        @Override
+        protected void initializeSessionNegotiator(SocketChannel ch, Promise<? extends NetconfSession> promise) {
+            ch.pipeline().addAfter(DESERIALIZER_EX_HANDLER_KEY, AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR, negotiatorFactory.getSessionNegotiator(listenerFactory, ch, promise));
+        }
     }
 
 }
