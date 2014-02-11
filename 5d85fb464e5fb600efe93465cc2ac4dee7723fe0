@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d5567605",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-11T00:00:19Z",
+      "side": 1,
+      "message": "I thought we agreed in having this function only create and remove the container directories if necessary",
+      "revId": "5d85fb464e5fb600efe93465cc2ac4dee7723fe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1551ae0e",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-11T00:00:19Z",
+      "side": 1,
+      "message": "No need to check file by file...\nPlease use .isDirectory()",
+      "revId": "5d85fb464e5fb600efe93465cc2ac4dee7723fe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b559c236",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ContainerConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-11T00:00:19Z",
+      "side": 1,
+      "message": "I thought we agreed in moving this code to COnfigurationService",
+      "revId": "5d85fb464e5fb600efe93465cc2ac4dee7723fe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

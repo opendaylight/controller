@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_753fcab4",
+        "filename": "opendaylight/containermanager/implementation/src/main/java/org/opendaylight/controller/containermanager/internal/ContainerManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-11T00:00:19Z",
+      "side": 0,
+      "message": "Thanks for removing this",
+      "revId": "46d4a430862a1cd87e38cf586c5b6f93372b4fdd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_554a8655",
+        "filename": "opendaylight/containermanager/implementation/src/main/java/org/opendaylight/controller/containermanager/internal/ContainerManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1016,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-11T00:00:19Z",
+      "side": 0,
+      "message": "Thanks for removing this",
+      "revId": "46d4a430862a1cd87e38cf586c5b6f93372b4fdd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
