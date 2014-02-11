@@ -21,6 +21,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +32,8 @@ public class DataBrokerServiceImpl implements DataBrokerService {
     private final RestconfClientContext restconfClientContext;
     private final RestconfClientContextFactory restconfClientContextFactory = null;
 
-    public DataBrokerServiceImpl(URL baseUrl) throws UnsupportedProtocolException {
-        this.restconfClientContext = restconfClientContextFactory.getRestconfClientContext(baseUrl);
+    public DataBrokerServiceImpl(URL baseUrl, BindingIndependentMappingService mappingService, SchemaContextHolder schemaContextHolder) throws UnsupportedProtocolException {
+        this.restconfClientContext = restconfClientContextFactory.getRestconfClientContext(baseUrl, mappingService, schemaContextHolder);
     }
     @Override
     public <T extends DataRoot> T getData(DataStoreIdentifier store, Class<T> rootType) {
