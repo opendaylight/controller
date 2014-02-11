@@ -10,30 +10,18 @@ package org.opendaylight.controller.netconf.api;
 
 import org.w3c.dom.Document;
 
-import com.google.common.base.Optional;
-
 /**
  * NetconfMessage represents a wrapper around org.w3c.dom.Document. Needed for
  * implementing ProtocolMessage interface.
  */
-public final class NetconfMessage {
-    private final String additionalHeader;
+public class NetconfMessage {
     private final Document doc;
 
     public NetconfMessage(final Document doc) {
-        this(doc, null);
-    }
-
-    public NetconfMessage(Document doc, String additionalHeader) {
         this.doc = doc;
-        this.additionalHeader = additionalHeader;
     }
 
     public Document getDocument() {
         return this.doc;
-    }
-
-    public Optional<String> getAdditionalHeader() {
-        return additionalHeader== null ? Optional.<String>absent() : Optional.of(additionalHeader);
     }
 }

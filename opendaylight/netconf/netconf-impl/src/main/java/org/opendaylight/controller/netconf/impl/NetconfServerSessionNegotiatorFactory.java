@@ -8,20 +8,15 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-
-import java.io.InputStream;
-
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-
-import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -32,9 +27,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Preconditions;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import java.io.InputStream;
 
-public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfServerSession, NetconfServerSessionListener> {
+public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
     public static final String SERVER_HELLO_XML_LOCATION = "/server_hello.xml";
 
@@ -77,7 +74,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private static final XPathExpression capabilitiesXPath = XMLNetconfUtil
             .compileXPath("/netconf:hello/netconf:capabilities");
 
-    private NetconfMessage createHelloMessage(long sessionId) {
+    private NetconfHelloMessage createHelloMessage(long sessionId) {
         Document helloMessageTemplate = getHelloTemplateClone();
 
         // change session ID
@@ -96,7 +93,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
             capabilityElement.setTextContent(capability);
             capabilitiesElement.appendChild(capabilityElement);
         }
-        return new NetconfMessage(helloMessageTemplate);
+        return new NetconfHelloMessage(helloMessageTemplate);
     }
 
     private synchronized Document getHelloTemplateClone() {
