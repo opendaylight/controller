@@ -8,10 +8,6 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -19,9 +15,9 @@ import javax.annotation.Nullable;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -31,6 +27,10 @@ import org.w3c.dom.Node;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 
 public class NetconfClientSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfSessionPreferences, NetconfClientSession, NetconfClientSessionListener> {
@@ -71,7 +71,7 @@ public class NetconfClientSessionNegotiator extends
     }
 
     @Override
-    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel, NetconfMessage message) {
+    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel, NetconfHelloMessage message) {
         return new NetconfClientSession(sessionListener, channel, extractSessionId(message.getDocument()),
                 getCapabilities(message.getDocument()));
     }
