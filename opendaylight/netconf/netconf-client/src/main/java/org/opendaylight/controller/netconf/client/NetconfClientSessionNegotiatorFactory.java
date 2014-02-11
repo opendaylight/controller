@@ -17,6 +17,8 @@ import java.io.InputStream;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
@@ -28,11 +30,11 @@ import com.google.common.base.Preconditions;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfClientSession, NetconfClientSessionListener> {
 
-    private final Optional<String> additionalHeader;
+    private final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader;
     private final long connectionTimeoutMillis;
     private final Timer timer;
 
-    public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<String> additionalHeader, long connectionTimeoutMillis) {
+    public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<NetconfHelloMessageAdditionalHeader> additionalHeader, long connectionTimeoutMillis) {
         this.timer = Preconditions.checkNotNull(timer);
         this.additionalHeader = additionalHeader;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
@@ -53,9 +55,12 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
             Promise<NetconfClientSession> promise) {
         // Hello message needs to be recreated every time
         NetconfMessage helloMessage = loadHelloMessageTemplate();
+
         if(this.additionalHeader.isPresent()) {
-            helloMessage = new NetconfMessage(helloMessage.getDocument(), additionalHeader.get());
-        }
+            helloMessage = new NetconfHelloMessage(helloMessage.getDocument(), additionalHeader.get());
+        } else
+            helloMessage = new NetconfHelloMessage(helloMessage.getDocument());
+
         NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
                 sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
