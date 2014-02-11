@@ -8,10 +8,14 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
+import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfiguration;
+import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfigurationBuilder;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
@@ -22,16 +26,16 @@ import org.slf4j.LoggerFactory;
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadFactory;
 import java.util.regex.Pattern;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterActivator.class);
 
-    private final static MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-    private static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
+    public static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
 
-    private static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS = "maxWaitForCapabilitiesMillis";
+    public static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS = "maxWaitForCapabilitiesMillis";
 
     public static final String NETCONF_CONFIG_PERSISTER = "netconf.config.persister";
 
@@ -39,11 +43,31 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     public static final String DEFAULT_IGNORED_REGEX = "^urn:ietf:params:xml:ns:netconf:base:1.0";
 
+    private final MBeanServer platformMBeanServer;
 
+    private final Optional<ConfigPusherConfiguration> initialConfigForPusher;
     private volatile ConfigPersisterNotificationHandler jmxNotificationHandler;
     private Thread initializationThread;
+    private ThreadFactory initializationThreadFactory;
     private EventLoopGroup nettyThreadGroup;
     private PersisterAggregator persisterAggregator;
+
+    public ConfigPersisterActivator() {
+        this(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable initializationRunnable) {
+                return new Thread(initializationRunnable, "ConfigPersister-registrator");
+            }
+        }, ManagementFactory.getPlatformMBeanServer(), null);
+    }
+
+    @VisibleForTesting
+    protected ConfigPersisterActivator(ThreadFactory threadFactory, MBeanServer mBeanServer,
+            ConfigPusherConfiguration initialConfigForPusher) {
+        this.initializationThreadFactory = threadFactory;
+        this.platformMBeanServer = mBeanServer;
+        this.initialConfigForPusher = Optional.fromNullable(initialConfigForPusher);
+    }
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -51,31 +75,11 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
-        String regexProperty = propertiesProvider.getProperty(IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX);
-        String regex;
-        if (regexProperty != null) {
-            regex = regexProperty;
-        } else {
-            regex = DEFAULT_IGNORED_REGEX;
-        }
-
-        String timeoutProperty = propertiesProvider.getProperty(MAX_WAIT_FOR_CAPABILITIES_MILLIS);
-        long maxWaitForCapabilitiesMillis;
-        if (timeoutProperty == null) {
-            maxWaitForCapabilitiesMillis = ConfigPusher.DEFAULT_MAX_WAIT_FOR_CAPABILITIES_MILLIS;
-        } else {
-            maxWaitForCapabilitiesMillis = Integer.valueOf(timeoutProperty);
-        }
-
-        final Pattern ignoredMissingCapabilityRegex = Pattern.compile(regex);
-        nettyThreadGroup = new NioEventLoopGroup();
+        final Pattern ignoredMissingCapabilityRegex = getIgnoredCapabilitiesProperty(propertiesProvider);
 
         persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
-        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                "Netconf is not configured, persister is not operational", true);
-        final ConfigPusher configPusher = new ConfigPusher(address, nettyThreadGroup, maxWaitForCapabilitiesMillis,
-                ConfigPusher.DEFAULT_CONNECTION_TIMEOUT_MILLIS);
 
+        final ConfigPusher configPusher = new ConfigPusher(getConfigurationForPusher(context, propertiesProvider));
 
         // offload initialization to another thread in order to stop blocking activator
         Runnable initializationRunnable = new Runnable() {
@@ -94,8 +98,49 @@ public class ConfigPersisterActivator implements BundleActivator {
                 logger.info("Configuration Persister initialization completed.");
             }
         };
-        initializationThread = new Thread(initializationRunnable, "ConfigPersister-registrator");
+
+        initializationThread = initializationThreadFactory.newThread(initializationRunnable);
         initializationThread.start();
+    }
+
+    private Pattern getIgnoredCapabilitiesProperty(PropertiesProviderBaseImpl propertiesProvider) {
+        String regexProperty = propertiesProvider.getProperty(IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX);
+        String regex;
+        if (regexProperty != null) {
+            regex = regexProperty;
+        } else {
+            regex = DEFAULT_IGNORED_REGEX;
+        }
+        return Pattern.compile(regex);
+    }
+
+    private Optional<Long> getMaxWaitForCapabilitiesProperty(PropertiesProviderBaseImpl propertiesProvider) {
+        String timeoutProperty = propertiesProvider.getProperty(MAX_WAIT_FOR_CAPABILITIES_MILLIS);
+        return Optional.fromNullable(timeoutProperty == null ? null : Long.valueOf(timeoutProperty));
+    }
+
+    private ConfigPusherConfiguration getConfigurationForPusher(BundleContext context,
+            PropertiesProviderBaseImpl propertiesProvider) {
+
+        // If configuration was injected via constructor, use it
+        if(initialConfigForPusher.isPresent())
+            return initialConfigForPusher.get();
+
+        Optional<Long> maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesProperty(propertiesProvider);
+        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
+                "Netconf is not configured, persister is not operational", true);
+
+        nettyThreadGroup = new NioEventLoopGroup();
+
+        ConfigPusherConfigurationBuilder configPusherConfigurationBuilder = ConfigPusherConfigurationBuilder.aConfigPusherConfiguration();
+
+        if(maxWaitForCapabilitiesMillis.isPresent())
+            configPusherConfigurationBuilder.withNetconfCapabilitiesWaitTimeoutMs(maxWaitForCapabilitiesMillis.get());
+
+        return configPusherConfigurationBuilder
+                .withEventLoopGroup(nettyThreadGroup)
+                .withNetconfAddress(address)
+                .build();
     }
 
     @Override
@@ -104,7 +149,8 @@ public class ConfigPersisterActivator implements BundleActivator {
         if (jmxNotificationHandler != null) {
             jmxNotificationHandler.close();
         }
-        nettyThreadGroup.shutdownGracefully();
+        if(nettyThreadGroup!=null)
+            nettyThreadGroup.shutdownGracefully();
         persisterAggregator.close();
     }
 }

@@ -49,6 +49,11 @@
 
         <!-- test dependencies -->
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>mockito-configuration</artifactId>
         </dependency>
