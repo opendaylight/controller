@@ -8,7 +8,7 @@ module opendaylight-match-types {
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
 
     revision "2013-10-26" {
-        description "Initial revision of macth types";
+        description "Initial revision of match types";
     }
 
     grouping "mac-address-filter" {
