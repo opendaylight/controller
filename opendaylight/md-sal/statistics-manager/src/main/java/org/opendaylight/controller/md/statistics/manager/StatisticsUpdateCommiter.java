@@ -354,35 +354,17 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
 
         for(FlowAndStatisticsMapList map: notification.getFlowAndStatisticsMapList()){
             short tableId = map.getTableId();
-
-
             boolean foundOriginalFlow = false;
 
             FlowBuilder flowBuilder = new FlowBuilder();
 
             FlowStatisticsDataBuilder flowStatisticsData = new FlowStatisticsDataBuilder();
 
-            FlowBuilder flow = new FlowBuilder();
-            flow.setContainerName(map.getContainerName());
-            flow.setBufferId(map.getBufferId());
-            flow.setCookie(map.getCookie());
-            flow.setCookieMask(map.getCookieMask());
-            flow.setFlags(map.getFlags());
-            flow.setFlowName(map.getFlowName());
-            flow.setHardTimeout(map.getHardTimeout());
-            if(map.getFlowId() != null)
+            FlowBuilder flow = new FlowBuilder(map);
+            if(map.getFlowId() != null) {
                 flow.setId(new FlowId(map.getFlowId().getValue()));
-            flow.setIdleTimeout(map.getIdleTimeout());
-            flow.setInstallHw(map.isInstallHw());
-            flow.setInstructions(map.getInstructions());
-            if(map.getFlowId()!= null)
-                flow.setKey(new FlowKey(new FlowId(map.getKey().getFlowId().getValue())));
-            flow.setMatch(map.getMatch());
-            flow.setOutGroup(map.getOutGroup());
-            flow.setOutPort(map.getOutPort());
-            flow.setPriority(map.getPriority());
-            flow.setStrict(map.isStrict());
-            flow.setTableId(tableId);
+                flow.setKey(new FlowKey(flow.getId()));
+            }
 
             Flow flowRule = flow.build();
 
@@ -403,25 +385,8 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             //Augment the data to the flow node
 
             FlowStatisticsBuilder flowStatistics = new FlowStatisticsBuilder();
-            flowStatistics.setByteCount(flowStats.getByteCount());
-            flowStatistics.setPacketCount(flowStats.getPacketCount());
-            flowStatistics.setDuration(flowStats.getDuration());
-            flowStatistics.setContainerName(map.getContainerName());
-            flowStatistics.setBufferId(map.getBufferId());
-            flowStatistics.setCookie(map.getCookie());
-            flowStatistics.setCookieMask(map.getCookieMask());
-            flowStatistics.setFlags(map.getFlags());
-            flowStatistics.setFlowName(map.getFlowName());
-            flowStatistics.setHardTimeout(map.getHardTimeout());
-            flowStatistics.setIdleTimeout(map.getIdleTimeout());
-            flowStatistics.setInstallHw(map.isInstallHw());
-            flowStatistics.setInstructions(map.getInstructions());
-            flowStatistics.setMatch(map.getMatch());
-            flowStatistics.setOutGroup(map.getOutGroup());
-            flowStatistics.setOutPort(map.getOutPort());
-            flowStatistics.setPriority(map.getPriority());
-            flowStatistics.setStrict(map.isStrict());
-            flowStatistics.setTableId(tableId);
+            flowStatistics.fieldsFrom(map);
+            flowStatistics.fieldsFrom(flowStats);
 
             flowStatisticsData.setFlowStatistics(flowStatistics.build());
 
@@ -431,7 +396,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
 
-            Table table= (Table)it.readConfigurationData(tableRef);
+            Table table = (Table)it.readConfigurationData(tableRef);
 
             //TODO: Not a good way to do it, need to figure out better way.
             //TODO: major issue in any alternate approach is that flow key is incrementally assigned
@@ -458,38 +423,38 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
                         it.putOperationalData(flowRef, flowBuilder.build());
                     }
                 }
-            }
 
-            table= (Table)it.readOperationalData(tableRef);
-            if(!foundOriginalFlow && table != null){
+                if(!foundOriginalFlow) {
 
-                for(Flow existingFlow : table.getFlow()){
-                    FlowStatisticsData augmentedflowStatisticsData = existingFlow.getAugmentation(FlowStatisticsData.class);
-                    if(augmentedflowStatisticsData != null){
-                        FlowBuilder existingOperationalFlow = new FlowBuilder();
-                        existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
-                        sucLogger.debug("Existing unaccounted flow in operational data store : {}",existingFlow.toString());
-                        if(flowEquals(flowRule,existingOperationalFlow.build())){
-                            InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
-                                    .augmentation(FlowCapableNode.class)
-                                    .child(Table.class, new TableKey(tableId))
-                                    .child(Flow.class,existingFlow.getKey()).toInstance();
-                            flowBuilder.setKey(existingFlow.getKey());
-                            flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                            sucLogger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
-                            foundOriginalFlow = true;
+                    for(Flow existingFlow : table.getFlow()){
+                        FlowStatisticsData augmentedflowStatisticsData = existingFlow.getAugmentation(FlowStatisticsData.class);
+                        if(augmentedflowStatisticsData != null){
+                            FlowBuilder existingOperationalFlow = new FlowBuilder();
+                            existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
+                            sucLogger.debug("Existing unaccounted flow in operational data store : {}",existingFlow.toString());
+                            if(flowEquals(flowRule,existingOperationalFlow.build())){
+                                InstanceIdentifier<Flow> flowRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
+                                        .augmentation(FlowCapableNode.class)
+                                        .child(Table.class, new TableKey(tableId))
+                                        .child(Flow.class,existingFlow.getKey()).toInstance();
+                                flowBuilder.setKey(existingFlow.getKey());
+                                flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
+                                sucLogger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
+                                foundOriginalFlow = true;
 
-                            // Update entry with timestamp of latest response
-                            flow.setKey(existingFlow.getKey());
-                            FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flow.build());
-                            cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
+                                // Update entry with timestamp of latest response
+                                flow.setKey(existingFlow.getKey());
+                                FlowEntry flowStatsEntry = nsa.new FlowEntry(tableId,flow.build());
+                                cache.get(notification.getId()).updateFlowStats(flowStatsEntry);
 
-                            it.putOperationalData(flowRef, flowBuilder.build());
-                            break;
+                                it.putOperationalData(flowRef, flowBuilder.build());
+                                break;
+                            }
                         }
                     }
                 }
             }
+
             if(!foundOriginalFlow){
                 String flowKey = "#UF$TABLE*"+Short.toString(tableId)+"*"+Integer.toString(this.unaccountedFlowsCounter);
                 this.unaccountedFlowsCounter++;
