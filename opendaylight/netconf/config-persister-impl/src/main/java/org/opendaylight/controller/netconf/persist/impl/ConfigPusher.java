@@ -103,6 +103,7 @@ public class ConfigPusher {
                 EditAndCommitResponse editAndCommitResponse = pushLastConfig(configSnapshotHolder, netconfClient);
                 return new EditAndCommitResponseWithRetries(editAndCommitResponse, retryAttempt);
             } catch (ConflictingVersionException e) {
+                logger.debug("Conflicting version detected, will retry after timeout");
                 lastException = e;
                 Thread.sleep(1000);
             } catch (RuntimeException e) {
@@ -152,7 +153,10 @@ public class ConfigPusher {
                 logger.trace("Session id received from netconf server: {}", netconfClient.getClientSession());
                 return netconfClient;
             }
-            logger.debug("Polling hello from netconf, attempt {}, capabilities {}", attempt, latestCapabilities);
+            Set<String> allNotFound = computeNotFoundCapabilities(expectedCaps, latestCapabilities);
+            logger.debug("Netconf server did not provide required capabilities. Attempt {}. " +
+                    "Expected but not found: {}, all expected {}, current {}",
+                    attempt, allNotFound, expectedCaps, latestCapabilities);
             Util.closeClientAndDispatcher(netconfClient);
             Thread.sleep(delayMillis);
         }
@@ -160,11 +164,16 @@ public class ConfigPusher {
             logger.error("Could not connect to the server in {} ms", maxWaitForCapabilitiesMillis);
             throw new RuntimeException("Could not connect to netconf server");
         }
-        Set<String> allNotFound = new HashSet<>(expectedCaps);
-        allNotFound.removeAll(latestCapabilities);
+        Set<String> allNotFound = computeNotFoundCapabilities(expectedCaps, latestCapabilities);
         logger.error("Netconf server did not provide required capabilities. Expected but not found: {}, all expected {}, current {}",
                 allNotFound, expectedCaps, latestCapabilities);
         throw new RuntimeException("Netconf server did not provide required capabilities. Expected but not found:" + allNotFound);
+    }
+
+    private static Set<String> computeNotFoundCapabilities(Set<String> expectedCaps, Set<String> latestCapabilities) {
+        Set<String> allNotFound = new HashSet<>(expectedCaps);
+        allNotFound.removeAll(latestCapabilities);
+        return allNotFound;
     }
 
 
@@ -219,11 +228,15 @@ public class ConfigPusher {
     }
 
 
-    private static NetconfMessage sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfClient netconfClient) throws IOException {
+    private static NetconfMessage sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfClient netconfClient)
+            throws ConflictingVersionException, IOException {
         try {
             NetconfMessage netconfMessage = netconfClient.sendMessage(request, NETCONF_SEND_ATTEMPTS, NETCONF_SEND_ATTEMPT_MS_DELAY);
             NetconfUtil.checkIsMessageOk(netconfMessage);
             return netconfMessage;
+        }catch(ConflictingVersionException e) {
+            logger.trace("conflicting version detected: {}", e.toString());
+            throw e;
         } catch (RuntimeException e) { // TODO: change NetconfClient#sendMessage to throw checked exceptions
             logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
             throw new IOException("Failed to execute netconf transaction", e);

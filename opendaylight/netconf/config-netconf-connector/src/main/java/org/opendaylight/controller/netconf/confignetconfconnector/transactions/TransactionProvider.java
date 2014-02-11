@@ -10,11 +10,11 @@ package org.opendaylight.controller.netconf.confignetconfconnector.transactions;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +94,7 @@ public class TransactionProvider implements AutoCloseable {
     /**
      * Commit and notification send must be atomic
      */
-    public synchronized CommitStatus commitTransaction() throws NetconfDocumentedException {
+    public synchronized CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException {
         final Optional<ObjectName> maybeTaON = getTransaction();
         Preconditions.checkState(maybeTaON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
         ObjectName taON = maybeTaON.get();
@@ -108,7 +108,7 @@ public class TransactionProvider implements AutoCloseable {
             // no clean up: user can reconfigure and recover this transaction
             logger.warn("Transaction {} failed on {}", taON, validationException.toString());
             throw validationException;
-        } catch (Exception e) {
+        } catch (ConflictingVersionException e) {
             logger.error("Exception while commit of {}, aborting transaction", taON, e);
             // clean up
             abortTransaction();
@@ -142,7 +142,7 @@ public class TransactionProvider implements AutoCloseable {
         transactionClient.validateConfig();
     }
 
-    public void validateTestTransaction(ObjectName taON) {
+    public void validateTestTransaction(ObjectName taON) throws ValidationException {
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON);
         transactionClient.validateConfig();
     }

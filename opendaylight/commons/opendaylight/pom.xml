@@ -77,8 +77,8 @@
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
     <samples.loadbalancer>0.5.2-SNAPSHOT</samples.loadbalancer>
-    <config.version>0.2.4-SNAPSHOT</config.version>
-    <netconf.version>0.2.4-SNAPSHOT</netconf.version>
+    <config.version>0.2.5-SNAPSHOT</config.version>
+    <netconf.version>0.2.5-SNAPSHOT</netconf.version>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
     <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
     <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>

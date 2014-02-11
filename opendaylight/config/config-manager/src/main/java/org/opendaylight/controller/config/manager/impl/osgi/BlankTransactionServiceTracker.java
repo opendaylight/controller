@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.spi.ModuleFactory;
@@ -41,7 +42,8 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     synchronized void blankTransaction() {
         // race condition check: config-persister might push new configuration while server is starting up.
         ConflictingVersionException lastException = null;
-        for (int i = 0; i < 10; i++) {
+        int maxAttempts = 10;
+        for (int i = 0; i < maxAttempts; i++) {
             try {
                 // create transaction
                 boolean blankTransaction = true;
@@ -57,9 +59,13 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
                     Thread.currentThread().interrupt();
                     throw new IllegalStateException(interruptedException);
                 }
+            } catch (ValidationException e) {
+                logger.error("Validation exception while running blank transaction indicates programming error", e);
+                throw new RuntimeException("Validation exception while running blank transaction indicates programming error", e);
             }
         }
-        throw lastException;
+        throw new RuntimeException("Maximal number of attempts reached and still cannot get optimistic lock from " +
+                "config manager",lastException);
     }
 
     @Override
