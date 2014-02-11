@@ -56,11 +56,11 @@
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
     <guava.version>14.0.1</guava.version>
     <osgi.core.version>5.0.0</osgi.core.version>
-    <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
-    <ietf-yang-types.version>2010.09.24.3</ietf-yang-types.version>
-    <ietf-topology.version>2013.10.21.1</ietf-topology.version>
-    <opendaylight-l2-types.version>2013.08.27.3</opendaylight-l2-types.version>
-    <yang-ext.version>2013.09.07.3</yang-ext.version>
+    <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
+    <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
+    <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
+    <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
+    <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
     <javassist.version>3.17.1-GA</javassist.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
