@@ -41,6 +41,7 @@ import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
+import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -99,6 +100,30 @@ public class Troubleshoot implements IDaylightWeb {
     @Override
     public boolean isAuthorized(UserLevel userLevel) {
         return userLevel.ordinal() <= AUTH_LEVEL.ordinal();
+    }
+
+    @RequestMapping(value = "/nodeInfo", method = RequestMethod.GET)
+    @ResponseBody
+    public NodeDescription getNodeInfo(HttpServletRequest request, @RequestParam(required = false) String container,
+            @RequestParam(required = true) String nodeId) {
+        List<Map<String, String>> lines = new ArrayList<Map<String, String>>();
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
+                    .getInstance(IStatisticsManager.class, containerName, this);
+            if(statisticsManager != null){
+                Node node = Node.fromString(nodeId);
+                NodeDescription nodeDesc = statisticsManager.getNodeDescription(node);
+                return nodeDesc;
+            }
+        }
+
+        return new NodeDescription();
     }
 
     @RequestMapping(value = "/existingNodes", method = RequestMethod.GET)

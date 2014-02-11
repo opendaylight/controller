@@ -1,8 +1,8 @@
-/* 
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved. 
- * 
- * This program and the accompanying materials are made available under the 
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
@@ -63,13 +63,13 @@ $(one.f.menu.right.bottom).each(function(index, value) {
 /**Troubleshoot modules*/
 one.f.troubleshooting = {
     rootUrl: "/controller/web/troubleshoot",
-    rightBottomDashlet: { 
+    rightBottomDashlet: {
         get: function() {
             var $rightBottomDashlet = $("#right-bottom").find(".dashlet");
             return $rightBottomDashlet;
         },
         setDashletHeader: function(label) {
-            $("#right-bottom li a")[0].innerHTML = label; 
+            $("#right-bottom li a")[0].innerHTML = label;
         }
     },
     createTable: function(columnNames, body) {
@@ -92,8 +92,11 @@ one.f.troubleshooting.existingNodes = {
             portsDataGrid: "one_f_troubleshooting_existingNodes_id_portsDataGrid",
             flowsDataGrid: "one_f_troubleshooting_existingNodes_id_flowsDataGrid",
             refreshFlowsButton:"one_f_troubleshooting_existingNodes_id_refreshFlowsButton",
-            refreshPortsButton:"one_f_troubleshooting_existingNodes_id_refreshPortsButton"
-
+            refreshPortsButton:"one_f_troubleshooting_existingNodes_id_refreshPortsButton",
+            modal : {
+                nodeInfo : "one_f_troubleshooting_existingNodes_id_modal_nodeInfo",
+                cancelButton : "one_f_troubleshooting_existingNodes_id_modal_cancelButton",
+            }
         },
         load: {
             main: function($dashlet) {
@@ -171,7 +174,7 @@ one.f.troubleshooting.existingNodes = {
                         $("#" + one.f.troubleshooting.existingNodes.id.portsDataGrid).datagrid({dataSource: dataSource});
                     });
                 } catch(e) {}
-            } 
+            }
         },
         ajax : function(url, callback) {
             $.getJSON(url, function(data) {
@@ -204,7 +207,9 @@ one.f.troubleshooting.existingNodes = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["statistics"] = "<a href=\"javascript:one.f.troubleshooting.existingNodes.load.flows('" + item["nodeId"] + "');\">Flows</a>" + 
+                            item.nodeName = "<a href=\"javascript:one.f.troubleshooting.existingNodes.data.nodeInfo('"
+                                + item.nodeId + "');\">" + item.nodeName + "</a>"
+                            item["statistics"] = "<a href=\"javascript:one.f.troubleshooting.existingNodes.load.flows('" + item["nodeId"] + "');\">Flows</a>" +
                             " <a href=\"javascript:one.f.troubleshooting.existingNodes.load.ports('" + item["nodeId"] + "');\">Ports</a>";
                         });
                     },
@@ -461,6 +466,46 @@ one.f.troubleshooting.existingNodes = {
                     result.push(tr);
                 });
                 return result;
+            },
+            nodeInfo : function(nodeId){
+                $.getJSON(one.main.constants.address.prefix + "/troubleshoot/nodeInfo?nodeId=" + nodeId, function(content) {
+                    var h3 = 'Node Information'
+
+                    var headers = [ 'Description','Specification'];
+
+                    var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
+                    var $table = one.lib.dashlet.table.table(attributes);
+                    var $thead = one.lib.dashlet.table.header(headers);
+                    $table.append($thead);
+
+                    var footer = [];
+
+                    var cancelButton = one.lib.dashlet.button.single("Cancel",
+                            one.f.troubleshooting.existingNodes.id.modal.nodeInfo, "", "");
+                    var $cancelButton = one.lib.dashlet.button.button(cancelButton);
+                    footer.push($cancelButton);
+
+                    var body = []
+                    $.each(content, function(key, value) {
+                        var tr = {};
+                        var entry = [];
+
+                        entry.push(key);
+                        entry.push(value);
+
+                        tr.entry = entry;
+                        body.push(tr);
+                    });
+                    var $tbody = one.lib.dashlet.table.body(body);
+                    $table.append($tbody);
+
+                    var $modal = one.lib.modal.spawn(one.f.troubleshooting.existingNodes.id.modal.nodeInfo, h3, $table , footer);
+                    $modal.modal();
+
+                    $('#'+one.f.troubleshooting.existingNodes.id.modal.nodeInfo, $modal).click(function() {
+                        $modal.modal('hide');
+                    });
+                });
             }
         }
 };
@@ -488,7 +533,7 @@ one.f.troubleshooting.uptime = {
                 $("#" + one.f.troubleshooting.uptime.id.datagrid).datagrid({dataSource: dataSource});
             });
     },
-    
+
     ajax : {
         main : function(url, requestData, callback) {
             $.getJSON(url, requestData, function(data) {
@@ -496,7 +541,7 @@ one.f.troubleshooting.uptime = {
             });
         }
     },
-    
+
     data: {
         uptimeDataGrid: function(data) {
             var source = new StaticDataSource({
@@ -548,7 +593,7 @@ one.f.troubleshooting.statistics = {
         var $p = $(document.createElement('p'));
         $p.text('Please select a Flow or Ports statistics');
         $p.addClass('text-center').addClass('text-info');
-        
+
         $dashlet.append($none)
             .append($p);
     }
