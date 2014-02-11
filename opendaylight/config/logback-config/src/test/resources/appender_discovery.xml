@@ -1,0 +1,44 @@
+<configuration>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%level %logger - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <appender name="STDOUT2" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="MEMORY" class="org.opendaylight.controller.config.yang.logback.memoryappender.MemoryAppender">
+
+    </appender>
+
+    <logger name="w" level="WARN"/>
+
+    <logger name="w.e" level="ERROR"/>
+
+    <logger name="stdout2" level="DEBUG">
+        <appender-ref ref="STDOUT2"/>
+    </logger>
+
+    <logger name="ignore.ignore" level="INFO" >
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="MEMORY"/>
+
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

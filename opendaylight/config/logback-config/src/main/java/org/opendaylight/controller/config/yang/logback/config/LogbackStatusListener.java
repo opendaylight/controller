@@ -17,48 +17,47 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.status.StatusBase;
 import ch.qos.logback.core.status.StatusListener;
 import ch.qos.logback.core.status.StatusManager;
+import org.slf4j.LoggerFactory;
 
-public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBean, Closeable {
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class LogbackStatusListener implements StatusListener, Closeable {
 
     private final List<StatusTO> receivedStatuses;
     private final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper;
-    private LogbackRuntimeRegistration reg;
+    private final LogbackRuntimeRegistration reg;
 
     public LogbackStatusListener(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         receivedStatuses = new ArrayList<>();
         this.rootRuntimeBeanRegistratorWrapper = rootRuntimeBeanRegistratorWrapper;
-    }
-
-    @Override
-    public synchronized List<StatusTO> getStatusTO() {
-        return Collections.unmodifiableList(receivedStatuses);
-    }
-
-    @Override
-    public synchronized void reset() {
-        receivedStatuses.clear();
-    }
-
-    public LogbackRuntimeRegistration register() {
-        reg = registerToJMX(rootRuntimeBeanRegistratorWrapper);
+        reg = rootRuntimeBeanRegistratorWrapper.register(new LogbackRuntimeMXBeanImpl());
         registerToLogback();
-        return reg;
     }
 
-    private LogbackRuntimeRegistration registerToJMX(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
-        return rootRuntimeBeanRegistratorWrapper.register(this);
+
+    private class LogbackRuntimeMXBeanImpl implements LogbackRuntimeMXBean {
+
+        @Override
+        public synchronized List<StatusTO> getStatusTO() {
+            return Collections.unmodifiableList(receivedStatuses);
+        }
+
+        @Override
+        public synchronized void reset() {
+            clear();
+        }
+
+    }
+
+    public synchronized void clear() {
+        receivedStatuses.clear();
     }
 
     private synchronized void registerToLogback() {
@@ -66,13 +65,11 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
         final StatusManager statusManager = context.getStatusManager();
 
         statusManager.remove(this);
-        reset();
+        clear();
 
         statusManager.add(this);
-        addInitialStatuses(statusManager);
-    }
 
-    private void addInitialStatuses(StatusManager statusManager) {
+        // add initial status messages
         for (ch.qos.logback.core.status.Status status : statusManager.getCopyOfStatusList()) {
             addStatusEvent(status);
         }
@@ -83,33 +80,30 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
         receivedStatuses.add(transformStatus(status));
     }
 
-    private StatusTO transformStatus(ch.qos.logback.core.status.Status status) {
+    private static StatusTO transformStatus(ch.qos.logback.core.status.Status status) {
         StatusTO transformed = new StatusTO();
-
         transformed.setDate(status.getDate());
         transformed.setLevel(transformStatusLevel(status.getLevel()));
         transformed.setMessage(status.getMessage());
-
         return transformed;
     }
 
-    private String transformStatusLevel(int status) {
+    private static String transformStatusLevel(int status) {
         switch (status) {
-        case StatusBase.INFO:
-            return "INFO";
-        case StatusBase.WARN:
-            return "WARN";
-        case StatusBase.ERROR:
-            return "ERROR";
-        default:
-            throw new IllegalStateException("Unknown status level " + status);
+            case StatusBase.INFO:
+                return "INFO";
+            case StatusBase.WARN:
+                return "WARN";
+            case StatusBase.ERROR:
+                return "ERROR";
+            default:
+                throw new IllegalStateException("Unknown status level " + status);
         }
     }
 
     @Override
-    public void close() throws IOException {
-        if (reg != null)
-            reg.close();
+    public void close() {
+        reg.close();
         unregisterFromLogback();
     }
 

@@ -1,0 +1,97 @@
+module logback {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:logback:config";
+    prefix "logback";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+
+
+    description
+        "This module contains the base YANG definitions for logback module.";
+
+    revision "2013-07-16" {
+        description
+            "Initial revision.";
+    }
+
+    identity logback {
+        description
+            "Actual state of logback configuration.";
+        base config:module-type;
+        config:java-name-prefix Logback;
+    }
+
+    identity appender {
+        description "Service interface each appender module must implement";
+        base config:service-type;
+        config:java-class org.opendaylight.controller.config.yang.logback.api.HasAppenders;
+    }
+
+    identity logback-rpc;
+
+    augment "/config:modules/config:module/config:configuration" {
+        case logback {
+            when "/config:modules/config:module/config:type = 'logback'";
+
+            list loggers {
+                config:java-name-prefix LoggerTO;
+
+                leaf logger-name {
+                    type string;
+                    mandatory true;
+                }
+                key logger-name;
+
+                leaf level {
+                    type string;
+                    mandatory true;
+                }
+
+                leaf-list appenders {
+                    type string;
+                }
+
+                leaf additivity {
+                    type boolean;
+                    default true;
+                }
+            }
+
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case logback {
+            when "/config:modules/config:module/config:type = 'logback'";
+
+            rpcx:rpc-context-instance "logback-rpc";
+
+            list status {
+                config:java-name-prefix StatusTO;
+
+                leaf level {
+                    type string;
+                }
+
+                leaf message {
+                    type string;
+                }
+
+                leaf date {
+                    type uint32;
+                }
+            }
+        }
+    }
+
+    rpc reset {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance logback-rpc;
+                }
+            }
+        }
+    }
+}

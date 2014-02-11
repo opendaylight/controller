@@ -9,6 +9,8 @@
 
 
   <logger name="org.opendaylight.yangtools.yang.parser.util.ModuleDependencySort" level="ERROR"/>
+  <logger name="org.ops4j.pax.exam.nat.internal.NativeTestContainer" level="DEBUG"/>
+  <logger name="org.opendaylight.controller.netconf.persist" level="DEBUG"/>
 
   <root level="info">
     <appender-ref ref="STDOUT" />
