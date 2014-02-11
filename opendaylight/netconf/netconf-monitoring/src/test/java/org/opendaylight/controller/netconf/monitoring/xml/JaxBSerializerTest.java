@@ -11,10 +11,13 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.NetconfTcp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfSsh;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.Transport;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.SchemasBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Sessions;
@@ -39,7 +42,7 @@ public class JaxBSerializerTest {
 
             @Override
             public Sessions getSessions() {
-                return new SessionsBuilder().setSession(Lists.newArrayList(getMockSession())).build();
+                return new SessionsBuilder().setSession(Lists.newArrayList(getMockSession(NetconfTcp.class), getMockSession(NetconfSsh.class))).build();
             }
 
             @Override
@@ -51,7 +54,7 @@ public class JaxBSerializerTest {
         Element xml = new JaxBSerializer().toXml(model);
     }
 
-    private Session getMockSession() {
+    private Session getMockSession(Class<? extends Transport> transportType) {
         Session mocked = mock(Session.class);
         Session1 mockedSession1 = mock(Session1.class);
         doReturn("client").when(mockedSession1).getSessionIdentifier();
@@ -62,7 +65,7 @@ public class JaxBSerializerTest {
         doReturn(new ZeroBasedCounter32(0L)).when(mocked).getInRpcs();
         doReturn(new ZeroBasedCounter32(0L)).when(mocked).getOutNotifications();
         doReturn(new ZeroBasedCounter32(0L)).when(mocked).getOutRpcErrors();
-        doReturn(NetconfSsh.class).when(mocked).getTransport();
+        doReturn(transportType).when(mocked).getTransport();
         doReturn("username").when(mocked).getUsername();
         doReturn(mockedSession1).when(mocked).getAugmentation(Session1.class);
         return mocked;
