@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.util.mapping;
 
+import java.util.Map;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
@@ -20,8 +22,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.Map;
-
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
 
@@ -29,7 +29,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         this.netconfSessionIdForReporting = netconfSessionIdForReporting;
     }
 
-    public String getNetconfSessionIdForReporting() {
+    public final String getNetconfSessionIdForReporting() {
         return netconfSessionIdForReporting;
     }
 
@@ -67,7 +67,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
     protected abstract HandlingPriority canHandle(String operationName, String netconfOperationNamespace);
 
     @Override
-    public Document handle(Document message, NetconfOperationRouter opRouter) throws NetconfDocumentedException {
+    public final Document handle(Document message, NetconfOperationRouter opRouter) throws NetconfDocumentedException {
 
         XmlElement requestElement = getRequestElementWithCheck(message);
 
