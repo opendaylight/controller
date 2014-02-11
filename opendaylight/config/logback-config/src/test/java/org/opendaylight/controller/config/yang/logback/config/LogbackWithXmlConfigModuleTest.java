@@ -7,32 +7,31 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.util.List;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import com.google.common.collect.Lists;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.slf4j.LoggerFactory;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
 
 public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
 
@@ -61,7 +60,7 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
      * @throws MalformedObjectNameException
      */
     @Test
-    public void test() throws InstanceAlreadyExistsException, InstanceNotFoundException, MalformedObjectNameException {
+    public void test() throws InstanceAlreadyExistsException, InstanceNotFoundException, MalformedObjectNameException, ValidationException, ConflictingVersionException {
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), LogbackModuleFactory.INSTANCE_NAME);
@@ -106,7 +105,7 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
      */
     @Test
     public void testAddNewLogger() throws InstanceAlreadyExistsException, InstanceNotFoundException,
-            MalformedObjectNameException {
+            MalformedObjectNameException, ValidationException, ConflictingVersionException {
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), LogbackModuleFactory.INSTANCE_NAME);

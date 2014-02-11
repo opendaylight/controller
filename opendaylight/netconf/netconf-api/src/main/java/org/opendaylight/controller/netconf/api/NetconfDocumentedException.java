@@ -8,7 +8,11 @@
 
 package org.opendaylight.controller.netconf.api;
 
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,6 +22,8 @@ import java.util.Map;
 public class NetconfDocumentedException extends Exception {
 
     private static final long serialVersionUID = 1L;
+
+
 
     public enum ErrorType {
         transport, rpc, protocol, application;
@@ -82,6 +88,20 @@ public class NetconfDocumentedException extends Exception {
         this.errorTag = errorTag;
         this.errorSeverity = errorSeverity;
         this.errorInfo = errorInfo;
+    }
+
+    public static NetconfDocumentedException wrap(ValidationException e) throws NetconfDocumentedException {
+        final Map<String, String> errorInfo = new HashMap<>();
+        errorInfo.put(ErrorTag.operation_failed.name(), "Validation failed");
+        throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
+                ErrorSeverity.error, errorInfo);
+    }
+
+    public static NetconfDocumentedException wrap(ConflictingVersionException e) throws NetconfDocumentedException {
+        final Map<String, String> errorInfo = new HashMap<>();
+        errorInfo.put(ErrorTag.operation_failed.name(), "Optimistic lock failed");
+        throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
+                ErrorSeverity.error, errorInfo);
     }
 
     public ErrorType getErrorType() {

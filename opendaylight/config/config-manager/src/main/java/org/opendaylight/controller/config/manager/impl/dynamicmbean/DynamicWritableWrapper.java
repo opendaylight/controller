@@ -164,8 +164,9 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
             try {
                 validate();
             } catch (Exception e) {
-                throw ValidationException.createForSingleException(
-                        moduleIdentifier, e);
+
+                throw new MBeanException(ValidationException.createForSingleException(
+                        moduleIdentifier, e));
             }
             return Void.TYPE;
         }
