@@ -28,21 +28,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class implement statistics manager related listener interface and augment all the
- * received statistics data to data stores.
+ * This class is responsible for listening for statistics update notifications and
+ * routing them to the appropriate NodeStatisticsHandler.
+
  * TODO: Need to add error message listener and clean-up the associated tx id
  * if it exists in the tx-id cache.
  * @author vishnoianil
- *
  */
-public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsListener,
+public class StatisticsListener implements OpendaylightGroupStatisticsListener,
         OpendaylightMeterStatisticsListener,
         OpendaylightFlowStatisticsListener,
         OpendaylightPortStatisticsListener,
         OpendaylightFlowTableStatisticsListener,
         OpendaylightQueueStatisticsListener{
 
-    private final static Logger sucLogger = LoggerFactory.getLogger(StatisticsUpdateCommiter.class);
+    private final static Logger sucLogger = LoggerFactory.getLogger(StatisticsListener.class);
     private final StatisticsProvider statisticsManager;
     private final MultipartMessageManager messageManager;
 
@@ -50,7 +50,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
      * default ctor
      * @param manager
      */
-    public StatisticsUpdateCommiter(final StatisticsProvider manager){
+    public StatisticsListener(final StatisticsProvider manager){
         this.statisticsManager = manager;
         this.messageManager = this.statisticsManager.getMultipartMessageManager();
     }
@@ -62,9 +62,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             return;
 
         //Add statistics to local cache
-        final NodeStatisticsAger sna = this.statisticsManager.getStatisticsHandler(notification.getId());
-        if (sna != null) {
-            sna.updateMeterConfigStats(notification.getMeterConfigStats());
+        final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateMeterConfigStats(notification.getMeterConfigStats());
         }
     }
 
@@ -75,9 +75,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             return;
 
         //Add statistics to local cache
-        final NodeStatisticsAger nsa = this.statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
-            nsa.updateMeterStats(notification.getMeterStats());
+        final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateMeterStats(notification.getMeterStats());
         }
     }
 
@@ -87,9 +87,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
-        final NodeStatisticsAger nsa = statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
-            nsa.updateGroupDescStats(notification.getGroupDescStats());
+        final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateGroupDescStats(notification.getGroupDescStats());
         }
     }
 
@@ -99,15 +99,15 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
-        final NodeStatisticsAger nsa = statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
-            nsa.updateGroupStats(notification.getGroupStats());
+        final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateGroupStats(notification.getGroupStats());
         }
     }
 
     @Override
     public void onMeterFeaturesUpdated(MeterFeaturesUpdated notification) {
-        final NodeStatisticsAger sna = this.statisticsManager.getStatisticsHandler(notification.getId());
+        final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
             sna.updateMeterFeatures(notification);
         }
@@ -115,7 +115,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
 
     @Override
     public void onGroupFeaturesUpdated(GroupFeaturesUpdated notification) {
-        final NodeStatisticsAger sna = this.statisticsManager.getStatisticsHandler(notification.getId());
+        final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
             sna.updateGroupFeatures(notification);
         }
@@ -128,7 +128,7 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             return;
 
         sucLogger.debug("Received flow stats update : {}",notification.toString());
-        final NodeStatisticsAger sna = this.statisticsManager.getStatisticsHandler(notification.getId());
+        final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
             sna.updateFlowStats(notification.getFlowAndStatisticsMapList());
         }
@@ -140,10 +140,10 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
-        final NodeStatisticsAger nsa = this.statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
+        final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
             final Short tableId = messageManager.getTableIdForTxId(notification.getId(),notification.getTransactionId());
-            nsa.updateAggregateFlowStats(tableId, notification);
+            handler.updateAggregateFlowStats(tableId, notification);
         }
     }
 
@@ -153,9 +153,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
-        final NodeStatisticsAger nsa = this.statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
-            nsa.updateNodeConnectorStats(notification.getNodeConnectorStatisticsAndPortNumberMap());
+        final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateNodeConnectorStats(notification.getNodeConnectorStatisticsAndPortNumberMap());
         }
     }
 
@@ -165,9 +165,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
         if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
             return;
 
-        final NodeStatisticsAger nsa = this.statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
-            nsa.updateFlowTableStats(notification.getFlowTableAndStatisticsMap());
+        final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateFlowTableStats(notification.getFlowTableAndStatisticsMap());
         }
     }
 
@@ -178,9 +178,9 @@ public class StatisticsUpdateCommiter implements OpendaylightGroupStatisticsList
             return;
 
         //Add statistics to local cache
-        final NodeStatisticsAger nsa = this.statisticsManager.getStatisticsHandler(notification.getId());
-        if (nsa != null) {
-            nsa.updateQueueStats(notification.getQueueIdAndStatisticsMap());
+        final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
+        if (handler != null) {
+            handler.updateQueueStats(notification.getQueueIdAndStatisticsMap());
         }
     }
 }
