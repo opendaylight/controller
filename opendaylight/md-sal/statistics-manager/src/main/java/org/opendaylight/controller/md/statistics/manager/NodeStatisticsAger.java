@@ -18,18 +18,23 @@ import org.opendaylight.controller.sal.binding.api.data.DataModificationTransact
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.desc.GroupDescBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.desc.stats.reply.GroupDescStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -38,11 +43,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsData;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.flow.capable.node.connector.queue.statistics.FlowCapableNodeConnectorQueueStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.queue.id.and.statistics.map.QueueIdAndStatisticsMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -53,6 +65,7 @@ import com.google.common.base.Preconditions;
  *
  */
 public class NodeStatisticsAger {
+    private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsAger.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
     private final Map<GroupDescStats,Long> groupDescStatsUpdate = new HashMap<>();
@@ -123,7 +136,7 @@ public class NodeStatisticsAger {
         }
     }
 
-    public class QueueEntry{
+    private static final class QueueEntry{
         private final NodeConnectorId nodeConnectorId;
         private final QueueId queueId;
         public QueueEntry(NodeConnectorId ncId, QueueId queueId){
@@ -140,7 +153,6 @@ public class NodeStatisticsAger {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + getOuterType().hashCode();
             result = prime * result + ((nodeConnectorId == null) ? 0 : nodeConnectorId.hashCode());
             result = prime * result + ((queueId == null) ? 0 : queueId.hashCode());
             return result;
@@ -157,9 +169,6 @@ public class NodeStatisticsAger {
                 return false;
             }
             QueueEntry other = (QueueEntry) obj;
-            if (!getOuterType().equals(other.getOuterType())) {
-                return false;
-            }
             if (nodeConnectorId == null) {
                 if (other.nodeConnectorId != null) {
                     return false;
@@ -176,9 +185,6 @@ public class NodeStatisticsAger {
             }
             return true;
         }
-        private NodeStatisticsAger getOuterType() {
-            return NodeStatisticsAger.this;
-        }
     }
 
     public NodeKey getTargetNodeKey() {
@@ -186,22 +192,105 @@ public class NodeStatisticsAger {
     }
 
     public synchronized void updateGroupDescStats(List<GroupDescStats> list){
-        Long expiryTime = getExpiryTime();
-        for(GroupDescStats groupDescStats : list)
+        final Long expiryTime = getExpiryTime();
+        final DataModificationTransaction trans = statisticsProvider.startChange();
+
+        for (GroupDescStats groupDescStats : list) {
+            GroupBuilder groupBuilder = new GroupBuilder();
+            GroupKey groupKey = new GroupKey(groupDescStats.getGroupId());
+            groupBuilder.setKey(groupKey);
+
+            InstanceIdentifier<Group> groupRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
+                                                                                        .augmentation(FlowCapableNode.class)
+                                                                                        .child(Group.class,groupKey).toInstance();
+
+            NodeGroupDescStatsBuilder groupDesc= new NodeGroupDescStatsBuilder();
+            GroupDescBuilder stats = new GroupDescBuilder();
+            stats.fieldsFrom(groupDescStats);
+            groupDesc.setGroupDesc(stats.build());
+
+            //Update augmented data
+            groupBuilder.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
+
+            trans.putOperationalData(groupRef, groupBuilder.build());
             this.groupDescStatsUpdate.put(groupDescStats, expiryTime);
+        }
+
+        trans.commit();
     }
 
     public synchronized void updateMeterConfigStats(List<MeterConfigStats> list){
-        Long expiryTime = getExpiryTime();
-        for(MeterConfigStats meterConfigStats: list)
+        final Long expiryTime = getExpiryTime();
+        final DataModificationTransaction trans = statisticsProvider.startChange();
+
+        for(MeterConfigStats meterConfigStats : list) {
+            MeterBuilder meterBuilder = new MeterBuilder();
+            MeterKey meterKey = new MeterKey(meterConfigStats.getMeterId());
+            meterBuilder.setKey(meterKey);
+
+            InstanceIdentifier<Meter> meterRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
+                                                                                        .augmentation(FlowCapableNode.class)
+                                                                                        .child(Meter.class,meterKey).toInstance();
+
+            NodeMeterConfigStatsBuilder meterConfig= new NodeMeterConfigStatsBuilder();
+            MeterConfigStatsBuilder stats = new MeterConfigStatsBuilder();
+            stats.fieldsFrom(meterConfigStats);
+            meterConfig.setMeterConfigStats(stats.build());
+
+            //Update augmented data
+            meterBuilder.addAugmentation(NodeMeterConfigStats.class, meterConfig.build());
+
+            trans.putOperationalData(meterRef, meterBuilder.build());
             this.meterConfigStatsUpdate.put(meterConfigStats, expiryTime);
+        }
+
+        trans.commit();
+    }
+
+    public void updateQueueStats(List<QueueIdAndStatisticsMap> list) {
+        final Long expiryTime = getExpiryTime();
+        final DataModificationTransaction trans = statisticsProvider.startChange();
+
+        for (QueueIdAndStatisticsMap swQueueStats : list) {
+
+            QueueEntry queueEntry = new QueueEntry(swQueueStats.getNodeConnectorId(),swQueueStats.getQueueId());
+
+            FlowCapableNodeConnectorQueueStatisticsDataBuilder queueStatisticsDataBuilder = new FlowCapableNodeConnectorQueueStatisticsDataBuilder();
+
+            FlowCapableNodeConnectorQueueStatisticsBuilder queueStatisticsBuilder = new FlowCapableNodeConnectorQueueStatisticsBuilder();
+
+            queueStatisticsBuilder.fieldsFrom(swQueueStats);
+
+            queueStatisticsDataBuilder.setFlowCapableNodeConnectorQueueStatistics(queueStatisticsBuilder.build());
+
+            InstanceIdentifier<Queue> queueRef
+                    = InstanceIdentifier.builder(Nodes.class)
+                                        .child(Node.class, targetNodeKey)
+                                        .child(NodeConnector.class, new NodeConnectorKey(swQueueStats.getNodeConnectorId()))
+                                        .augmentation(FlowCapableNodeConnector.class)
+                                        .child(Queue.class, new QueueKey(swQueueStats.getQueueId())).toInstance();
+
+            QueueBuilder queueBuilder = new QueueBuilder();
+            FlowCapableNodeConnectorQueueStatisticsData qsd = queueStatisticsDataBuilder.build();
+            queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, qsd);
+            queueBuilder.setKey(new QueueKey(swQueueStats.getQueueId()));
+
+            logger.debug("Augmenting queue statistics {} of queue {} to port {}",
+                                        qsd,
+                                        swQueueStats.getQueueId(),
+                                        swQueueStats.getNodeConnectorId());
+
+            trans.putOperationalData(queueRef, queueBuilder.build());
+            this.queuesStatsUpdate.put(queueEntry, expiryTime);
+        }
+
+        trans.commit();
     }
 
     public synchronized void updateFlowStats(FlowEntry flowEntry){
         this.flowStatsUpdate.put(flowEntry, getExpiryTime());
     }
     public synchronized void updateQueueStats(QueueEntry queueEntry){
-        this.queuesStatsUpdate.put(queueEntry, getExpiryTime());
     }
 
     private static Long getExpiryTime(){
