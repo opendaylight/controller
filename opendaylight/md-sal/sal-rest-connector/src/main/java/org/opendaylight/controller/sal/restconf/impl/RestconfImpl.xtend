@@ -47,6 +47,9 @@ import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBu
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder
 
 import static javax.ws.rs.core.Response.Status.*
+import java.util.Map
+import java.util.Collections
+import org.opendaylight.yangtools.yang.data.api.SimpleNode
 
 class RestconfImpl implements RestconfService {
 
@@ -293,7 +296,7 @@ class RestconfImpl implements RestconfService {
         return new StructuredData(rpcResult.result, rpc.output, null)
     }
 
-    override readConfigurationData(String identifier) {
+    override readConfigurationData(String identifier, UriInfo info) {        
         val iiWithData = identifier.toInstanceIdentifier
         var CompositeNode data = null;
         if (iiWithData.mountPoint !== null) {
@@ -301,10 +304,12 @@ class RestconfImpl implements RestconfService {
         } else {
             data = broker.readConfigurationData(iiWithData.getInstanceIdentifier);
         }
+        val depth = info.getQueryParameters(false).getFirst(RestconfUriParameter.DEPTH.toString);
+        data = cutDataAccordingToDepthParameter(depth, data)
         return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
     }
 
-    override readOperationalData(String identifier) {
+    override readOperationalData(String identifier, UriInfo info) {
         val iiWithData = identifier.toInstanceIdentifier
         var CompositeNode data = null;
         if (iiWithData.mountPoint !== null) {
@@ -312,6 +317,8 @@ class RestconfImpl implements RestconfService {
         } else {
             data = broker.readOperationalData(iiWithData.getInstanceIdentifier);
         }
+        val depth = info.getQueryParameters(false).getFirst(RestconfUriParameter.DEPTH.toString);
+        data = cutDataAccordingToDepthParameter(depth, data)
         return new StructuredData(data, iiWithData.schemaNode, iiWithData.mountPoint)
     }
 
@@ -675,5 +682,44 @@ class RestconfImpl implements RestconfService {
         }
         return currentAugment
     }
+    
+    private def cutDataAccordingToDepthParameter(String depth, CompositeNode data) {
+        if (depth !== null) {
+            try {
+                val depthInt = Integer.valueOf(depth)
+                val cutData = cutDataAtNestingLevel(data, depthInt)
+                if (cutData instanceof CompositeNode) {
+                    return cutData as CompositeNode
+                } 
+            } catch (NumberFormatException e) {
+                
+            }
+        }
+        return data;
+    }
+
+    private def Node<?> cutDataAtNestingLevel(Node<?> node, Integer level) {
+        if (node instanceof CompositeNode) {
+            var outputChildNodes = new ArrayList<Node<?>>()
+            for (childNode : (node as CompositeNode).children) {
+                if (level > 0) {
+                    outputChildNodes.add(cutDataAtNestingLevel(childNode, level - 1))
+                } else if (childNode instanceof CompositeNode) {
+                    outputChildNodes.add(
+                        NodeFactory.createImmutableCompositeNode(childNode.nodeType, childNode.parent,
+                            Collections.emptyList)) //cut childs which are lower then level
+                } else if (childNode instanceof SimpleNode<?>) {
+                    outputChildNodes.add(
+                        NodeFactory.createImmutableSimpleNode(childNode.nodeType, childNode.parent,
+                            (childNode as SimpleNode<?>).value))
+                }
+            }
+            return NodeFactory.createImmutableCompositeNode(node.nodeType, node.parent, outputChildNodes)
+        } else if (node instanceof SimpleNode<?>) {
+            return NodeFactory.createImmutableSimpleNode(node.nodeType, node.parent,
+                (node as SimpleNode<?>).value)
+        }
+        return null
+    }    
 
 }

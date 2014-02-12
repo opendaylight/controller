@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
@@ -46,6 +47,10 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -256,6 +261,166 @@ public class RestGetOperationTest extends JerseyTest {
         assertTrue("Json response for /operations/mount_point rpc-behind-module2 is incorrect",
                 validateOperationsResponseJson(responseBody, "rpc-behind-module2", "module2-behind-mount-point").find());
 
+    }
+
+    // /config/......?depth={number}
+    @Test
+    
+    public void getConfigWithUriDepthParameterTest() throws UnsupportedEncodingException {
+        ControllerContext.getInstance().setGlobalSchema(schemaContextModules);            
+        CompositeNode cont1 = prepareCompositeNodeCont1();
+        
+        when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(cont1);        
+        String uri = "/config/deep-module:cont/cont1";
+        Response response = target(uri).queryParam("depth", "1").request("application/xml").get();
+        String stream = response.readEntity(String.class);
+        assertTrue("Incorrect output for uri deep-module:cont1?depth=1",verifyResponseWhenUriCont1Depth1(stream));
+        
+        uri = createUri("/config/", "deep-module:cont/cont1");
+        response = target(uri).queryParam("depth", "2").request("application/xml").get();
+        stream = response.readEntity(String.class);
+        assertTrue("Incorrect output for uri deep-module:cont1?depth=2",verifyResponseWhenUriCont1Depth2(stream));  
+
+        
+        when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(prepareCompositeNodeCont(cont1));
+        uri = createUri("/config/", "deep-module:cont");
+        response = target(uri).queryParam("depth", "2").request("application/xml").get();
+        assertTrue("Incorrect output for uri deep-module:cont?depth=2",verifyResponseWhenUriContDepth2(response.readEntity(String.class)));
+        
+
+    }
+
+    private boolean verifyResponseWhenUriCont1Depth2(String stream) {
+        StringBuilder regex = new StringBuilder();
+        regex.append("^");
+        
+        regex.append(".*<cont1");
+        regex.append(".*");
+        regex.append(".*>");
+        
+        regex.append(".*<cont11>");
+        regex.append(".*<cont111>");
+        regex.append(".*<lf1111>");
+        regex.append(".*</lf1111>");
+        regex.append(".*</cont111>");
+        regex.append(".*</cont11>");
+        regex.append(".*</cont1>");
+        
+        regex.append(".*");
+        regex.append("$");
+        
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(stream).find();
+    }
+
+    private boolean verifyResponseWhenUriContDepth2(String stream) {
+        StringBuilder regex = new StringBuilder();
+        regex.append("^");
+
+        regex.append(".*<cont");
+        regex.append(".*");
+        regex.append(".*>");
+        
+        regex.append(".*<cont1>");
+        regex.append(".*<cont11>");
+        regex.append(".*<cont111/>");
+        regex.append(".*</cont11>");
+        regex.append(".*</cont1>");
+        
+        regex.append(".*<cont2>");
+        regex.append(".*<cont21>");
+        regex.append(".*<cont211/>");
+        regex.append(".*</cont21>");
+        regex.append(".*</cont2>");
+        
+        regex.append(".*<lf1>");
+        regex.append(".*</lf1>");
+
+        regex.append(".*</cont>");
+        regex.append(".*");
+        regex.append("$");
+        
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(stream).find();
+        
+    }
+    
+    private boolean verifyResponseWhenUriCont1Depth1(String stream) {
+        StringBuilder regex = new StringBuilder();
+        regex.append("^");
+        
+        regex.append(".*<cont1");
+        regex.append(".*");
+        regex.append(".*>");
+        
+        regex.append(".*<cont11>");
+        regex.append(".*<cont111/>");
+        regex.append(".*</cont11>");
+        regex.append(".*</cont1>");
+        
+        regex.append(".*");
+        regex.append("$");
+        
+        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        return ptrn.matcher(stream).find();
+        
+    }
+
+    private MutableCompositeNode prepareCompositeNodeCont(CompositeNode cont1) {
+        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont", "urn:deep:module", "2014-02-12"), null, null, null, null);        
+
+        MutableCompositeNode cont2 = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont2", "urn:deep:module", "2014-02-12"), cont, null, null, null);
+        MutableCompositeNode cont21 = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont21", "urn:deep:module", "2014-02-12"), cont2, null, null, null);
+
+        MutableCompositeNode cont211 = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont211", "urn:deep:module", "2014-02-12"), cont21, null, null, null);
+
+        MutableSimpleNode<?> lf2111 = NodeFactory.createMutableSimpleNode(
+                TestUtils.buildQName("lf2111", "urn:deep:module", "2014-02-12"), cont211, "lf2111 value", null, null);
+        cont211.getChildren().add(lf2111);
+        cont211.init();
+
+        cont21.getChildren().add(cont211);
+        cont21.init();
+
+        cont2.getChildren().add(cont21);
+        cont2.init();
+
+        MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(
+                TestUtils.buildQName("lf1", "urn:deep:module", "2014-02-12"), cont, "lf1 value", null, null);
+
+        ((MutableCompositeNode)cont1).setParent(cont);
+        cont.getChildren().add(cont1);
+        cont.getChildren().add(cont2);
+        cont.getChildren().add(lf1);
+        cont.init();
+        return cont;
+    }
+
+    private MutableCompositeNode prepareCompositeNodeCont1() {
+        MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont1", "urn:deep:module", "2014-02-12"), null, null, null, null);
+
+        MutableCompositeNode cont11 = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont11", "urn:deep:module", "2014-02-12"), cont1, null, null, null);
+
+        MutableCompositeNode cont111 = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont111", "urn:deep:module", "2014-02-12"), cont11, null, null, null);
+
+        MutableSimpleNode<?> lf1111 = NodeFactory.createMutableSimpleNode(
+                TestUtils.buildQName("lf1111", "urn:deep:module", "2014-02-12"), cont111, "lf1111 value", null, null);
+        cont111.getChildren().add(lf1111);
+        cont111.init();
+
+        cont11.getChildren().add(cont111);
+        cont11.init();
+
+        cont1.getChildren().add(cont11);
+        cont1.init();
+        return cont1;
     }
 
     private Matcher validateOperationsResponseJson(String searchIn, String rpcName, String moduleName) {

@@ -1,0 +1,29 @@
+module deep-module {
+    namespace "urn:deep:module";
+    prefix "mod1";
+    revision "2014-02-12";
+    
+    container cont {
+        container cont1 {
+            container cont11 {
+                container cont111 {
+                    leaf lf1111 {
+                        type string;
+                    }
+                }
+            }            
+        }
+        container cont2 {
+            container cont21 {
+                container cont211 {
+                    leaf lf2111 {
+                        type string;    
+                    }
+                }
+            }
+        }
+        leaf lf1 {
+            type string;
+        }
+    }
+}
