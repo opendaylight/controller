@@ -23,7 +23,9 @@ import org.opendaylight.yangtools.yang.binding.Notification
 import org.slf4j.LoggerFactory
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolderimport com.google.common.collect.Multimaps
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListener
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListenerimport java.util.Set
+import com.google.common.collect.ImmutableSet
+import java.util.concurrent.Future
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
     
@@ -100,7 +102,15 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
             listenerToNotify = listenerToNotify + listeners.get(type as Class<? extends Notification>)
         }
         val tasks = listenerToNotify.map[new NotifyTask(it, notification)].toSet;
-        executor.invokeAll(tasks);
+        submitAll(executor,tasks);
+    }
+    
+    def submitAll(ExecutorService service, Set<NotifyTask> tasks) {
+        val ret = ImmutableSet.<Future<Object>>builder();
+        for(task : tasks) {
+            ret.add(service.submit(task));
+        }
+        return ret.build();
     }
 
     override <T extends Notification> registerNotificationListener(Class<T> notificationType,
