@@ -8,33 +8,34 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Optional;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
+import java.net.InetSocketAddress;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.util.AdditionalHeaderUtil;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
-import org.opendaylight.protocol.framework.SessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
+import com.google.common.base.Optional;
 
 public class NetconfServerSessionNegotiator extends
-        AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession> {
+        AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
 
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
 
     protected NetconfServerSessionNegotiator(NetconfServerSessionPreferences sessionPreferences,
-            Promise<NetconfServerSession> promise, Channel channel, Timer timer, SessionListener sessionListener,
+            Promise<NetconfServerSession> promise, Channel channel, Timer timer, NetconfServerSessionListener sessionListener,
             long connectionTimeoutMillis) {
         super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
     }
 
     @Override
-    protected NetconfServerSession getSession(SessionListener sessionListener, Channel channel, NetconfMessage message) {
+    protected NetconfServerSession getSession(NetconfServerSessionListener sessionListener, Channel channel, NetconfMessage message) {
         Optional<String> additionalHeader = message.getAdditionalHeader();
 
         AdditionalHeader parsedHeader;

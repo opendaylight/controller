@@ -234,10 +234,6 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     private class NetconfOperationExecution implements NetconfOperationFilterChain {
         private final NetconfOperation operationWithHighestPriority;
 
-        private NetconfOperationExecution(NetconfOperation operationWithHighestPriority) {
-            this.operationWithHighestPriority = operationWithHighestPriority;
-        }
-
         public NetconfOperationExecution(TreeMap<HandlingPriority, Set<NetconfOperation>> sortedPriority,
                 HandlingPriority highestFoundPriority) {
             operationWithHighestPriority = sortedPriority.get(highestFoundPriority).iterator().next();

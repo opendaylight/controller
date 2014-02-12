@@ -12,14 +12,14 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
-import org.opendaylight.controller.netconf.api.NetconfSession;
+
+import java.net.InetSocketAddress;
+
 import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 
-import java.net.InetSocketAddress;
-
-public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, NetconfServerSessionListener> {
+public class NetconfServerDispatcher extends AbstractDispatcher<NetconfServerSession, NetconfServerSessionListener> {
 
     private final ServerChannelInitializer initializer;
 
@@ -31,15 +31,15 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
 
     public ChannelFuture createServer(InetSocketAddress address) {
 
-        return super.createServer(address, new PipelineInitializer<NetconfSession>() {
+        return super.createServer(address, new PipelineInitializer<NetconfServerSession>() {
             @Override
-            public void initializeChannel(final SocketChannel ch, final Promise<NetconfSession> promise) {
+            public void initializeChannel(final SocketChannel ch, final Promise<NetconfServerSession> promise) {
                 initializer.initialize(ch, promise);
             }
         });
     }
 
-    public static class ServerChannelInitializer extends AbstractChannelInitializer {
+    public static class ServerChannelInitializer extends AbstractChannelInitializer<NetconfServerSession> {
 
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
         private final NetconfServerSessionListenerFactory listenerFactory;
@@ -51,11 +51,10 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfSession, 
         }
 
         @Override
-        protected void initializeAfterDecoder(SocketChannel ch, Promise<? extends NetconfSession> promise) {
+        protected void initializeAfterDecoder(SocketChannel ch, Promise<NetconfServerSession> promise) {
             ch.pipeline().addLast("deserializerExHandler", new DeserializerExceptionHandler());
             ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(listenerFactory, ch, promise));
         }
-
     }
 
 }
