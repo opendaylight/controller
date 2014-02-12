@@ -96,7 +96,7 @@ public class StatisticsProvider implements AutoCloseable {
     private final DataProviderService dps;
 
     //Local caching of stats
-    private final ConcurrentMap<NodeId,NodeStatisticsAger> statisticsCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<NodeId,NodeStatisticsHandler> statisticsCache = new ConcurrentHashMap<>();
 
     private OpendaylightGroupStatisticsService groupStatsService;
 
@@ -125,7 +125,7 @@ public class StatisticsProvider implements AutoCloseable {
         return multipartMessageManager;
     }
 
-    private final StatisticsUpdateCommiter updateCommiter = new StatisticsUpdateCommiter(StatisticsProvider.this);
+    private final StatisticsListener updateCommiter = new StatisticsListener(StatisticsProvider.this);
 
     private Registration<NotificationListener> listenerRegistration;
 
@@ -170,7 +170,7 @@ public class StatisticsProvider implements AutoCloseable {
             public void run() {
                 while(true){
                     try {
-                        for(NodeStatisticsAger nodeStatisticsAger : statisticsCache.values()){
+                        for(NodeStatisticsHandler nodeStatisticsAger : statisticsCache.values()){
                             nodeStatisticsAger.cleanStaleStatistics();
                         }
                         multipartMessageManager.cleanStaleTransactionIds();
@@ -455,11 +455,11 @@ public class StatisticsProvider implements AutoCloseable {
      * @return Node statistics handler for that node. Null if the statistics should
      *         not handled.
      */
-    public final NodeStatisticsAger getStatisticsHandler(final NodeId nodeId) {
+    public final NodeStatisticsHandler getStatisticsHandler(final NodeId nodeId) {
         Preconditions.checkNotNull(nodeId);
-        NodeStatisticsAger ager = statisticsCache.get(nodeId);
+        NodeStatisticsHandler ager = statisticsCache.get(nodeId);
         if (ager == null) {
-            ager = new NodeStatisticsAger(this, new NodeKey(nodeId));
+            ager = new NodeStatisticsHandler(this, new NodeKey(nodeId));
             statisticsCache.put(nodeId, ager);
         }
 
