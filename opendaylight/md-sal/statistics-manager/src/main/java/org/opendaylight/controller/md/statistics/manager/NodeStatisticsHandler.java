@@ -97,13 +97,14 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 /**
- * Main responsibility of this class to clean up all the stale statistics data
- * associated to Flow,Meter,Group,Queue.
- * @author avishnoi@in.ibm.com
+ * This class handles the lifecycle of per-node statistics. It receives data
+ * from StatisticsListener, stores it in the data store and keeps track of
+ * when the data should be removed.
  *
+ * @author avishnoi@in.ibm.com
  */
-public class NodeStatisticsAger {
-    private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsAger.class);
+public class NodeStatisticsHandler {
+    private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
     private final Map<GroupDescStats,Long> groupDescStatsUpdate = new HashMap<>();
@@ -115,7 +116,7 @@ public class NodeStatisticsAger {
     private final NodeKey targetNodeKey;
     private int unaccountedFlowsCounter = 1;
 
-    public NodeStatisticsAger(StatisticsProvider statisticsProvider, NodeKey nodeKey){
+    public NodeStatisticsHandler(StatisticsProvider statisticsProvider, NodeKey nodeKey){
         this.statisticsProvider = Preconditions.checkNotNull(statisticsProvider);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
@@ -172,8 +173,8 @@ public class NodeStatisticsAger {
             return true;
         }
 
-        private NodeStatisticsAger getOuterType() {
-            return NodeStatisticsAger.this;
+        private NodeStatisticsHandler getOuterType() {
+            return NodeStatisticsHandler.this;
         }
     }
 
