@@ -9,7 +9,6 @@
 
 package org.opendaylight.controller.configuration.internal;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -52,6 +51,8 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
     private static final Logger logger = LoggerFactory.getLogger(ContainerConfigurationService.class);
     private IClusterContainerServices clusterServices;
     private ConcurrentMap <ConfigurationEvent, String> containerConfigEvent;
+    // Path to file that belongs to the container that the current instance belongs to
+    private String root;
     /*
      * Collection containing the configuration objects.
      * This is configuration world: container names (also the map key)
@@ -59,7 +60,6 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
      */
     private Set<IConfigurationContainerAware> configurationAwareList = Collections
             .synchronizedSet(new HashSet<IConfigurationContainerAware>());
-    private String root;
     private ObjectReader objReader;
     private ObjectWriter objWriter;
 
@@ -93,14 +93,9 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
 
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
-        String containerName = (props != null) ? (String) props.get("containerName") : GlobalConstants.DEFAULT.toString();
-        root = String.format("%s%s/", GlobalConstants.STARTUPHOME.toString(), containerName);
-        if (!new File(root).exists()) {
-            boolean created = new File(root).mkdir();
-            if (!created) {
-                logger.error("Failed to create startup config directory for container {}", containerName);
-            }
-        }
+        String containerName = (props != null) ? (String) props.get("containerName") :
+            GlobalConstants.DEFAULT.toString();
+        root =  String.format("%s%s/", GlobalConstants.STARTUPHOME.toString(), containerName);
     }
 
     public void start() {
@@ -119,17 +114,17 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
      * Function called by the dependency manager before Container is Stopped and Destroyed.
      */
     public void containerStop() {
-        // Remove container directory along with its startup files
-        File[] files = new File(root).listFiles();
-        for (File file : files) {
-            file.delete();
-        }
-        new File(root).delete();
+        // Do nothing
+    }
+
+    String getRoot() {
+        return root;
     }
 
     @Override
     public Status saveConfiguration() {
         boolean success = true;
+
         for (IConfigurationContainerAware configurationAware : configurationAwareList) {
             logger.trace("Save Config triggered for {}", configurationAware.getClass().getSimpleName());
 
