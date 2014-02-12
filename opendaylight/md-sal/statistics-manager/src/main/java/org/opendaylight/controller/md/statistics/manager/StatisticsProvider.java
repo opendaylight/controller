@@ -448,7 +448,15 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public final NodeStatisticsAger getStatisticsAger(final NodeId nodeId) {
+    /**
+     * Get the handler for a particular node.
+     *
+     * @param nodeId source node
+     * @return Node statistics handler for that node. Null if the statistics should
+     *         not handled.
+     */
+    public final NodeStatisticsAger getStatisticsHandler(final NodeId nodeId) {
+        Preconditions.checkNotNull(nodeId);
         NodeStatisticsAger ager = statisticsCache.get(nodeId);
         if (ager == null) {
             ager = new NodeStatisticsAger(this, new NodeKey(nodeId));
