@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_183563f7",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/FlowComparator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-02-12T11:56:03Z",
+      "side": 1,
+      "message": "I think eventually these custom equal function will not be required once we use cookies as a flow identifier.",
+      "revId": "fc07d3f24ba59d5e91d11bff8eb9914a98d29162",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9828339b",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/FlowComparator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-02-12T11:56:03Z",
+      "side": 1,
+      "message": "Reason for using the custom equals function was that flow which user installs and the flow that finally get installs in switch sometime is not exact. For example, if user install flow with ip \u003d10.0.0.10 with no mask to openflow 1.3 switch, config data store will contain details [ip\u003d10.0.0.10 and mask\u003dnull], but when you fetch stats from switch you will get [ip\u003d10.0.0.10 and mask\u003d32] which is fine, because switch assumes mask\u003d32. So with default equals that compares on exact values will fail here. Another example is, assume user installs flow with ip \u003d 10.0.0.10/24 to openflow 1.0 switch, but openflow 1.0 switch don\u0027t have mask concept, so when you fetch stats from switch, you won\u0027t get any mask associated with the ip that user provided at the time of installation. So to find out the corresponding flow from config data store, i first compare ip with mask, and if that fails i find with ip without mask.",
+      "revId": "fc07d3f24ba59d5e91d11bff8eb9914a98d29162",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
