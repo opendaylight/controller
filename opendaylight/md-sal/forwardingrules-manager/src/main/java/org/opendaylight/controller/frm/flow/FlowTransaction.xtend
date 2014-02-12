@@ -24,12 +24,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowRef
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri
+import java.math.BigInteger
+import java.util.concurrent.atomic.AtomicLong
 
 class FlowTransaction extends AbstractTransaction {
     
     @Property
     val SalFlowService salFlowService;   
-    
+    val AtomicLong flowCookie = new AtomicLong(1);
     
     new(DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,SalFlowService salFlowService) {
         super(modification)        
@@ -75,6 +77,7 @@ class FlowTransaction extends AbstractTransaction {
             val nodeInstanceId = instanceId.firstIdentifierOf(Node);
             val builder = new AddFlowInputBuilder(flow);
             builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setCookie(BigInteger.valueOf(flowCookie.getAndIncrement()));
             builder.setTransactionUri(new Uri(modification.getIdentifier() as String));
             builder.setFlowRef(new FlowRef(instanceId));
             builder.setFlowTable(new FlowTableRef(tableInstanceId));
