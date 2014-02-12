@@ -801,11 +801,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>configuration</artifactId>
-        <version>${controller.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>configuration.implementation</artifactId>
         <version>${controller.version}</version>
       </dependency>
@@ -1442,7 +1437,6 @@
               <artifactId>netty-timer-config</artifactId>
               <version>${config.version}</version>
           </dependency>
-
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>configuration</artifactId>
