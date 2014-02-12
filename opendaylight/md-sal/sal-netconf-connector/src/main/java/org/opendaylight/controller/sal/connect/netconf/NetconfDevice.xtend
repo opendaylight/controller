@@ -125,7 +125,7 @@ AutoCloseable {
         checkState(schemaSourceProvider != null, "Schema Source Provider must be set.")
         checkState(eventExecutor != null, "Event executor must be set.");
 
-        val listener = new NetconfDeviceListener(this, eventExecutor);
+        val listener = new NetconfDeviceListener(this);
         val task = startClientTask(dispatcher, listener)
         if (mountInstance != null) {
             commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, this)
