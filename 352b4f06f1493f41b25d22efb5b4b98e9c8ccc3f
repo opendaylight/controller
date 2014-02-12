@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0351740e",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-12T15:32:21Z",
+      "side": 1,
+      "message": "missing {}",
+      "revId": "352b4f06f1493f41b25d22efb5b4b98e9c8ccc3f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
