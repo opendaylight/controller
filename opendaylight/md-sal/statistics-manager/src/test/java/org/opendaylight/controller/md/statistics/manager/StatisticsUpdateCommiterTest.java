@@ -25,7 +25,7 @@ public class StatisticsUpdateCommiterTest {
             .getLogger(StatisticsUpdateCommiterTest.class);
 
     /**
-     * Test method for {@link org.opendaylight.controller.md.statistics.manager.StatisticsUpdateCommiter#layer3MatchEquals(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match, org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match)}.
+     * Test method for {@link org.opendaylight.controller.md.statistics.manager.StatisticsListener#layer3MatchEquals(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match, org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match)}.
      */
     @Test
     public void testLayer3MatchEquals() {
