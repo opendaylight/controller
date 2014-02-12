@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -97,21 +98,21 @@ public class MediaTypesTest extends JerseyTest {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
         String uri = createUri(uriPrefix, uriPath);
-        when(restconfService.readConfigurationData(uriPath)).thenReturn(null);
+        when(restconfService.readConfigurationData(eq(uriPath),any(UriInfo.class))).thenReturn(null);
         get(uri, Draft02.MediaTypes.DATA+JSON);
-        verify(restconfService, times(1)).readConfigurationData(uriPath);
+        verify(restconfService, times(1)).readConfigurationData(eq(uriPath),any(UriInfo.class));
         get(uri, Draft02.MediaTypes.DATA+XML);
-        verify(restconfService, times(2)).readConfigurationData(uriPath);
+        verify(restconfService, times(2)).readConfigurationData(eq(uriPath),any(UriInfo.class));
         get(uri, MediaType.APPLICATION_JSON);
-        verify(restconfService, times(3)).readConfigurationData(uriPath);
+        verify(restconfService, times(3)).readConfigurationData(eq(uriPath),any(UriInfo.class));
         get(uri, MediaType.APPLICATION_XML);
-        verify(restconfService, times(4)).readConfigurationData(uriPath);
+        verify(restconfService, times(4)).readConfigurationData(eq(uriPath),any(UriInfo.class));
         get(uri, MediaType.TEXT_XML);
-        verify(restconfService, times(5)).readConfigurationData(uriPath);
+        verify(restconfService, times(5)).readConfigurationData(eq(uriPath),any(UriInfo.class));
         
         // negative tests
         get(uri, MediaType.TEXT_PLAIN);
-        verify(restconfService, times(5)).readConfigurationData(uriPath);
+        verify(restconfService, times(5)).readConfigurationData(eq(uriPath),any(UriInfo.class));
     }
     
     @Test
@@ -119,21 +120,21 @@ public class MediaTypesTest extends JerseyTest {
         String uriPrefix = "/operational/";
         String uriPath = "ietf-interfaces:interfaces";
         String uri = createUri(uriPrefix, uriPath);
-        when(restconfService.readOperationalData(uriPath)).thenReturn(null);
+        when(restconfService.readOperationalData(eq(uriPath),any(UriInfo.class))).thenReturn(null);
         get(uri, Draft02.MediaTypes.DATA+JSON);
-        verify(restconfService, times(1)).readOperationalData(uriPath);
+        verify(restconfService, times(1)).readOperationalData(eq(uriPath),any(UriInfo.class));
         get(uri, Draft02.MediaTypes.DATA+XML);
-        verify(restconfService, times(2)).readOperationalData(uriPath);
+        verify(restconfService, times(2)).readOperationalData(eq(uriPath),any(UriInfo.class));
         get(uri, MediaType.APPLICATION_JSON);
-        verify(restconfService, times(3)).readOperationalData(uriPath);
+        verify(restconfService, times(3)).readOperationalData(eq(uriPath),any(UriInfo.class));
         get(uri, MediaType.APPLICATION_XML);
-        verify(restconfService, times(4)).readOperationalData(uriPath);
+        verify(restconfService, times(4)).readOperationalData(eq(uriPath),any(UriInfo.class));
         get(uri, MediaType.TEXT_XML);
-        verify(restconfService, times(5)).readOperationalData(uriPath);
+        verify(restconfService, times(5)).readOperationalData(eq(uriPath),any(UriInfo.class));
         
         // negative tests
         get(uri, MediaType.TEXT_PLAIN);
-        verify(restconfService, times(5)).readOperationalData(uriPath);
+        verify(restconfService, times(5)).readOperationalData(eq(uriPath),any(UriInfo.class));
     }
     
     @Test

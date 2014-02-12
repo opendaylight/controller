@@ -16,6 +16,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -106,13 +107,13 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public StructuredData readConfigurationData(@PathParam("identifier") String identifier);
+    public StructuredData readConfigurationData(@PathParam("identifier") String identifier, @Context UriInfo depth);
 
     @GET
     @Path("/operational/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML, 
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public StructuredData readOperationalData(@PathParam("identifier") String identifier);
+    public StructuredData readOperationalData(@PathParam("identifier") String identifier, @Context UriInfo depth);
 
     @PUT
     @Path("/config/{identifier:.+}")

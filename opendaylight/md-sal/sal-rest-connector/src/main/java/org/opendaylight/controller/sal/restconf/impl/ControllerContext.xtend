@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
 import static javax.ws.rs.core.Response.Status.*
+import java.util.Collections
+import static org.opendaylight.controller.sal.restconf.impl.ControllerContext.*
 
 class ControllerContext implements SchemaServiceListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
@@ -57,6 +59,8 @@ class ControllerContext implements SchemaServiceListener {
     val static MOUNT_MODULE = "yang-ext"
     val static MOUNT_NODE = "mount"
     public val static MOUNT = "yang-ext:mount"
+    val static URI_IDENTIFIER_AND_PARAMETERS_DELIMITER = "?"
+    val static URI_PARAMETER_SEPARATOR = "&"
 
     @Property
     var SchemaContext globalSchema;
@@ -98,7 +102,7 @@ class ControllerContext implements SchemaServiceListener {
 
     private def InstanceIdWithSchemaNode toIdentifier(String restconfInstance, boolean toMountPointIdentifier) {
         checkPreconditions
-        val pathArgs = Lists.newArrayList(Splitter.on("/").split(restconfInstance))
+        val pathArgs = Lists.newArrayList(Splitter.on("/").split(restconfInstance.removeParameterPartOfUri))
         pathArgs.omitFirstAndLastEmptyString
         if (pathArgs.empty) {
             return null;
@@ -230,7 +234,8 @@ class ControllerContext implements SchemaServiceListener {
         '''/«argument.nodeType.toRestconfIdentifier()»'''
     }
 
-    private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifierWithPredicates argument, ListSchemaNode node) {
+    private def dispatch CharSequence convertToRestconfIdentifier(NodeIdentifierWithPredicates argument,
+        ListSchemaNode node) {
         val nodeIdentifier = argument.nodeType.toRestconfIdentifier();
         val keyValues = argument.keyValues;
         return '''/«nodeIdentifier»/«FOR key : node.keyDefinition SEPARATOR "/"»«keyValues.get(key).toUriString»«ENDFOR»'''
@@ -370,6 +375,7 @@ class ControllerContext implements SchemaServiceListener {
         val moduleName = strings.head.toModuleName
         var DataSchemaNode targetNode = null
         if (!moduleName.nullOrEmpty) {
+
             // if it is mount point
             if (moduleName == MOUNT_MODULE && nodeName == MOUNT_NODE) {
                 if (mountPoint !== null) {
@@ -605,5 +611,46 @@ class ControllerContext implements SchemaServiceListener {
             qnameToRpc.put(qname, operation);
         }
     }
+    
+    def toUrlParameters(String parameters) {
+        val urlParameters = Lists.newArrayList(Splitter.on(URI_PARAMETER_SEPARATOR).split(parameters))
+        urlParameters.omitFirstAndLastEmptyString
+        val urlParameterMap = new HashMap<String, String>();
+        for (urlParameter : urlParameters) {
+            val parameterParts = Lists.newArrayList(Splitter.on("=").split(urlParameter))
+            if (parameterParts.size == 2) {
+                urlParameterMap.put(parameterParts.get(0), parameterParts.get(1))
+            }
+        }
+
+        return urlParameterMap;
+    }
+
+    def getIndexOfAmpersandInLastUriPath(String uriString) {
+        val lastIndexOfSlash = uriString.lastIndexOf("/")
+        if (lastIndexOfSlash != -1) {
+            return uriString.indexOf(URI_IDENTIFIER_AND_PARAMETERS_DELIMITER, lastIndexOfSlash)
+        } else {
+            return uriString.indexOf(URI_IDENTIFIER_AND_PARAMETERS_DELIMITER)
+        }        
+    }
+    
+    def removeParameterPartOfUri(String uriString) {
+        val firstAmpersandIndex = getIndexOfAmpersandInLastUriPath(uriString)
+        if (firstAmpersandIndex != -1) {
+            return uriString.substring(0,firstAmpersandIndex)
+        }
+        return uriString
+    }
+
+    def resolveUrlParameters(String uriString) {
+        var Map<String, String> urlParameters = Collections.emptyMap;
+        val firstAmpersandIndex = getIndexOfAmpersandInLastUriPath(uriString)
+        if (firstAmpersandIndex != -1) {
+            urlParameters = uriString.substring(firstAmpersandIndex + 1).toUrlParameters
+        }
+        return urlParameters
+    }
+    
 
 }
