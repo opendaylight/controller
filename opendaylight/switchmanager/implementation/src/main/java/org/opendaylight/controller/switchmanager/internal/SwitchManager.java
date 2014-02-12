@@ -1121,12 +1121,24 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 new Object[] { node, type, props, containerName });
         switch (type) {
         case ADDED:
+            if (nodeProps.containsKey(node)) {
+                log.debug("Redundant udate. Skipping.");
+                return;
+            }
             addNode(node, props);
             break;
         case CHANGED:
+            if (!nodeProps.containsKey(node) || (props == null)) {
+                log.debug("Redundant udate. Skipping.");
+                return;
+            }
             updateNode(node, props);
             break;
         case REMOVED:
+            if (!nodeProps.containsKey(node)) {
+                log.debug("Redundant udate. Skipping.");
+                return;
+            }
             removeNode(node);
             break;
         default:
@@ -1149,6 +1161,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
         switch (type) {
         case ADDED:
+            if (nodeConnectorProps.containsKey(nodeConnector)) {
+                update = false;
+            }
             if (props != null) {
                 for (Property prop : props) {
                     addNodeConnectorProp(nodeConnector, prop);
