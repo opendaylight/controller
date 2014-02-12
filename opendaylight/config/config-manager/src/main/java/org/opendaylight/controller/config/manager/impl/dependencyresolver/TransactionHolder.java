@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.CommitInfo;
@@ -37,5 +38,7 @@ interface TransactionHolder {
             throws InstanceAlreadyExistsException;
 
     ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier);
+
+    Optional<ModuleInternalTransactionalInfo> findInfo(ModuleIdentifier moduleIdentifier);
 
 }

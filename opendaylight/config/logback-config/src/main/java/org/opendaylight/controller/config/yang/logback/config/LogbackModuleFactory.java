@@ -16,24 +16,31 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.yang.logback.util.AppenderDiscovery;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class LogbackModuleFactory extends
         org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModuleFactory {
+    private static final Logger logger = LoggerFactory.getLogger(LogbackModuleFactory.class);
 
     public static final String INSTANCE_NAME = "singleton";
 
     @Override
     public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            BundleContext bundleContext) {
+                                           BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         LogbackModule logbackModule = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
@@ -47,11 +54,41 @@ public class LogbackModuleFactory extends
 
     @Override
     public Set<LogbackModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
-            BundleContext bundleContext) {
-        DependencyResolver resolver = dependencyResolverFactory.createDependencyResolver(new ModuleIdentifier(
-                getImplementationName(), INSTANCE_NAME));
-        LogbackModule defaultLogback = instantiateModule(INSTANCE_NAME, resolver, bundleContext);
-        return Sets.newHashSet(defaultLogback);
+                                                BundleContext bundleContext) {
+
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(getImplementationName(), INSTANCE_NAME);
+        DependencyResolver temporaryDependencyResolver = dependencyResolverFactory.createTemporaryDependencyResolver();
+
+        if (temporaryDependencyResolver.containsDependency(moduleIdentifier)){
+            return Collections.emptySet();
+        }
+        Set<String> notFoundAppenders = findAppendersNotPresentInTransaction(temporaryDependencyResolver);
+        if (notFoundAppenders.isEmpty() == false) {
+            logger.warn("logback-config will not be instantiated because some appenders were not found:" + notFoundAppenders);
+            return Collections.emptySet();
+        } else {
+            DependencyResolver resolver = dependencyResolverFactory.createDependencyResolver(moduleIdentifier);
+            LogbackModule defaultLogback = instantiateModule(INSTANCE_NAME, resolver, bundleContext);
+            return Collections.singleton(defaultLogback);
+        }
     }
 
+    static Set<String> findAppendersNotPresentInTransaction(DependencyResolver temporaryDependencyResolver) {
+        // only create default instance if all discovered appenders are present in the transaction
+        // convention: factory name of appener = appender fully qualified class name
+        AppenderDiscovery appenderDiscovery = new AppenderDiscovery();
+        Set<ModuleIdentifier> foundAppendersInTransaction = temporaryDependencyResolver.validateDependencies(HasAppendersServiceInterface.class);
+        Set<String> factoryNames = new HashSet<>();
+        for (ModuleIdentifier mi : foundAppendersInTransaction) {
+            factoryNames.add(mi.getFactoryName());
+        }
+        Set<String> notFoundAppenders = new HashSet<>();
+        for (Class<Appender<ILoggingEvent>> appenderClass : appenderDiscovery.findAllAppenderClasses()) {
+            String appenderClassName = appenderClass.getCanonicalName();
+            if (factoryNames.contains(appenderClassName) == false) {
+                notFoundAppenders.add(appenderClassName);
+            }
+        }
+        return notFoundAppenders;
+    }
 }

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -51,6 +52,11 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
     @Override
     public DependencyResolver createDependencyResolver(ModuleIdentifier moduleIdentifier) {
         return getOrCreate(moduleIdentifier);
+    }
+
+    @Override
+    public DependencyResolver createTemporaryDependencyResolver() {
+        return new DependencyResolverImpl(null, transactionStatus, modulesHolder, readableRegistry, codecRegistry);
     }
 
     public synchronized DependencyResolverImpl getOrCreate(ModuleIdentifier name) {
@@ -151,5 +157,10 @@ public class DependencyResolverManager implements TransactionHolder, DependencyR
             }
         }
         return result;
+    }
+
+    @Override
+    public Optional<ModuleInternalTransactionalInfo> findInfo(ModuleIdentifier moduleIdentifier) {
+        return modulesHolder.findInfo(moduleIdentifier);
     }
 }

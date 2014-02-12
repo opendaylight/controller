@@ -220,7 +220,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         return maxDependencyDepth;
     }
 
-    public void countMaxDependencyDepth(DependencyResolverManager manager) {
+    void countMaxDependencyDepth(DependencyResolverManager manager) {
         transactionStatus.checkCommitted();
         if (maxDependencyDepth == null) {
             maxDependencyDepth = getMaxDepth(this, manager,
@@ -277,6 +277,11 @@ final class DependencyResolverImpl implements DependencyResolver,
             }
         }
         return set;
+    }
+
+    @Override
+    public boolean containsDependency(ModuleIdentifier moduleIdentifier) {
+        return modulesHolder.findInfo(moduleIdentifier).isPresent();
     }
 
     private void assertIsServiceInterface(Class<? extends AbstractServiceInterface> expectedServiceInterface) {

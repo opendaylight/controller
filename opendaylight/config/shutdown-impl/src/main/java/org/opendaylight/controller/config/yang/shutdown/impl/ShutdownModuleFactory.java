@@ -23,6 +23,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 public class ShutdownModuleFactory extends AbstractShutdownModuleFactory {
@@ -43,8 +44,11 @@ public class ShutdownModuleFactory extends AbstractShutdownModuleFactory {
 
     @Override
     public Set<ShutdownModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
-        ModuleIdentifier id = new ModuleIdentifier(NAME, NAME);
-        DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(id);
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(NAME, NAME);
+        if (dependencyResolverFactory.createTemporaryDependencyResolver().containsDependency(moduleIdentifier)) {
+            return Collections.emptySet();
+        }
+        DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(moduleIdentifier);
         ShutdownModule shutdownModule = instantiateModule(NAME, dependencyResolver, bundleContext);
         return new java.util.HashSet<>(Arrays.asList(shutdownModule));
     }

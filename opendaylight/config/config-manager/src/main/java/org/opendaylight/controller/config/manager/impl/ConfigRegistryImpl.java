@@ -101,9 +101,6 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     // internal jmx server shared by all transactions
     private final MBeanServer transactionsMBeanServer;
 
-    // Used for finding new factory instances for default module functionality
-    @GuardedBy("this")
-    private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
 
     @GuardedBy("this") // switched in every 2ndPC
     private CloseableServiceReferenceReadableRegistry  readableSRRegistry = ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
@@ -173,7 +170,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         } catch (InstanceAlreadyExistsException e) {
             throw new IllegalStateException(e);
         }
-        transactionController.copyExistingModulesAndProcessFactoryDiff(currentConfig.getEntries(), lastListOfFactories);
+        transactionController.copyExistingModulesAndProcessFactoryDiff(currentConfig.getEntries());
         transactionsHolder.add(transactionName, transactionController);
         return transactionController;
     }
@@ -206,7 +203,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // optimistic lock ok
 
         CommitInfo commitInfo = configTransactionController.validateBeforeCommitAndLockTransaction();
-        lastListOfFactories = Collections.unmodifiableList(configTransactionController.getCurrentlyRegisteredFactories());
+
         // non recoverable from here:
         try {
             return secondPhaseCommit(

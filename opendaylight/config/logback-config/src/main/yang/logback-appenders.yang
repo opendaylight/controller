@@ -17,27 +17,27 @@ module config-logback-appenders {
 
 
     
-    identity console-appender {
+    identity ch.qos.logback.core.ConsoleAppender {
         base config:module-type;
         config:provided-service logback:appender;
         config:java-name-prefix ConsoleAppender;
     }
 
-    identity file-appender {
+    identity ch.qos.logback.core.FileAppender {
     	base config:module-type;
         config:provided-service logback:appender;
         config:java-name-prefix FileAppender;
     }
 
-    identity rolling-file-appender {
+    identity ch.qos.logback.core.rolling.RollingFileAppender {
     	base config:module-type;
     	config:provided-service logback:appender;
     	config:java-name-prefix RollingFileAppender;
     }
 
     augment "/config:modules/config:module/config:configuration" {
-        case rolling-file-appender {
-            when "/config:modules/config:module/config:type = 'rolling-file-appender'";
+        case ch.qos.logback.core.rolling.RollingFileAppender {
+            when "/config:modules/config:module/config:type = 'ch.qos.logback.core.rolling.RollingFileAppender'";
 
             list rolling-file-appenderTO {
 
@@ -117,8 +117,8 @@ module config-logback-appenders {
 
     augment "/config:modules/config:module/config:configuration" {
 
-        case console-appender {
-            when "/config:modules/config:module/config:type = 'console-appender'";
+        case ch.qos.logback.core.ConsoleAppender {
+            when "/config:modules/config:module/config:type = 'ch.qos.logback.core.ConsoleAppender'";
 
             list console-appenderTO {
                 leaf encoder-pattern {
@@ -142,8 +142,8 @@ module config-logback-appenders {
 
     augment "/config:modules/config:module/config:configuration" {
 
-        case file-appender {
-            when "/config:modules/config:module/config:type = 'file-appender'";
+        case ch.qos.logback.core.FileAppender {
+            when "/config:modules/config:module/config:type = 'ch.qos.logback.core.FileAppender'";
 
             list file-appenderTO {
                 leaf append {

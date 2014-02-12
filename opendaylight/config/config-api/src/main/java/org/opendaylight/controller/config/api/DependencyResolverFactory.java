@@ -11,4 +11,6 @@ public interface DependencyResolverFactory {
 
     DependencyResolver createDependencyResolver(ModuleIdentifier moduleIdentifier);
 
+    DependencyResolver createTemporaryDependencyResolver();
+
 }

@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -17,13 +14,16 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 
+import java.util.Collections;
+import java.util.Set;
+
 /**
-*
-*/
+ *
+ */
 public class RuntimeMappingModuleFactory extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractRuntimeMappingModuleFactory {
 
-    private static RuntimeMappingModule SINGLETON = null;
+
     private static ModuleIdentifier IDENTIFIER = new ModuleIdentifier(NAME, "runtime-mapping-singleton");
 
     @Override
@@ -33,7 +33,7 @@ public class RuntimeMappingModuleFactory extends
 
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver,
-            DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
+                               DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
         RuntimeMappingModule module = (RuntimeMappingModule) super.createModule(instanceName, dependencyResolver, old,
                 bundleContext);
         module.setBundleContext(bundleContext);
@@ -42,14 +42,15 @@ public class RuntimeMappingModuleFactory extends
 
     @Override
     public Set<RuntimeMappingModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
-            BundleContext bundleContext) {
-        if (SINGLETON == null) {
-            DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(IDENTIFIER);
-            SINGLETON = new RuntimeMappingModule(IDENTIFIER, dependencyResolver);
-            SINGLETON.setBundleContext(bundleContext);
+                                                       BundleContext bundleContext) {
+        if (dependencyResolverFactory.createTemporaryDependencyResolver().containsDependency(IDENTIFIER)) {
+            return Collections.emptySet();
         }
 
-        return Collections.singleton(SINGLETON);
-    }
 
+        DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(IDENTIFIER);
+        RuntimeMappingModule defaultModule = new RuntimeMappingModule(IDENTIFIER, dependencyResolver);
+        defaultModule.setBundleContext(bundleContext);
+        return Collections.singleton(defaultModule);
+    }
 }

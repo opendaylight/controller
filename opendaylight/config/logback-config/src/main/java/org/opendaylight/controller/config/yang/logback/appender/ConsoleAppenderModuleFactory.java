@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +43,15 @@ public class ConsoleAppenderModuleFactory extends org.opendaylight.controller.co
 
     @Override
     public Set<ConsoleAppenderModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
+
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(NAME, INSTANCE_NAME);
+        if (dependencyResolverFactory.createTemporaryDependencyResolver().containsDependency(moduleIdentifier)) {
+            return Collections.emptySet();
+        }
+        // not exists yet
         ConsoleAppenderModule defaultModule = createModule(INSTANCE_NAME, dependencyResolverFactory.createDependencyResolver(
-                new ModuleIdentifier(NAME, INSTANCE_NAME)), bundleContext);
+                moduleIdentifier), bundleContext);
+
         Map<String, ConsoleAppender> current = new AppenderDiscovery().findAppenders(ConsoleAppender.class);
         List<ConsoleAppenderTO> tos = new ArrayList<>(current.size());
         for (ConsoleAppender consoleAppender : current.values()) {

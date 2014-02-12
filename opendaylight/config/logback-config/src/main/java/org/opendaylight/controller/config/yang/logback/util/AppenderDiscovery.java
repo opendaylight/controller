@@ -13,9 +13,11 @@ import ch.qos.logback.core.Appender;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class AppenderDiscovery {
     private final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -37,4 +39,17 @@ public class AppenderDiscovery {
         }
         return result;
     }
+
+    public Set<Class<Appender<ILoggingEvent>>> findAllAppenderClasses() {
+        Set<Class<Appender<ILoggingEvent>>> result = new HashSet<>();
+        for (ch.qos.logback.classic.Logger logger : lc.getLoggerList()) {
+            for (Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders(); appenderIterator.hasNext(); ) {
+                Appender<ILoggingEvent> next = appenderIterator.next();
+                    result.add((Class<Appender<ILoggingEvent>>) next.getClass());
+            }
+        }
+        return result;
+    }
+
+
 }

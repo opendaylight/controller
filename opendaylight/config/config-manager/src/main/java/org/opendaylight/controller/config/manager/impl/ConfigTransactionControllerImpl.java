@@ -36,7 +36,6 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -103,7 +102,7 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> existingModules, List<ModuleFactory> lastListOfFactories) {
+    public void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> existingModules) {
         // copy old configuration to this server
         for (ModuleInternalInfo oldConfigInfo : existingModules) {
             try {
@@ -112,51 +111,39 @@ class ConfigTransactionControllerImpl implements
                 throw new IllegalStateException("Error while copying " + oldConfigInfo, e);
             }
         }
-        processDefaultBeans(lastListOfFactories);
+        processDefaultBeans();
     }
 
-    private synchronized void processDefaultBeans(List<ModuleFactory> lastListOfFactories) {
+    private synchronized void processDefaultBeans() {
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
 
-        Set<ModuleFactory> oldSet = new HashSet<>(lastListOfFactories);
-        Set<ModuleFactory> newSet = new HashSet<>(factoriesHolder.getModuleFactories());
 
-        List<ModuleFactory> toBeAdded = new ArrayList<>();
-        List<ModuleFactory> toBeRemoved = new ArrayList<>();
-        for(ModuleFactory moduleFactory: factoriesHolder.getModuleFactories()) {
-            if (oldSet.contains(moduleFactory) == false){
-                toBeAdded.add(moduleFactory);
-            }
-        }
-        for(ModuleFactory moduleFactory: lastListOfFactories){
-            if (newSet.contains(moduleFactory) == false) {
-                toBeRemoved.add(moduleFactory);
-            }
-        }
+        // TODO removed factories: behaviour if factory disappears need to be defined
+
+
         // add default modules
-        for (ModuleFactory moduleFactory : toBeAdded) {
-            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager,
-                    getModuleFactoryBundleContext(moduleFactory.getImplementationName()));
-            for (Module module : defaultModules) {
-                // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
-                DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
-                try {
-                    boolean defaultBean = true;
-                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null, dependencyResolver, defaultBean);
-                } catch (InstanceAlreadyExistsException e) {
-                    throw new IllegalStateException(e);
+        boolean rerun = true;
+        while(rerun) {
+            rerun = false;
+            for (ModuleFactory moduleFactory : getCurrentlyRegisteredFactories()) {
+                Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager,
+                        getModuleFactoryBundleContext(moduleFactory.getImplementationName()));
+                for (Module module : defaultModules) {
+                    rerun = true;
+                    // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
+                    DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
+                    try {
+                        boolean defaultBean = true;
+                        ModuleInternalInfo maybeOldConfigBeanInfo = null;
+                        putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, maybeOldConfigBeanInfo, dependencyResolver, defaultBean);
+                    } catch (InstanceAlreadyExistsException e) {
+                        throw new IllegalStateException(e);
+                    }
                 }
             }
         }
 
-        // remove modules belonging to removed factories
-        for(ModuleFactory removedFactory: toBeRemoved){
-            List<ModuleIdentifier> modulesOfRemovedFactory = dependencyResolverManager.findAllByFactory(removedFactory);
-            for (ModuleIdentifier name : modulesOfRemovedFactory) {
-                destroyModule(name);
-            }
-        }
     }
 
 

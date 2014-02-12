@@ -100,11 +100,10 @@ public interface ModuleFactory {
     Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces();
 
     /**
-     * Called when ModuleFactory is registered to config manager.
+     * Called at start of every transaction.
      * Useful for populating the registry with pre-existing state. Since
-     * the method is called for each ModuleFactory separately and transaction
-     * is committed automatically, returned modules MUST be valid and commitable
-     * without any manual intervention.
+     * Returned modules MUST be valid and commitable without any manual intervention and
+     * should depend only on other default modules.
      *
      * @param dependencyResolverFactory factory for getting dependency resolvers for each module.
      * @param bundleContext Reference to OSGi bundleContext that can be used to

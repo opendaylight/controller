@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
+
+import javax.management.ObjectName;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Defines contract between {@link ConfigTransactionControllerImpl} (producer)
@@ -29,11 +28,11 @@ interface ConfigTransactionControllerInternal extends
 
     /**
      * 1, Copy already committed modules to current transaction.
-     * 2, Diff: compute added and removed factories from last run, then create new modules using
-     * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory)}
-     * and remove modules belonging to removed factories.
+     * 2, Call
+     * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory, org.osgi.framework.BundleContext)}
+     * on each factory until no new default beans are instantiated
      */
-    void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> entries, List<ModuleFactory> lastListOfFactories);
+    void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> entries);
 
     /**
      * Call {@link org.opendaylight.controller.config.spi.Module#validate()} on

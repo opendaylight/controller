@@ -72,6 +72,8 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
      */
     Set<ModuleIdentifier> validateDependencies(Class<? extends AbstractServiceInterface> expectedServiceInterface);
 
+    boolean containsDependency(ModuleIdentifier moduleIdentifier);
+
     /**
      * During second phase commit, resolve dependencies that implement service interface dynamically.
      *

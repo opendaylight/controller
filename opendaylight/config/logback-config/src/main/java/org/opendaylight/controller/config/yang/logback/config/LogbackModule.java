@@ -9,13 +9,16 @@ package org.opendaylight.controller.config.yang.logback.config;
 
 import nu.xom.Element;
 import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.yang.logback.api.HasAppenders;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
+import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
 
 public final class LogbackModule extends org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule {
@@ -37,23 +40,29 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
 
     @Override
     protected void customValidation() {
+
         dependencyResolver.validateDependencies(HasAppendersServiceInterface.class);
+        Set<String> notFoundAppenders = LogbackModuleFactory.findAppendersNotPresentInTransaction(dependencyResolver);
+        checkCondition(notFoundAppenders.isEmpty(), "Some appenders in logback API are not present in transaction:" +
+                notFoundAppenders, loggersJmxAttribute);
+
         validateLoggersObjects();
-        // TODO: validate that all appenders are available, name clashes
+
+        // TODO validate name clashes
     }
 
     private void validateLoggersObjects() {
 
-        JmxAttributeValidationException.checkNotNull(getLoggerTO(), loggersJmxAttribute);
+        checkNotNull(getLoggerTO(), loggersJmxAttribute);
 
         for (LoggerTO loggerToValidate : getLoggerTO()) {
-            JmxAttributeValidationException.checkNotNull(loggerToValidate.getLoggerName(), "LoggerName is null",
+            checkNotNull(loggerToValidate.getLoggerName(), "LoggerName is null",
                     loggersJmxAttribute);
-            JmxAttributeValidationException.checkNotNull(loggerToValidate.getLevel(), "Level is null",
+            checkNotNull(loggerToValidate.getLevel(), "Level is null",
                     loggersJmxAttribute);
-            JmxAttributeValidationException.checkCondition(!loggerToValidate.getLoggerName().isEmpty(),
+            checkCondition(!loggerToValidate.getLoggerName().isEmpty(),
                     "LoggerName needs to be set", loggersJmxAttribute);
-            JmxAttributeValidationException.checkCondition(!loggerToValidate.getLevel().isEmpty(),
+            checkCondition(!loggerToValidate.getLevel().isEmpty(),
                     "Level needs to be set", loggersJmxAttribute);
 
 

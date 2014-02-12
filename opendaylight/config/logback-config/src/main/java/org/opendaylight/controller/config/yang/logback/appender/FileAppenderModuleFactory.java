@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +40,15 @@ public class FileAppenderModuleFactory extends org.opendaylight.controller.confi
 
     @Override
     public Set<FileAppenderModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
+
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(NAME, INSTANCE_NAME);
+        if (dependencyResolverFactory.createTemporaryDependencyResolver().containsDependency(moduleIdentifier)) {
+            return Collections.emptySet();
+        }
+        // not exists yet
+
         FileAppenderModule defaultModule = createModule(INSTANCE_NAME, dependencyResolverFactory.createDependencyResolver(
-                new ModuleIdentifier(NAME, INSTANCE_NAME)), bundleContext);
+                moduleIdentifier), bundleContext);
         Map<String, FileAppender> current = new AppenderDiscovery().findAppenders(FileAppender.class);
         List<FileAppenderTO> tos = new ArrayList<>(current.size());
         for (FileAppender fileAppender : current.values()) {

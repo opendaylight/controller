@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -131,5 +132,14 @@ class ModulesHolder implements TransactionHolder {
             throw new IllegalStateException("Not found:" + moduleIdentifier);
         }
         return found;
+    }
+
+    public Optional<ModuleInternalTransactionalInfo> findInfo(ModuleIdentifier moduleIdentifier) {
+        ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = commitMap.get(moduleIdentifier);
+        if (moduleInternalTransactionalInfo == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(moduleInternalTransactionalInfo);
+        }
     }
 }
