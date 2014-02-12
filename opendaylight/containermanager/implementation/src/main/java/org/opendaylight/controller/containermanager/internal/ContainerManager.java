@@ -9,7 +9,6 @@
 
 package org.opendaylight.controller.containermanager.internal;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -751,26 +750,6 @@ public class ContainerManager extends Authorization<String> implements IContaine
         return status;
     }
 
-    private void removeComponentsStartUpfiles(String containerName) {
-        String startupLocation = String.format("./%s", GlobalConstants.STARTUPHOME.toString());
-        String containerPrint = String.format("_%s.", containerName.toLowerCase(Locale.ENGLISH));
-
-        File directory = new File(startupLocation);
-        String[] fileList = directory.list();
-
-        logger.trace("Deleting startup configuration files for container {}", containerName);
-        if (fileList != null) {
-            for (String fileName : fileList) {
-                if (fileName.contains(containerPrint)) {
-                    String fullPath = String.format("%s/%s", startupLocation, fileName);
-                    File file = new File(fullPath);
-                    boolean done = file.delete();
-                    logger.trace("{} {}", (done ? "Deleted: " : "Failed to delete: "), fileName);
-                }
-            }
-        }
-    }
-
     /**
      * Create and initialize default all resource group and create association
      * with default well known users and profiles, if not already learnt from
@@ -1013,19 +992,6 @@ public class ContainerManager extends Authorization<String> implements IContaine
         notifyContainerModeChange(delete, notifyLocal);
         // Notify listeners
         notifyContainerAwareListeners(container, delete);
-
-        /*
-         * This is a quick fix until configuration service becomes the
-         * centralized configuration management place. Here container manager
-         * will remove the startup files for all the bundles that are present in
-         * the container being deleted. Do the cleanup here in Container manger
-         * as do not want to put this temporary code in Configuration manager
-         * yet which is ODL.
-         */
-        if (delete) {
-            // TODO: remove when Config Mgr takes over
-            removeComponentsStartUpfiles(containerName);
-        }
     }
 
     private void notifyContainerEntryChangeInternal(String containerName, List<NodeConnector> ncList, UpdateType update, boolean notifyLocal) {
