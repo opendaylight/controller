@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.dom.broker.impl;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map.Entry;
@@ -18,8 +20,8 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification;
 import org.opendaylight.controller.md.sal.common.impl.util.AbstractLockableDelegator;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
+import org.opendaylight.controller.sal.dom.broker.util.YangDataOperations;
 import org.opendaylight.controller.sal.dom.broker.util.YangSchemaUtils;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -28,14 +30,13 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.controller.sal.dom.broker.util.YangDataOperations;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-
-import static com.google.common.base.Preconditions.*;
+import com.google.common.collect.ImmutableSet;
 
 public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements //
         DataStore, //
@@ -46,7 +47,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     private SchemaContext schema = null;
     private boolean validationEnabled = false;
-    private DataReader<InstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
+    private final DataReader<InstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
 
     @Override
     public boolean containsConfigurationPath(InstanceIdentifier path) {
@@ -164,7 +165,6 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     private NormalizedDataModification prepareMergedTransaction(
             DataModification<InstanceIdentifier, CompositeNode> original) {
-        // NOOP for now
         NormalizedDataModification normalized = new NormalizedDataModification(original);
         for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
             normalized.putConfigurationData(entry.getKey(), entry.getValue());
@@ -173,12 +173,38 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             normalized.putOperationalData(entry.getKey(), entry.getValue());
         }
         for (InstanceIdentifier entry : original.getRemovedConfigurationData()) {
-            normalized.removeConfigurationData(entry);
+            normalized.deepRemoveConfigurationData(entry);
         }
         for (InstanceIdentifier entry : original.getRemovedOperationalData()) {
-            normalized.removeOperationalData(entry);
+            normalized.deepRemoveOperationalData(entry);
         }
         return normalized;
+    }
+
+    private Iterable<InstanceIdentifier> getConfigurationSubpaths(InstanceIdentifier entry) {
+        // FIXME: This should be replaced by index
+        Iterable<InstanceIdentifier> paths = getStoredConfigurationPaths();
+
+        return getChildrenPaths(entry, paths);
+
+    }
+
+    public Iterable<InstanceIdentifier> getOperationalSubpaths(InstanceIdentifier entry) {
+        // FIXME: This should be indexed
+        Iterable<InstanceIdentifier> paths = getStoredOperationalPaths();
+
+        return getChildrenPaths(entry, paths);
+    }
+
+    private static final Iterable<InstanceIdentifier> getChildrenPaths(InstanceIdentifier entry,
+            Iterable<InstanceIdentifier> paths) {
+        ImmutableSet.Builder<InstanceIdentifier> children = ImmutableSet.builder();
+        for (InstanceIdentifier potential : paths) {
+            if (entry.contains(potential)) {
+                children.add(entry);
+            }
+        }
+        return children.build();
     }
 
     private final Comparator<Entry<InstanceIdentifier, CompositeNode>> preparationComparator = new Comparator<Entry<InstanceIdentifier, CompositeNode>>() {
@@ -282,13 +308,36 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     private class NormalizedDataModification extends AbstractDataModification<InstanceIdentifier, CompositeNode> {
 
-        private Object identifier;
+        private final Object identifier;
         private TransactionStatus status;
 
         public NormalizedDataModification(DataModification<InstanceIdentifier, CompositeNode> original) {
             super(getDelegate());
             identifier = original;
             status = TransactionStatus.NEW;
+        }
+
+        /**
+         *
+         * Ensures all subpaths are removed - this currently does slow lookup in
+         * all keys.
+         *
+         * @param entry
+         */
+        public void deepRemoveOperationalData(InstanceIdentifier entry) {
+            Iterable<InstanceIdentifier> paths = getOperationalSubpaths(entry);
+            removeOperationalData(entry);
+            for (InstanceIdentifier potential : paths) {
+                removeOperationalData(potential);
+            }
+        }
+
+        public void deepRemoveConfigurationData(InstanceIdentifier entry) {
+            Iterable<InstanceIdentifier> paths = getConfigurationSubpaths(entry);
+            removeConfigurationData(entry);
+            for (InstanceIdentifier potential : paths) {
+                removeConfigurationData(potential);
+            }
         }
 
         @Override
