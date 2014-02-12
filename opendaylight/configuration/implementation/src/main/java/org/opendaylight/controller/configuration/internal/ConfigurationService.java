@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.configuration.internal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -105,21 +106,67 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
         return saveConfigurationsInternal();
     }
 
+
+    private List<String> getCurrentContainerList() {
+        List<String> containerList = new ArrayList<String>();
+        for (IConfigurationAware configurationAware : this.configurationAwareList) {
+            if (configurationAware instanceof ContainerConfigurationService) {
+                String containerFilePath = ((ContainerConfigurationService)configurationAware).getRoot();
+                containerList.add(containerFilePath);
+            }
+        }
+        return containerList;
+    }
+
+    private void createContainerDirectory(IConfigurationAware configurationAware) {
+        String containerFilePath = ((ContainerConfigurationService) configurationAware).getRoot();
+        if (!new File(containerFilePath).exists()) {
+            boolean created = new File(containerFilePath).mkdir();
+            if (!created) {
+               logger.error("Failed to create startup config directory: {}", containerFilePath);
+            }
+        }
+    }
+
+    private void clearStaleContainerDirectories() {
+        List<String> activeContainers = getCurrentContainerList();
+        for (File file : new File(ROOT.toString()).listFiles()) {
+            String containerDirectory = file.getName();
+            if (file.isDirectory() && !activeContainers.contains(containerDirectory)) {
+                logger.trace("Removing directory for container {}", containerDirectory);
+                for (File innerFile : file.listFiles()) {
+                      innerFile.delete();
+                }
+                boolean removed = file.delete();
+                if (!removed) {
+                   logger.warn("Failed to remove stale directory: {}", containerDirectory);
+                }
+            }
+        }
+    }
+
+
     private Status saveConfigurationsInternal() {
         boolean success = true;
         for (IConfigurationAware configurationAware : configurationAwareList) {
+            if (configurationAware instanceof ContainerConfigurationService) {
+                // Create directory for new containers
+                createContainerDirectory(configurationAware);
+            }
             Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
                 success = false;
-                logger.warn("Failed to save config for {}",
-                        configurationAware.getClass().getName());
+                logger.warn("Failed to save config for {}", configurationAware.getClass().getName());
             }
         }
+        // Remove startup directories of containers that were removed from
+        // the configuration but not saved
+        clearStaleContainerDirectories();
+
         if (success) {
             return new Status(StatusCode.SUCCESS);
         } else {
-            return new Status(StatusCode.INTERNALERROR,
-                    "Failed to Save All Configurations");
+            return new Status(StatusCode.INTERNALERROR, "Failed to Save All Configurations");
         }
     }
 
