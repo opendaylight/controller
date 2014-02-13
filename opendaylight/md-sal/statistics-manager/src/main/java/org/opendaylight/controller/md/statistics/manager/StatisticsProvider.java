@@ -156,7 +156,9 @@ public class StatisticsProvider implements AutoCloseable {
             public void run() {
                 try {
                     // Send stats requests
-                    statsRequestSender();
+                    for (NodeStatisticsHandler h : handlers.values()) {
+                        sendStatisticsRequestsToNode(h);
+                    }
 
                     // Perform cleanup
                     for(NodeStatisticsHandler nodeStatisticsAger : handlers.values()){
@@ -207,12 +209,6 @@ public class StatisticsProvider implements AutoCloseable {
 
     protected DataModificationTransaction startChange() {
         return dps.beginTransaction();
-    }
-
-    private void statsRequestSender() {
-        for (NodeStatisticsHandler h : handlers.values()) {
-            sendStatisticsRequestsToNode(h);
-        }
     }
 
     private void sendStatisticsRequestsToNode(final NodeStatisticsHandler h) {
