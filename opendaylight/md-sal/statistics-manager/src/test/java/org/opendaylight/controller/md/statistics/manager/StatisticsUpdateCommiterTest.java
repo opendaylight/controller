@@ -17,10 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  */
 public class StatisticsUpdateCommiterTest {
-    
+
     private static final Logger LOG = LoggerFactory
             .getLogger(StatisticsUpdateCommiterTest.class);
 
@@ -34,45 +34,45 @@ public class StatisticsUpdateCommiterTest {
                 {{"10.1.2.0/24", "10.1.2.0/24"}, {"10.1.2.0/24", "10.1.1.0/24"}},
                 {{"10.1.1.0/24", "10.1.2.0/24"}, {"10.1.2.0/24", "10.1.2.0/24"}},
                 {{"10.1.1.0/24", "10.1.1.0/24"}, {"10.1.2.0/24", "10.1.2.0/24"}},
-                
+
                 {{"10.1.1.0/24", null}, {"10.1.1.0/24", "10.1.2.0/24"}},
                 {{"10.1.1.0/24", null}, {"10.1.2.0/24", "10.1.2.0/24"}},
                 {{"10.1.1.0/24", null}, {"10.1.2.0/24", null}},
                 {{"10.1.1.0/24", null}, {"10.1.1.0/24", null}},
-                
+
                 {{null, "10.1.1.0/24"}, {"10.1.2.0/24", "10.1.1.0/24"}},
                 {{null, "10.1.1.0/24"}, {"10.1.2.0/24", "10.1.2.0/24"}},
                 {{null, "10.1.1.0/24"}, {null, "10.1.2.0/24"}},
                 {{null, "10.1.1.0/24"}, {null, "10.1.1.0/24"}},
-                
+
                 {{null, null}, {null, "10.1.1.0/24"}},
                 {{null, null}, {null, null}},
         };
-        
+
         boolean[] matches = new boolean[] {
-                true, 
+                true,
                 false,
                 false,
                 false,
-                
+
                 false,
                 false,
                 false,
                 true,
-                
+
                 false,
                 false,
                 false,
                 true,
-                
+
                 false,
                 true
         };
-        
+
         for (int i = 0; i < matches.length; i++) {
             checkComparisonOfL3Match(
-                    matchSeeds[i][0][0], matchSeeds[i][0][1], 
-                    matchSeeds[i][1][0], matchSeeds[i][1][1], 
+                    matchSeeds[i][0][0], matchSeeds[i][0][1],
+                    matchSeeds[i][1][0], matchSeeds[i][1][1],
                     matches[i]);
         }
     }
@@ -83,23 +83,23 @@ public class StatisticsUpdateCommiterTest {
      * @param m2Source match2 - src
      * @param msDestination match2 - dest
      * @param matches expected match output
-     * 
+     *
      */
-    private static void checkComparisonOfL3Match(String m1Source, String m1Destination, 
+    private static void checkComparisonOfL3Match(String m1Source, String m1Destination,
             String m2Source, String msDestination, boolean matches) {
         Ipv4Match m1Layer3 = prepareIPv4Match(m1Source, m1Destination);
         Ipv4Match m2Layer3 = prepareIPv4Match(m2Source, msDestination);
         boolean comparisonResult;
         try {
-            comparisonResult = StatisticsUpdateCommiter.layer3MatchEquals(m1Layer3, m2Layer3);
-            Assert.assertEquals("failed to compare: "+m1Layer3+" vs. "+m2Layer3, 
+            comparisonResult = FlowComparator.layer3MatchEquals(m1Layer3, m2Layer3);
+            Assert.assertEquals("failed to compare: "+m1Layer3+" vs. "+m2Layer3,
                     matches, comparisonResult);
         } catch (Exception e) {
             LOG.error("failed to compare: {} vs. {}", m1Layer3, m2Layer3, e);
             Assert.fail(e.getMessage());
         }
     }
-    
+
     private static Ipv4Match prepareIPv4Match(String source, String destination) {
         Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
         if (source != null) {
@@ -108,7 +108,7 @@ public class StatisticsUpdateCommiterTest {
         if (destination != null) {
             ipv4MatchBuilder.setIpv4Destination(new Ipv4Prefix(destination));
         }
-        
+
         return ipv4MatchBuilder.build();
     }
 
