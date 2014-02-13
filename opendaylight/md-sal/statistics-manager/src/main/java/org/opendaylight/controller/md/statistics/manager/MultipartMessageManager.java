@@ -129,7 +129,7 @@ public class MultipartMessageManager {
 
     private static Long getExpiryTime(){
         return System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(
-                StatisticsProvider.STATS_THREAD_EXECUTION_TIME*NUMBER_OF_WAIT_CYCLES);
+                StatisticsProvider.STATS_COLLECTION_MILLIS*NUMBER_OF_WAIT_CYCLES);
     }
 
     public enum StatsRequestType{
