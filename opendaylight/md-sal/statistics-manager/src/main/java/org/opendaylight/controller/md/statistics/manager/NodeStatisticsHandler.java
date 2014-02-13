@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -64,6 +65,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
@@ -107,7 +109,7 @@ import com.google.common.base.Preconditions;
  *
  * @author avishnoi@in.ibm.com
  */
-public class NodeStatisticsHandler implements AutoCloseable {
+public final class NodeStatisticsHandler implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
@@ -116,15 +118,17 @@ public class NodeStatisticsHandler implements AutoCloseable {
     private final Map<FlowEntry,Long> flowStatsUpdate = new HashMap<>();
     private final Map<QueueEntry,Long> queuesStatsUpdate = new HashMap<>();
     private final InstanceIdentifier<Node> targetNodeIdentifier;
-    private final StatisticsProvider statisticsProvider;
+    private final DataProviderService dps;
+    private final NodeRef targetNodeRef;
     private final NodeKey targetNodeKey;
     private Collection<TableKey> knownTables = Collections.emptySet();
     private int unaccountedFlowsCounter = 1;
 
-    public NodeStatisticsHandler(StatisticsProvider statisticsProvider, NodeKey nodeKey){
-        this.statisticsProvider = Preconditions.checkNotNull(statisticsProvider);
+    public NodeStatisticsHandler(final DataProviderService dps, final NodeKey nodeKey) {
+        this.dps = Preconditions.checkNotNull(dps);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
+        this.targetNodeRef = new NodeRef(targetNodeIdentifier);
     }
 
     private static class FlowEntry {
@@ -235,9 +239,17 @@ public class NodeStatisticsHandler implements AutoCloseable {
         return knownTables;
     }
 
+    public InstanceIdentifier<Node> getTargetNodeIdentifier() {
+        return targetNodeIdentifier;
+    }
+
+    public NodeRef getTargetNodeRef() {
+        return targetNodeRef;
+    }
+
     public synchronized void updateGroupDescStats(List<GroupDescStats> list){
         final Long expiryTime = getExpiryTime();
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for (GroupDescStats groupDescStats : list) {
             GroupBuilder groupBuilder = new GroupBuilder();
@@ -264,7 +276,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     }
 
     public synchronized void updateGroupStats(List<GroupStats> list) {
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for(GroupStats groupStats : list) {
             GroupBuilder groupBuilder = new GroupBuilder();
@@ -292,7 +304,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
     public synchronized void updateMeterConfigStats(List<MeterConfigStats> list) {
         final Long expiryTime = getExpiryTime();
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for(MeterConfigStats meterConfigStats : list) {
             MeterBuilder meterBuilder = new MeterBuilder();
@@ -320,7 +332,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
 
     public synchronized void updateMeterStats(List<MeterStats> list) {
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for(MeterStats meterStats : list) {
             MeterBuilder meterBuilder = new MeterBuilder();
@@ -348,7 +360,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
     public synchronized void updateQueueStats(List<QueueIdAndStatisticsMap> list) {
         final Long expiryTime = getExpiryTime();
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for (QueueIdAndStatisticsMap swQueueStats : list) {
 
@@ -387,7 +399,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     }
 
     public synchronized void updateFlowTableStats(List<FlowTableAndStatisticsMap> list) {
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         final Set<TableKey> knownTables = new HashSet<>(list.size());
         for (FlowTableAndStatisticsMap ftStats : list) {
@@ -415,7 +427,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     }
 
     public synchronized void updateNodeConnectorStats(List<NodeConnectorStatisticsAndPortNumberMap> list) {
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for(NodeConnectorStatisticsAndPortNumberMap portStats : list) {
 
@@ -461,7 +473,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
     public synchronized void updateAggregateFlowStats(Short tableId, AggregateFlowStatistics flowStats) {
         if (tableId != null) {
-            final DataModificationTransaction trans = statisticsProvider.startChange();
+            final DataModificationTransaction trans = dps.beginTransaction();
 
 
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
@@ -486,7 +498,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     }
 
     public synchronized void updateGroupFeatures(GroupFeatures notification) {
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -504,7 +516,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     }
 
     public synchronized void updateMeterFeatures(MeterFeatures features) {
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -523,7 +535,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
     public synchronized void updateFlowStats(List<FlowAndStatisticsMapList> list) {
         final Long expiryTime = getExpiryTime();
-        final DataModificationTransaction trans = statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
 
         for(FlowAndStatisticsMapList map : list) {
             short tableId = map.getTableId();
@@ -683,7 +695,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     }
 
     public synchronized void cleanStaleStatistics(){
-        final DataModificationTransaction trans = this.statisticsProvider.startChange();
+        final DataModificationTransaction trans = dps.beginTransaction();
         final long now = System.nanoTime();
 
         //Clean stale statistics related to group
