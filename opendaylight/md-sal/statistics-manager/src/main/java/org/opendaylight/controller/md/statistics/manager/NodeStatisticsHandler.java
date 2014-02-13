@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -22,6 +23,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.A
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.aggregate.flow.statistics.AggregateFlowStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.features.GroupFeaturesBuilder;
@@ -59,6 +62,7 @@ public final class NodeStatisticsHandler implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
+    private final MultipartMessageManager msgManager = new MultipartMessageManager();
     private final InstanceIdentifier<Node> targetNodeIdentifier;
     private final FlowStatsTracker flowStats;
     private final FlowTableStatsTracker flowTableStats;
@@ -105,38 +109,52 @@ public final class NodeStatisticsHandler implements AutoCloseable {
         return targetNodeRef;
     }
 
-    public synchronized void updateGroupDescStats(List<GroupDescStats> list) {
-        groupDescStats.updateStats(list);
+    public synchronized void updateGroupDescStats(TransactionAware transaction, Boolean more, List<GroupDescStats> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            groupDescStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateGroupStats(List<GroupStats> list) {
-        groupStats.updateStats(list);
+    public synchronized void updateGroupStats(TransactionAware transaction, Boolean more, List<GroupStats> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            groupStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateMeterConfigStats(List<MeterConfigStats> list) {
-        meterConfigStats.updateStats(list);
+    public synchronized void updateMeterConfigStats(TransactionAware transaction, Boolean more, List<MeterConfigStats> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            meterConfigStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateMeterStats(List<MeterStats> list) {
-        meterStats.updateStats(list);
+    public synchronized void updateMeterStats(TransactionAware transaction, Boolean more, List<MeterStats> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            meterStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateQueueStats(List<QueueIdAndStatisticsMap> list) {
-        queueStats.updateStats(list);
+    public synchronized void updateQueueStats(TransactionAware transaction, Boolean more, List<QueueIdAndStatisticsMap> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            queueStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateFlowTableStats(List<FlowTableAndStatisticsMap> list) {
-        flowTableStats.updateStats(list);
+    public synchronized void updateFlowTableStats(TransactionAware transaction, Boolean more, List<FlowTableAndStatisticsMap> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            flowTableStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateNodeConnectorStats(List<NodeConnectorStatisticsAndPortNumberMap> list) {
-        nodeConnectorStats.updateStats(list);
+    public synchronized void updateNodeConnectorStats(TransactionAware transaction, Boolean more, List<NodeConnectorStatisticsAndPortNumberMap> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            nodeConnectorStats.updateStats(list);
+        }
     }
 
-    public synchronized void updateAggregateFlowStats(Short tableId, AggregateFlowStatistics flowStats) {
+    public synchronized void updateAggregateFlowStats(TransactionAware transaction, Boolean more, AggregateFlowStatistics flowStats) {
+        final Short tableId = msgManager.isExpectedTableTransaction(transaction, more);
         if (tableId != null) {
             final DataModificationTransaction trans = dps.beginTransaction();
-
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
 
@@ -153,8 +171,13 @@ public final class NodeStatisticsHandler implements AutoCloseable {
             tableBuilder.addAugmentation(AggregateFlowStatisticsData.class, aggregateFlowStatisticsDataBuilder.build());
             trans.putOperationalData(tableRef, tableBuilder.build());
 
-            // FIXME: should we be tracking this data?
             trans.commit();
+        }
+    }
+
+    public synchronized void updateFlowStats(TransactionAware transaction, Boolean more, List<FlowAndStatisticsMapList> list) {
+        if (msgManager.isExpectedTransaction(transaction, more)) {
+            flowStats.updateStats(list);
         }
     }
 
@@ -194,10 +217,6 @@ public final class NodeStatisticsHandler implements AutoCloseable {
         trans.commit();
     }
 
-    public synchronized void updateFlowStats(List<FlowAndStatisticsMapList> list) {
-        flowStats.updateStats(list);
-    }
-
     public synchronized void cleanStaleStatistics() {
         final DataModificationTransaction trans = dps.beginTransaction();
         final long now = System.nanoTime();
@@ -209,6 +228,7 @@ public final class NodeStatisticsHandler implements AutoCloseable {
         meterStats.cleanup(trans, now);
         nodeConnectorStats.cleanup(trans, now);
         queueStats.cleanup(trans, now);
+        msgManager.cleanStaleTransactionIds();
 
         trans.commit();
     }
@@ -217,5 +237,15 @@ public final class NodeStatisticsHandler implements AutoCloseable {
     public void close() {
         // FIXME: cleanup any resources we hold (registrations, etc.)
         logger.debug("Statistics handler for {} shut down", targetNodeKey.getId());
+    }
+
+    // FIXME: this should be private
+    public synchronized void recordExpectedTransaction(TransactionId transactionId, StatsRequestType reqType) {
+        msgManager.recordExpectedTransaction(transactionId, reqType);
+    }
+
+    // FIXME: this should be private
+    public synchronized void recordExpectedTableTransaction(TransactionId transactionId, Short tableId) {
+        msgManager.recordExpectedTableTransaction(transactionId, StatsRequestType.AGGR_FLOW, tableId);
     }
 }
