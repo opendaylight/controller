@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -25,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput;
@@ -236,25 +236,28 @@ public class StatisticsProvider implements AutoCloseable {
 
     private void statsRequestSender() {
         for (NodeStatisticsHandler h : handlers.values()) {
-            sendStatisticsRequestsToNode(h.getTargetNodeKey());
+            sendStatisticsRequestsToNode(h);
         }
     }
 
-    private void sendStatisticsRequestsToNode(NodeKey targetNode){
+    private void sendStatisticsRequestsToNode(NodeStatisticsHandler h) {
+        NodeKey targetNode = h.getTargetNodeKey();
+        spLogger.debug("Send requests for statistics collection to node : {}", targetNode.getId());
 
-        spLogger.debug("Send requests for statistics collection to node : {})",targetNode.getId());
-
-        InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode).toInstance();
+        InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNode).build();
 
         NodeRef targetNodeRef = new NodeRef(targetInstanceId);
 
         try{
-            if(flowStatsService != null){
-                sendAggregateFlowsStatsFromAllTablesRequest(targetNode);
-                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
-            }
             if(flowTableStatsService != null){
                 sendAllFlowTablesStatisticsRequest(targetNodeRef);
+            }
+            if(flowStatsService != null){
+                // FIXME: it does not make sense to trigger this before sendAllFlowTablesStatisticsRequest()
+                //        comes back -- we do not have any tables anyway.
+                sendAggregateFlowsStatsFromAllTablesRequest(h);
+
+                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
             }
             if(portStatsService != null){
                 sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
@@ -268,7 +271,7 @@ public class StatisticsProvider implements AutoCloseable {
                 sendMeterConfigStatisticsRequest(targetNodeRef);
             }
             if(queueStatsService != null){
-                sendAllQueueStatsFromAllNodeConnector (targetNodeRef);
+                sendAllQueueStatsFromAllNodeConnector(targetNodeRef);
             }
         }catch(Exception e){
             spLogger.error("Exception occured while sending statistics requests : {}", e);
@@ -319,21 +322,12 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    private void sendAggregateFlowsStatsFromAllTablesRequest(final NodeKey nodeKey) throws InterruptedException, ExecutionException{
-        FlowCapableNode node = (FlowCapableNode)dps.readOperationalData(
-                InstanceIdentifier.builder(Nodes.class).child(Node.class,nodeKey).augmentation(FlowCapableNode.class).build());
-        if (node != null) {
-            final List<Table> tables = node.getTable();
-            if (tables != null) {
-                spLogger.debug("Node {} supports {} table(s)", nodeKey, tables.size());
-                for(Table table : tables) {
-                    sendAggregateFlowsStatsFromTableRequest(nodeKey, table.getId());
-                }
-            } else {
-                spLogger.debug("Node {} has no associated tables", nodeKey);
-            }
-        } else {
-            spLogger.debug("Node {} not found", nodeKey);
+    private void sendAggregateFlowsStatsFromAllTablesRequest(final NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
+        final Collection<TableKey> tables = h.getKnownTables();
+        spLogger.debug("Node {} supports {} table(s)", h, tables.size());
+
+        for (TableKey key : h.getKnownTables()) {
+            sendAggregateFlowsStatsFromTableRequest(h.getTargetNodeKey(), key.getId().shortValue());
         }
     }
 
@@ -502,7 +496,7 @@ public class StatisticsProvider implements AutoCloseable {
             spLogger.debug("Started node handler for {}", key.getId());
 
             // FIXME: this should be in the NodeStatisticsHandler itself
-            sendStatisticsRequestsToNode(key);
+            sendStatisticsRequestsToNode(h);
         }
     }
 
