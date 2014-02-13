@@ -103,7 +103,7 @@ import com.google.common.base.Preconditions;
  *
  * @author avishnoi@in.ibm.com
  */
-public class NodeStatisticsHandler {
+public class NodeStatisticsHandler implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
@@ -773,5 +773,11 @@ public class NodeStatisticsHandler {
 
         InstanceIdentifier<?> nodeGroupStatisticsAugmentation = groupRef.augmentation(NodeGroupStatistics.class).toInstance();
         trans.removeOperationalData(nodeGroupStatisticsAugmentation);
+    }
+
+    @Override
+    public void close() {
+        // FIXME: cleanup any resources we hold (registrations, etc.)
+        logger.debug("Statistics handler for {} shut down", targetNodeKey.getId());
     }
 }
