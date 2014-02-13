@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_fe3a7797",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/InventoryNotificationProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-02-13T19:11:23Z",
+      "side": 1,
+      "message": "The subscription is a \u0027subtree\u0027 one, so you get notified whenever things change within it. If you want only the check for nodes, filter the identifiers such that you check .getTargetType() againts Node.class.",
+      "revId": "86f6b109b136e590a55c84c7402086e84ecb108e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
