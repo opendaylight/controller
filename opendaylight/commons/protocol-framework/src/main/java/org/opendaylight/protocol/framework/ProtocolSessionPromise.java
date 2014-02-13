@@ -82,7 +82,8 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
                         }
 
                         if (!cf.isSuccess()) {
-                            LOG.warn("Attempt to connect to connect to {} failed", ProtocolSessionPromise.this.address, cf.cause());
+                            LOG.debug("Attempt to connect to {} failed", ProtocolSessionPromise.this.address, cf.cause());
+
                             final Future<Void> rf = ProtocolSessionPromise.this.strategy.scheduleReconnect(cf.cause());
                             rf.addListener(new FutureListener<Void>() {
                                 @Override
