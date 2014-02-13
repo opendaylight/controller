@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -320,17 +319,21 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    private void sendAggregateFlowsStatsFromAllTablesRequest(NodeKey targetNodeKey) throws InterruptedException, ExecutionException{
-
-        List<Short> tablesId = getTablesFromNode(targetNodeKey);
-
-        if(tablesId.size() != 0){
-            for(Short id : tablesId){
-
-                sendAggregateFlowsStatsFromTableRequest(targetNodeKey,id);
+    private void sendAggregateFlowsStatsFromAllTablesRequest(final NodeKey nodeKey) throws InterruptedException, ExecutionException{
+        FlowCapableNode node = (FlowCapableNode)dps.readOperationalData(
+                InstanceIdentifier.builder(Nodes.class).child(Node.class,nodeKey).augmentation(FlowCapableNode.class).build());
+        if (node != null) {
+            final List<Table> tables = node.getTable();
+            if (tables != null) {
+                spLogger.debug("Node {} supports {} table(s)", nodeKey, tables.size());
+                for(Table table : tables) {
+                    sendAggregateFlowsStatsFromTableRequest(nodeKey, table.getId());
+                }
+            } else {
+                spLogger.debug("Node {} has no associated tables", nodeKey);
             }
-        }else{
-            spLogger.debug("No details found in data store for flow tables associated with Node {}",targetNodeKey);
+        } else {
+            spLogger.debug("Node {} not found", nodeKey);
         }
     }
 
@@ -459,20 +462,6 @@ public class StatisticsProvider implements AutoCloseable {
             spLogger.info("Attempted to get non-existing handler for {}", nodeId);
         }
         return handler;
-    }
-
-    private List<Short> getTablesFromNode(NodeKey nodeKey){
-        InstanceIdentifier<FlowCapableNode> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class,nodeKey).augmentation(FlowCapableNode.class).toInstance();
-
-        FlowCapableNode node = (FlowCapableNode)dps.readOperationalData(nodesIdentifier);
-        List<Short> tablesId = new ArrayList<Short>();
-        if(node != null && node.getTable()!=null){
-            spLogger.debug("Number of tables {} supported by node {}",node.getTable().size(),nodeKey);
-            for(Table table: node.getTable()){
-                tablesId.add(table.getId());
-            }
-        }
-        return tablesId;
     }
 
     @SuppressWarnings("unchecked")
