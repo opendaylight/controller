@@ -16,32 +16,23 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.osgi.framework.BundleContext;
 
 public class StatisticsManagerActivator extends AbstractBindingAwareProvider {
+    private StatisticsProvider statsProvider;
 
-    private static ProviderContext pSession;
-    
-    private static StatisticsProvider statsProvider = new StatisticsProvider();
-   
     @Override
     public void onSessionInitiated(ProviderContext session) {
-        
-        pSession = session;
-        DataProviderService dps = session.<DataProviderService>getSALService(DataProviderService.class);
-        StatisticsManagerActivator.statsProvider.setDataService(dps);
-        DataBrokerService dbs = session.<DataBrokerService>getSALService(DataBrokerService.class);
-        StatisticsManagerActivator.statsProvider.setDataBrokerService(dbs);
-        NotificationProviderService nps = session.<NotificationProviderService>getSALService(NotificationProviderService.class);
-        StatisticsManagerActivator.statsProvider.setNotificationService(nps);
-        StatisticsManagerActivator.statsProvider.start();
+        final DataBrokerService dbs = session.getSALService(DataBrokerService.class);
+        final DataProviderService dps = session.getSALService(DataProviderService.class);
+        final NotificationProviderService nps = session.getSALService(NotificationProviderService.class);
 
+        statsProvider = new StatisticsProvider(dps);
+        statsProvider.start(dbs, nps, session);
     }
-    
+
     @Override
     protected void stopImpl(BundleContext context) {
-        StatisticsManagerActivator.statsProvider.close();
+        if (statsProvider != null) {
+            statsProvider.close();
+            statsProvider = null;
+        }
     }
-    
-    public static ProviderContext getProviderContext(){
-        return pSession;
-    }
-
 }
