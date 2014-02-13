@@ -8,17 +8,18 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
+import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -64,6 +65,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -96,7 +98,7 @@ public class StatisticsProvider implements AutoCloseable {
     private final DataProviderService dps;
 
     //Local caching of stats
-    private final ConcurrentMap<NodeId,NodeStatisticsHandler> statisticsCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<NodeId,NodeStatisticsHandler> handlers = new ConcurrentHashMap<>();
 
     private OpendaylightGroupStatisticsService groupStatsService;
 
@@ -129,20 +131,29 @@ public class StatisticsProvider implements AutoCloseable {
 
     private Registration<NotificationListener> listenerRegistration;
 
+    private ListenerRegistration<DataChangeListener> flowCapableTrackerRegistration;
+
     public void start(final DataBrokerService dbs, final NotificationProviderService nps, final RpcConsumerRegistry rpcRegistry) {
 
-        this.listenerRegistration = nps.registerNotificationListener(this.updateCommiter);
-
-        statsUpdateHandler = new StatisticsUpdateHandler(StatisticsProvider.this);
-        registerDataStoreUpdateListener(dbs);
-
-        // Get Group/Meter statistics service instance
+        // Get Group/Meter statistics service instances
         groupStatsService = rpcRegistry.getRpcService(OpendaylightGroupStatisticsService.class);
         meterStatsService = rpcRegistry.getRpcService(OpendaylightMeterStatisticsService.class);
         flowStatsService = rpcRegistry.getRpcService(OpendaylightFlowStatisticsService.class);
         portStatsService = rpcRegistry.getRpcService(OpendaylightPortStatisticsService.class);
         flowTableStatsService = rpcRegistry.getRpcService(OpendaylightFlowTableStatisticsService.class);
         queueStatsService = rpcRegistry.getRpcService(OpendaylightQueueStatisticsService.class);
+
+        // Start receiving notifications
+        this.listenerRegistration = nps.registerNotificationListener(this.updateCommiter);
+
+        // Register for switch connect/disconnect notifications
+        final InstanceIdentifier<FlowCapableNode> fcnId = InstanceIdentifier.builder(Nodes.class)
+                .child(Node.class).augmentation(FlowCapableNode.class).build();
+        this.flowCapableTrackerRegistration = dbs.registerDataChangeListener(fcnId,
+                new FlowCapableTracker(this, fcnId));
+
+        statsUpdateHandler = new StatisticsUpdateHandler(StatisticsProvider.this);
+        registerDataStoreUpdateListener(dbs);
 
         statisticsRequesterThread = new Thread( new Runnable(){
 
@@ -170,7 +181,7 @@ public class StatisticsProvider implements AutoCloseable {
             public void run() {
                 while(true){
                     try {
-                        for(NodeStatisticsHandler nodeStatisticsAger : statisticsCache.values()){
+                        for(NodeStatisticsHandler nodeStatisticsAger : handlers.values()){
                             nodeStatisticsAger.cleanStaleStatistics();
                         }
                         multipartMessageManager.cleanStaleTransactionIds();
@@ -191,10 +202,7 @@ public class StatisticsProvider implements AutoCloseable {
     }
 
     private void registerDataStoreUpdateListener(DataBrokerService dbs) {
-        //Register for Node updates
-        InstanceIdentifier<? extends DataObject> pathNode = InstanceIdentifier.builder(Nodes.class)
-                                                                        .child(Node.class).toInstance();
-        dbs.registerDataChangeListener(pathNode, statsUpdateHandler);
+        // FIXME: the below should be broken out into StatisticsUpdateHandler
 
         //Register for flow updates
         InstanceIdentifier<? extends DataObject> pathFlow = InstanceIdentifier.builder(Nodes.class).child(Node.class)
@@ -239,22 +247,22 @@ public class StatisticsProvider implements AutoCloseable {
         for (Node targetNode : targetNodes){
 
             if(targetNode.getAugmentation(FlowCapableNode.class) != null){
-                sendStatisticsRequestsToNode(targetNode);
+                sendStatisticsRequestsToNode(targetNode.getKey());
             }
         }
     }
 
-    public void sendStatisticsRequestsToNode(Node targetNode){
+    private void sendStatisticsRequestsToNode(NodeKey targetNode){
 
         spLogger.debug("Send requests for statistics collection to node : {})",targetNode.getId());
 
-        InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode.getKey()).toInstance();
+        InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class,targetNode).toInstance();
 
         NodeRef targetNodeRef = new NodeRef(targetInstanceId);
 
         try{
             if(flowStatsService != null){
-                sendAggregateFlowsStatsFromAllTablesRequest(targetNode.getKey());
+                sendAggregateFlowsStatsFromAllTablesRequest(targetNode);
                 sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
             }
             if(flowTableStatsService != null){
@@ -280,7 +288,7 @@ public class StatisticsProvider implements AutoCloseable {
     }
 
 
-    public void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) throws InterruptedException, ExecutionException {
+    private void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) throws InterruptedException, ExecutionException {
         final GetFlowTablesStatisticsInputBuilder input =
                 new GetFlowTablesStatisticsInputBuilder();
 
@@ -294,7 +302,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
         final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input =
                 new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
 
@@ -323,7 +331,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendAggregateFlowsStatsFromAllTablesRequest(NodeKey targetNodeKey) throws InterruptedException, ExecutionException{
+    private void sendAggregateFlowsStatsFromAllTablesRequest(NodeKey targetNodeKey) throws InterruptedException, ExecutionException{
 
         List<Short> tablesId = getTablesFromNode(targetNodeKey);
 
@@ -337,7 +345,7 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
 
-    public void sendAggregateFlowsStatsFromTableRequest(NodeKey targetNodeKey,Short tableId) throws InterruptedException, ExecutionException{
+    private void sendAggregateFlowsStatsFromTableRequest(NodeKey targetNodeKey,Short tableId) throws InterruptedException, ExecutionException{
 
         spLogger.debug("Send aggregate stats request for flow table {} to node {}",tableId,targetNodeKey);
         GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input =
@@ -353,7 +361,7 @@ public class StatisticsProvider implements AutoCloseable {
                 , StatsRequestType.AGGR_FLOW);
     }
 
-    public void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
 
         final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
 
@@ -366,7 +374,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendAllGroupStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllGroupStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
 
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
 
@@ -393,7 +401,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendAllMeterStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllMeterStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
 
         GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
 
@@ -421,7 +429,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) throws InterruptedException, ExecutionException {
+    private void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) throws InterruptedException, ExecutionException {
         GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
 
         input.setNode(targetNode);
@@ -457,13 +465,11 @@ public class StatisticsProvider implements AutoCloseable {
      */
     public final NodeStatisticsHandler getStatisticsHandler(final NodeId nodeId) {
         Preconditions.checkNotNull(nodeId);
-        NodeStatisticsHandler ager = statisticsCache.get(nodeId);
-        if (ager == null) {
-            ager = new NodeStatisticsHandler(this, new NodeKey(nodeId));
-            statisticsCache.put(nodeId, ager);
+        NodeStatisticsHandler handler = handlers.get(nodeId);
+        if (handler == null) {
+            spLogger.info("Attempted to get non-existing handler for {}", nodeId);
         }
-
-        return ager;
+        return handler;
     }
 
     private List<Node> getAllConnectedNodes(){
@@ -496,24 +502,50 @@ public class StatisticsProvider implements AutoCloseable {
         return nodeKey.getId();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void close(){
-
+    public void close() {
         try {
-            spLogger.info("Statistics Provider stopped.");
             if (this.listenerRegistration != null) {
-
                 this.listenerRegistration.close();
-
                 this.statisticsRequesterThread.destroy();
-
                 this.statisticsAgerThread.destroy();
-
             }
-          } catch (Throwable e) {
-            throw Exceptions.sneakyThrow(e);
-          }
+            if (this.flowCapableTrackerRegistration != null) {
+                this.flowCapableTrackerRegistration.close();
+                this.flowCapableTrackerRegistration = null;
+            }
+        } catch (Exception e) {
+            spLogger.warn("Failed to stop Statistics Provider completely", e);
+        } finally {
+            spLogger.info("Statistics Provider stopped.");
+        }
     }
 
+    synchronized void startNodeHandlers(final Collection<NodeKey> addedNodes) {
+        for (NodeKey key : addedNodes) {
+            if (handlers.containsKey(key.getId())) {
+                spLogger.warn("Attempted to start already-existing handler for {}, very strange", key.getId());
+                continue;
+            }
+
+            final NodeStatisticsHandler h = new NodeStatisticsHandler(this, key);
+            handlers.put(key.getId(), h);
+            spLogger.debug("Started node handler for {}", key.getId());
+
+            // FIXME: this should be in the NodeStatisticsHandler itself
+            sendStatisticsRequestsToNode(key);
+        }
+    }
+
+    synchronized void stopNodeHandlers(final Collection<NodeKey> removedNodes) {
+        for (NodeKey key : removedNodes) {
+            final NodeStatisticsHandler s = handlers.remove(key.getId());
+            if (s != null) {
+                spLogger.debug("Stopping node handler for {}", key.getId());
+                s.close();
+            } else {
+                spLogger.warn("Attempted to remove non-existing handler for {}, very strange", key.getId());
+            }
+        }
+    }
 }
