@@ -457,7 +457,8 @@ one.f.flows = {
             var editButton = one.lib.dashlet.button.single("Edit Flow", one.f.flows.id.dashlet.edit, "btn-primary", "btn-mini");
             var $editButton = one.lib.dashlet.button.button(editButton);
             $editButton.click(function() {
-                var $modal = one.f.flows.modal.initialize(true);
+            	var install = flow['flow']['installInHw'];
+                var $modal = one.f.flows.modal.initialize(true,install);
                 $modal.modal().on('shown',function(){
                     var $port = $('#'+one.f.flows.id.modal.form.port);
                     $('#'+one.f.flows.id.modal.form.nodes).trigger("change");
@@ -550,7 +551,7 @@ one.f.flows = {
                 return $p;
             }
         },
-        initialize : function(edit) {
+        initialize : function(edit,install) {
             var h3;
             if(edit) {
                 h3 = "Edit Flow Entry";
@@ -571,7 +572,7 @@ one.f.flows = {
             if (edit) {
                 // bind edit flow button
                 $('#'+one.f.flows.id.modal.edit, $modal).click(function() {
-                    one.f.flows.modal.save($modal, 'true', true);
+                    one.f.flows.modal.save($modal, install, true);
                 });
             } else {
                 // bind add flow button
