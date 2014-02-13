@@ -691,7 +691,7 @@ public final class NodeStatisticsHandler implements AutoCloseable {
 
     private static Long getExpiryTime(){
         final long now = System.nanoTime();
-        return now + TimeUnit.MILLISECONDS.toNanos(StatisticsProvider.STATS_THREAD_EXECUTION_TIME * NUMBER_OF_WAIT_CYCLES);
+        return now + TimeUnit.MILLISECONDS.toNanos(StatisticsProvider.STATS_COLLECTION_MILLIS * NUMBER_OF_WAIT_CYCLES);
     }
 
     public synchronized void cleanStaleStatistics(){
