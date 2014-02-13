@@ -21,10 +21,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.q
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsData;
@@ -59,26 +59,25 @@ public class StatisticsUpdateHandler implements DataChangeListener {
         Map<InstanceIdentifier<?>, DataObject> additions = change.getCreatedConfigurationData();
         for (InstanceIdentifier<? extends DataObject> dataObjectInstance : additions.keySet()) {
             DataObject dataObject = additions.get(dataObjectInstance);
-            InstanceIdentifier<Node> nodeII = dataObjectInstance.firstIdentifierOf(Node.class);
-            NodeRef nodeRef = new NodeRef(nodeII);
+            NodeKey nodeII = dataObjectInstance.firstKeyOf(Node.class, NodeKey.class);
             if(dataObject instanceof Flow){
                 Flow flow = (Flow) dataObject;
                 try {
-                    this.statisticsManager.sendFlowStatsFromTableRequest(nodeRef, flow);
+                    this.statisticsManager.sendFlowStatsFromTableRequest(nodeII, flow);
                 } catch (InterruptedException | ExecutionException e) {
                     suhLogger.warn("Following exception occured while sending flow statistics request newly added flow: {}", e);
                 }
             }
             if(dataObject instanceof Meter){
                 try {
-                    this.statisticsManager.sendMeterConfigStatisticsRequest(nodeRef);
+                    this.statisticsManager.sendMeterConfigStatisticsRequest(nodeII);
                 } catch (InterruptedException | ExecutionException e) {
                     suhLogger.warn("Following exception occured while sending meter statistics request for newly added meter: {}", e);
                 }
             }
             if(dataObject instanceof Group){
                 try {
-                    this.statisticsManager.sendGroupDescriptionRequest(nodeRef);
+                    this.statisticsManager.sendGroupDescriptionRequest(nodeII);
                 } catch (InterruptedException | ExecutionException e) {
                     suhLogger.warn("Following exception occured while sending group description request for newly added group: {}", e);
                 }
@@ -88,7 +87,8 @@ public class StatisticsUpdateHandler implements DataChangeListener {
                 InstanceIdentifier<NodeConnector> nodeConnectorII = dataObjectInstance.firstIdentifierOf(NodeConnector.class);
                 NodeConnectorKey nodeConnectorKey = InstanceIdentifier.keyOf(nodeConnectorII);
                 try {
-                    this.statisticsManager.sendQueueStatsFromGivenNodeConnector(nodeRef, nodeConnectorKey.getId(), queue.getQueueId());
+                    this.statisticsManager.sendQueueStatsFromGivenNodeConnector(nodeII,
+                            nodeConnectorKey.getId(), queue.getQueueId());
                 } catch (InterruptedException | ExecutionException e) {
                     suhLogger.warn("Following exception occured while sending queue statistics request for newly added group: {}", e);
                 }
