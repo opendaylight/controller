@@ -20,8 +20,6 @@ public class DataChangeEventImpl<P extends Path<P>, D> implements DataChangeEven
     private final DataChange<P, D> dataChange;
 
     private final D originalConfigurationSubtree;
-
-
     private final D originalOperationalSubtree;
     private final D updatedOperationalSubtree;
     private final D updatedConfigurationSubtree;

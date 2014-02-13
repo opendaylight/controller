@@ -1,0 +1,142 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module opendaylight-sal-restconf-broker-impl {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:restconf:broker";
+    prefix "restconf-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding {prefix sal;}
+    import opendaylight-md-sal-dom {prefix dom;}
+    import opendaylight-md-sal-common {prefix common;}
+
+    description
+        "Service definition for Restconf MD-SAL.";
+ 
+    revision "2014-02-10" {
+        description
+            "Initial revision";
+    }
+
+    identity binding-dom-mapping-service {
+        base config:service-type;
+        config:java-class "org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService";
+    }
+
+
+    identity restconf-broker-impl {
+        base config:module-type;
+        config:provided-service sal:binding-data-consumer-broker;
+        config:provided-service sal:binding-notification-subscription-service;
+        /*TODO provide RpcConsumerRegistry*/
+        config:java-name-prefix SalRemoteServiceBroker;
+    }
+    
+    identity restconf-data-broker {
+        base config:module-type;
+        config:provided-service sal:binding-data-broker;
+        config:java-name-prefix DataBrokerImpl;
+    }
+    
+    identity restconf-rpc-broker {
+        base config:module-type;
+        config:provided-service sal:binding-rpc-registry;
+        config:java-name-prefix RpcBrokerImpl;
+    }
+    
+    identity restconf-notification-broker {
+        base config:module-type;
+        config:provided-service sal:binding-notification-service;
+        config:java-name-prefix NotificationBrokerImpl;
+    }
+
+    identity restconf-runtime-generated-mapping {
+        base config:module-type;
+        config:provided-service binding-dom-mapping-service;
+        config:java-name-prefix RuntimeMapping;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case restconf-broker-impl {
+            when "/config:modules/config:module/config:type = 'restconf-broker-impl'";
+            
+            /*
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:binding-rpc-registry;
+                    }
+                }
+            }*/
+            
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:binding-data-broker;
+                    }
+                }
+            }
+            
+            container notification-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:binding-notification-service;
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case restconf-data-broker {
+            when "/config:modules/config:module/config:type = 'restconf-data-broker'";
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+            container mapping-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity binding-dom-mapping-service;
+                    }
+                }
+            } 
+        }
+    }
+    
+
+    augment "/config:modules/config:module/config:state" {
+        case restconf-runtime-generated-mapping {
+            when "/config:modules/config:module/config:type = 'restconf-runtime-generated-mapping'";
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case restconf-data-broker {
+            when "/config:modules/config:module/config:type = 'restconf-data-broker'";
+            container data {
+                uses common:data-state;
+            }
+        }
+    }
+    augment "/config:modules/config:module/config:state" {
+        case restconf-rpc-broker {
+            when "/config:modules/config:module/config:type = 'restconf-rpc-broker'";
+            uses common:rpc-state;
+        }
+    }
+    augment "/config:modules/config:module/config:state" {
+        case restconf-notification-broker {
+            when "/config:modules/config:module/config:type = 'restconf-notification-broker'";
+            uses common:notification-state;
+        }
+    }
+}
