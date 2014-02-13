@@ -6,7 +6,7 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
         <relativePath>../..</relativePath>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>sal-remoterpc-connector</artifactId>
@@ -14,8 +14,8 @@
 
   <properties>
     <zeromq.version>0.3.1</zeromq.version>
-    <jackson.version>2.3.0</jackson.version>
     <stax.version>1.0.1</stax.version>
+    <yang.jmx.plugin>0.2.4-SNAPSHOT</yang.jmx.plugin>
   </properties>
 
   <dependencies>
@@ -38,8 +38,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>remoterpc-routingtable.implementation</artifactId>
-      <!-- TODO: fix the version. Why is it not MD Sal project version?-->
-      <version>0.4.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- AD Sal -->
@@ -133,6 +132,7 @@
                     <instructions>
                         <Import-Package>
                             *,
+                            com.google.common.collect,
                             !org.codehaus.enunciate.jaxrs
                         </Import-Package>
                         <Export-Package>
@@ -184,12 +184,12 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
-                        <version>0.2.3-SNAPSHOT</version>
+                        <version>${yang.jmx.plugin}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-			<version>${yangtools.version}</version>
+			            <version>${yangtools.version}</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>

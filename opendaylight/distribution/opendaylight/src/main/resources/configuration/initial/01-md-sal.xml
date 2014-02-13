@@ -54,7 +54,15 @@
                         <name>runtime-mapping-singleton</name>
                     </mapping-service>
                 </module>
-                
+                <module>
+                   <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote:rpc">prefix:remote-zeromq-rpc-server</type>
+                   <name>remoter</name>
+                   <port xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote:rpc">5666</port>
+                   <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote:rpc">
+                       <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</type>
+                       <name>dom-broker</name>
+                   </dom-broker>
+               </module>
             </modules>
             
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
@@ -128,6 +136,7 @@
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote:rpc?module=odl-sal-dom-rpc-remote-cfg&amp;revision=2013-10-28</capability>
     </required-capabilities>
 
 </snapshot>
