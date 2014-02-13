@@ -7,11 +7,15 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -114,6 +118,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     private final InstanceIdentifier<Node> targetNodeIdentifier;
     private final StatisticsProvider statisticsProvider;
     private final NodeKey targetNodeKey;
+    private Collection<TableKey> knownTables = Collections.emptySet();
     private int unaccountedFlowsCounter = 1;
 
     public NodeStatisticsHandler(StatisticsProvider statisticsProvider, NodeKey nodeKey){
@@ -171,7 +176,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
         }
     }
 
-    private static final class QueueEntry{
+    private static final class QueueEntry {
         private final NodeConnectorId nodeConnectorId;
         private final QueueId queueId;
         public QueueEntry(NodeConnectorId ncId, QueueId queueId){
@@ -226,6 +231,10 @@ public class NodeStatisticsHandler implements AutoCloseable {
         return targetNodeKey;
     }
 
+    public Collection<TableKey> getKnownTables() {
+        return knownTables;
+    }
+
     public synchronized void updateGroupDescStats(List<GroupDescStats> list){
         final Long expiryTime = getExpiryTime();
         final DataModificationTransaction trans = statisticsProvider.startChange();
@@ -253,7 +262,6 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
         trans.commit();
     }
-
 
     public synchronized void updateGroupStats(List<GroupStats> list) {
         final DataModificationTransaction trans = statisticsProvider.startChange();
@@ -381,19 +389,14 @@ public class NodeStatisticsHandler implements AutoCloseable {
     public synchronized void updateFlowTableStats(List<FlowTableAndStatisticsMap> list) {
         final DataModificationTransaction trans = statisticsProvider.startChange();
 
+        final Set<TableKey> knownTables = new HashSet<>(list.size());
         for (FlowTableAndStatisticsMap ftStats : list) {
 
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(ftStats.getTableId().getValue())).toInstance();
 
             FlowTableStatisticsDataBuilder statisticsDataBuilder = new FlowTableStatisticsDataBuilder();
-
-            FlowTableStatisticsBuilder statisticsBuilder = new FlowTableStatisticsBuilder();
-            statisticsBuilder.setActiveFlows(ftStats.getActiveFlows());
-            statisticsBuilder.setPacketsLookedUp(ftStats.getPacketsLookedUp());
-            statisticsBuilder.setPacketsMatched(ftStats.getPacketsMatched());
-
-            final FlowTableStatistics stats = statisticsBuilder.build();
+            final FlowTableStatistics stats = new FlowTableStatisticsBuilder(ftStats).build();
             statisticsDataBuilder.setFlowTableStatistics(stats);
 
             logger.debug("Augment flow table statistics: {} for table {} on Node {}",
@@ -404,9 +407,10 @@ public class NodeStatisticsHandler implements AutoCloseable {
             tableBuilder.addAugmentation(FlowTableStatisticsData.class, statisticsDataBuilder.build());
             trans.putOperationalData(tableRef, tableBuilder.build());
 
-            // FIXME: should we be tracking this data?
+            knownTables.add(tableBuilder.getKey());
         }
 
+        this.knownTables = Collections.unmodifiableCollection(knownTables);
         trans.commit();
     }
 
