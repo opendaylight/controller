@@ -44,7 +44,6 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
 
     private final static Logger sucLogger = LoggerFactory.getLogger(StatisticsListener.class);
     private final StatisticsProvider statisticsManager;
-    private final MultipartMessageManager messageManager;
 
     /**
      * default ctor
@@ -52,56 +51,37 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
      */
     public StatisticsListener(final StatisticsProvider manager){
         this.statisticsManager = manager;
-        this.messageManager = this.statisticsManager.getMultipartMessageManager();
     }
 
     @Override
     public void onMeterConfigStatsUpdated(final MeterConfigStatsUpdated notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
-        //Add statistics to local cache
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateMeterConfigStats(notification.getMeterConfigStats());
+            handler.updateMeterConfigStats(notification, notification.isMoreReplies(), notification.getMeterConfigStats());
         }
     }
 
     @Override
     public void onMeterStatisticsUpdated(MeterStatisticsUpdated notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
-        //Add statistics to local cache
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateMeterStats(notification.getMeterStats());
+            handler.updateMeterStats(notification, notification.isMoreReplies(), notification.getMeterStats());
         }
     }
 
     @Override
     public void onGroupDescStatsUpdated(GroupDescStatsUpdated notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
         final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateGroupDescStats(notification.getGroupDescStats());
+            handler.updateGroupDescStats(notification, notification.isMoreReplies(), notification.getGroupDescStats());
         }
     }
 
     @Override
     public void onGroupStatisticsUpdated(GroupStatisticsUpdated notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
         final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateGroupStats(notification.getGroupStats());
+            handler.updateGroupStats(notification, notification.isMoreReplies(), notification.getGroupStats());
         }
     }
 
@@ -123,65 +103,42 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
 
     @Override
     public void onFlowsStatisticsUpdate(final FlowsStatisticsUpdate notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
         sucLogger.debug("Received flow stats update : {}",notification.toString());
         final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
-            sna.updateFlowStats(notification.getFlowAndStatisticsMapList());
+            sna.updateFlowStats(notification, notification.isMoreReplies(), notification.getFlowAndStatisticsMapList());
         }
     }
 
     @Override
     public void onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            final Short tableId = messageManager.getTableIdForTxId(notification.getId(),notification.getTransactionId());
-            handler.updateAggregateFlowStats(tableId, notification);
+            handler.updateAggregateFlowStats(notification, notification.isMoreReplies(), notification);
         }
     }
 
     @Override
     public void onNodeConnectorStatisticsUpdate(NodeConnectorStatisticsUpdate notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateNodeConnectorStats(notification.getNodeConnectorStatisticsAndPortNumberMap());
+            handler.updateNodeConnectorStats(notification, notification.isMoreReplies(), notification.getNodeConnectorStatisticsAndPortNumberMap());
         }
     }
 
     @Override
     public void onFlowTableStatisticsUpdate(FlowTableStatisticsUpdate notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateFlowTableStats(notification.getFlowTableAndStatisticsMap());
+            handler.updateFlowTableStats(notification, notification.isMoreReplies(), notification.getFlowTableAndStatisticsMap());
         }
     }
 
     @Override
     public void onQueueStatisticsUpdate(QueueStatisticsUpdate notification) {
-        //Check if response is for the request statistics-manager sent.
-        if(!messageManager.isRequestTxIdExist(notification.getId(),notification.getTransactionId(),notification.isMoreReplies()))
-            return;
-
-        //Add statistics to local cache
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateQueueStats(notification.getQueueIdAndStatisticsMap());
+            handler.updateQueueStats(notification, notification.isMoreReplies(), notification.getQueueIdAndStatisticsMap());
         }
     }
 }
-
