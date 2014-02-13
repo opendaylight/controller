@@ -8,10 +8,13 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
@@ -88,12 +91,13 @@ import com.google.common.base.Preconditions;
  *
  */
 public class StatisticsProvider implements AutoCloseable {
-    public static final int STATS_THREAD_EXECUTION_TIME= 15000;
+    public static final long STATS_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(15);
 
     private static final Logger spLogger = LoggerFactory.getLogger(StatisticsProvider.class);
 
     private final ConcurrentMap<NodeId, NodeStatisticsHandler> handlers = new ConcurrentHashMap<>();
     private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
+    private final Timer timer = new Timer("statistics-manager", true);
     private final DataProviderService dps;
 
     private OpendaylightGroupStatisticsService groupStatsService;
@@ -109,11 +113,6 @@ public class StatisticsProvider implements AutoCloseable {
     private OpendaylightQueueStatisticsService queueStatsService;
 
     private StatisticsUpdateHandler statsUpdateHandler;
-
-    private Thread statisticsRequesterThread;
-
-    private Thread statisticsAgerThread;
-
 
     public StatisticsProvider(final DataProviderService dataService) {
         this.dps = Preconditions.checkNotNull(dataService);
@@ -152,49 +151,26 @@ public class StatisticsProvider implements AutoCloseable {
         statsUpdateHandler = new StatisticsUpdateHandler(StatisticsProvider.this);
         registerDataStoreUpdateListener(dbs);
 
-        statisticsRequesterThread = new Thread( new Runnable(){
-
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                while(true){
-                    try {
-                        statsRequestSender();
+                try {
+                    // Send stats requests
+                    statsRequestSender();
 
-                        Thread.sleep(STATS_THREAD_EXECUTION_TIME);
-                    }catch (Exception e){
-                        spLogger.error("Exception occurred while sending stats request : {}",e);
+                    // Perform cleanup
+                    for(NodeStatisticsHandler nodeStatisticsAger : handlers.values()){
+                        nodeStatisticsAger.cleanStaleStatistics();
                     }
+
+                    multipartMessageManager.cleanStaleTransactionIds();
+                } catch (RuntimeException e) {
+                    spLogger.warn("Failed to request statistics", e);
                 }
             }
-        });
+        }, 0, STATS_COLLECTION_MILLIS);
 
-        spLogger.debug("Statistics requester thread started with timer interval : {}",STATS_THREAD_EXECUTION_TIME);
-
-        statisticsRequesterThread.start();
-
-        statisticsAgerThread = new Thread( new Runnable(){
-
-            @Override
-            public void run() {
-                while(true){
-                    try {
-                        for(NodeStatisticsHandler nodeStatisticsAger : handlers.values()){
-                            nodeStatisticsAger.cleanStaleStatistics();
-                        }
-                        multipartMessageManager.cleanStaleTransactionIds();
-
-                        Thread.sleep(STATS_THREAD_EXECUTION_TIME);
-                    }catch (Exception e){
-                        spLogger.error("Exception occurred while sending stats request : {}",e);
-                    }
-                }
-            }
-        });
-
-        spLogger.debug("Statistics ager thread started with timer interval : {}",STATS_THREAD_EXECUTION_TIME);
-
-        statisticsAgerThread.start();
-
+        spLogger.debug("Statistics timer task with timer interval : {}ms", STATS_COLLECTION_MILLIS);
         spLogger.info("Statistics Provider started.");
     }
 
@@ -465,13 +441,13 @@ public class StatisticsProvider implements AutoCloseable {
         try {
             if (this.listenerRegistration != null) {
                 this.listenerRegistration.close();
-                this.statisticsRequesterThread.destroy();
-                this.statisticsAgerThread.destroy();
+                this.listenerRegistration = null;
             }
             if (this.flowCapableTrackerRegistration != null) {
                 this.flowCapableTrackerRegistration.close();
                 this.flowCapableTrackerRegistration = null;
             }
+            timer.cancel();
         } catch (Exception e) {
             spLogger.warn("Failed to stop Statistics Provider completely", e);
         } finally {
