@@ -235,11 +235,11 @@ public class StatisticsProvider implements AutoCloseable {
             }
             if(groupStatsService != null){
                 sendAllGroupStatisticsRequest(h);
-                sendGroupDescriptionRequest(h.getTargetNodeRef());
+                sendGroupDescriptionRequest(h);
             }
             if(meterStatsService != null){
                 sendAllMeterStatisticsRequest(h);
-                sendMeterConfigStatisticsRequest(h.getTargetNodeRef());
+                sendMeterConfigStatisticsRequest(h);
             }
             if(queueStatsService != null){
                 sendAllQueueStatsFromAllNodeConnector(h);
@@ -278,19 +278,25 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendFlowStatsFromTableRequest(NodeRef targetNode,Flow flow) throws InterruptedException, ExecutionException{
+    public void sendFlowStatsFromTableRequest(NodeKey node, Flow flow) throws InterruptedException, ExecutionException {
+        final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
+        if (h != null) {
+            sendFlowStatsFromTableRequest(h, flow);
+        }
+    }
+
+    private void sendFlowStatsFromTableRequest(NodeStatisticsHandler h, Flow flow) throws InterruptedException, ExecutionException{
         final GetFlowStatisticsFromFlowTableInputBuilder input =
                 new GetFlowStatisticsFromFlowTableInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
         input.fieldsFrom(flow);
 
         Future<RpcResult<GetFlowStatisticsFromFlowTableOutput>> response =
                 flowStatsService.getFlowStatisticsFromFlowTable(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
-                , StatsRequestType.ALL_FLOW);
-
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(),
+                response.get().getResult().getTransactionId(), StatsRequestType.ALL_FLOW);
     }
 
     private void sendAggregateFlowsStatsFromAllTablesRequest(final NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
@@ -345,17 +351,23 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendGroupDescriptionRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendGroupDescriptionRequest(NodeKey node) throws InterruptedException, ExecutionException{
+        final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
+        if (h != null) {
+            sendGroupDescriptionRequest(h);
+        }
+    }
+
+    private void sendGroupDescriptionRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
         final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetGroupDescriptionOutput>> response =
                 groupStatsService.getGroupDescription(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
-                , StatsRequestType.GROUP_DESC);
-
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(),
+                response.get().getResult().getTransactionId(), StatsRequestType.GROUP_DESC);
     }
 
     private void sendAllMeterStatisticsRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
@@ -372,18 +384,24 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    public void sendMeterConfigStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    public void sendMeterConfigStatisticsRequest(NodeKey node) throws InterruptedException, ExecutionException {
+        final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
+        if (h != null) {
+            sendMeterConfigStatisticsRequest(h);
+        }
+    }
+
+    private void sendMeterConfigStatisticsRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
 
         GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetAllMeterConfigStatisticsOutput>> response =
                 meterStatsService.getAllMeterConfigStatistics(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
-                , StatsRequestType.METER_CONFIG);;
-
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(),
+                response.get().getResult().getTransactionId(), StatsRequestType.METER_CONFIG);;
     }
 
     private void sendAllQueueStatsFromAllNodeConnector(NodeStatisticsHandler h) throws InterruptedException, ExecutionException {
@@ -394,23 +412,28 @@ public class StatisticsProvider implements AutoCloseable {
         Future<RpcResult<GetAllQueuesStatisticsFromAllPortsOutput>> response =
                 queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(), response.get().getResult().getTransactionId()
-                , StatsRequestType.ALL_QUEUE_STATS);;
-
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(),
+                response.get().getResult().getTransactionId(), StatsRequestType.ALL_QUEUE_STATS);;
     }
 
-    public void sendQueueStatsFromGivenNodeConnector(NodeRef targetNode,NodeConnectorId nodeConnectorId, QueueId queueId) throws InterruptedException, ExecutionException {
+    public void sendQueueStatsFromGivenNodeConnector(NodeKey node,NodeConnectorId nodeConnectorId, QueueId queueId) throws InterruptedException, ExecutionException {
+        final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
+        if (h != null) {
+            sendQueueStatsFromGivenNodeConnector(h, nodeConnectorId, queueId);
+        }
+    }
+
+    private void sendQueueStatsFromGivenNodeConnector(NodeStatisticsHandler h, NodeConnectorId nodeConnectorId, QueueId queueId) throws InterruptedException, ExecutionException {
         GetQueueStatisticsFromGivenPortInputBuilder input = new GetQueueStatisticsFromGivenPortInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
         input.setNodeConnectorId(nodeConnectorId);
         input.setQueueId(queueId);
         Future<RpcResult<GetQueueStatisticsFromGivenPortOutput>> response =
                 queueStatsService.getQueueStatisticsFromGivenPort(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
-                , StatsRequestType.ALL_QUEUE_STATS);;
-
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(),
+                response.get().getResult().getTransactionId(), StatsRequestType.ALL_QUEUE_STATS);;
     }
 
     /**
@@ -427,13 +450,6 @@ public class StatisticsProvider implements AutoCloseable {
             spLogger.info("Attempted to get non-existing handler for {}", nodeId);
         }
         return handler;
-    }
-
-    @SuppressWarnings("unchecked")
-    private NodeId getNodeId(NodeRef nodeRef){
-        InstanceIdentifier<Node> nodeII = (InstanceIdentifier<Node>) nodeRef.getValue();
-        NodeKey nodeKey = InstanceIdentifier.keyOf(nodeII);
-        return nodeKey.getId();
     }
 
     @Override
