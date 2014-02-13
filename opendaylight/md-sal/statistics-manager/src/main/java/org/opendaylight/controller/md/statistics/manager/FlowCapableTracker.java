@@ -68,6 +68,8 @@ final class FlowCapableTracker implements DataChangeListener {
      */
     @Override
     public synchronized void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        logger.debug("Tracker at root {} processing notification", root);
+
         /*
          * First process all the identifiers which were removed, trying to figure out
          * whether they constitute removal of FlowCapableNode.
@@ -103,5 +105,7 @@ final class FlowCapableTracker implements DataChangeListener {
                 }
             }), Predicates.notNull());
         stats.startNodeHandlers(addedNodes);
+
+        logger.debug("Tracker at root {} finished processing notification", root);
     }
 }
