@@ -62,10 +62,10 @@
         <!-- Compability Packages -->
         <module>compatibility</module>
 
-	<!-- Clustering
-	<module>remoterpc-routingtable/implementation</module>
+	<!-- Clustering -->
+	      <module>remoterpc-routingtable/implementation</module>
         <module>sal-remoterpc-connector/implementation</module>
-        <module>clustered-data-store/implementation</module>
+        <!--module>clustered-data-store/implementation</module>
 	 -->
         
     </modules>
