@@ -240,38 +240,34 @@ public class StatisticsProvider implements AutoCloseable {
         }
     }
 
-    private void sendStatisticsRequestsToNode(NodeStatisticsHandler h) {
+    private void sendStatisticsRequestsToNode(final NodeStatisticsHandler h) {
         NodeKey targetNode = h.getTargetNodeKey();
         spLogger.debug("Send requests for statistics collection to node : {}", targetNode.getId());
 
-        InstanceIdentifier<Node> targetInstanceId = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNode).build();
-
-        NodeRef targetNodeRef = new NodeRef(targetInstanceId);
-
         try{
             if(flowTableStatsService != null){
-                sendAllFlowTablesStatisticsRequest(targetNodeRef);
+                sendAllFlowTablesStatisticsRequest(h);
             }
             if(flowStatsService != null){
                 // FIXME: it does not make sense to trigger this before sendAllFlowTablesStatisticsRequest()
                 //        comes back -- we do not have any tables anyway.
                 sendAggregateFlowsStatsFromAllTablesRequest(h);
 
-                sendAllFlowsStatsFromAllTablesRequest(targetNodeRef);
+                sendAllFlowsStatsFromAllTablesRequest(h);
             }
             if(portStatsService != null){
-                sendAllNodeConnectorsStatisticsRequest(targetNodeRef);
+                sendAllNodeConnectorsStatisticsRequest(h);
             }
             if(groupStatsService != null){
-                sendAllGroupStatisticsRequest(targetNodeRef);
-                sendGroupDescriptionRequest(targetNodeRef);
+                sendAllGroupStatisticsRequest(h);
+                sendGroupDescriptionRequest(h.getTargetNodeRef());
             }
             if(meterStatsService != null){
-                sendAllMeterStatisticsRequest(targetNodeRef);
-                sendMeterConfigStatisticsRequest(targetNodeRef);
+                sendAllMeterStatisticsRequest(h);
+                sendMeterConfigStatisticsRequest(h.getTargetNodeRef());
             }
             if(queueStatsService != null){
-                sendAllQueueStatsFromAllNodeConnector(targetNodeRef);
+                sendAllQueueStatsFromAllNodeConnector(h);
             }
         }catch(Exception e){
             spLogger.error("Exception occured while sending statistics requests : {}", e);
@@ -279,30 +275,30 @@ public class StatisticsProvider implements AutoCloseable {
     }
 
 
-    private void sendAllFlowTablesStatisticsRequest(NodeRef targetNodeRef) throws InterruptedException, ExecutionException {
+    private void sendAllFlowTablesStatisticsRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException {
         final GetFlowTablesStatisticsInputBuilder input =
                 new GetFlowTablesStatisticsInputBuilder();
 
-        input.setNode(targetNodeRef);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetFlowTablesStatisticsOutput>> response =
                 flowTableStatsService.getFlowTablesStatistics(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNodeRef),response.get().getResult().getTransactionId()
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(),response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_FLOW_TABLE);
 
     }
 
-    private void sendAllFlowsStatsFromAllTablesRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllFlowsStatsFromAllTablesRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
         final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input =
                 new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> response =
                 flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(), response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_FLOW);
 
     }
@@ -347,29 +343,29 @@ public class StatisticsProvider implements AutoCloseable {
                 , StatsRequestType.AGGR_FLOW);
     }
 
-    private void sendAllNodeConnectorsStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllNodeConnectorsStatisticsRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
 
         final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetAllNodeConnectorsStatisticsOutput>> response =
                 portStatsService.getAllNodeConnectorsStatistics(input.build());
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(), response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_PORT);
 
     }
 
-    private void sendAllGroupStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllGroupStatisticsRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
 
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetAllGroupStatisticsOutput>> response =
                 groupStatsService.getAllGroupStatistics(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(), response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_GROUP);
 
     }
@@ -387,16 +383,16 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    private void sendAllMeterStatisticsRequest(NodeRef targetNode) throws InterruptedException, ExecutionException{
+    private void sendAllMeterStatisticsRequest(NodeStatisticsHandler h) throws InterruptedException, ExecutionException{
 
         GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetAllMeterStatisticsOutput>> response =
                 meterStatsService.getAllMeterStatistics(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(), response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_METER);;
 
     }
@@ -415,15 +411,15 @@ public class StatisticsProvider implements AutoCloseable {
 
     }
 
-    private void sendAllQueueStatsFromAllNodeConnector(NodeRef targetNode) throws InterruptedException, ExecutionException {
+    private void sendAllQueueStatsFromAllNodeConnector(NodeStatisticsHandler h) throws InterruptedException, ExecutionException {
         GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
 
-        input.setNode(targetNode);
+        input.setNode(h.getTargetNodeRef());
 
         Future<RpcResult<GetAllQueuesStatisticsFromAllPortsOutput>> response =
                 queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build());
 
-        this.multipartMessageManager.addTxIdToRequestTypeEntry(getNodeId(targetNode), response.get().getResult().getTransactionId()
+        this.multipartMessageManager.addTxIdToRequestTypeEntry(h.getTargetNodeKey().getId(), response.get().getResult().getTransactionId()
                 , StatsRequestType.ALL_QUEUE_STATS);;
 
     }

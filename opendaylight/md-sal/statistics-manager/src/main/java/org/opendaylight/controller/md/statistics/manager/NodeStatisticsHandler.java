@@ -64,6 +64,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
@@ -107,7 +108,7 @@ import com.google.common.base.Preconditions;
  *
  * @author avishnoi@in.ibm.com
  */
-public class NodeStatisticsHandler implements AutoCloseable {
+public final class NodeStatisticsHandler implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
@@ -117,6 +118,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
     private final Map<QueueEntry,Long> queuesStatsUpdate = new HashMap<>();
     private final InstanceIdentifier<Node> targetNodeIdentifier;
     private final StatisticsProvider statisticsProvider;
+    private final NodeRef targetNodeRef;
     private final NodeKey targetNodeKey;
     private Collection<TableKey> knownTables = Collections.emptySet();
     private int unaccountedFlowsCounter = 1;
@@ -125,6 +127,7 @@ public class NodeStatisticsHandler implements AutoCloseable {
         this.statisticsProvider = Preconditions.checkNotNull(statisticsProvider);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
+        this.targetNodeRef = new NodeRef(targetNodeIdentifier);
     }
 
     private static class FlowEntry {
@@ -233,6 +236,14 @@ public class NodeStatisticsHandler implements AutoCloseable {
 
     public Collection<TableKey> getKnownTables() {
         return knownTables;
+    }
+
+    public InstanceIdentifier<Node> getTargetNodeIdentifier() {
+        return targetNodeIdentifier;
+    }
+
+    public NodeRef getTargetNodeRef() {
+        return targetNodeRef;
     }
 
     public synchronized void updateGroupDescStats(List<GroupDescStats> list){
