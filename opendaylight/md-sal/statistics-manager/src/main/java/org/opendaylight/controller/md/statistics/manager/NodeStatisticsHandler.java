@@ -122,7 +122,7 @@ public class NodeStatisticsHandler {
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
     }
 
-    public class FlowEntry {
+    private static class FlowEntry {
         private final Short tableId;
         private final Flow flow;
 
@@ -143,7 +143,6 @@ public class NodeStatisticsHandler {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + getOuterType().hashCode();
             result = prime * result + ((flow == null) ? 0 : flow.hashCode());
             result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
             return result;
@@ -158,8 +157,6 @@ public class NodeStatisticsHandler {
             if (getClass() != obj.getClass())
                 return false;
             FlowEntry other = (FlowEntry) obj;
-            if (!getOuterType().equals(other.getOuterType()))
-                return false;
             if (flow == null) {
                 if (other.flow != null)
                     return false;
@@ -171,10 +168,6 @@ public class NodeStatisticsHandler {
             } else if (!tableId.equals(other.tableId))
                 return false;
             return true;
-        }
-
-        private NodeStatisticsHandler getOuterType() {
-            return NodeStatisticsHandler.this;
         }
     }
 
