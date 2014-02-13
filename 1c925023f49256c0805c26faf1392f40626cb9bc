@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7e232756",
+        "filename": "opendaylight/configuration/implementation/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-13T22:47:30Z",
+      "side": 1,
+      "message": "this makes circular dependency, and not really needed",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5e1e230d",
+        "filename": "opendaylight/configuration/implementation/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-13T22:47:30Z",
+      "side": 1,
+      "message": "this makes circular dependency, and not really needed",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3e192f22",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-13T22:47:30Z",
+      "side": 1,
+      "message": "let\u0027s have this as String?",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7efc47b8",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-13T22:47:30Z",
+      "side": 1,
+      "message": "getContainerDirectoryList",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1e142be7",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-13T22:47:30Z",
+      "side": 1,
+      "message": "instanceof IConfigurationContainerService",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9e281b34",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ContainerConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-02-13T22:47:30Z",
+      "side": 1,
+      "message": "public getConfigurationRoot, and please add this api to IConfigurationServiceCommon",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
