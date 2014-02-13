@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_e350a033",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/handler/NetconfHelloMessageToXMLEncoder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-02-13T10:51:27Z",
+      "side": 1,
+      "message": "Formatting",
+      "revId": "51016f4b5725d03d32921797554d5e0fd9132bf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
