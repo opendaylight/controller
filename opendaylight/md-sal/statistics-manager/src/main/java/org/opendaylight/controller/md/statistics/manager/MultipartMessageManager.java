@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Main responsibility of the class is to manage multipart response
@@ -23,6 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
  *
  */
 public class MultipartMessageManager {
+    private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
     /*
      *  Map for tx id and type of request, to keep track of all the request sent
@@ -36,23 +39,16 @@ public class MultipartMessageManager {
      */
     private final Map<TxIdEntry,Short> txIdTotableIdMap = new ConcurrentHashMap<>();
 
-    private static final int NUMBER_OF_WAIT_CYCLES =2;
-
     private static final class TxIdEntry {
-        private final TransactionId txId;
-        private final NodeId nodeId;
         private final StatsRequestType requestType;
+        private final TransactionId txId;
 
-        public TxIdEntry(NodeId nodeId, TransactionId txId, StatsRequestType requestType){
+        public TxIdEntry(TransactionId txId, StatsRequestType requestType){
             this.txId = txId;
-            this.nodeId = nodeId;
             this.requestType = requestType;
         }
         public TransactionId getTxId() {
             return txId;
-        }
-        public NodeId getNodeId() {
-            return nodeId;
         }
         public StatsRequestType getRequestType() {
             return requestType;
@@ -61,7 +57,6 @@ public class MultipartMessageManager {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((nodeId == null) ? 0 : nodeId.hashCode());
             result = prime * result + ((txId == null) ? 0 : txId.hashCode());
             return result;
         }
@@ -78,13 +73,6 @@ public class MultipartMessageManager {
             }
             TxIdEntry other = (TxIdEntry) obj;
 
-            if (nodeId == null) {
-                if (other.nodeId != null) {
-                    return false;
-                }
-            } else if (!nodeId.equals(other.nodeId)) {
-                return false;
-            }
             if (txId == null) {
                 if (other.txId != null) {
                     return false;
@@ -97,34 +85,40 @@ public class MultipartMessageManager {
 
         @Override
         public String toString() {
-            return "TxIdEntry [txId=" + txId + ", nodeId=" + nodeId + ", requestType=" + requestType + "]";
+            return "TxIdEntry [txId=" + txId + ", requestType=" + requestType + "]";
         }
     }
 
-    public Short getTableIdForTxId(NodeId nodeId,TransactionId id){
-        return txIdTotableIdMap.get(new TxIdEntry(nodeId,id,null));
+    public void recordExpectedTableTransaction(TransactionId id, StatsRequestType type, Short tableId) {
+        recordExpectedTransaction(id, type);
+        txIdTotableIdMap.put(new TxIdEntry(id, null), Preconditions.checkNotNull(tableId));
     }
 
-    public void setTxIdAndTableIdMapEntry(NodeId nodeId, TransactionId id,Short tableId){
-        if(id == null)
-            return;
-        txIdTotableIdMap.put(new TxIdEntry(nodeId,id,null), tableId);
+    public Short isExpectedTableTransaction(TransactionAware transaction, Boolean more) {
+        if (!isExpectedTransaction(transaction, more)) {
+            return null;
+        }
+
+        final TxIdEntry key = new TxIdEntry(transaction.getTransactionId(), null);
+        if (more != null && more.booleanValue()) {
+            return txIdTotableIdMap.get(key);
+        } else {
+            return txIdTotableIdMap.remove(key);
+        }
     }
 
-    public boolean isRequestTxIdExist(NodeId nodeId, TransactionId id, Boolean moreRepliesToFollow){
-        TxIdEntry entry = new TxIdEntry(nodeId,id,null);
-        if(moreRepliesToFollow.booleanValue()){
+    public void recordExpectedTransaction(TransactionId id, StatsRequestType type) {
+        TxIdEntry entry = new TxIdEntry(Preconditions.checkNotNull(id), Preconditions.checkNotNull(type));
+        txIdToRequestTypeMap.put(entry, getExpiryTime());
+    }
+
+    public boolean isExpectedTransaction(TransactionAware transaction, Boolean more) {
+        TxIdEntry entry = new TxIdEntry(transaction.getTransactionId(), null);
+        if (more != null && more.booleanValue()) {
             return txIdToRequestTypeMap.containsKey(entry);
-        }else{
+        } else {
             return txIdToRequestTypeMap.remove(entry) != null;
         }
-    }
-
-    public void addTxIdToRequestTypeEntry (NodeId nodeId, TransactionId id,StatsRequestType type){
-        if(id == null)
-            return;
-        TxIdEntry entry = new TxIdEntry(nodeId,id,type);
-        txIdToRequestTypeMap.put(entry, getExpiryTime());
     }
 
     private static Long getExpiryTime(){
