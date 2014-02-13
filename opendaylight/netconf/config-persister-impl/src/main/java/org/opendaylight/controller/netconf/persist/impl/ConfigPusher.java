@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import io.netty.channel.EventLoopGroup;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -30,7 +28,7 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageAdditionalHeader;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -40,12 +38,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import io.netty.channel.EventLoopGroup;
 
 @Immutable
 public class ConfigPusher {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigPusher.class);
     private static final int NETCONF_SEND_ATTEMPT_MS_DELAY = 1000;
     private static final int NETCONF_SEND_ATTEMPTS = 20;
 
@@ -134,8 +132,8 @@ public class ConfigPusher {
         final long deadlineNanos = pollingStartNanos + TimeUnit.MILLISECONDS.toNanos(maxWaitForCapabilitiesMillis);
         int attempt = 0;
 
-        String additionalHeader = NetconfMessageAdditionalHeader.toString("unknown", address.getAddress().getHostAddress(),
-                Integer.toString(address.getPort()), "tcp", Optional.of("persister"));
+        NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("unknown", address.getAddress().getHostAddress(),
+                Integer.toString(address.getPort()), "tcp", "persister");
 
         Set<String> latestCapabilities = null;
         while (System.nanoTime() < deadlineNanos) {

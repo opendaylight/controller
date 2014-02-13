@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.NetconfTcp;
@@ -38,13 +39,13 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfServerSession.class);
 
-    private final NetconfServerSessionNegotiator.AdditionalHeader header;
+    private final NetconfHelloMessageAdditionalHeader header;
 
     private Date loginTime;
     private long inRpcSuccess, inRpcFail, outRpcError;
 
     public NetconfServerSession(NetconfServerSessionListener sessionListener, Channel channel, long sessionId,
-            NetconfServerSessionNegotiator.AdditionalHeader header) {
+            NetconfHelloMessageAdditionalHeader header) {
         super(sessionListener, channel, sessionId);
         this.header = header;
         logger.debug("Session {} created", toString());
@@ -71,6 +72,9 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
+    private static final String dateTimePatternString = DateAndTime.PATTERN_CONSTANTS.get(0);
+    private static final Pattern dateTimePattern = Pattern.compile(dateTimePatternString);
+
     @Override
     public Session toManagementSession() {
         SessionBuilder builder = new SessionBuilder();
@@ -80,16 +84,16 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
         Preconditions.checkState(DateAndTime.PATTERN_CONSTANTS.size() == 1);
         String formattedDateTime = formatDateTime(loginTime);
-        String pattern = DateAndTime.PATTERN_CONSTANTS.get(0);
-        Matcher matcher = Pattern.compile(pattern).matcher(formattedDateTime);
-        Preconditions.checkState(matcher.matches(), "Formatted datetime %s does not match pattern %s", formattedDateTime, pattern);
+
+        Matcher matcher = dateTimePattern.matcher(formattedDateTime);
+        Preconditions.checkState(matcher.matches(), "Formatted datetime %s does not match pattern %s", formattedDateTime, dateTimePattern);
         builder.setLoginTime(new DateAndTime(formattedDateTime));
 
         builder.setInBadRpcs(new ZeroBasedCounter32(inRpcFail));
         builder.setInRpcs(new ZeroBasedCounter32(inRpcSuccess));
         builder.setOutRpcErrors(new ZeroBasedCounter32(outRpcError));
 
-        builder.setUsername(header.getUsername());
+        builder.setUsername(header.getUserName());
         builder.setTransport(getTransportForString(header.getTransport()));
 
         builder.setOutNotifications(new ZeroBasedCounter32(0L));
@@ -97,7 +101,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         builder.setKey(new SessionKey(getSessionId()));
 
         Session1Builder builder1 = new Session1Builder();
-        builder1.setSessionIdentifier(header.getSessionType());
+        builder1.setSessionIdentifier(header.getSessionIdentifier());
         builder.addAugmentation(Session1.class, builder1.build());
 
         return builder.build();

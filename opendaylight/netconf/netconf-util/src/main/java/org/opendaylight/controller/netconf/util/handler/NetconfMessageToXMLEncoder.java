@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 
-public final class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMessage> {
+public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMessage> {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToXMLEncoder.class);
 
     private final Optional<String> clientId;
@@ -47,21 +47,17 @@ public final class NetconfMessageToXMLEncoder extends MessageToByteEncoder<Netco
             msg.getDocument().appendChild(comment);
         }
 
-        final ByteBuffer msgBytes;
-        if(msg.getAdditionalHeader().isPresent()) {
-            final String header = msg.getAdditionalHeader().get();
-            LOG.trace("Header of netconf message parsed \n{}", header);
-            // FIXME: this can be written in pieces
-            msgBytes = Charsets.UTF_8.encode(header + xmlToString(msg.getDocument()));
-        } else {
-            msgBytes = Charsets.UTF_8.encode(xmlToString(msg.getDocument()));
-        }
+        final ByteBuffer msgBytes = encodeMessage(msg);
 
         LOG.trace("Putting message \n{}", xmlToString(msg.getDocument()));
         out.writeBytes(msgBytes);
     }
 
-    private String xmlToString(Document doc) {
+    protected ByteBuffer encodeMessage(NetconfMessage msg) {
+        return Charsets.UTF_8.encode(xmlToString(msg.getDocument()));
+    }
+
+    protected String xmlToString(Document doc) {
         return XmlUtil.toString(doc, false);
     }
 }

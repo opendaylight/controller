@@ -18,6 +18,7 @@ import java.io.Closeable;
 import java.net.InetSocketAddress;
 
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
@@ -31,19 +32,23 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClientDispatcher.class);
 
-    private final NetconfClientSessionNegotiatorFactory negotatorFactory;
+    private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
     private final HashedWheelTimer timer;
 
-    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup, long clientConnectionTimeoutMillis) {
+    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup,
+            long clientConnectionTimeoutMillis) {
         super(bossGroup, workerGroup);
         timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.<String>absent(), clientConnectionTimeoutMillis);
+        this.negotiatorFactory = new NetconfClientSessionNegotiatorFactory(timer,
+                Optional.<NetconfHelloMessageAdditionalHeader> absent(), clientConnectionTimeoutMillis);
     }
 
-    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup, String additionalHeader, long connectionTimeoutMillis) {
+    public NetconfClientDispatcher(EventLoopGroup bossGroup, EventLoopGroup workerGroup,
+            NetconfHelloMessageAdditionalHeader additionalHeader, long connectionTimeoutMillis) {
         super(bossGroup, workerGroup);
         timer = new HashedWheelTimer();
-        this.negotatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader), connectionTimeoutMillis);
+        this.negotiatorFactory = new NetconfClientSessionNegotiatorFactory(timer, Optional.of(additionalHeader),
+                connectionTimeoutMillis);
     }
 
     public Future<NetconfClientSession> createClient(InetSocketAddress address,
@@ -57,7 +62,7 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
             }
 
             private void initialize(SocketChannel ch, Promise<NetconfClientSession> promise) {
-                new ClientChannelInitializer( negotatorFactory, sessionListener).initialize(ch, promise);
+                new ClientChannelInitializer(negotiatorFactory, sessionListener).initialize(ch, promise);
             }
         });
     }
@@ -65,7 +70,7 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
     public Future<Void> createReconnectingClient(final InetSocketAddress address,
             final NetconfClientSessionListener listener,
             final ReconnectStrategyFactory connectStrategyFactory, final ReconnectStrategy reestablishStrategy) {
-        final ClientChannelInitializer init = new ClientChannelInitializer(negotatorFactory, listener);
+        final ClientChannelInitializer init = new ClientChannelInitializer(negotiatorFactory, listener);
 
         return super.createReconnectingClient(address, connectStrategyFactory, reestablishStrategy,
                 new PipelineInitializer<NetconfClientSession>() {
@@ -88,14 +93,20 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
         }
 
         @Override
-        protected void initializeAfterDecoder(SocketChannel ch, Promise<NetconfClientSession> promise) {
-            ch.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(
-                    new SessionListenerFactory<NetconfClientSessionListener>() {
-                        @Override
-                        public NetconfClientSessionListener getSessionListener() {
-                            return sessionListener;
-                        }
-                    }, ch, promise));
+        public void initialize(SocketChannel ch, Promise<NetconfClientSession> promise) {
+                super.initialize(ch,promise);
+        }
+
+        @Override
+        protected void initializeSessionNegotiator(SocketChannel ch, Promise<NetconfClientSession> promise) {
+            ch.pipeline().addAfter(NETCONF_MESSAGE_DECODER,  AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR,
+                    negotiatorFactory.getSessionNegotiator(
+                            new SessionListenerFactory<NetconfClientSessionListener>() {
+                                @Override
+                                public NetconfClientSessionListener getSessionListener() {
+                                    return sessionListener;
+                                }
+                            }, ch, promise));
         }
     }
 
