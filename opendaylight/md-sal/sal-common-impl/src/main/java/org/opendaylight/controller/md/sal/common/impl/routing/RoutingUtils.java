@@ -42,7 +42,7 @@ public class RoutingUtils {
         private final Map<C, Set<P>> removal;
         private final Map<C, Set<P>> announcement;
 
-        public RouteChangeImpl(ImmutableMap<C, Set<P>> removal, ImmutableMap<C, Set<P>> announcement) {
+        public RouteChangeImpl(ImmutableMap<C, Set<P>> announcement, ImmutableMap<C, Set<P>> removal) {
             super();
             this.removal = removal;
             this.announcement = announcement;
