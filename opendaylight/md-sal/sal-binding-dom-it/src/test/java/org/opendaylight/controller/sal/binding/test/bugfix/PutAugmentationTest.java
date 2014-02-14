@@ -6,9 +6,11 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.sal.binding.test.bugfix;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.Map;
@@ -52,38 +54,42 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .toInstance();
 
-
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier//
             .builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY).toInstance();
-
 
     private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = InstanceIdentifier//
             .builder(NODES_INSTANCE_ID_BA) //
             .child(Node.class, NODE_KEY) //
             .augmentation(FlowCapableNode.class) //
-            .child(SupportedActions.class)
-            .toInstance();
+            .child(SupportedActions.class).toInstance();
 
+    private static final InstanceIdentifier<FlowCapableNode> ALL_FLOW_CAPABLE_NODES = InstanceIdentifier //
+            .builder(NODES_INSTANCE_ID_BA) //
+            .child(Node.class) //
+            .augmentation(FlowCapableNode.class) //
+            .build();
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
-    private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME, SupportedActions.QNAME.getLocalName());
-
+    private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME,
+            SupportedActions.QNAME.getLocalName());
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier SUPPORTED_ACTIONS_INSTANCE_ID_BI = //
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-                    .node(Nodes.QNAME) //
-                    .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-                    .node(SUPPORTED_ACTIONS_QNAME) //
-                    .toInstance();
+    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+            .node(Nodes.QNAME) //
+            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
+            .node(SUPPORTED_ACTIONS_QNAME) //
+            .toInstance();
+    private static final InstanceIdentifier<FlowCapableNode> FLOW_AUGMENTATION_PATH = InstanceIdentifier //
+            .builder(NODE_INSTANCE_ID_BA) //
+            .augmentation(FlowCapableNode.class) //
+            .build();
 
-    private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
-
-
+    private DataChangeEvent<InstanceIdentifier<?>, DataObject> lastReceivedChangeEvent;
 
     /**
      * Test for Bug 148
@@ -93,7 +99,8 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
     @Test
     public void putNodeAndAugmentation() throws Exception {
 
-        baDataService.registerDataChangeListener(NODES_INSTANCE_ID_BA, this);
+        baDataService.registerDataChangeListener(ALL_FLOW_CAPABLE_NODES, this);
+
 
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(NODE_ID));
@@ -102,7 +109,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         baseTransaction.putOperationalData(NODE_INSTANCE_ID_BA, nodeBuilder.build());
         RpcResult<TransactionStatus> result = baseTransaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-        assertNotNull(receivedChangeEvent);
+
         Node node = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
         assertNotNull(node);
         assertEquals(NODE_KEY, node.getKey());
@@ -114,13 +121,16 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         fnub.setDescription("Description Foo");
         fnub.setSoftware("JUnit emulated");
         FlowCapableNode fnu = fnub.build();
-        InstanceIdentifier<FlowCapableNode> augmentIdentifier = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class).toInstance();
+        InstanceIdentifier<FlowCapableNode> augmentIdentifier = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA)
+                .augmentation(FlowCapableNode.class).toInstance();
         DataModificationTransaction augmentedTransaction = baDataService.beginTransaction();
         augmentedTransaction.putOperationalData(augmentIdentifier, fnu);
 
         result = augmentedTransaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
+        assertNotNull(lastReceivedChangeEvent);
+        assertTrue(lastReceivedChangeEvent.getCreatedOperationalData().containsKey(FLOW_AUGMENTATION_PATH));
 
         Node augmentedNode = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
         assertNotNull(node);
@@ -131,10 +141,13 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         assertEquals(fnu.getDescription(), readedAugmentation.getDescription());
         assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
         testNodeRemove();
+        assertTrue(lastReceivedChangeEvent.getRemovedOperationalData().contains(FLOW_AUGMENTATION_PATH));
     }
 
     @Test
     public void putNodeWithAugmentation() throws Exception {
+
+        baDataService.registerDataChangeListener(ALL_FLOW_CAPABLE_NODES, this);
 
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(NODE_ID));
@@ -151,23 +164,31 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         DataModificationTransaction baseTransaction = baDataService.beginTransaction();
         baseTransaction.putOperationalData(NODE_INSTANCE_ID_BA, nodeBuilder.build());
         RpcResult<TransactionStatus> result = baseTransaction.commit().get();
+
+        assertNotNull(lastReceivedChangeEvent);
+        assertTrue(lastReceivedChangeEvent.getCreatedOperationalData().containsKey(FLOW_AUGMENTATION_PATH));
+        lastReceivedChangeEvent = null;
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        FlowCapableNode readedAugmentation = (FlowCapableNode) baDataService.readOperationalData(InstanceIdentifier.builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class).toInstance());
+        FlowCapableNode readedAugmentation = (FlowCapableNode) baDataService.readOperationalData(InstanceIdentifier
+                .builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class).toInstance());
         assertNotNull(readedAugmentation);
+
         assertEquals(fnu.getHardware(), readedAugmentation.getHardware());
 
         testPutNodeConnectorWithAugmentation();
+        lastReceivedChangeEvent = null;
         testNodeRemove();
-    }
 
+        assertTrue(lastReceivedChangeEvent.getRemovedOperationalData().contains(FLOW_AUGMENTATION_PATH));
+    }
 
     private void testPutNodeConnectorWithAugmentation() throws Exception {
         NodeConnectorKey ncKey = new NodeConnectorKey(new NodeConnectorId("test:0:0"));
         InstanceIdentifier<NodeConnector> ncPath = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA)
-        .child(NodeConnector.class, ncKey).toInstance();
+                .child(NodeConnector.class, ncKey).toInstance();
         InstanceIdentifier<FlowCapableNodeConnector> ncAugmentPath = InstanceIdentifier.builder(ncPath)
-        .augmentation(FlowCapableNodeConnector.class).toInstance();
+                .augmentation(FlowCapableNodeConnector.class).toInstance();
 
         NodeConnectorBuilder nc = new NodeConnectorBuilder();
         nc.setKey(ncKey);
@@ -181,7 +202,8 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         RpcResult<TransactionStatus> result = baseTransaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        FlowCapableNodeConnector readedAugmentation = (FlowCapableNodeConnector) baDataService.readOperationalData(ncAugmentPath);
+        FlowCapableNodeConnector readedAugmentation = (FlowCapableNodeConnector) baDataService
+                .readOperationalData(ncAugmentPath);
         assertNotNull(readedAugmentation);
         assertEquals(fncb.getName(), readedAugmentation.getName());
     }
@@ -196,7 +218,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         assertNull(node);
     }
 
-    private void verifyNodes(Nodes nodes,Node original) {
+    private void verifyNodes(Nodes nodes, Node original) {
         assertNotNull(nodes);
         assertNotNull(nodes.getNode());
         assertEquals(1, nodes.getNode().size());
@@ -212,8 +234,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
 
     }
 
-    private void assertBindingIndependentVersion(
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
+    private void assertBindingIndependentVersion(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
         CompositeNode node = biDataService.readOperationalData(nodeId);
         assertNotNull(node);
     }
@@ -224,7 +245,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
 
     @Override
     public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        receivedChangeEvent = change;
+        lastReceivedChangeEvent = change;
     }
 
 }
