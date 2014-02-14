@@ -9,14 +9,10 @@ package org.opendaylight.controller.md.sal.common.impl.service
 
 import com.google.common.collect.FluentIterable
 import com.google.common.collect.HashMultimap
-import com.google.common.collect.ImmutableList
 import com.google.common.collect.Multimap
-import java.util.ArrayList
 import java.util.Arrays
-import java.util.Collection
 import java.util.Collections
 import java.util.HashSet
-import java.util.List
 import java.util.Set
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
@@ -27,14 +23,12 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener
 import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration
 import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory
 import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService
 import org.opendaylight.controller.md.sal.common.api.data.DataReader
 import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification
 import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter
-import org.opendaylight.controller.sal.common.util.Rpcs
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.yangtools.concepts.CompositeObjectRegistration
 import org.opendaylight.yangtools.concepts.ListenerRegistration
@@ -43,10 +37,14 @@ import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.slf4j.LoggerFactory
 
-import static com.google.common.base.Preconditions.*import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
+import static com.google.common.base.Preconditions.*
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent
 import com.google.common.collect.Multimaps
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+import java.util.Map
+import com.google.common.base.Predicate
+import com.google.common.util.concurrent.MoreExecutors
 
 abstract class AbstractDataBroker<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> implements DataModificationTransactionFactory<P, D>, //
 DataReader<P, D>, //
@@ -57,35 +55,55 @@ DataProvisionService<P, D> {
 
     @Property
     var ExecutorService executor;
+    
+    @Property
+    var ExecutorService notificationExecutor = MoreExecutors.sameThreadExecutor;
 
     @Property
     var AbstractDataReadRouter<P, D> dataReadRouter;
-    
+
     @Property
     private val AtomicLong submittedTransactionsCount = new AtomicLong;
-    
+
     @Property
     private val AtomicLong failedTransactionsCount = new AtomicLong
-    
+
     @Property
     private val AtomicLong finishedTransactionsCount = new AtomicLong
 
-    Multimap<P, DataChangeListenerRegistration<P, D, DCL>> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.create());
-    Multimap<P, DataCommitHandlerRegistrationImpl<P, D>> commitHandlers = Multimaps.synchronizedSetMultimap(HashMultimap.create());
-    
+    Multimap<P, DataChangeListenerRegistration<P, D, DCL>> listeners = Multimaps.
+        synchronizedSetMultimap(HashMultimap.create());
+    Multimap<P, DataCommitHandlerRegistrationImpl<P, D>> commitHandlers = Multimaps.
+        synchronizedSetMultimap(HashMultimap.create());
+
     private val Lock registrationLock = new ReentrantLock;
-    
-    val ListenerRegistry<RegistrationListener<DataCommitHandlerRegistration<P,D>>> commitHandlerRegistrationListeners = new ListenerRegistry();
+
+    val ListenerRegistry<RegistrationListener<DataCommitHandlerRegistration<P, D>>> commitHandlerRegistrationListeners = new ListenerRegistry();
+
     public new() {
     }
 
     protected def /*Iterator<Entry<Collection<DataChangeListenerRegistration<P,D,DCL>>,D>>*/ affectedCommitHandlers(
-        HashSet<P> paths) {
-        return withLock(registrationLock) [|
+        Set<P> paths) {
+        return withLock(registrationLock) [ |
             return FluentIterable.from(commitHandlers.asMap.entrySet).filter[key.isAffectedBy(paths)] //
-                .transformAndConcat[value] //
+            .transformAndConcat[value] //
+            .transform[instance].toList()
+        ]
+    }
+
+    protected def /*Iterator<Entry<Collection<DataChangeListenerRegistration<P,D,DCL>>,D>>*/ probablyAffectedCommitHandlers(
+        HashSet<P> paths) {
+        return withLock(registrationLock) [ |
+            return FluentIterable.from(commitHandlers.asMap.entrySet).filter[key.isProbablyAffectedBy(paths)] //
+            .
+                transformAndConcat[value] //
                 .transform[instance].toList()
         ]
+    }
+    
+    protected def Map<P,D> deepGetBySubpath(Map<P,D> dataSet,P path) {
+        return Collections.emptyMap();
     }
 
     override final readConfigurationData(P path) {
@@ -95,26 +113,26 @@ DataProvisionService<P, D> {
     override final readOperationalData(P path) {
         return dataReadRouter.readOperationalData(path);
     }
-    
-    private static def <T> withLock(Lock lock,Callable<T> method) {
+
+    private static def <T> withLock(Lock lock, Callable<T> method) {
         lock.lock
         try {
             return method.call
         } finally {
             lock.unlock
         }
-    } 
+    }
 
     override final registerCommitHandler(P path, DataCommitHandler<P, D> commitHandler) {
-        return withLock(registrationLock) [|
+        return withLock(registrationLock) [ |
             val registration = new DataCommitHandlerRegistrationImpl(path, commitHandler, this);
             commitHandlers.put(path, registration)
-            LOG.trace("Registering Commit Handler {} for path: {}",commitHandler,path);
-            for(listener : commitHandlerRegistrationListeners) {
+            LOG.trace("Registering Commit Handler {} for path: {}", commitHandler, path);
+            for (listener : commitHandlerRegistrationListeners) {
                 try {
                     listener.instance.onRegister(registration);
                 } catch (Exception e) {
-                    LOG.error("Unexpected exception in listener {} during invoking onRegister",listener.instance,e);
+                    LOG.error("Unexpected exception in listener {} during invoking onRegister", listener.instance, e);
                 }
             }
             return registration;
@@ -122,51 +140,51 @@ DataProvisionService<P, D> {
     }
 
     override final def registerDataChangeListener(P path, DCL listener) {
-        return withLock(registrationLock) [|
+        return withLock(registrationLock) [ |
             val reg = new DataChangeListenerRegistration(path, listener, this);
             listeners.put(path, reg);
             val initialConfig = dataReadRouter.readConfigurationData(path);
             val initialOperational = dataReadRouter.readOperationalData(path);
-            val event = createInitialListenerEvent(path,initialConfig,initialOperational);
+            val event = createInitialListenerEvent(path, initialConfig, initialOperational);
             listener.onDataChanged(event);
             return reg;
         ]
     }
 
     final def registerDataReader(P path, DataReader<P, D> reader) {
-        return withLock(registrationLock) [|
+        return withLock(registrationLock) [ |
             val confReg = dataReadRouter.registerConfigurationReader(path, reader);
             val dataReg = dataReadRouter.registerOperationalReader(path, reader);
-    
             return new CompositeObjectRegistration(reader, Arrays.asList(confReg, dataReg));
         ]
     }
-    
-    override registerCommitHandlerListener(RegistrationListener<DataCommitHandlerRegistration<P, D>> commitHandlerListener) {
+
+    override registerCommitHandlerListener(
+        RegistrationListener<DataCommitHandlerRegistration<P, D>> commitHandlerListener) {
         val ret = commitHandlerRegistrationListeners.register(commitHandlerListener);
         return ret;
     }
-    
-    protected  def DataChangeEvent<P,D> createInitialListenerEvent(P path,D initialConfig,D initialOperational) {
-        return new InitialDataChangeEventImpl<P, D>(initialConfig,initialOperational);
-        
+
+    protected def DataChangeEvent<P, D> createInitialListenerEvent(P path, D initialConfig, D initialOperational) {
+        return new InitialDataChangeEventImpl<P, D>(initialConfig, initialOperational);
+
     }
 
     protected final def removeListener(DataChangeListenerRegistration<P, D, DCL> registration) {
-        return withLock(registrationLock) [|
+        return withLock(registrationLock) [ |
             listeners.remove(registration.path, registration);
         ]
     }
 
     protected final def removeCommitHandler(DataCommitHandlerRegistrationImpl<P, D> registration) {
-        return withLock(registrationLock) [|
+        return withLock(registrationLock) [ |
             commitHandlers.remove(registration.path, registration);
-             LOG.trace("Removing Commit Handler {} for path: {}",registration.instance,registration.path);
-            for(listener : commitHandlerRegistrationListeners) {
+            LOG.trace("Removing Commit Handler {} for path: {}", registration.instance, registration.path);
+            for (listener : commitHandlerRegistrationListeners) {
                 try {
                     listener.instance.onUnregister(registration);
                 } catch (Exception e) {
-                    LOG.error("Unexpected exception in listener {} during invoking onUnregister",listener.instance,e);
+                    LOG.error("Unexpected exception in listener {} during invoking onUnregister", listener.instance, e);
                 }
             }
             return null;
@@ -177,27 +195,54 @@ DataProvisionService<P, D> {
         return commitHandlers.entries;
     }
 
-    protected def /*Iterator<Entry<Collection<DataChangeListenerRegistration<P,D,DCL>>,D>>*/ affectedListenersWithInitialState(
-        HashSet<P> paths) {
-        return withLock(registrationLock) [|
+    protected def /*Iterator<Entry<Collection<DataChangeListenerRegistration<P,D,DCL>>,D>>*/ affectedListeners(
+        Set<P> paths) {
+        return withLock(registrationLock) [ |
             return FluentIterable.from(listeners.asMap.entrySet).filter[key.isAffectedBy(paths)].transform [
-                val operationalState = readOperationalData(key)
-                val configurationState = readConfigurationData(key)
-                return new ListenerStateCapture(key, value, operationalState, configurationState)
+                return new ListenerStateCapture<P,D,DCL>(key, value,createContainsPredicate(key))
             ].toList()
         ]
     }
 
-    protected def boolean isAffectedBy(P key, Set<P> paths) {
+    protected def /*Iterator<Entry<Collection<DataChangeListenerRegistration<P,D,DCL>>,D>>*/ probablyAffectedListeners(
+        Set<P> paths) {
+        return withLock(registrationLock) [ |
+            return FluentIterable.from(listeners.asMap.entrySet).filter[key.isProbablyAffectedBy(paths)].transform [
+                return new ListenerStateCapture(key, value,createContainsPredicate(key))
+            ].toList()
+        ]
+    }
+    
+    
+    protected def Predicate<P> createContainsPredicate(P key) {
+        return [ other | key.contains(other) ]
+    }
+    
+    protected def Predicate<P> createIsContainedPredicate(P key) {
+        return [ other | other.contains(key) ]
+    }
+
+    protected def boolean isAffectedBy(P key,Set<P> paths) {
+        val contains = createContainsPredicate(key)
         if (paths.contains(key)) {
             return true;
         }
         for (path : paths) {
-            if (key.contains(path)) {
+            if (contains.apply(path)) {
                 return true;
             }
         }
 
+        return false;
+    }
+
+    protected def boolean isProbablyAffectedBy(P key, Set<P> paths) {
+        val isContained = createIsContainedPredicate(key)
+        for (path : paths) {
+            if (isContained.apply(path)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -209,22 +254,6 @@ DataProvisionService<P, D> {
         return executor.submit(task);
     }
 
-}
-
-@Data
-package class ListenerStateCapture<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> {
-
-    @Property
-    P path;
-
-    @Property
-    Collection<DataChangeListenerRegistration<P, D, DCL>> listeners;
-
-    @Property
-    D initialOperationalState;
-
-    @Property
-    D initialConfigurationState;
 }
 
 package class DataChangeListenerRegistration<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> extends AbstractObjectRegistration<DCL> implements ListenerRegistration<DCL> {
@@ -268,99 +297,6 @@ implements DataCommitHandlerRegistration<P, D> {
     }
 }
 
-package class TwoPhaseCommit<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> implements Callable<RpcResult<TransactionStatus>> {
-
-    private static val log = LoggerFactory.getLogger(TwoPhaseCommit);
-
-    val AbstractDataTransaction<P, D> transaction;
-    val AbstractDataBroker<P, D, DCL> dataBroker;
-    
-    new(AbstractDataTransaction<P, D> transaction, AbstractDataBroker<P, D, DCL> broker) {
-        this.transaction = transaction;
-        this.dataBroker = broker;
-    }
-
-    override call() throws Exception {
-
-        // get affected paths
-        val affectedPaths = new HashSet<P>();
-
-        affectedPaths.addAll(transaction.createdConfigurationData.keySet);
-        affectedPaths.addAll(transaction.updatedConfigurationData.keySet);
-        affectedPaths.addAll(transaction.removedConfigurationData);
-
-        affectedPaths.addAll(transaction.createdOperationalData.keySet);
-        affectedPaths.addAll(transaction.updatedOperationalData.keySet);
-        affectedPaths.addAll(transaction.removedOperationalData);
-
-        val listeners = dataBroker.affectedListenersWithInitialState(affectedPaths);
-
-        val transactionId = transaction.identifier;
-
-        log.trace("Transaction: {} Started.",transactionId);
-        log.trace("Transaction: {} Affected Subtrees:",transactionId,affectedPaths);
-        // requesting commits
-        val Iterable<DataCommitHandler<P, D>> commitHandlers = dataBroker.affectedCommitHandlers(affectedPaths);
-        val List<DataCommitTransaction<P, D>> handlerTransactions = new ArrayList();
-        try {
-            for (handler : commitHandlers) {
-                handlerTransactions.add(handler.requestCommit(transaction));
-            }
-        } catch (Exception e) {
-            log.error("Transaction: {} Request Commit failed", transactionId,e);
-            dataBroker.failedTransactionsCount.andIncrement
-            transaction.changeStatus(TransactionStatus.FAILED)
-            return rollback(handlerTransactions, e);
-        }
-        val List<RpcResult<Void>> results = new ArrayList();
-        try {
-            for (subtransaction : handlerTransactions) {
-                results.add(subtransaction.finish());
-            }
-            listeners.publishDataChangeEvent();
-        } catch (Exception e) {
-            log.error("Transaction: {} Finish Commit failed",transactionId, e);
-            dataBroker.failedTransactionsCount.andIncrement
-            transaction.changeStatus(TransactionStatus.FAILED)
-            return rollback(handlerTransactions, e);
-        }
-        log.trace("Transaction: {} Finished successfully.",transactionId);
-        dataBroker.finishedTransactionsCount.andIncrement;
-        transaction.changeStatus(TransactionStatus.COMMITED)
-        return Rpcs.getRpcResult(true, TransactionStatus.COMMITED, Collections.emptySet());
-
-    }
-
-    def void publishDataChangeEvent(ImmutableList<ListenerStateCapture<P, D, DCL>> listeners) {
-        dataBroker.executor.submit [|
-            for (listenerSet : listeners) {
-                val updatedConfiguration = dataBroker.readConfigurationData(listenerSet.path);
-                val updatedOperational = dataBroker.readOperationalData(listenerSet.path);
-
-                val changeEvent = new DataChangeEventImpl(transaction, listenerSet.initialConfigurationState,
-                    listenerSet.initialOperationalState, updatedOperational, updatedConfiguration);
-                for (listener : listenerSet.listeners) {
-                    try {
-                        listener.instance.onDataChanged(changeEvent);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }        
-        ]
-    }
-
-    def rollback(List<DataCommitTransaction<P, D>> transactions, Exception e) {
-        for (transaction : transactions) {
-            transaction.rollback()
-        }
-
-        // FIXME return encountered error.
-        return Rpcs.getRpcResult(false, TransactionStatus.FAILED, Collections.emptySet());
-    }
-}
-
 public abstract class AbstractDataTransaction<P extends Path<P>, D> extends AbstractDataModification<P, D> {
 
     private static val LOG = LoggerFactory.getLogger(AbstractDataTransaction);
@@ -372,7 +308,7 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D> extends Abst
 
     var AbstractDataBroker<P, D, ?> broker;
 
-    protected new(Object identifier,AbstractDataBroker<P, D, ?> dataBroker) {
+    protected new(Object identifier, AbstractDataBroker<P, D, ?> dataBroker) {
         super(dataBroker);
         _identifier = identifier;
         broker = dataBroker;
@@ -388,16 +324,16 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D> extends Abst
 
     override readConfigurationData(P path) {
         val local = this.updatedConfigurationData.get(path);
-        if(local != null) {
+        if (local != null) {
             return local;
         }
-        
+
         return broker.readConfigurationData(path);
     }
 
     override readOperationalData(P path) {
         val local = this.updatedOperationalData.get(path);
-        if(local != null) {
+        if (local != null) {
             return local;
         }
         return broker.readOperationalData(path);

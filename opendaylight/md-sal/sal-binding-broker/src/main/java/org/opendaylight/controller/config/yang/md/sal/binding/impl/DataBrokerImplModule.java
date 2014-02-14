@@ -57,14 +57,14 @@ public final class DataBrokerImplModule extends
             dataBindingBroker = createStandAloneBroker(listeningExecutor);
         }
         dataBindingBroker.registerRuntimeBean(getRootRuntimeBeanRegistratorWrapper());
-
+        dataBindingBroker.setNotificationExecutor(SingletonHolder.getDefaultChangeEventExecutor());
         return dataBindingBroker;
     }
     private BindingIndependentMappingService resolveMappingServiceDependency() {
         if(getMappingService() != null) {
             return getMappingServiceDependency();
         }
-        
+
         ServiceReference<BindingIndependentMappingService> potentialMappingService = bundleContext.getServiceReference(BindingIndependentMappingService.class);
         if(potentialMappingService != null) {
             return bundleContext.getService(potentialMappingService);
