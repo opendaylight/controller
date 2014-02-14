@@ -16,7 +16,6 @@
     </scm>
 
     <artifactId>remoterpc-routingtable.implementation</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <build>
@@ -81,13 +80,13 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-connector-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>clustering.services</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
+            <version>${clustering.services.version}</version>
         </dependency>
 
 

@@ -13,44 +13,46 @@ import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.osgi.framework.BundleContext;
 
 /**
-*
-*/
-public final class ZeroMQServerModule extends org.opendaylight.controller.config.yang.md.sal.remote.rpc.AbstractZeroMQServerModule
- {
+ *
+ */
+public final class ZeroMQServerModule
+    extends org.opendaylight.controller.config.yang.md.sal.remote.rpc.AbstractZeroMQServerModule {
 
-    private static final Integer ZEROMQ_ROUTER_PORT = 5554;
-    private BundleContext bundleContext;
+  private static final Integer ZEROMQ_ROUTER_PORT = 5554;
+  private BundleContext bundleContext;
 
-    public ZeroMQServerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
-        super(identifier, dependencyResolver);
-    }
+  public ZeroMQServerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+                            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    super(identifier, dependencyResolver);
+  }
 
-    public ZeroMQServerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            ZeroMQServerModule oldModule, java.lang.AutoCloseable oldInstance) {
+  public ZeroMQServerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+                            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+                            ZeroMQServerModule oldModule, java.lang.AutoCloseable oldInstance) {
 
-        super(identifier, dependencyResolver, oldModule, oldInstance);
-    }
+    super(identifier, dependencyResolver, oldModule, oldInstance);
+  }
 
-    @Override
-    protected void customValidation(){
-        // Add custom validation for module attributes here.
-    }
+  @Override
+  protected void customValidation() {
+    // Add custom validation for module attributes here.
+  }
 
-    @Override
-    public java.lang.AutoCloseable createInstance() {
-        
-        Broker broker = getDomBrokerDependency();
+  @Override
+  public java.lang.AutoCloseable createInstance() {
 
-        final int port = getPort() != null ? getPort() : ZEROMQ_ROUTER_PORT;
+    Broker broker = getDomBrokerDependency();
 
-        ServerImpl serverImpl = new ServerImpl(port);
-        
-        ClientImpl clientImpl = new ClientImpl();
+    final int port = getPort() != null ? getPort() : ZEROMQ_ROUTER_PORT;
+
+    ServerImpl serverImpl = new ServerImpl(port);
+
+    ClientImpl clientImpl = new ClientImpl();
 
     RoutingTableProvider provider = new RoutingTableProvider(bundleContext);//,serverImpl);
 
-
-    facade.setRoutingTableProvider(provider );
+    RemoteRpcProvider facade = new RemoteRpcProvider(serverImpl, clientImpl);
+    facade.setRoutingTableProvider(provider);
     facade.setContext(bundleContext);
     facade.setRpcProvisionRegistry((RpcProvisionRegistry) broker);
 

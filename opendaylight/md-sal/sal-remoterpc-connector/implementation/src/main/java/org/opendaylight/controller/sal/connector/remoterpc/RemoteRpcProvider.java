@@ -279,7 +279,7 @@ public class RemoteRpcProvider implements
       for (RpcRoutingContext context : changes.keySet()){
         routeId = new RouteIdentifierImpl();
         routeId.setType(context.getRpc());
-        routeId.setContext(context.getContext());
+        //routeId.setContext(context.getContext());
 
         for (InstanceIdentifier instanceId : changes.get(context)){
           routeId.setRoute(instanceId);
