@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.config.manager.impl;
+package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
@@ -31,7 +31,7 @@ public class DestroyedModule implements AutoCloseable,
     private final OsgiRegistration osgiRegistration;
     private final int orderingIdx;
 
-    DestroyedModule(ModuleIdentifier identifier, AutoCloseable instance,
+    public DestroyedModule(ModuleIdentifier identifier, AutoCloseable instance,
             ModuleJMXRegistrator oldJMXRegistrator,
             OsgiRegistration osgiRegistration, int orderingIdx) {
         this.identifier = identifier;

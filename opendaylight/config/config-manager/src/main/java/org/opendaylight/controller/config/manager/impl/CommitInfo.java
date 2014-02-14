@@ -14,6 +14,8 @@ import java.util.Map;
 import javax.annotation.concurrent.Immutable;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
+import org.opendaylight.controller.config.manager.impl.dependencyresolver.ModuleInternalTransactionalInfo;
 
 /**
  * Structure obtained during first phase commit, contains destroyed modules from
