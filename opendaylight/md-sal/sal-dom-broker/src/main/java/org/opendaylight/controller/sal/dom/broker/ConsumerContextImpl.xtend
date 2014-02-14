@@ -37,7 +37,7 @@ class ConsumerContextImpl implements ConsumerSession {
     }
 
     override rpc(QName rpc, CompositeNode input) {
-        return broker.invokeRpc(rpc, input);
+        return broker.invokeRpcAsync(rpc, input);
     }
 
     override <T extends BrokerService> T getService(Class<T> service) {

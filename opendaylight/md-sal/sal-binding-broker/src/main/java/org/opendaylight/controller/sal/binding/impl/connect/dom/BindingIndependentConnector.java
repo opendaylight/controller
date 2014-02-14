@@ -149,8 +149,6 @@ public class BindingIndependentConnector implements //
 
     private RpcProviderRegistryImpl baRpcRegistryImpl;
 
-    private org.opendaylight.controller.sal.dom.broker.spi.RpcRouter biRouter;
-
     private NotificationProviderService baNotifyService;
 
     private NotificationPublishService domNotificationService;
@@ -318,9 +316,6 @@ public class BindingIndependentConnector implements //
                 baRpcRegistryImpl = (RpcProviderRegistryImpl) baRpcRegistry;
                 baRpcRegistryImpl.registerRouterInstantiationListener(domToBindingRpcManager.getInstance());
                 baRpcRegistryImpl.registerGlobalRpcRegistrationListener(domToBindingRpcManager.getInstance());
-            }
-            if (biRpcRegistry instanceof org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) {
-                biRouter = (org.opendaylight.controller.sal.dom.broker.spi.RpcRouter) biRpcRegistry;
             }
             rpcForwarding = true;
         }
@@ -804,10 +799,10 @@ public class BindingIndependentConnector implements //
 
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
-            if(biRouter != null) {
+            if(biRpcRegistry != null) {
                 CompositeNode xml = mappingService.toDataDom(input);
                 CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
-                RpcResult<CompositeNode> result = biRouter.invokeRpc(rpc, wrappedXml);
+                RpcResult<CompositeNode> result = biRpcRegistry.invokeRpc(rpc, wrappedXml);
                 Object baResultValue = null;
                 if (result.getResult() != null) {
                     baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(), result.getResult());
@@ -867,10 +862,10 @@ public class BindingIndependentConnector implements //
 
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
-            if(biRouter != null) {
+            if(biRpcRegistry != null) {
                 CompositeNode xml = mappingService.toDataDom(input);
                 CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
-                RpcResult<CompositeNode> result = biRouter.invokeRpc(rpc, wrappedXml);
+                RpcResult<CompositeNode> result = biRpcRegistry.invokeRpc(rpc, wrappedXml);
                 Object baResultValue = null;
                 RpcResult<?> baResult = Rpcs.<Void>getRpcResult(result.isSuccessful(), null, result.getErrors());
                 return Futures.<RpcResult<?>>immediateFuture(baResult);
