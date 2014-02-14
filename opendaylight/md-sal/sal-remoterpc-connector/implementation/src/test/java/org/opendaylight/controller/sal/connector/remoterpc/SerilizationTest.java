@@ -38,7 +38,8 @@ public class SerilizationTest {
   @Test
   public void toXml() throws FileNotFoundException {
 
-    InputStream xmlStream = SerilizationTest.class.getResourceAsStream("/FourSimpleChildren.xml");
+    //InputStream xmlStream = SerilizationTest.class.getResourceAsStream("/FourSimpleChildren.xml");
+    InputStream xmlStream = SerilizationTest.class.getResourceAsStream("/AddFlow.xml");
     StringWriter writer = new StringWriter();
 
     CompositeNode data = loadCompositeNode(xmlStream);
@@ -59,8 +60,6 @@ public class SerilizationTest {
     _logger.info("Parsed xml [{}]", writer.toString());
   }
 
-  //Note to self:  Stolen from TestUtils
-  ///Users/alefan/odl/controller4/opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/TestUtils.java
   // Figure out how to include TestUtils through pom ...was getting errors
   private CompositeNode loadCompositeNode(InputStream xmlInputStream) throws FileNotFoundException {
     if (xmlInputStream == null) {

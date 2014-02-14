@@ -90,6 +90,7 @@ class ClientRequestHandler implements AutoCloseable{
     //otherwise first create the bridge and then send request
     if ( connectedServers.containsKey(remoteServerAddress) )
       return sendMessage(request, remoteServerAddress);
+
     else{
       workerPool.execute(new Worker(remoteServerAddress));
       connectedServers.put(remoteServerAddress, remoteServerAddress);
@@ -105,12 +106,15 @@ class ClientRequestHandler implements AutoCloseable{
     ZMQ.Socket socket = context.socket(ZMQ.REQ);
 
     try {
-      socket.connect( INPROC_PROTOCOL_PREFIX + address);
+      String inProcessSocketAddress = INPROC_PROTOCOL_PREFIX + address;
+      socket.connect( inProcessSocketAddress );
+      _logger.debug("Sending request [{}]", request);
       socket.send(Message.serialize(request));
-      _logger.debug("Request sent. Waiting for reply...");
+      _logger.info("Request sent. Waiting for reply...");
       byte[] reply = socket.recv(0);
-      _logger.debug("Response received");
+      _logger.info("Response received");
       response = (Message) Message.deserialize(reply);
+      _logger.debug("Response [{}]", response);
     } finally {
       socket.close();
     }
@@ -143,7 +147,7 @@ class ClientRequestHandler implements AutoCloseable{
    */
   private class Worker implements Runnable {
     private String name;
-    private String remoteServer;  //<servername:rpc-port>
+    private String remoteServer;  //<serverip:rpc-port>
 
     public Worker(String address){
       this.name = DEFAULT_NAME + "[" + address + "]";
