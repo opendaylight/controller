@@ -39,7 +39,7 @@ import static java.lang.String.format;
  * during validation. Tracks dependencies for ordering purposes.
  */
 final class DependencyResolverImpl implements DependencyResolver,
-       Comparable<DependencyResolverImpl> {
+        Comparable<DependencyResolverImpl> {
     private static final Logger logger = LoggerFactory.getLogger(DependencyResolverImpl.class);
 
     private final ModulesHolder modulesHolder;
@@ -82,7 +82,6 @@ final class DependencyResolverImpl implements DependencyResolver,
                         + expectedServiceInterface, jmxAttribute);
 
 
-
         // check that objectName belongs to this transaction - this should be
         // stripped
         // in DynamicWritableWrapper
@@ -118,7 +117,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
     }
 
-    // transalate from serviceref to module ON
+    // translate from serviceref to module ON
     private ObjectName translateServiceRefIfPossible(ObjectName dependentReadOnlyON) {
         if (ObjectNameUtil.isServiceReference(dependentReadOnlyON)) {
             String serviceQName = ObjectNameUtil.getServiceQName(dependentReadOnlyON);
@@ -135,7 +134,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     //TODO: check for cycles
     @Override
     public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentReadOnlyON,
-            JmxAttribute jmxAttribute) {
+                                 JmxAttribute jmxAttribute) {
         if (expectedType == null || dependentReadOnlyON == null || jmxAttribute == null) {
             throw new IllegalArgumentException(format(
                     "Null parameters not allowed, got %s %s %s", expectedType,
@@ -194,7 +193,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     public <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass, JmxAttribute jmxAttribute) {
         try {
             resolveIdentity(identityRef, expectedBaseClass);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw JmxAttributeValidationException.wrap(e, jmxAttribute);
         }
     }
@@ -215,7 +214,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         return maxDependencyDepth;
     }
 
-    public void countMaxDependencyDepth(DependencyResolverManager manager) {
+    void countMaxDependencyDepth(DependencyResolverManager manager) {
         transactionStatus.checkCommitted();
         if (maxDependencyDepth == null) {
             maxDependencyDepth = getMaxDepth(this, manager,
@@ -224,8 +223,8 @@ final class DependencyResolverImpl implements DependencyResolver,
     }
 
     private static int getMaxDepth(DependencyResolverImpl impl,
-            DependencyResolverManager manager,
-            LinkedHashSet<ModuleIdentifier> chainForDetectingCycles) {
+                                   DependencyResolverManager manager,
+                                   LinkedHashSet<ModuleIdentifier> chainForDetectingCycles) {
         int maxDepth = 0;
         LinkedHashSet<ModuleIdentifier> chainForDetectingCycles2 = new LinkedHashSet<>(
                 chainForDetectingCycles);
@@ -258,4 +257,5 @@ final class DependencyResolverImpl implements DependencyResolver,
     public ModuleIdentifier getIdentifier() {
         return name;
     }
+
 }
