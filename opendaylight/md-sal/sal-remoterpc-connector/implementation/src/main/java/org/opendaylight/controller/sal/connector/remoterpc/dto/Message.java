@@ -15,8 +15,8 @@ import java.io.*;
 public class Message implements Serializable {
 
  public static enum MessageType {
-    ANNOUNCE((byte) 0),  //TODO: Remove announce, add rpc registration and deregistration
-    HEARTBEAT((byte) 1),
+    PING((byte) 0),
+    PONG((byte) 1),
     REQUEST((byte) 2),
     RESPONSE((byte) 3),
     ERROR((byte)4);
@@ -77,6 +77,7 @@ public class Message implements Serializable {
   public void setRecipient(String recipient) {
     this.recipient = recipient;
   }
+
   @Override
   public String toString() {
     return "Message{" +
