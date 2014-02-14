@@ -8,24 +8,30 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
+
 final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnectorStatisticsAndPortNumberMap, NodeConnectorStatisticsAndPortNumberMap> {
     private static final Logger logger = LoggerFactory.getLogger(NodeConnectorStatsTracker.class);
+    private final OpendaylightPortStatisticsService portStatsService;
 
-    NodeConnectorStatsTracker(InstanceIdentifier<Node> nodeIdentifier, DataProviderService dps, long lifetimeNanos) {
-        super(nodeIdentifier, dps, lifetimeNanos);
+    NodeConnectorStatsTracker(final OpendaylightPortStatisticsService portStatsService, final FlowCapableContext context, long lifetimeNanos) {
+        super(context, lifetimeNanos);
+        this.portStatsService = Preconditions.checkNotNull(portStatsService);
     }
 
     @Override
@@ -69,5 +75,12 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
         }
 
         return item;
+    }
+
+    public ListenableFuture<TransactionId> request() {
+        final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
+        input.setNode(getNodeRef());
+
+        return requestHelper(portStatsService.getAllNodeConnectorsStatistics(input.build()));
     }
 }
