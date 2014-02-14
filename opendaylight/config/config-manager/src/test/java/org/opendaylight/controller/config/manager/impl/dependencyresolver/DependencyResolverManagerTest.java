@@ -7,24 +7,27 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
+import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
+import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
+import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 
 public class DependencyResolverManagerTest {
 
@@ -42,7 +45,7 @@ public class DependencyResolverManagerTest {
     public void setUp() {
         transactionStatus = mock(TransactionStatus.class);
         ServiceReferenceReadableRegistry mockedRegistry = mock(ServiceReferenceReadableRegistry.class);
-        tested = new DependencyResolverManager("txName", transactionStatus, mockedRegistry, null);
+        tested = new DependencyResolverManager(new TransactionIdentifier("txName"), transactionStatus, mockedRegistry, null);
         doNothing().when(transactionStatus).checkCommitStarted();
         doNothing().when(transactionStatus).checkNotCommitted();
     }
@@ -87,10 +90,18 @@ public class DependencyResolverManagerTest {
 
     private static void mockGetInstance(DependencyResolverManager tested,
             ModuleIdentifier moduleIdentifier) {
-        ModuleInternalTransactionalInfo mock = mock(ModuleInternalTransactionalInfo.class);
-        doReturn(moduleIdentifier).when(mock).getIdentifier();
-        doReturn(mockedModule()).when(mock).getModule();
-        tested.put(mock);
+
+        ModuleFactory moduleFactory = mock(ModuleFactory.class);
+        ModuleInternalInfo maybeOldInternalInfo = null;
+        TransactionModuleJMXRegistration transactionModuleJMXRegistration = null;
+        boolean isDefaultBean = false;
+
+        tested.put(moduleIdentifier,
+        mockedModule(),
+         moduleFactory,
+         maybeOldInternalInfo,
+         transactionModuleJMXRegistration,
+         isDefaultBean);
     }
 
     private static Module mockedModule() {

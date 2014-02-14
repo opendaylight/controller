@@ -11,8 +11,7 @@ import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.CommitInfo;
-import org.opendaylight.controller.config.manager.impl.DestroyedModule;
-import org.opendaylight.controller.config.manager.impl.ModuleInternalTransactionalInfo;
+import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 
@@ -30,19 +29,19 @@ import java.util.Set;
 /**
  * Represents modules to be committed.
  */
-class ModulesHolder implements TransactionHolder {
-    private final String transactionName;
+class ModulesHolder {
+    private final TransactionIdentifier transactionIdentifier;
     @GuardedBy("this")
     private final Map<ModuleIdentifier, ModuleInternalTransactionalInfo> commitMap = new HashMap<>();
 
     @GuardedBy("this")
     private final Set<ModuleInternalTransactionalInfo> unorderedDestroyedFromPreviousTransactions = new HashSet<>();
 
-    ModulesHolder(String transactionName) {
-        this.transactionName = transactionName;
+    ModulesHolder(TransactionIdentifier transactionIdentifier) {
+        this.transactionIdentifier = transactionIdentifier;
     }
 
-    @Override
+
     public CommitInfo toCommitInfo() {
         List<DestroyedModule> orderedDestroyedFromPreviousTransactions = new ArrayList<>(
                 unorderedDestroyedFromPreviousTransactions.size());
@@ -62,43 +61,38 @@ class ModulesHolder implements TransactionHolder {
                 .get(moduleIdentifier);
         JmxAttributeValidationException.checkNotNull(
                 moduleInternalTransactionalInfo, "Module " + moduleIdentifier
-                        + "" + " not found in transaction " + transactionName,
+                        + "" + " not found in transaction " + transactionIdentifier,
                 jmxAttributeForReporting);
         return moduleInternalTransactionalInfo;
     }
 
-    @Override
     public Module findModule(ModuleIdentifier moduleIdentifier,
             JmxAttribute jmxAttributeForReporting) {
         return findModuleInternalTransactionalInfo(moduleIdentifier,
-                jmxAttributeForReporting).getModule();
+                jmxAttributeForReporting).getProxiedModule();
     }
 
-    @Override
     public ModuleFactory findModuleFactory(ModuleIdentifier moduleIdentifier,
             JmxAttribute jmxAttributeForReporting) {
         return findModuleInternalTransactionalInfo(moduleIdentifier,
                 jmxAttributeForReporting).getModuleFactory();
     }
 
-    @Override
     public Map<ModuleIdentifier, Module> getAllModules() {
         Map<ModuleIdentifier, Module> result = new HashMap<>();
         for (ModuleInternalTransactionalInfo entry : commitMap.values()) {
             ModuleIdentifier name = entry.getIdentifier();
-            result.put(name, entry.getModule());
+            result.put(name, entry.getProxiedModule());
         }
         return result;
     }
 
-    @Override
     public void put(
             ModuleInternalTransactionalInfo moduleInternalTransactionalInfo) {
         commitMap.put(moduleInternalTransactionalInfo.getIdentifier(),
                 moduleInternalTransactionalInfo);
     }
 
-    @Override
     public ModuleInternalTransactionalInfo destroyModule(
             ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo found = commitMap.remove(moduleIdentifier);
@@ -111,7 +105,6 @@ class ModulesHolder implements TransactionHolder {
         return found;
     }
 
-    @Override
     public void assertNotExists(ModuleIdentifier moduleIdentifier)
             throws InstanceAlreadyExistsException {
         if (commitMap.containsKey(moduleIdentifier)) {
@@ -124,7 +117,6 @@ class ModulesHolder implements TransactionHolder {
         return commitMap.values();
     }
 
-    @Override
     public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo found = commitMap.get(moduleIdentifier);
         if (found == null) {

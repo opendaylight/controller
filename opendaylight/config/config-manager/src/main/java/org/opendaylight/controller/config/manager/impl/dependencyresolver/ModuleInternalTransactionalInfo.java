@@ -5,9 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.config.manager.impl;
+package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;
@@ -18,24 +19,25 @@ import javax.annotation.Nullable;
 
 public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdentifier> {
     private final ModuleIdentifier name;
-    private final Module module;
+    private final Module proxiedModule, realModule;
     private final ModuleFactory moduleFactory;
     @Nullable
     private final ModuleInternalInfo maybeOldInternalInfo;
     private final TransactionModuleJMXRegistration transactionModuleJMXRegistration;
     private final boolean isDefaultBean;
 
-    ModuleInternalTransactionalInfo(ModuleIdentifier name, Module module,
-                                    ModuleFactory moduleFactory,
-                                    ModuleInternalInfo maybeOldInternalInfo,
-                                    TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-                                    boolean isDefaultBean) {
+    public ModuleInternalTransactionalInfo(ModuleIdentifier name, Module proxiedModule,
+                                           ModuleFactory moduleFactory,
+                                           ModuleInternalInfo maybeOldInternalInfo,
+                                           TransactionModuleJMXRegistration transactionModuleJMXRegistration,
+                                           boolean isDefaultBean, Module realModule) {
         this.name = name;
-        this.module = module;
+        this.proxiedModule = proxiedModule;
         this.moduleFactory = moduleFactory;
         this.maybeOldInternalInfo = maybeOldInternalInfo;
         this.transactionModuleJMXRegistration = transactionModuleJMXRegistration;
         this.isDefaultBean = isDefaultBean;
+        this.realModule = realModule;
     }
 
 
@@ -56,8 +58,8 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     }
 
 
-    public Module getModule() {
-        return module;
+    public Module getProxiedModule() {
+        return proxiedModule;
     }
 
     public ModuleFactory getModuleFactory() {
@@ -83,5 +85,9 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
 
     public boolean isDefaultBean() {
         return isDefaultBean;
+    }
+
+    public Module getRealModule() {
+        return realModule;
     }
 }

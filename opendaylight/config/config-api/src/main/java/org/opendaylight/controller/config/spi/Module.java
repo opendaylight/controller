@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.config.spi;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * ConfigBeans.
  * <p>
  * In order to guide dependency resolution, the setter method should be
- * annotated with {@link RequireInterface}.
+ * annotated with {@link org.opendaylight.controller.config.api.annotations.RequireInterface}.
  * </p>
  * <p>
  * Thread safety note: implementations of this interface are not required to be
@@ -43,10 +43,10 @@ public interface Module extends Identifiable<ModuleIdentifier>{
      * Returns 'live' object that was configured using this object. It is
      * allowed to call this method only after all ConfigBeans were validated. In
      * this method new resources might be opened or old instance might be
-     * modified. Note that when obtaining dependent Module using
-     * {@link org.opendaylight.controller.config.api.DependencyResolver#validateDependency(Class, javax.management.ObjectName, String)}
-     * a proxy will be created that will disallow calling this method before
-     * second commit phase begins.
+     * modified. This method must be implemented so that it returns same
+     * result for a single transaction. Since Module is created per transaction
+     * this means that it must be safe to cache result of first call.
+     *
      *
      * @return closeable instance: After bundle update the factory might be able
      *         to copy old configuration into new one without being able to cast

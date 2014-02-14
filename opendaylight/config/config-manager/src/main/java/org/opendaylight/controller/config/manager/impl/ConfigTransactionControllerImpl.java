@@ -13,6 +13,7 @@ import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DependencyResolverManager;
+import org.opendaylight.controller.config.manager.impl.dependencyresolver.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicWritableWrapper;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtomicBoolean;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtomicBoolean.ReadOnlyAtomicBooleanImpl;
@@ -95,7 +96,8 @@ class ConfigTransactionControllerImpl implements
         this.currentlyRegisteredFactories = currentlyRegisteredFactories;
         this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(currentlyRegisteredFactories);
         this.transactionStatus = new TransactionStatus();
-        this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus, writableSRRegistry, codecRegistry);
+        this.dependencyResolverManager = new DependencyResolverManager(txLookupRegistry.getTransactionIdentifier(),
+                transactionStatus, writableSRRegistry, codecRegistry);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
         this.blankTransaction = blankTransaction;
@@ -231,11 +233,10 @@ class ConfigTransactionControllerImpl implements
         // put wrapper to jmx
         TransactionModuleJMXRegistration transactionModuleJMXRegistration = getTxModuleJMXRegistrator()
                 .registerMBean(writableDynamicWrapper, writableON);
-        ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = new ModuleInternalTransactionalInfo(
+
+        dependencyResolverManager.put(
                 moduleIdentifier, module, moduleFactory,
                 maybeOldConfigBeanInfo, transactionModuleJMXRegistration, isDefaultBean);
-
-        dependencyResolverManager.put(moduleInternalTransactionalInfo);
         return writableON;
     }
 
@@ -394,8 +395,6 @@ class ConfigTransactionControllerImpl implements
 
         logger.trace("Committed configuration {}", getTransactionIdentifier());
         transactionStatus.setCommitted();
-        // unregister this and all modules from jmx
-        close();
 
         return dependencyResolverManager.getSortedModuleIdentifiers();
     }
@@ -413,8 +412,7 @@ class ConfigTransactionControllerImpl implements
     }
 
     public void close() {
-        //FIXME: should not close object that was retrieved in constructor, a wrapper object should do that perhaps
-        txLookupRegistry.close();
+        dependencyResolverManager.close();
     }
 
     @Override
@@ -572,6 +570,7 @@ class ConfigTransactionControllerImpl implements
         return writableSRRegistry;
     }
 
+    @Override
     public TransactionIdentifier getTransactionIdentifier() {
         return txLookupRegistry.getTransactionIdentifier();
     }
