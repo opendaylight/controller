@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
@@ -32,12 +32,12 @@ public class MultipartMessageManager {
      *  by Statistics Manager. Statistics Manager won't entertain any multipart
      *  response for which it didn't send the request.
      */
-    private final Map<TxIdEntry,Long> txIdToRequestTypeMap = new ConcurrentHashMap<>();
+    private final Map<TxIdEntry,Long> txIdToRequestTypeMap = new HashMap<>();
     /*
      * Map to keep track of the request tx id for flow table statistics request.
      * Because flow table statistics multi part response do not contains the table id.
      */
-    private final Map<TxIdEntry,Short> txIdTotableIdMap = new ConcurrentHashMap<>();
+    private final Map<TxIdEntry,Short> txIdTotableIdMap = new HashMap<>();
 
     private static final class TxIdEntry {
         private final StatsRequestType requestType;
