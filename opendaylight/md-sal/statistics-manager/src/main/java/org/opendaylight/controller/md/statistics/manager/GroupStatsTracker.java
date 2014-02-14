@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatisticsBuilder;
@@ -19,12 +21,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
 
-final class GroupStatsTracker extends AbstractStatsTracker<GroupStats, GroupStats> {
+final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, GroupStats> {
+    private static final Logger logger = LoggerFactory.getLogger(GroupStatsTracker.class);
     private final OpendaylightGroupStatisticsService groupStatsService;
 
     GroupStatsTracker(OpendaylightGroupStatisticsService groupStatsService, FlowCapableContext context, long lifetimeNanos) {
@@ -58,10 +63,46 @@ final class GroupStatsTracker extends AbstractStatsTracker<GroupStats, GroupStat
         return item;
     }
 
-    public ListenableFuture<TransactionId> request() {
+    @Override
+    protected InstanceIdentifier<?> listenPath() {
+        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Group.class).build();
+    }
+
+    @Override
+    protected String statName() {
+        return "Group";
+    }
+
+    public void request() {
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         input.setNode(getNodeRef());
 
-        return requestHelper(groupStatsService.getAllGroupStatistics(input.build()));
+        requestHelper(groupStatsService.getAllGroupStatistics(input.build()), StatsRequestType.ALL_GROUP);
+    }
+
+    @Override
+    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        final DataModificationTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+            if (Group.class.equals(key.getTargetType())) {
+                @SuppressWarnings("unchecked")
+                InstanceIdentifier<Group> group = (InstanceIdentifier<Group>)key;
+                InstanceIdentifier<?> del = InstanceIdentifier.builder(group).augmentation(NodeGroupStatistics.class).toInstance();
+                logger.debug("Key {} triggered remove of augmentation {}", key, del);
+
+                trans.removeOperationalData(del);
+            }
+        }
+        trans.commit();
+    }
+
+    @Override
+    public void start(final DataBrokerService dbs) {
+        if (groupStatsService == null) {
+            logger.debug("No Group Statistics service, not subscribing to groups on node {}", getNodeIdentifier());
+            return;
+        }
+
+        super.start(dbs);
     }
 }
