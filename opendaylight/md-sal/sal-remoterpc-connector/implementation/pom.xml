@@ -14,7 +14,6 @@
 
   <properties>
     <zeromq.version>0.3.1</zeromq.version>
-    <jackson.version>2.3.0</jackson.version>
     <stax.version>1.0.1</stax.version>
     <yang.jmx.plugin>0.2.4-SNAPSHOT</yang.jmx.plugin>
   </properties>

@@ -7,14 +7,11 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc.dto;
 
-import java.io.Serializable;
-import java.net.URI;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+
+import java.io.Serializable;
 
 public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QName, InstanceIdentifier>,Serializable {
 
@@ -82,5 +79,14 @@ public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QNa
     result = prime * result + (type    == null ? 0:type.hashCode());
     result = prime * result + (route   == null ? 0:route.hashCode());
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "RouteIdentifierImpl{" +
+        "context=" + context +
+        ", type=" + type +
+        ", route=" + route +
+        '}';
   }
 }

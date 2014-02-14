@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -140,9 +141,29 @@ public class ClientImpl implements RemoteRpcClient {
       Message response = handler.handle(request);
       CompositeNode payload = null;
 
-      if ( response != null )
-        payload = XmlUtils.xmlToCompositeNode((String) response.getPayload());
+      if ( response != null ) {
 
+        _logger.info("Received response [{}]", response);
+
+        Object rawPayload = response.getPayload();
+        switch (response.getType()) {
+          case ERROR:
+            if ( rawPayload instanceof List )
+              errors = (List) rawPayload;
+              break;
+
+          case RESPONSE:
+            payload = XmlUtils.xmlToCompositeNode((String) rawPayload);
+            break;
+
+          default:
+            errors.add(
+                RpcErrors.getRpcError(null, null,null,null,"Unable to get response from remote controller", null, null)
+            );
+            break;
+
+        }
+      }
       return Rpcs.getRpcResult(true, payload, errors);
 
     } catch (Exception e){
