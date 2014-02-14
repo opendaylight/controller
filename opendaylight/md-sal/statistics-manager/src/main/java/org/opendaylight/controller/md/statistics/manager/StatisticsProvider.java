@@ -12,7 +12,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
@@ -178,28 +177,28 @@ public class StatisticsProvider implements AutoCloseable {
         return dps.beginTransaction();
     }
 
-    public void sendFlowStatsFromTableRequest(NodeKey node, Flow flow) throws InterruptedException, ExecutionException {
+    public void sendFlowStatsFromTableRequest(NodeKey node, Flow flow) {
         final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
         if (h != null) {
             h.sendFlowStatsFromTableRequest(flow);
         }
     }
 
-    public void sendGroupDescriptionRequest(NodeKey node) throws InterruptedException, ExecutionException{
+    public void sendGroupDescriptionRequest(NodeKey node) {
         final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
         if (h != null) {
             h.sendGroupDescriptionRequest();
         }
     }
 
-    public void sendMeterConfigStatisticsRequest(NodeKey node) throws InterruptedException, ExecutionException {
+    public void sendMeterConfigStatisticsRequest(NodeKey node) {
         final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
         if (h != null) {
             h.sendMeterConfigStatisticsRequest();
         }
     }
 
-    public void sendQueueStatsFromGivenNodeConnector(NodeKey node,NodeConnectorId nodeConnectorId, QueueId queueId) throws InterruptedException, ExecutionException {
+    public void sendQueueStatsFromGivenNodeConnector(NodeKey node,NodeConnectorId nodeConnectorId, QueueId queueId) {
         final NodeStatisticsHandler h = getStatisticsHandler(node.getId());
         if (h != null) {
             h.sendQueueStatsFromGivenNodeConnector(nodeConnectorId, queueId);
