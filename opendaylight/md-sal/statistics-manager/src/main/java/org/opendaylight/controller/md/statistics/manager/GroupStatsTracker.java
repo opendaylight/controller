@@ -8,22 +8,28 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.statistics.reply.GroupStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-final class GroupStatsTracker extends AbstractStatsTracker<GroupStats, GroupStats> {
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 
-    GroupStatsTracker(InstanceIdentifier<Node> nodeIdentifier, DataProviderService dps, long lifetimeNanos) {
-        super(nodeIdentifier, dps, lifetimeNanos);
+final class GroupStatsTracker extends AbstractStatsTracker<GroupStats, GroupStats> {
+    private final OpendaylightGroupStatisticsService groupStatsService;
+
+    GroupStatsTracker(OpendaylightGroupStatisticsService groupStatsService, FlowCapableContext context, long lifetimeNanos) {
+        super(context, lifetimeNanos);
+        this.groupStatsService = Preconditions.checkNotNull(groupStatsService);
     }
 
     @Override
@@ -52,4 +58,10 @@ final class GroupStatsTracker extends AbstractStatsTracker<GroupStats, GroupStat
         return item;
     }
 
+    public ListenableFuture<TransactionId> request() {
+        final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
+        input.setNode(getNodeRef());
+
+        return requestHelper(groupStatsService.getAllGroupStatistics(input.build()));
+    }
 }
