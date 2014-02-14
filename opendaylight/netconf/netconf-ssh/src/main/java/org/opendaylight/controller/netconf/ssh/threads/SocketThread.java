@@ -109,8 +109,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                 netconf_ssh_output.setDaemon(false);
                                 netconf_ssh_output.start();
 
-                            } catch (Throwable t){
-                                logger.error("SSH bridge couldn't create echo socket",t.getMessage(),t);
+                            } catch (Exception t) {
+                                logger.error("SSH bridge could not create echo socket: {}", t.getMessage(), t);
 
                                 try {
                                     if (netconf_ssh_input!=null){
@@ -129,7 +129,6 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                     Thread.currentThread().interrupt();
                                     logger.error("netconf_ssh_output join error ",e);
                                 }
-
                             }
                         } else {
                             try {
