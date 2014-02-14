@@ -549,12 +549,18 @@ class ControllerContext implements SchemaServiceListener {
         val typedef = (node as LeafSchemaNode).type;
         
         var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
+        var additionalInfo = ""
         if(decoded === null) {
             var baseType = RestUtil.resolveBaseTypeFrom(typedef)
             if(baseType instanceof IdentityrefTypeDefinition) {
                 decoded = toQName(urlDecoded)
+                additionalInfo = "For key which is of type identityref it should be in format module_name:identity_name."
             }
         }
+        if (decoded === null) {
+            throw new ResponseException(BAD_REQUEST, uriValue + " from URI can't be resolved. "+  additionalInfo )
+        }                
+        
         map.put(node.QName, decoded);
     }
 
