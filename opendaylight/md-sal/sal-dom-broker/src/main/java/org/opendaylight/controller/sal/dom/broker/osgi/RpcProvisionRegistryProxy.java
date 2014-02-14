@@ -12,8 +12,12 @@ import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener
 import org.opendaylight.controller.sal.core.api.*;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
+
+import java.util.Set;
 
 public class RpcProvisionRegistryProxy extends AbstractBrokerServiceProxy<RpcProvisionRegistry>
                                        implements RpcProvisionRegistry {
@@ -46,4 +50,15 @@ public class RpcProvisionRegistryProxy extends AbstractBrokerServiceProxy<RpcPro
     public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(L listener) {
         return getDelegate().registerRouteChangeListener(listener);
     }
+
+
+  @Override
+  public Set<QName> getSupportedRpcs() {
+    return getDelegate().getSupportedRpcs();
+  }
+
+  @Override
+  public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+    return getDelegate().invokeRpc(rpc,input);
+  }
 }

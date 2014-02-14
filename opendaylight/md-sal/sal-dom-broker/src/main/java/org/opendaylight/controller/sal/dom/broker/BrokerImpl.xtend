@@ -74,7 +74,7 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         return session;
     }
 
-    protected def Future<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
+    protected def Future<RpcResult<CompositeNode>> invokeRpcAsync(QName rpc, CompositeNode input) {
         val result = executor.submit([|router.invokeRpc(rpc, input)] as Callable<RpcResult<CompositeNode>>);
         return result;
     }
@@ -139,6 +139,14 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     
     override <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> registerRouteChangeListener(L listener) {
         return router.registerRouteChangeListener(listener);
+    }
+
+    override invokeRpc(QName rpc,CompositeNode input){
+        return router.invokeRpc(rpc,input)
+    }
+
+    override getSupportedRpcs() {
+        return router.getSupportedRpcs();
     }
     
 }

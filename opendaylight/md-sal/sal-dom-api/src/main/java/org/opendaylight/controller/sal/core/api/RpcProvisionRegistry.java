@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public interface RpcProvisionRegistry extends BrokerService, RouteChangePublisher<RpcRoutingContext, InstanceIdentifier> {
+public interface RpcProvisionRegistry extends RpcImplementation, BrokerService, RouteChangePublisher<RpcRoutingContext, InstanceIdentifier> {
 
     /**
      * Registers an implementation of the rpc.
