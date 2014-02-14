@@ -13,4 +13,12 @@ package org.opendaylight.controller.configuration;
  * Container configuration service
  */
 public interface IConfigurationContainerService extends IConfigurationServiceCommon {
+
+    /**
+     * Bundle will call this function to ask ContainerConfigurationService to provide the
+     * directory location of container
+     *
+     * @return The path to active container directory
+     */
+    String getConfigurationRoot();
 }
