@@ -7,29 +7,32 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-
-final class MeterConfigStatsTracker extends AbstractStatsTracker<MeterConfigStats, MeterConfigStats> {
+final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterConfigStats, MeterConfigStats> {
+    private static final Logger logger = LoggerFactory.getLogger(MeterConfigStatsTracker.class);
     private final OpendaylightMeterStatisticsService meterStatsService;
 
     protected MeterConfigStatsTracker(OpendaylightMeterStatisticsService meterStatsService, final FlowCapableContext context, long lifetimeNanos) {
         super(context, lifetimeNanos);
-        this.meterStatsService = Preconditions.checkNotNull(meterStatsService);
+        this.meterStatsService = meterStatsService;
     }
 
     @Override
@@ -60,10 +63,50 @@ final class MeterConfigStatsTracker extends AbstractStatsTracker<MeterConfigStat
         return item;
     }
 
-    public ListenableFuture<TransactionId> request() {
-        GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
-        input.setNode(getNodeRef());
+    public void request() {
+        if (meterStatsService != null) {
+            GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
+            input.setNode(getNodeRef());
 
-        return requestHelper(meterStatsService.getAllMeterConfigStatistics(input.build()));
+            requestHelper(meterStatsService.getAllMeterConfigStatistics(input.build()), StatsRequestType.METER_CONFIG);
+        }
+    }
+
+    @Override
+    public void onDataChanged(DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> change) {
+        final DataModificationTransaction trans = startTransaction();
+
+        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+            if (Meter.class.equals(key.getTargetType())) {
+                @SuppressWarnings("unchecked")
+                InstanceIdentifier<Meter> meter = (InstanceIdentifier<Meter>)key;
+
+                InstanceIdentifier<?> nodeMeterStatisticsAugmentation =
+                        InstanceIdentifier.builder(meter).augmentation(NodeMeterConfigStats.class).toInstance();
+                trans.removeOperationalData(nodeMeterStatisticsAugmentation);
+            }
+        }
+
+        trans.commit();
+    }
+
+    @Override
+    protected InstanceIdentifier<?> listenPath() {
+        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Meter.class).build();
+    }
+
+    @Override
+    protected String statName() {
+        return "Meter Config";
+    }
+
+    @Override
+    public void start(final DataBrokerService dbs) {
+        if (meterStatsService == null) {
+            logger.debug("No Meter Statistics service, not subscribing to meter on node {}", getNodeIdentifier());
+            return;
+        }
+
+        super.start(dbs);
     }
 }

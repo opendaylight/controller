@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.Map.Entry;
+
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
@@ -24,20 +28,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.flow.capable.node.connector.queue.statistics.FlowCapableNodeConnectorQueueStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.queue.id.and.statistics.map.QueueIdAndStatisticsMap;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-
-final class QueueStatsTracker extends AbstractStatsTracker<QueueIdAndStatisticsMap, QueueStatsEntry> {
+final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndStatisticsMap, QueueStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(QueueStatsTracker.class);
     private final OpendaylightQueueStatisticsService queueStatsService;
 
     QueueStatsTracker(OpendaylightQueueStatisticsService queueStatsService, final FlowCapableContext context, long lifetimeNanos) {
         super(context, lifetimeNanos);
-        this.queueStatsService = Preconditions.checkNotNull(queueStatsService);
+        this.queueStatsService = queueStatsService;
     }
 
     @Override
@@ -81,20 +83,73 @@ final class QueueStatsTracker extends AbstractStatsTracker<QueueIdAndStatisticsM
         return queueEntry;
     }
 
-    public ListenableFuture<TransactionId> request() {
-        GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
-        input.setNode(getNodeRef());
+    public void request() {
+        if (queueStatsService != null) {
+            GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
+            input.setNode(getNodeRef());
 
-        return requestHelper(queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build()));
+            requestHelper(queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build()), StatsRequestType.ALL_QUEUE_STATS);
+        }
     }
 
-    public ListenableFuture<TransactionId> request(NodeConnectorId nodeConnectorId, QueueId queueId) {
-        GetQueueStatisticsFromGivenPortInputBuilder input = new GetQueueStatisticsFromGivenPortInputBuilder();
+    public void request(NodeConnectorId nodeConnectorId, QueueId queueId) {
+        if (queueStatsService != null) {
+            GetQueueStatisticsFromGivenPortInputBuilder input = new GetQueueStatisticsFromGivenPortInputBuilder();
 
-        input.setNode(getNodeRef());
-        input.setNodeConnectorId(nodeConnectorId);
-        input.setQueueId(queueId);
+            input.setNode(getNodeRef());
+            input.setNodeConnectorId(nodeConnectorId);
+            input.setQueueId(queueId);
 
-        return requestHelper(queueStatsService.getQueueStatisticsFromGivenPort(input.build()));
+            requestHelper(queueStatsService.getQueueStatisticsFromGivenPort(input.build()), StatsRequestType.ALL_QUEUE_STATS);
+        }
+    }
+
+    @Override
+    public void onDataChanged(DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> change) {
+        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
+            if (Queue.class.equals(e.getKey().getTargetType())) {
+                final Queue queue = (Queue) e.getValue();
+                final NodeConnectorKey key = e.getKey().firstKeyOf(NodeConnector.class, NodeConnectorKey.class);
+                logger.debug("Key {} triggered request for connector {} queue {}", key.getId(), queue.getQueueId());
+                request(key.getId(), queue.getQueueId());
+            } else {
+                logger.debug("Ignoring key {}", e.getKey());
+            }
+        }
+
+        final DataModificationTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+            if (Queue.class.equals(key.getTargetType())) {
+                @SuppressWarnings("unchecked")
+                final InstanceIdentifier<Queue> queue = (InstanceIdentifier<Queue>)key;
+                final InstanceIdentifier<?> del = InstanceIdentifier.builder(queue)
+                        .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class).build();
+                logger.debug("Key {} triggered remove of augmentation {}", key, del);
+
+                trans.removeOperationalData(del);
+            }
+        }
+        trans.commit();
+    }
+
+    @Override
+    protected InstanceIdentifier<?> listenPath() {
+        return getNodeIdentifierBuilder().child(NodeConnector.class)
+                .augmentation(FlowCapableNodeConnector.class).child(Queue.class).build();
+    }
+
+    @Override
+    protected String statName() {
+        return "Queue";
+    }
+
+    @Override
+    public void start(final DataBrokerService dbs) {
+        if (queueStatsService == null) {
+            logger.debug("No Queue Statistics service, not subscribing to queues on node {}", getNodeIdentifier());
+            return;
+        }
+
+        super.start(dbs);
     }
 }
