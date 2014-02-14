@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -18,21 +17,30 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
+
 final class FlowStatsTracker extends AbstractStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(FlowStatsTracker.class);
+    private final OpendaylightFlowStatisticsService flowStatsService;
     private int unaccountedFlowsCounter = 1;
 
-    FlowStatsTracker(InstanceIdentifier<Node> nodeIdentifier, DataProviderService dps, long lifetimeNanos) {
-        super(nodeIdentifier, dps, lifetimeNanos);
+    FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, long lifetimeNanos) {
+        super(context, lifetimeNanos);
+        this.flowStatsService = Preconditions.checkNotNull(flowStatsService);
     }
 
     @Override
@@ -182,5 +190,29 @@ final class FlowStatsTracker extends AbstractStatsTracker<FlowAndStatisticsMapLi
         FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
         trans.putOperationalData(flowRef, flowBuilder.build());
         return flowStatsEntry;
+    }
+
+    public ListenableFuture<TransactionId> requestAllFlowsAllTables() {
+        final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
+        input.setNode(getNodeRef());
+
+        return requestHelper(flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build()));
+    }
+
+    public ListenableFuture<TransactionId> requestAggregateFlows(final TableKey key) {
+        GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input =
+                new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+
+        input.setNode(getNodeRef());
+        input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(key.getId()));
+        return requestHelper(flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build()));
+    }
+
+    public ListenableFuture<TransactionId> requestFlow(final Flow flow) {
+        final GetFlowStatisticsFromFlowTableInputBuilder input =
+                new GetFlowStatisticsFromFlowTableInputBuilder(flow);
+        input.setNode(getNodeRef());
+
+        return requestHelper(flowStatsService.getFlowStatisticsFromFlowTable(input.build()));
     }
 }
