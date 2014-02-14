@@ -16,37 +16,37 @@ module opendaylight-group-statistics {
         description "Initial revision of group statistics service";
     }
     
-	grouping group-statistics {
+    grouping group-statistics {
         container group-statistics {
             //config "false";
             uses group-types:group-statistics;
         }
-	}    
+    }    
     
     augment "/inv:nodes/inv:node/fni:group" {
         ext:augment-identifier "node-group-statistics";
         uses group-statistics;
     }
 
-	grouping group-desc {
+    grouping group-desc {
         container group-desc {
             //config "false";
             uses group-types:group;
         }
-	}
+    }
     
     augment "/inv:nodes/inv:node/fni:group" {
         ext:augment-identifier "node-group-desc-stats";
         uses group-desc;
     }
 
-	grouping group-features {
-	        container group-features {
+    grouping group-features {
+            container group-features {
             //config "false";
             uses group-types:group-features-reply;
         }
     }
-	    
+        
     augment "/inv:nodes/inv:node" {
         ext:augment-identifier "node-group-features";
         uses group-features;
@@ -103,29 +103,20 @@ module opendaylight-group-statistics {
     //Notification calls
     
     notification group-statistics-updated {
-        leaf moreReplies {
-            type boolean;
-        }
         uses inv:node;
         uses group-types:group-statistics-reply;
-        uses tr:transaction-aware;
+        uses tr:multipart-transaction-aware;
     }
     
     notification group-desc-stats-updated {
-        leaf moreReplies {
-            type boolean;
-        }
         uses inv:node;
         uses group-types:group-desc-stats-reply;
-        uses tr:transaction-aware;
+        uses tr:multipart-transaction-aware;
     }
 
     notification group-features-updated {
-        leaf moreReplies {
-            type boolean;
-        }
         uses inv:node;
         uses group-types:group-features-reply;
-        uses tr:transaction-aware;
+        uses tr:multipart-transaction-aware;
     }
 }

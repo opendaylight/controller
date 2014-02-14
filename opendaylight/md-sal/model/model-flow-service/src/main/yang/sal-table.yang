@@ -33,10 +33,7 @@ module sal-table {
     
     notification table-updated {
         uses "inv:node-context-ref";
-        uses tr:transaction-aware;
-        leaf moreReplies {
-            type boolean;
-        }
+        uses tr:multipart-transaction-aware;
         uses table-type:table-features;
     }
 }
