@@ -48,4 +48,39 @@ public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QNa
   public void setRoute(InstanceIdentifier route) {
     this.route = route;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    RouteIdentifierImpl that = (RouteIdentifierImpl) o;
+
+    if (context == null){
+      if (that.getContext() != null)  return false;
+    }else
+      if (!context.equals(that.context)) return false;
+
+    if (route == null){
+      if (that.getRoute() != null) return false;
+    }else
+      if (!route.equals(that.route)) return false;
+
+    if (type == null){
+      if (that.getType() != null) return false;
+    }else
+      if (!type.equals(that.type)) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int prime = 31;
+    int result = 0;
+    result = prime * result + (context == null ? 0:context.hashCode());
+    result = prime * result + (type    == null ? 0:type.hashCode());
+    result = prime * result + (route   == null ? 0:route.hashCode());
+    return result;
+  }
 }
