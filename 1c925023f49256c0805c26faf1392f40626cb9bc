@@ -101,6 +101,24 @@
       "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_de18d3d4",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ContainerConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 81
+      },
+      "writtenOn": "2014-02-14T20:00:51Z",
+      "side": 1,
+      "message": "Adding this method to IConfigurationServiceCommon requires the ConfigurationService.java also to implement this method, as ConfigurationService implements IConfigurationService which is the child class of IConfigurationServiceCommon.  As of now getConfigurationRoot() is not required in  ConfigurationService.  \n\nThe other option is to add this method in IConfigurationContainerService class.  That way only ContainerConfigurationService.java has to implement the method as is required to fix this bug. \n\nI am adding it to IConfigurationContainerService for now.  Please let me know if it should be moved to IConfigurationServiceCommon as mentioned in your comment above.  Thanks.",
+      "parentUuid": "da6255ed_9e281b34",
+      "revId": "1c925023f49256c0805c26faf1392f40626cb9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
