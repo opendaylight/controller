@@ -11,7 +11,6 @@ package org.opendaylight.controller.md.statistics.manager;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.osgi.framework.BundleContext;
 
@@ -20,12 +19,11 @@ public class StatisticsManagerActivator extends AbstractBindingAwareProvider {
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
-        final DataBrokerService dbs = session.getSALService(DataBrokerService.class);
         final DataProviderService dps = session.getSALService(DataProviderService.class);
         final NotificationProviderService nps = session.getSALService(NotificationProviderService.class);
 
         statsProvider = new StatisticsProvider(dps);
-        statsProvider.start(dbs, nps, session);
+        statsProvider.start(nps, session);
     }
 
     @Override
