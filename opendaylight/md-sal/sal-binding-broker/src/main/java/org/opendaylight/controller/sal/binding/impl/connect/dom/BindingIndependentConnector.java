@@ -45,8 +45,6 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.GlobalRpcRegistrationListener;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.RouterInstantiationListener;
@@ -79,6 +77,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,11 +113,11 @@ public class BindingIndependentConnector implements //
 
     private DataProviderService baDataService;
 
-    private ConcurrentMap<Object, BindingToDomTransaction> domOpenedTransactions = new ConcurrentHashMap<>();
-    private ConcurrentMap<Object, DomToBindingTransaction> bindingOpenedTransactions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Object, BindingToDomTransaction> domOpenedTransactions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Object, DomToBindingTransaction> bindingOpenedTransactions = new ConcurrentHashMap<>();
 
-    private BindingToDomCommitHandler bindingToDomCommitHandler = new BindingToDomCommitHandler();
-    private DomToBindingCommitHandler domToBindingCommitHandler = new DomToBindingCommitHandler();
+    private final BindingToDomCommitHandler bindingToDomCommitHandler = new BindingToDomCommitHandler();
+    private final DomToBindingCommitHandler domToBindingCommitHandler = new DomToBindingCommitHandler();
 
     private Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> baCommitHandlerRegistration;
 
@@ -130,7 +130,7 @@ public class BindingIndependentConnector implements //
     // private ListenerRegistration<BindingToDomRpcForwardingManager>
     // bindingToDomRpcManager;
 
-    private Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier>() {
+    private final Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier>() {
 
         @Override
         public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier apply(InstanceIdentifier<?> input) {
@@ -413,8 +413,8 @@ public class BindingIndependentConnector implements //
     private class BindingToDomTransaction implements
             DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> {
 
-        private DataModificationTransaction backing;
-        private DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification;
+        private final DataModificationTransaction backing;
+        private final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification;
 
         public BindingToDomTransaction(DataModificationTransaction backing,
                 DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
@@ -491,6 +491,7 @@ public class BindingIndependentConnector implements //
             // FIXME: do registration based on only active commit handlers.
         }
 
+        @Override
         public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> requestCommit(
                 DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> domTransaction) {
             Object identifier = domTransaction.getIdentifier();
@@ -587,9 +588,9 @@ public class BindingIndependentConnector implements //
 
         private final Set<QName> supportedRpcs;
         private final WeakReference<Class<? extends RpcService>> rpcServiceType;
-        private Set<org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration> registrations;
-        private Map<QName, RpcInvocationStrategy> strategiesByQName = new HashMap<>();
-        private WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
+        private final Set<org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration> registrations;
+        private final Map<QName, RpcInvocationStrategy> strategiesByQName = new HashMap<>();
+        private final WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
 
         public DomToBindingRpcForwarder(Class<? extends RpcService> service) {
             this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
@@ -771,10 +772,10 @@ public class BindingIndependentConnector implements //
     private class DefaultInvocationStrategy extends RpcInvocationStrategy {
 
         @SuppressWarnings("rawtypes")
-        private WeakReference<Class> inputClass;
+        private final WeakReference<Class> inputClass;
 
         @SuppressWarnings("rawtypes")
-        private WeakReference<Class> outputClass;
+        private final WeakReference<Class> outputClass;
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
         public DefaultInvocationStrategy(QName rpc, Method targetMethod, Class<?> outputClass,
@@ -825,6 +826,7 @@ public class BindingIndependentConnector implements //
             super(rpc, targetMethod);
         }
 
+        @Override
         public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
             @SuppressWarnings("unchecked")
             Future<RpcResult<Void>> result = (Future<RpcResult<Void>>) targetMethod.invoke(rpcService);
@@ -837,21 +839,21 @@ public class BindingIndependentConnector implements //
             return Futures.immediateFuture(null);
         }
     }
-    
+
     private class NoOutputInvocationStrategy extends RpcInvocationStrategy {
 
-        
+
         @SuppressWarnings("rawtypes")
-        private WeakReference<Class> inputClass;
+        private final WeakReference<Class> inputClass;
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        public NoOutputInvocationStrategy(QName rpc, Method targetMethod, 
+        public NoOutputInvocationStrategy(QName rpc, Method targetMethod,
                 Class<? extends DataContainer> inputClass) {
             super(rpc,targetMethod);
             this.inputClass = new WeakReference(inputClass);
         }
-        
-        
+
+
         @Override
         public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
             DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
@@ -902,12 +904,12 @@ public class BindingIndependentConnector implements //
     public void setDomNotificationService(NotificationPublishService domService) {
         this.domNotificationService = domService;
     }
-    
+
     private class DomToBindingNotificationForwarder implements NotificationInterestListener, NotificationListener {
 
-        private ConcurrentMap<QName, WeakReference<Class<? extends Notification>>> notifications = new ConcurrentHashMap<>();
-        private Set<QName> supportedNotifications = new HashSet<>();
-        
+        private final ConcurrentMap<QName, WeakReference<Class<? extends Notification>>> notifications = new ConcurrentHashMap<>();
+        private final Set<QName> supportedNotifications = new HashSet<>();
+
         @Override
         public Set<QName> getSupportedNotifications() {
             return Collections.unmodifiableSet(supportedNotifications);
@@ -922,7 +924,7 @@ public class BindingIndependentConnector implements //
                 if (potentialClass != null) {
                     final DataContainer baNotification = mappingService.dataObjectFromDataDom(potentialClass,
                             notification);
-                    
+
                     if (baNotification instanceof Notification) {
                         baNotifyService.publish((Notification) baNotification);
                     }

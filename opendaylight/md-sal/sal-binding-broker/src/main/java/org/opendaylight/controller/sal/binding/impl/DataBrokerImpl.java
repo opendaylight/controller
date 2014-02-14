@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,11 +20,45 @@ import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.DataObjectReadingUtil;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Maps;
 
 
 public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> //
        implements DataProviderService, AutoCloseable {
+
+    private final static class ContainsWildcarded implements Predicate<InstanceIdentifier<? extends DataObject>> {
+
+        private final  InstanceIdentifier<? extends DataObject> key;
+
+        public ContainsWildcarded(InstanceIdentifier<? extends DataObject> key) {
+            this.key = key;
+        }
+
+        @Override
+        public boolean apply(InstanceIdentifier<? extends DataObject> input) {
+            return key.containsWildcarded(input);
+        }
+    }
+
+    private final static class IsContainedWildcarded implements Predicate<InstanceIdentifier<? extends DataObject>> {
+
+        private final  InstanceIdentifier<? extends DataObject> key;
+
+        public IsContainedWildcarded(InstanceIdentifier<? extends DataObject> key) {
+            this.key = key;
+        }
+
+        @Override
+        public boolean apply(InstanceIdentifier<? extends DataObject> input) {
+            return input.containsWildcarded(key);
+        }
+    }
 
     private final AtomicLong nextTransaction = new AtomicLong();
     private final AtomicLong createdTransactionsCount = new AtomicLong();
@@ -110,16 +145,33 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     }
 
     @Override
-    protected boolean isAffectedBy(InstanceIdentifier<? extends DataObject> key,
-            Set<InstanceIdentifier<? extends DataObject>> paths) {
-        if (paths.contains(key)) {
-            return true;
-        }
-        for (InstanceIdentifier<?> path : paths) {
-            if (key.containsWildcarded(path)) {
-                return true;
+    protected Predicate<InstanceIdentifier<? extends DataObject>> createContainsPredicate(final
+            InstanceIdentifier<? extends DataObject> key) {
+        return new ContainsWildcarded(key);
+    }
+
+    @Override
+    protected Predicate<InstanceIdentifier<? extends DataObject>> createIsContainedPredicate(final
+            InstanceIdentifier<? extends DataObject> key) {
+        return new IsContainedWildcarded(key);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    protected Map<InstanceIdentifier<? extends DataObject>, DataObject> deepGetBySubpath(
+            Map<InstanceIdentifier<? extends DataObject>, DataObject> dataSet,
+            InstanceIdentifier<? extends DataObject> path) {
+        Builder<InstanceIdentifier<? extends DataObject>, DataObject> builder = ImmutableMap.builder();
+        Map<InstanceIdentifier<? extends DataObject>, DataObject> potential = Maps.filterKeys(dataSet, createIsContainedPredicate(path));
+        for(Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : potential.entrySet()) {
+            try {
+                builder.putAll(DataObjectReadingUtil.readData(entry.getValue(),(InstanceIdentifier)entry.getKey(),path));
+            } catch (Exception e) {
+                // FIXME : Log exception;
             }
         }
-        return false;
+        return builder.build();
+
     }
+
 }

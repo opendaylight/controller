@@ -29,6 +29,7 @@ public class SingletonHolder {
     public static final NotificationInvokerFactory INVOKER_FACTORY = RPC_GENERATOR_IMPL.getInvokerFactory();
     private static ListeningExecutorService NOTIFICATION_EXECUTOR = null;
     private static ListeningExecutorService COMMIT_EXECUTOR = null;
+    private static ListeningExecutorService CHANGE_EVENT_EXECUTOR = null;
 
     public static synchronized final ListeningExecutorService getDefaultNotificationExecutor() {
         if (NOTIFICATION_EXECUTOR == null) {
@@ -63,5 +64,22 @@ public class SingletonHolder {
         ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat(format).build();
         ExecutorService executor = Executors.newCachedThreadPool(factory);
         return MoreExecutors.listeningDecorator(executor);
+    }
+
+    public static ExecutorService getDefaultChangeEventExecutor() {
+        if (CHANGE_EVENT_EXECUTOR == null) {
+            ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-change-%d").build();
+            /*
+             * FIXME: this used to be newCacheThreadPool(), but MD-SAL does not have transaction
+             *        ordering guarantees, which means that using a concurrent threadpool results
+             *        in application data being committed in random order, potentially resulting
+             *        in inconsistent data being present. Once proper primitives are introduced,
+             *        concurrency can be reintroduced.
+             */
+            ExecutorService executor = Executors.newSingleThreadExecutor(factory);
+            CHANGE_EVENT_EXECUTOR  = MoreExecutors.listeningDecorator(executor);
+        }
+
+        return CHANGE_EVENT_EXECUTOR;
     }
 }
