@@ -7,10 +7,14 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Interface exposed to AbstractStatsTracker by its parent NodeStatisticsHandler.
@@ -21,4 +25,6 @@ interface FlowCapableContext {
     InstanceIdentifier<Node> getNodeIdentifier();
     NodeRef getNodeRef();
     DataModificationTransaction startDataModification();
+    void registerTransaction(ListenableFuture<TransactionId> future, StatsRequestType type);
+    void registerTableTransaction(ListenableFuture<TransactionId> future, Short tableId);
 }

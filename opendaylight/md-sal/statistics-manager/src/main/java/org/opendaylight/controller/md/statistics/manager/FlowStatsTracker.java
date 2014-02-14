@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.Map.Entry;
+
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -24,23 +29,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.O
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-
-final class FlowStatsTracker extends AbstractStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
+final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(FlowStatsTracker.class);
     private final OpendaylightFlowStatisticsService flowStatsService;
     private int unaccountedFlowsCounter = 1;
 
     FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, long lifetimeNanos) {
         super(context, lifetimeNanos);
-        this.flowStatsService = Preconditions.checkNotNull(flowStatsService);
+        this.flowStatsService = flowStatsService;
     }
 
     @Override
@@ -192,27 +194,80 @@ final class FlowStatsTracker extends AbstractStatsTracker<FlowAndStatisticsMapLi
         return flowStatsEntry;
     }
 
-    public ListenableFuture<TransactionId> requestAllFlowsAllTables() {
-        final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
-        input.setNode(getNodeRef());
-
-        return requestHelper(flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build()));
+    @Override
+    protected InstanceIdentifier<?> listenPath() {
+        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Table.class).child(Flow.class).build();
     }
 
-    public ListenableFuture<TransactionId> requestAggregateFlows(final TableKey key) {
-        GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input =
-                new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
-
-        input.setNode(getNodeRef());
-        input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(key.getId()));
-        return requestHelper(flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build()));
+    @Override
+    protected String statName() {
+        return "Flow";
     }
 
-    public ListenableFuture<TransactionId> requestFlow(final Flow flow) {
-        final GetFlowStatisticsFromFlowTableInputBuilder input =
-                new GetFlowStatisticsFromFlowTableInputBuilder(flow);
-        input.setNode(getNodeRef());
+    public void requestAllFlowsAllTables() {
+        if (flowStatsService != null) {
+            final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
+            input.setNode(getNodeRef());
 
-        return requestHelper(flowStatsService.getFlowStatisticsFromFlowTable(input.build()));
+            requestHelper(flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build()), StatsRequestType.ALL_FLOW);
+        }
+    }
+
+    public void requestAggregateFlows(final TableKey key) {
+        if (flowStatsService != null) {
+            GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input =
+                    new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+
+            input.setNode(getNodeRef());
+            input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(key.getId()));
+            requestHelper(flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build()), StatsRequestType.ALL_FLOW);
+        }
+    }
+
+    public void requestFlow(final Flow flow) {
+        if (flowStatsService != null) {
+            final GetFlowStatisticsFromFlowTableInputBuilder input =
+                    new GetFlowStatisticsFromFlowTableInputBuilder(flow);
+            input.setNode(getNodeRef());
+
+            requestHelper(flowStatsService.getFlowStatisticsFromFlowTable(input.build()), StatsRequestType.ALL_FLOW);
+        }
+    }
+
+    @Override
+    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
+            if (Flow.class.equals(e.getKey().getTargetType())) {
+                final Flow flow = (Flow) e.getValue();
+                logger.debug("Key {} triggered request for flow {}", e.getKey(), flow);
+                requestFlow(flow);
+            } else {
+                logger.debug("Ignoring key {}", e.getKey());
+            }
+        }
+
+        final DataModificationTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+            if (Flow.class.equals(key.getTargetType())) {
+                @SuppressWarnings("unchecked")
+                final InstanceIdentifier<Flow> flow = (InstanceIdentifier<Flow>)key;
+                final InstanceIdentifier<?> del = InstanceIdentifier.builder(flow)
+                        .augmentation(FlowStatisticsData.class).build();
+                logger.debug("Key {} triggered remove of augmentation {}", key, del);
+
+                trans.removeOperationalData(del);
+            }
+        }
+        trans.commit();
+    }
+
+    @Override
+    public void start(final DataBrokerService dbs) {
+        if (flowStatsService == null) {
+            logger.debug("No Flow Statistics service, not subscribing to flows on node {}", getNodeIdentifier());
+            return;
+        }
+
+        super.start(dbs);
     }
 }
