@@ -90,32 +90,20 @@ module opendaylight-meter-statistics {
     //Notification calls
     
     notification meter-statistics-updated {
-        leaf moreReplies {
-            type boolean;
-        }
-        
         uses inv:node;
         uses meter-types:meter-statistics-reply;
-        uses tr:transaction-aware;
+        uses tr:multipart-transaction-aware;
     }
     
     notification meter-config-stats-updated {
-        leaf moreReplies {
-            type boolean;
-        }
-        
         uses inv:node;
         uses meter-types:meter-config-stats-reply;
-        uses tr:transaction-aware;
+        uses tr:multipart-transaction-aware;
     }
 
     notification meter-features-updated {
-        leaf moreReplies {
-            type boolean;
-        }
-        
         uses inv:node;
         uses meter-types:meter-features-reply;
-        uses tr:transaction-aware;
+        uses tr:multipart-transaction-aware;
     }
 }
