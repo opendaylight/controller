@@ -9,8 +9,6 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
@@ -23,26 +21,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsDataBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowsStatisticsFromAllFlowTablesOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.aggregate.flow.statistics.AggregateFlowStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsService;
@@ -56,10 +42,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterConfigStatisticsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
@@ -68,22 +50,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.Meter
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.config.stats.reply.MeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.AggregateFlowStatistics;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.GetAllNodeConnectorsStatisticsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.queue.id.and.statistics.map.QueueIdAndStatisticsMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * This class handles the lifecycle of per-node statistics. It receives data
@@ -92,16 +70,9 @@ import com.google.common.base.Preconditions;
  *
  * @author avishnoi@in.ibm.com
  */
-public final class NodeStatisticsHandler implements AutoCloseable {
+public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableContext {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
-
-    private final OpendaylightFlowStatisticsService flowStatsService;
-    private final OpendaylightFlowTableStatisticsService flowTableStatsService;
-    private final OpendaylightGroupStatisticsService groupStatsService;
-    private final OpendaylightMeterStatisticsService meterStatsService;
-    private final OpendaylightPortStatisticsService portStatsService;
-    private final OpendaylightQueueStatisticsService queueStatsService;
 
     private final MultipartMessageManager msgManager = new MultipartMessageManager();
     private final InstanceIdentifier<Node> targetNodeIdentifier;
@@ -129,38 +100,62 @@ public final class NodeStatisticsHandler implements AutoCloseable {
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
         this.targetNodeRef = new NodeRef(targetNodeIdentifier);
 
-        this.flowStatsService = flowStatsService;
-        this.flowTableStatsService = flowTableStatsService;
-        this.groupStatsService = groupStatsService;
-        this.meterStatsService = meterStatsService;
-        this.portStatsService = portStatsService;
-        this.queueStatsService = queueStatsService;
-
         final long lifetimeNanos = TimeUnit.MILLISECONDS.toNanos(StatisticsProvider.STATS_COLLECTION_MILLIS * NUMBER_OF_WAIT_CYCLES);
-        flowStats = new FlowStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        flowTableStats = new FlowTableStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        groupDescStats = new GroupDescStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        groupStats = new GroupStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        meterConfigStats = new MeterConfigStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        meterStats = new MeterStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        nodeConnectorStats = new NodeConnectorStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
-        queueStats = new QueueStatsTracker(targetNodeIdentifier, dps, lifetimeNanos);
+
+        if (flowStatsService != null) {
+            flowStats = new FlowStatsTracker(flowStatsService, this, lifetimeNanos);
+        } else {
+            flowStats = null;
+        }
+        if (flowTableStatsService != null) {
+            flowTableStats = new FlowTableStatsTracker(flowTableStatsService, this, lifetimeNanos);
+        } else {
+            flowTableStats = null;
+        }
+
+        if (groupStatsService != null) {
+            groupDescStats = new GroupDescStatsTracker(groupStatsService, this, lifetimeNanos);
+            groupStats = new GroupStatsTracker(groupStatsService, this, lifetimeNanos);
+        } else {
+            groupDescStats = null;
+            groupStats = null;
+        }
+        if (meterStatsService != null) {
+            meterConfigStats = new MeterConfigStatsTracker(meterStatsService, this, lifetimeNanos);
+            meterStats = new MeterStatsTracker(meterStatsService, this, lifetimeNanos);
+        } else {
+            meterConfigStats = null;
+            meterStats = null;
+        }
+        if (portStatsService != null) {
+            nodeConnectorStats = new NodeConnectorStatsTracker(portStatsService, this, lifetimeNanos);
+        } else {
+            nodeConnectorStats = null;
+        }
+        if (queueStatsService != null) {
+            queueStats = new QueueStatsTracker(queueStatsService, this, lifetimeNanos);
+        } else {
+            queueStats = null;
+        }
     }
 
     public NodeKey getTargetNodeKey() {
         return targetNodeKey;
     }
 
-    public Collection<TableKey> getKnownTables() {
-        return flowTableStats.getTables();
-    }
-
-    public InstanceIdentifier<Node> getTargetNodeIdentifier() {
+    @Override
+    public InstanceIdentifier<Node> getNodeIdentifier() {
         return targetNodeIdentifier;
     }
 
-    public NodeRef getTargetNodeRef() {
+    @Override
+    public NodeRef getNodeRef() {
         return targetNodeRef;
+    }
+
+    @Override
+    public DataModificationTransaction startDataModification() {
+        return dps.beginTransaction();
     }
 
     public synchronized void updateGroupDescStats(TransactionAware transaction, Boolean more, List<GroupDescStats> list) {
@@ -290,37 +285,38 @@ public final class NodeStatisticsHandler implements AutoCloseable {
     public synchronized void requestPeriodicStatistics() {
         logger.debug("Send requests for statistics collection to node : {}", targetNodeKey);
 
-        try{
-            if(flowTableStatsService != null){
-                final GetFlowTablesStatisticsInputBuilder input = new GetFlowTablesStatisticsInputBuilder();
-                input.setNode(targetNodeRef);
+        if (flowTableStats != null){
+            registerTransaction(flowTableStats.request(), StatsRequestType.ALL_FLOW);
+        }
+        if (flowStats != null){
+            // FIXME: it does not make sense to trigger this before sendAllFlowTablesStatisticsRequest()
+            //        comes back -- we do not have any tables anyway.
+            final Collection<TableKey> tables = flowTableStats.getTables();
+            logger.debug("Node {} supports {} table(s)", targetNodeKey, tables.size());
+            for (final TableKey key : tables) {
+                logger.debug("Send aggregate stats request for flow table {} to node {}", key.getId(), targetNodeKey);
+                registerTableTransaction(flowStats.requestAggregateFlows(key),  key.getId());
+            }
 
-                Future<RpcResult<GetFlowTablesStatisticsOutput>> response = flowTableStatsService.getFlowTablesStatistics(input.build());
-                recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_FLOW_TABLE);
-            }
-            if(flowStatsService != null){
-                // FIXME: it does not make sense to trigger this before sendAllFlowTablesStatisticsRequest()
-                //        comes back -- we do not have any tables anyway.
-                sendAggregateFlowsStatsFromAllTablesRequest();
+            registerTransaction(flowStats.requestAllFlowsAllTables(), StatsRequestType.ALL_FLOW);
+        }
 
-                sendAllFlowsStatsFromAllTablesRequest();
-            }
-            if(portStatsService != null){
-                sendAllNodeConnectorsStatisticsRequest();
-            }
-            if(groupStatsService != null){
-                sendAllGroupStatisticsRequest();
-                sendGroupDescriptionRequest();
-            }
-            if(meterStatsService != null){
-                sendAllMeterStatisticsRequest();
-                sendMeterConfigStatisticsRequest();
-            }
-            if(queueStatsService != null){
-                sendAllQueueStatsFromAllNodeConnector();
-            }
-        } catch(Exception e) {
-            logger.error("Exception occured while sending statistics requests", e);
+        if (nodeConnectorStats != null) {
+            registerTransaction(nodeConnectorStats.request(), StatsRequestType.ALL_PORT);
+        }
+
+        if (groupStats != null) {
+            registerTransaction(groupStats.request(), StatsRequestType.ALL_GROUP);
+        }
+        sendGroupDescriptionRequest();
+
+        if (meterStats != null) {
+            registerTransaction(meterStats.request(), StatsRequestType.ALL_METER);
+        }
+        sendMeterConfigStatisticsRequest();
+
+        if(queueStats != null) {
+            registerTransaction(queueStats.request(), StatsRequestType.ALL_QUEUE_STATS);
         }
     }
 
@@ -334,132 +330,67 @@ public final class NodeStatisticsHandler implements AutoCloseable {
         logger.debug("Statistics handler for {} shut down", targetNodeKey.getId());
     }
 
-    synchronized void sendFlowStatsFromTableRequest(Flow flow) throws InterruptedException, ExecutionException{
-        final GetFlowStatisticsFromFlowTableInputBuilder input =
-                new GetFlowStatisticsFromFlowTableInputBuilder(flow);
-
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetFlowStatisticsFromFlowTableOutput>> response =
-                flowStatsService.getFlowStatisticsFromFlowTable(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_FLOW);
-    }
-
-    synchronized void sendGroupDescriptionRequest() throws InterruptedException, ExecutionException{
-        final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();
-
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetGroupDescriptionOutput>> response =
-                groupStatsService.getGroupDescription(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.GROUP_DESC);
-    }
-
-    synchronized void sendMeterConfigStatisticsRequest() throws InterruptedException, ExecutionException{
-
-        GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();
-
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetAllMeterConfigStatisticsOutput>> response =
-                meterStatsService.getAllMeterConfigStatistics(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.METER_CONFIG);
-    }
-
-    synchronized void sendQueueStatsFromGivenNodeConnector(NodeConnectorId nodeConnectorId, QueueId queueId) throws InterruptedException, ExecutionException {
-        GetQueueStatisticsFromGivenPortInputBuilder input = new GetQueueStatisticsFromGivenPortInputBuilder();
-
-        input.setNode(targetNodeRef);
-        input.setNodeConnectorId(nodeConnectorId);
-        input.setQueueId(queueId);
-        Future<RpcResult<GetQueueStatisticsFromGivenPortOutput>> response =
-                queueStatsService.getQueueStatisticsFromGivenPort(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_QUEUE_STATS);;
-    }
-
-    private void sendAllMeterStatisticsRequest() throws InterruptedException, ExecutionException{
-
-        GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
-
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetAllMeterStatisticsOutput>> response =
-                meterStatsService.getAllMeterStatistics(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_METER);
-    }
-
-    private void sendAllFlowsStatsFromAllTablesRequest() throws InterruptedException, ExecutionException{
-        final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> response = flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_FLOW);
-    }
-
-    private void sendAggregateFlowsStatsFromAllTablesRequest() throws InterruptedException, ExecutionException{
-        final Collection<TableKey> tables = getKnownTables();
-        logger.debug("Node {} supports {} table(s)", targetNodeKey, tables.size());
-
-        for (TableKey key : tables) {
-            sendAggregateFlowsStatsFromTableRequest(key.getId().shortValue());
+    synchronized void sendFlowStatsFromTableRequest(Flow flow) {
+        if (flowStats == null) {
+            logger.debug("No Flow statistics service, not sending a request");
+            return;
         }
+
+        registerTransaction(flowStats.requestFlow(flow), StatsRequestType.ALL_FLOW);
     }
 
-    private void sendAggregateFlowsStatsFromTableRequest(Short tableId) throws InterruptedException, ExecutionException{
-        logger.debug("Send aggregate stats request for flow table {} to node {}",tableId, targetNodeKey);
-        GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder input =
-                new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+    synchronized void sendGroupDescriptionRequest() {
+        if (groupStats == null) {
+            logger.debug("No Group Descriptor statistics service, not sending a request");
+            return;
+        }
 
-        input.setNode(new NodeRef(InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).toInstance()));
-        input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(tableId));
-        Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> response =
-                flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build());
-
-        recordExpectedTableTransaction(response.get().getResult().getTransactionId(), tableId);
+        registerTransaction(groupDescStats.request(), StatsRequestType.GROUP_DESC);
     }
 
-    private void sendAllQueueStatsFromAllNodeConnector() throws InterruptedException, ExecutionException {
-        GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
+    synchronized void sendMeterConfigStatisticsRequest() {
+        if (meterConfigStats == null) {
+            logger.debug("No Meter Config statistics service, not sending a request");
+            return;
+        }
 
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetAllQueuesStatisticsFromAllPortsOutput>> response =
-                queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_QUEUE_STATS);
+        registerTransaction(meterConfigStats.request(), StatsRequestType.METER_CONFIG);
     }
 
-    private void sendAllNodeConnectorsStatisticsRequest() throws InterruptedException, ExecutionException{
-        final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
+    synchronized void sendQueueStatsFromGivenNodeConnector(NodeConnectorId nodeConnectorId, QueueId queueId) {
+        if (queueStats == null) {
+            logger.debug("No Queue statistics service, not sending a request");
+            return;
+        }
 
-        input.setNode(targetNodeRef);
-
-        Future<RpcResult<GetAllNodeConnectorsStatisticsOutput>> response =
-                portStatsService.getAllNodeConnectorsStatistics(input.build());
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_PORT);
+        registerTransaction(queueStats.request(nodeConnectorId, queueId), StatsRequestType.ALL_QUEUE_STATS);
     }
 
-    private void sendAllGroupStatisticsRequest() throws InterruptedException, ExecutionException{
-        final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
-        input.setNode(targetNodeRef);
+    private void registerTransaction(final ListenableFuture<TransactionId> future, final StatsRequestType type) {
+        Futures.addCallback(future, new FutureCallback<TransactionId>() {
+            @Override
+            public void onSuccess(TransactionId result) {
+                msgManager.recordExpectedTransaction(result, type);
+            }
 
-        Future<RpcResult<GetAllGroupStatisticsOutput>> response =
-                groupStatsService.getAllGroupStatistics(input.build());
-
-        recordExpectedTransaction(response.get().getResult().getTransactionId(), StatsRequestType.ALL_GROUP);
+            @Override
+            public void onFailure(Throwable t) {
+                logger.warn("Failed to send statistics request for node {}", targetNodeKey, t);
+            }
+        });
     }
 
-    private void recordExpectedTransaction(TransactionId transactionId, StatsRequestType reqType) {
-        msgManager.recordExpectedTransaction(transactionId, reqType);
-    }
+    private void registerTableTransaction(final ListenableFuture<TransactionId> future, final Short id) {
+        Futures.addCallback(future, new FutureCallback<TransactionId>() {
+            @Override
+            public void onSuccess(TransactionId result) {
+                msgManager.recordExpectedTableTransaction(result, StatsRequestType.AGGR_FLOW, id);
+            }
 
-    private void recordExpectedTableTransaction(TransactionId transactionId, Short tableId) {
-        msgManager.recordExpectedTableTransaction(transactionId, StatsRequestType.AGGR_FLOW, tableId);
+            @Override
+            public void onFailure(Throwable t) {
+                logger.warn("Failed to send table statistics request for node {} table {}", targetNodeKey, id, t);
+            }
+        });
     }
 }
