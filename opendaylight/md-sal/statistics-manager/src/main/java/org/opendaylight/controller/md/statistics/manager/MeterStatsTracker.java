@@ -8,22 +8,28 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.GetAllMeterStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-final class MeterStatsTracker extends AbstractStatsTracker<MeterStats, MeterStats> {
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 
-    MeterStatsTracker(InstanceIdentifier<Node> nodeIdentifier, DataProviderService dps, long lifetimeNanos) {
-        super(nodeIdentifier, dps, lifetimeNanos);
+final class MeterStatsTracker extends AbstractStatsTracker<MeterStats, MeterStats> {
+    private final OpendaylightMeterStatisticsService meterStatsService;
+
+    MeterStatsTracker(OpendaylightMeterStatisticsService meterStatsService, final FlowCapableContext context, long lifetimeNanos) {
+        super(context, lifetimeNanos);
+        this.meterStatsService = Preconditions.checkNotNull(meterStatsService);
     }
 
     @Override
@@ -51,5 +57,12 @@ final class MeterStatsTracker extends AbstractStatsTracker<MeterStats, MeterStat
         meterBuilder.addAugmentation(NodeMeterStatistics.class, meterStatsBuilder.build());
         trans.putOperationalData(meterRef, meterBuilder.build());
         return item;
+    }
+
+    public ListenableFuture<TransactionId> request() {
+        GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
+        input.setNode(getNodeRef());
+
+        return requestHelper(meterStatsService.getAllMeterStatistics(input.build()));
     }
 }
