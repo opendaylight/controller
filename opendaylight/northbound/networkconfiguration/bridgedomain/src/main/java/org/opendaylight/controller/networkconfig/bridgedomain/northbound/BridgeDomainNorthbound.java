@@ -29,6 +29,7 @@ import org.opendaylight.controller.northbound.commons.exception.NotAcceptableExc
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.BridgeDomainConfigServiceException;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IBridgeDomainConfigService;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
@@ -114,9 +115,7 @@ public class BridgeDomainNorthbound {
            if (status.getCode().equals(StatusCode.SUCCESS)) {
                return Response.status(Response.Status.CREATED).build();
            }
-       } catch (Error e) {
-           throw e;
-       } catch (Throwable t) {
+       } catch (BridgeDomainConfigServiceException e) {
            return Response.status(Response.Status.PRECONDITION_FAILED).build();
        }
        throw new ResourceNotFoundException(status.getDescription());
