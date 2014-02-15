@@ -9,7 +9,6 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
@@ -30,8 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsData;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Following are two main responsibilities of the class
@@ -45,8 +42,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class StatisticsUpdateHandler implements DataChangeListener {
-
-    private static final Logger suhLogger = LoggerFactory.getLogger(StatisticsUpdateHandler.class);
     private final StatisticsProvider statisticsManager;
 
     public StatisticsUpdateHandler(final StatisticsProvider manager){
@@ -62,36 +57,19 @@ public class StatisticsUpdateHandler implements DataChangeListener {
             NodeKey nodeII = dataObjectInstance.firstKeyOf(Node.class, NodeKey.class);
             if(dataObject instanceof Flow){
                 Flow flow = (Flow) dataObject;
-                try {
-                    this.statisticsManager.sendFlowStatsFromTableRequest(nodeII, flow);
-                } catch (InterruptedException | ExecutionException e) {
-                    suhLogger.warn("Following exception occured while sending flow statistics request newly added flow: {}", e);
-                }
+                this.statisticsManager.sendFlowStatsFromTableRequest(nodeII, flow);
             }
             if(dataObject instanceof Meter){
-                try {
-                    this.statisticsManager.sendMeterConfigStatisticsRequest(nodeII);
-                } catch (InterruptedException | ExecutionException e) {
-                    suhLogger.warn("Following exception occured while sending meter statistics request for newly added meter: {}", e);
-                }
+                this.statisticsManager.sendMeterConfigStatisticsRequest(nodeII);
             }
             if(dataObject instanceof Group){
-                try {
-                    this.statisticsManager.sendGroupDescriptionRequest(nodeII);
-                } catch (InterruptedException | ExecutionException e) {
-                    suhLogger.warn("Following exception occured while sending group description request for newly added group: {}", e);
-                }
+                this.statisticsManager.sendGroupDescriptionRequest(nodeII);
             }
             if(dataObject instanceof Queue){
                 Queue queue = (Queue) dataObject;
                 InstanceIdentifier<NodeConnector> nodeConnectorII = dataObjectInstance.firstIdentifierOf(NodeConnector.class);
                 NodeConnectorKey nodeConnectorKey = InstanceIdentifier.keyOf(nodeConnectorII);
-                try {
-                    this.statisticsManager.sendQueueStatsFromGivenNodeConnector(nodeII,
-                            nodeConnectorKey.getId(), queue.getQueueId());
-                } catch (InterruptedException | ExecutionException e) {
-                    suhLogger.warn("Following exception occured while sending queue statistics request for newly added group: {}", e);
-                }
+                this.statisticsManager.sendQueueStatsFromGivenNodeConnector(nodeII, nodeConnectorKey.getId(), queue.getQueueId());
             }
         }
 

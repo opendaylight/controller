@@ -8,28 +8,36 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.FlowCapableNodeConnectorQueueStatisticsDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetAllQueuesStatisticsFromAllPortsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.GetQueueStatisticsFromGivenPortInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.flow.capable.node.connector.queue.statistics.FlowCapableNodeConnectorQueueStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.queue.id.and.statistics.map.QueueIdAndStatisticsMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
+
 final class QueueStatsTracker extends AbstractStatsTracker<QueueIdAndStatisticsMap, QueueStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(QueueStatsTracker.class);
+    private final OpendaylightQueueStatisticsService queueStatsService;
 
-    QueueStatsTracker(InstanceIdentifier<Node> nodeIdentifier,
-            DataProviderService dps, long lifetimeNanos) {
-        super(nodeIdentifier, dps, lifetimeNanos);
+    QueueStatsTracker(OpendaylightQueueStatisticsService queueStatsService, final FlowCapableContext context, long lifetimeNanos) {
+        super(context, lifetimeNanos);
+        this.queueStatsService = Preconditions.checkNotNull(queueStatsService);
     }
 
     @Override
@@ -71,5 +79,22 @@ final class QueueStatsTracker extends AbstractStatsTracker<QueueIdAndStatisticsM
 
         trans.putOperationalData(queueRef, queueBuilder.build());
         return queueEntry;
+    }
+
+    public ListenableFuture<TransactionId> request() {
+        GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
+        input.setNode(getNodeRef());
+
+        return requestHelper(queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build()));
+    }
+
+    public ListenableFuture<TransactionId> request(NodeConnectorId nodeConnectorId, QueueId queueId) {
+        GetQueueStatisticsFromGivenPortInputBuilder input = new GetQueueStatisticsFromGivenPortInputBuilder();
+
+        input.setNode(getNodeRef());
+        input.setNodeConnectorId(nodeConnectorId);
+        input.setQueueId(queueId);
+
+        return requestHelper(queueStatsService.getQueueStatisticsFromGivenPort(input.build()));
     }
 }
