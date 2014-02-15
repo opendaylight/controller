@@ -9,10 +9,8 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Collection;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
@@ -51,8 +49,6 @@ import com.google.common.base.Preconditions;
  *
  */
 public class StatisticsProvider implements AutoCloseable {
-    public static final long STATS_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(15);
-
     private static final Logger spLogger = LoggerFactory.getLogger(StatisticsProvider.class);
 
     private final ConcurrentMap<NodeId, NodeStatisticsHandler> handlers = new ConcurrentHashMap<>();
@@ -101,27 +97,6 @@ public class StatisticsProvider implements AutoCloseable {
         this.flowCapableTrackerRegistration = dps.registerDataChangeListener(fcnId,
                 new FlowCapableTracker(this, fcnId));
 
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    // Send stats requests
-                    for (NodeStatisticsHandler h : handlers.values()) {
-                        h.requestPeriodicStatistics();
-                    }
-
-                    // Perform cleanup
-                    for(NodeStatisticsHandler nodeStatisticsAger : handlers.values()){
-                        nodeStatisticsAger.cleanStaleStatistics();
-                    }
-
-                } catch (RuntimeException e) {
-                    spLogger.warn("Failed to request statistics", e);
-                }
-            }
-        }, 0, STATS_COLLECTION_MILLIS);
-
-        spLogger.debug("Statistics timer task with timer interval : {}ms", STATS_COLLECTION_MILLIS);
         spLogger.info("Statistics Provider started.");
     }
 
@@ -173,7 +148,7 @@ public class StatisticsProvider implements AutoCloseable {
             final NodeStatisticsHandler old = handlers.putIfAbsent(key.getId(), h);
             if (old == null) {
                 spLogger.debug("Started node handler for {}", key.getId());
-                h.start();
+                h.start(timer);
             } else {
                 spLogger.debug("Prevented race on handler for {}", key.getId());
             }
