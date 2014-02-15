@@ -55,9 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * This class handles the lifecycle of per-node statistics. It receives data
@@ -298,34 +295,14 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     @Override
-    public void registerTransaction(final ListenableFuture<TransactionId> future) {
-        Futures.addCallback(future, new FutureCallback<TransactionId>() {
-            @Override
-            public void onSuccess(TransactionId result) {
-                msgManager.recordExpectedTransaction(result);
-                logger.debug("Transaction {} for node {} sent successfully", result, targetNodeKey);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                logger.warn("Failed to send statistics request for node {}", targetNodeKey, t);
-            }
-        });
+    public void registerTransaction(TransactionId id) {
+        msgManager.recordExpectedTransaction(id);
+        logger.debug("Transaction {} for node {} sent successfully", id, targetNodeKey);
     }
 
     @Override
-    public void registerTableTransaction(final ListenableFuture<TransactionId> future, final Short id) {
-        Futures.addCallback(future, new FutureCallback<TransactionId>() {
-            @Override
-            public void onSuccess(TransactionId result) {
-                msgManager.recordExpectedTableTransaction(result, id);
-                logger.debug("Transaction {} for node {} table {} sent successfully", result, targetNodeKey, id);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                logger.warn("Failed to send table statistics request for node {} table {}", targetNodeKey, id, t);
-            }
-        });
+    public void registerTableTransaction(final TransactionId id, final Short table) {
+        msgManager.recordExpectedTableTransaction(id, table);
+        logger.debug("Transaction {} for node {} table {} sent successfully", id, targetNodeKey, table);
     }
 }
