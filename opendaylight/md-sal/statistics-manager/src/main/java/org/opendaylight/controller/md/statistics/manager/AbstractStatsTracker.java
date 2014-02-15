@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
@@ -23,6 +22,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -30,10 +31,16 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 
 abstract class AbstractStatsTracker<I, K> {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractStatsTracker.class);
     private static final Function<RpcResult<? extends TransactionAware>, TransactionId> FUNCTION =
             new Function<RpcResult<? extends TransactionAware>, TransactionId>() {
         @Override
         public TransactionId apply(RpcResult<? extends TransactionAware> input) {
+            if (!input.isSuccessful()) {
+                logger.debug("Statistics request failed: {}", input.getErrors());
+                throw new RPCFailedException("Failed to send statistics request", input.getErrors());
+            }
+
             return input.getResult().getTransactionId();
         }
     };
@@ -59,8 +66,8 @@ abstract class AbstractStatsTracker<I, K> {
         return context.getNodeIdentifier();
     }
 
-    protected final <T extends TransactionAware> void requestHelper(Future<RpcResult<T>> future, StatsRequestType type) {
-        context.registerTransaction(Futures.transform(JdkFutureAdapters.listenInPoolThread(future), FUNCTION), type);
+    protected final <T extends TransactionAware> void requestHelper(Future<RpcResult<T>> future) {
+        context.registerTransaction(Futures.transform(JdkFutureAdapters.listenInPoolThread(future), FUNCTION));
     }
 
     protected final DataModificationTransaction startTransaction() {

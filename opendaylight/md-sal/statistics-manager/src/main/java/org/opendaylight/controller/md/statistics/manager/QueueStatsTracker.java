@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.statistics.manager;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
@@ -88,7 +87,7 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
             GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
             input.setNode(getNodeRef());
 
-            requestHelper(queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build()), StatsRequestType.ALL_QUEUE_STATS);
+            requestHelper(queueStatsService.getAllQueuesStatisticsFromAllPorts(input.build()));
         }
     }
 
@@ -100,7 +99,7 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
             input.setNodeConnectorId(nodeConnectorId);
             input.setQueueId(queueId);
 
-            requestHelper(queueStatsService.getQueueStatisticsFromGivenPort(input.build()), StatsRequestType.ALL_QUEUE_STATS);
+            requestHelper(queueStatsService.getQueueStatisticsFromGivenPort(input.build()));
         }
     }
 

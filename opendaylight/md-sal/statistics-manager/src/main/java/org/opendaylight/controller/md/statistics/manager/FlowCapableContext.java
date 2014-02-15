@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -25,6 +24,6 @@ interface FlowCapableContext {
     InstanceIdentifier<Node> getNodeIdentifier();
     NodeRef getNodeRef();
     DataModificationTransaction startDataModification();
-    void registerTransaction(ListenableFuture<TransactionId> future, StatsRequestType type);
+    void registerTransaction(ListenableFuture<TransactionId> future);
     void registerTableTransaction(ListenableFuture<TransactionId> future, Short tableId);
 }

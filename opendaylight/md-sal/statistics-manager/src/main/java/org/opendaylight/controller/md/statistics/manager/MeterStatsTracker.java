@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -67,7 +66,7 @@ final class MeterStatsTracker extends AbstractListeningStatsTracker<MeterStats, 
             GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();
             input.setNode(getNodeRef());
 
-            requestHelper(meterStatsService.getAllMeterStatistics(input.build()), StatsRequestType.ALL_METER);
+            requestHelper(meterStatsService.getAllMeterStatistics(input.build()));
         }
     }
 
