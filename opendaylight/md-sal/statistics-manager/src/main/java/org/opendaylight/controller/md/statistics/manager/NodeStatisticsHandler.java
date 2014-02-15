@@ -9,6 +9,8 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -65,9 +67,12 @@ import com.google.common.base.Preconditions;
  */
 public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableContext {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
+
+    private static final long STATS_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(15);
+    private static final long FIRST_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
-    private final MultipartMessageManager msgManager = new MultipartMessageManager();
+    private final MultipartMessageManager msgManager;
     private final InstanceIdentifier<Node> targetNodeIdentifier;
     private final FlowStatsTracker flowStats;
     private final FlowTableStatsTracker flowTableStats;
@@ -80,6 +85,13 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     private final DataProviderService dps;
     private final NodeRef targetNodeRef;
     private final NodeKey targetNodeKey;
+    private final TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            requestPeriodicStatistics();
+            cleanStaleStatistics();
+        }
+    };
 
     public NodeStatisticsHandler(final DataProviderService dps, final NodeKey nodeKey,
             final OpendaylightFlowStatisticsService flowStatsService,
@@ -93,8 +105,9 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
         this.targetNodeRef = new NodeRef(targetNodeIdentifier);
 
-        final long lifetimeNanos = TimeUnit.MILLISECONDS.toNanos(StatisticsProvider.STATS_COLLECTION_MILLIS * NUMBER_OF_WAIT_CYCLES);
+        final long lifetimeNanos = TimeUnit.MILLISECONDS.toNanos(STATS_COLLECTION_MILLIS * NUMBER_OF_WAIT_CYCLES);
 
+        msgManager = new MultipartMessageManager(lifetimeNanos);
         flowStats = new FlowStatsTracker(flowStatsService, this, lifetimeNanos);
         flowTableStats = new FlowTableStatsTracker(flowTableStatsService, this, lifetimeNanos);
         groupDescStats = new GroupDescStatsTracker(groupStatsService, this, lifetimeNanos);
@@ -271,7 +284,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         queueStats.request();
     }
 
-    public synchronized void start() {
+    public synchronized void start(final Timer timer) {
         flowStats.start(dps);
         groupDescStats.start(dps);
         groupStats.start(dps);
@@ -279,11 +292,16 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         meterStats.start(dps);
         queueStats.start(dps);
 
+        timer.schedule(task, (long) (Math.random() * FIRST_COLLECTION_MILLIS), STATS_COLLECTION_MILLIS);
+
+        logger.debug("Statistics handler for node started with base interval {}ms", STATS_COLLECTION_MILLIS);
+
         requestPeriodicStatistics();
     }
 
     @Override
     public synchronized void close() {
+        task.cancel();
         flowStats.close();
         groupDescStats.close();
         groupStats.close();
