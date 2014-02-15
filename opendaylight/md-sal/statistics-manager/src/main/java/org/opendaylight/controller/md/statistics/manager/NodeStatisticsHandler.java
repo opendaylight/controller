@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -299,11 +298,11 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     @Override
-    public void registerTransaction(final ListenableFuture<TransactionId> future, final StatsRequestType type) {
+    public void registerTransaction(final ListenableFuture<TransactionId> future) {
         Futures.addCallback(future, new FutureCallback<TransactionId>() {
             @Override
             public void onSuccess(TransactionId result) {
-                msgManager.recordExpectedTransaction(result, type);
+                msgManager.recordExpectedTransaction(result);
                 logger.debug("Transaction {} for node {} sent successfully", result, targetNodeKey);
             }
 
@@ -319,7 +318,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         Futures.addCallback(future, new FutureCallback<TransactionId>() {
             @Override
             public void onSuccess(TransactionId result) {
-                msgManager.recordExpectedTableTransaction(result, StatsRequestType.AGGR_FLOW, id);
+                msgManager.recordExpectedTableTransaction(result, id);
                 logger.debug("Transaction {} for node {} table {} sent successfully", result, targetNodeKey, id);
             }
 

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -76,7 +75,7 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
             final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();
             input.setNode(getNodeRef());
 
-            requestHelper(groupStatsService.getGroupDescription(input.build()), StatsRequestType.GROUP_DESC);
+            requestHelper(groupStatsService.getGroupDescription(input.build()));
         }
     }
 

@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
@@ -79,7 +78,7 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
             final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
             input.setNode(getNodeRef());
 
-            requestHelper(portStatsService.getAllNodeConnectorsStatistics(input.build()), StatsRequestType.ALL_PORT);
+            requestHelper(portStatsService.getAllNodeConnectorsStatistics(input.build()));
         }
     }
 }

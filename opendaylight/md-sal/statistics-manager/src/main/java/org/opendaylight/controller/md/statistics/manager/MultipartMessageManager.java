@@ -40,18 +40,13 @@ public class MultipartMessageManager {
     private final Map<TxIdEntry,Short> txIdTotableIdMap = new ConcurrentHashMap<>();
 
     private static final class TxIdEntry {
-        private final StatsRequestType requestType;
         private final TransactionId txId;
 
-        public TxIdEntry(TransactionId txId, StatsRequestType requestType){
+        public TxIdEntry(TransactionId txId) {
             this.txId = txId;
-            this.requestType = requestType;
         }
         public TransactionId getTxId() {
             return txId;
-        }
-        public StatsRequestType getRequestType() {
-            return requestType;
         }
         @Override
         public int hashCode() {
@@ -85,13 +80,13 @@ public class MultipartMessageManager {
 
         @Override
         public String toString() {
-            return "TxIdEntry [txId=" + txId + ", requestType=" + requestType + "]";
+            return "TxIdEntry [txId=" + txId + ']';
         }
     }
 
-    public void recordExpectedTableTransaction(TransactionId id, StatsRequestType type, Short tableId) {
-        recordExpectedTransaction(id, type);
-        txIdTotableIdMap.put(new TxIdEntry(id, null), Preconditions.checkNotNull(tableId));
+    public void recordExpectedTableTransaction(TransactionId id, Short tableId) {
+        recordExpectedTransaction(id);
+        txIdTotableIdMap.put(new TxIdEntry(id), Preconditions.checkNotNull(tableId));
     }
 
     public Short isExpectedTableTransaction(TransactionAware transaction, Boolean more) {
@@ -99,7 +94,7 @@ public class MultipartMessageManager {
             return null;
         }
 
-        final TxIdEntry key = new TxIdEntry(transaction.getTransactionId(), null);
+        final TxIdEntry key = new TxIdEntry(transaction.getTransactionId());
         if (more != null && more.booleanValue()) {
             return txIdTotableIdMap.get(key);
         } else {
@@ -107,13 +102,13 @@ public class MultipartMessageManager {
         }
     }
 
-    public void recordExpectedTransaction(TransactionId id, StatsRequestType type) {
-        TxIdEntry entry = new TxIdEntry(Preconditions.checkNotNull(id), Preconditions.checkNotNull(type));
+    public void recordExpectedTransaction(TransactionId id) {
+        TxIdEntry entry = new TxIdEntry(Preconditions.checkNotNull(id));
         txIdToRequestTypeMap.put(entry, getExpiryTime());
     }
 
     public boolean isExpectedTransaction(TransactionAware transaction, Boolean more) {
-        TxIdEntry entry = new TxIdEntry(transaction.getTransactionId(), null);
+        TxIdEntry entry = new TxIdEntry(transaction.getTransactionId());
         if (more != null && more.booleanValue()) {
             return txIdToRequestTypeMap.containsKey(entry);
         } else {
@@ -124,18 +119,6 @@ public class MultipartMessageManager {
     private static Long getExpiryTime(){
         return System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(
                 StatisticsProvider.STATS_COLLECTION_MILLIS*NUMBER_OF_WAIT_CYCLES);
-    }
-
-    public enum StatsRequestType {
-        ALL_FLOW,
-        AGGR_FLOW,
-        ALL_PORT,
-        ALL_FLOW_TABLE,
-        ALL_QUEUE_STATS,
-        ALL_GROUP,
-        ALL_METER,
-        GROUP_DESC,
-        METER_CONFIG
     }
 
     public void cleanStaleTransactionIds() {

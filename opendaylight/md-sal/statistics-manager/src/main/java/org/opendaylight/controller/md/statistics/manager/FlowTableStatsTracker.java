@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -67,7 +66,7 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
             final GetFlowTablesStatisticsInputBuilder input = new GetFlowTablesStatisticsInputBuilder();
             input.setNode(getNodeRef());
 
-            requestHelper(flowTableStatsService.getFlowTablesStatistics(input.build()), StatsRequestType.ALL_FLOW);
+            requestHelper(flowTableStatsService.getFlowTablesStatistics(input.build()));
         }
     }
 }
