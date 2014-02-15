@@ -22,6 +22,7 @@ import java.util.Queue;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.handler.ChunkedFramingMechanismEncoder;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
@@ -59,15 +60,15 @@ public class MessageParserTest {
         enc.encode(null, msg, out);
         int msgLength = out.readableBytes();
 
-        int chunkCount = msgLength / NetconfMessageConstants.MAX_CHUNK_SIZE;
-        if ((msgLength % NetconfMessageConstants.MAX_CHUNK_SIZE) != 0) {
+        int chunkCount = msgLength / ChunkedFramingMechanismEncoder.DEFAULT_CHUNK_SIZE;
+        if ((msgLength % ChunkedFramingMechanismEncoder.DEFAULT_CHUNK_SIZE) != 0) {
             chunkCount++;
         }
         for (int i = 1; i <= chunkCount; i++) {
             ByteBuf recievedOutbound = (ByteBuf) messages.poll();
-            int exptHeaderLength = NetconfMessageConstants.MAX_CHUNK_SIZE;
+            int exptHeaderLength = ChunkedFramingMechanismEncoder.DEFAULT_CHUNK_SIZE;
             if (i == chunkCount) {
-                exptHeaderLength = msgLength - (NetconfMessageConstants.MAX_CHUNK_SIZE * (i - 1));
+                exptHeaderLength = msgLength - (ChunkedFramingMechanismEncoder.DEFAULT_CHUNK_SIZE * (i - 1));
                 byte[] eom = new byte[NetconfMessageConstants.endOfChunk.length];
                 recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.endOfChunk.length,
                         eom);
@@ -77,8 +78,7 @@ public class MessageParserTest {
             byte[] header = new byte[String.valueOf(exptHeaderLength).length()
                     + NetconfMessageConstants.MIN_HEADER_LENGTH - 1];
             recievedOutbound.getBytes(0, header);
-            NetconfMessageHeader messageHeader = new NetconfMessageHeader();
-            messageHeader.fromBytes(header);
+            NetconfMessageHeader messageHeader = NetconfMessageHeader.fromBytes(header);
             assertEquals(exptHeaderLength, messageHeader.getLength());
 
             testChunkChannel.writeInbound(recievedOutbound);

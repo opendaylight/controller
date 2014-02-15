@@ -8,49 +8,29 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
+import java.nio.ByteBuffer;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-
-import java.nio.ByteBuffer;
 
 /**
  * Netconf message header is used only when chunked framing mechanism is
  * supported. The header consists of only the length field.
  */
+@Deprecated
 public final class NetconfMessageHeader {
-
-    private long length;
-
     // \n#<length>\n
-    private static final byte[] headerBegin = new byte[] { (byte) 0x0a, (byte) 0x23 };
+    private static final byte[] HEADER_START = new byte[] { (byte) 0x0a, (byte) 0x23 };
+    private static final byte HEADER_END = (byte) 0x0a;
+    private final long length;
 
-    private static final byte headerEnd = (byte) 0x0a;
-
-    private boolean parsed = false;
-
-    public NetconfMessageHeader() {
-
-    }
-
-    public NetconfMessageHeader fromBytes(final byte[] bytes) {
-        // the length is variable therefore bytes between headerBegin and
-        // headerEnd mark the length
-        // the length should be only numbers and therefore easily parsed with
-        // ASCII
-        this.length = Long.parseLong(Charsets.US_ASCII.decode(
-                ByteBuffer.wrap(bytes, headerBegin.length, bytes.length - headerBegin.length - 1)).toString());
-        Preconditions.checkState(this.length < Integer.MAX_VALUE && this.length > 0);
-        this.parsed = true;
-        return this;
+    public NetconfMessageHeader(final long length) {
+        Preconditions.checkArgument(length < Integer.MAX_VALUE && length > 0);
+        this.length = length;
     }
 
     public byte[] toBytes() {
-        final byte[] l = String.valueOf(this.length).getBytes(Charsets.US_ASCII);
-        final byte[] h = new byte[headerBegin.length + l.length + 1];
-        System.arraycopy(headerBegin, 0, h, 0, headerBegin.length);
-        System.arraycopy(l, 0, h, headerBegin.length, l.length);
-        System.arraycopy(new byte[] { headerEnd }, 0, h, headerBegin.length + l.length, 1);
-        return h;
+        return toBytes(this.length);
     }
 
     // FIXME: improve precision to long
@@ -58,22 +38,23 @@ public final class NetconfMessageHeader {
         return (int) this.length;
     }
 
-    public void setLength(final int length) {
-        this.length = length;
+    public static NetconfMessageHeader fromBytes(final byte[] bytes) {
+        // the length is variable therefore bytes between headerBegin and
+        // headerEnd mark the length
+        // the length should be only numbers and therefore easily parsed with
+        // ASCII
+        long length = Long.parseLong(Charsets.US_ASCII.decode(
+                ByteBuffer.wrap(bytes, HEADER_START.length, bytes.length - HEADER_START.length - 1)).toString());
+
+        return new NetconfMessageHeader(length);
     }
 
-    /**
-     * @return the parsed
-     */
-    public boolean isParsed() {
-        return this.parsed;
-    }
-
-    /**
-     * @param parsed
-     *            the parsed to set
-     */
-    public void setParsed() {
-        this.parsed = false;
+    public static byte[] toBytes(final long length) {
+        final byte[] l = String.valueOf(length).getBytes(Charsets.US_ASCII);
+        final byte[] h = new byte[HEADER_START.length + l.length + 1];
+        System.arraycopy(HEADER_START, 0, h, 0, HEADER_START.length);
+        System.arraycopy(l, 0, h, HEADER_START.length, l.length);
+        System.arraycopy(new byte[] { HEADER_END }, 0, h, HEADER_START.length + l.length, 1);
+        return h;
     }
 }
