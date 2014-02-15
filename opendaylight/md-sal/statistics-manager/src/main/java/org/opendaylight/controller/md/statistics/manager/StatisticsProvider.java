@@ -94,11 +94,10 @@ public class StatisticsProvider implements AutoCloseable {
     private static final Logger spLogger = LoggerFactory.getLogger(StatisticsProvider.class);
 
     private final MultipartMessageManager multipartMessageManager = new MultipartMessageManager();
-    private final InstanceIdentifier<Nodes> nodesIdentifier = InstanceIdentifier.builder(Nodes.class).toInstance();
     private final DataProviderService dps;
 
     //Local caching of stats
-    private final ConcurrentMap<NodeId,NodeStatisticsHandler> handlers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<NodeId, NodeStatisticsHandler> handlers = new ConcurrentHashMap<>();
 
     private OpendaylightGroupStatisticsService groupStatsService;
 
@@ -236,19 +235,9 @@ public class StatisticsProvider implements AutoCloseable {
         return dps.beginTransaction();
     }
 
-    private void statsRequestSender(){
-
-        List<Node> targetNodes = getAllConnectedNodes();
-
-        if(targetNodes == null)
-            return;
-
-
-        for (Node targetNode : targetNodes){
-
-            if(targetNode.getAugmentation(FlowCapableNode.class) != null){
-                sendStatisticsRequestsToNode(targetNode.getKey());
-            }
+    private void statsRequestSender() {
+        for (NodeStatisticsHandler h : handlers.values()) {
+            sendStatisticsRequestsToNode(h.getTargetNodeKey());
         }
     }
 
@@ -470,15 +459,6 @@ public class StatisticsProvider implements AutoCloseable {
             spLogger.info("Attempted to get non-existing handler for {}", nodeId);
         }
         return handler;
-    }
-
-    private List<Node> getAllConnectedNodes(){
-        Nodes nodes = (Nodes) dps.readOperationalData(nodesIdentifier);
-        if(nodes == null)
-            return null;
-
-        spLogger.debug("Number of connected nodes : {}",nodes.getNode().size());
-        return nodes.getNode();
     }
 
     private List<Short> getTablesFromNode(NodeKey nodeKey){
