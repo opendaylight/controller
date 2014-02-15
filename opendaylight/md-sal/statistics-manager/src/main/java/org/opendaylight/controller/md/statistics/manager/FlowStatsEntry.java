@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 
 final class FlowStatsEntry {
     private final Short tableId;
-    private final Flow flow;
+    private final FlowKey flow;
 
-    public FlowStatsEntry(Short tableId, Flow flow){
+    public FlowStatsEntry(Short tableId, FlowKey flow){
         this.tableId = tableId;
         this.flow = flow;
     }
@@ -22,7 +22,7 @@ final class FlowStatsEntry {
         return tableId;
     }
 
-    public Flow getFlow() {
+    public FlowKey getFlow() {
         return flow;
     }
 

@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.math.BigInteger;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.WeakHashMap;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
@@ -27,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.G
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -34,10 +38,37 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(FlowStatsTracker.class);
     private final OpendaylightFlowStatisticsService flowStatsService;
     private int unaccountedFlowsCounter = 1;
+
+    /*
+     * This is our cookie -> flow ID cache. It is maintained by listening for configuration data changes
+     * and adjusting it. We need it for quickly matching flows coming up from the switch back to MD-SAL
+     * data store.
+     *
+     * TODO: this can easily be maintained inside MD-SAL operational data store, using fast reads, as we
+     *       would be performing reads of small data by its primary key.
+     */
+    private final BiMap<BigInteger, FlowKey> cookieMap = HashBiMap.create();
+
+    /*
+     * This is our flow -> flow ID cache. We need to maintain this for unaccounted threads, so hopefully
+     * this is going to be small. We are using weak keys, as flows may come and go without us knowing --
+     * WeakHashMap will provide us with consistency as long as no memory pressure is built up or as long
+     * as the flow stat entry is still hanging somewhere.
+     *
+     * TODO: this too can be stored in MD-SAL. Here the additional challenge is to create a primary key.
+     *       Fortunately the YANG Java binding spec guarantees that DTOs which compare equal have the same
+     *       toString() result, so the table will be String->String :)
+     */
+    private final Map<Flow, FlowKey> flowMap = new WeakHashMap<>();
+
 
     FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, long lifetimeNanos) {
         super(context, lifetimeNanos);
@@ -49,42 +80,68 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         InstanceIdentifier<?> flowRef = getNodeIdentifierBuilder()
                             .augmentation(FlowCapableNode.class)
                             .child(Table.class, new TableKey(item.getTableId()))
-                            .child(Flow.class,item.getFlow().getKey())
+                            .child(Flow.class, item.getFlow())
                             .augmentation(FlowStatisticsData.class).toInstance();
         trans.removeOperationalData(flowRef);
+    }
+
+    private FlowKey keyForCookie(final BigInteger cookie) {
+        if (cookie == null) {
+            logger.debug("Encountered a foreign flow");
+            return null;
+        }
+
+        final FlowKey key = cookieMap.get(cookie);
+        if (key == null) {
+            logger.debug("Cookie {} is not currently known", cookie);
+        } else {
+            logger.debug("Cookie {} mapped to flow {}", cookie, key);
+        }
+
+        return key;
+    }
+
+    private FlowKey keyForFlow(final FlowAndStatisticsMapList map) {
+        final FlowBuilder fb = new FlowBuilder();
+        fb.setContainerName(map.getContainerName());
+        fb.setBufferId(map.getBufferId());
+        fb.setCookie(map.getCookie());
+        fb.setCookieMask(map.getCookieMask());
+        fb.setFlags(map.getFlags());
+        fb.setFlowName(map.getFlowName());
+        fb.setHardTimeout(map.getHardTimeout());
+        fb.setIdleTimeout(map.getIdleTimeout());
+        fb.setInstallHw(map.isInstallHw());
+        fb.setInstructions(map.getInstructions());
+        fb.setMatch(map.getMatch());
+        fb.setOutGroup(map.getOutGroup());
+        fb.setOutPort(map.getOutPort());
+        fb.setPriority(map.getPriority());
+        fb.setStrict(map.isStrict());
+        fb.setTableId(map.getTableId());
+
+        final Flow flow = fb.build();
+        FlowKey key = flowMap.get(flow);
+        if (key != null) {
+            logger.debug("Unaccounted flow reused at {}", key);
+            return key;
+        }
+
+        final String keyName = "#UF$TABLE*" + String.valueOf(map.getTableId()) + '*' + String.valueOf(unaccountedFlowsCounter);
+        unaccountedFlowsCounter++;
+
+        key = new FlowKey(new FlowId(keyName));
+        logger.debug("Created new key {} for unaccounted flow {}", key, flow);
+        flowMap.put(flow, key);
+        return key;
     }
 
     @Override
     protected FlowStatsEntry updateSingleStat(DataModificationTransaction trans, FlowAndStatisticsMapList map) {
         short tableId = map.getTableId();
 
-        FlowBuilder flowBuilder = new FlowBuilder();
+        final FlowStatisticsDataBuilder flowStatisticsData = new FlowStatisticsDataBuilder();
 
-        FlowStatisticsDataBuilder flowStatisticsData = new FlowStatisticsDataBuilder();
-
-        FlowBuilder flow = new FlowBuilder();
-        flow.setContainerName(map.getContainerName());
-        flow.setBufferId(map.getBufferId());
-        flow.setCookie(map.getCookie());
-        flow.setCookieMask(map.getCookieMask());
-        flow.setFlags(map.getFlags());
-        flow.setFlowName(map.getFlowName());
-        flow.setHardTimeout(map.getHardTimeout());
-        if(map.getFlowId() != null)
-            flow.setId(new FlowId(map.getFlowId().getValue()));
-        flow.setIdleTimeout(map.getIdleTimeout());
-        flow.setInstallHw(map.isInstallHw());
-        flow.setInstructions(map.getInstructions());
-        if(map.getFlowId()!= null)
-            flow.setKey(new FlowKey(new FlowId(map.getKey().getFlowId().getValue())));
-        flow.setMatch(map.getMatch());
-        flow.setOutGroup(map.getOutGroup());
-        flow.setOutPort(map.getOutPort());
-        flow.setPriority(map.getPriority());
-        flow.setStrict(map.isStrict());
-        flow.setTableId(tableId);
-
-        Flow flowRule = flow.build();
 
         FlowAndStatisticsMapListBuilder stats = new FlowAndStatisticsMapListBuilder();
         stats.setByteCount(map.getByteCount());
@@ -116,81 +173,29 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         flowStatistics.setStrict(map.isStrict());
         flowStatistics.setTableId(tableId);
 
-        flowStatisticsData.setFlowStatistics(flowStatistics.build());
+        FlowStatistics fst = flowStatistics.build();
+        flowStatisticsData.setFlowStatistics(fst);
 
-        logger.debug("Flow : {}",flowRule.toString());
-        logger.debug("Statistics to augment : {}",flowStatistics.build().toString());
+        logger.debug("Statistics to augment : {}", fst);
 
-        InstanceIdentifier<Table> tableRef = getNodeIdentifierBuilder()
-                .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
-
-        //TODO: Not a good way to do it, need to figure out better way.
-        //TODO: major issue in any alternate approach is that flow key is incrementally assigned
-        //to the flows stored in data store.
-        // Augment same statistics to all the matching masked flow
-        Table table= (Table)trans.readConfigurationData(tableRef);
-        if(table != null){
-            for(Flow existingFlow : table.getFlow()){
-                logger.debug("Existing flow in data store : {}",existingFlow.toString());
-                if(FlowComparator.flowEquals(flowRule,existingFlow)){
-                    InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
-                            .augmentation(FlowCapableNode.class)
-                            .child(Table.class, new TableKey(tableId))
-                            .child(Flow.class,existingFlow.getKey()).toInstance();
-                    flowBuilder.setKey(existingFlow.getKey());
-                    flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                    logger.debug("Found matching flow in the datastore, augmenting statistics");
-                    // Update entry with timestamp of latest response
-                    flow.setKey(existingFlow.getKey());
-                    FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                    trans.putOperationalData(flowRef, flowBuilder.build());
-                    return flowStatsEntry;
-                }
-            }
+        FlowKey key = keyForCookie(map.getCookie());
+        if (key == null) {
+            key = keyForFlow(map);
         }
+        Preconditions.checkState(key != null, "Key should have been asigned");
 
-        table = (Table)trans.readOperationalData(tableRef);
-        if(table != null){
-            for(Flow existingFlow : table.getFlow()){
-                FlowStatisticsData augmentedflowStatisticsData = existingFlow.getAugmentation(FlowStatisticsData.class);
-                if(augmentedflowStatisticsData != null){
-                    FlowBuilder existingOperationalFlow = new FlowBuilder();
-                    existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
-                    logger.debug("Existing unaccounted flow in operational data store : {}",existingFlow.toString());
-                    if(FlowComparator.flowEquals(flowRule,existingOperationalFlow.build())){
-                        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
-                                .augmentation(FlowCapableNode.class)
-                                .child(Table.class, new TableKey(tableId))
-                                .child(Flow.class,existingFlow.getKey()).toInstance();
-                        flowBuilder.setKey(existingFlow.getKey());
-                        flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                        logger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
-                        // Update entry with timestamp of latest response
-                        flow.setKey(existingFlow.getKey());
-                        FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                        trans.putOperationalData(flowRef, flowBuilder.build());
-                        return flowStatsEntry;
-                    }
-                }
-            }
-        }
+        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(tableId))
+                .child(Flow.class, key).build();
 
-        String flowKey = "#UF$TABLE*"+Short.toString(tableId)+"*"+Integer.toString(this.unaccountedFlowsCounter);
-        this.unaccountedFlowsCounter++;
-        FlowKey newFlowKey = new FlowKey(new FlowId(flowKey));
-        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
-                    .child(Table.class, new TableKey(tableId))
-                    .child(Flow.class,newFlowKey).toInstance();
-        flowBuilder.setKey(newFlowKey);
+        final FlowBuilder flowBuilder = new FlowBuilder();
+        flowBuilder.setId(key.getId());
+        flowBuilder.setKey(key);
         flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-        logger.debug("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",
-                    flowBuilder.build());
 
-        // Update entry with timestamp of latest response
-        flow.setKey(newFlowKey);
-        FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
         trans.putOperationalData(flowRef, flowBuilder.build());
-        return flowStatsEntry;
+        return new FlowStatsEntry(tableId, key);
     }
 
     @Override
@@ -234,14 +239,38 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+    public synchronized void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
             if (Flow.class.equals(e.getKey().getTargetType())) {
                 final Flow flow = (Flow) e.getValue();
                 logger.debug("Key {} triggered request for flow {}", e.getKey(), flow);
+
+                if (flow.getCookie() != null) {
+                    cookieMap.put(flow.getCookie(), flow.getKey());
+                    logger.debug("Key {} added flow {} cookie {}", e.getKey(), flow.getKey(), flow.getCookie());
+                } else {
+                    logger.debug("Not adding flow {} into cache, as it does not have a cookie", flow);
+                }
+
                 requestFlow(flow);
             } else {
-                logger.debug("Ignoring key {}", e.getKey());
+                logger.debug("Ignoring created key {}", e.getKey());
+            }
+        }
+
+        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
+            if (Flow.class.equals(e.getKey().getTargetType())) {
+                final Flow flow = (Flow) e.getValue();
+
+                final BigInteger oc = cookieMap.inverse().remove(flow.getKey());
+                final BigInteger nc = flow.getCookie();
+                if (nc != null) {
+                    cookieMap.put(nc, flow.getKey());
+                }
+
+                logger.debug("Key {} updated cookie mapping for flow {} from {} to {}", e.getKey(), flow.getKey(), oc, nc);
+            } else {
+                logger.debug("Ignoring updated key {}", e.getKey());
             }
         }
 
@@ -254,7 +283,13 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                         .augmentation(FlowStatisticsData.class).build();
                 logger.debug("Key {} triggered remove of augmentation {}", key, del);
 
+                final FlowKey fk = flow.firstKeyOf(Flow.class, FlowKey.class);
+                final BigInteger cookie = cookieMap.inverse().remove(fk);
+                logger.debug("Key {} removed flow {} cookie {}", key, fk, cookie);
+
                 trans.removeOperationalData(del);
+            } else {
+                logger.debug("Ignoring removed key {}", key);
             }
         }
         trans.commit();
