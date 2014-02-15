@@ -29,7 +29,7 @@ public interface IPluginInBridgeDomainConfigService {
      * @note This method will return false if one or more of the supplied params is not supported by the
      * protocol plugin that serves the Node.
      */
-    public Status createBridgeDomain(Node node, String bridgeIdentifier, Map<ConfigConstants, Object> params) throws Throwable;
+    public Status createBridgeDomain(Node node, String bridgeIdentifier, Map<ConfigConstants, Object> params) throws BridgeDomainConfigServiceException;
 
     /**
      * Delete a Bridge Domain
