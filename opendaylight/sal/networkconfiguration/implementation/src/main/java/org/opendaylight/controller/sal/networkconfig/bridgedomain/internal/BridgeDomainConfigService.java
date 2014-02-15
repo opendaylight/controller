@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.BridgeDomainConfigServiceException;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IBridgeDomainConfigService;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class BridgeDomainConfigService implements IBridgeDomainConfigService {
     protected static final Logger logger = LoggerFactory
             .getLogger(BridgeDomainConfigService.class);
-    private ConcurrentMap<String, IPluginInBridgeDomainConfigService> pluginService =
+    private final ConcurrentMap<String, IPluginInBridgeDomainConfigService> pluginService =
             new ConcurrentHashMap<String, IPluginInBridgeDomainConfigService>();
 
     void setPluginInService (Map props, IPluginInBridgeDomainConfigService s) {
@@ -80,7 +81,7 @@ public class BridgeDomainConfigService implements IBridgeDomainConfigService {
 
     @Override
     public Status createBridgeDomain(Node node, String bridgeIdentifier, Map<ConfigConstants, Object> params)
-            throws Throwable {
+            throws BridgeDomainConfigServiceException {
         if (pluginService != null) {
             IPluginInBridgeDomainConfigService plugin = this.pluginService.get(node.getType());
             if (plugin != null) {
