@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.statistics.manager;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
@@ -24,9 +23,7 @@ import com.google.common.base.Preconditions;
  * @author avishnoi@in.ibm.com
  *
  */
-public class MultipartMessageManager {
-    private static final int NUMBER_OF_WAIT_CYCLES = 2;
-
+class MultipartMessageManager {
     /*
      *  Map for tx id and type of request, to keep track of all the request sent
      *  by Statistics Manager. Statistics Manager won't entertain any multipart
@@ -38,6 +35,11 @@ public class MultipartMessageManager {
      * Because flow table statistics multi part response do not contains the table id.
      */
     private final Map<TxIdEntry,Short> txIdTotableIdMap = new ConcurrentHashMap<>();
+    private final long lifetimeNanos;
+
+    public MultipartMessageManager(long lifetimeNanos) {
+        this.lifetimeNanos = lifetimeNanos;
+    }
 
     private static final class TxIdEntry {
         private final TransactionId txId;
@@ -116,9 +118,8 @@ public class MultipartMessageManager {
         }
     }
 
-    private static Long getExpiryTime(){
-        return System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(
-                StatisticsProvider.STATS_COLLECTION_MILLIS*NUMBER_OF_WAIT_CYCLES);
+    private Long getExpiryTime() {
+        return System.nanoTime() + lifetimeNanos;
     }
 
     public void cleanStaleTransactionIds() {
