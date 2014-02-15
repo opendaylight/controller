@@ -7,12 +7,18 @@
  */
 package org.opendaylight.controller.netconf.util.handler;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+
+import java.io.IOException;
+
+import javax.xml.transform.TransformerException;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -39,9 +45,9 @@ import com.google.common.base.Preconditions;
  * </pre>
  */
 public final class NetconfHelloMessageToXMLEncoder extends NetconfMessageToXMLEncoder {
-
     @Override
-    protected ByteBuffer encodeMessage(NetconfMessage msg) {
+    @VisibleForTesting
+    public void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) throws IOException, TransformerException {
         Preconditions.checkState(msg instanceof NetconfHelloMessage, "Netconf message of type %s expected, was %s",
                 NetconfHelloMessage.class, msg.getClass());
         Optional<NetconfHelloMessageAdditionalHeader> headerOptional = ((NetconfHelloMessage) msg)
@@ -50,15 +56,9 @@ public final class NetconfHelloMessageToXMLEncoder extends NetconfMessageToXMLEn
         // If additional header present, serialize it along with netconf hello
         // message
         if (headerOptional.isPresent()) {
-            byte[] bytesFromHeader = headerOptional.get().toFormattedString().getBytes(Charsets.UTF_8);
-            byte[] bytesFromMessage = xmlToString(msg.getDocument()).getBytes(Charsets.UTF_8);
-
-            ByteBuffer byteBuffer = ByteBuffer.allocate(bytesFromHeader.length + bytesFromMessage.length)
-                    .put(bytesFromHeader).put(bytesFromMessage);
-            byteBuffer.flip();
-            return byteBuffer;
+            out.writeBytes(headerOptional.get().toFormattedString().getBytes(Charsets.UTF_8));
         }
 
-        return super.encodeMessage(msg);
+        super.encode(ctx, msg, out);
     }
 }
