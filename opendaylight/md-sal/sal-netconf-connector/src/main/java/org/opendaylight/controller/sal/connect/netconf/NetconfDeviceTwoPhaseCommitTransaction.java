@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_CANDIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_COMMIT_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_EDIT_CONFIG_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_TARGET_QNAME;
 
@@ -132,7 +132,7 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
     }
 
     @Override
-    public RpcResult<Void> finish() throws IllegalStateException {
+    public RpcResult<Void> finish() {
         CompositeNodeBuilder<ImmutableCompositeNode> commitInput = ImmutableCompositeNode.builder();
         commitInput.setQName(NETCONF_COMMIT_QNAME);
         RpcResult<?> rpcResult = device.invokeRpc(NetconfMapping.NETCONF_COMMIT_QNAME, commitInput.toInstance());
