@@ -25,23 +25,38 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 
 abstract class AbstractStatsTracker<I, K> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractStatsTracker.class);
-    private static final Function<RpcResult<? extends TransactionAware>, TransactionId> FUNCTION =
-            new Function<RpcResult<? extends TransactionAware>, TransactionId>() {
+    private final FutureCallback<RpcResult<? extends TransactionAware>> callback =
+            new FutureCallback<RpcResult<? extends TransactionAware>>() {
         @Override
-        public TransactionId apply(RpcResult<? extends TransactionAware> input) {
-            if (!input.isSuccessful()) {
-                logger.debug("Statistics request failed: {}", input.getErrors());
-                throw new RPCFailedException("Failed to send statistics request", input.getErrors());
-            }
+        public void onSuccess(RpcResult<? extends TransactionAware> result) {
+            if (result.isSuccessful()) {
+                final TransactionId id = result.getResult().getTransactionId();
+                if (id == null) {
+                    final Throwable t = new UnsupportedOperationException("No protocol support");
+                    t.fillInStackTrace();
+                    onFailure(t);
+                } else {
+                    context.registerTransaction(id);
+                }
+            } else {
+                logger.debug("Statistics request failed: {}", result.getErrors());
 
-            return input.getResult().getTransactionId();
+                final Throwable t = new RPCFailedException("Failed to send statistics request", result.getErrors());
+                t.fillInStackTrace();
+                onFailure(t);
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            logger.debug("Failed to send statistics request", t);
         }
     };
 
@@ -67,7 +82,7 @@ abstract class AbstractStatsTracker<I, K> {
     }
 
     protected final <T extends TransactionAware> void requestHelper(Future<RpcResult<T>> future) {
-        context.registerTransaction(Futures.transform(JdkFutureAdapters.listenInPoolThread(future), FUNCTION));
+        Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future), callback);
     }
 
     protected final DataModificationTransaction startTransaction() {
