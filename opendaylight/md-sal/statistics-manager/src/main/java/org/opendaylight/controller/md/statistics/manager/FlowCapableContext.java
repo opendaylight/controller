@@ -13,8 +13,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 /**
  * Interface exposed to AbstractStatsTracker by its parent NodeStatisticsHandler.
  * While we could simply exist without this interface, its purpose is to document
@@ -24,6 +22,6 @@ interface FlowCapableContext {
     InstanceIdentifier<Node> getNodeIdentifier();
     NodeRef getNodeRef();
     DataModificationTransaction startDataModification();
-    void registerTransaction(ListenableFuture<TransactionId> future);
-    void registerTableTransaction(ListenableFuture<TransactionId> future, Short tableId);
+    void registerTransaction(TransactionId id);
+    void registerTableTransaction(TransactionId id, Short tableId);
 }
