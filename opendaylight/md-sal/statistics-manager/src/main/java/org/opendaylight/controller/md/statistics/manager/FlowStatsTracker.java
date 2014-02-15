@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.statistics.manager;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -209,7 +208,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
             final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();
             input.setNode(getNodeRef());
 
-            requestHelper(flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build()), StatsRequestType.ALL_FLOW);
+            requestHelper(flowStatsService.getAllFlowsStatisticsFromAllFlowTables(input.build()));
         }
     }
 
@@ -220,7 +219,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
 
             input.setNode(getNodeRef());
             input.setTableId(new org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId(key.getId()));
-            requestHelper(flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build()), StatsRequestType.ALL_FLOW);
+            requestHelper(flowStatsService.getAggregateFlowStatisticsFromFlowTableForAllFlows(input.build()));
         }
     }
 
@@ -230,7 +229,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                     new GetFlowStatisticsFromFlowTableInputBuilder(flow);
             input.setNode(getNodeRef());
 
-            requestHelper(flowStatsService.getFlowStatisticsFromFlowTable(input.build()), StatsRequestType.ALL_FLOW);
+            requestHelper(flowStatsService.getFlowStatisticsFromFlowTable(input.build()));
         }
     }
 
