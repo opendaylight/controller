@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -23,11 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
 
 final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStatisticsMap, FlowTableAndStatisticsMap> {
     private final Set<TableKey> privateTables = new ConcurrentSkipListSet<>();
@@ -36,7 +33,7 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
 
     FlowTableStatsTracker(OpendaylightFlowTableStatisticsService flowTableStatsService, final FlowCapableContext context, long lifetimeNanos) {
         super(context, lifetimeNanos);
-        this.flowTableStatsService = Preconditions.checkNotNull(flowTableStatsService);
+        this.flowTableStatsService = flowTableStatsService;
     }
 
     Set<TableKey> getTables() {
@@ -65,10 +62,12 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
         return item;
     }
 
-    public ListenableFuture<TransactionId> request() {
-        final GetFlowTablesStatisticsInputBuilder input = new GetFlowTablesStatisticsInputBuilder();
-        input.setNode(getNodeRef());
+    public void request() {
+        if (flowTableStatsService != null) {
+            final GetFlowTablesStatisticsInputBuilder input = new GetFlowTablesStatisticsInputBuilder();
+            input.setNode(getNodeRef());
 
-        return requestHelper(flowTableStatsService.getFlowTablesStatistics(input.build()));
+            requestHelper(flowTableStatsService.getFlowTablesStatistics(input.build()), StatsRequestType.ALL_FLOW);
+        }
     }
 }

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.md.statistics.manager.MultipartMessageManager.StatsRequestType;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
@@ -27,7 +28,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
 
 abstract class AbstractStatsTracker<I, K> {
     private static final Function<RpcResult<? extends TransactionAware>, TransactionId> FUNCTION =
@@ -59,8 +59,12 @@ abstract class AbstractStatsTracker<I, K> {
         return context.getNodeIdentifier();
     }
 
-    protected static final <T extends TransactionAware> ListenableFuture<TransactionId> requestHelper(Future<RpcResult<T>> future) {
-        return Futures.transform(JdkFutureAdapters.listenInPoolThread(future), FUNCTION);
+    protected final <T extends TransactionAware> void requestHelper(Future<RpcResult<T>> future, StatsRequestType type) {
+        context.registerTransaction(Futures.transform(JdkFutureAdapters.listenInPoolThread(future), FUNCTION), type);
+    }
+
+    protected final DataModificationTransaction startTransaction() {
+        return context.startDataModification();
     }
 
     protected abstract void cleanupSingleStat(DataModificationTransaction trans, K item);
@@ -68,7 +72,7 @@ abstract class AbstractStatsTracker<I, K> {
 
     public final synchronized void updateStats(List<I> list) {
         final Long expiryTime = System.nanoTime() + lifetimeNanos;
-        final DataModificationTransaction trans = context.startDataModification();
+        final DataModificationTransaction trans = startTransaction();
 
         for (final I item : list) {
             trackedItems.put(updateSingleStat(trans, item), expiryTime);
