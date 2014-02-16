@@ -7,14 +7,11 @@
  */
 package org.opendaylight.controller.sal.restconf.broker.impl;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.restconf.broker.listeners.RemoteNotificationListener;
@@ -27,9 +24,14 @@ import org.opendaylight.yangtools.restconf.client.api.RestconfClientContext;
 import org.opendaylight.yangtools.restconf.client.api.event.EventStreamInfo;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
+
 public class NotificationServiceImpl implements NotificationService {
-    private SalRemoteService salRemoteService;
-    private RestconfClientContext restconfClientContext;
+    private final SalRemoteService salRemoteService;
+    private final RestconfClientContext restconfClientContext;
 
     private final Multimap<Class<? extends Notification>,NotificationListener<? extends Object>> listeners;
     private ExecutorService _executor;
@@ -82,9 +84,8 @@ public class NotificationServiceImpl implements NotificationService {
         String notificationStreamName = RemoteStreamTools.createNotificationStream(salRemoteService, notifications);
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext, notificationStreamName);
         RemoteNotificationListener remoteNotificationListener = new RemoteNotificationListener(listener);
-        ListenerRegistration listenerRegistration = restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName))).registerNotificationListener(remoteNotificationListener);
-        SalNotificationRegistration salNotificationRegistration = new SalNotificationRegistration(listenerRegistration);
-        return salNotificationRegistration;
+        ListenerRegistration<?> listenerRegistration = restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName))).registerNotificationListener(remoteNotificationListener);
+        return new SalNotificationRegistration<T>(listenerRegistration);
     }
 
     @Override
@@ -92,14 +93,13 @@ public class NotificationServiceImpl implements NotificationService {
         //TODO implementation using sal-remote
         String notificationStreamName = RemoteStreamTools.createNotificationStream(salRemoteService, null);
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext, notificationStreamName);
-        ListenerRegistration listenerRegistration = restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName))).registerNotificationListener(listener);
-        return listenerRegistration;
+        return restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName))).registerNotificationListener(listener);
     }
 
     private class SalNotificationRegistration<T extends Notification> implements Registration<NotificationListener<T>>{
-        private Registration registration;
+        private final Registration<?> registration;
 
-        public SalNotificationRegistration(ListenerRegistration listenerRegistration){
+        public SalNotificationRegistration(ListenerRegistration<?> listenerRegistration){
             this.registration = listenerRegistration;
         }
 
