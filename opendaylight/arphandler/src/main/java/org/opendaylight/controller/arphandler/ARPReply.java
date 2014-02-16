@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
  * ARP Reply event wrapper
  */
 public class ARPReply extends ARPEvent {
-
+    private static final long serialVersionUID = 1L;
     private final NodeConnector port;
     private final byte[] tMac;
     private final byte[] sMac;

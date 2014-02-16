@@ -19,6 +19,7 @@ import org.opendaylight.controller.switchmanager.Subnet;
  * specified host
  */
 public class ARPRequest extends ARPEvent {
+    private static final long serialVersionUID = 1L;
     private final Subnet subnet;
     private final HostNodeConnector host;
 
