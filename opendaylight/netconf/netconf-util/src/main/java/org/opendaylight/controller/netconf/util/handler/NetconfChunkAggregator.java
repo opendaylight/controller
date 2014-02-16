@@ -46,6 +46,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
             {
                 final byte b = in.readByte();
                 if (b != '\n') {
+                    logger.debug("Got byte {} while waiting for {}", b, (byte)'\n');
                     throw new IllegalStateException("Malformed chunk header encountered (byte 0)");
                 }
 
@@ -56,6 +57,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
             {
                 final byte b = in.readByte();
                 if (b != '#') {
+                    logger.debug("Got byte {} while waiting for {}", b, (byte)'#');
                     throw new IllegalStateException("Malformed chunk header encountered (byte 1)");
                 }
 
@@ -66,6 +68,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
             {
                 final byte b = in.readByte();
                 if (b < '1' || b > '9') {
+                    logger.debug("Got byte {} while waiting for {}-{}", b, (byte)'1', (byte)'9');
                     throw new IllegalStateException("Invalid chunk size encountered (byte 0)");
                 }
 
@@ -82,6 +85,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
                 }
 
                 if (b < '0' || b > '9') {
+                    logger.debug("Got byte {} while waiting for {}-{}", b, (byte)'0', (byte)'9');
                     throw new IllegalStateException("Invalid chunk size encountered");
                 }
 
@@ -89,6 +93,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
                 chunkSize += b - '0';
 
                 if (chunkSize > maxChunkSize) {
+                    logger.debug("Parsed chunk size {}, maximum allowed is {}", chunkSize, maxChunkSize);
                     throw new IllegalStateException("Maximum chunk size exceeded");
                 }
                 break;
