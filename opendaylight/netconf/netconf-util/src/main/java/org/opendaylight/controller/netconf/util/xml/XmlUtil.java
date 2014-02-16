@@ -42,8 +42,17 @@ import org.xml.sax.SAXException;
 import com.google.common.base.Charsets;
 
 public class XmlUtil {
-
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
+    private static final DocumentBuilderFactory BUILDERFACTORY;
+
+    static {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setCoalescing(true);
+        factory.setIgnoringElementContentWhitespace(true);
+        factory.setIgnoringComments(true);
+        BUILDERFACTORY = factory;
+    }
 
     public static Element readXmlToElement(String xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
@@ -60,12 +69,11 @@ public class XmlUtil {
     }
 
     public static Document readXmlToDocument(InputStream xmlContent) throws SAXException, IOException {
-        DocumentBuilderFactory factory = getDocumentBuilderFactory();
         DocumentBuilder dBuilder;
         try {
-            dBuilder = factory.newDocumentBuilder();
+            dBuilder = BUILDERFACTORY.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to parse XML document", e);
         }
         Document doc = dBuilder.parse(xmlContent);
 
@@ -77,23 +85,13 @@ public class XmlUtil {
         return readXmlToDocument(new FileInputStream(xmlFile)).getDocumentElement();
     }
 
-    private static final DocumentBuilderFactory getDocumentBuilderFactory() {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        factory.setCoalescing(true);
-        factory.setIgnoringElementContentWhitespace(true);
-        factory.setIgnoringComments(true);
-        return factory;
-    }
-
     public static Document newDocument() {
-        DocumentBuilderFactory factory = getDocumentBuilderFactory();
         try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            DocumentBuilder builder = BUILDERFACTORY.newDocumentBuilder();
             Document document = builder.newDocument();
             return document;
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to create document", e);
         }
     }
 
