@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a4374e4c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-02-16T14:12:58Z",
+      "side": 1,
+      "message": "Resolved rebase conflicts is usually something written as a comment between patchsets, not as part of commit message because it becomes irrelevant after the patch was merged.\nHence, please reconsider whether it\u0027s really needed as part of the commit message.",
+      "revId": "648c7d66877c5cb6ffef4e2dac29e0925016033f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c434824b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/config/yang/md/sal/remote/rpc/ZeroMQServerModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-02-16T14:12:58Z",
+      "side": 1,
+      "message": "this class has a lot of changes and it\u0027s not clear whether this is just formatting or something more than that.\nAnd the commit message also doesn\u0027t mention changes in this class at all.\nIf this is just formatting, it shouldn\u0027t be part of this patch.\nOtherwise, please add to commit message what was done here and why.\nthank you!",
+      "revId": "648c7d66877c5cb6ffef4e2dac29e0925016033f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e431c65a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/sal/connector/remoterpc/RemoteRpcProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-02-16T14:12:58Z",
+      "side": 1,
+      "message": "why adding dead code? if this line is not needed, please remove it completely.\nif it will be needed in the future, it can be easily added/looked up in history.",
+      "revId": "648c7d66877c5cb6ffef4e2dac29e0925016033f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
