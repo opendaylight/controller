@@ -30,151 +30,123 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common-util</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-netconf-connector</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-core-api</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-broker-impl</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
-          <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>sal-remote</artifactId>
-              <version>${mdsal.version}</version>
-          </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-restconf-broker</artifactId>
-            <version>${mdsal.version}</version>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-remote</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-restconf-broker</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-core-spi</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common-api</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common-impl</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-api</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-config</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-broker-impl</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-compatibility</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-connector-api</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-rest-connector</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-inventory</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-flow-base</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-flow-service</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-flow-statistics</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-flow-management</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>inventory-manager</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>forwardingrules-manager</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>topology-lldp-discovery</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>topology-manager</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-topology</artifactId>
-            <version>1.1-SNAPSHOT</version>
+          <groupId>org.opendaylight.controller.model</groupId>
+          <artifactId>model-topology</artifactId>
+          <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
          <groupId>org.opendaylight.yangtools.model</groupId>
          <artifactId>ietf-topology</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-binding-util</artifactId>
-            <version>1.1-SNAPSHOT</version>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-binding-util</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>statistics-manager</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>concepts</artifactId>
-          <version>${concepts.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
@@ -183,147 +155,119 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>concepts</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
-          <dependency>
-              <groupId>org.opendaylight.yangtools</groupId>
-              <artifactId>restconf-client-api</artifactId>
-              <version>${yangtools.version}</version>
-          </dependency>
-          <dependency>
-              <groupId>org.opendaylight.yangtools</groupId>
-              <artifactId>restconf-client-impl</artifactId>
-              <version>${yangtools.version}</version>
-          </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>restconf-client-api</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>restconf-client-impl</artifactId>
+        </dependency>
 
         <!-- config-->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-api</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-manager</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-jmx-generator</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-store-api</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-store-impl</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>logback-config</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-api</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-file-adapter</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-file-xml-adapter</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-directory-adapter</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-directory-xml-adapter</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-directory-autodetect-adapter</artifactId>
-          <version>${config.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>shutdown-api</artifactId>
-          <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>shutdown-impl</artifactId>
-          <version>${config.version}</version>
         </dependency>
 
        <!-- Netconf -->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-api</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-impl</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-util</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-client</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-mapping-api</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-ssh</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-netconf-connector</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-monitoring</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>ietf-netconf-monitoring</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>ietf-netconf-monitoring-extension</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-impl</artifactId>
-          <version>${netconf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -340,34 +284,27 @@
           <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>threadpool-config-api</artifactId>
-              <version>${config.version}</version>
           </dependency>
           <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>netty-config-api</artifactId>
-              <version>${config.version}</version>
           </dependency>
           <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>threadpool-config-impl</artifactId>
-              <version>${config.version}</version>
           </dependency>
           <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>netty-threadgroup-config</artifactId>
-              <version>${config.version}</version>
           </dependency>
           <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>netty-event-executor-config</artifactId>
-              <version>${config.version}</version>
           </dependency>
           <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>netty-timer-config</artifactId>
-              <version>${config.version}</version>
           </dependency>
-
 
           <!-- toaster example I'm pretty sure we should trim -->
          <dependency>
@@ -389,7 +326,6 @@
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-binding</artifactId>
-          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
@@ -445,7 +381,6 @@
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-model-util</artifactId>
-          <version>${yangtools.version}</version>
          </dependency>
          <dependency>
           <groupId>org.opendaylight.yangtools</groupId>

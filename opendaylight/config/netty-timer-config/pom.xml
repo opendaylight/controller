@@ -24,12 +24,10 @@
       <dependency>
          <groupId>org.opendaylight.controller</groupId>
          <artifactId>netty-config-api</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.opendaylight.controller</groupId>
          <artifactId>threadpool-config-api</artifactId>
-         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.slf4j</groupId>
@@ -65,7 +63,6 @@
       <dependency>
          <groupId>org.opendaylight.controller</groupId>
          <artifactId>threadpool-config-impl</artifactId>
-         <version>${project.version}</version>
          <scope>test</scope>
       </dependency>
 

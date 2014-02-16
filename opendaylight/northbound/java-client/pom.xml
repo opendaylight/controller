@@ -31,7 +31,6 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>${enunciate.version}</version>
       </plugin>
 
       <plugin>

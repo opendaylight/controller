@@ -18,12 +18,10 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-api</artifactId>
-            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

@@ -46,7 +46,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -56,12 +55,10 @@
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-service</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-management</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -70,7 +67,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-broker-impl</artifactId>
-      <version>1.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
