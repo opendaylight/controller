@@ -8,6 +8,16 @@
 package org.opendaylight.controller.netconf.ssh.threads;
 
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
+import javax.annotation.concurrent.ThreadSafe;
+
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ethz.ssh2.AuthenticationResult;
 import ch.ethz.ssh2.PtySettings;
 import ch.ethz.ssh2.ServerAuthenticationCallback;
@@ -16,25 +26,15 @@ import ch.ethz.ssh2.ServerConnectionCallback;
 import ch.ethz.ssh2.ServerSession;
 import ch.ethz.ssh2.ServerSessionCallback;
 import ch.ethz.ssh2.SimpleServerSessionCallback;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import javax.annotation.concurrent.ThreadSafe;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ThreadSafe
-public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback
-{
-
-    private Socket socket;
-    private static final String USER = "netconf";
-    private static final String PASSWORD = "netconf";
-    private InetSocketAddress clientAddress;
+public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback {
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
+
+    private final Socket socket;
+    private final InetSocketAddress clientAddress;
     private ServerConnection conn = null;
-    private long sessionId;
+    private final long sessionId;
     private String currentUser;
     private final String remoteAddressWithPort;
     private final AuthProvider authProvider;
@@ -77,6 +77,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
             logger.error("SocketThread error ",e);
         }
     }
+    @Override
     public ServerSessionCallback acceptSession(final ServerSession session)
     {
         SimpleServerSessionCallback cb = new SimpleServerSessionCallback()
@@ -85,6 +86,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
             public Runnable requestSubsystem(final ServerSession ss, final String subsystem) throws IOException
             {
                 return new Runnable(){
+                    @Override
                     public void run()
                     {
                         if (subsystem.equals("netconf")){
@@ -145,6 +147,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
             {
                 return new Runnable()
                 {
+                    @Override
                     public void run()
                     {
                         //noop
@@ -157,6 +160,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
             {
                 return new Runnable()
                 {
+                    @Override
                     public void run()
                     {
                         //noop
@@ -168,22 +172,26 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         return cb;
     }
 
+    @Override
     public String initAuthentication(ServerConnection sc)
     {
         logger.trace("Established connection with host {}",remoteAddressWithPort);
         return "Established connection with host "+remoteAddressWithPort+"\r\n";
     }
 
+    @Override
     public String[] getRemainingAuthMethods(ServerConnection sc)
     {
         return new String[] { ServerAuthenticationCallback.METHOD_PASSWORD };
     }
 
+    @Override
     public AuthenticationResult authenticateWithNone(ServerConnection sc, String username)
     {
         return AuthenticationResult.FAILURE;
     }
 
+    @Override
     public AuthenticationResult authenticateWithPassword(ServerConnection sc, String username, String password)
     {
 
@@ -199,6 +207,7 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
         return AuthenticationResult.FAILURE;
     }
 
+    @Override
     public AuthenticationResult authenticateWithPublicKey(ServerConnection sc, String username, String algorithm,
             byte[] publickey, byte[] signature)
     {
