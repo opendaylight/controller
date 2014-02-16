@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_643dd62a",
+        "filename": "opendaylight/netconf/netconf-monitoring/src/main/java/org/opendaylight/controller/netconf/monitoring/MonitoringConstants.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-02-16T14:19:56Z",
+      "side": 1,
+      "message": "isn\u0027t this exactly the same as the constant NAMESPACE just with addition of  \"-extension\" ? Why not reuse the first constant instead of copy-paste?\n(similar comment for the constant MODULE_NAME below which can also be reused)",
+      "revId": "c9625a326c3cb6a76c6217a7cbd963e23d8d0f5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
