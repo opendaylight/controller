@@ -13,7 +13,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
@@ -21,8 +20,9 @@ import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
+import com.google.common.base.Charsets;
 
+public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
     private final static Logger logger = LoggerFactory.getLogger(NetconfMessageChunkDecoder.class);
 
     @Override
@@ -63,7 +63,7 @@ public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
         while ((b = in.readByte()) != 10) {
             chunkSize.writeByte(b);
         }
-        return Integer.parseInt(chunkSize.toString(Charset.forName("UTF-8")));
+        return Integer.parseInt(chunkSize.toString(Charsets.US_ASCII));
     }
 
 }
