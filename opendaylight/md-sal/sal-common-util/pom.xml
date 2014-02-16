@@ -29,7 +29,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
-      <version>${project.version}</version>
     </dependency>
     
   </dependencies>

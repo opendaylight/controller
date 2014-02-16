@@ -22,7 +22,6 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>${enunciate.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>

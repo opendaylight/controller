@@ -675,6 +675,11 @@
       </dependency>
       <dependency>
        <groupId>org.opendaylight.yangtools.model</groupId>
+       <artifactId>ietf-topology-l3-unicast-igp</artifactId>
+       <version>${ietf-topology.version}</version>
+      </dependency>
+      <dependency>
+       <groupId>org.opendaylight.yangtools.model</groupId>
        <artifactId>opendaylight-l2-types</artifactId>
        <version>${opendaylight-l2-types.version}</version>
       </dependency>
@@ -692,6 +697,16 @@
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>concepts</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>restconf-client-api</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>restconf-client-impl</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
 
@@ -1206,6 +1221,13 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-binding-broker-impl</artifactId>
+          <version>${mdsal.version}</version>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-compatibility</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
@@ -1267,6 +1289,21 @@
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>statistics-manager</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-remote</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-restconf-broker</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-binding-util</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
         <dependency>
@@ -1403,6 +1440,16 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-impl</artifactId>
+          <version>${netconf.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>ietf-netconf-monitoring</artifactId>
+          <version>${netconf.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>ietf-netconf-monitoring-extension</artifactId>
           <version>${netconf.version}</version>
         </dependency>
 

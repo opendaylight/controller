@@ -58,7 +58,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
