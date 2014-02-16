@@ -24,8 +24,8 @@ import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.handler.ChunkedFramingMechanismEncoder;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfChunkAggregator;
+import org.opendaylight.controller.netconf.util.handler.NetconfEOMAggregator;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
 import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
@@ -48,7 +48,7 @@ public class MessageParserTest {
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK),
                 new NetconfMessageToXMLEncoder(),
 
-                new NetconfMessageAggregator(FramingMechanism.CHUNK), new NetconfMessageChunkDecoder(),
+                new NetconfChunkAggregator(),
                 new NetconfXMLToMessageDecoder());
 
         testChunkChannel.writeOutbound(this.msg);
@@ -94,15 +94,14 @@ public class MessageParserTest {
     public void testEOMFramingMechanismOnPipeline() throws Exception {
         EmbeddedChannel testChunkChannel = new EmbeddedChannel(
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.EOM),
-                new NetconfMessageToXMLEncoder(), new NetconfMessageAggregator(
-                        FramingMechanism.EOM), new NetconfXMLToMessageDecoder());
+                new NetconfMessageToXMLEncoder(), new NetconfEOMAggregator(), new NetconfXMLToMessageDecoder());
 
         testChunkChannel.writeOutbound(this.msg);
         ByteBuf recievedOutbound = (ByteBuf) testChunkChannel.readOutbound();
 
-        byte[] eom = new byte[NetconfMessageConstants.endOfMessage.length];
-        recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.endOfMessage.length, eom);
-        assertArrayEquals(NetconfMessageConstants.endOfMessage, eom);
+        byte[] eom = new byte[NetconfMessageConstants.END_OF_MESSAGE.length];
+        recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.END_OF_MESSAGE.length, eom);
+        assertArrayEquals(NetconfMessageConstants.END_OF_MESSAGE, eom);
 
         testChunkChannel.writeInbound(recievedOutbound);
         NetconfMessage receivedMessage = (NetconfMessage) testChunkChannel.readInbound();
