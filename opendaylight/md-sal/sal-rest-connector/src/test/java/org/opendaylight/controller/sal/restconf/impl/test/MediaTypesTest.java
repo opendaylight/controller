@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.JSON;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -70,7 +70,7 @@ public class MediaTypesTest extends JerseyTest {
   public void testPostOperationsWithInputDataMediaTypes() throws UnsupportedEncodingException {
       String uriPrefix = "/operations/";
       String uriPath = "ietf-interfaces:interfaces";
-      String uri = createUri(uriPrefix, uriPath);
+      String uri = uriPrefix + uriPath;
       when(restconfService.invokeRpc(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
       post(uri, Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+JSON, jsonData);
       verify(restconfService, times(1)).invokeRpc(eq(uriPath), any(CompositeNode.class));
@@ -96,7 +96,7 @@ public class MediaTypesTest extends JerseyTest {
     public void testGetConfigMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
-        String uri = createUri(uriPrefix, uriPath);
+        String uri = uriPrefix + uriPath;
         when(restconfService.readConfigurationData(uriPath)).thenReturn(null);
         get(uri, Draft02.MediaTypes.DATA+JSON);
         verify(restconfService, times(1)).readConfigurationData(uriPath);
@@ -118,7 +118,7 @@ public class MediaTypesTest extends JerseyTest {
     public void testGetOperationalMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/operational/";
         String uriPath = "ietf-interfaces:interfaces";
-        String uri = createUri(uriPrefix, uriPath);
+        String uri = uriPrefix + uriPath;
         when(restconfService.readOperationalData(uriPath)).thenReturn(null);
         get(uri, Draft02.MediaTypes.DATA+JSON);
         verify(restconfService, times(1)).readOperationalData(uriPath);
@@ -140,7 +140,7 @@ public class MediaTypesTest extends JerseyTest {
     public void testPutConfigMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
-        String uri = createUri(uriPrefix, uriPath);
+        String uri = uriPrefix + uriPath;
         when(restconfService.updateConfigurationData(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
         put(uri, null, Draft02.MediaTypes.DATA+JSON, jsonData);
         verify(restconfService, times(1)).updateConfigurationData(eq(uriPath), any(CompositeNode.class));
@@ -160,7 +160,7 @@ public class MediaTypesTest extends JerseyTest {
     public void testPostConfigWithPathMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
-        String uri = createUri(uriPrefix, uriPath);
+        String uri = uriPrefix + uriPath;
         when(restconfService.createConfigurationData(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
         post(uri, null, Draft02.MediaTypes.DATA+JSON, jsonData);
         verify(restconfService, times(1)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
@@ -179,7 +179,7 @@ public class MediaTypesTest extends JerseyTest {
     @Test
     public void testPostConfigMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
-        String uri = createUri(uriPrefix, "");
+        String uri = uriPrefix;
         when(restconfService.createConfigurationData(any(CompositeNode.class))).thenReturn(null);
         post(uri, null, Draft02.MediaTypes.DATA+JSON, jsonData);
         verify(restconfService, times(1)).createConfigurationData(any(CompositeNode.class));
@@ -199,7 +199,7 @@ public class MediaTypesTest extends JerseyTest {
     public void testDeleteConfigMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
-        String uri = createUri(uriPrefix, uriPath);
+        String uri = uriPrefix + uriPath;
         when(restconfService.deleteConfigurationData(eq(uriPath))).thenReturn(null);
         target(uri).request("fooMediaType").delete();
         verify(restconfService, times(1)).deleteConfigurationData(uriPath);
