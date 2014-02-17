@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public abstract class AbstractAttribute implements AttributeIfc {
@@ -22,8 +22,8 @@ public abstract class AbstractAttribute implements AttributeIfc {
     AbstractAttribute(DataSchemaNode attrNode) {
         this.attributeYangName = getLocalName(attrNode);
         this.node = attrNode;
-        this.upperCaseCammelCase = ModuleMXBeanEntry.findJavaNamePrefix(node);
-        this.lowerCaseCammelCase = ModuleMXBeanEntry.findJavaParameter(node);
+        this.upperCaseCammelCase = TypeProviderWrapper.findJavaNamePrefix(node);
+        this.lowerCaseCammelCase = TypeProviderWrapper.findJavaParameter(node);
     }
 
     @Override

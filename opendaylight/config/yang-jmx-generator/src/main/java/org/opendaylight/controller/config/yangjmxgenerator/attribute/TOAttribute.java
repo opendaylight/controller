@@ -11,7 +11,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
@@ -121,7 +120,7 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
                 .entrySet()) {
 
             capitalizedPropertiesToTypesMap.put(
-                    ModuleMXBeanEntry.convertToJavaName(entry.getKey(), true),
+                    TypeProviderWrapper.convertToJavaName(entry.getKey(), true),
                     entry.getValue());
         }
         return capitalizedPropertiesToTypesMap;
@@ -133,7 +132,7 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
                 .entrySet()) {
 
             jmxPropertiesToTypesMap.put(
-                    ModuleMXBeanEntry.convertToJavaName(entry.getKey(), false),
+                    TypeProviderWrapper.convertToJavaName(entry.getKey(), false),
                     entry.getValue());
         }
         return jmxPropertiesToTypesMap;
