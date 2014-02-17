@@ -49,7 +49,7 @@ public class NetconfServerSessionNegotiator extends
 
         logger.debug("Additional header from hello parsed as {} from {}", parsedHeader, additionalHeader);
 
-        return new NetconfServerSession(sessionListener, channel, sessionPreferences.getSessionId(), parsedHeader);
+        return new NetconfServerSession(sessionListener, channel, getSessionPreferences().getSessionId(), parsedHeader);
     }
 
    }

@@ -31,9 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class XmlElement {
+public final class XmlElement {
 
-    public final Element element;
+    private final Element element;
 
     private XmlElement(Element element) {
         this.element = element;
@@ -123,9 +123,6 @@ public class XmlElement {
 
     public void appendChild(Element element) {
         this.element.appendChild(element);
-        // Element newElement = (Element) element.cloneNode(true);
-        // newElement.appendChild(configElement);
-        // return XmlElement.fromDomElement(newElement);
     }
 
     public Element getDomElement() {
@@ -153,10 +150,12 @@ public class XmlElement {
         final List<XmlElement> result = new ArrayList<>();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
-            if (item instanceof Element == false)
+            if (item instanceof Element == false) {
                 continue;
-            if (strat.accept((Element) item))
+            }
+            if (strat.accept((Element) item)) {
                 result.add(new XmlElement((Element) item));
+            }
         }
 
         return result;
@@ -290,12 +289,12 @@ public class XmlElement {
     public String getNamespace() {
         String namespaceURI = element.getNamespaceURI();
         Preconditions.checkState(namespaceURI != null, "No namespace defined for %s", this);
-        return namespaceURI.toString();
+        return namespaceURI;
     }
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("XmlElement{");
+        final StringBuilder sb = new StringBuilder("XmlElement{");
         sb.append("name='").append(getName()).append('\'');
         if (element.getNamespaceURI() != null) {
             sb.append(", namespace='").append(getNamespace()).append('\'');
@@ -320,7 +319,7 @@ public class XmlElement {
     public Map.Entry<String/* prefix */, String/* namespace */> findNamespaceOfTextContent() {
         Map<String, String> namespaces = extractNamespaces(element);
         String textContent = getTextContent();
-        int indexOfColon = textContent.indexOf(":");
+        int indexOfColon = textContent.indexOf(':');
         String prefix;
         if (indexOfColon > -1) {
             prefix = textContent.substring(0, indexOfColon);
@@ -360,15 +359,18 @@ public class XmlElement {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         XmlElement that = (XmlElement) o;
 
-        if (!element.isEqualNode(that.element))
+        if (!element.isEqualNode(that.element)) {
             return false;
+        }
 
         return true;
     }
@@ -392,7 +394,7 @@ public class XmlElement {
         return true;
     }
 
-    private static interface ElementFilteringStrategy {
+    private interface ElementFilteringStrategy {
         boolean accept(Element e);
     }
 }

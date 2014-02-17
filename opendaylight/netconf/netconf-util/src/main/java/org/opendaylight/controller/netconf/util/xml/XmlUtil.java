@@ -41,7 +41,8 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Charsets;
 
-public class XmlUtil {
+public final class XmlUtil {
+
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
@@ -53,6 +54,8 @@ public class XmlUtil {
         factory.setIgnoringComments(true);
         BUILDERFACTORY = factory;
     }
+
+    private XmlUtil() {}
 
     public static Element readXmlToElement(String xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
@@ -67,6 +70,9 @@ public class XmlUtil {
     public static Document readXmlToDocument(String xmlContent) throws SAXException, IOException {
         return readXmlToDocument(new ByteArrayInputStream(xmlContent.getBytes(Charsets.UTF_8)));
     }
+
+    // TODO improve exceptions throwing
+    // along with XmlElement
 
     public static Document readXmlToDocument(InputStream xmlContent) throws SAXException, IOException {
         DocumentBuilder dBuilder;
@@ -133,14 +139,13 @@ public class XmlUtil {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, addXmlDeclaration == true ? "no" : "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, addXmlDeclaration ? "no" : "yes");
 
             StreamResult result = new StreamResult(new StringWriter());
             DOMSource source = new DOMSource(xml);
             transformer.transform(source, result);
 
-            String xmlString = result.getWriter().toString();
-            return xmlString;
+            return result.getWriter().toString();
         } catch (IllegalArgumentException | TransformerFactoryConfigurationError | TransformerException e) {
             throw new RuntimeException("Unable to serialize xml element " + xml, e);
         }

@@ -39,7 +39,9 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
 
             b[off] = (byte)c;
 
-            if(this.bb.readableBytes() == 0) return bytesRead;
+            if(this.bb.readableBytes() == 0) {
+                return bytesRead;
+            }
 
             int ltr = len-1;
             ltr = (ltr <= bb.readableBytes()) ? ltr : bb.readableBytes();
@@ -72,28 +74,23 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
         }
     }
 
-    public void channelRegistered(ChannelHandlerContext ctx)
-            throws Exception {
+    public void channelRegistered(ChannelHandlerContext ctx) {
         ctx.fireChannelRegistered();
     }
 
-    public void channelUnregistered(ChannelHandlerContext ctx)
-            throws Exception {
+    public void channelUnregistered(ChannelHandlerContext ctx) {
         ctx.fireChannelUnregistered();
     }
 
-    public void channelActive(ChannelHandlerContext ctx)
-            throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) {
         ctx.fireChannelActive();
     }
 
-    public void channelInactive(ChannelHandlerContext ctx)
-            throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         ctx.fireChannelInactive();
     }
 
-    public void channelRead(ChannelHandlerContext ctx, Object o)
-            throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object o) {
         synchronized(lock) {
             this.bb.discardReadBytes();
             this.bb.writeBytes((ByteBuf) o);
@@ -101,31 +98,25 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
         }
     }
 
-    public void channelReadComplete(ChannelHandlerContext ctx)
-            throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.fireChannelReadComplete();
     }
 
-    public void userEventTriggered(ChannelHandlerContext ctx, Object o)
-            throws Exception {
+    public void userEventTriggered(ChannelHandlerContext ctx, Object o) {
         ctx.fireUserEventTriggered(o);
     }
 
-    public void channelWritabilityChanged(ChannelHandlerContext ctx)
-            throws Exception {
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) {
         ctx.fireChannelWritabilityChanged();
     }
 
-    public void handlerAdded(ChannelHandlerContext ctx)
-            throws Exception {
+    public void handlerAdded(ChannelHandlerContext ctx) {
     }
 
-    public void handlerRemoved(ChannelHandlerContext ctx)
-            throws Exception {
+    public void handlerRemoved(ChannelHandlerContext ctx) {
     }
 
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable)
-            throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
         ctx.fireExceptionCaught(throwable);
     }
 }

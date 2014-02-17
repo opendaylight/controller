@@ -14,7 +14,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPromise;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
 
@@ -27,7 +26,7 @@ public class ChannelOutputStream extends OutputStream implements ChannelOutbound
     private ChannelHandlerContext ctx;
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
         synchronized(lock) {
             ctx.writeAndFlush(buff).awaitUninterruptibly();
             buff = Unpooled.buffer();
@@ -35,51 +34,44 @@ public class ChannelOutputStream extends OutputStream implements ChannelOutbound
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         synchronized(lock) {
             buff.writeByte(b);
         }
     }
 
     public void bind(ChannelHandlerContext ctx, SocketAddress localAddress,
-                     ChannelPromise promise) throws Exception {
+                     ChannelPromise promise) {
         ctx.bind(localAddress, promise);
     }
 
     public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress,
-                        SocketAddress localAddress, ChannelPromise promise)
-            throws Exception {
+                        SocketAddress localAddress, ChannelPromise promise) {
         this.ctx = ctx;
         ctx.connect(remoteAddress, localAddress, promise);
     }
 
-    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise)
-            throws Exception {
+    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) {
         ctx.disconnect(promise);
     }
 
-    public void close(ChannelHandlerContext ctx, ChannelPromise promise)
-            throws Exception {
+    public void close(ChannelHandlerContext ctx, ChannelPromise promise) {
         ctx.close(promise);
     }
 
-    public void deregister(ChannelHandlerContext ctx, ChannelPromise channelPromise)
-            throws Exception {
+    public void deregister(ChannelHandlerContext ctx, ChannelPromise channelPromise) {
         ctx.deregister(channelPromise);
     }
 
-    public void read(ChannelHandlerContext ctx)
-            throws Exception {
+    public void read(ChannelHandlerContext ctx) {
         ctx.read();
     }
 
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
-            throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         // pass
     }
 
-    public void flush(ChannelHandlerContext ctx)
-            throws Exception {
+    public void flush(ChannelHandlerContext ctx) {
         // pass
     }
 
@@ -91,8 +83,7 @@ public class ChannelOutputStream extends OutputStream implements ChannelOutbound
             throws Exception {
     }
 
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-            throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         ctx.fireExceptionCaught(cause);
     }
 }

@@ -135,11 +135,13 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         for (byte[] possibleStart : POSSIBLE_STARTS) {
             int i = 0;
             for (byte b : possibleStart) {
-                if(bytes[i++] != b)
+                if(bytes[i++] != b) {
                     break;
+                }
 
-                if(i == possibleStart.length)
+                if(i == possibleStart.length) {
                     return true;
+                }
             }
         }
 

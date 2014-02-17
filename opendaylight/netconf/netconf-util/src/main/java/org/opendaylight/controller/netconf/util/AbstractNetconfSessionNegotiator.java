@@ -21,6 +21,7 @@ import io.netty.util.concurrent.Promise;
 
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
@@ -47,7 +48,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
 
-    protected final P sessionPreferences;
+    private final P sessionPreferences;
 
     private final L sessionListener;
     private Timeout timeout;
@@ -79,14 +80,15 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
             Future<Channel> future = sslHandler.get().handshakeFuture();
             future.addListener(new GenericFutureListener<Future<? super Channel>>() {
                 @Override
-                public void operationComplete(Future<? super Channel> future) throws Exception {
+                public void operationComplete(Future<? super Channel> future) {
                     Preconditions.checkState(future.isSuccess(), "Ssl handshake was not successful");
                     logger.debug("Ssl handshake complete");
                     start();
                 }
             });
-        } else
+        } else {
             start();
+        }
     }
 
     private static Optional<SslHandler> getSslHandler(Channel channel) {
@@ -94,31 +96,19 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         return sslHandler == null ? Optional.<SslHandler> absent() : Optional.of(sslHandler);
     }
 
+    public P getSessionPreferences() {
+        return sessionPreferences;
+    }
+
     private void start() {
         final NetconfMessage helloMessage = this.sessionPreferences.getHelloMessage();
         logger.debug("Session negotiation started with hello message {}", XmlUtil.toString(helloMessage.getDocument()));
 
-        channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ChannelHandler() {
-            @Override
-            public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-            }
-
-            @Override
-            public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-            }
-
-            @Override
-            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-                logger.warn("An exception occurred during negotiation on channel {}", channel.localAddress(), cause);
-                cancelTimeout();
-                negotiationFailed(cause);
-                changeState(State.FAILED);
-            }
-        });
+        channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ExceptionHandlingInboundChannelHandler());
 
         timeout = this.timer.newTimeout(new TimerTask() {
             @Override
-            public void run(final Timeout timeout) throws Exception {
+            public void run(final Timeout timeout) {
                 synchronized (this) {
                     if (state != State.ESTABLISHED) {
                         logger.debug("Connection timeout after {}, session is in state {}", timeout, state);
@@ -138,8 +128,9 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     }
 
     private void cancelTimeout() {
-        if(timeout!=null)
+        if(timeout!=null) {
             timeout.cancel();
+        }
     }
 
     private void sendMessage(NetconfMessage message) {
@@ -148,27 +139,20 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     @Override
     protected void handleMessage(NetconfHelloMessage netconfMessage) {
+        Preconditions.checkNotNull(netconfMessage != null, "netconfMessage");
+
         final Document doc = netconfMessage.getDocument();
 
-        // Only Hello message should arrive during negotiation
-        if (netconfMessage instanceof NetconfHelloMessage) {
+        replaceHelloMessageHandlers();
 
-            replaceHelloMessageHandlers();
-
-            if (shouldUseChunkFraming(doc)) {
-                insertChunkFramingToPipeline();
-            }
-
-            changeState(State.ESTABLISHED);
-            S session = getSession(sessionListener, channel, netconfMessage);
-
-            negotiationSuccessful(session);
-        } else {
-            final IllegalStateException cause = new IllegalStateException(
-                    "Received message was not hello as expected, but was " + XmlUtil.toString(doc));
-            logger.warn("Negotiation of netconf session failed", cause);
-            negotiationFailed(cause);
+        if (shouldUseChunkFraming(doc)) {
+            insertChunkFramingToPipeline();
         }
+
+        changeState(State.ESTABLISHED);
+        S session = getSession(sessionListener, channel, netconfMessage);
+
+        negotiationSuccessful(session);
     }
 
     /**
@@ -218,14 +202,31 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     }
 
     private static boolean isStateChangePermitted(State state, State newState) {
-        if (state == State.IDLE && newState == State.OPEN_WAIT)
+        if (state == State.IDLE && newState == State.OPEN_WAIT) {
             return true;
-        if (state == State.OPEN_WAIT && newState == State.ESTABLISHED)
+        }
+        if (state == State.OPEN_WAIT && newState == State.ESTABLISHED) {
             return true;
-        if (state == State.OPEN_WAIT && newState == State.FAILED)
+        }
+        if (state == State.OPEN_WAIT && newState == State.FAILED) {
             return true;
+        }
 
         logger.debug("Transition from {} to {} is not allowed", state, newState);
         return false;
+    }
+
+    /**
+     * Handler to catch exceptions in pipeline during negotiation
+     */
+    private final class ExceptionHandlingInboundChannelHandler extends ChannelInboundHandlerAdapter {
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            logger.warn("An exception occurred during negotiation on channel {}", channel.localAddress(), cause);
+            cancelTimeout();
+            negotiationFailed(cause);
+            changeState(State.FAILED);
+        }
     }
 }

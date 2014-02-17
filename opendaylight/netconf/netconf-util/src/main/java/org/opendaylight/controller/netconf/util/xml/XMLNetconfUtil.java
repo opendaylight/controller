@@ -13,7 +13,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-public class XMLNetconfUtil {
+public final class XMLNetconfUtil {
+
+    private XMLNetconfUtil() {}
 
     public static XPathExpression compileXPath(String xPath) {
         final XPathFactory xPathfactory = XPathFactory.newInstance();

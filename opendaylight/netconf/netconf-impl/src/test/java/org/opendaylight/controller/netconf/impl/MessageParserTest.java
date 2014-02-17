@@ -69,10 +69,10 @@ public class MessageParserTest {
             int exptHeaderLength = ChunkedFramingMechanismEncoder.DEFAULT_CHUNK_SIZE;
             if (i == chunkCount) {
                 exptHeaderLength = msgLength - (ChunkedFramingMechanismEncoder.DEFAULT_CHUNK_SIZE * (i - 1));
-                byte[] eom = new byte[NetconfMessageConstants.endOfChunk.length];
-                recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.endOfChunk.length,
+                byte[] eom = new byte[NetconfMessageConstants.END_OF_CHUNK.length];
+                recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.END_OF_CHUNK.length,
                         eom);
-                assertArrayEquals(NetconfMessageConstants.endOfChunk, eom);
+                assertArrayEquals(NetconfMessageConstants.END_OF_CHUNK, eom);
             }
 
             byte[] header = new byte[String.valueOf(exptHeaderLength).length()

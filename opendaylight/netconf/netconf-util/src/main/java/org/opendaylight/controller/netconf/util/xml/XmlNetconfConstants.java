@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.netconf.util.xml;
 
-public class XmlNetconfConstants {
+public final class XmlNetconfConstants {
+
+    private XmlNetconfConstants() {}
 
     public static final String MOUNTPOINTS = "mountpoints";
     public static final String MOUNTPOINT = "mountpoint";
