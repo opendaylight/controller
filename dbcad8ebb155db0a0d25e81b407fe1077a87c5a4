@@ -2,6 +2,142 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_38edc226",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/appender/ConsoleAppenderModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Isn\u0027t Cisco copyright missing ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_18f0befc",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/appender/ConsoleAppenderModuleFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Isn\u0027t Cisco copyright missing ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_788fba75",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/appender/FileAppenderModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Isn\u0027t Cisco copyright missing ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f8f28a04",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/appender/FileAppenderModuleFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Isn\u0027t Cisco copyright missing ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d8f586ed",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/appender/RollingFileAppenderModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Isn\u0027t Cisco copyright missing ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b8e09229",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/appender/RollingFileAppenderModuleFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Isn\u0027t Cisco copyright missing ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3886e266",
+        "filename": "opendaylight/config/logback-config/src/main/java/org/opendaylight/controller/config/yang/logback/config/LogbackStatusListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Is field rootRuntimeBeanRegistratorWrapper needed ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b899b2c5",
+        "filename": "opendaylight/config/logback-config/src/main/yang/logback-appenders.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Shouldn\u0027t Cisco copyright be here as well ?",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_2400fe00",
         "filename": "opendaylight/config/logback-config/src/main/yang/logback-appenders.yang",
         "patchSetId": 3
@@ -13,6 +149,23 @@
       "writtenOn": "2014-02-17T11:49:52Z",
       "side": 1,
       "message": "Tabs",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9894ae8b",
+        "filename": "opendaylight/config/logback-config/src/main/yang/logback.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-02-17T12:25:40Z",
+      "side": 1,
+      "message": "Shouldn\u0027t Cisco copyright be here as well ?",
       "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
