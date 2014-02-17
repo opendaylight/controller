@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_2400fe00",
+        "filename": "opendaylight/config/logback-config/src/main/yang/logback-appenders.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-02-17T11:49:52Z",
+      "side": 1,
+      "message": "Tabs",
+      "revId": "dbcad8ebb155db0a0d25e81b407fe1077a87c5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
