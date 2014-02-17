@@ -2170,7 +2170,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     public Set<Switch> getConfiguredNotConnectedSwitches() {
         Set<Switch> configuredNotConnectedSwitches = new HashSet<Switch>();
         if (this.inventoryService == null) {
-            log.trace("inventory service not avaiable");
+            log.trace("inventory service not available");
             return configuredNotConnectedSwitches;
         }
 
