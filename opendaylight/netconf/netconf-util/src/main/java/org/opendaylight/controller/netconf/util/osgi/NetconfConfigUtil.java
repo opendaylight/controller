@@ -17,12 +17,12 @@ import java.net.InetSocketAddress;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class NetconfConfigUtil {
+public final class NetconfConfigUtil {
     private static final Logger logger = LoggerFactory.getLogger(NetconfConfigUtil.class);
 
     private static final String PREFIX_PROP = "netconf.";
 
-
+    private NetconfConfigUtil() {}
 
     private enum InfixProp {
         tcp, ssh

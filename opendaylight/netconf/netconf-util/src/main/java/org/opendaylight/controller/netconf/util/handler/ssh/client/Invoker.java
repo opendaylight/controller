@@ -19,6 +19,7 @@ public abstract class Invoker {
     private Invoker(){}
 
     protected boolean isInvoked() {
+        // TODO invoked is always false
         return invoked;
     }
 
@@ -34,7 +35,9 @@ public abstract class Invoker {
         return new Invoker() {
             @Override
             void invoke(SshSession session) throws IOException {
-                if (isInvoked() == true) throw new IllegalStateException("Already invoked.");
+                if (isInvoked()) {
+                    throw new IllegalStateException("Already invoked.");
+                }
 
                 session.startSubSystem(subsystem);
             }

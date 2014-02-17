@@ -41,9 +41,11 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Charsets;
 
-public class XmlUtil {
+public final class XmlUtil {
 
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
+
+    private XmlUtil() {}
 
     public static Element readXmlToElement(String xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
@@ -58,6 +60,9 @@ public class XmlUtil {
     public static Document readXmlToDocument(String xmlContent) throws SAXException, IOException {
         return readXmlToDocument(new ByteArrayInputStream(xmlContent.getBytes(Charsets.UTF_8)));
     }
+
+    // TODO improve exceptions throwing
+    // along with XmlElement
 
     public static Document readXmlToDocument(InputStream xmlContent) throws SAXException, IOException {
         DocumentBuilderFactory factory = getDocumentBuilderFactory();
@@ -77,7 +82,7 @@ public class XmlUtil {
         return readXmlToDocument(new FileInputStream(xmlFile)).getDocumentElement();
     }
 
-    private static final DocumentBuilderFactory getDocumentBuilderFactory() {
+    private static DocumentBuilderFactory getDocumentBuilderFactory() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setCoalescing(true);
@@ -90,8 +95,7 @@ public class XmlUtil {
         DocumentBuilderFactory factory = getDocumentBuilderFactory();
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.newDocument();
-            return document;
+            return builder.newDocument();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -135,14 +139,13 @@ public class XmlUtil {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, addXmlDeclaration == true ? "no" : "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, addXmlDeclaration ? "no" : "yes");
 
             StreamResult result = new StreamResult(new StringWriter());
             DOMSource source = new DOMSource(xml);
             transformer.transform(source, result);
 
-            String xmlString = result.getWriter().toString();
-            return xmlString;
+            return result.getWriter().toString();
         } catch (IllegalArgumentException | TransformerFactoryConfigurationError | TransformerException e) {
             throw new RuntimeException("Unable to serialize xml element " + xml, e);
         }

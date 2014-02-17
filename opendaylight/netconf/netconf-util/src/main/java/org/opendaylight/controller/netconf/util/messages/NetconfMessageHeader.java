@@ -22,9 +22,9 @@ public final class NetconfMessageHeader {
     private long length;
 
     // \n#<length>\n
-    private static final byte[] headerBegin = new byte[] { (byte) 0x0a, (byte) 0x23 };
+    private static final byte[] HEADER_BEGIN = new byte[] { (byte) 0x0a, (byte) 0x23 };
 
-    private static final byte headerEnd = (byte) 0x0a;
+    private static final byte HEADER_END = (byte) 0x0a;
 
     private boolean parsed = false;
 
@@ -33,12 +33,12 @@ public final class NetconfMessageHeader {
     }
 
     public NetconfMessageHeader fromBytes(final byte[] bytes) {
-        // the length is variable therefore bytes between headerBegin and
-        // headerEnd mark the length
+        // the length is variable therefore bytes between HEADER_BEGIN and
+        // HEADER_END mark the length
         // the length should be only numbers and therefore easily parsed with
         // ASCII
         this.length = Long.parseLong(Charsets.US_ASCII.decode(
-                ByteBuffer.wrap(bytes, headerBegin.length, bytes.length - headerBegin.length - 1)).toString());
+                ByteBuffer.wrap(bytes, HEADER_BEGIN.length, bytes.length - HEADER_BEGIN.length - 1)).toString());
         Preconditions.checkState(this.length < Integer.MAX_VALUE && this.length > 0);
         this.parsed = true;
         return this;
@@ -46,10 +46,10 @@ public final class NetconfMessageHeader {
 
     public byte[] toBytes() {
         final byte[] l = String.valueOf(this.length).getBytes(Charsets.US_ASCII);
-        final byte[] h = new byte[headerBegin.length + l.length + 1];
-        System.arraycopy(headerBegin, 0, h, 0, headerBegin.length);
-        System.arraycopy(l, 0, h, headerBegin.length, l.length);
-        System.arraycopy(new byte[] { headerEnd }, 0, h, headerBegin.length + l.length, 1);
+        final byte[] h = new byte[HEADER_BEGIN.length + l.length + 1];
+        System.arraycopy(HEADER_BEGIN, 0, h, 0, HEADER_BEGIN.length);
+        System.arraycopy(l, 0, h, HEADER_BEGIN.length, l.length);
+        System.arraycopy(new byte[] {HEADER_END}, 0, h, HEADER_BEGIN.length + l.length, 1);
         return h;
     }
 

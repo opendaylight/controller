@@ -68,10 +68,10 @@ public class MessageParserTest {
             int exptHeaderLength = NetconfMessageConstants.MAX_CHUNK_SIZE;
             if (i == chunkCount) {
                 exptHeaderLength = msgLength - (NetconfMessageConstants.MAX_CHUNK_SIZE * (i - 1));
-                byte[] eom = new byte[NetconfMessageConstants.endOfChunk.length];
-                recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.endOfChunk.length,
+                byte[] eom = new byte[NetconfMessageConstants.END_OF_CHUNK.length];
+                recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.END_OF_CHUNK.length,
                         eom);
-                assertArrayEquals(NetconfMessageConstants.endOfChunk, eom);
+                assertArrayEquals(NetconfMessageConstants.END_OF_CHUNK, eom);
             }
 
             byte[] header = new byte[String.valueOf(exptHeaderLength).length()
@@ -100,9 +100,9 @@ public class MessageParserTest {
         testChunkChannel.writeOutbound(this.msg);
         ByteBuf recievedOutbound = (ByteBuf) testChunkChannel.readOutbound();
 
-        byte[] eom = new byte[NetconfMessageConstants.endOfMessage.length];
-        recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.endOfMessage.length, eom);
-        assertArrayEquals(NetconfMessageConstants.endOfMessage, eom);
+        byte[] eom = new byte[NetconfMessageConstants.END_OF_MESSAGE.length];
+        recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageConstants.END_OF_MESSAGE.length, eom);
+        assertArrayEquals(NetconfMessageConstants.END_OF_MESSAGE, eom);
 
         testChunkChannel.writeInbound(recievedOutbound);
         NetconfMessage receivedMessage = (NetconfMessage) testChunkChannel.readInbound();

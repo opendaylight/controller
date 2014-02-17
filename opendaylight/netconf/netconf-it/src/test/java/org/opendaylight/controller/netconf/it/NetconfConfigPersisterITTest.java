@@ -163,7 +163,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     private VerifyingNotificationListener createCommitNotificationListener() throws InstanceNotFoundException {
         VerifyingNotificationListener listener = new VerifyingNotificationListener();
-        platformMBeanServer.addNotificationListener(DefaultCommitNotificationProducer.objectName, listener, null, null);
+        platformMBeanServer.addNotificationListener(DefaultCommitNotificationProducer.OBJECT_NAME, listener, null, null);
         return listener;
     }
 

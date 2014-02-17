@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.util.handler.ssh.client;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,8 +19,8 @@ import java.io.OutputStream;
 /**
  * Wrapper class for proprietary SSH sessions implementations
  */
-public class SshSession {
-    final Session session;
+public class SshSession implements Closeable {
+    private final Session session;
 
     public SshSession(Session session) {
         this.session = session;
@@ -61,8 +62,8 @@ public class SshSession {
         return session.waitUntilDataAvailable(timeout);
     }
 
-    public int waitForCondition(int condition_set, long timeout) {
-        return session.waitForCondition(condition_set, timeout);
+    public int waitForCondition(int conditionSet, long timeout) {
+        return session.waitForCondition(conditionSet, timeout);
     }
 
     public Integer getExitStatus() {
@@ -71,5 +72,10 @@ public class SshSession {
 
     public String getExitSignal() {
         return session.getExitSignal();
+    }
+
+    @Override
+    public void close() {
+        session.close();
     }
 }

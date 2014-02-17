@@ -31,7 +31,7 @@ public class NetconfXMLToMessageDecoder extends ByteToMessageDecoder {
 
     @Override
     @VisibleForTesting
-    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws NetconfDeserializerException{
         if (in.readableBytes() == 0) {
             LOG.debug("No more content in incoming buffer.");
             return;

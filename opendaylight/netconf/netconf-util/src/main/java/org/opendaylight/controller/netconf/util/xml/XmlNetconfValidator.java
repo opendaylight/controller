@@ -21,8 +21,11 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Preconditions;
 
-public class XmlNetconfValidator {
-    static final Schema schema;
+public final class XmlNetconfValidator {
+
+    private static final Schema SCHEMA;
+
+    private XmlNetconfValidator() {}
 
     static {
         final InputStream xmlSchema = XmlNetconfValidator.class.getResourceAsStream("/xml.xsd");
@@ -30,11 +33,11 @@ public class XmlNetconfValidator {
 
         final InputStream rfc4714Schema = XmlNetconfValidator.class.getResourceAsStream("/rfc4741.xsd");
         Preconditions.checkNotNull(rfc4714Schema, "Cannot find rfc4741.xsd");
-        schema = XmlUtil.loadSchema(xmlSchema, rfc4714Schema);
+        SCHEMA = XmlUtil.loadSchema(xmlSchema, rfc4714Schema);
     }
 
     public static void validate(Document inputDocument) throws SAXException, IOException {
-        final Validator validator = schema.newValidator();
+        final Validator validator = SCHEMA.newValidator();
         final Source source = new DOMSource(inputDocument);
         validator.validate(source);
     }

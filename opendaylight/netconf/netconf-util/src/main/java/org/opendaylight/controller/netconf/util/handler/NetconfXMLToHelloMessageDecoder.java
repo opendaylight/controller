@@ -47,7 +47,7 @@ public class NetconfXMLToHelloMessageDecoder extends NetconfXMLToMessageDecoder 
             if (endOfAuthHeader > -1) {
                 byte[] additionalHeaderBytes = Arrays.copyOfRange(bytes, 0, endOfAuthHeader + 2);
                 additionalHeaderCache = additionalHeaderToString(additionalHeaderBytes);
-                bytes = Arrays.copyOfRange(bytes, endOfAuthHeader + 2, bytes.length);
+                return Arrays.copyOfRange(bytes, endOfAuthHeader + 2, bytes.length);
             }
         }
 
@@ -106,11 +106,13 @@ public class NetconfXMLToHelloMessageDecoder extends NetconfXMLToMessageDecoder 
         for (byte[] possibleStart : POSSIBLE_STARTS) {
             int i = 0;
             for (byte b : possibleStart) {
-                if(bytes[i++] != b)
+                if(bytes[i++] != b) {
                     break;
+                }
 
-                if(i == possibleStart.length)
+                if(i == possibleStart.length) {
                     return true;
+                }
             }
         }
 

@@ -21,18 +21,18 @@ import java.util.List;
 
 public class NetconfMessageAggregator extends ByteToMessageDecoder {
 
-    private final static Logger logger = LoggerFactory.getLogger(NetconfMessageAggregator.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetconfMessageAggregator.class);
 
-    private byte[] eom = NetconfMessageConstants.endOfMessage;
+    private byte[] eom = NetconfMessageConstants.END_OF_MESSAGE;
 
     public NetconfMessageAggregator(FramingMechanism framingMechanism) {
         if (framingMechanism == FramingMechanism.CHUNK) {
-            eom = NetconfMessageConstants.endOfChunk;
+            eom = NetconfMessageConstants.END_OF_CHUNK;
         }
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         int index = indexOfSequence(in, eom);
         if (index == -1) {
             logger.debug("Message is not complete, read again.");

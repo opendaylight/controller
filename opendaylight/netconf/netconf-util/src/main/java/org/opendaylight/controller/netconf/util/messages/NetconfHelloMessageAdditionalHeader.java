@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * session's connection. Provided information can be reported via netconf
  * monitoring.
  * <pre>
- * It has pattern "[username; host-address:port; transport; session-identifier;]"
+ * It has PATTERN "[username; host-address:port; transport; session-identifier;]"
  * username - name of account on a remote
  * host-address - client's IP address
  * port - port number
@@ -92,20 +92,20 @@ public class NetconfHelloMessageAdditionalHeader {
     }
 
     // TODO IPv6
-    private static final Pattern pattern = Pattern
+    private static final Pattern PATTERN = Pattern
             .compile("\\[(?<username>[^;]+);(?<address>[0-9\\.]+)[:/](?<port>[0-9]+);(?<transport>[a-z]+)[^\\]]+\\]");
-    private static final Pattern customHeaderPattern = Pattern
+    private static final Pattern CUSTOM_HEADER_PATTERN = Pattern
             .compile("\\[(?<username>[^;]+);(?<address>[0-9\\.]+)[:/](?<port>[0-9]+);(?<transport>[a-z]+);(?<sessionIdentifier>[a-z]+)[^\\]]+\\]");
 
     /**
      * Parse additional header from a formatted string
      */
     public static NetconfHelloMessageAdditionalHeader fromString(String additionalHeader) {
-        additionalHeader = additionalHeader.trim();
-        Matcher matcher = pattern.matcher(additionalHeader);
-        Matcher matcher2 = customHeaderPattern.matcher(additionalHeader);
+        String additionalHeaderTrimmed = additionalHeader.trim();
+        Matcher matcher = PATTERN.matcher(additionalHeaderTrimmed);
+        Matcher matcher2 = CUSTOM_HEADER_PATTERN.matcher(additionalHeaderTrimmed);
         Preconditions.checkArgument(matcher.matches(), "Additional header in wrong format %s, expected %s",
-                additionalHeader, pattern);
+                additionalHeaderTrimmed, PATTERN);
 
         String username = matcher.group("username");
         String address = matcher.group("address");

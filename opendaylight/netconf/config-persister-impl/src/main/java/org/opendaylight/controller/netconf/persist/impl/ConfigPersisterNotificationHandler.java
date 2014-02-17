@@ -49,7 +49,7 @@ public class ConfigPersisterNotificationHandler implements Closeable {
     private static void registerAsJMXListener(MBeanServerConnection mBeanServerConnection, ConfigPersisterNotificationListener listener) {
         logger.trace("Called registerAsJMXListener");
         try {
-            mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.objectName, listener, null, null);
+            mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.OBJECT_NAME, listener, null, null);
         } catch (InstanceNotFoundException | IOException e) {
             throw new RuntimeException("Cannot register as JMX listener to netconf", e);
         }
@@ -58,7 +58,7 @@ public class ConfigPersisterNotificationHandler implements Closeable {
     @Override
     public synchronized void close() {
         // unregister from JMX
-        ObjectName on = DefaultCommitOperationMXBean.objectName;
+        ObjectName on = DefaultCommitOperationMXBean.OBJECT_NAME;
         try {
             if (mBeanServerConnection.isRegistered(on)) {
                 mBeanServerConnection.removeNotificationListener(on, listener);
