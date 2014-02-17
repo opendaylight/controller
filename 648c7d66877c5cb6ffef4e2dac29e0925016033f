@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_98aeee2c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/config/yang/md/sal/remote/rpc/ZeroMQServerModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-02-17T21:11:13Z",
+      "side": 1,
+      "message": "Line#52 is the only change in this class. This line got deleted after rebase so I had to add it back. This I mentioned in the commit message. I agree, I could have been more explicit.",
+      "parentUuid": "da6255ed_c434824b",
+      "revId": "648c7d66877c5cb6ffef4e2dac29e0925016033f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_e431c65a",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/sal/connector/remoterpc/RemoteRpcProvider.java",
         "patchSetId": 3
