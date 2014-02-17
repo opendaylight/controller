@@ -47,7 +47,7 @@ public class ConfigRegistryClientsTest {
     @Test
     public void testLookupRuntimeBeans() throws Exception {
         Set<ObjectName> jmxLookup = lookupRuntimeBeans(jmxRegistryClient);
-        assertEquals(Sets.newHashSet(testingRegistry.run2, testingRegistry.run1, testingRegistry.run3), jmxLookup);
+        assertEquals(Sets.newHashSet(TestingConfigRegistry.run2, TestingConfigRegistry.run1, TestingConfigRegistry.run3), jmxLookup);
     }
 
     private Set<ObjectName> lookupRuntimeBeans(ConfigRegistryClient client)
@@ -67,13 +67,13 @@ public class ConfigRegistryClientsTest {
                 jmxRegistryClient, TestingConfigRegistry.moduleName1,
                 TestingConfigRegistry.instName1);
         assertEquals(1, jmxLookup.size());
-        assertEquals(Sets.newHashSet(testingRegistry.run2), jmxLookup);
+        assertEquals(Sets.newHashSet(TestingConfigRegistry.run2), jmxLookup);
 
         jmxLookup = clientLookupRuntimeBeansWithModuleAndInstance(
                 jmxRegistryClient, TestingConfigRegistry.moduleName2,
                 TestingConfigRegistry.instName2);
         assertEquals(1, jmxLookup.size());
-        assertEquals(Sets.newHashSet(testingRegistry.run3), jmxLookup);
+        assertEquals(Sets.newHashSet(TestingConfigRegistry.run3), jmxLookup);
 
         jmxLookup = clientLookupRuntimeBeansWithModuleAndInstance(
                 jmxRegistryClient, TestingConfigRegistry.moduleName1,

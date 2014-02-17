@@ -314,9 +314,9 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
             try {
                 boolean retStatus;
                 if(oldLatch != null) {
-                    retStatus = oldLatch.await(this.latchTimeout, TimeUnit.SECONDS);
+                    retStatus = oldLatch.await(StatisticsManager.latchTimeout, TimeUnit.SECONDS);
                 } else {
-                    retStatus = newLatch.await(this.latchTimeout, TimeUnit.SECONDS);
+                    retStatus = newLatch.await(StatisticsManager.latchTimeout, TimeUnit.SECONDS);
                 }
                 // log the return code as it will give us, if
                 // the latch timed out.

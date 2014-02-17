@@ -30,14 +30,14 @@ public class AuthProvider implements AuthProviderInterface {
 
     public AuthProvider(IUserManager ium,InputStream privateKeyFileInputStream) throws Exception {
 
-        this.um = ium;
-        if (this.um  == null){
+        AuthProvider.um = ium;
+        if (AuthProvider.um  == null){
             throw new Exception("No usermanager service available.");
         }
 
         List<String> roles = new ArrayList<String>(1);
         roles.add(UserLevel.SYSTEMADMIN.toString());
-        this.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles));
+        AuthProvider.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles));
 
         try {
             PEM = IOUtils.toString(privateKeyFileInputStream);
@@ -48,10 +48,10 @@ public class AuthProvider implements AuthProviderInterface {
     }
     @Override
     public boolean authenticated(String username, String password)  throws Exception {
-        if (this.um  == null){
+        if (AuthProvider.um  == null){
             throw new Exception("No usermanager service available.");
         }
-        AuthResultEnum authResult = this.um.authenticate(username,password);
+        AuthResultEnum authResult = AuthProvider.um.authenticate(username,password);
         if (authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC)){
             return true;
         }
@@ -69,12 +69,12 @@ public class AuthProvider implements AuthProviderInterface {
 
     @Override
     public void removeUserManagerService() {
-        this.um = null;
+        AuthProvider.um = null;
     }
 
     @Override
     public void addUserManagerService(IUserManager userManagerService) {
-        this.um = userManagerService;
+        AuthProvider.um = userManagerService;
     }
 
 

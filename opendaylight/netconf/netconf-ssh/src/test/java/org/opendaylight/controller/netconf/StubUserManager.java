@@ -30,8 +30,8 @@ public class StubUserManager implements IUserManager{
     private static String password;
 
     public StubUserManager(String user, String password){
-        this.user = user;
-        this.password = password;
+        StubUserManager.user = user;
+        StubUserManager.password = password;
     }
     @Override
     public List<String> getUserRoles(String userName) {
@@ -40,7 +40,7 @@ public class StubUserManager implements IUserManager{
 
     @Override
     public AuthResultEnum authenticate(String username, String password) {
-        if (this.user.equals(username) && this.password.equals(password)){
+        if (StubUserManager.user.equals(username) && StubUserManager.password.equals(password)){
             return AuthResultEnum.AUTH_ACCEPT_LOC;
         }
         return AuthResultEnum.AUTH_REJECT_LOC;
