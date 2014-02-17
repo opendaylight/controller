@@ -12,7 +12,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -94,10 +93,10 @@ public class RestGetOperationTest extends JerseyTest {
     @Test
     public void getOperationalStatusCodes() throws UnsupportedEncodingException {
         mockReadOperationalDataMethod();
-        String uri = createUri("/operational/", "ietf-interfaces:interfaces/interface/eth0");
+        String uri = "/operational/ietf-interfaces:interfaces/interface/eth0";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
 
-        uri = createUri("/operational/", "wrong-module:interfaces/interface/eth0");
+        uri = "/operational/wrong-module:interfaces/interface/eth0";
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
     }
 
@@ -107,10 +106,10 @@ public class RestGetOperationTest extends JerseyTest {
     @Test
     public void getConfigStatusCodes() throws UnsupportedEncodingException {
         mockReadConfigurationDataMethod();
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
+        String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
 
-        uri = createUri("/config/", "wrong-module:interfaces/interface/eth0");
+        uri = "/config/wrong-module:interfaces/interface/eth0";
         assertEquals(400, get(uri, MediaType.APPLICATION_XML));
     }
 
@@ -129,11 +128,10 @@ public class RestGetOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/",
-                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1");
+        String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
 
-        uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont/cont1");
+        uri = "/config/ietf-interfaces:interfaces/yang-ext:mount/test-module:cont/cont1";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
@@ -149,7 +147,7 @@ public class RestGetOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+        String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
@@ -158,7 +156,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getModulesTest() throws UnsupportedEncodingException, FileNotFoundException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = createUri("/modules", "");
+        String uri = "/modules";
 
         Response response = target(uri).request("application/yang.api+json").get();
         validateModulesResponseJson(response);
@@ -172,7 +170,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getModuleTest() throws FileNotFoundException, UnsupportedEncodingException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = createUri("/modules/module/module2/2014-01-02", "");
+        String uri = "/modules/module/module2/2014-01-02";
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -197,7 +195,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getOperationsTest() throws FileNotFoundException, UnsupportedEncodingException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = createUri("/operations", "");
+        String uri = "/operations";
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -238,7 +236,7 @@ public class RestGetOperationTest extends JerseyTest {
 
         controllerContext.setMountService(mockMountService);
 
-        String uri = createUri("/operations/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+        String uri = "/operations/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -329,7 +327,7 @@ public class RestGetOperationTest extends JerseyTest {
 
         controllerContext.setMountService(mockMountService);
 
-        String uri = createUri("/modules/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/");
+        String uri = "/modules/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
 
         Response response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
@@ -371,8 +369,7 @@ public class RestGetOperationTest extends JerseyTest {
 
         controllerContext.setMountService(mockMountService);
 
-        String uri = createUri("/modules/module/",
-                "ietf-interfaces:interfaces/interface/0/yang-ext:mount/module1-behind-mount-point/2014-02-03");
+        String uri = "/modules/module/ietf-interfaces:interfaces/interface/0/yang-ext:mount/module1-behind-mount-point/2014-02-03";
 
         Response response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());

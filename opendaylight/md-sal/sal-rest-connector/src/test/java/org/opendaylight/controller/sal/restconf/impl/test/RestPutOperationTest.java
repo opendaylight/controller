@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -95,7 +94,7 @@ public class RestPutOperationTest extends JerseyTest {
      */
     @Test
     public void putConfigStatusCodes() throws UnsupportedEncodingException {
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/eth0");
+        String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
         mockCommitConfigurationDataPutMethod(TransactionStatus.COMMITED);
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
 
@@ -121,10 +120,10 @@ public class RestPutOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont");
+        String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData2));
 
-        uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount/test-module:cont");
+        uri = "/config/ietf-interfaces:interfaces/yang-ext:mount/test-module:cont";
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData2));
     }
 
@@ -144,7 +143,7 @@ public class RestPutOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/yang-ext:mount");
+        String uri = "/config/ietf-interfaces:interfaces/yang-ext:mount";
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData3));
     }
 
