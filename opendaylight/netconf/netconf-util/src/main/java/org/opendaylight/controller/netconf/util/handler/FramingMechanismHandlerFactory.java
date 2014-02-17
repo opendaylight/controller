@@ -17,7 +17,9 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class FramingMechanismHandlerFactory {
 
-    private final static Logger logger = LoggerFactory.getLogger(FramingMechanismHandlerFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(FramingMechanismHandlerFactory.class);
+
+    private FramingMechanismHandlerFactory() {}
 
     public static MessageToByteEncoder<ByteBuf> createHandler(FramingMechanism framingMechanism) {
         logger.debug("{} framing mechanism was selected.", framingMechanism);

@@ -49,7 +49,7 @@ public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf
         }
         out.writeBytes(createChunkHeader(msg.readableBytes()));
         out.writeBytes(msg.readBytes(msg.readableBytes()));
-        out.writeBytes(NetconfMessageConstants.endOfChunk);
+        out.writeBytes(NetconfMessageConstants.END_OF_CHUNK);
     }
 
     private ByteBuf createChunkHeader(int chunkSize) {

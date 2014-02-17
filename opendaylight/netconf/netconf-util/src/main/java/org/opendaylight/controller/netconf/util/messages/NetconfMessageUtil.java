@@ -13,7 +13,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 
-public class NetconfMessageUtil {
+public final class NetconfMessageUtil {
+
+    private NetconfMessageUtil() {}
 
     public static boolean isOKMessage(NetconfMessage message) {
         return isOKMessage(message.getDocument());

@@ -27,9 +27,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class NetconfUtil {
+public final class NetconfUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfUtil.class);
+
+    private NetconfUtil() {}
 
     public static NetconfMessage createMessage(final File f) {
         Preconditions.checkNotNull(f, "File parameter was null");

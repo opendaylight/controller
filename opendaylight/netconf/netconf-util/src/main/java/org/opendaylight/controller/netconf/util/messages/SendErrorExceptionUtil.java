@@ -29,8 +29,10 @@ import javax.xml.xpath.XPathExpression;
 import java.io.InputStream;
 import java.util.Map.Entry;
 
-public class SendErrorExceptionUtil {
+public final class SendErrorExceptionUtil {
     private static final Logger logger = LoggerFactory.getLogger(SendErrorExceptionUtil.class);
+
+    private SendErrorExceptionUtil() {}
 
     public static void sendErrorMessage(final NetconfSession session,
             final NetconfDocumentedException sendErrorException) {
@@ -68,8 +70,9 @@ public class SendErrorExceptionUtil {
             for (int i = 0; i < incomingAttributes.getLength(); i++) {
                 final Attr attr = (Attr) incomingAttributes.item(i);
                 // skip namespace
-                if (attr.getNodeName().equals(XmlUtil.XMLNS_ATTRIBUTE_KEY))
+                if (attr.getNodeName().equals(XmlUtil.XMLNS_ATTRIBUTE_KEY)) {
                     continue;
+                }
                 rpcReply.setAttributeNode((Attr) errorDocument.importNode(attr, true));
             }
         } catch (final Exception e) {

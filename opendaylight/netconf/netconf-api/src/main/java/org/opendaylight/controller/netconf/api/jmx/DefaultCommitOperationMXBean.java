@@ -14,7 +14,7 @@ import javax.management.ObjectName;
 
 public interface DefaultCommitOperationMXBean {
 
-    static String typeName = "NetconfNotificationProvider";
-    public static ObjectName objectName = ObjectNameUtil.createONWithDomainAndType(typeName);
+    String TYPE_NAME = "NetconfNotificationProvider";
+    ObjectName OBJECT_NAME = ObjectNameUtil.createONWithDomainAndType(TYPE_NAME);
 
 }

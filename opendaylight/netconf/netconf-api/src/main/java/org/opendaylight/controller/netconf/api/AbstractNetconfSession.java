@@ -22,13 +22,13 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
     private final long sessionId;
     private boolean up = false;
 
-    protected final Channel channel;
+    private final Channel channel;
 
     protected AbstractNetconfSession(L sessionListener, Channel channel, long sessionId) {
         this.sessionListener = sessionListener;
         this.channel = channel;
         this.sessionId = sessionId;
-        logger.debug("Session {} created", toString());
+        logger.debug("Session {} created", sessionId);
     }
 
     protected abstract S thisInstance();
