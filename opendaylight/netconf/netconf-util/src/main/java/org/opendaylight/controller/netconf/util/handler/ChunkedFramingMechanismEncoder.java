@@ -20,10 +20,10 @@ public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf
 
     private NetconfMessageHeader messageHeader = new NetconfMessageHeader();
 
-    private final static int MAX_CHUNK_SIZE = NetconfMessageConstants.MAX_CHUNK_SIZE;
+    private static final int MAX_CHUNK_SIZE = NetconfMessageConstants.MAX_CHUNK_SIZE;
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
         while (msg.readableBytes() > MAX_CHUNK_SIZE) {
             ByteBuf chunk = Unpooled.buffer(MAX_CHUNK_SIZE);
             chunk.writeBytes(createChunkHeader(MAX_CHUNK_SIZE));
@@ -32,7 +32,7 @@ public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf
         }
         out.writeBytes(createChunkHeader(msg.readableBytes()));
         out.writeBytes(msg.readBytes(msg.readableBytes()));
-        out.writeBytes(NetconfMessageConstants.endOfChunk);
+        out.writeBytes(NetconfMessageConstants.END_OF_CHUNK);
     }
 
     private ByteBuf createChunkHeader(int chunkSize) {

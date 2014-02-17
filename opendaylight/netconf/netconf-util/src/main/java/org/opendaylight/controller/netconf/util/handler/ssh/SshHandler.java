@@ -29,6 +29,8 @@ import org.opendaylight.controller.netconf.util.handler.ssh.virtualsocket.Virtua
  * stops at instance of this class. All downstream events are handed of to wrapped {@link org.opendaylight.controller.netconf.util.handler.ssh.client.SshClientAdapter};
  */
 public class SshHandler extends ChannelOutboundHandlerAdapter {
+    private static final String SOCKET = "socket";
+
     private final VirtualSocket virtualSocket = new VirtualSocket();
     private final SshClientAdapter sshClientAdapter;
 
@@ -39,20 +41,20 @@ public class SshHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx){
-        if (ctx.channel().pipeline().get("socket") == null) {
-            ctx.channel().pipeline().addFirst("socket", virtualSocket);
+        if (ctx.channel().pipeline().get(SOCKET) == null) {
+            ctx.channel().pipeline().addFirst(SOCKET, virtualSocket);
         }
     }
 
     @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        if (ctx.channel().pipeline().get("socket") != null) {
-            ctx.channel().pipeline().remove("socket");
+    public void handlerRemoved(ChannelHandlerContext ctx) {
+        if (ctx.channel().pipeline().get(SOCKET) != null) {
+            ctx.channel().pipeline().remove(SOCKET);
         }
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws IOException {
         this.sshClientAdapter.write((ByteBuf) msg);
     }
 
@@ -60,18 +62,18 @@ public class SshHandler extends ChannelOutboundHandlerAdapter {
     public void connect(final ChannelHandlerContext ctx,
                         SocketAddress remoteAddress,
                         SocketAddress localAddress,
-                        ChannelPromise promise) throws Exception {
+                        ChannelPromise promise) {
         ctx.connect(remoteAddress, localAddress, promise);
 
         promise.addListener(new ChannelFutureListener() {
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+            public void operationComplete(ChannelFuture channelFuture) {
                 sshClientAdapter.start(ctx);
             }}
         );
     }
 
     @Override
-    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) {
         sshClientAdapter.stop(promise);
     }
 }

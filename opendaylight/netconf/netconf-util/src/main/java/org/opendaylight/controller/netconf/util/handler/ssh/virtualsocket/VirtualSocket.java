@@ -26,6 +26,9 @@ import java.nio.channels.SocketChannel;
  * are able to use full potential of NIO environment.
  */
 public class VirtualSocket extends Socket implements ChannelHandler {
+    private static final String INPUT_STREAM = "inputStream";
+    private static final String OUTPUT_STREAM = "outputStream";
+
     private final ChannelInputStream chis = new ChannelInputStream();
     private final ChannelOutputStream chos = new ChannelOutputStream();
     private ChannelHandlerContext ctx;
@@ -39,29 +42,30 @@ public class VirtualSocket extends Socket implements ChannelHandler {
         return this.chos;
     }
 
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+    public void handlerAdded(ChannelHandlerContext ctx) {
         this.ctx = ctx;
 
-        if (ctx.channel().pipeline().get("outputStream") == null) {
-            ctx.channel().pipeline().addFirst("outputStream", chos);
+        if (ctx.channel().pipeline().get(OUTPUT_STREAM) == null) {
+            ctx.channel().pipeline().addFirst(OUTPUT_STREAM, chos);
         }
 
-        if (ctx.channel().pipeline().get("inputStream") == null) {
-            ctx.channel().pipeline().addFirst("inputStream", chis);
-        }
-    }
-
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        if (ctx.channel().pipeline().get("outputStream") != null) {
-            ctx.channel().pipeline().remove("outputStream");
-        }
-
-        if (ctx.channel().pipeline().get("inputStream") != null) {
-            ctx.channel().pipeline().remove("inputStream");
+        if (ctx.channel().pipeline().get(INPUT_STREAM) == null) {
+            ctx.channel().pipeline().addFirst(INPUT_STREAM, chis);
         }
     }
 
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) throws Exception {
+    public void handlerRemoved(ChannelHandlerContext ctx) {
+        if (ctx.channel().pipeline().get(OUTPUT_STREAM) != null) {
+            ctx.channel().pipeline().remove(OUTPUT_STREAM);
+        }
+
+        if (ctx.channel().pipeline().get(INPUT_STREAM) != null) {
+            ctx.channel().pipeline().remove(INPUT_STREAM);
+        }
+    }
+
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
+        // TODO exceptionCaught is deprecated transform this handler
         ctx.fireExceptionCaught(throwable);
     }
 
@@ -80,7 +84,9 @@ public class VirtualSocket extends Socket implements ChannelHandler {
     public InetAddress getInetAddress() {
         InetSocketAddress isa = getInetSocketAddress();
 
-        if (isa == null) throw new VirtualSocketException();
+        if (isa == null) {
+            throw new VirtualSocketException();
+        }
 
         return getInetSocketAddress().getAddress();
     }

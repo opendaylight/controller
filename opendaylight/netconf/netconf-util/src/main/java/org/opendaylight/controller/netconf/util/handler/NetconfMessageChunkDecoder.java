@@ -8,12 +8,12 @@
 
 package org.opendaylight.controller.netconf.util.handler;
 
+import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
@@ -23,7 +23,10 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
 
-    private final static Logger logger = LoggerFactory.getLogger(NetconfMessageChunkDecoder.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetconfMessageChunkDecoder.class);
+
+    public static final int HASH = 35;
+    public static final int LF = 10;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -36,7 +39,7 @@ public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
                     chunkSize = readHeader(in);
                     isParsed = true;
                 }
-                if (chunkSize != -1 && isParsed) {
+                if (chunkSize != -1) {
                     in.readBytes(byteBufMsg, chunkSize);
                     isParsed = false;
                 } else {
@@ -48,22 +51,25 @@ public class NetconfMessageChunkDecoder extends ByteToMessageDecoder {
             }
         }
         out.add(byteBufMsg);
-        isParsed = false;
     }
 
     private int readHeader(ByteBuf in) {
         ByteBuf chunkSize = Unpooled.buffer(NetconfMessageConstants.MIN_HEADER_LENGTH,
                 NetconfMessageConstants.MAX_HEADER_LENGTH);
         byte b = in.readByte();
-        if (b != 10)
+
+
+        if (b != LF) {
             return -1;
+        }
         b = in.readByte();
-        if (b != 35)
+        if (b != HASH) {
             return -1;
-        while ((b = in.readByte()) != 10) {
+        }
+        while ((b = in.readByte()) != LF) {
             chunkSize.writeByte(b);
         }
-        return Integer.parseInt(chunkSize.toString(Charset.forName("UTF-8")));
+        return Integer.parseInt(chunkSize.toString(Charsets.UTF_8));
     }
 
 }

@@ -31,7 +31,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
 
     private final MBeanServer mbeanServer;
 
-    private final ObjectName on = DefaultCommitOperationMXBean.objectName;
+    private final ObjectName on = DefaultCommitOperationMXBean.OBJECT_NAME;
 
     public DefaultCommitNotificationProducer(MBeanServer mBeanServer) {
         this.mbeanServer = mBeanServer;

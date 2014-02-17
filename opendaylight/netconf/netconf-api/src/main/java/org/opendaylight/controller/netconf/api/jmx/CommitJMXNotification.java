@@ -17,12 +17,12 @@ public class CommitJMXNotification extends NetconfJMXNotification {
 
     private final Element configSnapshot;
 
-    private static final String afterCommitMessageTemplate = "Commit successful: %s";
+    private static final String AFTER_COMMIT_MESSAGE_TEMPLATE = "Commit successful: %s";
     private final Set<String> capabilities;
 
     CommitJMXNotification(NotificationBroadcasterSupport source, String message, Element cfgSnapshot,
             Set<String> capabilities) {
-        super(TransactionProviderJMXNotificationType.commit, source, String.format(afterCommitMessageTemplate, message));
+        super(TransactionProviderJMXNotificationType.commit, source, String.format(AFTER_COMMIT_MESSAGE_TEMPLATE, message));
         this.configSnapshot = cfgSnapshot;
         this.capabilities = capabilities;
     }

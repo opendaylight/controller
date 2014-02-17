@@ -39,7 +39,7 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
 
     @Override
     @VisibleForTesting
-    public void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) throws Exception {
+    public void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) {
         LOG.debug("Sent to encode : {}", msg);
 
         if (clientId.isPresent()) {

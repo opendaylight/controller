@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class SshClient {
     private final VirtualSocket socket;
-    private final Map<Integer, SshSession> openSessions = new HashMap();
+    private final Map<Integer, SshSession> openSessions = new HashMap<>();
     private final AuthenticationHandler authenticationHandler;
     private Connection connection;
 
@@ -33,8 +33,9 @@ public class SshClient {
     }
 
     public SshSession openSession() throws IOException {
-        if (connection == null)
+        if (connection == null) {
             connect();
+        }
 
         Session session = connection.openSession();
         SshSession sshSession = new SshSession(session);
@@ -52,7 +53,7 @@ public class SshClient {
 
     public void closeSession(SshSession session) {
         if (session.getState() == Channel.STATE_OPEN || session.getState() == Channel.STATE_OPENING) {
-            session.session.close();
+            session.close();
         }
     }
 
@@ -62,7 +63,8 @@ public class SshClient {
 
         openSessions.clear();
 
-        if (connection != null)
+        if (connection != null) {
             connection.close();
+        }
     }
 }
