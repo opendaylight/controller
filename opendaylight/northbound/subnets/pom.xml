@@ -22,7 +22,6 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>${enunciate.version}</version>
         <dependencies>
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -110,7 +109,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

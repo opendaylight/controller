@@ -7,25 +7,27 @@
  */
 package org.opendaylight.controller.netconf.ssh.threads;
 
-import ch.ethz.ssh2.ServerConnection;
-import ch.ethz.ssh2.ServerSession;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import javax.annotation.concurrent.ThreadSafe;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.ethz.ssh2.ServerConnection;
+import ch.ethz.ssh2.ServerSession;
 
 @ThreadSafe
 public class IOThread extends Thread {
 
     private static final Logger logger =  LoggerFactory.getLogger(IOThread.class);
 
-    private InputStream inputStream;
-    private OutputStream outputStream;
-    private String id;
-    private ServerSession servSession;
-    private ServerConnection servconnection;
+    private final InputStream inputStream;
+    private final OutputStream outputStream;
+    private final ServerSession servSession;
+    private final ServerConnection servconnection;
     private String customHeader;
 
 
@@ -37,6 +39,7 @@ public class IOThread extends Thread {
         super.setName(id);
         logger.trace("IOThread {} created", super.getName());
     }
+
     public IOThread (InputStream is, OutputStream os, String id,ServerSession ss, ServerConnection conn,String header){
         this.inputStream = is;
         this.outputStream = os;
@@ -53,7 +56,7 @@ public class IOThread extends Thread {
         try {
             if (this.customHeader!=null && !this.customHeader.equals("")){
                 this.outputStream.write(this.customHeader.getBytes());
-                logger.trace("adding  {} header", this.customHeader);
+                logger.trace("adding {} header", this.customHeader);
             }
             IOUtils.copy(this.inputStream, this.outputStream);
         } catch (Exception e) {

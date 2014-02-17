@@ -41,12 +41,10 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>restconf-client-api</artifactId>
-            <version>${yangtools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>restconf-client-impl</artifactId>
-            <version>${yangtools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

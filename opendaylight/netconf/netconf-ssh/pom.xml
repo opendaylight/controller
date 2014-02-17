@@ -35,7 +35,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>usermanager</artifactId>
-            <version>0.4.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
