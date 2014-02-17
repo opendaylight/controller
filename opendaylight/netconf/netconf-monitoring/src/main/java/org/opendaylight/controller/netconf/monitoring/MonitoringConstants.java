@@ -9,9 +9,13 @@ package org.opendaylight.controller.netconf.monitoring;
 
 public class MonitoringConstants {
 
-    public static final String NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring";
     public static final String MODULE_NAME = "ietf-netconf-monitoring";
     public static final String MODULE_REVISION = "2010-10-04";
+
+    public static final String NAMESPACE = "urn:ietf:params:xml:ns:yang:" + MODULE_NAME;
+    public static final String EXTENSION_NAMESPACE = NAMESPACE + "-extension";
+
+    public static final String EXTENSION_NAMESPACE_PREFIX = "ncme";
 
     public static final String URI = String.format("%s?module=%s&revision=%s", NAMESPACE, MODULE_NAME, MODULE_REVISION);
 
