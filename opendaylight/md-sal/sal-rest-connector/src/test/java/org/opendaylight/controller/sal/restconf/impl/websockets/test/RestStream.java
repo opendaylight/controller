@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -69,13 +68,13 @@ public class RestStream extends JerseyTest {
 
     @Test
     public void testCallRpcCallGet() throws UnsupportedEncodingException, InterruptedException {
-        String uri = createUri("/operations/", "sal-remote:create-data-change-event-subscription");
+        String uri = "/operations/sal-remote:create-data-change-event-subscription";
         Response responseWithStreamName = post(uri, MediaType.APPLICATION_XML, getRpcInput());
         String xmlResponse = responseWithStreamName.readEntity(String.class);
         assertNotNull(xmlResponse);
         assertTrue(xmlResponse.contains("<stream-name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</stream-name>"));
 
-        uri = createUri("/streams/stream/", "ietf-interfaces:interfaces/ietf-interfaces:interface/eth0");
+        uri = "/streams/stream/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0";
         Response responseWithRedirectionUri = get(uri, MediaType.APPLICATION_XML);
         final URI websocketServerUri = responseWithRedirectionUri.getLocation();
         assertNotNull(websocketServerUri);

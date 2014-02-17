@@ -57,6 +57,8 @@ class ControllerContext implements SchemaServiceListener {
     val static MOUNT_MODULE = "yang-ext"
     val static MOUNT_NODE = "mount"
     public val static MOUNT = "yang-ext:mount"
+    val static URI_ENCODING_CHAR_SET = "ISO-8859-1"
+    val static URI_SLASH_PLACEHOLDER = "%2F";
 
     @Property
     var SchemaContext globalSchema;
@@ -98,7 +100,8 @@ class ControllerContext implements SchemaServiceListener {
 
     private def InstanceIdWithSchemaNode toIdentifier(String restconfInstance, boolean toMountPointIdentifier) {
         checkPreconditions
-        val pathArgs = Lists.newArrayList(Splitter.on("/").split(restconfInstance))
+        val encodedPathArgs = Lists.newArrayList(Splitter.on("/").split(restconfInstance))
+        val pathArgs = urlPathArgsDecode(encodedPathArgs)
         pathArgs.omitFirstAndLastEmptyString
         if (pathArgs.empty) {
             return null;
@@ -353,7 +356,7 @@ class ControllerContext implements SchemaServiceListener {
 
     private def toUriString(Object object) {
         if(object === null) return "";
-        return URLEncoder.encode(object.toString)
+        return object.toString.replace("/",URI_SLASH_PLACEHOLDER)        
     }
     
     private def InstanceIdWithSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
@@ -605,5 +608,14 @@ class ControllerContext implements SchemaServiceListener {
             qnameToRpc.put(qname, operation);
         }
     }
+
+
+    def urlPathArgsDecode(List<String> strings) {
+        val List<String> decodedPathArgs = new ArrayList();
+        for (pathArg : strings) {
+            decodedPathArgs.add(URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET))
+        }
+        return decodedPathArgs
+    }    
 
 }
