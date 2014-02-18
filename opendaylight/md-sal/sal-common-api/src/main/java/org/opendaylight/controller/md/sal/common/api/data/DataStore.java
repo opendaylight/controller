@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-public interface DataStore<P, D> extends //
+import org.opendaylight.yangtools.concepts.Path;
+
+public interface DataStore<P extends Path<P>, D> extends //
         DataReader<P, D>, //
         DataModificationTransactionFactory<P, D> {
 

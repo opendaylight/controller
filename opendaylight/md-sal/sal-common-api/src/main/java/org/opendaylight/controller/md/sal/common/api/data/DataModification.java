@@ -10,11 +10,10 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-//FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-//import org.opendaylight.yangtools.concepts.Path;
-public interface DataModification<P/* extends Path<P> */, D> extends DataChange<P, D>, DataReader<P, D> {
+public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>, DataReader<P, D> {
 
     /**
      * Returns transaction identifier
