@@ -15,17 +15,17 @@
                     </type>
                     <name>id-test</name>
                     <identities>
-                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:test-identity1</afi>
-                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:test-identity2</safi>
+                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</afi>
+                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</safi>
                     </identities>
                     <identities>
-                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:test-identity2</afi>
-                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:test-identity1</safi>
+                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</afi>
+                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</safi>
                     </identities>
                     <identities-container>
-                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:test-identity2</afi>
+                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</afi>
                     </identities-container>
-                    <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:test-identity1</afi>
+                    <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</afi>
                 </module>
             </modules>
 

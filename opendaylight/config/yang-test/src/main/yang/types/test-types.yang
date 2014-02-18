@@ -31,4 +31,13 @@ module test-types {
         }
       }
 
+
+
+    identity test-identity1 {
+
+    }
+
+    identity test-identity2 {
+        base test-identity1;
+    }
 }

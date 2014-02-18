@@ -46,6 +46,14 @@
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>mockito-configuration</artifactId>
         </dependency>
+
+        <!--Dependencies regardign RuntimeGeneratedMappingService-->
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-generator-impl</artifactId>
+        </dependency>
+        <!--End-->
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-util</artifactId>
