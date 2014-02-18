@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import org.opendaylight.yangtools.concepts.Path;
+
 /**
  * A chain of transactions. Transactions in a chain need to be committed in sequence and each
  * transaction should see the effects of previous transactions as if they happened. A chain
  * makes no guarantees of atomicity, in fact transactions are committed as soon as possible.
  */
-public interface TransactionChain<P/* extends Path<P> */, D> extends AutoCloseable {
+public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable {
     /**
      * Create a new transaction which will continue the chain. The previous transaction
      * has to be either COMMITTED or CANCELLED.

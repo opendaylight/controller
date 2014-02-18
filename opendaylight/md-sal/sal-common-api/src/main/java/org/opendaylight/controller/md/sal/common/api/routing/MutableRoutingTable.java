@@ -8,10 +8,9 @@
 package org.opendaylight.controller.md.sal.common.api.routing;
 
 import org.opendaylight.yangtools.concepts.Mutable;
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.concepts.Path;
 
-public interface MutableRoutingTable<C,P/* extends Path<P> */,T> extends RoutingTable<C,P,T>, Mutable {
+public interface MutableRoutingTable<C, P extends Path<P>, T> extends RoutingTable<C,P,T>, Mutable {
     
     void setDefaultRoute(T target);
     void updateRoute(P path,T target);

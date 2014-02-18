@@ -9,10 +9,9 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import java.util.EventListener;
 
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.concepts.Path;
 
-public interface DataChangeListener<P/* extends Path<P> */,D> extends EventListener {
+public interface DataChangeListener<P extends Path<P>, D> extends EventListener {
 
     void onDataChanged(DataChangeEvent<P, D> change);
 }

@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.concepts.Path;
 
-public interface DataProvider<P/* extends Path<P> */,D> extends DataReader<P, D> {
+public interface DataProvider<P extends Path<P>, D> extends DataReader<P, D> {
 
 }

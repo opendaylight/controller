@@ -8,30 +8,29 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 /**
  * Two phase commit handler (cohort) of the two-phase commit protocol of data.
- * 
+ *
  * <p>
  * The provider should expose the implementation of DataCommitHandler if it's
  * functionality depends on any subset of data stored in data repositories, in
  * order to participate in {@link DataBrokerService#commit(DataStoreIdentifier)
  * operation.
- * 
+ *
  * <p>
  * Operations of two-phase commit handlers should not change data in data store,
  * this is responsibility of the coordinator (broker or some component of the
  * broker).
- * 
+ *
  * The commit handlers are responsible for changing the internal state of the
  * provider to reflect the commited changes in data.
- * 
+ *
  * <h3>Two-phase commit</h3>
- * 
+ *
  * <h4>Commit Request Phase</h4>
- * 
+ *
  * <ol>
  * <li> <code>Consumer</code> edits data by invocation of
  * <code>DataBrokerService.editCandidateData(DataStoreIdentifier, DataRoot)</code>
@@ -51,9 +50,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * </ol>
  * <li><code>Broker</code> starts a commit finish phase
  * </ol>
- * 
+ *
  * <h4>Commit Finish Phase</h4>
- * 
+ *
  * <ol>
  * <li>For each <code>CommitTransaction</code> from Commit Request phase
  * <ol>
@@ -69,7 +68,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * <li>If error occured, the broker starts a commit rollback phase.
  * </ul>
  * </ol>
- * 
+ *
  * <h4>Commit Rollback Phase</h4>
  * <li>For each <code>DataCommitTransaction</code> from Commit Request phase
  * <ol>
@@ -78,43 +77,43 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * <li>The provider rollbacks a commit and returns an {@link RpcResult} of
  * rollback. </ol>
  * <li>Broker returns a error result to the consumer.
- * 
+ *
  * @param <P> Class representing a path
  * @param <D> Superclass from which all data objects are derived from.
  */
-public interface DataCommitHandler<P/* extends Path<P> */,D> {
+public interface DataCommitHandler<P extends Path<P>, D> {
 
-    
+
     DataCommitTransaction<P, D> requestCommit(DataModification<P,D> modification);
 
-    public interface DataCommitTransaction<P/* extends Path<P> */,D> {
+    public interface DataCommitTransaction<P extends Path<P>, D> {
 
         DataModification<P,D> getModification();
 
         /**
-         * 
+         *
          * Finishes a commit.
-         * 
+         *
          * This callback is invoked by commit coordinator to finish commit action.
-         * 
+         *
          * The implementation is required to finish transaction or return unsuccessful
          * rpc result if something went wrong.
-         * 
+         *
          * The provider (commit handler) should apply all changes to its state
          * which are a result of data change-
-         * 
+         *
          * @return
          */
         RpcResult<Void> finish() throws IllegalStateException;
 
         /**
          * Rollbacks a commit.
-         * 
+         *
          * This callback is invoked by commit coordinator to finish commit action.
-         * 
+         *
          * The provider (commit handler) should rollback all changes to its state
          * which were a result of previous request commit.
-         * 
+         *
          * @return
          * @throws IllegalStateException
          *             If the method is invoked after {@link #finish()}
