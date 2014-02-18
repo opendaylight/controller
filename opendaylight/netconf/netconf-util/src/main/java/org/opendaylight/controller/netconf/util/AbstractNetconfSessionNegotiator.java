@@ -8,29 +8,6 @@
 
 package org.opendaylight.controller.netconf.util;
 
-import java.util.concurrent.TimeUnit;
-
-import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfSessionListener;
-import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
-import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
-import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
-import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.protocol.framework.AbstractSessionNegotiator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -42,12 +19,33 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 
+import java.util.concurrent.TimeUnit;
+
+import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfSessionListener;
+import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
+import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
+import org.opendaylight.controller.netconf.util.handler.NetconfChunkAggregator;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
+import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.protocol.framework.AbstractSessionNegotiator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends AbstractNetconfSession<S, L>, L extends NetconfSessionListener<S>>
 extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
-    public static final String CHUNK_DECODER_CHANNEL_HANDLER_KEY = "chunkDecoder";
 
     protected final P sessionPreferences;
 
@@ -162,7 +160,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
             }
 
             changeState(State.ESTABLISHED);
-            S session = getSession(sessionListener, channel, (NetconfHelloMessage)netconfMessage);
+            S session = getSession(sessionListener, channel, netconfMessage);
 
             negotiationSuccessful(session);
         } else {
@@ -180,9 +178,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_FRAME_ENCODER,
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK));
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_AGGREGATOR,
-                new NetconfMessageAggregator(FramingMechanism.CHUNK));
-        channel.pipeline().addAfter(AbstractChannelInitializer.NETCONF_MESSAGE_AGGREGATOR,
-                CHUNK_DECODER_CHANNEL_HANDLER_KEY, new NetconfMessageChunkDecoder());
+                new NetconfChunkAggregator());
     }
 
     private boolean shouldUseChunkFraming(Document doc) {

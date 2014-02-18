@@ -8,32 +8,24 @@
 
 package org.opendaylight.controller.netconf.util.handler;
 
-import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
+
+import java.util.List;
+
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.google.common.base.Charsets;
 
-public class NetconfMessageAggregator extends ByteToMessageDecoder {
-
-    private final static Logger logger = LoggerFactory.getLogger(NetconfMessageAggregator.class);
-
-    private byte[] eom = NetconfMessageConstants.endOfMessage;
-
-    public NetconfMessageAggregator(FramingMechanism framingMechanism) {
-        if (framingMechanism == FramingMechanism.CHUNK) {
-            eom = NetconfMessageConstants.endOfChunk;
-        }
-    }
+public class NetconfEOMAggregator extends ByteToMessageDecoder {
+    private final static Logger logger = LoggerFactory.getLogger(NetconfEOMAggregator.class);
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        int index = indexOfSequence(in, eom);
+        int index = indexOfSequence(in, NetconfMessageConstants.END_OF_MESSAGE);
         if (index == -1) {
             logger.debug("Message is not complete, read again.");
             if (logger.isTraceEnabled()) {
@@ -43,7 +35,7 @@ public class NetconfMessageAggregator extends ByteToMessageDecoder {
             ctx.read();
         } else {
             ByteBuf msg = in.readBytes(index);
-            in.readBytes(eom.length);
+            in.readBytes(NetconfMessageConstants.END_OF_MESSAGE.length);
             in.discardReadBytes();
             logger.debug("Message is complete.");
             out.add(msg);

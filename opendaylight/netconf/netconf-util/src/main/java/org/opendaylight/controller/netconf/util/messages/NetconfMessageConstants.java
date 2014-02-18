@@ -11,8 +11,11 @@ package org.opendaylight.controller.netconf.util.messages;
 import com.google.common.base.Charsets;
 
 public class NetconfMessageConstants {
-
-    public static final byte[] endOfMessage = "]]>]]>".getBytes(Charsets.UTF_8);
+    /**
+     * The NETCONF 1.0 old-style message separator. This is framing mechanism
+     * is used by default.
+     */
+    public static final byte[] END_OF_MESSAGE = "]]>]]>".getBytes(Charsets.UTF_8);
 
     public static final byte[] endOfChunk = "\n##\n".getBytes(Charsets.UTF_8);
 
