@@ -356,7 +356,6 @@ class ControllerContext implements SchemaServiceListener {
 
     private def toUriString(Object object) {
         if(object === null) return "";
-//        return object.toString.replace("/",URI_SLASH_PLACEHOLDER)
         return URLEncoder.encode(object.toString,URI_ENCODING_CHAR_SET)        
     }
     
@@ -620,6 +619,13 @@ class ControllerContext implements SchemaServiceListener {
             decodedPathArgs.add(URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET))
         }
         return decodedPathArgs
+    }
+        
+    def urlPathArgDecode(String pathArg) {
+        if (pathArg !== null) {
+            return URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET)
+        }
+        return null
     }    
 
 }
