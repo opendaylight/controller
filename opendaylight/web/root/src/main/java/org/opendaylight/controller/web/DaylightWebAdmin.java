@@ -212,10 +212,12 @@ public class DaylightWebAdmin {
         UserConfig newConfig = gson.fromJson(json, UserConfig.class);
         List<UserConfig> currentUserConfig = userManager.getLocalUserList();
         String password = null;
+        byte[] salt = null;
         String user = newConfig.getUser();
         for (UserConfig userConfig : currentUserConfig) {
             if(userConfig.getUser().equals(user)){
                 password = userConfig.getPassword();
+                salt = userConfig.getSalt();
                 break;
             }
         }
@@ -228,8 +230,9 @@ public class DaylightWebAdmin {
         //The password is stored in hash mode, hence it cannot be retrieved and added to UserConfig object
         //The hashed password is injected below to the json string containing username and new roles before
         //converting to UserConfig object.
-        json = json.replace("\"roles\"", "\"password\":\""+ password + "\",\"roles\"");
         Gson gson = new Gson();
+        json = json.replace("\"roles\"", "\"salt\":" + gson.toJson(salt, salt.getClass()) + ",\"password\":\""+ password + "\",\"roles\"");
+
         newConfig = gson.fromJson(json, UserConfig.class);
 
         Status result = userManager.modifyLocalUser(newConfig);

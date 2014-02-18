@@ -136,6 +136,10 @@ public class UserConfig extends ConfigurationObject implements Serializable {
         return new ArrayList<String>(roles);
     }
 
+    public byte[] getSalt() {
+        return salt.clone();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
