@@ -230,10 +230,7 @@ class RestconfImpl implements RestconfService {
     }
 
     override invokeRpc(String identifier, CompositeNode payload) {
-        val rpc = identifier.rpcDefinition
-        if (rpc === null) {
-            throw new ResponseException(NOT_FOUND, "RPC does not exist.");
-        }
+        val rpc = resolveIdentifierInInvokeRpc(identifier)        
         if (rpc.QName.namespace.toString == SAL_REMOTE_NAMESPACE && rpc.QName.localName == SAL_REMOTE_RPC_SUBSRCIBE) {
             val value = normalizeNode(payload, rpc.input, null)
             val pathNode = value?.getFirstSimpleByName(QName.create(rpc.QName, "path"))
@@ -267,9 +264,24 @@ class RestconfImpl implements RestconfService {
         if (!noPayload.nullOrEmpty) {
             throw new ResponseException(UNSUPPORTED_MEDIA_TYPE, "Content-Type contains unsupported Media Type.");
         }
-        return callRpc(identifier.rpcDefinition, null)
+        val rpc = resolveIdentifierInInvokeRpc(identifier)
+        return callRpc(rpc, null)
     }
 
+    def resolveIdentifierInInvokeRpc(String identifier) {
+        val slashIndex = identifier.indexOf("/")
+        var identifierWithoutSlash = identifier
+        if (slashIndex !== -1) {
+            identifierWithoutSlash = identifier.substring(0,slashIndex)
+        }
+        val identifierDecoded = identifierWithoutSlash.urlPathArgDecode        
+        val rpc = identifierDecoded.rpcDefinition
+        if (rpc === null) {
+            throw new ResponseException(NOT_FOUND, "RPC does not exist.");
+        }
+        return rpc
+    }
+    
     private def StructuredData callRpc(RpcDefinition rpc, CompositeNode payload) {
         if (rpc === null) {
             throw new ResponseException(NOT_FOUND, "RPC does not exist.");
