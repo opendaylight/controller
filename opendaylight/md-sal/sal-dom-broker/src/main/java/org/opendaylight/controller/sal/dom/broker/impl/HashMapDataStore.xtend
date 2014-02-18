@@ -18,9 +18,11 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
 import org.opendaylight.controller.sal.core.api.data.DataStore
 import java.util.HashSet
+import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 
-class HashMapDataStore implements DataStore, AutoCloseable {
-
+final class HashMapDataStore implements DataStore, AutoCloseable {
+    private val Logger LOG = LoggerFactory.getLogger(HashMapDataStore)
 
     val Map<InstanceIdentifier, CompositeNode> configuration = new ConcurrentHashMap();
     val Map<InstanceIdentifier, CompositeNode> operational = new ConcurrentHashMap();
@@ -28,12 +30,11 @@ class HashMapDataStore implements DataStore, AutoCloseable {
     
     
     override containsConfigurationPath(InstanceIdentifier path) {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
-        
+        return configuration.containsKey(path)
     }
     
     override containsOperationalPath(InstanceIdentifier path) {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        return operational.containsKey(path)
     }
     
     override getStoredConfigurationPaths() {
@@ -45,10 +46,12 @@ class HashMapDataStore implements DataStore, AutoCloseable {
     }
 
     override readConfigurationData(InstanceIdentifier path) {
+        LOG.trace("Reading configuration path {}", path)
         configuration.get(path);
     }
 
     override readOperationalData(InstanceIdentifier path) {
+        LOG.trace("Reading operational path {}", path)
         operational.get(path);
     }
 
@@ -65,10 +68,20 @@ class HashMapDataStore implements DataStore, AutoCloseable {
     def RpcResult<Void> finish(HashMapDataStoreTransaction transaction) {
         val modification = transaction.modification;
         for (removal : modification.removedConfigurationData) {
+            LOG.trace("Removing configuration path {}", removal)
             remove(configuration,removal);
         }
         for (removal : modification.removedOperationalData) {
+            LOG.trace("Removing operational path {}", removal)
             remove(operational,removal);
+        }
+        if (LOG.isTraceEnabled()) {
+            for (a : modification.updatedConfigurationData.keySet) {
+                LOG.trace("Adding configuration path {}", a)
+            }
+            for (a : modification.updatedOperationalData.keySet) {
+                LOG.trace("Adding operational path {}", a)
+            }
         }
         configuration.putAll(modification.updatedConfigurationData);
         operational.putAll(modification.updatedOperationalData);
@@ -84,6 +97,7 @@ class HashMapDataStore implements DataStore, AutoCloseable {
             }
         }
         for(pathToRemove : affected) {
+            LOG.trace("Removed path {}", pathToRemove)
             map.remove(pathToRemove);
         }
         
