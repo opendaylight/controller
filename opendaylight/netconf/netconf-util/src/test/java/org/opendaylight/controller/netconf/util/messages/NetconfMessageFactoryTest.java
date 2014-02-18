@@ -16,14 +16,13 @@ import java.util.List;
 
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.handler.NetconfXMLToHelloMessageDecoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
 
 import com.google.common.io.Files;
 
 public class NetconfMessageFactoryTest {
     @Test
     public void testAuth() throws Exception {
-        NetconfXMLToMessageDecoder parser = new NetconfXMLToHelloMessageDecoder();
+        NetconfXMLToHelloMessageDecoder parser = new NetconfXMLToHelloMessageDecoder();
         File authHelloFile = new File(getClass().getResource("/netconfMessages/client_hello_with_auth.xml").getFile());
 
         final List<Object> out = new ArrayList<>();
