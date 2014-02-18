@@ -8,32 +8,27 @@
 package org.opendaylight.controller.sal.dom.broker;
 
 import java.util.Collections
-import java.util.HashMap
 import java.util.HashSet
-import java.util.Map
 import java.util.Set
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener
 import org.opendaylight.controller.sal.core.api.Broker
-import org.opendaylight.controller.sal.core.api.BrokerService
 import org.opendaylight.controller.sal.core.api.Consumer
 import org.opendaylight.controller.sal.core.api.Provider
-import org.opendaylight.controller.sal.core.spi.BrokerModule
+import org.opendaylight.controller.sal.core.api.RpcImplementation
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
+import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
+import org.opendaylight.controller.sal.core.api.RpcRoutingContext
+import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter
 import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 import org.osgi.framework.BundleContext
 import org.slf4j.LoggerFactory
-import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter
-import org.opendaylight.yangtools.concepts.ListenerRegistration
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
-import org.opendaylight.controller.sal.core.api.RpcImplementation
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener
-import org.opendaylight.controller.sal.core.api.RpcRoutingContext
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 
 public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BrokerImpl);

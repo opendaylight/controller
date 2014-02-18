@@ -1,5 +1,7 @@
 package org.opendaylight.controller.sal.compatibility;
 
+import java.util.List;
+
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
@@ -10,8 +12,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class InventoryNotificationProvider implements AutoCloseable{
 
@@ -33,7 +33,7 @@ public class InventoryNotificationProvider implements AutoCloseable{
                 && inventoryPublisher!= null){
 
             if(nodeConnectorDataChangeListener == null){
-                InstanceIdentifier nodeConnectorPath = InstanceIdentifier.builder(Nodes.class).child(Node.class).child(NodeConnector.class).build();
+                InstanceIdentifier<NodeConnector> nodeConnectorPath = InstanceIdentifier.builder(Nodes.class).child(Node.class).child(NodeConnector.class).build();
                 nodeConnectorDataChangeListener = new NodeConnectorDataChangeListener();
                 nodeConnectorDataChangeListener.setInventoryPublisher(inventoryPublisher);
                 nodeConnectorDataChangeListenerRegistration = dataProviderService.registerDataChangeListener(nodeConnectorPath, nodeConnectorDataChangeListener);

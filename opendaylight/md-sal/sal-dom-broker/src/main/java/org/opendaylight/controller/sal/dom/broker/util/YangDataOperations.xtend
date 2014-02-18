@@ -38,12 +38,6 @@ class YangDataOperations {
         throw new IllegalArgumentException("Supplied node is not data node container.");
     }
 
-    private def static checkConfigurational(DataSchemaNode node, boolean config) {
-        if (config) {
-            checkArgument(node.configuration, "Supplied composite node is not configurational.");
-        }
-    }
-
     private static dispatch def Iterable<? extends Node<?>> mergeMultiple(LeafSchemaNode node, List<Node<?>> original,
         List<Node<?>> modified, boolean configurational) {
         checkArgument(original.size === 1);
