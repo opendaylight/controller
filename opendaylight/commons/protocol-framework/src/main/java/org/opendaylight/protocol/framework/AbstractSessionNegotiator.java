@@ -85,6 +85,7 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final void channelRead(final ChannelHandlerContext ctx, final Object msg) {
         LOG.debug("Negotiation read invoked on channel {}", channel);
         try {

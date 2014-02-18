@@ -40,6 +40,7 @@ public abstract class AbstractProtocolSession<M> extends SimpleChannelInboundHan
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected final void channelRead0(final ChannelHandlerContext ctx, final Object msg) {
         LOG.debug("Message was received: {}", msg);
         handleMessage((M) msg);
