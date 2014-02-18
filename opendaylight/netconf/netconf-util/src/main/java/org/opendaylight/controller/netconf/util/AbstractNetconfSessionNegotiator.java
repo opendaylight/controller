@@ -135,17 +135,14 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
             }
         }, connectionTimeoutMillis, TimeUnit.MILLISECONDS);
 
-        sendMessage(helloMessage);
+        // FIXME, make sessionPreferences return HelloMessage, move NetconfHelloMessage to API
+        sendMessage((NetconfHelloMessage)helloMessage);
         changeState(State.OPEN_WAIT);
     }
 
     private void cancelTimeout() {
         if(timeout!=null)
             timeout.cancel();
-    }
-
-    private void sendMessage(NetconfMessage message) {
-        this.channel.writeAndFlush(message);
     }
 
     @Override
