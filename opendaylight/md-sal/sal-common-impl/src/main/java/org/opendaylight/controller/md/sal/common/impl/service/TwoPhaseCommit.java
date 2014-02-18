@@ -61,6 +61,17 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
 
         log.trace("Transaction: {} Affected Subtrees:", transactionId, changedPaths);
 
+        // The transaction has no effects, let's just shortcut it
+        if (changedPaths.isEmpty()) {
+            dataBroker.getFinishedTransactionsCount().getAndIncrement();
+            transaction.changeStatus(TransactionStatus.COMMITED);
+
+            log.trace("Transaction: {} Finished successfully (no effects).", transactionId);
+
+            return Rpcs.<TransactionStatus> getRpcResult(true, TransactionStatus.COMMITED,
+                    Collections.<RpcError> emptySet());
+        }
+
         final ImmutableList.Builder<ListenerStateCapture<P, D, DCL>> listenersBuilder = ImmutableList.builder();
         listenersBuilder.addAll(dataBroker.affectedListeners(changedPaths));
         filterProbablyAffectedListeners(dataBroker.probablyAffectedListeners(changedPaths),listenersBuilder);
@@ -211,14 +222,12 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
             @Override
             public void run() {
                 for (final ListenerStateCapture<P, D, DCL> listenerSet : listeners) {
-                    {
-                        DataChangeEvent<P, D> changeEvent = listenerSet.createEvent(transaction);
-                        for (final DataChangeListenerRegistration<P, D, DCL> listener : listenerSet.getListeners()) {
-                            try {
-                                listener.getInstance().onDataChanged(changeEvent);
-                            } catch (Exception e) {
-                                log.error("Unhandled exception when invoking listener {}", listener);
-                            }
+                    DataChangeEvent<P, D> changeEvent = listenerSet.createEvent(transaction);
+                    for (final DataChangeListenerRegistration<P, D, DCL> listener : listenerSet.getListeners()) {
+                        try {
+                            listener.getInstance().onDataChanged(changeEvent);
+                        } catch (Exception e) {
+                            log.error("Unhandled exception when invoking listener {}", listener, e);
                         }
                     }
                 }
