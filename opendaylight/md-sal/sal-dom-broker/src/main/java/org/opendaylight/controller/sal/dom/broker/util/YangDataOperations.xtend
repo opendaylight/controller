@@ -38,12 +38,6 @@ class YangDataOperations {
         throw new IllegalArgumentException("Supplied node is not data node container.");
     }
 
-    private def static checkConfigurational(DataSchemaNode node, boolean config) {
-        if (config) {
-            checkArgument(node.configuration, "Supplied composite node is not configurational.");
-        }
-    }
-
     private static dispatch def Iterable<? extends Node<?>> mergeMultiple(LeafSchemaNode node, List<Node<?>> original,
         List<Node<?>> modified, boolean configurational) {
         checkArgument(original.size === 1);
@@ -71,8 +65,8 @@ class YangDataOperations {
         if(node.keyDefinition === null || node.keyDefinition.empty) {
             return modified;
         }
-        val originalMap = (original as List).toIndexMap(node.keyDefinition);
-        val modifiedMap = (modified as List).toIndexMap(node.keyDefinition);
+        val originalMap = (original as List<CompositeNode>).toIndexMap(node.keyDefinition);
+        val modifiedMap = (modified as List<CompositeNode>).toIndexMap(node.keyDefinition);
         
         val List<Node<?>> mergedNodes = new ArrayList(original.size + modified.size);
         for(entry : modifiedMap.entrySet) {

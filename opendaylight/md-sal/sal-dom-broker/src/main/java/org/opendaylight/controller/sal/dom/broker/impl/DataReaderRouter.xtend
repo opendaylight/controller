@@ -7,29 +7,26 @@
  */
 package org.opendaylight.controller.sal.dom.broker.impl
 
-import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import org.opendaylight.controller.md.sal.common.api.data.DataReader
-import org.opendaylight.yangtools.yang.common.QName
 import java.net.URI
-import java.util.List
-import org.opendaylight.yangtools.yang.data.api.Node
 import java.util.ArrayList
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl
-import java.util.Map
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier
-import org.opendaylight.yangtools.yang.data.api.SimpleNode
-import java.util.Collections
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
-import java.util.HashMap
-import static com.google.common.base.Preconditions.*;
 import java.util.Collection
-import java.util.Set
+import java.util.Collections
+import java.util.HashMap
+import java.util.Map
 import java.util.Map.Entry
-import org.slf4j.LoggerFactory
+import java.util.Set
+import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter
+import org.opendaylight.yangtools.yang.common.QName
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
+import org.opendaylight.yangtools.yang.data.api.Node
+import org.opendaylight.yangtools.yang.data.api.SimpleNode
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl
+import org.slf4j.LoggerFactory
+
+import static com.google.common.base.Preconditions.*
 
 class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
     private static val LOG = LoggerFactory.getLogger(DataReaderRouter);
@@ -42,7 +39,6 @@ class DataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier, Compos
         var name = pathArgument?.nodeType;
         val nodes = new ArrayList<Node<?>>();
         val keyNodes = new HashMap<QName, SimpleNode<?>>();
-        val iterator = data.iterator;
         for(dataBit : data) {
             try {
                 if(pathArgument != null && dataBit != null) {

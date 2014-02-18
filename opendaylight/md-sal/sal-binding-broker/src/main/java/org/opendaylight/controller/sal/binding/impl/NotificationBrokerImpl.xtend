@@ -8,25 +8,25 @@
 package org.opendaylight.controller.sal.binding.impl
 
 import com.google.common.collect.HashMultimap
+import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Multimap
-import java.util.Collection
+import com.google.common.collect.Multimaps
 import java.util.Collections
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
+import java.util.Set
 import org.opendaylight.controller.sal.binding.api.NotificationListener
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListener
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.yangtools.concepts.Registration
+import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 import org.opendaylight.yangtools.yang.binding.Notification
 import org.slf4j.LoggerFactory
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolderimport com.google.common.collect.Multimaps
-import org.opendaylight.yangtools.concepts.util.ListenerRegistry
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListenerimport java.util.Set
-import java.util.Set
-import com.google.common.collect.ImmutableSet
-import java.util.concurrent.Future
 
 class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
     
@@ -67,11 +67,6 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
 
     def getNotificationTypes(Notification notification) {
         notification.class.interfaces.filter[it != Notification && Notification.isAssignableFrom(it)]
-    }
-
-    @SuppressWarnings("unchecked")
-    private def notifyAll(Collection<NotificationListener<?>> listeners, Notification notification) {
-        listeners.forEach[(it as NotificationListener).onNotification(notification)]
     }
 
     @Deprecated

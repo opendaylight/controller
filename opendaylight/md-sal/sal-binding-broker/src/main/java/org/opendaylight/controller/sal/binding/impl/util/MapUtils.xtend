@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.sal.binding.impl.util
 
-import java.util.Map.Entry
-import org.opendaylight.yangtools.concepts.Path
-import java.util.Map
-import java.util.Set
+import com.google.common.collect.Multimap
 import java.util.Collection
 import java.util.HashSet
-import com.google.common.collect.Multimap
+import java.util.Map.Entry
+import org.opendaylight.yangtools.concepts.Path
 
 class MapUtils {
 

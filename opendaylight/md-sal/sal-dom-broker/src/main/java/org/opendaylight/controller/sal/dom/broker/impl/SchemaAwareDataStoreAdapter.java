@@ -150,7 +150,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     protected CompositeNode mergeData(InstanceIdentifier path, CompositeNode stored, CompositeNode modified,
             boolean config) {
-        long startTime = System.nanoTime();
+        // long startTime = System.nanoTime();
         try {
             DataSchemaNode node = schemaNodeFor(path);
             return YangDataOperations.merge(node, stored, modified, config);
