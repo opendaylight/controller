@@ -7,15 +7,17 @@
  */
 package org.opendaylight.controller.test.sal.binding.it;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -34,8 +36,8 @@ import com.google.inject.Inject;
 public class DataServiceTest extends AbstractTest {
 
     protected DataBrokerService consumerDataService;
-    
-    
+
+
     @Inject
     Broker broker2;
 
@@ -56,59 +58,58 @@ public class DataServiceTest extends AbstractTest {
 
         assertNotNull(consumerDataService);
 
-        
+
         DataModificationTransaction transaction = consumerDataService.beginTransaction();
         assertNotNull(transaction);
-        
+
         NodeRef node1 = createNodeRef("0");
         DataObject  node = consumerDataService.readConfigurationData(node1.getValue());
         assertNull(node);
         Node nodeData1 = createNode("0");
-        
+
         transaction.putConfigurationData(node1.getValue(), nodeData1);
         Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
         assertNotNull(commitResult);
-        
+
         RpcResult<TransactionStatus> result = commitResult.get();
-        
+
         assertNotNull(result);
         assertNotNull(result.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
-        
+
         Node readedData = (Node) consumerDataService.readConfigurationData(node1.getValue());
         assertNotNull(readedData);
         assertEquals(nodeData1.getKey(), readedData.getKey());
-        
-        
+
+
         DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
         assertNotNull(transaction);
-        
+
         transaction2.removeConfigurationData(node1.getValue());
-        
+
         Future<RpcResult<TransactionStatus>> commitResult2 = transaction2.commit();
         assertNotNull(commitResult2);
-        
+
         RpcResult<TransactionStatus> result2 = commitResult2.get();
-        
+
         assertNotNull(result2);
         assertNotNull(result2.getResult());
         assertEquals(TransactionStatus.COMMITED, result2.getResult());
-    
+
         DataObject readedData2 = consumerDataService.readConfigurationData(node1.getValue());
         assertNull(readedData2);
-        
-    
+
+
     }
 
-    
+
     private static NodeRef createNodeRef(String string) {
         NodeKey key = new NodeKey(new NodeId(string));
-        InstanceIdentifier<Node> path = InstanceIdentifier.builder().node(Nodes.class).node(Node.class, key)
-                .toInstance();
+        InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class).child(Node.class, key).build();
 
         return new NodeRef(path);
     }
-    
+
     private static Node createNode(String string) {
         NodeBuilder ret = new NodeBuilder();
         NodeId id = new NodeId(string);

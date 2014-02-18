@@ -192,8 +192,7 @@ public class RoutedServiceTest extends AbstractTest {
      */
     private static NodeRef createNodeRef(String string) {
         NodeKey key = new NodeKey(new NodeId(string));
-        InstanceIdentifier<Node> path = InstanceIdentifier.builder().node(Nodes.class).node(Node.class, key)
-                .toInstance();
+        InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class).child(Node.class, key).build();
 
         return new NodeRef(path);
     }
