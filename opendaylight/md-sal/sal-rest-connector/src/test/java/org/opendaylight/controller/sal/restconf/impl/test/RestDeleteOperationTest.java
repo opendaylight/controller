@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.createUri;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -72,7 +71,7 @@ public class RestDeleteOperationTest extends JerseyTest {
 
     @Test
     public void deleteConfigStatusCodes() throws UnsupportedEncodingException {
-        String uri = createUri("/config/", "test-interface:interfaces");
+        String uri = "/config/test-interface:interfaces";
         Future<RpcResult<TransactionStatus>> dummyFuture = createFuture(TransactionStatus.COMMITED);
         when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
         Response response = target(uri).request(MediaType.APPLICATION_XML).delete();

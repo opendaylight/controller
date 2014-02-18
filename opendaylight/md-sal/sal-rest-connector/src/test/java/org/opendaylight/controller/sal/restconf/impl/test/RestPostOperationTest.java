@@ -109,7 +109,7 @@ public class RestPostOperationTest extends JerseyTest {
     public void postOperationsStatusCodes() throws UnsupportedEncodingException {
         controllerContext.setSchemas(schemaContextTestModule);
         mockInvokeRpc(cnSnDataOutput, true);
-        String uri = createUri("/operations/", "test-module:rpc-test");
+        String uri = "/operations/test-module:rpc-test";
         assertEquals(200, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         mockInvokeRpc(null, true);
@@ -118,7 +118,7 @@ public class RestPostOperationTest extends JerseyTest {
         mockInvokeRpc(null, false);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
-        uri = createUri("/operations/", "test-module:rpc-wrongtest");
+        uri = "/operations/test-module:rpc-wrongtest";
         assertEquals(404, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
     }
 
@@ -126,7 +126,7 @@ public class RestPostOperationTest extends JerseyTest {
     public void postConfigOnlyStatusCodes() throws UnsupportedEncodingException {
         controllerContext.setSchemas(schemaContextYangsIetf);
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
-        String uri = createUri("/config", "");
+        String uri = "/config";
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
 
         mockCommitConfigurationDataPostMethod(null);
@@ -140,7 +140,7 @@ public class RestPostOperationTest extends JerseyTest {
     public void postConfigStatusCodes() throws UnsupportedEncodingException {
         controllerContext.setSchemas(schemaContextYangsIetf);
         mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
-        String uri = createUri("/config/", "ietf-interfaces:interfaces");
+        String uri = "/config/ietf-interfaces:interfaces";
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
 
         mockCommitConfigurationDataPostMethod(null);
@@ -167,9 +167,9 @@ public class RestPostOperationTest extends JerseyTest {
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/");
+        String uri = "/config/ietf-interfaces:interfaces/interface/0/";
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData4));
-        uri = createUri("/config/", "ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont");
+        uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData3));
     }
 
@@ -206,13 +206,13 @@ public class RestPostOperationTest extends JerseyTest {
         ArgumentCaptor<InstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(InstanceIdentifier.class);
         ArgumentCaptor<CompositeNode> compNodeCaptor = ArgumentCaptor.forClass(CompositeNode.class);
 
-        String URI_1 = createUri("/config", "");
+        String URI_1 = "/config";
         assertEquals(204, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
         verify(brokerFacade).commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
         String identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces]";
         assertEquals(identifier, instanceIdCaptor.getValue().getPath().toString());
 
-        String URI_2 = createUri("/config/", "test-interface:interfaces");
+        String URI_2 = "/config/test-interface:interfaces";
         assertEquals(204, post(URI_2, Draft02.MediaTypes.DATA + XML, xmlBlockData));
         verify(brokerFacade, times(2))
                 .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
@@ -227,15 +227,11 @@ public class RestPostOperationTest extends JerseyTest {
         when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(null);
 
-        String URI_1 = createUri("/config", "");
+        String URI_1 = "/config";
         assertEquals(202, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
 
-        String URI_2 = createUri("/config/", "test-interface:interfaces");
+        String URI_2 = "/config/test-interface:interfaces";
         assertEquals(202, post(URI_2, Draft02.MediaTypes.DATA + XML, xmlBlockData));
-    }
-
-    private String createUri(String prefix, String encodedPart) throws UnsupportedEncodingException {
-        return URI.create(prefix + URLEncoder.encode(encodedPart, Charsets.US_ASCII.name()).toString()).toASCIIString();
     }
 
     private static void initMocking() {
