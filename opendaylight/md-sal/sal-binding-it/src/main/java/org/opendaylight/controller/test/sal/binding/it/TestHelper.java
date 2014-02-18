@@ -23,8 +23,6 @@ public class TestHelper {
 
     public static final String CONTROLLER_MODELS = "org.opendaylight.controller.model";
     public static final String YANGTOOLS_MODELS = "org.opendaylight.yangtools.model";
-    private static final String OPENDAYLIGHT_SNAPSHOT = "http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/";
-    private static final String OPENDAYLIGHT_RELEASE = "http://nexus.opendaylight.org/content/repositories/opendaylight.release/";
 
     public static Option mdSalCoreBundles() {
         return new DefaultCompositeOption( //

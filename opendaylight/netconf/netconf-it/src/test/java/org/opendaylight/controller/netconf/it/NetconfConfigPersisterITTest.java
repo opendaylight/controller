@@ -7,9 +7,27 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import io.netty.channel.ChannelFuture;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -44,32 +62,12 @@ import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOper
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
-
-    private static final Logger logger =  LoggerFactory.getLogger(NetconfConfigPersisterITTest.class);
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
 
@@ -230,7 +228,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         public VerifyingPersister() throws IOException {
             Persister mockedAggregator = mock(Persister.class);
 
-            doAnswer(new Answer() {
+            doAnswer(new Answer<Object>() {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
                     ConfigSnapshotHolder configSnapshot = (ConfigSnapshotHolder) invocation.getArguments()[0];

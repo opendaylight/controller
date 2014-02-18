@@ -16,28 +16,28 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 public class RoutingUtils {
-    
+
     public static <C,P> RouteChange<C,P> removalChange(C context,P path) {
         final ImmutableMap<C, Set<P>> announcements = ImmutableMap.<C,Set<P>>of();
         final ImmutableMap<C, Set<P>> removals = ImmutableMap.<C,Set<P>>of(context, ImmutableSet.of(path));
         return new RouteChangeImpl<C,P>(announcements, removals);
     }
-    
+
     public static <C,P> RouteChange<C,P> announcementChange(C context,P path) {
         final ImmutableMap<C, Set<P>> announcements = ImmutableMap.<C,Set<P>>of(context, ImmutableSet.of(path));
         final ImmutableMap<C, Set<P>> removals = ImmutableMap.<C,Set<P>>of();
         return new RouteChangeImpl<C,P>(announcements, removals);
     }
-    
-    
+
+
     public static <C,P> RouteChange<C,P> change(Map<C, Set<P>> announcements,
             Map<C, Set<P>> removals) {
         final ImmutableMap<C, Set<P>> immutableAnnouncements = ImmutableMap.<C,Set<P>>copyOf(announcements);
         final ImmutableMap<C, Set<P>> immutableRemovals = ImmutableMap.<C,Set<P>>copyOf(removals);
         return new RouteChangeImpl<C,P>(immutableAnnouncements, immutableRemovals);
     }
-    
-    
+
+
     private static class RouteChangeImpl<C,P> implements RouteChange<C, P> {
         private final Map<C, Set<P>> removal;
         private final Map<C, Set<P>> announcement;
@@ -52,7 +52,7 @@ public class RoutingUtils {
         public Map<C, Set<P>> getAnnouncements() {
             return announcement;
         }
-        
+
         @Override
         public Map<C, Set<P>> getRemovals() {
             return removal;
@@ -78,7 +78,7 @@ public class RoutingUtils {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            RouteChangeImpl other = (RouteChangeImpl) obj;
+            RouteChangeImpl<?, ?> other = (RouteChangeImpl<?, ?>) obj;
             if (announcement == null) {
                 if (other.announcement != null)
                     return false;
@@ -95,5 +95,5 @@ public class RoutingUtils {
     }
 
 
-    
+
 }
