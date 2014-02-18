@@ -44,7 +44,7 @@ public class BindingIndependentMappingServiceTracker implements ServiceTrackerCu
         this.service = service;
         CodecRegistry codecRegistry = service.getCodecRegistry();
         logger.debug("Codec registry acquired {}", codecRegistry);
-        activator.initConfigManager(ctx, codecRegistry);
+//        activator.initConfigManager(ctx, codecRegistry);
         return service;
     }
 

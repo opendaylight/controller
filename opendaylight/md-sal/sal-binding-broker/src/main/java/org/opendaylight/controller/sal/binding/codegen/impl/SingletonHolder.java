@@ -25,7 +25,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public class SingletonHolder {
 
-    public static final ClassPool CLASS_POOL = new ClassPool();
+    public static final ClassPool CLASS_POOL = ClassPool.getDefault();
     public static final org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator RPC_GENERATOR_IMPL = new org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator(
             CLASS_POOL);
     public static final RuntimeCodeGenerator RPC_GENERATOR = RPC_GENERATOR_IMPL;

@@ -8,14 +8,18 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
 import java.lang.management.ManagementFactory;
+import java.util.Collection;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.RuntimeGeneratedMappingServiceActivator;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -25,38 +29,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigManagerActivator implements BundleActivator {
-    private static final Logger logger = LoggerFactory
-            .getLogger(ConfigManagerActivator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigManagerActivator.class);
 
-    private ExtenderBundleTracker extenderBundleTracker;
+    private ExtensibleBundleTracker<Collection<Registration<YangModuleInfo>>> bundleTracker;
     private ConfigRegistryImpl configRegistry;
     private ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
     private ServiceRegistration configRegistryServiceRegistration;
 
-    private ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService> tracker;
+    private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
+
+    private RuntimeGeneratedMappingServiceActivator mappingServiceActivator;
 
     @Override
     public void start(BundleContext context) throws Exception {
-        BindingIndependentMappingServiceTracker mappingServiceTracker = new BindingIndependentMappingServiceTracker(
-                context, this);
-        tracker = new ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService>(
-                context, BindingIndependentMappingService.class, mappingServiceTracker);
 
-        logger.debug("Waiting for codec registry");
+        // track bundles containing YangModuleInfo
+        ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker();
+        mappingServiceActivator = new RuntimeGeneratedMappingServiceActivator(moduleInfoBundleTracker);
+        CodecRegistry codecRegistry = mappingServiceActivator.startRuntimeMappingService(context).getCodecRegistry();
 
-        tracker.open();
-    }
+        // start config registry
+        BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
+                context);
+        configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
+                codecRegistry);
 
-    void initConfigManager(BundleContext context, CodecRegistry codecRegistry) {
-        BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
-                new BundleContextBackedModuleFactoriesResolver(context);
-        MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
+        // track bundles containing factories
+        BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
+                configRegistry);
+        ModuleFactoryBundleTracker moduleFactoryBundleTracker = new ModuleFactoryBundleTracker(
+                blankTransactionServiceTracker);
 
-
-        // TODO push codecRegistry/IdentityCodec to dependencyResolver
-
-        configRegistry = new ConfigRegistryImpl(
-                bundleContextBackedModuleFactoriesResolver, configMBeanServer, codecRegistry);
+        // start extensible tracker
+        bundleTracker = new ExtensibleBundleTracker<>(context, moduleInfoBundleTracker, moduleFactoryBundleTracker);
+        bundleTracker.open();
 
         // register config registry to OSGi
         configRegistryServiceRegistration = context.registerService(ConfigRegistryImpl.class, configRegistry, null);
@@ -69,29 +75,20 @@ public class ConfigManagerActivator implements BundleActivator {
             throw new RuntimeException("Config Registry was already registered to JMX", e);
         }
 
-        // track bundles containing factories
-        BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(configRegistry);
-        extenderBundleTracker = new ExtenderBundleTracker(context, blankTransactionServiceTracker);
-        extenderBundleTracker.open();
-
-        ServiceTracker<?, ?> serviceTracker = new ServiceTracker(context, ModuleFactory.class, blankTransactionServiceTracker);
+        ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context, ModuleFactory.class,
+                blankTransactionServiceTracker);
         serviceTracker.open();
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         try {
-            tracker.close();
-        } catch (Exception e) {
-            logger.warn("Exception while closing tracker", e);
-        }
-        try {
             configRegistry.close();
         } catch (Exception e) {
             logger.warn("Exception while closing config registry", e);
         }
         try {
-            extenderBundleTracker.close();
+            bundleTracker.close();
         } catch (Exception e) {
             logger.warn("Exception while closing extender", e);
         }
@@ -106,6 +103,11 @@ public class ConfigManagerActivator implements BundleActivator {
             configRegistryServiceRegistration.unregister();
         } catch (Exception e) {
             logger.warn("Exception while unregistering config registry", e);
+        }
+        try {
+            mappingServiceActivator.close();
+        } catch (Exception e) {
+            logger.warn("Exception while closing mapping service", e);
         }
     }
 }

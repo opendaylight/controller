@@ -41,28 +41,20 @@ module config-test-impl {
         config:java-name-prefix IdentityTest;
     }
 
-    identity test-identity1 {
-
-    }
-
-    identity test-identity2 {
-        base test-identity1;
-    }
-
     augment "/config:modules/config:module/config:configuration" {
             case impl-identity-test {
                 when "/config:modules/config:module/config:type = 'impl-identity-test'";
 
                 leaf afi {
                     type identityref {
-                        base test-identity1;
+                        base tt:test-identity1;
                     }
                 }
 
                 container identities-container {
                     leaf afi {
                         type identityref {
-                            base test-identity1;
+                            base tt:test-identity1;
                         }
                     }
                 }
@@ -70,19 +62,19 @@ module config-test-impl {
                 list identities {
                     leaf afi {
                         type identityref {
-                            base test-identity1;
+                            base tt:test-identity1;
                         }
                     }
                     leaf safi {
                         type identityref {
-                            base test-identity1;
+                            base tt:test-identity1;
                         }
                     }
 
                     container identities-inner {
                         leaf afi {
                             type identityref {
-                                base test-identity1;
+                                base tt:test-identity1;
                             }
                         }
                     }

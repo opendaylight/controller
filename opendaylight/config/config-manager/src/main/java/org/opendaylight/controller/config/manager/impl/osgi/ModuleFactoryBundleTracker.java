@@ -16,10 +16,9 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.BundleTracker;
+import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +32,12 @@ import org.slf4j.LoggerFactory;
  * the services are unregistered automatically.
  * Code based on http://www.toedter.com/blog/?p=236
  */
-public class ExtenderBundleTracker extends BundleTracker<Object> {
+public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Object> {
     private final BlankTransactionServiceTracker blankTransactionServiceTracker;
-    private static final Logger logger = LoggerFactory.getLogger(ExtenderBundleTracker.class);
+    private static final Logger logger = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
 
-    public ExtenderBundleTracker(BundleContext context, BlankTransactionServiceTracker blankTransactionServiceTracker) {
-        super(context, Bundle.ACTIVE, null);
+    public ModuleFactoryBundleTracker(BlankTransactionServiceTracker blankTransactionServiceTracker) {
         this.blankTransactionServiceTracker = blankTransactionServiceTracker;
-        logger.trace("Registered as extender with context {}", context);
     }
 
     @Override
@@ -63,8 +60,12 @@ public class ExtenderBundleTracker extends BundleTracker<Object> {
     }
 
     @Override
+    public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
+        // NOOP
+    }
+
+    @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        super.removedBundle(bundle,event,object);
         // workaround for service tracker not getting removed service event
         blankTransactionServiceTracker.blankTransaction();
     }
