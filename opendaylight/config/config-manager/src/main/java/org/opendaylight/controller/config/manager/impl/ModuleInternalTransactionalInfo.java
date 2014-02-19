@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import javax.annotation.Nullable;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;
-import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator
-        .TransactionModuleJMXRegistration;
+import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
+
+import javax.annotation.Nullable;
 
 public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdentifier> {
     private final ModuleIdentifier name;
@@ -27,10 +26,10 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     private final boolean isDefaultBean;
 
     ModuleInternalTransactionalInfo(ModuleIdentifier name, Module module,
-            ModuleFactory moduleFactory,
-            ModuleInternalInfo maybeOldInternalInfo,
-            TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-            boolean isDefaultBean) {
+                                    ModuleFactory moduleFactory,
+                                    ModuleInternalInfo maybeOldInternalInfo,
+                                    TransactionModuleJMXRegistration transactionModuleJMXRegistration,
+                                    boolean isDefaultBean) {
         this.name = name;
         this.module = module;
         this.moduleFactory = moduleFactory;
@@ -67,8 +66,9 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
 
     @Nullable
     public ModuleInternalInfo getOldInternalInfo() {
-        if (maybeOldInternalInfo == null)
+        if (maybeOldInternalInfo == null) {
             throw new NullPointerException();
+        }
         return maybeOldInternalInfo;
     }
 

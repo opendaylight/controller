@@ -53,7 +53,7 @@ public class BundleContextBackedModuleFactoriesResolver implements
             if(factory == null) {
                 throw new NullPointerException("ServiceReference of class" + serviceReference.getClass() + "not found.");
             }
-            StringBuffer errors = new StringBuffer();
+
             String moduleName = factory.getImplementationName();
             if (moduleName == null || moduleName.isEmpty()) {
                 throw new IllegalStateException(
@@ -63,23 +63,17 @@ public class BundleContextBackedModuleFactoriesResolver implements
                 throw new NullPointerException("Bundle context of " + factory + " ModuleFactory not found.");
             }
             logger.debug("Reading factory {} {}", moduleName, factory);
-            String error = null;
+
             Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
             if (conflicting != null) {
-                error = String
-                        .format("Module name is not unique. Found two conflicting factories with same name '%s': " +
-                                "\n\t%s\n\t%s\n", moduleName, conflicting.getKey(), factory);
-
-            }
-
-            if (error == null) {
+                String error = String
+                        .format("Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
+                                moduleName, conflicting.getKey(), factory);
+                logger.error(error);
+                throw new IllegalArgumentException(error);
+            } else {
                 result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,
                         serviceReference.getBundle().getBundleContext()));
-            } else {
-                errors.append(error);
-            }
-            if (errors.length() > 0) {
-                throw new IllegalArgumentException(errors.toString());
             }
         }
         return result;

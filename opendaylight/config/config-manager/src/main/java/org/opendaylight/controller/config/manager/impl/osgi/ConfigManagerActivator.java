@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import java.lang.management.ManagementFactory;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanServer;
-
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.spi.ModuleFactory;
@@ -23,6 +18,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanServer;
+import java.lang.management.ManagementFactory;
 
 public class ConfigManagerActivator implements BundleActivator {
     private static final Logger logger = LoggerFactory
@@ -36,10 +35,10 @@ public class ConfigManagerActivator implements BundleActivator {
     private ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService> tracker;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) {
         BindingIndependentMappingServiceTracker mappingServiceTracker = new BindingIndependentMappingServiceTracker(
                 context, this);
-        tracker = new ServiceTracker<BindingIndependentMappingService, BindingIndependentMappingService>(
+        tracker = new ServiceTracker<>(
                 context, BindingIndependentMappingService.class, mappingServiceTracker);
 
         logger.debug("Waiting for codec registry");
@@ -66,7 +65,7 @@ public class ConfigManagerActivator implements BundleActivator {
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
         } catch (InstanceAlreadyExistsException e) {
-            throw new RuntimeException("Config Registry was already registered to JMX", e);
+            throw new IllegalStateException("Config Registry was already registered to JMX", e);
         }
 
         // track bundles containing factories
@@ -79,7 +78,7 @@ public class ConfigManagerActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) {
         try {
             tracker.close();
         } catch (Exception e) {

@@ -25,13 +25,21 @@ public class ServiceReference {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ServiceReference that = (ServiceReference) o;
 
-        if (!refName.equals(that.refName)) return false;
-        if (!serviceInterfaceName.equals(that.serviceInterfaceName)) return false;
+        if (!refName.equals(that.refName)) {
+            return false;
+        }
+        if (!serviceInterfaceName.equals(that.serviceInterfaceName)) {
+            return false;
+        }
 
         return true;
     }

@@ -195,16 +195,17 @@ final class ModuleMXBeanEntryBuilder {
                 boolean providedServiceWasSet = false;
                 for (UnknownSchemaNode unknownNode : id.getUnknownSchemaNodes()) {
                     // TODO: test this
-                    if (ConfigConstants.PROVIDED_SERVICE_EXTENSION_QNAME.equals(unknownNode.getNodeType())) {
-                        // no op: 0 or more provided identities are allowed
-                    } else if (ConfigConstants.JAVA_NAME_PREFIX_EXTENSION_QNAME.equals(unknownNode.getNodeType())) {
+                    boolean unknownNodeIsProvidedServiceExtension = ConfigConstants.PROVIDED_SERVICE_EXTENSION_QNAME.equals(unknownNode.getNodeType());
+                    // true => no op: 0 or more provided identities are allowed
+
+                    if (ConfigConstants.JAVA_NAME_PREFIX_EXTENSION_QNAME.equals(unknownNode.getNodeType())) {
                         // 0..1 allowed
                         checkState(
                                 providedServiceWasSet == false,
                                 format("More than one language extension %s is not allowed here: %s",
                                         ConfigConstants.JAVA_NAME_PREFIX_EXTENSION_QNAME, id));
                         providedServiceWasSet = true;
-                    } else {
+                    } else if (unknownNodeIsProvidedServiceExtension == false) {
                         throw new IllegalStateException("Unexpected language extension " + unknownNode.getNodeType());
                     }
                 }

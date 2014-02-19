@@ -7,22 +7,24 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.QueryExp;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.JMX;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.QueryExp;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class InternalJMXRegistrator implements Closeable {
     private static final Logger logger = LoggerFactory
@@ -38,7 +40,7 @@ public class InternalJMXRegistrator implements Closeable {
         private final ObjectName on;
 
         InternalJMXRegistration(InternalJMXRegistrator internalJMXRegistrator,
-                ObjectName on) {
+                                ObjectName on) {
             this.internalJMXRegistrator = internalJMXRegistrator;
             this.on = on;
         }
@@ -54,13 +56,11 @@ public class InternalJMXRegistrator implements Closeable {
     private final List<InternalJMXRegistrator> children = new ArrayList<>();
 
     public synchronized InternalJMXRegistration registerMBean(Object object,
-            ObjectName on) throws InstanceAlreadyExistsException {
+                                                              ObjectName on) throws InstanceAlreadyExistsException {
         try {
             configMBeanServer.registerMBean(object, on);
-        } catch (InstanceAlreadyExistsException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (MBeanRegistrationException | NotCompliantMBeanException e) {
+            throw new IllegalStateException(e);
         }
         registeredObjectNames.add(on);
         return new InternalJMXRegistration(this, on);
@@ -69,14 +69,13 @@ public class InternalJMXRegistrator implements Closeable {
     private synchronized void unregisterMBean(ObjectName on) {
         // first check that on was registered using this instance
         boolean removed = registeredObjectNames.remove(on);
-        if (!removed)
-            throw new IllegalStateException(
-                    "Cannot unregister - ObjectName not found in 'registeredObjectNames': "
-                            + on);
+        if (!removed) {
+            throw new IllegalStateException("Cannot unregister - ObjectName not found in 'registeredObjectNames': " + on);
+        }
         try {
             configMBeanServer.unregisterMBean(on);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (InstanceNotFoundException | MBeanRegistrationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -112,7 +111,7 @@ public class InternalJMXRegistrator implements Closeable {
     }
 
     public <T> T newMBeanProxy(ObjectName objectName, Class<T> interfaceClass,
-            boolean notificationBroadcaster) {
+                               boolean notificationBroadcaster) {
         return JMX.newMBeanProxy(configMBeanServer, objectName, interfaceClass,
                 notificationBroadcaster);
     }
@@ -123,7 +122,7 @@ public class InternalJMXRegistrator implements Closeable {
     }
 
     public <T> T newMXBeanProxy(ObjectName objectName, Class<T> interfaceClass,
-            boolean notificationBroadcaster) {
+                                boolean notificationBroadcaster) {
         return JMX.newMXBeanProxy(configMBeanServer, objectName,
                 interfaceClass, notificationBroadcaster);
     }

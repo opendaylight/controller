@@ -53,7 +53,7 @@ import static java.lang.String.format;
 class ConfigTransactionControllerImpl implements
         ConfigTransactionControllerInternal,
         ConfigTransactionControllerImplMXBean,
-        Identifiable<TransactionIdentifier>{
+        Identifiable<TransactionIdentifier> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
 
     private final ConfigTransactionLookupRegistry txLookupRegistry;
@@ -124,12 +124,12 @@ class ConfigTransactionControllerImpl implements
 
         List<ModuleFactory> toBeAdded = new ArrayList<>();
         List<ModuleFactory> toBeRemoved = new ArrayList<>();
-        for(ModuleFactory moduleFactory: factoriesHolder.getModuleFactories()) {
-            if (oldSet.contains(moduleFactory) == false){
+        for (ModuleFactory moduleFactory : factoriesHolder.getModuleFactories()) {
+            if (oldSet.contains(moduleFactory) == false) {
                 toBeAdded.add(moduleFactory);
             }
         }
-        for(ModuleFactory moduleFactory: lastListOfFactories){
+        for (ModuleFactory moduleFactory : lastListOfFactories) {
             if (newSet.contains(moduleFactory) == false) {
                 toBeRemoved.add(moduleFactory);
             }
@@ -151,7 +151,7 @@ class ConfigTransactionControllerImpl implements
         }
 
         // remove modules belonging to removed factories
-        for(ModuleFactory removedFactory: toBeRemoved){
+        for (ModuleFactory removedFactory : toBeRemoved) {
             List<ModuleIdentifier> modulesOfRemovedFactory = dependencyResolverManager.findAllByFactory(removedFactory);
             for (ModuleIdentifier name : modulesOfRemovedFactory) {
                 destroyModule(name);
@@ -189,7 +189,7 @@ class ConfigTransactionControllerImpl implements
 
     @Override
     public synchronized ObjectName createModule(String factoryName,
-            String instanceName) throws InstanceAlreadyExistsException {
+                                                String instanceName) throws InstanceAlreadyExistsException {
 
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
@@ -213,11 +213,11 @@ class ConfigTransactionControllerImpl implements
             throws InstanceAlreadyExistsException {
 
         logger.debug("Adding module {} to transaction {}", moduleIdentifier, this);
-        if (moduleIdentifier.equals(module.getIdentifier())==false) {
+        if (moduleIdentifier.equals(module.getIdentifier()) == false) {
             throw new IllegalStateException("Incorrect name reported by module. Expected "
-             + moduleIdentifier + ", got " + module.getIdentifier());
+                    + moduleIdentifier + ", got " + module.getIdentifier());
         }
-        if (dependencyResolver.getIdentifier().equals(moduleIdentifier) == false ) {
+        if (dependencyResolver.getIdentifier().equals(moduleIdentifier) == false) {
             throw new IllegalStateException("Incorrect name reported by dependency resolver. Expected "
                     + moduleIdentifier + ", got " + dependencyResolver.getIdentifier());
         }
@@ -271,7 +271,7 @@ class ConfigTransactionControllerImpl implements
         // first remove refNames, it checks for objectname existence
         try {
             writableSRRegistry.removeServiceReferences(
-                    ObjectNameUtil.createTransactionModuleON(getTransactionName(),moduleIdentifier));
+                    ObjectNameUtil.createTransactionModuleON(getTransactionName(), moduleIdentifier));
         } catch (InstanceNotFoundException e) {
             logger.error("Possible code error: cannot find {} in {}", moduleIdentifier, writableSRRegistry);
             throw new IllegalStateException("Possible code error: cannot find " + moduleIdentifier, e);
@@ -294,8 +294,9 @@ class ConfigTransactionControllerImpl implements
 
     @Override
     public synchronized void validateConfig() throws ValidationException {
-        if (configBeanModificationDisabled.get())
+        if (configBeanModificationDisabled.get()) {
             throw new IllegalStateException("Cannot start validation");
+        }
         configBeanModificationDisabled.set(true);
         try {
             validate_noLocks();
@@ -383,7 +384,7 @@ class ConfigTransactionControllerImpl implements
                 logger.error("Commit failed on {} in transaction {}", name,
                         getTransactionIdentifier(), e);
                 internalAbort();
-                throw new RuntimeException(
+                throw new IllegalStateException(
                         format("Error - getInstance() failed for %s in transaction %s",
                                 name, getTransactionIdentifier()), e);
             }
