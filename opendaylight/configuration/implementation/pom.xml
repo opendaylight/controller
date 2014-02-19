@@ -15,7 +15,7 @@
   </scm>
 
   <artifactId>configuration.implementation</artifactId>
-  <version>0.4.2-SNAPSHOT</version>
+  <version>0.4.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <build>

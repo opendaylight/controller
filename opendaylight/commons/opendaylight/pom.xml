@@ -98,7 +98,7 @@
     <forwardingrulesmanager.version>0.5.1-SNAPSHOT</forwardingrulesmanager.version>
     <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
-    <configuration.version>0.4.2-SNAPSHOT</configuration.version>
+    <configuration.version>0.4.3-SNAPSHOT</configuration.version>
     <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
     <protocol_plugin.stub.version>0.4.2-SNAPSHOT</protocol_plugin.stub.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
