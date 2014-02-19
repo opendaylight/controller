@@ -26,6 +26,7 @@ import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 
 public class NetconfImplActivator implements BundleActivator {
 
@@ -88,7 +89,7 @@ public class NetconfImplActivator implements BundleActivator {
         logger.info("Shutting down netconf because YangStoreService service was removed");
 
         commitNot.close();
-        eventLoopGroup.shutdownGracefully();
+        eventLoopGroup.shutdownGracefully(0, 1, TimeUnit.SECONDS);
         timer.stop();
 
         regMonitoring.unregister();

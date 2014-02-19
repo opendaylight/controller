@@ -17,19 +17,14 @@
  */
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
-import io.netty.util.concurrent.AbstractEventExecutor;
+import com.google.common.reflect.AbstractInvocationHandler;
+import com.google.common.reflect.Reflection;
 import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.concurrent.EventExecutorGroup;
-import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import io.netty.util.concurrent.ScheduledFuture;
 
-import java.util.concurrent.Callable;
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
-/**
-*
-*/
 public final class GlobalEventExecutorModule extends
         org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractGlobalEventExecutorModule {
 
@@ -51,91 +46,35 @@ public final class GlobalEventExecutorModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return new GlobalEventExecutorCloseable(GlobalEventExecutor.INSTANCE);
+        final CloseableGlobalEventExecutorMixin closeableGlobalEventExecutorMixin =
+                new CloseableGlobalEventExecutorMixin(GlobalEventExecutor.INSTANCE);
+        return Reflection.newProxy(AutoCloseableEventExecutor.class, new AbstractInvocationHandler() {
+            @Override
+            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("close")) {
+                    closeableGlobalEventExecutorMixin.close();
+                    return null;
+                } else {
+                    return method.invoke(GlobalEventExecutor.INSTANCE, args);
+                }
+            }
+        });
     }
 
-    static final private class GlobalEventExecutorCloseable extends AbstractEventExecutor implements AutoCloseable {
+    public static interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable {
 
-        private EventExecutor executor;
+    }
 
-        public GlobalEventExecutorCloseable(EventExecutor executor) {
-            this.executor = executor;
+    public static class CloseableGlobalEventExecutorMixin implements AutoCloseable {
+        private final GlobalEventExecutor eventExecutor;
+
+        public CloseableGlobalEventExecutorMixin(GlobalEventExecutor eventExecutor) {
+            this.eventExecutor = eventExecutor;
         }
 
         @Override
-        public EventExecutorGroup parent() {
-            return this.executor.parent();
-        }
-
-        @Override
-        public boolean inEventLoop(Thread thread) {
-            return this.executor.inEventLoop(thread);
-        }
-
-        @Override
-        public boolean isShuttingDown() {
-            return this.executor.isShuttingDown();
-        }
-
-        @Override
-        public Future<?> shutdownGracefully(long quietPeriod, long timeout, TimeUnit unit) {
-            return this.executor.shutdownGracefully(quietPeriod, timeout, unit);
-        }
-
-        @Override
-        public Future<?> terminationFuture() {
-            return this.executor.terminationFuture();
-        }
-
-        @Override
-        public boolean isShutdown() {
-            return this.executor.isShutdown();
-        }
-
-        @Override
-        public boolean isTerminated() {
-            return this.executor.isTerminated();
-        }
-
-        @Override
-        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-            return this.executor.awaitTermination(timeout, unit);
-        }
-
-        @Override
-        public void execute(Runnable command) {
-            this.executor.execute(command);
-        }
-
-        @Override
-        public void close() throws Exception {
-            shutdownGracefully();
-        }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        public void shutdown() {
-            this.executor.shutdown();
-        }
-
-        @Override
-        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-            return this.executor.scheduleWithFixedDelay(command, initialDelay, delay, unit);
-        }
-
-        @Override
-        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-            return this.executor.schedule(command, delay, unit);
-        }
-
-        @Override
-        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-            return this.executor.schedule(callable, delay, unit);
-        }
-
-        @Override
-        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-            return this.executor.scheduleAtFixedRate(command, initialDelay, period, unit);
+        public void close() {
+            eventExecutor.shutdownGracefully(0, 1, TimeUnit.SECONDS);
         }
     }
 }

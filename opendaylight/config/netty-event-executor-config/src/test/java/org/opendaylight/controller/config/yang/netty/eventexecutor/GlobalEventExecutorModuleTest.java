@@ -8,9 +8,6 @@
 
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -20,10 +17,16 @@ import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 public class GlobalEventExecutorModuleTest extends AbstractConfigTest {
 
     private GlobalEventExecutorModuleFactory factory;
-    private final String instanceName = "netty1";
+    private final String instanceName = GlobalEventExecutorModuleFactory.SINGLETON_NAME;
 
     @Before
     public void setUp() {
@@ -37,12 +40,23 @@ public class GlobalEventExecutorModuleTest extends AbstractConfigTest {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
 
         createInstance(transaction, instanceName);
-        createInstance(transaction, instanceName + 2);
+
         transaction.validateConfig();
         CommitStatus status = transaction.commit();
 
-        assertBeanCount(2, factory.getImplementationName());
-        assertStatus(status, 2, 0, 0);
+        assertBeanCount(1, factory.getImplementationName());
+        assertStatus(status, 1, 0, 0);
+    }
+
+    @Test
+    public void testConflictingName() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        try {
+            createInstance(transaction, instanceName + "x");
+            fail();
+        }catch(IllegalArgumentException e){
+            assertTrue(e.getMessage() + " failure", e.getMessage().contains("only allowed name is singleton"));
+        }
     }
 
     @Test
