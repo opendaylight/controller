@@ -14,7 +14,6 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.restconf.broker.listeners.RemoteDataChangeNotificationListener;
 import org.opendaylight.controller.sal.restconf.broker.tools.RemoteStreamTools;
 import org.opendaylight.controller.sal.restconf.broker.transactions.RemoteDataModificationTransaction;
@@ -27,7 +26,6 @@ import org.opendaylight.yangtools.restconf.client.api.RestconfClientContext;
 import org.opendaylight.yangtools.restconf.client.api.event.EventStreamInfo;
 import org.opendaylight.yangtools.restconf.client.api.event.ListenableEventStreamContext;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
@@ -43,45 +41,6 @@ public class DataBrokerServiceImpl implements DataBrokerService  {
         this.restconfClientContext = restconfClientContext;
         this.salRemoteService =  this.restconfClientContext.getRpcServiceContext(SalRemoteService.class).getRpcService();
     }
-    @Override
-    public <T extends DataRoot> T getData(DataStoreIdentifier store, Class<T> rootType) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public <T extends DataRoot> T getData(DataStoreIdentifier store, T filter) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, Class<T> rootType) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, T filter) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public RpcResult<DataRoot> editCandidateData(DataStoreIdentifier store, DataRoot changeSet) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public Future<RpcResult<Void>> commit(DataStoreIdentifier store) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public DataObject getData(InstanceIdentifier<? extends DataObject> data) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public DataObject getConfigurationData(InstanceIdentifier<?> data) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
 
     @Override
     public DataModificationTransaction beginTransaction() {
@@ -89,16 +48,6 @@ public class DataBrokerServiceImpl implements DataBrokerService  {
         //TODO finish yang model for proper remoteDataModificationTransaction setup
         RemoteDataModificationTransaction remoteDataModificationTransaction = new RemoteDataModificationTransaction();
         return remoteDataModificationTransaction;
-    }
-
-    @Override
-    public void registerChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener) {
-        throw new UnsupportedOperationException("Deprecated");
-    }
-
-    @Override
-    public void unregisterChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener) {
-        throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override

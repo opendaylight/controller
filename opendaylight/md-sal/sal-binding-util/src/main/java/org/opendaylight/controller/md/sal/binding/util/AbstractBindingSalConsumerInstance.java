@@ -7,23 +7,18 @@
  */
 package org.opendaylight.controller.md.sal.binding.util;
 
-import java.util.concurrent.Future;
-
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.base.Preconditions;
 
@@ -115,69 +110,8 @@ public abstract class AbstractBindingSalConsumerInstance<D extends DataBrokerSer
     }
 
     @Override
-    @Deprecated
-    public <T extends DataRoot> T getData(DataStoreIdentifier store, Class<T> rootType) {
-        return getDataBrokerChecked().getData(store, rootType);
-    }
-
-    @Override
-    @Deprecated
-    public <T extends DataRoot> T getData(DataStoreIdentifier store, T filter) {
-        return getDataBrokerChecked().getData(store, filter);
-    }
-
-    @Override
-    @Deprecated
-    public <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, Class<T> rootType) {
-        return getDataBrokerChecked().getCandidateData(store, rootType);
-    }
-
-    @Override
-    @Deprecated
-    public <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, T filter) {
-        return getDataBrokerChecked().getCandidateData(store, filter);
-    }
-
-    @Override
-    @Deprecated
-    public RpcResult<DataRoot> editCandidateData(DataStoreIdentifier store, DataRoot changeSet) {
-        return getDataBrokerChecked().editCandidateData(store, changeSet);
-    }
-
-    @Override
-    @Deprecated
-    public Future<RpcResult<Void>> commit(DataStoreIdentifier store) {
-        return getDataBrokerChecked().commit(store);
-    }
-
-    @Override
-    @Deprecated
-    public DataObject getData(InstanceIdentifier<? extends DataObject> data) {
-        return getDataBrokerChecked().getData(data);
-    }
-
-    @Override
-    @Deprecated
-    public DataObject getConfigurationData(InstanceIdentifier<?> data) {
-        return getDataBrokerChecked().getConfigurationData(data);
-    }
-
-    @Override
     public DataModificationTransaction beginTransaction() {
         return getDataBrokerChecked().beginTransaction();
-    }
-
-    @Override
-    @Deprecated
-    public void registerChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener) {
-        getDataBrokerChecked().registerChangeListener(path, changeListener);
-    }
-
-    @Override
-    @Deprecated
-    public void unregisterChangeListener(InstanceIdentifier<? extends DataObject> path,
-            DataChangeListener changeListener) {
-        getDataBrokerChecked().unregisterChangeListener(path, changeListener);
     }
 
     @Override
