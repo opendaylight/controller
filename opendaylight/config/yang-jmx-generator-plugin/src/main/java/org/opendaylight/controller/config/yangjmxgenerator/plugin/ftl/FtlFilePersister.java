@@ -53,7 +53,7 @@ public class FtlFilePersister {
                         ftlFile.getFtlTempleteLocation());
                 try {
                     template.process(ftlFile, writer);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     throw new IllegalStateException(
                             "Template error while generating " + ftlFile, e);
                 }

@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
+import org.opendaylight.controller.config.api.annotations.Description;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.opendaylight.controller.config.api.annotations.Description;
-
-class AnnotationsHelper {
+public class AnnotationsHelper {
 
     /**
      * Look for annotation specified by annotationType on method. First observe

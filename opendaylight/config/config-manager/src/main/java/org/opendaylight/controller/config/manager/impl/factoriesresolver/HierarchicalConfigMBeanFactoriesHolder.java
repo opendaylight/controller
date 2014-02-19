@@ -10,25 +10,21 @@ package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
-import java.util.Collection;
-import java.util.ArrayList;
 
 /**
  * Hold sorted ConfigMBeanFactories by their module names. Check that module
  * names are globally unique.
  */
 public class HierarchicalConfigMBeanFactoriesHolder {
-    private static final Logger logger = LoggerFactory
-            .getLogger(HierarchicalConfigMBeanFactoriesHolder.class);
 
     private final Map<String, Map.Entry<ModuleFactory, BundleContext>> moduleNamesToConfigBeanFactories;
     private final Set<String> moduleNames;
