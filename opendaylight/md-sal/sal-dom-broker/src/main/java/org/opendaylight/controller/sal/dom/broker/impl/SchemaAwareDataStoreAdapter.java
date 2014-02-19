@@ -31,7 +31,6 @@ import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,6 @@ import com.google.common.collect.ImmutableSet;
 
 public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements //
         DataStore, //
-        SchemaServiceListener, //
         SchemaContextListener, //
         AutoCloseable {
 
