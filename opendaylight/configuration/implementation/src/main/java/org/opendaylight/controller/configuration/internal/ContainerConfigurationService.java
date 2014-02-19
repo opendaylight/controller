@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.configuration.internal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -218,5 +219,16 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
             return new ArrayList<ConfigurationObject>(((ConcurrentMap)obj).values());
         }
         return (List<ConfigurationObject>) obj;
+    }
+
+    @Override
+    public boolean hasBeenSaved() {
+        try {
+            File configRoot = new File(this.getConfigurationRoot());
+            return configRoot.exists();
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 }
