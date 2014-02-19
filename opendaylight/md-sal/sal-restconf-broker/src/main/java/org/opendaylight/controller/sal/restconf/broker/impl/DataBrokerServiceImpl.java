@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.sal.restconf.broker.impl;
 
-import com.google.common.base.Optional;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -22,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.remote.rev140114.CreateDataChangeEventSubscriptionInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.remote.rev140114.CreateDataChangeEventSubscriptionOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.remote.rev140114.SalRemoteService;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.restconf.client.api.RestconfClientContext;
 import org.opendaylight.yangtools.restconf.client.api.event.EventStreamInfo;
@@ -33,11 +34,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 public class DataBrokerServiceImpl implements DataBrokerService  {
 
     private static final Logger logger = LoggerFactory.getLogger(DataBrokerServiceImpl.class.toString());
-    private RestconfClientContext restconfClientContext;
-    private SalRemoteService salRemoteService;
+    private final RestconfClientContext restconfClientContext;
+    private final SalRemoteService salRemoteService;
 
     public DataBrokerServiceImpl(RestconfClientContext restconfClientContext) {
         this.restconfClientContext = restconfClientContext;
@@ -147,22 +150,12 @@ public class DataBrokerServiceImpl implements DataBrokerService  {
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext,streamName);
         ListenableEventStreamContext restConfListenableEventStreamContext = restconfClientContext.getEventStreamContext(desiredEventStream.get(streamName));
         RemoteDataChangeNotificationListener remoteDataChangeNotificationListener = new RemoteDataChangeNotificationListener(listener);
-        restConfListenableEventStreamContext.registerNotificationListener(remoteDataChangeNotificationListener);
-        return new SalRemoteDataListenerRegistration(listener);
-    }
-
-    private class SalRemoteDataListenerRegistration implements ListenerRegistration<DataChangeListener> {
-        private DataChangeListener dataChangeListener;
-        public SalRemoteDataListenerRegistration(DataChangeListener dataChangeListener){
-            this.dataChangeListener = dataChangeListener;
-        }
-        @Override
-        public DataChangeListener getInstance() {
-            return this.dataChangeListener;
-        }
-        @Override
-        public void close() throws Exception {
-            //noop
-        }
+        final ListenerRegistration<?> reg = restConfListenableEventStreamContext.registerNotificationListener(remoteDataChangeNotificationListener);
+        return new AbstractListenerRegistration<DataChangeListener>(listener) {
+            @Override
+            protected void removeRegistration() {
+                // FIXME: reg.close() once it does not throw
+            }
+        };
     }
 }
