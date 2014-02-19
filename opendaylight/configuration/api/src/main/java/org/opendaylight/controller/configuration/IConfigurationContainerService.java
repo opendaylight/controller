@@ -15,10 +15,20 @@ package org.opendaylight.controller.configuration;
 public interface IConfigurationContainerService extends IConfigurationServiceCommon {
 
     /**
-     * Bundle will call this function to ask ContainerConfigurationService to provide the
-     * directory location of container
+     * This function returns the path to the configuration directory of the
+     * current container.
      *
-     * @return The path to active container directory
+     * @return The path to active container's configuration directory
      */
-    String getConfigurationRoot();
+    public String getConfigurationRoot();
+
+    /**
+     * Function checks whether there exists a saved configuration for this
+     * container (This is essentially checking whether the container's root
+     * configuration directory exists)
+     *
+     * @return True iff container config has been saved at least once
+     */
+    public boolean hasBeenSaved();
+
 }

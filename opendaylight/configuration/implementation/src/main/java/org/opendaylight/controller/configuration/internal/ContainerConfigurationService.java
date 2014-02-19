@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.configuration.internal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -57,6 +58,7 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
             .synchronizedSet(new HashSet<IConfigurationContainerAware>());
     private ObjectReader objReader;
     private ObjectWriter objWriter;
+    private String containerName;
 
     public void addConfigurationContainerAware(
             IConfigurationContainerAware configurationAware) {
@@ -88,7 +90,7 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
 
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
-        String containerName = (props != null) ? (String) props.get("containerName") :
+        containerName = (props != null) ? (String) props.get("containerName") :
             GlobalConstants.DEFAULT.toString();
         root =  String.format("%s%s/", GlobalConstants.STARTUPHOME.toString(), containerName);
     }
@@ -127,13 +129,14 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
             Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
                 success = false;
-                logger.warn("Failed to save config for {}", configurationAware.getClass().getSimpleName());
+                logger.warn("Failed to save config for {} ({})", configurationAware.getClass().getSimpleName(),
+                        status.getDescription());
             }
         }
         if (success) {
             return new Status(StatusCode.SUCCESS);
         } else {
-            return new Status(StatusCode.INTERNALERROR, "Failed to Save All Configurations");
+            return new Status(StatusCode.INTERNALERROR, "Failed to save one or more configurations");
         }
     }
 
@@ -200,6 +203,10 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
 
     @Override
     public Status persistConfiguration(List<ConfigurationObject> config, String fileName) {
+        if (!hasBeenSaved()) {
+            return new Status(StatusCode.NOTALLOWED,
+                    String.format("Container %s has not been saved yet", containerName));
+        }
         String destination = String.format("%s%s", root, fileName);
         return objWriter.write(config, destination);
     }
@@ -218,5 +225,16 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
             return new ArrayList<ConfigurationObject>(((ConcurrentMap)obj).values());
         }
         return (List<ConfigurationObject>) obj;
+    }
+
+    @Override
+    public boolean hasBeenSaved() {
+        try {
+            File configRoot = new File(this.getConfigurationRoot());
+            return configRoot.exists();
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 }

@@ -85,6 +85,9 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
 
     public void init() {
         logger.info("ConfigurationService Manager init");
+
+        // Create the default startup directory, so that container unaware apps can initiate save
+        createContainerDirectory(ROOT + GlobalConstants.DEFAULT.toString());
     }
 
     public void start() {
@@ -112,7 +115,7 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
         List<String> containerList = new ArrayList<String>();
         for (IConfigurationAware configurationAware : this.configurationAwareList) {
             if (configurationAware instanceof IConfigurationContainerService) {
-                String containerFilePath = ((ContainerConfigurationService)configurationAware).getConfigurationRoot();
+                String containerFilePath = ((IConfigurationContainerService)configurationAware).getConfigurationRoot();
                 containerList.add(containerFilePath);
             }
         }
@@ -120,12 +123,21 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
     }
 
     private void createContainerDirectory(IConfigurationAware configurationAware) {
-        String containerFilePath = ((ContainerConfigurationService) configurationAware).getConfigurationRoot();
-        if (!new File(containerFilePath).exists()) {
-            boolean created = new File(containerFilePath).mkdir();
-            if (!created) {
-               logger.error("Failed to create startup config directory: {}", containerFilePath);
+        String containerFilePath = ((IConfigurationContainerService) configurationAware).getConfigurationRoot();
+        createContainerDirectory(containerFilePath);
+    }
+
+    private void createContainerDirectory(String containerFilePath) {
+
+        try {
+            if (!new File(containerFilePath).exists()) {
+                boolean created = new File(containerFilePath).mkdir();
+                if (!created) {
+                    logger.error("Failed to create config directory: {}", containerFilePath);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Failed to create config directory: {} ({})", containerFilePath, e.getMessage());
         }
     }
 
