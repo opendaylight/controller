@@ -603,10 +603,13 @@ class ControllerContext implements SchemaServiceListener {
     }
 
     override onGlobalContextUpdated(SchemaContext context) {
-        this.globalSchema = context;
-        for (operation : context.operations) {
-            val qname = operation.QName;
-            qnameToRpc.put(qname, operation);
+        if (context !== null) {
+            qnameToRpc.clear
+            this.globalSchema = context;
+            for (operation : context.operations) {
+                val qname = operation.QName;
+                qnameToRpc.put(qname, operation);
+            }
         }
     }
 
