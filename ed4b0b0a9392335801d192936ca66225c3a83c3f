@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_71c35538",
+        "filename": "opendaylight/configuration/implementation/src/main/java/org/opendaylight/controller/configuration/internal/ContainerConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-19T17:32:58Z",
+      "side": 1,
+      "message": "What about having persistConfiguration also return a failure Status with proper description.",
+      "revId": "ed4b0b0a9392335801d192936ca66225c3a83c3f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
