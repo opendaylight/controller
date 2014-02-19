@@ -24,8 +24,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * this is responsibility of the coordinator (broker or some component of the
  * broker).
  *
- * The commit handlers are responsible for changing the internal state of the
- * provider to reflect the commited changes in data.
+ * Commit handlers are responsible for changing the internal state of the
+ * provider to reflect the committed changes in data.
  *
  * <h3>Two-phase commit</h3>
  *
