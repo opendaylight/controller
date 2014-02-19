@@ -20,5 +20,14 @@ public interface IConfigurationContainerService extends IConfigurationServiceCom
      *
      * @return The path to active container directory
      */
-    String getConfigurationRoot();
+    public String getConfigurationRoot();
+
+    /**
+     * Function checks whether there exists a saved configuration for this container
+     * (This is essentially checking whether the container root config directory exists)
+     *
+     * @return True iff container config has been saved at least once
+     */
+    public boolean hasBeenSaved();
+
 }
