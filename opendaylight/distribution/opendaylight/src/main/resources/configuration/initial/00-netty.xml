@@ -23,7 +23,7 @@
                 </module>
                 <module>
                     <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty:eventexecutor">netty:netty-global-event-executor</type>
-                    <name>global-event-executor</name>
+                    <name>singleton</name>
                 </module>
             </modules>
             
@@ -43,7 +43,7 @@
                     <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty">netty:netty-event-executor</type>
                     <instance>
                         <name>global-event-executor</name>
-                        <provider>/modules/module[type='netty-global-event-executor'][name='global-event-executor']</provider>
+                        <provider>/modules/module[type='netty-global-event-executor'][name='singleton']</provider>
                     </instance>
                 </service>
                 <service>

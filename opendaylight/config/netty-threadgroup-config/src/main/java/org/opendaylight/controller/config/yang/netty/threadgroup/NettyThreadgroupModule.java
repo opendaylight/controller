@@ -21,6 +21,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 
+import java.util.concurrent.TimeUnit;
+
 /**
 *
 */
@@ -61,7 +63,7 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
 
         @Override
         public void close() throws Exception {
-            shutdownGracefully();
+            shutdownGracefully(0, 1, TimeUnit.SECONDS);
         }
     }
 }
