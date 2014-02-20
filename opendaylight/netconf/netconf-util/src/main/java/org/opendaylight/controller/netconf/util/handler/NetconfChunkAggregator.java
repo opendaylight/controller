@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.util.handler;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
@@ -67,13 +68,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
             case HEADER_LENGTH_FIRST:
             {
                 final byte b = in.readByte();
-                if (b < '1' || b > '9') {
-                    logger.debug("Got byte {} while waiting for {}-{}", b, (byte)'1', (byte)'9');
-                    throw new IllegalStateException("Invalid chunk size encountered (byte 0)");
-                }
-
-                chunkSize = b - '0';
-                state = State.HEADER_LENGTH_OTHER;
+                processHeaderLengthFirst(b);
                 break;
             }
             case HEADER_LENGTH_OTHER:
@@ -111,7 +106,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
                     return;
                 }
 
-                chunk = in.readBytes((int)chunkSize);
+                aggregateChunks(in.readBytes((int) chunkSize));
                 state = State.FOOTER_ONE;
                 break;
             case FOOTER_ONE:
@@ -123,11 +118,13 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
                 }
 
                 state = State.FOOTER_TWO;
+                chunkSize = 0;
                 break;
             }
             case FOOTER_TWO:
             {
                 final byte b = in.readByte();
+
                 if (b != '#') {
                     logger.debug("Got byte {} while waiting for {}", b, (byte)'#');
                     throw new IllegalStateException("Malformed chunk footer encountered (byte 1)");
@@ -139,8 +136,12 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
             case FOOTER_THREE:
             {
                 final byte b = in.readByte();
-                if (b != '#') {
-                    logger.debug("Got byte {} while waiting for {}", b, (byte)'#');
+
+                if (isHeaderLengthFirst(b)) {
+                    processHeaderLengthFirst(b);
+                    break;
+                } else if (b != '#') {
+                    logger.debug("Got byte {} while waiting for {} or {}-{}", b, (byte)'#', (byte)'1', (byte)'9');
                     throw new IllegalStateException("Malformed chunk footer encountered (byte 2)");
                 }
 
@@ -157,7 +158,6 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
 
                 state = State.HEADER_ONE;
                 out.add(chunk);
-                chunkSize = 0;
                 chunk = null;
                 break;
             }
@@ -165,5 +165,32 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
         }
 
         in.discardReadBytes();
+    }
+
+    private void aggregateChunks(ByteBuf newChunk) {
+        if(isFirstChunk()) {
+            chunk = newChunk;
+        } else {
+            // TODO Is there a better way to merge buffers ?
+            chunk = Unpooled.copiedBuffer(chunk, newChunk);
+        }
+    }
+
+    private boolean isFirstChunk() {
+        return chunk == null;
+    }
+
+    private void processHeaderLengthFirst(byte b) {
+        if (isHeaderLengthFirst(b) == false) {
+            logger.debug("Got byte {} while waiting for {}-{}", b, (byte)'1', (byte)'9');
+            throw new IllegalStateException("Invalid chunk size encountered (byte 0)");
+        }
+
+        chunkSize = b - '0';
+        state = State.HEADER_LENGTH_OTHER;
+    }
+
+    private boolean isHeaderLengthFirst(byte b) {
+        return b >= '1' && b <= '9';
     }
 }
