@@ -1449,16 +1449,6 @@
           <artifactId>config-persister-impl</artifactId>
           <version>${netconf.version}</version>
         </dependency>
-        <dependency>
-          <groupId>${project.groupId}</groupId>
-          <artifactId>ietf-netconf-monitoring</artifactId>
-          <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>${project.groupId}</groupId>
-          <artifactId>ietf-netconf-monitoring-extension</artifactId>
-          <version>${netconf.version}</version>
-        </dependency>
 
          <!-- threadpool -->
           <dependency>
