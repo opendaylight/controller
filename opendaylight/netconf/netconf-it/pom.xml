@@ -30,11 +30,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yang-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-api</artifactId>
             <scope>test</scope>
         </dependency>
@@ -76,6 +71,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>sal-binding-it</artifactId>
+            <version>${mdsal.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-mapping-api</artifactId>
             <scope>test</scope>
         </dependency>
@@ -95,6 +96,12 @@
             <artifactId>netconf-util</artifactId>
             <scope>test</scope>
             <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-test</artifactId>
+            <version>${config.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -152,6 +159,19 @@
                             <skip>false</skip>
                             <argLine>-Dlogback.configurationFile=${maven.test.dest}/logback.xml</argLine>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>maven-paxexam-plugin</artifactId>
+                <version>1.2.4</version>
+                <executions>
+                    <execution>
+                        <id>generate-config</id>
+                        <goals>
+                            <goal>generate-depends-file</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
