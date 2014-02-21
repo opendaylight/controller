@@ -166,6 +166,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-test-plugin</artifactId>
@@ -174,6 +175,7 @@
                     <execution>
                         <goals>
                             <goal>delete-sources</goal>
+
                             <goal>process-sources</goal>
                         </goals>
                     </execution>

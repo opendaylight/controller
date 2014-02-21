@@ -281,6 +281,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
         int orderingIdx = 0;
         for (ModuleIdentifier moduleIdentifier : orderedModuleIdentifiers) {
+            logger.trace("Registering {}", moduleIdentifier);
             ModuleInternalTransactionalInfo entry = commitInfo.getCommitted()
                     .get(moduleIdentifier);
             if (entry == null) {
