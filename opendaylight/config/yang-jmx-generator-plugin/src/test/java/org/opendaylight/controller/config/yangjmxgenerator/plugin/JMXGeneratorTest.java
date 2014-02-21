@@ -119,7 +119,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                         + JMXGenerator.NAMESPACE_TO_PACKAGE_DIVIDER
                         + PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX);
         map.put(JMXGenerator.MODULE_FACTORY_FILE_BOOLEAN, "false");
-        jmxGenerator = new JMXGenerator(new FreeMarkerCodeWriterImpl());
+        jmxGenerator = new JMXGenerator(new CodeWriter());
         jmxGenerator.setAdditionalConfig(map);
         File targetDir = new File(generatorOutputPath, "target");
         generatedResourcesDir = new File(targetDir, "generated-resources");

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.yangjmxgenerator;
 
 import com.google.common.collect.Sets;
-import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -36,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -52,13 +52,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public class ModuleMXBeanEntryTest extends AbstractYangTest {
-    public static final String EVENTBUS_MXB_NAME = "eventbus";
-    public static final String ASYNC_EVENTBUS_MXB_NAME = "async-eventbus";
-    public static final String THREADFACTORY_NAMING_MXB_NAME = "threadfactory-naming";
-    public static final String THREADPOOL_DYNAMIC_MXB_NAME = "threadpool-dynamic";
-    public static final String THREADPOOL_REGISTRY_IMPL_NAME = "threadpool-registry-impl";
-
-    public static final String BGP_LISTENER_IMPL_MXB_NAME = "bgp-listener-impl";
 
     public static final String PACKAGE_NAME = "pack2";
 
@@ -82,23 +75,15 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
     protected Map<QName, ServiceInterfaceEntry> modulesToSIEs;
 
-    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava() {
-        Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
-                .create(threadsJavaModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl
-                        (context)), PACKAGE_NAME);
-        assertNotNull(namesToMBEs);
-        Set<String> expectedMXBeanNames = Sets.newHashSet(EVENTBUS_MXB_NAME,
-                ASYNC_EVENTBUS_MXB_NAME, THREADFACTORY_NAMING_MXB_NAME,
-                THREADPOOL_DYNAMIC_MXB_NAME, THREADPOOL_REGISTRY_IMPL_NAME);
-        assertThat(namesToMBEs.keySet(), is(expectedMXBeanNames));
-        return namesToMBEs;
-    }
 
     @Before
     public void setUp() {
-        Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
-        modulesToSIEs = ServiceInterfaceEntry.create(threadsModule,
-                "packages.sis",identitiesToSIs);
+        modulesToSIEs = loadThreadsServiceInterfaceEntries("packages.sis");
+    }
+
+
+    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava() {
+        return loadThreadsJava(modulesToSIEs, PACKAGE_NAME);
     }
 
     @Test
