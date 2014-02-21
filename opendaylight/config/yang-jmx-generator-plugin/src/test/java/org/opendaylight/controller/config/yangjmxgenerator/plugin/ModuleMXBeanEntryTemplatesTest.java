@@ -34,7 +34,7 @@ public class ModuleMXBeanEntryTemplatesTest {
         assertNotNull(template);
     }
 
-    private ModuleMXBeanEntry mockMbe(String packageName) {
+    public static ModuleMXBeanEntry mockMbe(String packageName) {
         ModuleMXBeanEntry mbe = mock(ModuleMXBeanEntry.class);
         Map<String, AttributeIfc> a = Maps.newHashMap();
         JavaAttribute attr = mockJavaAttr();
@@ -52,7 +52,7 @@ public class ModuleMXBeanEntryTemplatesTest {
         return mbe;
     }
 
-    private JavaAttribute mockJavaAttr() {
+    public static JavaAttribute mockJavaAttr() {
         JavaAttribute attr = mock(JavaAttribute.class);
         Type typeA = mock(Type.class);
         doReturn("package").when(typeA).getName();

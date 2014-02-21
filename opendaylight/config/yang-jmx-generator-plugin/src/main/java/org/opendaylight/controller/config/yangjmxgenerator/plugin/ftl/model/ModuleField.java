@@ -44,6 +44,11 @@ public class ModuleField extends Field {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return ModuleFieldSerializer.toString(this);
+    }
+
     public Dependency getDependency() {
         return dependency;
     }
@@ -62,6 +67,11 @@ public class ModuleField extends Field {
 
     public String getAttributeName() {
         return attributeName;
+    }
+
+
+    public boolean isList() {
+        return getType().startsWith("java.util.List");
     }
 
 }
