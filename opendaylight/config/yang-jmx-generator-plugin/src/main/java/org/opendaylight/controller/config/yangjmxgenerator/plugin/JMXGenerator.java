@@ -12,16 +12,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -39,6 +29,17 @@ import org.opendaylight.yangtools.yang2sources.spi.CodeGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class interfaces with yang-maven-plugin. Gets parsed yang modules in
@@ -61,7 +62,7 @@ public class JMXGenerator implements CodeGenerator {
     private boolean generateModuleFactoryFile = true;
 
     public JMXGenerator() {
-        this.codeWriter = new FreeMarkerCodeWriterImpl();
+        this.codeWriter = new CodeWriter();
     }
 
     public JMXGenerator(CodeWriter codeWriter) {
@@ -139,7 +140,7 @@ public class JMXGenerator implements CodeGenerator {
                 ModuleMXBeanEntry mbe = mbeEntry.getValue();
                 try {
                     List<File> files1 = codeWriter.writeMbe(mbe, outputBaseDir,
-                            mainBaseDir, resourceBaseDir);
+                            mainBaseDir);
                     generatedFiles.addFile(files1);
                 } catch (Exception e) {
                     throw new RuntimeException(

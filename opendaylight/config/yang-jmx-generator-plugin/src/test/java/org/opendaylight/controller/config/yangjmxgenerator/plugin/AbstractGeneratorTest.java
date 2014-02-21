@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
-import java.io.File;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.opendaylight.controller.config.yangjmxgenerator.AbstractYangTest;
+
+import java.io.File;
 
 public abstract class AbstractGeneratorTest extends AbstractYangTest {
     private static final File GENERATOR_OUTPUT_PATH_ROOT = new File(
