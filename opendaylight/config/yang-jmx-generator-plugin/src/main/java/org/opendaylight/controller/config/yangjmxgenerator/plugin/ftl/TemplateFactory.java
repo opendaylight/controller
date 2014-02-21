@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.DependencyResolver;
@@ -45,12 +43,10 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQual
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
-import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 
 import javax.management.openmbean.SimpleType;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -58,49 +54,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class TemplateFactory {
-
-    public static Map<String, FtlTemplate> getFtlTemplates(
-            ModuleMXBeanEntry entry) {
-        Map<String, FtlTemplate> result = new HashMap<>();
-
-        result.putAll(TemplateFactory.tOsFromMbe(entry));
-
-        // IFC
-        result.put(entry.getMXBeanInterfaceName() + ".java",
-                TemplateFactory.mXBeanInterfaceTemplateFromMbe(entry));
-
-        // ABS fact
-        result.put(entry.getAbstractFactoryName() + ".java",
-                TemplateFactory.abstractFactoryTemplateFromMbe(entry));
-
-        // ABS module
-        result.put(entry.getAbstractModuleName() + ".java",
-                TemplateFactory.abstractModuleTemplateFromMbe(entry));
-
-        return result;
-    }
-
-    public static Map<String, FtlTemplate> getFtlStubTemplates(
-            ModuleMXBeanEntry entry) {
-        Map<String, FtlTemplate> result = new HashMap<>();
-        // STUB fact
-        result.put(entry.getStubFactoryName() + ".java",
-                TemplateFactory.stubFactoryTemplateFromMbe(entry));
-
-        result.put(entry.getStubModuleName() + ".java",
-                TemplateFactory.stubModuleTemplateFromMbe(entry));
-        return result;
-    }
-
-    public static Map<String, FtlTemplate> getFtlTemplates(
-            ServiceInterfaceEntry entry) {
-
-        Map<String, FtlTemplate> result = new HashMap<>();
-        result.put(entry.getTypeName() + ".java",
-                TemplateFactory.serviceInterfaceFromSie(entry));
-
-        return result;
-    }
 
     /**
      * Get map of file name as key, FtlFile instance representing runtime mx
@@ -183,11 +136,6 @@ public class TemplateFactory {
         return serializeType(type, false);
     }
 
-    private static boolean isIdentityRefType(Type type) {
-        return type instanceof IdentityrefTypeDefinition;
-    }
-
-
     private static String getReturnType(AttributeIfc attributeIfc) {
         String returnType;
         if (attributeIfc instanceof TypedAttribute) {
@@ -234,28 +182,17 @@ public class TemplateFactory {
         attrProcessor.processAttributes(mbe.getAttributes(),
                 mbe.getPackageName());
 
-        Collection<String> transformed = Collections2.transform(mbe
-                .getProvidedServices().keySet(),
-                new Function<String, String>() {
 
-                    @Override
-                    public String apply(String input) {
-                        return input + ".class";
-                    }
-                });
 
         return new AbstractFactoryTemplate(getHeaderFromEntry(mbe),
                 mbe.getPackageName(), mbe.getAbstractFactoryName(),
-                mbe.getGloballyUniqueName(), mbe.getFullyQualifiedName(mbe
-                        .getStubModuleName()), attrProcessor.getFields(),
-                Lists.newArrayList(transformed), mbe);
+                attrProcessor.getFields()
+        );
     }
 
     public static AbstractModuleTemplate abstractModuleTemplateFromMbe(
             ModuleMXBeanEntry mbe) {
-        AbstractModuleAttributesProcessor attrProcessor = new AbstractModuleAttributesProcessor();
-        attrProcessor.processAttributes(mbe.getAttributes(),
-                mbe.getPackageName());
+        AbstractModuleAttributesProcessor attrProcessor = new AbstractModuleAttributesProcessor(mbe.getAttributes());
 
         List<ModuleField> moduleFields = attrProcessor.getModuleFields();
         List<String> implementedIfcs = Lists.newArrayList(
@@ -298,15 +235,8 @@ public class TemplateFactory {
             ModuleMXBeanEntry mbe) {
         return new StubFactoryTemplate(getHeaderFromEntry(mbe),
                 mbe.getPackageName(), mbe.getStubFactoryName(),
-                mbe.getFullyQualifiedName(mbe.getAbstractFactoryName()),
-                mbe.getStubModuleName());
-    }
-
-    public static StubModuleTemplate stubModuleTemplateFromMbe(
-            ModuleMXBeanEntry mbe) {
-        return new StubModuleTemplate(getHeaderFromEntry(mbe),
-                mbe.getPackageName(), mbe.getStubModuleName(),
-                mbe.getFullyQualifiedName(mbe.getAbstractModuleName()));
+                mbe.getFullyQualifiedName(mbe.getAbstractFactoryName())
+        );
     }
 
     public static GeneralInterfaceTemplate mXBeanInterfaceTemplateFromMbe(
@@ -612,12 +542,26 @@ public class TemplateFactory {
     }
 
     private static class AbstractModuleAttributesProcessor {
+        private static class Holder {
+            private final List<ModuleField> moduleFields;
+            private final List<MethodDefinition> methods;
 
-        private final List<ModuleField> moduleFields = Lists.newArrayList();
-        private final List<MethodDefinition> methods = Lists.newArrayList();
+            private Holder(List<ModuleField> moduleFields, List<MethodDefinition> methods) {
+                this.moduleFields = Collections.unmodifiableList(moduleFields);
+                this.methods = Collections.unmodifiableList(methods);
+            }
+        }
 
-        void processAttributes(Map<String, AttributeIfc> attributes,
-                String packageName) {
+        private final Holder holder;
+
+
+        private AbstractModuleAttributesProcessor(Map<String, AttributeIfc> attributes) {
+            this.holder = processAttributes(attributes);
+        }
+
+        private static Holder processAttributes(Map<String, AttributeIfc> attributes) {
+            List<ModuleField> moduleFields = new ArrayList<>();
+            List<MethodDefinition> methods = new ArrayList<>();
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 String type, nullableDefaultWrapped = null;
                 AttributeIfc attributeIfc = attrEntry.getValue();
@@ -661,7 +605,7 @@ public class TemplateFactory {
 
                 String varName = BindingGeneratorUtil
                         .parseToValidParamName(attrEntry.getKey());
-
+                {
                 ModuleField field;
 
                 if (isIdentity) {
@@ -695,7 +639,7 @@ public class TemplateFactory {
                             nullableDefaultWrapped, isDependency, dependency, isListOfDependencies, needsDepResolver);
                 }
                 moduleFields.add(field);
-
+                }
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();
                 MethodDefinition getter = new MethodDefinition(type,
@@ -727,14 +671,15 @@ public class TemplateFactory {
 
                 methods.add(setter);
             }
+            return new Holder(moduleFields, methods);
         }
 
         List<ModuleField> getModuleFields() {
-            return moduleFields;
+            return holder.moduleFields;
         }
 
         List<MethodDefinition> getMethods() {
-            return methods;
+            return holder.methods;
         }
 
     }
