@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.sal.restconf.broker.impl;
 
-import com.google.common.base.Optional;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -33,11 +33,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 public class DataBrokerServiceImpl implements DataBrokerService  {
 
     private static final Logger logger = LoggerFactory.getLogger(DataBrokerServiceImpl.class.toString());
-    private RestconfClientContext restconfClientContext;
-    private SalRemoteService salRemoteService;
+    private final RestconfClientContext restconfClientContext;
+    private final SalRemoteService salRemoteService;
 
     public DataBrokerServiceImpl(RestconfClientContext restconfClientContext) {
         this.restconfClientContext = restconfClientContext;
@@ -152,7 +154,7 @@ public class DataBrokerServiceImpl implements DataBrokerService  {
     }
 
     private class SalRemoteDataListenerRegistration implements ListenerRegistration<DataChangeListener> {
-        private DataChangeListener dataChangeListener;
+        private final DataChangeListener dataChangeListener;
         public SalRemoteDataListenerRegistration(DataChangeListener dataChangeListener){
             this.dataChangeListener = dataChangeListener;
         }
@@ -161,7 +163,7 @@ public class DataBrokerServiceImpl implements DataBrokerService  {
             return this.dataChangeListener;
         }
         @Override
-        public void close() throws Exception {
+        public void close() {
             //noop
         }
     }

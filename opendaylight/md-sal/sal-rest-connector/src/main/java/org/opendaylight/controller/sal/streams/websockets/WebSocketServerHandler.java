@@ -33,102 +33,154 @@ import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * {@link WebSocketServerHandler} is implementation of
+ * {@link SimpleChannelInboundHandler} which allow handle
+ * {@link FullHttpRequest} and {@link WebSocketFrame} messages.
+ */
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketServerHandler.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(WebSocketServerHandler.class);
 
-    private WebSocketServerHandshaker handshaker;
+	private WebSocketServerHandshaker handshaker;
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FullHttpRequest) {
-            handleHttpRequest(ctx, (FullHttpRequest) msg);
-        } else if (msg instanceof WebSocketFrame) {
-            handleWebSocketFrame(ctx, (WebSocketFrame) msg);
-        }
-    }
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, Object msg)
+			throws Exception {
+		if (msg instanceof FullHttpRequest) {
+			handleHttpRequest(ctx, (FullHttpRequest) msg);
+		} else if (msg instanceof WebSocketFrame) {
+			handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+		}
+	}
 
-    private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req)
-            throws Exception {
-        // Handle a bad request.
-        if (!req.getDecoderResult().isSuccess()) {
-            sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
-            return;
-        }
+	/**
+	 * Checks if HTTP request method is GET and if is possible to decode HTTP
+	 * result of request.
+	 * 
+	 * @param ctx
+	 *            ChannelHandlerContext
+	 * @param req
+	 *            FullHttpRequest
+	 */
+	private void handleHttpRequest(ChannelHandlerContext ctx,
+			FullHttpRequest req) throws Exception {
+		// Handle a bad request.
+		if (!req.getDecoderResult().isSuccess()) {
+			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1,
+					BAD_REQUEST));
+			return;
+		}
 
-        // Allow only GET methods.
-        if (req.getMethod() != GET) {
-            sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
-            return;
-        }
+		// Allow only GET methods.
+		if (req.getMethod() != GET) {
+			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1,
+					FORBIDDEN));
+			return;
+		}
 
-        String streamName = Notificator.createStreamNameFromUri(req.getUri());
-        ListenerAdapter listener = Notificator.getListenerFor(streamName);
-        if (listener != null) {
-            listener.addSubscriber(ctx.channel());
-            logger.debug("Subscriber successfully registered.");
-        } else {
-            logger.error("Listener for stream with name '{}' was not found.", streamName);
-            sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR));
-        }
+		String streamName = Notificator.createStreamNameFromUri(req.getUri());
+		ListenerAdapter listener = Notificator.getListenerFor(streamName);
+		if (listener != null) {
+			listener.addSubscriber(ctx.channel());
+			logger.debug("Subscriber successfully registered.");
+		} else {
+			logger.error("Listener for stream with name '{}' was not found.",
+					streamName);
+			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1,
+					INTERNAL_SERVER_ERROR));
+		}
 
-        // Handshake
-        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
-                getWebSocketLocation(req), null, false);
-        handshaker = wsFactory.newHandshaker(req);
-        if (handshaker == null) {
-            WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel());
-        } else {
-            handshaker.handshake(ctx.channel(), req);
-        }
+		// Handshake
+		WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
+				getWebSocketLocation(req), null, false);
+		handshaker = wsFactory.newHandshaker(req);
+		if (handshaker == null) {
+			WebSocketServerHandshakerFactory
+					.sendUnsupportedWebSocketVersionResponse(ctx.channel());
+		} else {
+			handshaker.handshake(ctx.channel(), req);
+		}
 
-    }
+	}
 
-    private static void sendHttpResponse(ChannelHandlerContext ctx,
-            HttpRequest req, FullHttpResponse res) {
-        // Generate an error page if response getStatus code is not OK (200).
-        if (res.getStatus().code() != 200) {
-            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
-            res.content().writeBytes(buf);
-            buf.release();
-            setContentLength(res, res.content().readableBytes());
-        }
+	/**
+	 * Checks response status, send response and close connection if necessary
+	 * 
+	 * @param ctx
+	 *            ChannelHandlerContext
+	 * @param req
+	 *            HttpRequest
+	 * @param res
+	 *            FullHttpResponse
+	 */
+	private static void sendHttpResponse(ChannelHandlerContext ctx,
+			HttpRequest req, FullHttpResponse res) {
+		// Generate an error page if response getStatus code is not OK (200).
+		if (res.getStatus().code() != 200) {
+			ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(),
+					CharsetUtil.UTF_8);
+			res.content().writeBytes(buf);
+			buf.release();
+			setContentLength(res, res.content().readableBytes());
+		}
 
-        // Send the response and close the connection if necessary.
-        ChannelFuture f = ctx.channel().writeAndFlush(res);
-        if (!isKeepAlive(req) || res.getStatus().code() != 200) {
-            f.addListener(ChannelFutureListener.CLOSE);
-        }
-    }
+		// Send the response and close the connection if necessary.
+		ChannelFuture f = ctx.channel().writeAndFlush(res);
+		if (!isKeepAlive(req) || res.getStatus().code() != 200) {
+			f.addListener(ChannelFutureListener.CLOSE);
+		}
+	}
 
-    private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) throws IOException {
-        if (frame instanceof CloseWebSocketFrame) {
-            handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-            String streamName = Notificator.createStreamNameFromUri(((CloseWebSocketFrame) frame).reasonText());
-            ListenerAdapter listener = Notificator.getListenerFor(streamName);
-            if (listener != null) {
-                listener.removeSubscriber(ctx.channel());
-                logger.debug("Subscriber successfully registered.");
-            }
-            Notificator.removeListenerIfNoSubscriberExists(listener);
-            return;
-        } else if (frame instanceof PingWebSocketFrame) {
-            ctx.channel().write(new PongWebSocketFrame(frame.content().retain()));
-            return;
-        }
-    }
+	/**
+	 * Handles web socket frame.
+	 * 
+	 * @param ctx
+	 *            {@link ChannelHandlerContext}
+	 * @param frame
+	 *            {@link WebSocketFrame}
+	 */
+	private void handleWebSocketFrame(ChannelHandlerContext ctx,
+			WebSocketFrame frame) throws IOException {
+		if (frame instanceof CloseWebSocketFrame) {
+			handshaker.close(ctx.channel(),
+					(CloseWebSocketFrame) frame.retain());
+			String streamName = Notificator
+					.createStreamNameFromUri(((CloseWebSocketFrame) frame)
+							.reasonText());
+			ListenerAdapter listener = Notificator.getListenerFor(streamName);
+			if (listener != null) {
+				listener.removeSubscriber(ctx.channel());
+				logger.debug("Subscriber successfully registered.");
+			}
+			Notificator.removeListenerIfNoSubscriberExists(listener);
+			return;
+		} else if (frame instanceof PingWebSocketFrame) {
+			ctx.channel().write(
+					new PongWebSocketFrame(frame.content().retain()));
+			return;
+		}
+	}
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-            throws Exception {
-        if (cause instanceof java.nio.channels.ClosedChannelException == false) {
-            //cause.printStackTrace();
-        }
-        ctx.close();
-    }
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception {
+		if (cause instanceof java.nio.channels.ClosedChannelException == false) {
+			// cause.printStackTrace();
+		}
+		ctx.close();
+	}
 
-    private static String getWebSocketLocation(HttpRequest req) {
-        return "http://" + req.headers().get(HOST) + req.getUri();
-    }
+	/**
+	 * Get web socket location from HTTP request.
+	 * 
+	 * @param req
+	 *            HTTP request from which the location will be returned
+	 * @return String representation of web socket location.
+	 */
+	private static String getWebSocketLocation(HttpRequest req) {
+		return "http://" + req.headers().get(HOST) + req.getUri();
+	}
 
 }
