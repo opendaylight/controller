@@ -37,4 +37,8 @@ public class Constructor {
         return isPublic;
     }
 
+    @Override
+    public String toString() {
+        return ConstructorSerializer.toString(this);
+    }
 }
