@@ -17,13 +17,9 @@
  */
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
-import com.google.common.reflect.AbstractInvocationHandler;
-import com.google.common.reflect.Reflection;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.GlobalEventExecutor;
-
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin;
 
 public final class GlobalEventExecutorModule extends
         org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractGlobalEventExecutorModule {
@@ -46,35 +42,10 @@ public final class GlobalEventExecutorModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final CloseableGlobalEventExecutorMixin closeableGlobalEventExecutorMixin =
-                new CloseableGlobalEventExecutorMixin(GlobalEventExecutor.INSTANCE);
-        return Reflection.newProxy(AutoCloseableEventExecutor.class, new AbstractInvocationHandler() {
-            @Override
-            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
-                if (method.getName().equals("close")) {
-                    closeableGlobalEventExecutorMixin.close();
-                    return null;
-                } else {
-                    return method.invoke(GlobalEventExecutor.INSTANCE, args);
-                }
-            }
-        });
+        EventExecutor eventExecutor = GlobalEventExecutor.INSTANCE;
+        return CloseableEventExecutorMixin.createCloseableProxy(eventExecutor);
     }
 
-    public static interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable {
 
-    }
 
-    public static class CloseableGlobalEventExecutorMixin implements AutoCloseable {
-        private final GlobalEventExecutor eventExecutor;
-
-        public CloseableGlobalEventExecutorMixin(GlobalEventExecutor eventExecutor) {
-            this.eventExecutor = eventExecutor;
-        }
-
-        @Override
-        public void close() {
-            eventExecutor.shutdownGracefully(0, 1, TimeUnit.SECONDS);
-        }
-    }
 }
