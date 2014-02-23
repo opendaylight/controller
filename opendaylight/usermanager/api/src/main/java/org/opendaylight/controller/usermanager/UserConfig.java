@@ -137,7 +137,7 @@ public class UserConfig extends ConfigurationObject implements Serializable {
     }
 
     public byte[] getSalt() {
-        return salt.clone();
+        return (salt == null) ? null : salt.clone();
     }
 
     @Override
