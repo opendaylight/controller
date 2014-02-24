@@ -127,12 +127,8 @@ AutoCloseable {
 
         val listener = new NetconfDeviceListener(this);
         val task = startClientTask(dispatcher, listener)
-        if (mountInstance != null) {
-            commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, this)
-        }
         return processingExecutor.submit(task) as Future<Void>;
 
-    //commitHandlerReg = mountInstance.registerCommitHandler(path,this);
     }
 
     def Optional<SchemaContext> getSchemaContext() {
@@ -162,11 +158,16 @@ AutoCloseable {
                 deviceContextProvider.createContextFromCapabilities(initialCapabilities);
                 if (mountInstance != null && schemaContext.isPresent) {
                     mountInstance.schemaContext = schemaContext.get();
+                    val operations = schemaContext.get().operations;
+                    for (rpc : operations) {
+                        mountInstance.addRpcImplementation(rpc.QName, this);
+                    }
                 }
                 updateDeviceState()
                 if (mountInstance != null && confReaderReg == null && operReaderReg == null) {
                     confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, this);
                     operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, this);
+                    commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, this);
                 }
             } catch (Exception e) {
                 logger.error("Netconf client NOT started. ", e)
