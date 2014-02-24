@@ -120,7 +120,7 @@
         <sonar.branch>${user.name}-private-view</sonar.branch>
         <sonar.language>java</sonar.language>
         <exam.version>3.0.0</exam.version>
-        <sal.version>0.7.1-SNAPSHOT</sal.version>
+        <sal.version>0.8.1-SNAPSHOT</sal.version>
     </properties>
 
     <dependencyManagement>
