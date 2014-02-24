@@ -118,4 +118,14 @@ module opendaylight-inventory {
             type node-connector-ref;
         }
     }
+        rpc opendaylight-disconnect-switch {
+        input {
+        uses "inv:node-context-ref";         
+        }
+        output {
+        leaf disconnect-output{
+        type boolean;
+        }
+        }
+    }
 }
