@@ -17,6 +17,7 @@
 package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -79,6 +80,44 @@ public class Path implements Serializable {
         }
 
         this.edges = edges;
+    }
+
+    /**
+     * Create the reversed path
+     * @return The reversed path
+     */
+    public Path reverse() {
+        int j = 0;
+        List<Edge> rEdges = new ArrayList<Edge>();
+        for (int i = this.edges.size() -1; i >=0; i--) {
+            Edge rEdge = this.edges.get(i).reverse();
+            rEdges.add(j, rEdge);
+            j++;
+        }
+        Path rp;
+        try {
+         rp = new Path(rEdges);
+        } catch (ConstructionException ce) {
+            rp = null;
+        }
+        return rp;
+    }
+
+    /**
+     * Return the list of nodes of this path, the first node is the start node
+     * @return the list of nodes
+     */
+    public List<Node> getNodes() {
+        List<Node> nl = new ArrayList<Node>();
+        int s = this.getEdges().size();
+        if (s == 0) {
+            return nl; // empty list
+        }
+        nl.add(this.getStartNode());
+        for (int i = 0; i < s; i++) {
+            nl.add(this.getEdges().get(i).getHeadNodeConnector().getNode());
+        }
+        return nl;
     }
 
     /**
