@@ -30,7 +30,6 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.management.RuntimeMBeanException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -135,7 +134,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
     private void testValidation(ConfigTransactionClient transaction)
             throws InstanceAlreadyExistsException, ReflectionException,
-            InstanceNotFoundException, MBeanException {
+            InstanceNotFoundException, MBeanException, ConflictingVersionException {
         ObjectName fixed1names = transaction.createModule(
                 TestingFixedThreadPoolModuleFactory.NAME, fixed1);
         // call validate on config bean
@@ -143,8 +142,8 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
             platformMBeanServer.invoke(fixed1names, "validate", new Object[0],
                     new String[0]);
             fail();
-        } catch (RuntimeMBeanException e) {
-            RuntimeException targetException = e.getTargetException();
+        } catch (MBeanException e) {
+            Exception targetException = e.getTargetException();
             assertNotNull(targetException);
             assertEquals(ValidationException.class, targetException.getClass());
         }

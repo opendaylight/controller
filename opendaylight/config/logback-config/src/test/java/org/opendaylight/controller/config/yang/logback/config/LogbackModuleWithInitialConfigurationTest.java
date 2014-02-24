@@ -7,31 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMX;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -39,8 +14,32 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
-
 import com.google.common.collect.Lists;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.slf4j.LoggerFactory;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTest {
 
@@ -145,7 +144,7 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
     }
 
     public ObjectName createBeans() throws JoranException, InstanceAlreadyExistsException, IOException,
-            MalformedObjectNameException, InstanceNotFoundException {
+            MalformedObjectNameException, InstanceNotFoundException, ValidationException, ConflictingVersionException {
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
