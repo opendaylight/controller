@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba57610f_480abfd3",
+        "filename": "opendaylight/md-sal/blacklists-manager/src/main/java/org/opendaylight/controller/blacklist/BlackListManager.xtend",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 956
+      },
+      "writtenOn": "2014-02-24T09:34:33Z",
+      "side": 1,
+      "message": "Hi Govinda, \nCan you please change the bundle names to disconnect-manager , instead blacklist-manager ...",
+      "revId": "8e9d22a2c9b2f45d908b6b0fce58eeb91ee6fa04",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
