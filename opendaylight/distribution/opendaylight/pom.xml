@@ -90,6 +90,15 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-rest-connector</artifactId>
+<<<<<<< HEAD
+          <version>${mdsal.version}</version>
+        </dependency>		
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>blacklists-manager</artifactId>
+          <version>${mdsal.version}</version>
+=======
+>>>>>>> efa5be8f930f3eda7094c314e22347868b9db173
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
