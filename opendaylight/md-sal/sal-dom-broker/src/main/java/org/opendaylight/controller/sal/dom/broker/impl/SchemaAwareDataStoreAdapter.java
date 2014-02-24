@@ -9,10 +9,18 @@ package org.opendaylight.controller.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.activation.UnsupportedDataTypeException;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
@@ -26,15 +34,23 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
+import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
@@ -169,10 +185,10 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             DataModification<InstanceIdentifier, CompositeNode> original) {
         NormalizedDataModification normalized = new NormalizedDataModification(original);
         for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
-            normalized.putConfigurationData(entry.getKey(), entry.getValue());
+            normalized.putDeepConfigurationData(entry.getKey(), entry.getValue());
         }
         for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
-            normalized.putOperationalData(entry.getKey(), entry.getValue());
+            normalized.putDeepOperationalData(entry.getKey(), entry.getValue());
         }
         for (InstanceIdentifier entry : original.getRemovedConfigurationData()) {
             normalized.deepRemoveConfigurationData(entry);
@@ -310,6 +326,8 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     private class NormalizedDataModification extends AbstractDataModification<InstanceIdentifier, CompositeNode> {
 
+        private final String CONFIGURATIONAL_DATA_STORE_MARKER = "configurational";
+        private final String OPERATIONAL_DATA_STORE_MARKER = "operational";
         private final Object identifier;
         private TransactionStatus status;
 
@@ -342,6 +360,14 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
 
+        public void putDeepConfigurationData(InstanceIdentifier entryKey, CompositeNode entryData) {
+            this.putCompositeNodeData(entryKey, entryData, CONFIGURATIONAL_DATA_STORE_MARKER);
+        }
+        
+        public void putDeepOperationalData(InstanceIdentifier entryKey, CompositeNode entryData) {
+            this.putCompositeNodeData(entryKey, entryData, OPERATIONAL_DATA_STORE_MARKER);
+        }
+
         @Override
         public Object getIdentifier() {
             return this.identifier;
@@ -368,6 +394,69 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                 CompositeNode modified) {
             return mergeData(path, stored, modified, false);
         }
-    }
 
+        private void putData(InstanceIdentifier entryKey, CompositeNode entryData, String dataStoreIdentifier) {
+            if (dataStoreIdentifier != null && entryKey != null && entryData != null) {
+                switch (dataStoreIdentifier) {
+                case (CONFIGURATIONAL_DATA_STORE_MARKER):
+                    this.putConfigurationData(entryKey, entryData);
+                    break;
+                case (OPERATIONAL_DATA_STORE_MARKER):
+                    this.putOperationalData(entryKey, entryData);
+                    break;
+
+                default :
+                    LOG.error(dataStoreIdentifier + " is NOT valid DataStore switch marker");
+                    throw new RuntimeException(dataStoreIdentifier + " is NOT valid DataStore switch marker");
+                }
+            }
+        }
+
+        private void putCompositeNodeData(InstanceIdentifier entryKey, CompositeNode entryData, String dataStoreIdentifier) {
+            this.putData(entryKey, entryData, dataStoreIdentifier);
+            
+            for (Node<?> child : entryData.getChildren()) {
+                InstanceIdentifier subEntryId = InstanceIdentifier.builder(entryKey).node(child.getNodeType()).toInstance();
+                if (child instanceof CompositeNode) {
+                    DataSchemaNode subSchema = schemaNodeFor(subEntryId);
+                    CompositeNode compNode = (CompositeNode) child;
+                    InstanceIdentifier instanceId = null;
+
+                    if (subSchema instanceof ListSchemaNode) {
+                        ListSchemaNode listSubSchema = (ListSchemaNode) subSchema;
+                        Map<QName, Object> mapOfSubValues = this.getValuesFromListSchema(listSubSchema, (CompositeNode) child);
+                        if (mapOfSubValues != null) {
+                            instanceId = InstanceIdentifier.builder(entryKey).nodeWithKey(listSubSchema.getQName(), mapOfSubValues).toInstance();
+                        }
+                    } 
+                    else if (subSchema instanceof ContainerSchemaNode) {
+                        ContainerSchemaNode containerSchema = (ContainerSchemaNode) subSchema;
+                        instanceId = InstanceIdentifier.builder(entryKey).node(subSchema.getQName()).toInstance();
+                    }
+                    if (instanceId != null) {
+                        this.putCompositeNodeData(instanceId, compNode, dataStoreIdentifier);
+                    }
+                }
+            }
+        }
+
+        private Map<QName, Object> getValuesFromListSchema (ListSchemaNode listSchema, CompositeNode entryData) {
+            List<QName> keyDef = listSchema.getKeyDefinition();
+            if (keyDef != null && ! keyDef.isEmpty()) {
+                Map<QName, Object> map = new HashMap<QName, Object>();
+                for (QName key : keyDef) {
+                    List<Node<?>> data = entryData.get(key);
+                    if (data != null && ! data.isEmpty()) {
+                        for (Node<?> nodeData : data) {
+                            if (nodeData instanceof SimpleNode<?>) {
+                                map.put(key, data.get(0).getValue());
+                            }
+                        }
+                    }
+                }
+                return map;
+            }
+            return null;
+        }
+    }
 }
