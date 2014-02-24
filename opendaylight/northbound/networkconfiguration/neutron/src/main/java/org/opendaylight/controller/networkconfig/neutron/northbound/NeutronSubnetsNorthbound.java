@@ -33,13 +33,16 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.northbound.commons.RestMessages;
+import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
+import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
+import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
- * Open DOVE Northbound REST APIs.<br>
- * This class provides REST APIs for managing open DOVE internals related to Subnets
+ * Neutron Northbound REST APIs for Subnets.<br>
+ * This class provides REST APIs for managing neutron Subnets
  *
  * <br>
  * <br>
@@ -142,7 +145,7 @@ public class NeutronSubnetsNorthbound {
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         if (!subnetInterface.subnetExists(subnetUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("subnet UUID does not exist.");
         }
         if (fields.size() > 0) {
             NeutronSubnet ans = subnetInterface.getSubnet(subnetUUID);
@@ -190,19 +193,19 @@ public class NeutronSubnetsNorthbound {
              *  *then* add the subnet to the cache
              */
             if (subnetInterface.subnetExists(singleton.getID())) {
-                return Response.status(400).build();
+                throw new BadRequestException("subnet UUID already exists");
             }
             if (!networkInterface.networkExists(singleton.getNetworkUUID())) {
-                return Response.status(404).build();
+                throw new ResourceNotFoundException("network UUID does not exist.");
             }
             if (!singleton.isValidCIDR()) {
-                return Response.status(400).build();
+                throw new BadRequestException("invaild CIDR");
             }
             if (!singleton.initDefaults()) {
                 throw new InternalServerErrorException("subnet object could not be initialized properly");
             }
             if (singleton.gatewayIP_Pool_overlap()) {
-                return Response.status(409).build();
+                throw new ResourceConflictException("IP pool overlaps with gateway");
             }
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
             if (instances != null) {
@@ -240,20 +243,20 @@ public class NeutronSubnetsNorthbound {
                     throw new InternalServerErrorException("subnet object could not be initialized properly");
                 }
                 if (subnetInterface.subnetExists(test.getID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("subnet UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("subnet UUID already exists");
                 }
                 testMap.put(test.getID(), test);
                 if (!networkInterface.networkExists(test.getNetworkUUID())) {
-                    return Response.status(404).build();
+                    throw new ResourceNotFoundException("network UUID does not exist.");
                 }
                 if (!test.isValidCIDR()) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("Invalid CIDR");
                 }
                 if (test.gatewayIP_Pool_overlap()) {
-                    return Response.status(409).build();
+                    throw new ResourceConflictException("IP pool overlaps with gateway");
                 }
                 if (instances != null) {
                     for (Object instance : instances) {
@@ -312,10 +315,10 @@ public class NeutronSubnetsNorthbound {
          * verify the subnet exists and there is only one delta provided
          */
         if (!subnetInterface.subnetExists(subnetUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("subnet UUID does not exist.");
         }
         if (!input.isSingleton()) {
-            return Response.status(400).build();
+            throw new BadRequestException("Only singleton edit supported");
         }
         NeutronSubnet delta = input.getSingleton();
         NeutronSubnet original = subnetInterface.getSubnet(subnetUUID);
@@ -326,7 +329,7 @@ public class NeutronSubnetsNorthbound {
         if (delta.getID() != null || delta.getTenantID() != null ||
                 delta.getIpVersion() != null || delta.getCidr() != null ||
                 delta.getAllocationPools() != null) {
-            return Response.status(400).build();
+            throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
@@ -378,7 +381,7 @@ public class NeutronSubnetsNorthbound {
          * verify the subnet exists and it isn't currently in use
          */
         if (!subnetInterface.subnetExists(subnetUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("subnet UUID does not exist.");
         }
         if (subnetInterface.subnetInUse(subnetUUID)) {
             return Response.status(409).build();

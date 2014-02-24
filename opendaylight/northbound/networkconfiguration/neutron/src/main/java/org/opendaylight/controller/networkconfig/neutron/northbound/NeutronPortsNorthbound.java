@@ -36,12 +36,15 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
 import org.opendaylight.controller.northbound.commons.RestMessages;
+import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
+import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
+import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
- * Open DOVE Northbound REST APIs.<br>
- * This class provides REST APIs for managing the open DOVE
+ * Neutron Northbound REST APIs.<br>
+ * This class provides REST APIs for managing neutron port objects
  *
  * <br>
  * <br>
@@ -148,7 +151,7 @@ public class NeutronPortsNorthbound {
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         if (!portInterface.portExists(portUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("port UUID does not exist.");
         }
         if (fields.size() > 0) {
             NeutronPort ans = portInterface.getPort(portUUID);
@@ -200,20 +203,20 @@ public class NeutronPortsNorthbound {
              * have a valid MAC and the MAC not be in use
              */
             if (singleton.getNetworkUUID() == null) {
-                return Response.status(400).build();
+                throw new BadRequestException("network UUID musy be specified");
             }
             if (portInterface.portExists(singleton.getID())) {
-                return Response.status(400).build();
+                throw new BadRequestException("port UUID already exists");
             }
             if (!networkInterface.networkExists(singleton.getNetworkUUID())) {
-                return Response.status(404).build();
+                throw new ResourceNotFoundException("network UUID does not exist.");
             }
             if (singleton.getMacAddress() == null ||
                     !singleton.getMacAddress().matches(mac_regex)) {
-                return Response.status(400).build();
+                throw new BadRequestException("MAC address not properly formatted");
             }
             if (portInterface.macInUse(singleton.getMacAddress())) {
-                return Response.status(409).build();
+                throw new ResourceConflictException("MAC Address is in use.");
             }
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
             if (instances != null) {
@@ -237,21 +240,21 @@ public class NeutronPortsNorthbound {
                 while (fixedIPIterator.hasNext()) {
                     Neutron_IPs ip = fixedIPIterator.next();
                     if (ip.getSubnetUUID() == null) {
-                        return Response.status(400).build();
+                        throw new BadRequestException("subnet UUID not specified");
                     }
                     if (!subnetInterface.subnetExists(ip.getSubnetUUID())) {
-                        return Response.status(400).build();
+                        throw new BadRequestException("subnet UUID must exists");
                     }
                     NeutronSubnet subnet = subnetInterface.getSubnet(ip.getSubnetUUID());
                     if (!singleton.getNetworkUUID().equalsIgnoreCase(subnet.getNetworkUUID())) {
-                        return Response.status(400).build();
+                        throw new BadRequestException("network UUID must match that of subnet");
                     }
                     if (ip.getIpAddress() != null) {
                         if (!subnet.isValidIP(ip.getIpAddress())) {
-                            return Response.status(400).build();
+                            throw new BadRequestException("IP address is not valid");
                         }
                         if (subnet.isIPInUse(ip.getIpAddress())) {
-                            return Response.status(409).build();
+                            throw new ResourceConflictException("IP address is in use.");
                         }
                     }
                 }
@@ -279,32 +282,32 @@ public class NeutronPortsNorthbound {
                  * can't already contain a new port with the same UUID
                  */
                 if (portInterface.portExists(test.getID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("port UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("port UUID already exists");
                 }
                 for (NeutronPort check : testMap.values()) {
                     if (test.getMacAddress().equalsIgnoreCase(check.getMacAddress())) {
-                        return Response.status(409).build();
+                        throw new ResourceConflictException("MAC address already allocated");
                     }
                     for (Neutron_IPs test_fixedIP : test.getFixedIPs()) {
                         for (Neutron_IPs check_fixedIP : check.getFixedIPs()) {
                             if (test_fixedIP.getIpAddress().equals(check_fixedIP.getIpAddress())) {
-                                return Response.status(409).build();
+                                throw new ResourceConflictException("IP address already allocated");
                             }
                         }
                     }
                 }
                 testMap.put(test.getID(), test);
                 if (!networkInterface.networkExists(test.getNetworkUUID())) {
-                    return Response.status(404).build();
+                    throw new ResourceNotFoundException("network UUID does not exist.");
                 }
                 if (!test.getMacAddress().matches(mac_regex)) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("MAC address not properly formatted");
                 }
                 if (portInterface.macInUse(test.getMacAddress())) {
-                    return Response.status(409).build();
+                    throw new ResourceConflictException("MAC address in use");
                 }
                 if (instances != null) {
                     for (Object instance : instances) {
@@ -327,23 +330,23 @@ public class NeutronPortsNorthbound {
                     while (fixedIPIterator.hasNext()) {
                         Neutron_IPs ip = fixedIPIterator.next();
                         if (ip.getSubnetUUID() == null) {
-                            return Response.status(400).build();
+                            throw new BadRequestException("subnet UUID must be specified");
                         }
                         if (!subnetInterface.subnetExists(ip.getSubnetUUID())) {
-                            return Response.status(400).build();
+                            throw new BadRequestException("subnet UUID doesn't exists");
                         }
                         NeutronSubnet subnet = subnetInterface.getSubnet(ip.getSubnetUUID());
                         if (!test.getNetworkUUID().equalsIgnoreCase(subnet.getNetworkUUID())) {
-                            return Response.status(400).build();
+                            throw new BadRequestException("network UUID must match that of subnet");
                         }
                         if (ip.getIpAddress() != null) {
                             if (!subnet.isValidIP(ip.getIpAddress())) {
-                                return Response.status(400).build();
+                                throw new BadRequestException("ip address not valid");
                             }
                             //TODO: need to add consideration for a fixed IP being assigned the same address as a allocated IP in the
                             //same bulk create
                             if (subnet.isIPInUse(ip.getIpAddress())) {
-                                return Response.status(409).build();
+                                throw new ResourceConflictException("IP address in use");
                             }
                         }
                     }
@@ -399,11 +402,11 @@ public class NeutronPortsNorthbound {
 
         // port has to exist and only a single delta is supported
         if (!portInterface.portExists(portUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("port UUID does not exist.");
         }
         NeutronPort target = portInterface.getPort(portUUID);
         if (!input.isSingleton()) {
-            return Response.status(400).build();
+            throw new BadRequestException("only singleton edit suported");
         }
         NeutronPort singleton = input.getSingleton();
         NeutronPort original = portInterface.getPort(portUUID);
@@ -411,7 +414,7 @@ public class NeutronPortsNorthbound {
         // deltas restricted by Neutron
         if (singleton.getID() != null || singleton.getTenantID() != null ||
                 singleton.getStatus() != null) {
-            return Response.status(400).build();
+            throw new BadRequestException("attribute change blocked by Neutron");
         }
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
@@ -432,21 +435,21 @@ public class NeutronPortsNorthbound {
             while (fixedIPIterator.hasNext()) {
                 Neutron_IPs ip = fixedIPIterator.next();
                 if (ip.getSubnetUUID() == null) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("subnet UUID must be specified");
                 }
                 if (!subnetInterface.subnetExists(ip.getSubnetUUID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("subnet UUID doesn't exist.");
                 }
                 NeutronSubnet subnet = subnetInterface.getSubnet(ip.getSubnetUUID());
                 if (!target.getNetworkUUID().equalsIgnoreCase(subnet.getNetworkUUID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("network UUID must match that of subnet");
                 }
                 if (ip.getIpAddress() != null) {
                     if (!subnet.isValidIP(ip.getIpAddress())) {
-                        return Response.status(400).build();
+                        throw new BadRequestException("invalid IP address");
                     }
                     if (subnet.isIPInUse(ip.getIpAddress())) {
-                        return Response.status(409).build();
+                        throw new ResourceConflictException("IP address in use");
                     }
                 }
             }
@@ -454,7 +457,7 @@ public class NeutronPortsNorthbound {
 
         //        TODO: Support change of security groups
         // update the port and return the modified object
-                portInterface.updatePort(portUUID, singleton);
+        portInterface.updatePort(portUUID, singleton);
         NeutronPort updatedPort = portInterface.getPort(portUUID);
         if (instances != null) {
             for (Object instance : instances) {
@@ -488,7 +491,7 @@ public class NeutronPortsNorthbound {
 
         // port has to exist and not be owned by anyone.  then it can be removed from the cache
         if (!portInterface.portExists(portUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("port UUID does not exist.");
         }
         NeutronPort port = portInterface.getPort(portUUID);
         if (port.getDeviceID() != null ||

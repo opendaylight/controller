@@ -33,12 +33,15 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.northbound.commons.RestMessages;
+import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
+import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
+import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
- * Open DOVE Northbound REST APIs for Network.<br>
- * This class provides REST APIs for managing open DOVE internals related to Networks
+ * Neutron Northbound REST APIs for Network.<br>
+ * This class provides REST APIs for managing neutron Networks
  *
  * <br>
  * <br>
@@ -154,7 +157,7 @@ public class NeutronNetworksNorthbound {
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         if (!networkInterface.networkExists(netUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("network UUID does not exist.");
         }
         if (fields.size() > 0) {
             NeutronNetwork ans = networkInterface.getNetwork(netUUID);
@@ -189,7 +192,7 @@ public class NeutronNetworksNorthbound {
              * network ID can't already exist
              */
             if (networkInterface.networkExists(singleton.getID())) {
-                return Response.status(400).build();
+                throw new BadRequestException("network UUID already exists");
             }
 
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
@@ -226,10 +229,10 @@ public class NeutronNetworksNorthbound {
                  * already in this bulk request
                  */
                 if (networkInterface.networkExists(test.getID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("network UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    return Response.status(400).build();
+                    throw new BadRequestException("network UUID already exists");
                 }
                 if (instances != null) {
                     for (Object instance: instances) {
@@ -285,10 +288,10 @@ public class NeutronNetworksNorthbound {
          * network has to exist and only a single delta is supported
          */
         if (!networkInterface.networkExists(netUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("network UUID does not exist.");
         }
         if (!input.isSingleton()) {
-            return Response.status(400).build();
+            throw new BadRequestException("only singleton edits supported");
         }
         NeutronNetwork delta = input.getSingleton();
 
@@ -297,7 +300,7 @@ public class NeutronNetworksNorthbound {
          */
         if (delta.getID() != null || delta.getTenantID() != null ||
                 delta.getStatus() != null) {
-            return Response.status(400).build();
+            throw new BadRequestException("attribute edit blocked by Neutron");
         }
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
@@ -347,10 +350,10 @@ public class NeutronNetworksNorthbound {
          * network has to exist and not be in use before it can be removed
          */
         if (!networkInterface.networkExists(netUUID)) {
-            return Response.status(404).build();
+            throw new ResourceNotFoundException("network UUID does not exist.");
         }
         if (networkInterface.networkInUse(netUUID)) {
-            return Response.status(409).build();
+            throw new ResourceConflictException("Network ID in use");
         }
 
         NeutronNetwork singleton = networkInterface.getNetwork(netUUID);
