@@ -1,0 +1,74 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:test";
+    prefix "test";
+
+    organization "Cisco Systems, Inc.";
+
+    revision "2013-2-21" {
+        description
+            "Initial revision";
+    }
+
+	container container {
+        leaf uint32 {
+            type uint32;
+        }
+
+        leaf decimal64 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+
+        leaf boolean {
+            type boolean;
+        }
+
+        leaf binary {
+            type binary;
+        }
+
+        leaf string {
+            type string;
+        }
+
+        container innerContainer {
+            leaf uint16 {
+            	type uint16;
+            }
+
+            container innerInnerContainer {
+
+            	leaf uint16 {
+            		type uint16;
+            	}
+
+            	leaf uint32 {
+		            type uint32;
+		        }
+        	}
+        }
+
+        leaf-list leafList {
+        	type string;
+        }
+
+        list list {
+            key "uint32";
+
+	        leaf uint32 {
+	            type uint32;
+	        }
+
+	       	container containerInList{
+	       		leaf uint32 {
+	            	type uint32;
+	        	}
+	       	}
+
+        }
+    }
+
+}

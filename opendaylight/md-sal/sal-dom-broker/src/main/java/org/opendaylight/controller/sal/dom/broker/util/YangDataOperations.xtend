@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.common.QName
 import static extension org.opendaylight.controller.sal.dom.broker.util.YangDataUtils.*;
 
 class YangDataOperations {
-
+	
     static def CompositeNode merge(DataSchemaNode schema, CompositeNode stored, CompositeNode modified, boolean config) {
         if (stored === null) {
             return modified;

@@ -1,0 +1,8 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+
+    <leafList>currentLeafList2</leafList>
+    <leafList>currentLeafList3</leafList>
+    <leafList>currentLeafList4</leafList>
+    <leafList>currentLeafList5</leafList>
+
+</container>
