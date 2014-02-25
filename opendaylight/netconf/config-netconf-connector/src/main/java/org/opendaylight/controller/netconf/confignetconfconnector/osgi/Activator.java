@@ -25,7 +25,8 @@ public class Activator implements BundleActivator, YangStoreServiceTracker.YangS
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private BundleContext context;
-    ServiceRegistration osgiRegistration;
+    private ServiceRegistration osgiRegistration;
+    private ConfigRegistryLookupThread configRegistryLookup = null;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -36,20 +37,42 @@ public class Activator implements BundleActivator, YangStoreServiceTracker.YangS
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        if (configRegistryLookup != null) {
+            configRegistryLookup.interrupt();
+        }
     }
 
     @Override
     public synchronized void onYangStoreAdded(YangStoreService yangStoreService) {
-        checkState(osgiRegistration == null, "More than one onYangStoreAdded received");
-        NetconfOperationServiceFactoryImpl factory = new NetconfOperationServiceFactoryImpl(yangStoreService);
-        logger.debug("Registering into OSGi");
-        osgiRegistration = context.registerService(new String[]{NetconfOperationServiceFactory.class.getName()}, factory,
-                new Hashtable<String, Object>());
+        checkState(configRegistryLookup  == null, "More than one onYangStoreAdded received");
+        configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
+        configRegistryLookup.start();
     }
 
     @Override
     public synchronized void onYangStoreRemoved() {
-        osgiRegistration.unregister();
+        configRegistryLookup.interrupt();
+        if (osgiRegistration != null) {
+            osgiRegistration.unregister();
+        }
         osgiRegistration = null;
+        configRegistryLookup = null;
+    }
+
+    private class ConfigRegistryLookupThread extends Thread {
+        private final YangStoreService yangStoreService;
+
+        private ConfigRegistryLookupThread(YangStoreService yangStoreService) {
+            super("config-registry-lookup");
+            this.yangStoreService = yangStoreService;
+        }
+
+        @Override
+        public void run() {
+            NetconfOperationServiceFactoryImpl factory = new NetconfOperationServiceFactoryImpl(yangStoreService);
+            logger.debug("Registering into OSGi");
+            osgiRegistration = context.registerService(new String[]{NetconfOperationServiceFactory.class.getName()}, factory,
+                    new Hashtable<String, Object>());
+        }
     }
 }
