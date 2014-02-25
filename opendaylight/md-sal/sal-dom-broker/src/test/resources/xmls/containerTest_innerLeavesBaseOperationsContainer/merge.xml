@@ -1,0 +1,13 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <uint32 nc:operation="replace">88</uint32>
+    <augumentUint32>88</augumentUint32>
+    <decimal64 nc:operation="merge">88.1</decimal64>
+    <string nc:operation="delete"></string>
+    <binary nc:operation="remove"></binary>
+    <boolean nc:operation="create">false</boolean>
+
+    <identityRef>test-identity2</identityRef>
+    <augumentString2 nc:operation="create">augumentString2</augumentString2>
+
+</container>

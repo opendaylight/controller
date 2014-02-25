@@ -1,0 +1,8 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <list>
+        <uint32>1</uint32>
+        <containerInList>
+            <uint32>32</uint32>
+        </containerInList>
+    </list>
+</container>

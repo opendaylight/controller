@@ -1,0 +1,10 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+
+    <leafList nc:operation="delete">currentLeafList1</leafList>
+    <leafList nc:operation="remove">random</leafList>
+    <leafList nc:operation="create">currentLeafList3</leafList>
+    <leafList nc:operation="replace">currentLeafList4</leafList>
+    <leafList nc:operation="merge">currentLeafList5</leafList>
+
+</container>

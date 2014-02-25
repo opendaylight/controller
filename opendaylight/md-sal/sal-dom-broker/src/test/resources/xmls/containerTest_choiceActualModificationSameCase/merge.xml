@@ -1,0 +1,9 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <augumentString1>augumentString1</augumentString1>
+
+    <augumentContainer>
+        <augumentStringInAugumentContainer nc:operation="delete">
+        </augumentStringInAugumentContainer>
+    </augumentContainer>
+</container>

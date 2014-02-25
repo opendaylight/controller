@@ -1,0 +1,3 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <uint32>44</uint32>
+</container>
