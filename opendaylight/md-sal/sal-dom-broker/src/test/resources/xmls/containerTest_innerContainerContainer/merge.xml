@@ -1,0 +1,12 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+
+    <innerContainer nc:operation="merge">
+         <!--TODO integer element has contain value in order to be parsed even if its being removed-->
+        <uint16 nc:operation="remove">-1</uint16>
+        <innerInnerContainer nc:operation="replace">
+            <uint16>22</uint16>
+        </innerInnerContainer>
+    </innerContainer>
+
+</container>

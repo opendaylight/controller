@@ -48,12 +48,27 @@
             <artifactId>config-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>netconf-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-parser-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -104,8 +119,8 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            
-            
+
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -122,6 +137,7 @@
                             org.opendaylight.controller.sal.dom.broker.impl,
                             org.opendaylight.controller.sal.dom.broker.osgi,
                             org.opendaylight.controller.sal.dom.broker.util,
+                            org.opendaylight.controller.sal.dom.broker.util.operations,
                             org.opendaylight.controller.config.yang.md.sal.dom.impl,
                             org.opendaylight.controller.config.yang.md.sal.dom.statistics,
                             org.opendaylight.yangtools.yang.util

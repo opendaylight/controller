@@ -1,0 +1,7 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <innerContainer>
+        <innerInnerContainer>
+            <uint16>22</uint16>
+        </innerInnerContainer>
+    </innerContainer>
+</container>
