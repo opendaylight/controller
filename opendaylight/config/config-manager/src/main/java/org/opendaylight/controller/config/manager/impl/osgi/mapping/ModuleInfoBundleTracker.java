@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -98,31 +97,26 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
             errorMessage = logMessage("Class {} does not implement {} in bundle {}", clazz, YangModelBindingProvider.class, bundle);
             throw new IllegalStateException(errorMessage);
         }
-
+        YangModelBindingProvider instance;
         try {
-            Object instance = clazz.newInstance();
-            Object result = clazz.getMethod(GET_MODULE_INFO_METHOD).invoke(instance);
-
-            if (YangModuleInfo.class.isAssignableFrom(result.getClass()) == false) {
-                errorMessage = logMessage("Error invoking method not found {} in bundle {}, reason {}",
-                        GET_MODULE_INFO_METHOD, bundle, "Not assignable from " + YangModuleInfo.class);
-            } else {
-                return (YangModuleInfo) result;
-            }
-
+            Object instanceObj = clazz.newInstance();
+            instance = YangModelBindingProvider.class.cast(instanceObj);
         } catch (InstantiationException e) {
             errorMessage = logMessage("Could not instantiate {} in bundle {}, reason {}", moduleInfoClass, bundle, e);
+            throw new IllegalStateException(errorMessage, e);
         } catch (IllegalAccessException e) {
             errorMessage = logMessage("Illegal access during instatiation of class {} in bundle {}, reason {}",
                     moduleInfoClass, bundle, e);
-        } catch (NoSuchMethodException e) {
-            errorMessage = logMessage("Method not found {} in bundle {}, reason {}", GET_MODULE_INFO_METHOD, bundle, e);
-        } catch (InvocationTargetException e) {
-            errorMessage = logMessage("Error invoking method {} in bundle {}, reason {}", GET_MODULE_INFO_METHOD,
-                    bundle, e);
+            throw new IllegalStateException(errorMessage, e);
         }
+        try{
+            return instance.getModuleInfo();
+        } catch (NoClassDefFoundError e) {
 
-        throw new IllegalStateException(errorMessage);
+
+            logger.error("Error while executing getModuleInfo on {}", instance, e);
+            throw e;
+        }
     }
 
     private static Class<?> loadClass(String moduleInfoClass, Bundle bundle) {
