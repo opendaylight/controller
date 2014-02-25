@@ -1,0 +1,34 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+
+    <list nc:operation="merge">
+        <uint32>1</uint32>
+        <containerInList>
+            <uint32>88</uint32>
+        </containerInList>
+    </list>
+    <list nc:operation="merge">
+        <uint32>2</uint32>
+        <containerInList nc:operation="replace">
+        </containerInList>
+    </list>
+    <list nc:operation="delete">
+        <uint32>3</uint32>
+    </list>
+    <list nc:operation="remove">
+        <uint32>4</uint32>
+    </list>
+    <list>
+        <uint32>5</uint32>
+        <containerInList nc:operation="create">
+            <uint32>88</uint32>
+        </containerInList>
+    </list>
+    <list>
+        <uint32>6</uint32>
+        <containerInList>
+            <uint32 nc:operation="delete">-1</uint32>
+        </containerInList>
+    </list>
+
+</container>

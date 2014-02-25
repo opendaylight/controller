@@ -1,0 +1,5 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <uint32>88</uint32>
+    <string>currentString</string>
+    <decimal64>88.1</decimal64>
+</container>

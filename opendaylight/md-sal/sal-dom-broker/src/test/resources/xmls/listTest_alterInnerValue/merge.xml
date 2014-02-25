@@ -1,0 +1,11 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+
+    <list>
+        <uint32>1</uint32>
+        <containerInList>
+            <uint16 nc:operation="delete">88</uint16>
+        </containerInList>
+    </list>
+
+</container>

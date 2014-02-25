@@ -1,0 +1,4 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <uint32>88</uint32>
+    <string>string</string>
+</container>
