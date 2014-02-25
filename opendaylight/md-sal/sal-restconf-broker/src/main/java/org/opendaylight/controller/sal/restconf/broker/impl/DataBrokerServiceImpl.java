@@ -22,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.remote.rev140114.CreateDataChangeEventSubscriptionInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.remote.rev140114.CreateDataChangeEventSubscriptionOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.remote.rev140114.SalRemoteService;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.restconf.client.api.RestconfClientContext;
 import org.opendaylight.yangtools.restconf.client.api.event.EventStreamInfo;
@@ -149,22 +150,12 @@ public class DataBrokerServiceImpl implements DataBrokerService  {
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext,streamName);
         ListenableEventStreamContext restConfListenableEventStreamContext = restconfClientContext.getEventStreamContext(desiredEventStream.get(streamName));
         RemoteDataChangeNotificationListener remoteDataChangeNotificationListener = new RemoteDataChangeNotificationListener(listener);
-        restConfListenableEventStreamContext.registerNotificationListener(remoteDataChangeNotificationListener);
-        return new SalRemoteDataListenerRegistration(listener);
-    }
-
-    private class SalRemoteDataListenerRegistration implements ListenerRegistration<DataChangeListener> {
-        private final DataChangeListener dataChangeListener;
-        public SalRemoteDataListenerRegistration(DataChangeListener dataChangeListener){
-            this.dataChangeListener = dataChangeListener;
-        }
-        @Override
-        public DataChangeListener getInstance() {
-            return this.dataChangeListener;
-        }
-        @Override
-        public void close() {
-            //noop
-        }
+        final ListenerRegistration<?> reg = restConfListenableEventStreamContext.registerNotificationListener(remoteDataChangeNotificationListener);
+        return new AbstractListenerRegistration<DataChangeListener>(listener) {
+            @Override
+            protected void removeRegistration() {
+                reg.close();
+            }
+        };
     }
 }
