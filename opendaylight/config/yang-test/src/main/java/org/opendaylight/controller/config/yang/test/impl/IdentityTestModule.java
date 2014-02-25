@@ -31,15 +31,16 @@ public final class IdentityTestModule extends org.opendaylight.controller.config
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        System.err.println(getAfi());
-        System.err.println(getAfiIdentity());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
+        logger.info("Afi: {}", getAfi());
+        logger.info("Afi class: {}", getAfiIdentity());
 
-        getAfiIdentity();
         for (Identities identities : getIdentities()) {
-            identities.resolveAfi();
-            identities.resolveSafi();
+            logger.info("Identities Afi class: {}", identities.resolveAfi());
+            logger.info("Identities Safi class: {}", identities.resolveSafi());
+
         }
-        getIdentitiesContainer().resolveAfi();
+        logger.info("IdentityContainer Afi class: {}", getIdentitiesContainer().resolveAfi());
 
         return new AutoCloseable() {
             @Override
