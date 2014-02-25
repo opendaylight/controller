@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba57610f_48363f05",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Path.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-25T01:08:39Z",
+      "side": 1,
+      "message": "Here you could use the new getEdges() to return a copy of the edge list then simply reverse it through the Collections library:\n\npublic Path reverse() {\n     Path rp;\n     try {\n         rp \u003d new Path(Collections.reverse(getEdges()));\n     } catch (...) {\n         rp \u003d null;\n     }\n     return rp;\n}",
+      "revId": "564a0b8d321b9a51ed35d507e8dbb47ed5913050",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba57610f_88543722",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Path.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-25T01:08:39Z",
+      "side": 1,
+      "message": "Not related to your diffs, but could you please modify getEdges() to return a copy of the internal edge list.\nAs of now it is unsafe, becasue if somebody call getEdges() then it does a Collections.reverse(edges) it will modify the Path object...\n\nIf we do so, you may want to access the private member edges here, instead of calling getEdges()",
+      "revId": "564a0b8d321b9a51ed35d507e8dbb47ed5913050",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba57610f_6831030b",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Path.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-25T01:08:39Z",
+      "side": 1,
+      "message": "I think using the java enhanced loop here would look much cleaner:\n\nfor (Edge e : edges) {\nnl.add(e.getHeadConnector().getNode());",
+      "revId": "564a0b8d321b9a51ed35d507e8dbb47ed5913050",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
