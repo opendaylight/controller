@@ -195,7 +195,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
         this.serviceReferenceRegistrator = serviceReferenceRegistratorFactory.create();
 
-        Map<String, Set<String /* QName */>> factoryNamesToQNames = new HashMap<>();
+        Map<String, Set<String /* QName */>> modifiableFactoryNamesToQNames = new HashMap<>();
         Set<ServiceInterfaceAnnotation> allAnnotations = new HashSet<>();
         Set<String /* qName */> allQNames = new HashSet<>();
         for (Entry<String, ModuleFactory> entry : factories.entrySet()) {
@@ -210,27 +210,27 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             }
             allAnnotations.addAll(siAnnotations);
             allQNames.addAll(qNames);
-            factoryNamesToQNames.put(entry.getKey(), Collections.unmodifiableSet(qNames));
+            modifiableFactoryNamesToQNames.put(entry.getKey(), Collections.unmodifiableSet(qNames));
         }
-        this.factoryNamesToQNames = Collections.unmodifiableMap(factoryNamesToQNames);
+        this.factoryNamesToQNames = Collections.unmodifiableMap(modifiableFactoryNamesToQNames);
         this.allQNames = Collections.unmodifiableSet(allQNames);
         // fill namespacesToAnnotations
-        Map<String /* namespace */, Map<String /* localName */, ServiceInterfaceAnnotation>> namespacesToAnnotations =
+        Map<String /* namespace */, Map<String /* localName */, ServiceInterfaceAnnotation>> modifiableNamespacesToAnnotations =
                 new HashMap<>();
         for (ServiceInterfaceAnnotation sia : allAnnotations) {
-            Map<String, ServiceInterfaceAnnotation> ofNamespace = namespacesToAnnotations.get(sia.namespace());
+            Map<String, ServiceInterfaceAnnotation> ofNamespace = modifiableNamespacesToAnnotations.get(sia.namespace());
             if (ofNamespace == null) {
                 ofNamespace = new HashMap<>();
-                namespacesToAnnotations.put(sia.namespace(), ofNamespace);
+                modifiableNamespacesToAnnotations.put(sia.namespace(), ofNamespace);
             }
             if (ofNamespace.containsKey(sia.localName())) {
                 logger.error("Cannot construct namespacesToAnnotations map, conflict between local names in {}, offending local name: {}, map so far {}",
-                        sia.namespace(), sia.localName(), namespacesToAnnotations);
+                        sia.namespace(), sia.localName(), modifiableNamespacesToAnnotations);
                 throw new IllegalArgumentException("Conflict between local names in " + sia.namespace() + " : " + sia.localName());
             }
             ofNamespace.put(sia.localName(), sia);
         }
-        this.namespacesToAnnotations = Collections.unmodifiableMap(namespacesToAnnotations);
+        this.namespacesToAnnotations = Collections.unmodifiableMap(modifiableNamespacesToAnnotations);
         // copy refNames
         logger.trace("factoryNamesToQNames:{}", this.factoryNamesToQNames);
     }

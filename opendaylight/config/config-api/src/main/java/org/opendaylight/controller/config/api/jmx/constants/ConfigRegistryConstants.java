@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.api.jmx.constants;
 
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 public class ConfigRegistryConstants {
@@ -19,7 +20,7 @@ public class ConfigRegistryConstants {
 
     public static final ObjectName OBJECT_NAME = createONWithDomainAndType(TYPE_CONFIG_REGISTRY);
 
-    public static String GET_AVAILABLE_MODULE_NAMES_ATTRIBUT_NAME = "AvailableModuleNames";
+    public static final String GET_AVAILABLE_MODULE_NAMES_ATTRIBUT_NAME = "AvailableModuleNames";
 
     public static ObjectName createONWithDomainAndType(String type) {
         return createON(ON_DOMAIN, TYPE_KEY, type);
@@ -28,8 +29,8 @@ public class ConfigRegistryConstants {
     public static ObjectName createON(String name, String key, String value) {
         try {
             return new ObjectName(name, key, value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e);
         }
 
     }

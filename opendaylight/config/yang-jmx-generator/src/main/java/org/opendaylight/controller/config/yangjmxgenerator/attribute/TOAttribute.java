@@ -25,7 +25,9 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -208,22 +210,20 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public CompositeType getOpenType() {
-        String description = getNullableDescription() == null ? getAttributeYangName()
-                : getNullableDescription();
-        final String[] itemNames = new String[yangNameToAttributeMap.keySet()
-                .size()];
-        String[] itemDescriptions = itemNames;
-        FunctionImpl functionImpl = new FunctionImpl(itemNames);
+        String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
+
+        FunctionImpl functionImpl = new FunctionImpl();
         Map<String, AttributeIfc> jmxPropertiesToTypesMap = getJmxPropertiesToTypesMap();
         OpenType<?>[] itemTypes = Collections2.transform(
                 jmxPropertiesToTypesMap.entrySet(), functionImpl).toArray(
                 new OpenType<?>[] {});
+        String[] itemNames = functionImpl.getItemNames();
         try {
             // TODO add package name to create fully qualified name for this
             // type
             CompositeType compositeType = new CompositeType(
                     getUpperCaseCammelCase(), description, itemNames,
-                    itemDescriptions, itemTypes);
+                    itemNames, itemTypes);
             return compositeType;
         } catch (OpenDataException e) {
             throw new RuntimeException("Unable to create CompositeType for "
@@ -235,20 +235,20 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
         return packageName;
     }
 
-    private static final class FunctionImpl implements
-            Function<Entry<String, AttributeIfc>, OpenType<?>> {
-        private final String[] itemNames;
-        int i = 0;
+}
 
-        private FunctionImpl(String[] itemNames) {
-            this.itemNames = itemNames;
-        }
+class FunctionImpl implements
+        Function<Entry<String, AttributeIfc>, OpenType<?>> {
+    private final List<String> itemNames = new ArrayList<>();
 
-        @Override
-        public OpenType<?> apply(Entry<String, AttributeIfc> input) {
-            AttributeIfc innerType = input.getValue();
-            itemNames[i++] = input.getKey();
-            return innerType.getOpenType();
-        }
+    @Override
+    public OpenType<?> apply(Entry<String, AttributeIfc> input) {
+        AttributeIfc innerType = input.getValue();
+        itemNames.add(input.getKey());
+        return innerType.getOpenType();
+    }
+
+    public String[] getItemNames(){
+        return itemNames.toArray(new String[itemNames.size()]);
     }
 }

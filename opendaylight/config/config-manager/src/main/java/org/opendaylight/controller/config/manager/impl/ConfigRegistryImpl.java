@@ -105,27 +105,27 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
 
     @GuardedBy("this") // switched in every 2ndPC
-    private CloseableServiceReferenceReadableRegistry  readableSRRegistry = ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
+    private CloseableServiceReferenceReadableRegistry readableSRRegistry = ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
-            MBeanServer configMBeanServer, CodecRegistry codecRegistry) {
+                              MBeanServer configMBeanServer, CodecRegistry codecRegistry) {
         this(resolver, configMBeanServer,
                 new BaseJMXRegistrator(configMBeanServer), codecRegistry);
     }
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
-            MBeanServer configMBeanServer,
-            BaseJMXRegistrator baseJMXRegistrator, CodecRegistry codecRegistry) {
+                              MBeanServer configMBeanServer,
+                              BaseJMXRegistrator baseJMXRegistrator, CodecRegistry codecRegistry) {
         this.resolver = resolver;
-        this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
+        beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
         this.codecRegistry = codecRegistry;
-        this.registryMBeanServer = MBeanServerFactory
+        registryMBeanServer = MBeanServerFactory
                 .createMBeanServer("ConfigRegistry" + configMBeanServer.getDefaultDomain());
-        this.transactionsMBeanServer = MBeanServerFactory
+        transactionsMBeanServer = MBeanServerFactory
                 .createMBeanServer("ConfigTransactions" + configMBeanServer.getDefaultDomain());
     }
 
@@ -181,6 +181,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingThrowable")
     public synchronized CommitStatus commitConfig(ObjectName transactionControllerON)
             throws ConflictingVersionException, ValidationException {
         final String transactionName = ObjectNameUtil
@@ -211,7 +212,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             return secondPhaseCommit(
                     configTransactionController, commitInfo);
         } catch (Throwable t) { // some libs throw Errors: e.g.
-                                // javax.xml.ws.spi.FactoryFinder$ConfigurationError
+            // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
             logger.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
             if (t instanceof RuntimeException) {
@@ -219,7 +220,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             } else if (t instanceof Error) {
                 throw (Error) t;
             } else {
-                throw new RuntimeException(t);
+                throw new IllegalStateException(t);
             }
         }
     }
@@ -232,7 +233,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         for (DestroyedModule toBeDestroyed : commitInfo
                 .getDestroyedFromPreviousTransactions()) {
             toBeDestroyed.close(); // closes instance (which should close
-                                   // runtime jmx registrator),
+            // runtime jmx registrator),
             // also closes osgi registration and ModuleJMXRegistrator
             // registration
             currentConfig.remove(toBeDestroyed.getIdentifier());
@@ -278,9 +279,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         for (ModuleIdentifier moduleIdentifier : orderedModuleIdentifiers) {
             ModuleInternalTransactionalInfo entry = commitInfo.getCommitted()
                     .get(moduleIdentifier);
-            if (entry == null)
+            if (entry == null) {
                 throw new NullPointerException("Module not found "
                         + moduleIdentifier);
+            }
             Module module = entry.getModule();
             ObjectName primaryReadOnlyON = ObjectNameUtil
                     .createReadOnlyModuleON(moduleIdentifier);
@@ -342,7 +344,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             // register to OSGi
             if (osgiRegistration == null) {
                 ModuleFactory moduleFactory = entry.getModuleFactory();
-                if(moduleFactory != null) {
+                if (moduleFactory != null) {
                     BundleContext bc = configTransactionController.
                             getModuleFactoryBundleContext(moduleFactory.getImplementationName());
                     osgiRegistration = beanToOsgiServiceManager.registerToOsgi(module.getClass(),
@@ -369,8 +371,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         version = configTransactionController.getVersion();
 
         // switch readable Service Reference Registry
-        this.readableSRRegistry.close();
-        this.readableSRRegistry = ServiceReferenceRegistryImpl.createSRReadableRegistry(
+        readableSRRegistry.close();
+        readableSRRegistry = ServiceReferenceRegistryImpl.createSRReadableRegistry(
                 configTransactionController.getWritableRegistry(), this, baseJMXRegistrator);
 
         return new CommitStatus(newInstances, reusedInstances,
@@ -485,7 +487,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      */
     @Override
     public Set<ObjectName> lookupConfigBeans(String moduleName,
-            String instanceName) {
+                                             String instanceName) {
         ObjectName namePattern = ObjectNameUtil.createModulePattern(moduleName,
                 instanceName);
         return baseJMXRegistrator.queryNames(namePattern, null);
@@ -504,11 +506,13 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      */
     @Override
     public Set<ObjectName> lookupRuntimeBeans(String moduleName,
-            String instanceName) {
-        if (moduleName == null)
+                                              String instanceName) {
+        if (moduleName == null) {
             moduleName = "*";
-        if (instanceName == null)
+        }
+        if (instanceName == null) {
             instanceName = "*";
+        }
         ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
                 moduleName, instanceName);
         return baseJMXRegistrator.queryNames(namePattern, null);
@@ -646,7 +650,6 @@ class TransactionsHolder {
      * {@link ConfigTransactionControllerInternal} instances, because platform
      * MBeanServer transforms mbeans into another representation. Map is cleaned
      * every time current transactions are requested.
-     *
      */
     @GuardedBy("ConfigRegistryImpl.this")
     private final Map<String /* transactionName */, ConfigTransactionControllerInternal> transactions = new HashMap<>();
@@ -655,7 +658,7 @@ class TransactionsHolder {
      * Can only be called from within synchronized method.
      */
     public void add(String transactionName,
-            ConfigTransactionControllerInternal transactionController) {
+                    ConfigTransactionControllerInternal transactionController) {
         Object oldValue = transactions.put(transactionName,
                 transactionController);
         if (oldValue != null) {
@@ -674,7 +677,7 @@ class TransactionsHolder {
     public Map<String, ConfigTransactionControllerInternal> getCurrentTransactions() {
         // first, remove closed transaction
         for (Iterator<Entry<String, ConfigTransactionControllerInternal>> it = transactions
-                .entrySet().iterator(); it.hasNext();) {
+                .entrySet().iterator(); it.hasNext(); ) {
             Entry<String, ConfigTransactionControllerInternal> entry = it
                     .next();
             if (entry.getValue().isClosed()) {

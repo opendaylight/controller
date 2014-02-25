@@ -11,6 +11,7 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 import javax.annotation.concurrent.ThreadSafe;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,8 +47,8 @@ public class ObjectNameUtil {
     public static ObjectName createON(String on) {
         try {
             return new ObjectName(on);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -63,8 +64,8 @@ public class ObjectNameUtil {
         Hashtable<String, String> table = new Hashtable<>(attribs);
         try {
             return new ObjectName(domain, table);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e);
         }
 
     }
@@ -116,8 +117,7 @@ public class ObjectNameUtil {
     public static String getServiceQName(ObjectName objectName) {
         checkType(objectName, TYPE_SERVICE_REFERENCE);
         String quoted = objectName.getKeyProperty(SERVICE_QNAME_KEY);
-        String result = unquoteAndUnescape(objectName, quoted);
-        return result;
+        return unquoteAndUnescape(objectName, quoted);
     }
 
     // ObjectName supports quotation and ignores tokens like =, but fails to ignore ? sign.
@@ -292,8 +292,8 @@ public class ObjectNameUtil {
         }
     }
 
-    public static void checkTypeOneOf(ObjectName objectName, String ... types) {
-        for(String type: types) {
+    public static void checkTypeOneOf(ObjectName objectName, String... types) {
+        for (String type : types) {
             if (type.equals(objectName.getKeyProperty(TYPE_KEY))) {
                 return;
             }
@@ -304,10 +304,12 @@ public class ObjectNameUtil {
 
     public static ObjectName createModulePattern(String moduleName,
                                                  String instanceName) {
-        if (moduleName == null)
+        if (moduleName == null) {
             moduleName = "*";
-        if (instanceName == null)
+        }
+        if (instanceName == null) {
             instanceName = "*";
+        }
         // do not return object names containing transaction name
         ObjectName namePattern = ObjectNameUtil
                 .createON(ObjectNameUtil.ON_DOMAIN + ":"
@@ -343,13 +345,15 @@ public class ObjectNameUtil {
                                           String expectedType) {
         checkType(objectName, expectedType);
         String factoryName = getFactoryName(objectName);
-        if (factoryName == null)
+        if (factoryName == null) {
             throw new IllegalArgumentException(
                     "ObjectName does not contain module name");
+        }
         String instanceName = getInstanceName(objectName);
-        if (instanceName == null)
+        if (instanceName == null) {
             throw new IllegalArgumentException(
                     "ObjectName does not contain instance name");
+        }
         return new ModuleIdentifier(factoryName, instanceName);
     }
 

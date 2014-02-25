@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
-import java.io.Closeable;
-import java.util.Set;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
+import java.io.Closeable;
+import java.util.Set;
 
 /**
  * Contains constraints on passed {@link ObjectName} parameters. Only allow (un)
@@ -26,7 +25,7 @@ public class TransactionJMXRegistrator implements Closeable {
     private final String transactionName;
 
     TransactionJMXRegistrator(InternalJMXRegistrator internalJMXRegistrator,
-            String transactionName) {
+                              String transactionName) {
         this.childJMXRegistrator = internalJMXRegistrator.createChild();
         this.transactionName = transactionName;
     }
@@ -46,10 +45,11 @@ public class TransactionJMXRegistrator implements Closeable {
 
     public TransactionJMXRegistration registerMBean(Object object, ObjectName on)
             throws InstanceAlreadyExistsException {
-        if (!transactionName.equals(ObjectNameUtil.getTransactionName(on)))
+        if (!transactionName.equals(ObjectNameUtil.getTransactionName(on))) {
             throw new IllegalArgumentException(
                     "Transaction name mismatch between expected "
                             + transactionName + " " + "and " + on);
+        }
         ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_CONFIG_TRANSACTION);
         return new TransactionJMXRegistration(
                 childJMXRegistrator.registerMBean(object, on));

@@ -41,7 +41,7 @@ public class ConfigManagerActivator implements BundleActivator {
     private RuntimeGeneratedMappingServiceActivator mappingServiceActivator;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) {
 
         // track bundles containing YangModuleInfo
         ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker();
@@ -72,7 +72,7 @@ public class ConfigManagerActivator implements BundleActivator {
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
         } catch (InstanceAlreadyExistsException e) {
-            throw new RuntimeException("Config Registry was already registered to JMX", e);
+            throw new IllegalStateException("Config Registry was already registered to JMX", e);
         }
 
         ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context, ModuleFactory.class,
@@ -81,7 +81,7 @@ public class ConfigManagerActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) {
         try {
             configRegistry.close();
         } catch (Exception e) {

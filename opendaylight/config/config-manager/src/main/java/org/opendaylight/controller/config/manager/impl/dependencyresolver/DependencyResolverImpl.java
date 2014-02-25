@@ -39,7 +39,7 @@ import static java.lang.String.format;
  * during validation. Tracks dependencies for ordering purposes.
  */
 final class DependencyResolverImpl implements DependencyResolver,
-       Comparable<DependencyResolverImpl> {
+        Comparable<DependencyResolverImpl> {
     private static final Logger logger = LoggerFactory.getLogger(DependencyResolverImpl.class);
 
     private final ModulesHolder modulesHolder;
@@ -74,13 +74,13 @@ final class DependencyResolverImpl implements DependencyResolver,
             throw new NullPointerException(
                     "Parameter 'expectedServiceInterface' is null");
         }
-        if (jmxAttribute == null)
+        if (jmxAttribute == null) {
             throw new NullPointerException("Parameter 'jmxAttribute' is null");
+        }
 
         JmxAttributeValidationException.checkNotNull(dependentReadOnlyON,
                 "is null, expected dependency implementing "
                         + expectedServiceInterface, jmxAttribute);
-
 
 
         // check that objectName belongs to this transaction - this should be
@@ -135,7 +135,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     //TODO: check for cycles
     @Override
     public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentReadOnlyON,
-            JmxAttribute jmxAttribute) {
+                                 JmxAttribute jmxAttribute) {
         if (expectedType == null || dependentReadOnlyON == null || jmxAttribute == null) {
             throw new IllegalArgumentException(format(
                     "Null parameters not allowed, got %s %s %s", expectedType,
@@ -161,8 +161,7 @@ final class DependencyResolverImpl implements DependencyResolver,
             throw new JmxAttributeValidationException(message, jmxAttribute);
         }
         try {
-            T result = expectedType.cast(instance);
-            return result;
+            return expectedType.cast(instance);
         } catch (ClassCastException e) {
             String message = format(
                     "Instance cannot be cast to expected type. Instance class is %s , "
@@ -178,7 +177,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         IdentityCodec<?> identityCodec = codecRegistry.getIdentityCodec();
         Class<? extends BaseIdentity> deserialized = identityCodec.deserialize(qName);
         if (deserialized == null) {
-            throw new RuntimeException("Unable to retrieve identity class for " + qName + ", null response from "
+            throw new IllegalStateException("Unable to retrieve identity class for " + qName + ", null response from "
                     + codecRegistry);
         }
         if (expectedBaseClass.isAssignableFrom(deserialized)) {
@@ -194,7 +193,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     public <T extends BaseIdentity> void validateIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass, JmxAttribute jmxAttribute) {
         try {
             resolveIdentity(identityRef, expectedBaseClass);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw JmxAttributeValidationException.wrap(e, jmxAttribute);
         }
     }
@@ -224,8 +223,8 @@ final class DependencyResolverImpl implements DependencyResolver,
     }
 
     private static int getMaxDepth(DependencyResolverImpl impl,
-            DependencyResolverManager manager,
-            LinkedHashSet<ModuleIdentifier> chainForDetectingCycles) {
+                                   DependencyResolverManager manager,
+                                   LinkedHashSet<ModuleIdentifier> chainForDetectingCycles) {
         int maxDepth = 0;
         LinkedHashSet<ModuleIdentifier> chainForDetectingCycles2 = new LinkedHashSet<>(
                 chainForDetectingCycles);
