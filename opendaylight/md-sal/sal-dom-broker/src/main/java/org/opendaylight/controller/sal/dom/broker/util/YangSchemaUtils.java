@@ -40,7 +40,7 @@ import com.google.common.collect.FluentIterable;
 public class YangSchemaUtils {
 
     private static final Function<PathArgument, QName> QNAME_FROM_PATH_ARGUMENT = new Function<PathArgument, QName>(){
-        
+
         @Override
         public QName apply(PathArgument input) {
             if(input == null) {
@@ -53,26 +53,26 @@ public class YangSchemaUtils {
     private  YangSchemaUtils() {
         throw new UnsupportedOperationException("Utility class.");
     }
-    
-    
+
+
     public static DataSchemaNode getSchemaNode(SchemaContext schema,InstanceIdentifier path) {
         checkArgument(schema != null,"YANG Schema must not be null.");
         checkArgument(path != null,"Path must not be null.");
         return getSchemaNode(schema, FluentIterable.from(path.getPath()).transform(QNAME_FROM_PATH_ARGUMENT));
     }
-    
+
     public static DataSchemaNode getSchemaNode(SchemaContext schema,Iterable<QName> path) {
         checkArgument(schema != null,"YANG Schema must not be null.");
         checkArgument(path != null,"Path must not be null.");
         if(!path.iterator().hasNext()){
             return toRootDataNode(schema);
         }
-        
+
         QName firstNode = path.iterator().next();
         DataNodeContainer previous = schema.findModuleByNamespaceAndRevision(firstNode.getNamespace(),
                 firstNode.getRevision());
         Iterator<QName> iterator = path.iterator();
-        
+
         while (iterator.hasNext()) {
             checkArgument(previous!= null, "Supplied path does not resolve into valid schema node.");
             QName arg = iterator.next();
@@ -92,7 +92,7 @@ public class YangSchemaUtils {
         return (DataSchemaNode) previous;
     }
 
-    private static DataSchemaNode searchInChoices(DataNodeContainer node, QName arg) {
+    public static DataSchemaNode searchInChoices(DataNodeContainer node, QName arg) {
         Set<DataSchemaNode> children = node.getChildNodes();
         for (DataSchemaNode child : children) {
             if (child instanceof ChoiceNode) {
@@ -122,119 +122,119 @@ public class YangSchemaUtils {
     }
 
     private static final class NetconfDataRootNode implements ContainerSchemaNode {
-    
+
         public NetconfDataRootNode(SchemaContext schema) {
             // TODO Auto-generated constructor stub
         }
-    
+
         @Override
         public Set<TypeDefinition<?>> getTypeDefinitions() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public Set<DataSchemaNode> getChildNodes() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public Set<GroupingDefinition> getGroupings() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public DataSchemaNode getDataChildByName(QName name) {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public DataSchemaNode getDataChildByName(String name) {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public Set<UsesNode> getUses() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public Set<AugmentationSchema> getAvailableAugmentations() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public boolean isAugmenting() {
             // TODO Auto-generated method stub
             return false;
         }
-    
+
         @Override
         public boolean isAddedByUses() {
             // TODO Auto-generated method stub
             return false;
         }
-    
+
         @Override
         public boolean isConfiguration() {
             // TODO Auto-generated method stub
             return false;
         }
-    
+
         @Override
         public ConstraintDefinition getConstraints() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public QName getQName() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public SchemaPath getPath() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public String getDescription() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public String getReference() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public Status getStatus() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
             // TODO Auto-generated method stub
             return null;
         }
-    
+
         @Override
         public boolean isPresenceContainer() {
             // TODO Auto-generated method stub
             return false;
         }
-    
+
     }
 
 }

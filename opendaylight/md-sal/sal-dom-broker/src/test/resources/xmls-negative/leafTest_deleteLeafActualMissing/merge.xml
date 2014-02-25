@@ -1,0 +1,7 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+           nc:operation="merge">
+
+    <uint32 nc:operation="delete">88</uint32>
+
+</container>

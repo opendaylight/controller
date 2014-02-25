@@ -1,0 +1,9 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <identityRef>test-identity</identityRef>
+    <augumentString1>augumentString1</augumentString1>
+    <augumentContainer>
+        <augumentStringInAugumentContainer>
+            case1
+        </augumentStringInAugumentContainer>
+    </augumentContainer>
+</container>
