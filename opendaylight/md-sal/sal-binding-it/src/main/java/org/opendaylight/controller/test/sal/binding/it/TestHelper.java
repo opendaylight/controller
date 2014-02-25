@@ -127,7 +127,7 @@ public class TestHelper {
                 systemProperty("netconf.config.persister.1.storageAdapterClass").value(
                         "org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter"), //
                 systemProperty("netconf.config.persister.1.properties.fileStorage")
-                        .value(PathUtils.getBaseDir() + "/src/test/resources/controller.xml"), //
+                        .value(PathUtils.getBaseDir() + "/target/test-classes/controller.xml"),
                 systemProperty("netconf.config.persister.1.properties.numberOfBackups").value("1") //
                 //systemProperty("yangstore.blacklist").value(".*controller.model.*") //
 
