@@ -113,6 +113,8 @@
     <java.version.target>1.7</java.version.target>
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
+    <xtend.version>2.4.3</xtend.version>
+    <xtend.dstdir>${project.build.directory}/generated-sources/xtend-gen</xtend.dstdir>
   </properties>
 
   <dependencyManagement>
@@ -1165,6 +1167,11 @@
 
         <!-- md-sal -->
         <dependency>
+            <groupId>org.eclipse.xtend</groupId>
+            <artifactId>org.eclipse.xtend.lib</artifactId>
+            <version>${xtend.version}</version>
+        </dependency>
+        <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common</artifactId>
           <version>${mdsal.version}</version>
@@ -1440,16 +1447,6 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-impl</artifactId>
-          <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>${project.groupId}</groupId>
-          <artifactId>ietf-netconf-monitoring</artifactId>
-          <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>${project.groupId}</groupId>
-          <artifactId>ietf-netconf-monitoring-extension</artifactId>
           <version>${netconf.version}</version>
         </dependency>
 
@@ -1991,6 +1988,21 @@
             <testTarget>${java.version.target}</testTarget>
           </configuration>
        </plugin>
+          <plugin>
+              <groupId>org.eclipse.xtend</groupId>
+              <artifactId>xtend-maven-plugin</artifactId>
+              <version>${xtend.version}</version>
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>compile</goal>
+                      </goals>
+                      <configuration>
+                          <outputDirectory>${xtend.dstdir}</outputDirectory>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
       </plugins>
     </pluginManagement>
   </build>

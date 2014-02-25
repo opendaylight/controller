@@ -109,7 +109,7 @@
 
         <!-- Dependency Versions -->
         <mockito.version>1.9.5</mockito.version>
-        <xtend.version>2.4.3</xtend.version>
+
 
         <!-- Sonar properties using jacoco to retrieve integration test results -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -170,11 +170,7 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.xtend</groupId>
-                <artifactId>org.eclipse.xtend.lib</artifactId>
-                <version>${xtend.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
