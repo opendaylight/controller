@@ -17,6 +17,7 @@
 package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -120,10 +121,10 @@ public class Path implements Serializable {
      * getter method for the Path
      *
      *
-     * @return Return the list of edges that constitue the Path
+     * @return Return the list of edges that constitute the Path
      */
     public List<Edge> getEdges() {
-        return this.edges;
+        return (edges == null) ? Collections.<Edge>emptyList() : new LinkedList<Edge>(edges);
     }
 
     @Override
