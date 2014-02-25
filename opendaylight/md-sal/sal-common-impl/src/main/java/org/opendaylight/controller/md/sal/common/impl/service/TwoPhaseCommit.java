@@ -59,7 +59,7 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
                 .addAll(transaction.getCreatedOperationalData().keySet())
                 .addAll(transaction.getRemovedOperationalData()).build();
 
-        log.trace("Transaction: {} Affected Subtrees:", transactionId, changedPaths);
+        log.trace("Transaction: {} Affected Subtrees: {}", transactionId, changedPaths);
 
         // The transaction has no effects, let's just shortcut it
         if (changedPaths.isEmpty()) {
@@ -124,7 +124,7 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
 
         captureFinalState(listeners);
 
-        log.trace("Transaction: {} Notifying listeners.");
+        log.trace("Transaction: {} Notifying listeners.", transactionId);
 
         publishDataChangeEvent(listeners);
         return Rpcs.<TransactionStatus> getRpcResult(true, TransactionStatus.COMMITED,
