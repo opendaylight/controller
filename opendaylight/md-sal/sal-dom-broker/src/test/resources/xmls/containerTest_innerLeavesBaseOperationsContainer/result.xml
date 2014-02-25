@@ -1,0 +1,8 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <uint32>88</uint32>
+    <augumentUint32>88</augumentUint32>
+    <decimal64>88.1</decimal64>
+    <identityRef>test-identity2</identityRef>
+    <boolean>false</boolean>
+    <augumentString2>augumentString2</augumentString2>
+</container>

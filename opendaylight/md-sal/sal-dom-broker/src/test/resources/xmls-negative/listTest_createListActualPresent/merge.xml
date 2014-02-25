@@ -1,0 +1,8 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+
+    <list nc:operation="create">
+        <uint32>1</uint32>
+    </list>
+
+</container>
