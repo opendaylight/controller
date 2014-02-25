@@ -1,0 +1,152 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:test";
+    prefix "test";
+
+    organization "Cisco Systems, Inc.";
+
+    revision "2013-2-21" {
+        description
+            "Initial revision";
+    }
+
+    grouping listGroup {
+        list list {
+            key "uint32";
+
+            leaf uint32 {
+                type uint32;
+            }
+
+               container containerInList{
+                   leaf uint32 {
+                    type uint32;
+                }
+                leaf uint16 {
+                    type uint16;
+                }
+            }
+        }
+     }
+
+     grouping innerContainerGrouping {
+        container innerContainer {
+            leaf uint16 {
+                type uint16;
+            }
+
+            container innerInnerContainer {
+
+                leaf uint16 {
+                    type uint16;
+                }
+
+                leaf uint32 {
+                    type uint32;
+                }
+            }
+        }
+     }
+
+    container container {
+        leaf uint32 {
+            type uint32;
+        }
+
+        leaf decimal64 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+
+        leaf boolean {
+            type boolean;
+        }
+
+        leaf binary {
+            type binary;
+        }
+
+        leaf string {
+            type string;
+        }
+
+        uses listGroup;
+        uses innerContainerGrouping;
+
+        choice choice{}
+        choice choice2{}
+
+        leaf-list leafList {
+            type string;
+        }
+
+        leaf identityRef {
+            type identityref {
+                base test-identity;
+            }
+        }
+
+        /* TODO test modification with empty type
+        leaf empty {
+             type empty;
+         }
+         */
+    }
+
+    augment "/container/" {
+        leaf augumentUint32 {
+            type uint32;
+        }
+    }
+
+    augment "/container/choice/" {
+        case test-identity-augument {
+            when "/container/identityRef = 'test-identity'";
+            leaf augumentString1 {
+                type string;
+            }
+
+            leaf augumentInt1 {
+                type uint32;
+            }
+        }
+        case test-identity-augument2 {
+            when "/container/identityRef = 'test-identity2'";
+            leaf augumentString2 {
+                type string;
+            }
+
+            leaf augumentInt2 {
+                type uint32;
+            }
+        }
+    }
+
+    augment "/container/choice2/" {
+        case test-identity-augument {
+            when "/container/identityRef = 'test-identity'";
+            container augumentContainer {
+                leaf augumentStringInAugumentContainer {
+                    type string;
+                }
+            }
+        }
+        case test-identity-augument2 {
+            when "/container/identityRef = 'test-identity2'";
+            list augumentedList {
+                leaf augumentStringInAugumentList {
+                    type string;
+                }
+            }
+        }
+    }
+
+
+    identity test-identity {}
+    identity test-identity2 {
+        base test-identity;
+    }
+
+}

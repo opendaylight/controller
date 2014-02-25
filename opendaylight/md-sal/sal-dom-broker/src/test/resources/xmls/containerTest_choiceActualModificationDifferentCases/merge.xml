@@ -1,0 +1,10 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <augumentedList nc:operation="create">
+        <augumentStringInAugumentList>str1</augumentStringInAugumentList>
+    </augumentedList>
+
+    <augumentedList nc:operation="replace">
+        <augumentStringInAugumentList>str2</augumentStringInAugumentList>
+    </augumentedList>
+</container>

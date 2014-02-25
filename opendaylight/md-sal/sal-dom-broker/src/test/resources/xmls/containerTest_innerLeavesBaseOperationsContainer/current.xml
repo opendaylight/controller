@@ -1,0 +1,10 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+    <uint32>1</uint32>
+    <augumentUint32>1</augumentUint32>
+    <string>currentString</string>
+    <decimal64>45.1</decimal64>
+    <binary>abcd</binary>
+
+    <identityRef>test-identity</identityRef>
+    <augumentString1>augumentString1</augumentString1>
+</container>

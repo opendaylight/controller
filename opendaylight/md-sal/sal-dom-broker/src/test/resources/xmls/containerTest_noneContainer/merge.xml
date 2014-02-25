@@ -1,0 +1,9 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+
+    <uint32 nc:operation="replace">88</uint32>
+    <decimal64 nc:operation="merge">88.1</decimal64>
+    <string>newString</string>
+    <binary >aaa</binary>
+
+</container>
