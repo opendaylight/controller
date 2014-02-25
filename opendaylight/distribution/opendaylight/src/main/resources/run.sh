@@ -59,7 +59,7 @@ else
 fi
 
 function usage {
-    echo "Usage: $0 [-jmx] [-jmxport <num>] [-debug] [-debugsuspend] [-debugport <num>] [-start [<console port>]] [-stop] [-status] [-console] [-help] [<other args will automatically be used for the JVM>]"
+    echo "Usage: $0 [-jmx] [-jmxport <num>] [-debug] [-debugsuspend] [-debugport <num>] [-start [<console port>]] [-stop] [-status] [-console] [-help] [-agentpath:<path to lib>] [<other args will automatically be used for the JVM>]"
     exit 1
 }
 
@@ -83,6 +83,7 @@ statusdaemon=0
 consolestart=1
 dohelp=0
 extraJVMOpts=""
+agentPath=""
 unknown_option=0
 while true ; do
     case "$1" in
@@ -98,6 +99,7 @@ while true ; do
         -help) dohelp=1; shift;;
         -D*) extraJVMOpts="${extraJVMOpts} $1"; shift;;
         -X*) extraJVMOpts="${extraJVMOpts} $1"; shift;;
+        -agentpath:*) agentPath="$1"; shift;;
         "") break ;;
         *) echo "Unknown option $1"; unknown_option=1; shift ;;
     esac
@@ -209,6 +211,7 @@ if [ "${startdaemon}" -eq 1 ]; then
         exit -1
     fi
     $JAVA_HOME/bin/java ${extraJVMOpts} \
+        ${agentPath} \
         -Djava.io.tmpdir="${iotmpdir}/work/tmp" \
         -Dosgi.install.area="${bdir}" \
         -Dosgi.configuration.area="${confarea}/configuration" \
@@ -227,6 +230,7 @@ elif [ "${consolestart}" -eq 1 ]; then
         exit -1
     fi
     $JAVA_HOME/bin/java ${extraJVMOpts} \
+        ${agentPath} \
         -Djava.io.tmpdir="${iotmpdir}/work/tmp" \
         -Dosgi.install.area="${bdir}" \
         -Dosgi.configuration.area="${confarea}/configuration" \
