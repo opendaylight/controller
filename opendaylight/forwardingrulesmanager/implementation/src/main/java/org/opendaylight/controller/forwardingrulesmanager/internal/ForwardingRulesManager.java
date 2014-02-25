@@ -50,6 +50,9 @@ import org.opendaylight.controller.forwardingrulesmanager.PortGroupProvider;
 import org.opendaylight.controller.forwardingrulesmanager.implementation.data.FlowEntryDistributionOrder;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
+import org.opendaylight.controller.sal.action.Enqueue;
+import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.core.Config;
@@ -244,6 +247,57 @@ public class ForwardingRulesManager implements
     }
 
     /**
+     * Checks if the FlowEntry targets are valid for this container
+     *
+     * @param flowEntry
+     *            The flow entry to test
+     * @return a Status object representing the result of the validation
+     */
+    private Status validateEntry(FlowEntry flowEntry) {
+        // Node presence check
+        Node node = flowEntry.getNode();
+        if (!switchManager.getNodes().contains(node)) {
+            return new Status(StatusCode.BADREQUEST, String.format("Node %s is not present in this container", node));
+        }
+
+        // Ports and actions validation check
+        Flow flow = flowEntry.getFlow();
+        Match match = flow.getMatch();
+        if (match.isPresent(MatchType.IN_PORT)) {
+            NodeConnector inputPort = (NodeConnector)match.getField(MatchType.IN_PORT).getValue();
+            if (!switchManager.getNodeConnectors(node).contains(inputPort)) {
+                String msg = String.format("Ingress port %s is not present on this container", inputPort);
+                return new Status(StatusCode.BADREQUEST, msg);
+            }
+        }
+        for (Action action : flow.getActions()) {
+            if (action instanceof Flood && !GlobalConstants.DEFAULT.toString().equals(getContainerName())) {
+                return new Status(StatusCode.BADREQUEST, String.format("Flood is only allowed in default container"));
+            }
+            if (action instanceof FloodAll && !GlobalConstants.DEFAULT.toString().equals(getContainerName())) {
+                return new Status(StatusCode.BADREQUEST, String.format("FloodAll is only allowed in default container"));
+            }
+            if (action instanceof Output) {
+                Output out = (Output)action;
+                NodeConnector outputPort = out.getPort();
+                if (!switchManager.getNodeConnectors(node).contains(outputPort)) {
+                    String msg = String.format("Output port %s is not present on this container", outputPort);
+                    return new Status(StatusCode.BADREQUEST, msg);
+                }
+            }
+            if (action instanceof Enqueue) {
+                Enqueue out = (Enqueue)action;
+                NodeConnector outputPort = out.getPort();
+                if (!switchManager.getNodeConnectors(node).contains(outputPort)) {
+                    String msg = String.format("Enqueue port %s is not present on this container", outputPort);
+                    return new Status(StatusCode.BADREQUEST, msg);
+                }
+            }
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    /**
      * Adds a flow entry onto the network node It runs various validity checks
      * and derive the final container flows merged entries that will be
      * attempted to be installed
@@ -262,6 +316,15 @@ public class ForwardingRulesManager implements
             String logMsg = INVALID_FLOW_ENTRY + ": {}";
             log.warn(logMsg, flowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, INVALID_FLOW_ENTRY);
+        }
+
+        // Operational check: input, output and queue ports presence check and
+        // action validation for this container
+        Status status = validateEntry(flowEntry);
+        if (!status.isSuccess()) {
+            String msg = String.format("%s: %s", INVALID_FLOW_ENTRY, status.getDescription());
+            log.warn("{}: {}", msg, flowEntry);
+            return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
         /*
@@ -420,6 +483,15 @@ public class ForwardingRulesManager implements
             String logMsg = msg + ": {} and {}";
             log.debug(logMsg, currentFlowEntry, newFlowEntry);
             return new Status(StatusCode.SUCCESS, msg);
+        }
+
+        // Operational check: input, output and queue ports presence check and
+        // action validation for this container
+        Status status = validateEntry(newFlowEntry);
+        if (!status.isSuccess()) {
+            String msg = String.format("Modify: %s: %s", INVALID_FLOW_ENTRY, status.getDescription());
+            log.warn("{}: {}", msg, newFlowEntry);
+            return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
         /*
@@ -1516,7 +1588,7 @@ public class ForwardingRulesManager implements
     @Override
     public Status addStaticFlow(FlowConfig config) {
         // Configuration object validation
-        Status status = config.validate(container);
+        Status status = config.validate();
         if (!status.isSuccess()) {
             log.warn("Invalid Configuration for flow {}. The failure is {}", config, status.getDescription());
             String error = "Invalid Configuration (" + status.getDescription() + ")";
@@ -1680,6 +1752,7 @@ public class ForwardingRulesManager implements
                     config.setStatus(StatusCode.SUCCESS.toString());
                     break;
                 default:
+                    break;
                 }
             }
         }
@@ -1775,7 +1848,7 @@ public class ForwardingRulesManager implements
         }
 
         // Validity Check
-        Status status = newFlowConfig.validate(container);
+        Status status = newFlowConfig.validate();
         if (!status.isSuccess()) {
             String msg = "Invalid Configuration (" + status.getDescription() + ")";
             newFlowConfig.setStatus(msg);
@@ -1855,7 +1928,7 @@ public class ForwardingRulesManager implements
             }
         }
         if (target != null) {
-            Status status = target.validate(container);
+            Status status = target.validate();
             if (!status.isSuccess()) {
                 log.warn(status.getDescription());
                 return status;
@@ -2757,6 +2830,7 @@ public class ForwardingRulesManager implements
             this.reinstallAllFlowEntries();
             break;
         default:
+            break;
         }
 
         // Update our configuration DB
