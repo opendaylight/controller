@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba57610f_eb716d78",
+        "filename": "opendaylight/config/netty-event-executor-config/src/main/java/org/opendaylight/controller/config/yang/netty/eventexecutor/AutoCloseableEventExecutor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-02-25T08:02:51Z",
+      "side": 1,
+      "message": "missing copyright header",
+      "revId": "9d77c15c8746a38ff0df72773949041d5a9f8d1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba57610f_cb6ea996",
+        "filename": "opendaylight/config/netty-event-executor-config/src/main/java/org/opendaylight/controller/config/yang/netty/eventexecutor/AutoCloseableEventExecutor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-02-25T08:02:51Z",
+      "side": 1,
+      "message": "Can you add a shutdown(long, TimeUnit) method, turn that 1 into a public constant and call shutdown(DEFAULT_SHUTDOWN_SECONDS, TimeUnit.SECONDS)?",
+      "revId": "9d77c15c8746a38ff0df72773949041d5a9f8d1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
