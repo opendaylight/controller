@@ -1,0 +1,7 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test"
+           xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <identityRef>test-identity2</identityRef>
+    <augumentedList nc:operation="create">
+        <augumentStringInAugumentList>str1</augumentStringInAugumentList>
+    </augumentedList>
+</container>
