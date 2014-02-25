@@ -86,6 +86,19 @@ public class Edge implements Serializable {
     }
 
     /**
+     * Create the reversed edge
+     * @return The reversed edge.
+     */
+    public Edge reverse() {
+        Edge re;
+        try {
+            re = new Edge(this.headNodeConnector, this.tailNodeConnector);
+        } catch (ConstructionException e) {
+            re = null;
+        }
+        return re;
+    }
+    /**
      * getter of edge
      *
      *
