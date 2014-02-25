@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
  * and {@link ConfigRegistryImpl} (consumer).
  */
 interface ConfigTransactionControllerInternal extends
-        ConfigTransactionControllerImplMXBean {
+        ConfigTransactionControllerImplMXBean, AutoCloseable {
 
 
 
@@ -75,4 +75,8 @@ interface ConfigTransactionControllerInternal extends
 
     ServiceReferenceWritableRegistry getWritableRegistry();
 
+    TransactionIdentifier getTransactionIdentifier();
+
+    @Override
+    void close();
 }

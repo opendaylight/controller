@@ -118,7 +118,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
     }
 
-    // transalate from serviceref to module ON
+    // translate from serviceref to module ON
     private ObjectName translateServiceRefIfPossible(ObjectName dependentReadOnlyON) {
         if (ObjectNameUtil.isServiceReference(dependentReadOnlyON)) {
             String serviceQName = ObjectNameUtil.getServiceQName(dependentReadOnlyON);
@@ -214,7 +214,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         return maxDependencyDepth;
     }
 
-    public void countMaxDependencyDepth(DependencyResolverManager manager) {
+    void countMaxDependencyDepth(DependencyResolverManager manager) {
         transactionStatus.checkCommitted();
         if (maxDependencyDepth == null) {
             maxDependencyDepth = getMaxDepth(this, manager,
@@ -257,4 +257,5 @@ final class DependencyResolverImpl implements DependencyResolver,
     public ModuleIdentifier getIdentifier() {
         return name;
     }
+
 }
