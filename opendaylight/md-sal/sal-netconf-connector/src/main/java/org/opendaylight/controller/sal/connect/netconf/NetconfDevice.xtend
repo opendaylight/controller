@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.*
 import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*
 
 import static extension org.opendaylight.controller.sal.connect.netconf.NetconfMapping.*
+import com.google.common.util.concurrent.Futures
 
 class NetconfDevice implements Provider, // 
 DataReader<InstanceIdentifier, CompositeNode>, //
@@ -202,14 +203,14 @@ AutoCloseable {
     }
 
     override readConfigurationData(InstanceIdentifier path) {
-        val result = invokeRpc(NETCONF_GET_CONFIG_QNAME,
-            wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, path.toFilterStructure()));
+        val result = requestRpc(NETCONF_GET_CONFIG_QNAME,
+            wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, path.toFilterStructure())).get();
         val data = result.result.getFirstCompositeByName(NETCONF_DATA_QNAME);
         return data?.findNode(path) as CompositeNode;
     }
 
     override readOperationalData(InstanceIdentifier path) {
-        val result = invokeRpc(NETCONF_GET_QNAME, wrap(NETCONF_GET_QNAME, path.toFilterStructure()));
+        val result = requestRpc(NETCONF_GET_QNAME, wrap(NETCONF_GET_QNAME, path.toFilterStructure())).get();
         val data = result.result.getFirstCompositeByName(NETCONF_DATA_QNAME);
         return data?.findNode(path) as CompositeNode;
     }
@@ -218,19 +219,18 @@ AutoCloseable {
         Collections.emptySet;
     }
 
-    def createSubscription(String streamName) {
-        val it = ImmutableCompositeNode.builder()
-        QName = NETCONF_CREATE_SUBSCRIPTION_QNAME
-        addLeaf("stream", streamName);
-        invokeRpc(QName, toInstance())
-    }
+//    def createSubscription(String streamName) {
+//        val it = ImmutableCompositeNode.builder()
+//        QName = NETCONF_CREATE_SUBSCRIPTION_QNAME
+//        addLeaf("stream", streamName);
+//        invokeRpc(QName, toInstance())
+//    }
 
-    override invokeRpc(QName rpc, CompositeNode input) {
+    override requestRpc(QName rpc, CompositeNode input) {
         try {
             val message = rpc.toRpcMessage(input,schemaContext);
             val result = sendMessageImpl(message, messegeRetryCount, messageTimeoutCount);
-            return result.toRpcResult(rpc, schemaContext);
-
+            return Futures.immediateFuture(result.toRpcResult(rpc, schemaContext));
         } catch (Exception e) {
             logger.error("Rpc was not processed correctly.", e)
             throw e;
@@ -342,7 +342,6 @@ AutoCloseable {
         operReaderReg?.close()
         client?.close()
     }
-
 }
 
 package class NetconfDeviceSchemaContextProvider {

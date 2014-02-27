@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.connect.netconf;
 
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -44,15 +45,19 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
         }
 
         device.logger.trace("Loading YANG schema source for {}:{}", moduleName, revision);
-        RpcResult<CompositeNode> schemaReply = device.invokeRpc(GET_SCHEMA_QNAME, request.toInstance());
-        if (schemaReply.isSuccessful()) {
-            String schemaBody = getSchemaFromRpc(schemaReply.getResult());
-            if (schemaBody != null) {
-                device.logger.trace("YANG Schema successfully retrieved from remote for {}:{}", moduleName, revision);
-                return Optional.of(schemaBody);
+        try {
+            RpcResult<CompositeNode> schemaReply = device.requestRpc(GET_SCHEMA_QNAME, request.toInstance()).get();
+            if (schemaReply.isSuccessful()) {
+                String schemaBody = getSchemaFromRpc(schemaReply.getResult());
+                if (schemaBody != null) {
+                    device.logger.trace("YANG Schema successfully retrieved from remote for {}:{}", moduleName, revision);
+                    return Optional.of(schemaBody);
+                }
             }
+            device.logger.warn("YANG shcema was not successfully retrieved.");
+        } catch (InterruptedException | ExecutionException e) {
+            device.logger.warn("YANG shcema was not successfully retrieved.", e);
         }
-        device.logger.warn("YANG shcema was not successfully retrieved.");
         return Optional.absent();
     }
 

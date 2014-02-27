@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
+import java.util.Set;
+
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.core.api.*;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -17,7 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
-import java.util.Set;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class RpcProvisionRegistryProxy extends AbstractBrokerServiceProxy<RpcProvisionRegistry>
                                        implements RpcProvisionRegistry {
@@ -41,24 +43,23 @@ public class RpcProvisionRegistryProxy extends AbstractBrokerServiceProxy<RpcPro
         return getDelegate().addRoutedRpcImplementation(rpcType, implementation);
     }
 
-  @Override
-  public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation) {
-    getDelegate().setRoutedRpcDefaultDelegate(defaultImplementation);
-  }
+    @Override
+    public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation) {
+        getDelegate().setRoutedRpcDefaultDelegate(defaultImplementation);
+    }
 
-  @Override
+    @Override
     public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(L listener) {
         return getDelegate().registerRouteChangeListener(listener);
     }
 
+    @Override
+    public Set<QName> getSupportedRpcs() {
+        return getDelegate().getSupportedRpcs();
+    }
 
-  @Override
-  public Set<QName> getSupportedRpcs() {
-    return getDelegate().getSupportedRpcs();
-  }
-
-  @Override
-  public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
-    return getDelegate().invokeRpc(rpc,input);
-  }
+    @Override
+    public ListenableFuture<RpcResult<CompositeNode>> requestRpc(QName rpc, CompositeNode input) {
+        return getDelegate().requestRpc(rpc, input);
+    }
 }
