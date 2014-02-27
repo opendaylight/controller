@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, RoutedRpcDefaultImplementation {
 
@@ -53,7 +54,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
             "2013-07-09", "context-reference");
     private final ListenerRegistry<RpcRegistrationListener> rpcRegistrationListeners = new ListenerRegistry<>();
     private final ListenerRegistry<RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> routeChangeListeners = new ListenerRegistry<>();
-    
+
 
     private final String identifier;
     private final ConcurrentMap<QName, RpcImplementation> implementations = new ConcurrentHashMap<>();
@@ -83,16 +84,16 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         this.schemaProvider = schemaProvider;
     }
 
-  public RoutedRpcDefaultImplementation getRoutedRpcDefaultDelegate() {
-    return defaultDelegate;
-  }
+    public RoutedRpcDefaultImplementation getRoutedRpcDefaultDelegate() {
+        return defaultDelegate;
+    }
 
     @Override
-  public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultDelegate) {
-    this.defaultDelegate = defaultDelegate;
-  }
+    public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultDelegate) {
+        this.defaultDelegate = defaultDelegate;
+    }
 
-  @Override
+    @Override
     public RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
         checkArgument(rpcType != null, "RPC Type should not be null");
         checkArgument(implementation != null, "RPC Implementatoin should not be null");
@@ -161,7 +162,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
     }
 
     @Override
-    public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
         return findRpcImplemention(rpc).invokeRpc(rpc, input);
     }
 
@@ -233,9 +234,9 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
     }
 
     @Override
-    public RpcResult<CompositeNode> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> requestRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
       checkState(defaultDelegate != null);
-      return defaultDelegate.invokeRpc(rpc, identifier, input);
+      return defaultDelegate.requestRpc(rpc, identifier, input);
     }
 
     private static abstract class RoutingStrategy implements Identifiable<QName> {
@@ -286,7 +287,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         private final Set<QName> supportedRpcs;
         private RpcImplementation defaultDelegate;
         private final ConcurrentMap<InstanceIdentifier, RoutedRpcRegImpl> implementations = new ConcurrentHashMap<>();
-        private SchemaAwareRpcBroker router;
+        private final SchemaAwareRpcBroker router;
 
         public RoutedRpcSelector(RoutedRpcStrategy strategy, SchemaAwareRpcBroker router) {
             super();
@@ -315,7 +316,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         }
 
         @Override
-        public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+        public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
             CompositeNode inputContainer = input.getFirstCompositeByName(QName.create(rpc,"input"));
             checkArgument(inputContainer != null, "Rpc payload must contain input element");
             SimpleNode<?> routeContainer = inputContainer.getFirstSimpleByName(strategy.getLeaf());
@@ -330,7 +331,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
                 }
             }
             if (potential == null) {
-                return router.invokeRpc(rpc, (InstanceIdentifier) route, input);
+                return router.requestRpc(rpc, (InstanceIdentifier) route, input);
             }
             checkState(potential != null, "No implementation is available for rpc:%s path:%s", rpc, route);
             return potential.invokeRpc(rpc, input);
@@ -382,7 +383,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
             RoutedRpcRegistration {
 
         private final QName type;
-        private RoutedRpcSelector router;
+        private final RoutedRpcSelector router;
 
         public RoutedRpcRegImpl(QName rpcType, RpcImplementation implementation, RoutedRpcSelector routedRpcSelector) {
             super(implementation);
@@ -424,13 +425,13 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
                 routeListener.getInstance().onRouteChange(change);
             } catch (Exception e) {
                 LOG.error("Unhandled exception during invoking onRouteChange for {}",routeListener.getInstance(),e);
-                
+
             }
         }
-        
+
     }
 
-    
+
 
     private void notifyPathWithdrawal(QName context,QName identifier, InstanceIdentifier path) {
         RpcRoutingContext contextWrapped = RpcRoutingContext.create(context, identifier);
@@ -443,7 +444,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
             }
         }
     }
-    
+
     @Override
     public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
             L listener) {
