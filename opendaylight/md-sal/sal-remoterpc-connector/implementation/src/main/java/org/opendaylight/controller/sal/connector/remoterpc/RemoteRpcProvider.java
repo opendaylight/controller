@@ -8,7 +8,14 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import com.google.common.base.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
@@ -32,13 +39,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class RemoteRpcProvider implements
     RpcImplementation,
@@ -46,7 +48,7 @@ public class RemoteRpcProvider implements
     AutoCloseable,
     Provider {
 
-  private Logger _logger = LoggerFactory.getLogger(RemoteRpcProvider.class);
+  private final Logger _logger = LoggerFactory.getLogger(RemoteRpcProvider.class);
 
   private final ServerImpl server;
   private final ClientImpl client;
@@ -96,12 +98,12 @@ public class RemoteRpcProvider implements
   }
 
   @Override
-  public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+  public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
     return client.invokeRpc(rpc, input);
   }
 
   @Override
-  public RpcResult<CompositeNode> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+  public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
     return client.invokeRpc(rpc, identifier, input);
   }
 
@@ -289,8 +291,5 @@ public class RemoteRpcProvider implements
       return routeIdSet;
     }
 
-
-
   }
-
 }

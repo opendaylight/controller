@@ -41,6 +41,8 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 public class MountPointImpl implements MountProvisionInstance, SchemaContextProvider {
 
     private final SchemaAwareRpcBroker rpcs;
@@ -122,9 +124,8 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         return rpcs.getSupportedRpcs();
     }
 
-
     @Override
-    public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
         return rpcs.invokeRpc(rpc, input);
     }
 
@@ -132,7 +133,6 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener) {
         return rpcs.addRpcRegistrationListener(listener);
     }
-
 
     @Override
     public Future<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input) {
@@ -227,6 +227,4 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
             L listener) {
         return rpcs.registerRouteChangeListener(listener);
     }
-
-
 }
