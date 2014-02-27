@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.test.util;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +61,6 @@ import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import static com.google.common.base.Preconditions.*;
-
 public class BindingTestContext implements AutoCloseable, SchemaContextProvider {
 
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier TREE_ROOT = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
@@ -82,7 +82,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     private DataStoreStatsWrapper dataStoreStats;
     private DataStore dataStore;
 
-    private boolean dataStoreStatisticsEnabled = false;
+    private final boolean dataStoreStatisticsEnabled = false;
 
     private final ListeningExecutorService executor;
     private final ClassPool classPool;
@@ -93,6 +93,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
 
     private SchemaContext schemaContext;
 
+    @Override
     public SchemaContext getSchemaContext() {
         return schemaContext;
     }
@@ -245,7 +246,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
         };
         Reflections reflection = new Reflections("META-INF.yang", new ResourcesScanner());
         Set<String> result = reflection.getResources(predicate);
-        return (String[]) result.toArray(new String[result.size()]);
+        return result.toArray(new String[result.size()]);
     }
 
     private static SchemaContext getContext(String[] yangFiles) {
@@ -283,7 +284,6 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     private void startDomBroker() {
         checkState(executor != null);
         biBrokerImpl = new BrokerImpl();
-        biBrokerImpl.setExecutor(executor);
         biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", this));
     }
 

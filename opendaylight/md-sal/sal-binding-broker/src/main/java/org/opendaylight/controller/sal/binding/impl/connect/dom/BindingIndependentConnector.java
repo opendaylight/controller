@@ -89,6 +89,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class BindingIndependentConnector implements //
         RuntimeDataProvider, //
@@ -685,8 +686,9 @@ public class BindingIndependentConnector implements //
             }
         }
 
+
         @Override
-        public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode domInput) {
+        public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode domInput) {
             checkArgument(rpc != null);
             checkArgument(domInput != null);
 
@@ -695,10 +697,11 @@ public class BindingIndependentConnector implements //
             RpcService rpcService = baRpcRegistry.getRpcService(rpcType);
             checkState(rpcService != null);
             CompositeNode domUnwrappedInput = domInput.getFirstCompositeByName(QName.create(rpc, "input"));
+
             try {
-                return resolveInvocationStrategy(rpc).invokeOn(rpcService, domUnwrappedInput);
+                return Futures.immediateFuture(resolveInvocationStrategy(rpc).invokeOn(rpcService, domUnwrappedInput));
             } catch (Exception e) {
-                throw new IllegalStateException(e);
+                return Futures.immediateFailedFuture(e);
             }
         }
 
@@ -799,21 +802,25 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
-            if(biRpcRegistry != null) {
-                CompositeNode xml = mappingService.toDataDom(input);
-                CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
-                RpcResult<CompositeNode> result = biRpcRegistry.invokeRpc(rpc, wrappedXml);
-                Object baResultValue = null;
-                if (result.getResult() != null) {
-                    baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(), result.getResult());
-                }
-                RpcResult<?> baResult = Rpcs.getRpcResult(result.isSuccessful(), baResultValue, result.getErrors());
-                return Futures.<RpcResult<?>> immediateFuture(baResult);
+        public ListenableFuture<RpcResult<?>> forwardToDomBroker(DataObject input) {
+            if (biRpcRegistry == null) {
+                return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
             }
-            return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
-        }
 
+            CompositeNode xml = mappingService.toDataDom(input);
+            CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
+
+            return Futures.transform(biRpcRegistry.invokeRpc(rpc, wrappedXml), new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
+                @Override
+                public RpcResult<?> apply(RpcResult<CompositeNode> input) {
+                    Object baResultValue = null;
+                    if (input.getResult() != null) {
+                        baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(), input.getResult());
+                    }
+                    return Rpcs.getRpcResult(input.isSuccessful(), baResultValue, input.getErrors());
+                }
+            });
+        }
     }
 
     private class NoInputNoOutputInvocationStrategy extends RpcInvocationStrategy {
@@ -863,17 +870,20 @@ public class BindingIndependentConnector implements //
 
         @Override
         public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
-            if(biRpcRegistry != null) {
-                CompositeNode xml = mappingService.toDataDom(input);
-                CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
-                RpcResult<CompositeNode> result = biRpcRegistry.invokeRpc(rpc, wrappedXml);
-                Object baResultValue = null;
-                RpcResult<?> baResult = Rpcs.<Void>getRpcResult(result.isSuccessful(), null, result.getErrors());
-                return Futures.<RpcResult<?>>immediateFuture(baResult);
+            if (biRpcRegistry == null) {
+                return Futures.<RpcResult<?>>immediateFuture(Rpcs.getRpcResult(false));
             }
-            return Futures.<RpcResult<?>>immediateFuture(Rpcs.getRpcResult(false));
-        }
 
+            CompositeNode xml = mappingService.toDataDom(input);
+            CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
+
+            return Futures.transform(biRpcRegistry.invokeRpc(rpc, wrappedXml), new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
+                @Override
+                public RpcResult<?> apply(RpcResult<CompositeNode> input) {
+                    return Rpcs.<Void>getRpcResult(input.isSuccessful(), null, input.getErrors());
+                }
+            });
+        }
     }
 
     public boolean isRpcForwarding() {
