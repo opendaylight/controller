@@ -50,7 +50,7 @@ class BrokerConfigActivator implements AutoCloseable {
         broker.setRouter(new SchemaAwareRpcBroker("/", SchemaContextProviders.fromSchemaService(schemaService)));
 
         dataService = new DataBrokerImpl();
-        dataService.setExecutor(broker.getExecutor());
+        //dataService.setExecutor(broker.getExecutor());
 
         dataReg = context.registerService(DataBrokerService, dataService, emptyProperties);
         dataProviderReg = context.registerService(DataProviderService, dataService, emptyProperties);

@@ -9,18 +9,13 @@ package org.opendaylight.controller.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.Future;
-
-import javax.activation.UnsupportedDataTypeException;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
@@ -34,11 +29,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
-import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -47,7 +40,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
@@ -180,17 +172,24 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     private NormalizedDataModification prepareMergedTransaction(
             DataModification<InstanceIdentifier, CompositeNode> original) {
         NormalizedDataModification normalized = new NormalizedDataModification(original);
-        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
-            normalized.putDeepConfigurationData(entry.getKey(), entry.getValue());
-        }
-        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
-            normalized.putDeepOperationalData(entry.getKey(), entry.getValue());
-        }
+        LOG.trace("Transaction: {} Removed Configuration {}, Removed Operational {}", original.getIdentifier(),
+                original.getRemovedConfigurationData(), original.getRemovedConfigurationData());
+        LOG.trace("Transaction: {} Created Configuration {}, Created Operational {}", original.getIdentifier(),
+                original.getCreatedConfigurationData().entrySet(), original.getCreatedOperationalData().entrySet());
+        LOG.trace("Transaction: {} Updated Configuration {}, Updated Operational {}", original.getIdentifier(),
+                original.getUpdatedConfigurationData().entrySet(), original.getUpdatedOperationalData().entrySet());
+
         for (InstanceIdentifier entry : original.getRemovedConfigurationData()) {
             normalized.deepRemoveConfigurationData(entry);
         }
         for (InstanceIdentifier entry : original.getRemovedOperationalData()) {
             normalized.deepRemoveOperationalData(entry);
+        }
+        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
+            normalized.putDeepConfigurationData(entry.getKey(), entry.getValue());
+        }
+        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
+            normalized.putDeepOperationalData(entry.getKey(), entry.getValue());
         }
         return normalized;
     }
@@ -359,7 +358,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         public void putDeepConfigurationData(InstanceIdentifier entryKey, CompositeNode entryData) {
             this.putCompositeNodeData(entryKey, entryData, CONFIGURATIONAL_DATA_STORE_MARKER);
         }
-        
+
         public void putDeepOperationalData(InstanceIdentifier entryKey, CompositeNode entryData) {
             this.putCompositeNodeData(entryKey, entryData, OPERATIONAL_DATA_STORE_MARKER);
         }
@@ -401,18 +400,20 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                     this.putOperationalData(entryKey, entryData);
                     break;
 
-                default :
+                default:
                     LOG.error(dataStoreIdentifier + " is NOT valid DataStore switch marker");
                     throw new RuntimeException(dataStoreIdentifier + " is NOT valid DataStore switch marker");
                 }
             }
         }
 
-        private void putCompositeNodeData(InstanceIdentifier entryKey, CompositeNode entryData, String dataStoreIdentifier) {
+        private void putCompositeNodeData(InstanceIdentifier entryKey, CompositeNode entryData,
+                String dataStoreIdentifier) {
             this.putData(entryKey, entryData, dataStoreIdentifier);
-            
+
             for (Node<?> child : entryData.getChildren()) {
-                InstanceIdentifier subEntryId = InstanceIdentifier.builder(entryKey).node(child.getNodeType()).toInstance();
+                InstanceIdentifier subEntryId = InstanceIdentifier.builder(entryKey).node(child.getNodeType())
+                        .toInstance();
                 if (child instanceof CompositeNode) {
                     DataSchemaNode subSchema = schemaNodeFor(subEntryId);
                     CompositeNode compNode = (CompositeNode) child;
@@ -420,12 +421,13 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
                     if (subSchema instanceof ListSchemaNode) {
                         ListSchemaNode listSubSchema = (ListSchemaNode) subSchema;
-                        Map<QName, Object> mapOfSubValues = this.getValuesFromListSchema(listSubSchema, (CompositeNode) child);
+                        Map<QName, Object> mapOfSubValues = this.getValuesFromListSchema(listSubSchema,
+                                (CompositeNode) child);
                         if (mapOfSubValues != null) {
-                            instanceId = InstanceIdentifier.builder(entryKey).nodeWithKey(listSubSchema.getQName(), mapOfSubValues).toInstance();
+                            instanceId = InstanceIdentifier.builder(entryKey)
+                                    .nodeWithKey(listSubSchema.getQName(), mapOfSubValues).toInstance();
                         }
-                    } 
-                    else if (subSchema instanceof ContainerSchemaNode) {
+                    } else if (subSchema instanceof ContainerSchemaNode) {
                         ContainerSchemaNode containerSchema = (ContainerSchemaNode) subSchema;
                         instanceId = InstanceIdentifier.builder(entryKey).node(subSchema.getQName()).toInstance();
                     }
@@ -436,13 +438,13 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
 
-        private Map<QName, Object> getValuesFromListSchema (ListSchemaNode listSchema, CompositeNode entryData) {
+        private Map<QName, Object> getValuesFromListSchema(ListSchemaNode listSchema, CompositeNode entryData) {
             List<QName> keyDef = listSchema.getKeyDefinition();
-            if (keyDef != null && ! keyDef.isEmpty()) {
+            if (keyDef != null && !keyDef.isEmpty()) {
                 Map<QName, Object> map = new HashMap<QName, Object>();
                 for (QName key : keyDef) {
                     List<Node<?>> data = entryData.get(key);
-                    if (data != null && ! data.isEmpty()) {
+                    if (data != null && !data.isEmpty()) {
                         for (Node<?> nodeData : data) {
                             if (nodeData instanceof SimpleNode<?>) {
                                 map.put(key, data.get(0).getValue());

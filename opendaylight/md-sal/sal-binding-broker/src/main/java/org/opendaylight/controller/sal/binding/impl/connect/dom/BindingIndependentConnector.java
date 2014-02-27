@@ -202,6 +202,16 @@ public class BindingIndependentConnector implements //
             DataModification<InstanceIdentifier<? extends DataObject>, DataObject> source) {
         DataModificationTransaction target = biDataService.beginTransaction();
         LOG.debug("Created DOM Transaction {} for {},", target.getIdentifier(),source.getIdentifier());
+        for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedConfigurationData()) {
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biEntry = mappingService.toDataDom(entry);
+            target.removeConfigurationData(biEntry);
+            LOG.debug("Delete of Binding Configuration Data {} is translated to {}",entry,biEntry);
+        }
+        for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedOperationalData()) {
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biEntry = mappingService.toDataDom(entry);
+            target.removeOperationalData(biEntry);
+            LOG.debug("Delete of Binding Operational Data {} is translated to {}",entry,biEntry);
+        }
         for (Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : source.getUpdatedConfigurationData()
                 .entrySet()) {
             Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> biEntry = mappingService
@@ -216,16 +226,7 @@ public class BindingIndependentConnector implements //
             target.putOperationalData(biEntry.getKey(), biEntry.getValue());
             LOG.debug("Update of Binding Operational Data {} is translated to {}",entry,biEntry);
         }
-        for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedConfigurationData()) {
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biEntry = mappingService.toDataDom(entry);
-            target.removeConfigurationData(biEntry);
-            LOG.debug("Delete of Binding Configuration Data {} is translated to {}",entry,biEntry);
-        }
-        for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedOperationalData()) {
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biEntry = mappingService.toDataDom(entry);
-            target.removeOperationalData(biEntry);
-            LOG.debug("Delete of Binding Operational Data {} is translated to {}",entry,biEntry);
-        }
+
         return target;
     }
 
@@ -233,6 +234,24 @@ public class BindingIndependentConnector implements //
             DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> source) {
         org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction target = baDataService
                 .beginTransaction();
+        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
+            try {
+
+                InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
+                target.removeConfigurationData(baEntry);
+            } catch (DeserializationException e) {
+                LOG.error("Ommiting from BA transaction: {}.", entry, e);
+            }
+        }
+        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedOperationalData()) {
+            try {
+
+                InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
+                target.removeOperationalData(baEntry);
+            } catch (DeserializationException e) {
+                LOG.error("Ommiting from BA transaction: {}.", entry, e);
+            }
+        }
         for (Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
                 .getUpdatedConfigurationData().entrySet()) {
             try {
@@ -252,24 +271,6 @@ public class BindingIndependentConnector implements //
                 target.putOperationalData(baKey, baData);
             } catch (DeserializationException e) {
                 LOG.error("Ommiting from BA transaction: {}.", entry.getKey(), e);
-            }
-        }
-        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
-            try {
-
-                InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
-                target.removeConfigurationData(baEntry);
-            } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}.", entry, e);
-            }
-        }
-        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedOperationalData()) {
-            try {
-
-                InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
-                target.removeOperationalData(baEntry);
-            } catch (DeserializationException e) {
-                LOG.error("Ommiting from BA transaction: {}.", entry, e);
             }
         }
         return target;
