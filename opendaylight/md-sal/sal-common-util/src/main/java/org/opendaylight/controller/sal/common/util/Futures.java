@@ -12,6 +12,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * @deprecated Use {@link com.google.common.util.concurrent.Futures} instead.
+ */
+@Deprecated
 public class Futures {
 
     private Futures() {
