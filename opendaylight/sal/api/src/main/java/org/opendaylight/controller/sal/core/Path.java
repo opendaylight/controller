@@ -19,6 +19,7 @@ package org.opendaylight.controller.sal.core;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,11 +66,9 @@ public class Path implements Serializable {
             for (int i = 0; i < edges.size() - 1; i++) {
                 Edge current = edges.get(i);
                 Edge next = edges.get(i + 1);
-                if (!current.getHeadNodeConnector().getNode()
-                        .equals(
-                                next.getTailNodeConnector()
-                                        .getNode())) {
+                if (!current.getHeadNodeConnector().getNode().equals(next.getTailNodeConnector().getNode())) {
                     sequential = false;
+                    break;
                 }
             }
         } else if (edges.size() == 0) {
@@ -155,10 +154,10 @@ public class Path implements Serializable {
      * getter method for the Path
      *
      *
-     * @return Return the list of edges that constitue the Path
+     * @return Return the list of edges that constitute the Path
      */
     public List<Edge> getEdges() {
-        return this.edges;
+        return (edges == null) ? Collections.<Edge>emptyList() : new ArrayList<Edge>(edges);
     }
 
     @Override
@@ -171,18 +170,23 @@ public class Path implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Path other = (Path) obj;
         if (edges == null) {
-            if (other.edges != null)
+            if (other.edges != null) {
                 return false;
-        } else if (!edges.equals(other.edges))
+            }
+        } else if (!edges.equals(other.edges)) {
             return false;
+        }
         return true;
     }
 
