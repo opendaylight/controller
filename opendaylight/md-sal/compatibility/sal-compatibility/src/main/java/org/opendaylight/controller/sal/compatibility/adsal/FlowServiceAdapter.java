@@ -8,10 +8,8 @@
 package org.opendaylight.controller.sal.compatibility.adsal;
 
 import java.math.BigInteger;
-import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.common.util.Futures;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.compatibility.InventoryMapping;
 import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
@@ -37,6 +35,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(FlowServiceAdapter.class);
@@ -59,7 +60,7 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
     }
 
     @Override
-    public Future<RpcResult<AddFlowOutput>> addFlow(AddFlowInput input) {
+    public ListenableFuture<RpcResult<AddFlowOutput>> addFlow(AddFlowInput input) {
 
         Flow flow = ToSalConversionsUtils.toFlow(input, null);
         @SuppressWarnings("unchecked")
@@ -73,7 +74,7 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
     }
 
     @Override
-    public Future<RpcResult<RemoveFlowOutput>> removeFlow(RemoveFlowInput input) {
+    public ListenableFuture<RpcResult<RemoveFlowOutput>> removeFlow(RemoveFlowInput input) {
 
         Flow flow = ToSalConversionsUtils.toFlow(input, null);
         @SuppressWarnings("unchecked")
@@ -88,7 +89,7 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
     }
 
     @Override
-    public Future<RpcResult<UpdateFlowOutput>> updateFlow(UpdateFlowInput input) {
+    public ListenableFuture<RpcResult<UpdateFlowOutput>> updateFlow(UpdateFlowInput input) {
         @SuppressWarnings("unchecked")
         org.opendaylight.controller.sal.core.Node node = InventoryMapping.toAdNode((InstanceIdentifier<Node>) input
                 .getNode().getValue());
