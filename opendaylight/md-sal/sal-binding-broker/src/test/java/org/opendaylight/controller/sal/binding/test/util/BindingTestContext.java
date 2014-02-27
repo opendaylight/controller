@@ -351,7 +351,6 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     private void startDomBroker() {
         checkState(executor != null);
         biBrokerImpl = new BrokerImpl();
-        biBrokerImpl.setExecutor(executor);
         biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", this));
 
     }
