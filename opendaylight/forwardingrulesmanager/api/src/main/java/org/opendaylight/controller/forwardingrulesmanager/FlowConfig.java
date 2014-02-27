@@ -8,6 +8,19 @@
 
 package org.opendaylight.controller.forwardingrulesmanager;
 
+import java.io.Serializable;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
@@ -30,37 +43,18 @@ import org.opendaylight.controller.sal.action.SetTpSrc;
 import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.action.SetVlanPcp;
 import org.opendaylight.controller.sal.action.SwPath;
-import org.opendaylight.controller.sal.core.ContainerFlow;
-import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.switchmanager.Switch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Configuration Java Object which represents a flow configuration information
@@ -608,15 +602,6 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
         return true;
     }
 
-    public boolean isPortValid(Switch sw, String port) {
-        if (sw == null) {
-            log.debug("switch info is not available. Skip checking if port is part of a switch or not.");
-            return true;
-        }
-        NodeConnector nc = NodeConnectorCreator.createNodeConnector(port, sw.getNode());
-        return sw.getNodeConnectors().contains(nc);
-    }
-
     public boolean isVlanIdValid(String vlanId) {
         int vlan = Integer.decode(vlanId);
         return ((vlan >= 0) && (vlan < 4096));
@@ -647,45 +632,11 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
         return (proto != null);
     }
 
-    private Status conflictWithContainerFlow(IContainer container) {
-        // Return true if it's default container
-        if (container.getName().equals(GlobalConstants.DEFAULT.toString())) {
-            return new Status(StatusCode.SUCCESS);
-        }
-
-        // No container flow = no conflict
-        List<ContainerFlow> cFlowList = container.getContainerFlows();
-        if (((cFlowList == null)) || cFlowList.isEmpty()) {
-            return new Status(StatusCode.SUCCESS);
-        }
-
-        // Check against each container's flow
-        Flow flow = this.getFlow();
-
-        // Configuration is rejected if it conflicts with _all_ the container
-        // flows
-        for (ContainerFlow cFlow : cFlowList) {
-            if (cFlow.allowsFlow(flow)) {
-                log.trace("Config is congruent with at least one container flow");
-                return new Status(StatusCode.SUCCESS);
-            }
-        }
-        String msg = "Flow Config conflicts with all existing container flows";
-        log.trace(msg);
-
-        return new Status(StatusCode.BADREQUEST, msg);
-    }
-
-    public Status validate(IContainer container) {
+    public Status validate() {
         EtherIPType etype = EtherIPType.ANY;
         EtherIPType ipsrctype = EtherIPType.ANY;
         EtherIPType ipdsttype = EtherIPType.ANY;
 
-        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container.getName();
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
-                this);
-
-        Switch sw = null;
         try {
             // Flow name cannot be internal flow signature
             if (!isValidResourceName(name) || isInternalFlow()) {
@@ -694,20 +645,6 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
 
             if (node == null) {
                 return new Status(StatusCode.BADREQUEST, "Node is null");
-            }
-
-            if (switchManager != null) {
-                for (Switch device : switchManager.getNetworkDevices()) {
-                    if (device.getNode().equals(node)) {
-                        sw = device;
-                        break;
-                    }
-                }
-                if (sw == null) {
-                    return new Status(StatusCode.BADREQUEST, String.format("Node %s not found", node));
-                }
-            } else {
-                log.debug("switchmanager is not set yet");
             }
 
             if (priority != null) {
@@ -722,14 +659,8 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                 Long.decode(cookie);
             }
 
-            if (ingressPort != null) {
-                if (!isPortValid(sw, ingressPort)) {
-                    String msg = String.format("Ingress port %s is not valid for the Switch", ingressPort);
-                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                        msg += " in Container " + containerName;
-                    }
-                    return new Status(StatusCode.BADREQUEST, msg);
-                }
+            if (ingressPort != null && ingressPort.isEmpty()) {
+                return new Status(StatusCode.BADREQUEST, "Invalid ingress port");
             }
 
             if ((vlanId != null) && !isVlanIdValid(vlanId)) {
@@ -832,48 +763,6 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                 return new Status(StatusCode.BADREQUEST, "Actions value is null or empty");
             }
             for (String actiongrp : actions) {
-                // check output ports
-                sstr = Pattern.compile("OUTPUT=(.*)").matcher(actiongrp);
-                if (sstr.matches()) {
-                    for (String t : sstr.group(1).split(",")) {
-                        if (t != null) {
-                            if (!isPortValid(sw, t)) {
-                                String msg = String.format("Output port %s is not valid for this switch", t);
-                                if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                                    msg += " in Container " + containerName;
-                                }
-                                return new Status(StatusCode.BADREQUEST, msg);
-                            }
-                        }
-                    }
-                    continue;
-                }
-                // check enqueue
-                sstr = Pattern.compile("ENQUEUE=(.*)").matcher(actiongrp);
-                if (sstr.matches()) {
-                    for (String t : sstr.group(1).split(",")) {
-                        if (t != null) {
-                            String port = t.split(":")[0];
-                            if (!isPortValid(sw, port)) {
-                                String msg = String.format("Output port %d is not valid for this switch", port);
-                                if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                                    msg += " in Container " + containerName;
-                                }
-                                return new Status(StatusCode.BADREQUEST, msg);
-                            }
-                        }
-                    }
-                    continue;
-                }
-                // Check src IP
-                sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
-                if (sstr.matches()) {
-                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                        return new Status(StatusCode.BADREQUEST, String.format(
-                                "flood is not allowed in container %s", containerName));
-                    }
-                    continue;
-                }
                 // Check src IP
                 sstr = Pattern.compile(ActionType.SET_NW_SRC.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
@@ -964,11 +853,6 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                     }
                     continue;
                 }
-            }
-            // Check against the container flow
-            Status status;
-            if (!containerName.equals(GlobalConstants.DEFAULT.toString()) && !(status = conflictWithContainerFlow(container)).isSuccess()) {
-                return status;
             }
         } catch (NumberFormatException e) {
             return new Status(StatusCode.BADREQUEST, String.format("Invalid number format %s", e.getMessage()));

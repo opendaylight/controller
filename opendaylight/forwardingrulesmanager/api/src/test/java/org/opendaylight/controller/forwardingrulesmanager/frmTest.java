@@ -257,7 +257,7 @@ public class frmTest {
         FlowConfig flowConfig = new FlowConfig();
         Assert.assertFalse(flowConfig.isInternalFlow());
         flowConfig.setName("__Internal__");
-        Status status = flowConfig.validate(null);
+        Status status = flowConfig.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("name"));
         Assert.assertTrue(flowConfig.isInternalFlow());
@@ -509,228 +509,228 @@ public class frmTest {
     @Test
     public void testValid() throws UnknownHostException {
         FlowConfig fc2 = createSampleFlowConfig();
-        Assert.assertTrue(fc2.validate(null).isSuccess());
+        Assert.assertTrue(fc2.validate().isSuccess());
 
         FlowConfig fc = new FlowConfig();
-        Status status = fc.validate(null);
+        Status status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Invalid name"));
 
         fc.setName("Config");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Node is null"));
 
         fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
-        Assert.assertFalse(fc.validate(null).isSuccess());
+        Assert.assertFalse(fc.validate().isSuccess());
         List<String> actions = new ArrayList<String>();
         fc.setActions(actions);
-        Assert.assertFalse(fc.validate(null).isSuccess());
+        Assert.assertFalse(fc.validate().isSuccess());
         actions.add("OUTPUT=2");
         fc.setActions(actions);
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setPriority("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 65535"));
 
         fc.setPriority("100000");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 65535"));
 
         fc.setPriority("2000");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setCookie("100");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setIngressPort("100");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setVlanId(("-1"));
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 4095"));
 
         fc.setVlanId("5000");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 4095"));
 
         fc.setVlanId("100");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setVlanPriority("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 7"));
 
         fc.setVlanPriority("9");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 7"));
 
         fc.setVlanPriority("5");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setEtherType("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet type"));
 
         fc.setEtherType("0xfffff");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet type"));
 
         fc.setEtherType("0x800");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setTosBits("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP ToS bits"));
 
         fc.setTosBits("65");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP ToS bits"));
 
         fc.setTosBits("60");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcPort("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport source port"));
 
         fc.setSrcPort("0xfffff");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport source port"));
 
         fc.setSrcPort("0");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcPort("0x00ff");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcPort("0xffff");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setDstPort("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport destination port"));
 
         fc.setDstPort("0xfffff");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport destination port"));
 
         fc.setDstPort("0");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setDstPort("0x00ff");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setDstPort("0xffff");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcMac("abc");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet source address"));
 
         fc.setSrcMac("00:A0:C9:14:C8:29");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setDstMac("abc");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet destination address"));
 
         fc.setDstMac("00:A0:C9:22:AB:11");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcIp("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP source address"));
 
         fc.setSrcIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Src IP"));
 
         fc.setEtherType("0x86dd");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcIp("1.1.1.1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Src IP"));
 
         fc.setEtherType("0x800");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setDstIp("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP destination address"));
 
         fc.setDstIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Dst IP"));
 
         fc.setEtherType("0x86dd");
         fc.setSrcIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setDstIp("2.2.2.2");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Dst IP"));
 
         fc.setEtherType("0x800");
         fc.setSrcIp("1.1.1.1");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setEtherType(null);
         fc.setSrcIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP Src Dest Type mismatch"));
 
         fc.setSrcIp("1.1.1.1");
         fc.setIdleTimeout("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Idle Timeout value"));
 
         fc.setIdleTimeout("0xfffff");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Idle Timeout value"));
 
         fc.setIdleTimeout("10");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setHardTimeout("-1");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Hard Timeout value"));
 
         fc.setHardTimeout("0xfffff");
-        status = fc.validate(null);
+        status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Hard Timeout value"));
 
         fc.setHardTimeout("10");
-        Assert.assertTrue(fc.validate(null).isSuccess());
+        Assert.assertTrue(fc.validate().isSuccess());
 
     }
 
