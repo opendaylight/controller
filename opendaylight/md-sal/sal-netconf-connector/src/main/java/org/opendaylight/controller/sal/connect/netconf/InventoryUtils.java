@@ -14,9 +14,11 @@ import java.util.Date;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InventoryUtils {
-
+    private static final Logger LOG = LoggerFactory.getLogger(InventoryUtils.class);
     private static final URI INVENTORY_NAMESPACE = URI.create("urn:opendaylight:inventory");
     private static final URI NETCONF_INVENTORY_NAMESPACE = URI.create("urn:opendaylight:netconf-node-inventory");
     private static final Date INVENTORY_REVISION = dateFromString("2013-08-19");
@@ -33,18 +35,23 @@ public class InventoryUtils {
             .toInstance();
     public static final QName NETCONF_INVENTORY_MOUNT = null;
 
+    private InventoryUtils() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
     /**
      * Converts date in string format yyyy-MM-dd to java.util.Date.
-     * 
+     *
      * @return java.util.Date conformant to string formatted date yyyy-MM-dd.
      */
     private static Date dateFromString(final String date) {
+        // We do not reuse the formatter because it's not thread-safe
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
             return formatter.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOG.error("Failed to parse date {}", date, e);
+            return null;
         }
-        return null;
     }
 }
