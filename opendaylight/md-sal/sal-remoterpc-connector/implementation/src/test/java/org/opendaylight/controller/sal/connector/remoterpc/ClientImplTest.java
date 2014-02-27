@@ -7,29 +7,25 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import com.google.common.base.Optional;
-import junit.framework.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
-import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
-import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
-import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-
-import java.io.IOException;
-import java.util.*;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import junit.framework.Assert;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
+import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
+import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+
+import com.google.common.base.Optional;
 
 /**
  *
@@ -88,7 +84,7 @@ public class ClientImplTest {
     when(mockHandler.handle(any(Message.class))).
             thenReturn(MessagingUtil.createEmptyMessage());
 
-    RpcResult<CompositeNode> result = client.invokeRpc(null, null);
+    RpcResult<CompositeNode> result = client.invokeRpc(null, null).get();
 
     Assert.assertTrue(result.isSuccessful());
     Assert.assertTrue(result.getErrors().isEmpty());
@@ -101,7 +97,7 @@ public class ClientImplTest {
     when(mockHandler.handle(any(Message.class))).
             thenThrow(new IOException());
 
-    RpcResult<CompositeNode> result = client.invokeRpc(null, null);
+    RpcResult<CompositeNode> result = client.invokeRpc(null, null).get();
 
     Assert.assertFalse(result.isSuccessful());
     Assert.assertFalse(result.getErrors().isEmpty());

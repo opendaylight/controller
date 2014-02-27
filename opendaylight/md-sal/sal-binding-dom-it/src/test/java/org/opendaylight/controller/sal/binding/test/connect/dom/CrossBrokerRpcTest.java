@@ -50,6 +50,7 @@ import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 public class CrossBrokerRpcTest {
@@ -64,7 +65,7 @@ public class CrossBrokerRpcTest {
     public static final NodeId NODE_B = new NodeId("b");
     public static final NodeId NODE_C = new NodeId("c");
     public static final NodeId NODE_D = new NodeId("d");
-    
+
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final QName ADD_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "add-flow");
 
@@ -78,7 +79,7 @@ public class CrossBrokerRpcTest {
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_C_ID = createBINodeIdentifier(NODE_C);
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_D_ID = createBINodeIdentifier(NODE_D);
 
-    
+
 
     @Before
     public void setup() {
@@ -99,7 +100,7 @@ public class CrossBrokerRpcTest {
     }
 
     @Test
-    public void bindingRoutedRpcProvider_DomInvokerTest() {
+    public void bindingRoutedRpcProvider_DomInvokerTest() throws Exception {
 
         flowService//
                 .registerPath(NodeContext.class, BA_NODE_A_ID) //
@@ -114,7 +115,7 @@ public class CrossBrokerRpcTest {
 
         CompositeNode addFlowDom = toDomRpc(ADD_FLOW_QNAME, addFlowA);
         assertNotNull(addFlowDom);
-        RpcResult<CompositeNode> domResult = biRpcInvoker.invokeRpc(ADD_FLOW_QNAME, addFlowDom);
+        RpcResult<CompositeNode> domResult = biRpcInvoker.invokeRpc(ADD_FLOW_QNAME, addFlowDom).get();
         assertNotNull(domResult);
         assertTrue("DOM result is successful.", domResult.isSuccessful());
         assertTrue("Bidning Add Flow RPC was captured.", flowService.getReceivedAddFlows().containsKey(BA_NODE_A_ID));
@@ -128,18 +129,18 @@ public class CrossBrokerRpcTest {
         final AddFlowOutput output = builder.build();
         org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration registration = biRpcRegistry.addRoutedRpcImplementation(ADD_FLOW_QNAME, new RpcImplementation() {
             @Override
-            public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
-                CompositeNode result = testContext.getBindingToDomMappingService().toDataDom(output);
-                return Rpcs.getRpcResult(true, result, ImmutableList.<RpcError>of());
-            }
-
-            @Override
             public Set<QName> getSupportedRpcs() {
                 return ImmutableSet.of(ADD_FLOW_QNAME);
             }
+
+            @Override
+            public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
+                CompositeNode result = testContext.getBindingToDomMappingService().toDataDom(output);
+                return Futures.immediateFuture(Rpcs.getRpcResult(true, result, ImmutableList.<RpcError>of()));
+            }
         });
         registration.registerPath(NodeContext.QNAME, BI_NODE_C_ID);
-        
+
         SalFlowService baFlowInvoker = baRpcRegistry.getRpcService(SalFlowService.class);
         Future<RpcResult<AddFlowOutput>> baResult = baFlowInvoker.addFlow(addFlow(BA_NODE_C_ID).setPriority(500).build());
         assertNotNull(baResult);
