@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba57610f_bcc73964",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Path.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-27T00:12:24Z",
+      "side": 1,
+      "message": "yes we can",
+      "parentUuid": "ba57610f_1ce2c503",
+      "revId": "883521cd0e967cb19bd202f23177e603301bfc1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba57610f_bcf059ca",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Path.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-26T23:43:58Z",
       "side": 1,
       "message": "Since Path is immutable, and you access last element, I\u0027d use ArrayList here",
+      "revId": "883521cd0e967cb19bd202f23177e603301bfc1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba57610f_9cc47560",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Path.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-02-27T00:12:24Z",
+      "side": 1,
+      "message": "last or first.\nYes let\u0027s return an ArrayList.\nThanks.",
+      "parentUuid": "ba57610f_bcf059ca",
       "revId": "883521cd0e967cb19bd202f23177e603301bfc1a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
