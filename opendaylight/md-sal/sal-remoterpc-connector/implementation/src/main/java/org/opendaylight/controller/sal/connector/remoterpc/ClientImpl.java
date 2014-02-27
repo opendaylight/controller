@@ -7,7 +7,16 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import com.google.common.base.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+
 import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
@@ -27,16 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * An implementation of {@link RpcImplementation} that makes
@@ -46,8 +48,8 @@ public class ClientImpl implements RemoteRpcClient {
 
   private final Logger _logger = LoggerFactory.getLogger(ClientImpl.class);
 
-  private ZMQ.Context context = ZMQ.context(1);
-  private ClientRequestHandler handler;
+  private final ZMQ.Context context = ZMQ.context(1);
+  private final ClientRequestHandler handler;
   private RoutingTableProvider routingTableProvider;
 
   public ClientImpl(){
@@ -64,6 +66,7 @@ public class ClientImpl implements RemoteRpcClient {
     return routingTableProvider;
   }
 
+  @Override
   public void setRoutingTableProvider(RoutingTableProvider routingTableProvider) {
     this.routingTableProvider = routingTableProvider;
   }
@@ -93,7 +96,7 @@ public class ClientImpl implements RemoteRpcClient {
    * @param input payload for the remote service
    * @return
    */
-  public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+  public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
     RouteIdentifierImpl routeId = new RouteIdentifierImpl();
     routeId.setType(rpc);
 
@@ -115,7 +118,7 @@ public class ClientImpl implements RemoteRpcClient {
    *          payload
    * @return
    */
-  public RpcResult<CompositeNode> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+  public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
 
     RouteIdentifierImpl routeId = new RouteIdentifierImpl();
     routeId.setType(rpc);
@@ -126,7 +129,7 @@ public class ClientImpl implements RemoteRpcClient {
     return sendMessage(input, routeId, address);
   }
 
-  private RpcResult<CompositeNode> sendMessage(CompositeNode input, RouteIdentifierImpl routeId, String address) {
+  private ListenableFuture<RpcResult<CompositeNode>> sendMessage(CompositeNode input, RouteIdentifierImpl routeId, String address) {
     Message request = new Message.MessageBuilder()
         .type(Message.MessageType.REQUEST)
         .sender(Context.getInstance().getLocalUri())
@@ -164,11 +167,11 @@ public class ClientImpl implements RemoteRpcClient {
 
         }
       }
-      return Rpcs.getRpcResult(true, payload, errors);
+      return Futures.immediateFuture(Rpcs.getRpcResult(true, payload, errors));
 
     } catch (Exception e){
       collectErrors(e, errors);
-      return Rpcs.getRpcResult(false, null, errors);
+      return Futures.immediateFuture(Rpcs.<CompositeNode>getRpcResult(false, null, errors));
     }
   }
 
