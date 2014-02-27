@@ -269,7 +269,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(IFlowProgrammerNotifier.class)
                     .setCallbacks("setFlowProgrammerNotifier",
-                            "unsetsetFlowProgrammerNotifier")
+                            "unsetFlowProgrammerNotifier")
                     .setRequired(false));
 
             c.add(createServiceDependency()
