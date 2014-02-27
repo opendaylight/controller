@@ -1801,6 +1801,11 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>${releaseplugin.version}</version>
         </plugin>
+        <plugin>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-maven-plugin</artifactId>
+            <version>${yangtools.version}</version>
+        </plugin>
         <!-- Ignore/Execute plugin execution -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
