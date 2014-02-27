@@ -1121,7 +1121,10 @@ public class ForwardingRulesManager implements
             List<FlowEntryInstall> list = new ArrayList<FlowEntryInstall>(groupFlows.get(groupName));
             toBeRemoved = list.size();
             for (FlowEntryInstall entry : list) {
-                Status status = this.removeEntry(entry.getOriginal(), false);
+                // since this is the entry that was stored in groupFlows
+                // it is already validated and merged
+                // so can call removeEntryInternal directly
+                Status status = this.removeEntryInternal(entry, false);
                 if (status.isSuccess()) {
                     toBeRemoved -= 1;
                 } else {
