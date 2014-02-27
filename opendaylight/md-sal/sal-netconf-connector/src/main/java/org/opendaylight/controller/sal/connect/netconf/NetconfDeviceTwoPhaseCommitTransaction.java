@@ -15,14 +15,17 @@ import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NET
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_TARGET_QNAME;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -31,6 +34,8 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -38,7 +43,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<InstanceIdentifier, CompositeNode> {
-
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceTwoPhaseCommitTransaction.class);
     private final NetconfDevice device;
     private final DataModification<InstanceIdentifier, CompositeNode> modification;
     private final boolean candidateSupported = true;
@@ -50,7 +55,7 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
         this.modification = modification;
     }
 
-    public void prepare() {
+    void prepare() throws InterruptedException, ExecutionException {
         for (InstanceIdentifier toRemove : modification.getRemovedConfigurationData()) {
             sendDelete(toRemove);
         }
@@ -60,20 +65,20 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
 
     }
 
-    private void sendMerge(InstanceIdentifier key, CompositeNode value) {
+    private void sendMerge(InstanceIdentifier key, CompositeNode value) throws InterruptedException, ExecutionException {
         sendEditRpc(createEditStructure(key, Optional.<String>absent(), Optional.of(value)));
     }
 
-    private void sendDelete(InstanceIdentifier toDelete) {
+    private void sendDelete(InstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
         sendEditRpc(createEditStructure(toDelete, Optional.of("delete"), Optional.<CompositeNode> absent()));
     }
 
-    private void sendEditRpc(CompositeNode editStructure) {
+    private void sendEditRpc(CompositeNode editStructure) throws InterruptedException, ExecutionException {
         CompositeNodeBuilder<ImmutableCompositeNode> builder = configurationRpcBuilder();
         builder.setQName(NETCONF_EDIT_CONFIG_QNAME);
         builder.add(editStructure);
 
-        RpcResult<CompositeNode> rpcResult = device.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, builder.toInstance());
+        RpcResult<CompositeNode> rpcResult = device.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, builder.toInstance()).get();
         Preconditions.checkState(rpcResult.isSuccessful(),"Rpc Result was unsuccessful");
 
     }
@@ -135,8 +140,45 @@ public class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransac
     public RpcResult<Void> finish() {
         CompositeNodeBuilder<ImmutableCompositeNode> commitInput = ImmutableCompositeNode.builder();
         commitInput.setQName(NETCONF_COMMIT_QNAME);
-        RpcResult<?> rpcResult = device.invokeRpc(NetconfMapping.NETCONF_COMMIT_QNAME, commitInput.toInstance());
-        return (RpcResult<Void>) rpcResult;
+        try {
+            final RpcResult<?> rpcResult = device.invokeRpc(NetconfMapping.NETCONF_COMMIT_QNAME, commitInput.toInstance()).get();
+            return new RpcResult<Void>() {
+
+                @Override
+                public boolean isSuccessful() {
+                    return rpcResult.isSuccessful();
+                }
+
+                @Override
+                public Void getResult() {
+                    return null;
+                }
+
+                @Override
+                public Collection<RpcError> getErrors() {
+                    return rpcResult.getErrors();
+                }
+            };
+        } catch (final InterruptedException | ExecutionException e) {
+            LOG.warn("Failed to finish operation", e);
+            return new RpcResult<Void>() {
+                @Override
+                public boolean isSuccessful() {
+                    return false;
+                }
+
+                @Override
+                public Void getResult() {
+                    return null;
+                }
+
+                @Override
+                public Collection<RpcError> getErrors() {
+                    // FIXME: wrap the exception
+                    return Collections.emptySet();
+                }
+            };
+        }
     }
 
     @Override

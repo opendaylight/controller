@@ -14,8 +14,6 @@ import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 public interface RpcRouter extends RpcProvisionRegistry, RpcImplementation {
 
@@ -28,7 +26,4 @@ public interface RpcRouter extends RpcProvisionRegistry, RpcImplementation {
 
     @Override
     public Set<QName> getSupportedRpcs();
-
-    @Override
-    public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input);
 }
