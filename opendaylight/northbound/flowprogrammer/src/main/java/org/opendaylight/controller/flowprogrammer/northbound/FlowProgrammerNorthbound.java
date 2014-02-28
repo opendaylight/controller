@@ -454,7 +454,8 @@ public class FlowProgrammerNorthbound {
                     .build();
         }
         handleResourceCongruence(name, flowConfig.getName());
-        handleResourceCongruence(nodeId, flowConfig.getNode().getNodeIDString());
+        handleResourceCongruence(nodeType, flowConfig.getNode().getType());
+        handleResourceCongruence(nodeId, flowConfig.getNode().getID() == null ? null : flowConfig.getNode().getNodeIDString());
         handleDefaultDisabled(containerName);
 
         IForwardingRulesManager frm = getForwardingRulesManagerService(containerName);
