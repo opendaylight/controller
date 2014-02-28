@@ -171,17 +171,12 @@ public class NotificationModule implements BrokerModule {
             NotificationPublishService {
 
         @Override
-        public void sendNotification(CompositeNode notification) {
+        public void publish(CompositeNode notification) {
             checkSessionState();
             if (notification == null)
                 throw new IllegalArgumentException(
                         "Notification must not be null.");
             NotificationModule.this.sendNotification(notification);
-        }
-
-        @Override
-        public void publish(CompositeNode notification) {
-            sendNotification(notification);
         }
     }
 

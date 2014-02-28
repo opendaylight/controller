@@ -21,15 +21,13 @@ public class NotificationPublishServiceProxy extends AbstractBrokerServiceProxy<
         super(ref, delegate);
     }
 
-    public void sendNotification(CompositeNode notification) {
-        getDelegate().sendNotification(notification);
-    }
-
+    @Override
     public Registration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
         return addRegistration(getDelegate().addNotificationListener(notification, listener));
 
     }
 
+    @Override
     public void publish(CompositeNode notification) {
         getDelegate().publish(notification);
     }
