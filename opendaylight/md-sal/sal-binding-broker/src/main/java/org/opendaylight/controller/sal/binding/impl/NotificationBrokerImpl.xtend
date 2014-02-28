@@ -49,41 +49,8 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
         this.executor = executor;
     }
 
-    @Deprecated
-    override <T extends Notification> addNotificationListener(Class<T> notificationType,
-        NotificationListener<T> listener) {
-        listeners.put(notificationType, listener)
-    }
-
-    @Deprecated
-    override <T extends Notification> removeNotificationListener(Class<T> notificationType,
-        NotificationListener<T> listener) {
-        listeners.remove(notificationType, listener)
-    }
-
-    override notify(Notification notification) {
-        publish(notification)
-    }
-
     def getNotificationTypes(Notification notification) {
         notification.class.interfaces.filter[it != Notification && Notification.isAssignableFrom(it)]
-    }
-
-    @Deprecated
-    override addNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        throw new UnsupportedOperationException("Deprecated method. Use registerNotificationListener instead.");
-
-    }
-
-    @Deprecated
-    override removeNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        throw new UnsupportedOperationException(
-            "Deprecated method. Use RegisterNotificationListener returned value to close registration.")
-    }
-
-    @Deprecated
-    override notify(Notification notification, ExecutorService service) {
-        publish(notification, service)
     }
 
     override publish(Notification notification) {

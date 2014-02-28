@@ -15,24 +15,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {
-
-
-    /**
-     * Deprecated. Use {@link #publish(Notification)}.
-     *
-     * @param notification
-     */
-    @Deprecated
-    void notify(Notification notification);
-
-    /**
-     * Deprecated. Use {@link #publish(Notification,ExecutorService)}.
-     *
-     * @param notification
-     */
-    @Deprecated
-    void notify(Notification notification, ExecutorService service);
-
     /**
      * Publishes a notification.
      *

@@ -72,18 +72,6 @@ public abstract class AbstractBindingSalProviderInstance<D extends DataProviderS
     }
 
     @Override
-    @Deprecated
-    public void notify(Notification notification) {
-        getNotificationBrokerChecked().notify(notification);
-    }
-
-    @Override
-    @Deprecated
-    public void notify(Notification notification, ExecutorService service) {
-        getNotificationBrokerChecked().notify(notification, service);
-    }
-
-    @Override
     public void publish(Notification notification) {
         getNotificationBrokerChecked().publish(notification);
     }
