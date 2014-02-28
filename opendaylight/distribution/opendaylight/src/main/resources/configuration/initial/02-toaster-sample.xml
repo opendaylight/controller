@@ -1,0 +1,73 @@
+<snapshot>
+    <configuration>
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider:impl">
+                        prefix:toaster-provider-impl
+                    </type>
+                    <name>toaster-provider-impl</name>
+
+                    <rpc-registry>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                        <name>binding-rpc-broker</name>
+                    </rpc-registry>
+
+                    <notification-service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                            binding:binding-notification-service
+                        </type>
+                        <name>binding-notification-broker</name>
+                    </notification-service>
+                </module>
+
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer:impl">
+                        prefix:toaster-consumer-impl
+                    </type>
+                    <name>toaster-consumer-impl</name>
+
+                    <rpc-registry>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                        <name>binding-rpc-broker</name>
+                    </rpc-registry>
+
+                    <notification-service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+                            binding:binding-notification-service
+                        </type>
+                        <name>binding-notification-broker</name>
+                    </notification-service>
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <service>
+                    <type xmlns:toaster="urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider">toaster:toaster-provider</type>
+                    <instance>
+                        <name>toaster-provider</name>
+                        <provider>/modules/module[type='toaster-provider-impl'][name='toaster-provider-impl']</provider>
+                    </instance>
+                </service>
+                <service>
+                    <type xmlns:toaster="urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer">toaster:toaster-consumer</type>
+                    <instance>
+                        <name>toaster-consumer</name>
+                        <provider>/modules/module[type='toaster-consumer-impl'][name='toaster-consumer-impl']</provider>
+                    </instance>
+                </service>
+            </services>
+        </data>
+
+    </configuration>
+
+    <required-capabilities>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer?module=toaster-consumer&amp;revision=2014-01-31</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-consumer:impl?module=toaster-consumer-impl&amp;revision=2014-01-31</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider?module=toaster-provider&amp;revision=2014-01-31</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider:impl?module=toaster-provider-impl&amp;revision=2014-01-31</capability>
+    </required-capabilities>
+
+</snapshot>
+
