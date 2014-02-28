@@ -52,7 +52,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     private final static Logger LOG = LoggerFactory.getLogger(SchemaAwareDataStoreAdapter.class);
 
     private SchemaContext schema = null;
-    private boolean validationEnabled = false;
+    private boolean validationEnabled = true;
     private final DataReader<InstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
 
     @Override
@@ -127,13 +127,41 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     }
 
     private void validateAgainstSchema(DataModification<InstanceIdentifier, CompositeNode> modification) {
-        if (!validationEnabled) {
-            return;
-        }
-
         if (schema == null) {
             LOG.warn("Validation not performed for {}. Reason: YANG Schema not present.", modification.getIdentifier());
             return;
+        }
+        
+        if (validationEnabled) {
+            for (Entry<InstanceIdentifier, CompositeNode> entry : modification.getUpdatedConfigurationData().entrySet()) {
+                validateEntryAgainstSchema(entry.getKey(), entry.getValue());
+            }
+            for (Entry<InstanceIdentifier, CompositeNode> entry : modification.getUpdatedOperationalData().entrySet()) {
+                validateEntryAgainstSchema(entry.getKey(), entry.getValue());
+            }
+            return;
+        }
+    }
+
+    private void validateEntryAgainstSchema(InstanceIdentifier entryKey, CompositeNode entryData) {
+        DataSchemaNode entrySchema = schemaNodeFor(entryKey);
+        InstanceIdentifier entryDataKey = null;
+        if (entrySchema instanceof ListSchemaNode) {
+            ListSchemaNode listSubSchema = (ListSchemaNode) entrySchema;
+            Map<QName, Object> mapOfSubValues = getValuesFromListSchema(listSubSchema, (CompositeNode) entryData);
+            if (mapOfSubValues != null) {
+                entryDataKey = InstanceIdentifier.builder().nodeWithKey(listSubSchema.getQName(), mapOfSubValues).toInstance();
+            }
+        } else {
+            entryDataKey = InstanceIdentifier.builder(entrySchema.getQName()).toInstance();
+        }
+
+        if (entryDataKey != null && ! entryKey.getPath().containsAll(entryDataKey.getPath())) {
+            StringBuilder msgBuilder = new StringBuilder("Entry contains different arguments of path as is presented in data ");
+            msgBuilder.append(" \nWhole expected path is ").append(entryKey.toString());
+            msgBuilder.append(" \nbut a builded sub path has contained ").append(entryDataKey.toString());
+            LOG.error(msgBuilder.toString());
+            throw new IllegalArgumentException(msgBuilder.toString());
         }
     }
 
@@ -167,6 +195,27 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     private DataSchemaNode schemaNodeFor(InstanceIdentifier path) {
         checkState(schema != null, "YANG Schema is not available");
         return YangSchemaUtils.getSchemaNode(schema, path);
+    }
+
+    private Map<QName, Object> getValuesFromListSchema (ListSchemaNode listSchema, CompositeNode entryData) {
+        if (listSchema != null && entryData != null) {
+            List<QName> keyDef = listSchema.getKeyDefinition();
+            if (keyDef != null && !keyDef.isEmpty()) {
+                Map<QName, Object> map = new HashMap<QName, Object>();
+                for (QName key : keyDef) {
+                    List<Node<?>> data = entryData.get(key);
+                    if (data != null && !data.isEmpty()) {
+                        for (Node<?> nodeData : data) {
+                            if (nodeData instanceof SimpleNode<?>) {
+                                map.put(key, data.get(0).getValue());
+                            }
+                        }
+                    }
+                }
+                return map;
+            }
+        }
+        return null;
     }
 
     private NormalizedDataModification prepareMergedTransaction(
@@ -400,9 +449,10 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                     this.putOperationalData(entryKey, entryData);
                     break;
 
-                default:
-                    LOG.error(dataStoreIdentifier + " is NOT valid DataStore switch marker");
-                    throw new RuntimeException(dataStoreIdentifier + " is NOT valid DataStore switch marker");
+                default :
+                    String msg = dataStoreIdentifier + " is NOT valid DataStore switch marker";
+                    LOG.error(msg);
+                    throw new IllegalArgumentException(msg);
                 }
             }
         }
@@ -421,8 +471,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
                     if (subSchema instanceof ListSchemaNode) {
                         ListSchemaNode listSubSchema = (ListSchemaNode) subSchema;
-                        Map<QName, Object> mapOfSubValues = this.getValuesFromListSchema(listSubSchema,
-                                (CompositeNode) child);
+                        Map<QName, Object> mapOfSubValues = getValuesFromListSchema(listSubSchema, (CompositeNode) child);
                         if (mapOfSubValues != null) {
                             instanceId = InstanceIdentifier.builder(entryKey)
                                     .nodeWithKey(listSubSchema.getQName(), mapOfSubValues).toInstance();
@@ -437,24 +486,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                 }
             }
         }
-
-        private Map<QName, Object> getValuesFromListSchema(ListSchemaNode listSchema, CompositeNode entryData) {
-            List<QName> keyDef = listSchema.getKeyDefinition();
-            if (keyDef != null && !keyDef.isEmpty()) {
-                Map<QName, Object> map = new HashMap<QName, Object>();
-                for (QName key : keyDef) {
-                    List<Node<?>> data = entryData.get(key);
-                    if (data != null && !data.isEmpty()) {
-                        for (Node<?> nodeData : data) {
-                            if (nodeData instanceof SimpleNode<?>) {
-                                map.put(key, data.get(0).getValue());
-                            }
-                        }
-                    }
-                }
-                return map;
-            }
-            return null;
-        }
+    }
+}
     }
 }
