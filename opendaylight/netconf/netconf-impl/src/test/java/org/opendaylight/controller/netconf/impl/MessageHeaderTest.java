@@ -15,6 +15,7 @@ import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+@Deprecated
 public class MessageHeaderTest {
 
     private NetconfMessageHeader header = null;
