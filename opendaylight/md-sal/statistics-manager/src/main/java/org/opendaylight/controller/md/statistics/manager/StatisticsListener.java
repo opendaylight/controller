@@ -57,7 +57,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onMeterConfigStatsUpdated(final MeterConfigStatsUpdated notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateMeterConfigStats(notification, notification.isMoreReplies(), notification.getMeterConfigStats());
+            handler.updateMeterConfigStats(notification, notification.getMeterConfigStats());
         }
     }
 
@@ -65,7 +65,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onMeterStatisticsUpdated(MeterStatisticsUpdated notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateMeterStats(notification, notification.isMoreReplies(), notification.getMeterStats());
+            handler.updateMeterStats(notification, notification.getMeterStats());
         }
     }
 
@@ -73,7 +73,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onGroupDescStatsUpdated(GroupDescStatsUpdated notification) {
         final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateGroupDescStats(notification, notification.isMoreReplies(), notification.getGroupDescStats());
+            handler.updateGroupDescStats(notification, notification.getGroupDescStats());
         }
     }
 
@@ -81,7 +81,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onGroupStatisticsUpdated(GroupStatisticsUpdated notification) {
         final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateGroupStats(notification, notification.isMoreReplies(), notification.getGroupStats());
+            handler.updateGroupStats(notification, notification.getGroupStats());
         }
     }
 
@@ -106,7 +106,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
         sucLogger.debug("Received flow stats update : {}",notification.toString());
         final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
-            sna.updateFlowStats(notification, notification.isMoreReplies(), notification.getFlowAndStatisticsMapList());
+            sna.updateFlowStats(notification, notification.getFlowAndStatisticsMapList());
         }
     }
 
@@ -114,7 +114,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateAggregateFlowStats(notification, notification.isMoreReplies(), notification);
+            handler.updateAggregateFlowStats(notification, notification);
         }
     }
 
@@ -122,7 +122,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onNodeConnectorStatisticsUpdate(NodeConnectorStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateNodeConnectorStats(notification, notification.isMoreReplies(), notification.getNodeConnectorStatisticsAndPortNumberMap());
+            handler.updateNodeConnectorStats(notification, notification.getNodeConnectorStatisticsAndPortNumberMap());
         }
     }
 
@@ -130,7 +130,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onFlowTableStatisticsUpdate(FlowTableStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateFlowTableStats(notification, notification.isMoreReplies(), notification.getFlowTableAndStatisticsMap());
+            handler.updateFlowTableStats(notification, notification.getFlowTableAndStatisticsMap());
         }
     }
 
@@ -138,7 +138,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     public void onQueueStatisticsUpdate(QueueStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
-            handler.updateQueueStats(notification, notification.isMoreReplies(), notification.getQueueIdAndStatisticsMap());
+            handler.updateQueueStats(notification, notification.getQueueIdAndStatisticsMap());
         }
     }
 }
