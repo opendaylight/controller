@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.common.util;
 
+import java.util.Collection;
+
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
@@ -34,6 +36,25 @@ public class RpcErrors {
         return ret;
     }
 
+    public static class RpcErrorException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        private final Collection<RpcError> errors;
+
+        public RpcErrorException(final String message, final Collection<RpcError> errors) {
+            super(message);
+            this.errors = errors;
+        }
+
+        public Collection<RpcError> getErrors() {
+            return errors;
+        }
+
+        @Override
+        public String toString() {
+            return "RPCFailedException [errors=" + errors + ", message=" + getMessage() + ']';
+        }
+    }
+    
     private static class RpcErrorTO implements RpcError {
 
         private final String applicationTag;
