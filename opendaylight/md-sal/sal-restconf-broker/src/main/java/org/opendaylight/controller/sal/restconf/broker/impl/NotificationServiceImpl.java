@@ -54,29 +54,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public <T extends Notification> void addNotificationListener(Class<T> notificationType, NotificationListener<T> listener) {
-        this.listeners.put(notificationType, listener);
-    }
-
-    @Override
-    public void addNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        UnsupportedOperationException _unsupportedOperationException = new UnsupportedOperationException("Deprecated method. Use registerNotificationListener instead.");
-        throw _unsupportedOperationException;
-    }
-
-    @Override
-    public void removeNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        UnsupportedOperationException _unsupportedOperationException = new UnsupportedOperationException(
-                "Deprecated method. Use RegisterNotificationListener returned value to close registration.");
-        throw _unsupportedOperationException;
-    }
-
-    @Override
-    public <T extends Notification> void removeNotificationListener(Class<T> notificationType, NotificationListener<T> listener) {
-        this.listeners.remove(notificationType, listener);
-    }
-
-    @Override
     public <T extends Notification> Registration<NotificationListener<T>> registerNotificationListener(Class<T> notificationType, NotificationListener<T> listener) {
         //TODO implementation using sal-remote
         List<QName> notifications = new ArrayList<QName>();

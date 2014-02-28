@@ -72,32 +72,6 @@ public abstract class AbstractBindingSalConsumerInstance<D extends DataBrokerSer
     }
 
     @Override
-    @Deprecated
-    public <T extends Notification> void addNotificationListener(Class<T> notificationType,
-            NotificationListener<T> listener) {
-        getNotificationBrokerChecked().addNotificationListener(notificationType, listener);
-    }
-
-    @Override
-    @Deprecated
-    public void addNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        getNotificationBrokerChecked().addNotificationListener(listener);
-    }
-
-    @Override
-    @Deprecated
-    public void removeNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        getNotificationBrokerChecked().removeNotificationListener(listener);
-    }
-
-    @Override
-    @Deprecated
-    public <T extends Notification> void removeNotificationListener(Class<T> notificationType,
-            NotificationListener<T> listener) {
-        getNotificationBrokerChecked().removeNotificationListener(notificationType, listener);
-    }
-
-    @Override
     public <T extends Notification> Registration<NotificationListener<T>> registerNotificationListener(
             Class<T> notificationType, NotificationListener<T> listener) {
         return getNotificationBrokerChecked().registerNotificationListener(notificationType, listener);

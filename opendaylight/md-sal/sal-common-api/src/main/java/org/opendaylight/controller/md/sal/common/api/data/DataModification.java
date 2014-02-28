@@ -14,7 +14,6 @@ import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>, DataReader<P, D> {
-
     /**
      * Returns transaction identifier
      *
@@ -23,16 +22,6 @@ public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>
     Object getIdentifier();
 
     TransactionStatus getStatus();
-
-    /**
-     *
-     * @deprecated Use {@link #putOperationalData(Object, Object)} instead.
-     *
-     * @param path
-     * @param data
-     */
-    @Deprecated
-    void putRuntimeData(P path, D data);
 
     /**
      * Store a piece of data at specified path. This acts as a merge operation,
@@ -76,14 +65,6 @@ public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>
      */
     void putConfigurationData(P path, D data);
 
-    /**
-     * @deprecated Use {@link #removeOperationalData(Object)}
-     *
-     * @param path
-     */
-    @Deprecated
-    void removeRuntimeData(P path);
-
     void removeOperationalData(P path);
 
     void removeConfigurationData(P path);
@@ -112,5 +93,4 @@ public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>
      *         {@link TransactionStatus#FAILED} is reached.
      */
     Future<RpcResult<TransactionStatus>> commit();
-
 }

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sample.toaster.provider;
 
 import java.util.Collections;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,7 +16,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.controller.config.yang.config.toaster_provider.impl.ToasterProviderRuntimeMXBean;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.common.util.Futures;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
@@ -33,13 +31,15 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Futures;
+
 public class OpendaylightToaster implements ToasterData, ToasterService, ToasterProviderRuntimeMXBean {
 
     private static final Logger log = LoggerFactory.getLogger(OpendaylightToaster.class);
 
     private static final DisplayString toasterManufacturer = new DisplayString("Opendaylight");
     private static final DisplayString toasterModelNumber = new DisplayString("Model 1 - Binding Aware");
-    private ToasterStatus toasterStatus;
+    private final ToasterStatus toasterStatus;
 
     private NotificationProviderService notificationProvider;
     private final ExecutorService executor;
@@ -91,7 +91,7 @@ public class OpendaylightToaster implements ToasterData, ToasterService, Toaster
         currentTask.cancel(true);
         ToastDoneBuilder toastDone = new ToastDoneBuilder();
         toastDone.setToastStatus(ToastStatus.Cancelled);
-        notificationProvider.notify(toastDone.build());
+        notificationProvider.publish(toastDone.build());
     }
 
     public void setNotificationProvider(NotificationProviderService salService) {
@@ -125,7 +125,7 @@ public class OpendaylightToaster implements ToasterData, ToasterService, Toaster
 
             ToastDoneBuilder notifyBuilder = new ToastDoneBuilder();
             notifyBuilder.setToastStatus(ToastStatus.Done);
-            notificationProvider.notify(notifyBuilder.build());
+            notificationProvider.publish(notifyBuilder.build());
             log.trace("Toast Done");
             logToastInput(toastRequest);
             currentTask = null;
