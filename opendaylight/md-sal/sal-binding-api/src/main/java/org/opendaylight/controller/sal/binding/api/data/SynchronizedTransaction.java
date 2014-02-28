@@ -22,21 +22,21 @@ import com.google.common.base.Preconditions;
 
 /**
  * Synchronized wrapper for DataModificationTransaction.
- * 
+ *
  * To get instance of synchronized wrapper use {@link #from(DataModificationTransaction)}
  *
  */
 public final class SynchronizedTransaction implements DataModificationTransaction,Delegator<DataModificationTransaction> {
 
     private final DataModificationTransaction delegate;
-    
+
     private SynchronizedTransaction(DataModificationTransaction delegate) {
         this.delegate = delegate;
     }
 
     /**
      * Returns synchronized wrapper on supplied transaction.
-     * 
+     *
      * @param transaction Transaction for which synchronized wrapper should be created.
      * @return Synchronized wrapper over transaction.
      */
@@ -73,11 +73,6 @@ public final class SynchronizedTransaction implements DataModificationTransactio
         return delegate.getUpdatedOperationalData();
     }
 
-    @Deprecated
-    public synchronized void putRuntimeData(InstanceIdentifier<? extends DataObject> path, DataObject data) {
-        delegate.putRuntimeData(path, data);
-    }
-
     @Override
     public synchronized Object getIdentifier() {
         return delegate.getIdentifier();
@@ -106,11 +101,6 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     @Override
     public synchronized Map<InstanceIdentifier<? extends DataObject>, DataObject> getUpdatedConfigurationData() {
         return delegate.getUpdatedConfigurationData();
-    }
-
-    @Deprecated
-    public synchronized void removeRuntimeData(InstanceIdentifier<? extends DataObject> path) {
-        delegate.removeRuntimeData(path);
     }
 
     @Override

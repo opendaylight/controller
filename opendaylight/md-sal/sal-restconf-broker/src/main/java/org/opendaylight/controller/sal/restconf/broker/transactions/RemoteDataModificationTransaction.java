@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.restconf.broker.transactions;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -31,22 +32,12 @@ public class RemoteDataModificationTransaction implements DataModificationTransa
     }
 
     @Override
-    public void putRuntimeData(InstanceIdentifier<? extends DataObject> path, DataObject data) {
-
-    }
-
-    @Override
     public void putOperationalData(InstanceIdentifier<? extends DataObject> path, DataObject data) {
 
     }
 
     @Override
     public void putConfigurationData(InstanceIdentifier<? extends DataObject> path, DataObject data) {
-
-    }
-
-    @Override
-    public void removeRuntimeData(InstanceIdentifier<? extends DataObject> path) {
 
     }
 

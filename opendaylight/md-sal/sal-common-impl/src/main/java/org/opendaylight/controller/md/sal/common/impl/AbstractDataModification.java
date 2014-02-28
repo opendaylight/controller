@@ -41,7 +41,7 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     private final Map<P, D> unmodifiable_operationalUpdate;
     private final Set<P> unmodifiable_configurationRemove;
     private final Set<P> unmodifiable_OperationalRemove;
-    private DataReader<P, D> reader;
+    private final DataReader<P, D> reader;
 
     public AbstractDataModification(DataReader<P, D> reader) {
         this.reader = reader;
@@ -88,21 +88,11 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     @Override
-    public final void putRuntimeData(P path, D data) {
-        putOperationalData(path, data);
-    }
-
-    @Override
     public final void removeOperationalData(P path) {
         checkMutable();
         getOperationalOriginal(path);
         operationalUpdate.remove(path);
         operationalRemove.put(path, path);
-    }
-
-    @Override
-    public final void removeRuntimeData(P path) {
-        removeOperationalData(path);
     }
 
     @Override
@@ -194,11 +184,11 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
         }
         return null;
     }
-    
+
     protected D mergeOperationalData(P path,D stored, D modified) {
         return modified;
     }
-    
+
     protected D mergeConfigurationData(P path,D stored, D modified) {
         return modified;
     }
