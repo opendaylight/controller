@@ -21,9 +21,12 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
+import org.opendaylight.controller.sal.common.util.RpcErrors;
+import org.opendaylight.controller.sal.common.util.RpcErrors.RpcErrorException;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +40,8 @@ import com.google.common.collect.Sets;
 
 public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends DataChangeListener<P, D>> implements
         Callable<RpcResult<TransactionStatus>> {
+    public final static String APPLICATION_TAG = "sal-common-impl";
+    
     private final static Logger log = LoggerFactory.getLogger(TwoPhaseCommit.class);
 
     private final AbstractDataTransaction<P, D> transaction;
@@ -100,14 +105,18 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
             dataBroker.getFailedTransactionsCount().getAndIncrement();
             this.transaction.changeStatus(TransactionStatus.FAILED);
             return this.rollback(handlerTransactions, e);
-
         }
 
         log.trace("Transaction: {} Starting Finish.",transactionId);
         final List<RpcResult<Void>> results = new ArrayList<RpcResult<Void>>();
         try {
             for (final DataCommitTransaction<P, D> subtransaction : handlerTransactions) {
-                results.add(subtransaction.finish());
+                final RpcResult<Void> subResult = subtransaction.finish();
+                if (subResult.isSuccessful()) {
+                    results.add(subResult);
+                } else {
+                    throw new RpcErrorException("SubResult Exception", subResult.getErrors());
+                }
             }
         } catch (Exception e) {
             log.error("Transaction: {} Finish Commit failed", transactionId, e);
@@ -115,7 +124,6 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
             transaction.changeStatus(TransactionStatus.FAILED);
             return this.rollback(handlerTransactions, e);
         }
-
 
         dataBroker.getFinishedTransactionsCount().getAndIncrement();
         transaction.changeStatus(TransactionStatus.COMMITED);
@@ -237,10 +245,27 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
     }
 
     public RpcResult<TransactionStatus> rollback(final List<DataCommitTransaction<P, D>> transactions, final Exception e) {
-        for (final DataCommitTransaction<P, D> transaction : transactions) {
-            transaction.rollback();
+        Set<RpcError> errorSet = Sets.newHashSet();
+        if (e == null) {
+            String info = "Rollback without Exception call";
+            RpcError error = RpcErrors.getRpcError(APPLICATION_TAG, this.getClass().getSimpleName(), 
+                    info, ErrorSeverity.WARNING, info, RpcError.ErrorType.APPLICATION, null);
+            log.warn(info);
+            errorSet.add(error);
+        } else if (e instanceof RpcErrorException) {
+            errorSet.addAll(((RpcErrorException) e).getErrors()); 
+        } else {
+            String info = e.getClass().getSimpleName();
+            RpcError error = RpcErrors.getRpcError(APPLICATION_TAG, this
+                    .getClass().getSimpleName(), info,
+                    RpcError.ErrorSeverity.ERROR, e.getMessage(),
+                    RpcError.ErrorType.TRANSPORT, e.getCause());
+            errorSet.add(error);
         }
-        Set<RpcError> _emptySet = Collections.<RpcError> emptySet();
-        return Rpcs.<TransactionStatus> getRpcResult(false, TransactionStatus.FAILED, _emptySet);
+        for (final DataCommitTransaction<P, D> transaction : transactions) {
+            RpcResult<Void> rs = transaction.rollback();
+            errorSet.addAll(rs.getErrors());
+        }
+        return Rpcs.<TransactionStatus> getRpcResult(false, TransactionStatus.FAILED, errorSet);
     }
 }

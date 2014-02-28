@@ -43,12 +43,16 @@ import com.google.common.collect.ImmutableList;
 public class WriteParentReadChildTest extends AbstractDataServiceTest {
 
     private static final String FLOW_ID = "1234";
+    private static final String BAD_FLOW_ID = "154";
     private static final short TABLE_ID = (short) 0;
+    private static final short BAD_TABLE_ID = (short) 1;
     private static final String NODE_ID = "node:1";
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
     private static final FlowKey FLOW_KEY = new FlowKey(new FlowId(FLOW_ID));
+    private static final FlowKey BAD_FLOW_KEY = new FlowKey(new FlowId(BAD_FLOW_ID));
     private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
+    private static final TableKey BAD_TABLE_KEY = new TableKey(BAD_TABLE_ID);
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .child(Node.class, NODE_KEY).toInstance();
@@ -57,10 +61,19 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
     InstanceIdentifier.builder(NODE_INSTANCE_ID_BA) //
             .augmentation(FlowCapableNode.class).child(Table.class, TABLE_KEY).build();
 
+    private static final InstanceIdentifier<Table> BAD_TABLE_INSTANCE_ID_BA = //
+            InstanceIdentifier.builder(NODE_INSTANCE_ID_BA) //
+                    .augmentation(FlowCapableNode.class).child(Table.class, BAD_TABLE_KEY).build();
+
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
     InstanceIdentifier.builder(TABLE_INSTANCE_ID_BA) //
             .child(Flow.class, FLOW_KEY) //
             .toInstance();
+
+    private static final InstanceIdentifier<? extends DataObject> BAD_FLOW_INSTANCE_ID_BA = //
+            InstanceIdentifier.builder(TABLE_INSTANCE_ID_BA) //
+                    .child(Flow.class, BAD_FLOW_KEY) //
+                    .toInstance();
     /**
      *
      * The scenario tests writing parent node, which also contains child items
@@ -110,4 +123,93 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
         assertEquals(flow, readedFlow);
 
     }
+    
+    /**
+    *
+    * The scenario tests writing parent node for bad URL, which also contains child items
+    * and then reading child directly, by specifying path to the child.
+    *
+    * Expected behaviour is child is returned.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void writeBadTableReadFlow() throws Exception {
+
+       DataModificationTransaction modification = baDataService.beginTransaction();
+
+       Flow flow = new FlowBuilder() //
+               .setKey(FLOW_KEY) //
+               .setMatch(new MatchBuilder() //
+                       .setVlanMatch(new VlanMatchBuilder() //
+                               .setVlanId(new VlanIdBuilder() //
+                                       .setVlanId(new VlanId(10)) //
+                                       .build()) //
+                               .build()) //
+                       .build()) //
+                       .setInstructions(new InstructionsBuilder() //
+                           .setInstruction(ImmutableList.<Instruction>builder() //
+                                   .build()) //
+                       .build()) //
+               .build();
+
+       Table table = new TableBuilder()
+           .setKey(TABLE_KEY)
+           .setFlow(ImmutableList.of(flow))
+       .build();
+
+       modification.putConfigurationData(BAD_TABLE_INSTANCE_ID_BA, table);
+       RpcResult<TransactionStatus> ret = modification.commit().get();
+       assertNotNull(ret);
+       assertEquals(TransactionStatus.FAILED, ret.getResult());
+
+       DataObject readedBadTable = baDataService.readConfigurationData(BAD_TABLE_INSTANCE_ID_BA);
+       assertTrue("Readed table must be nul.", readedBadTable == null);
+
+       DataObject readedTable = baDataService.readConfigurationData(TABLE_INSTANCE_ID_BA);
+       assertTrue("Readed table must be nul.", readedTable == null);
+
+   }
+
+   /**
+   *
+   * The scenario tests writing child node for bad URL, which also contains child items
+   * and then reading child directly, by specifying path to the child.
+   *
+   * Expected behaviour is child is returned.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void writeTableReadBadFlow() throws Exception {
+
+      DataModificationTransaction modification = baDataService.beginTransaction();
+
+      Flow flow = new FlowBuilder() //
+              .setKey(FLOW_KEY) //
+              .setMatch(new MatchBuilder() //
+                      .setVlanMatch(new VlanMatchBuilder() //
+                              .setVlanId(new VlanIdBuilder() //
+                                      .setVlanId(new VlanId(10)) //
+                                      .build()) //
+                              .build()) //
+                      .build()) //
+                      .setInstructions(new InstructionsBuilder() //
+                          .setInstruction(ImmutableList.<Instruction>builder() //
+                                  .build()) //
+                      .build()) //
+              .build();
+
+      modification.putConfigurationData(BAD_FLOW_INSTANCE_ID_BA, flow);
+      RpcResult<TransactionStatus> ret = modification.commit().get();
+      assertNotNull(ret);
+      assertEquals(TransactionStatus.FAILED, ret.getResult());
+
+      DataObject readedBadTable = baDataService.readConfigurationData(BAD_FLOW_INSTANCE_ID_BA);
+      assertTrue("Readed flow must be nul.", readedBadTable == null);
+
+      DataObject readedTable = baDataService.readConfigurationData(FLOW_INSTANCE_ID_BA);
+      assertTrue("Readed flow must be nul.", readedTable == null);
+
+  }
 }
