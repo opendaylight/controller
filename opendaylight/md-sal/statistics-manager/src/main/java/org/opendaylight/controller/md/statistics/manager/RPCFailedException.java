@@ -11,6 +11,10 @@ import java.util.Collection;
 
 import org.opendaylight.yangtools.yang.common.RpcError;
 
+/**
+ * @deprecated use org.opendaylight.controller.sal.common.util.RpcErrors.RpcErrorException
+ */
+@Deprecated
 final class RPCFailedException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     private final Collection<RpcError> errors;

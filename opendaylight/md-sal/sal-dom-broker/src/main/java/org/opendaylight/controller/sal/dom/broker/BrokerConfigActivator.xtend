@@ -57,7 +57,7 @@ class BrokerConfigActivator implements AutoCloseable {
 
         wrappedStore = new SchemaAwareDataStoreAdapter();
         wrappedStore.changeDelegate(store);
-        wrappedStore.setValidationEnabled(false);
+        wrappedStore.setValidationEnabled(true);
 
         context.registerService(SchemaServiceListener, wrappedStore, emptyProperties)
 
