@@ -137,50 +137,50 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         return dps.beginTransaction();
     }
 
-    public synchronized void updateGroupDescStats(TransactionAware transaction, Boolean more, List<GroupDescStats> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateGroupDescStats(TransactionAware transaction, List<GroupDescStats> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             groupDescStats.updateStats(list);
         }
     }
 
-    public synchronized void updateGroupStats(TransactionAware transaction, Boolean more, List<GroupStats> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateGroupStats(TransactionAware transaction, List<GroupStats> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             groupStats.updateStats(list);
         }
     }
 
-    public synchronized void updateMeterConfigStats(TransactionAware transaction, Boolean more, List<MeterConfigStats> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateMeterConfigStats(TransactionAware transaction, List<MeterConfigStats> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             meterConfigStats.updateStats(list);
         }
     }
 
-    public synchronized void updateMeterStats(TransactionAware transaction, Boolean more, List<MeterStats> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateMeterStats(TransactionAware transaction, List<MeterStats> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             meterStats.updateStats(list);
         }
     }
 
-    public synchronized void updateQueueStats(TransactionAware transaction, Boolean more, List<QueueIdAndStatisticsMap> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateQueueStats(TransactionAware transaction, List<QueueIdAndStatisticsMap> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             queueStats.updateStats(list);
         }
     }
 
-    public synchronized void updateFlowTableStats(TransactionAware transaction, Boolean more, List<FlowTableAndStatisticsMap> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateFlowTableStats(TransactionAware transaction, List<FlowTableAndStatisticsMap> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             flowTableStats.updateStats(list);
         }
     }
 
-    public synchronized void updateNodeConnectorStats(TransactionAware transaction, Boolean more, List<NodeConnectorStatisticsAndPortNumberMap> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateNodeConnectorStats(TransactionAware transaction, List<NodeConnectorStatisticsAndPortNumberMap> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             nodeConnectorStats.updateStats(list);
         }
     }
 
-    public synchronized void updateAggregateFlowStats(TransactionAware transaction, Boolean more, AggregateFlowStatistics flowStats) {
-        final Short tableId = msgManager.isExpectedTableTransaction(transaction, more);
+    public synchronized void updateAggregateFlowStats(TransactionAware transaction, AggregateFlowStatistics flowStats) {
+        final Short tableId = msgManager.isExpectedTableTransaction(transaction);
         if (tableId != null) {
             final DataModificationTransaction trans = dps.beginTransaction();
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
@@ -203,8 +203,8 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         }
     }
 
-    public synchronized void updateFlowStats(TransactionAware transaction, Boolean more, List<FlowAndStatisticsMapList> list) {
-        if (msgManager.isExpectedTransaction(transaction, more)) {
+    public synchronized void updateFlowStats(TransactionAware transaction, List<FlowAndStatisticsMapList> list) {
+        if (msgManager.isExpectedTransaction(transaction)) {
             flowStats.updateStats(list);
         }
     }
