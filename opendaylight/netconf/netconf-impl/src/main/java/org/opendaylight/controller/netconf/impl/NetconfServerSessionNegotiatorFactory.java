@@ -12,6 +12,10 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+import java.io.InputStream;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
@@ -23,13 +27,11 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import java.io.InputStream;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
@@ -41,6 +43,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final SessionIdProvider idProvider;
     private final NetconfOperationServiceFactoryListener factoriesListener;
     private final long connectionTimeoutMillis;
+    private static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
 
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationServiceFactoryListener factoriesListener,
             SessionIdProvider idProvider, long connectionTimeoutMillis) {
@@ -93,7 +96,14 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
             capabilityElement.setTextContent(capability);
             capabilitiesElement.appendChild(capabilityElement);
         }
-        return new NetconfHelloMessage(helloMessageTemplate);
+        NetconfHelloMessage ncHelloMessage = null;
+        try {
+            ncHelloMessage = new NetconfHelloMessage(helloMessageTemplate);
+        } catch (NetconfDocumentedException e) {
+            logger.trace("Netconf message construction failed due to {}",e);
+            throw new IllegalStateException(e);
+        }
+        return ncHelloMessage;
     }
 
     private synchronized Document getHelloTemplateClone() {

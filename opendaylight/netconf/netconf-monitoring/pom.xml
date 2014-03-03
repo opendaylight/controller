@@ -61,6 +61,7 @@
                             org.opendaylight.controller.netconf.api,
                             org.opendaylight.controller.netconf.mapping.api,
                             org.opendaylight.controller.netconf.util.mapping,
+                            org.opendaylight.controller.netconf.util.exception,
                             org.osgi.framework,
                             org.slf4j,
                             org.w3c.dom,

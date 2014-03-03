@@ -9,11 +9,11 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Preconditions;
+import java.util.List;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
     private static final Logger logger = LoggerFactory.getLogger(SimpleAttributeReadingStrategy.class);
@@ -24,7 +24,7 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) {
+    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws NetconfDocumentedException {
         XmlElement xmlElement = configNodes.get(0);
         Preconditions.checkState(configNodes.size() == 1, "This element should be present only once " + xmlElement
                 + " but was " + configNodes.size());
@@ -37,12 +37,17 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
             logger.warn("Ignoring exception caused by failure to read text element", e);
         }
 
-        Preconditions.checkNotNull(textContent, "This element should contain text %s", xmlElement);
+        if (null == textContent){
+            throw new NetconfDocumentedException(String.format("This element should contain text %s", xmlElement),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
         return AttributeConfigElement.create(postprocessNullableDefault(getNullableDefault()),
                 postprocessParsedValue(textContent));
     }
 
-    protected String readElementContent(XmlElement xmlElement) {
+    protected String readElementContent(XmlElement xmlElement) throws NetconfDocumentedException {
         return xmlElement.getTextContent();
     }
 

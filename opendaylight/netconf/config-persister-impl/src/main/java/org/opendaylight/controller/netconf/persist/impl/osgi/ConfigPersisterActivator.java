@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.persist.impl.osgi;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
@@ -71,11 +72,15 @@ public class ConfigPersisterActivator implements BundleActivator {
                 final Thread pushingThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        configPusher.pushConfigs(configs);
-                        logger.info("Configuration Persister initialization completed.");
-                        ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
-                        synchronized (ConfigPersisterActivator.this) {
-                            autoCloseables.add(jmxNotificationHandler);
+                        try {
+                            configPusher.pushConfigs(configs);
+                            logger.info("Configuration Persister initialization completed.");
+                            ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
+                            synchronized (ConfigPersisterActivator.this) {
+                                autoCloseables.add(jmxNotificationHandler);
+                            }
+                        } catch (NetconfDocumentedException e) {
+                            logger.error("Configurations push failure due to {}",e);
                         }
                     }
                 }, "config-pusher");

@@ -98,6 +98,7 @@
                         </Bundle-Activator>
                         <Private-Package>
                             org.opendaylight.controller.netconf.confignetconfconnector.mapping.*,
+                            org.opendaylight.controller.netconf.confignetconfconnector.exception,
                             org.opendaylight.controller.netconf.confignetconfconnector.operations.*,
                             org.opendaylight.controller.netconf.confignetconfconnector.transactions,
                             org.opendaylight.controller.netconf.confignetconfconnector.util,
@@ -118,6 +119,7 @@
                             org.opendaylight.controller.netconf.mapping.api,
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.exception,
                             org.opendaylight.yangtools.yang.common,
                             org.opendaylight.yangtools.yang.model.api,
                             org.osgi.framework,

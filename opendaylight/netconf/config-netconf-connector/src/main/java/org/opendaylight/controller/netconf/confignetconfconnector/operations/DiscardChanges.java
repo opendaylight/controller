@@ -6,10 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.confignetconfconnector.operations;
-
-import java.util.HashMap;
-import java.util.Map;
+    package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -23,6 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiscardChanges extends AbstractConfigNetconfOperation {
 
@@ -38,7 +38,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    private static void fromXml(XmlElement xml) {
+    private static void fromXml(XmlElement xml) throws NetconfDocumentedException {
         xml.checkName(DISCARD);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
@@ -50,21 +50,10 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-        try {
-            fromXml(xml);
-        } catch (final IllegalArgumentException e) {
-            //FIXME where can IllegalStateException  be thrown?
-            logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.bad_attribute,
-                    ErrorSeverity.error, errorInfo);
-        }
-
+        fromXml(xml);
         try {
             this.transactionProvider.abortTransaction();
         } catch (final IllegalStateException e) {
-            //FIXME where can IllegalStateException  be thrown?
             logger.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
