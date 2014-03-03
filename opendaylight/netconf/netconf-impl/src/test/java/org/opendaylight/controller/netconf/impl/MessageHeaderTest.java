@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;
 
+@Deprecated
 public class MessageHeaderTest {
     @Test
     public void testFromBytes() {
