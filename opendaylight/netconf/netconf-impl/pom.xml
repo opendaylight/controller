@@ -89,6 +89,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-client</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>commons.logback_settings</artifactId>
         </dependency>
