@@ -14,10 +14,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
-import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
@@ -91,7 +91,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     @Test
     public void testSecure() throws Exception {
         NetconfClientDispatcher dispatch = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
-        try (NetconfClient netconfClient = new NetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("tls-client", tlsAddress, 4000, dispatch))  {
 
         }
     }
