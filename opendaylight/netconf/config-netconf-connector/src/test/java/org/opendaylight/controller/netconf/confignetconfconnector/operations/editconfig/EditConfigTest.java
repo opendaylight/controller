@@ -22,6 +22,7 @@ import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.StrategyInvocationException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementDefinition;
@@ -80,7 +81,7 @@ public class EditConfigTest {
     }
 
     @Test
-    public void test() throws NetconfDocumentedException, ValidationException {
+    public void test() throws NetconfDocumentedException, ValidationException, StrategyInvocationException {
         EditConfig edit = new EditConfig(yangStoreSnapshot, provider, configRegistry,
                 ValidateTest.NETCONF_SESSION_ID_FOR_REPORTING);
         EditConfigStrategy editStrat = mock(EditConfigStrategy.class);
@@ -104,7 +105,7 @@ public class EditConfigTest {
                 any(ConfigTransactionClient.class), any(ServiceRegistryWrapper.class));
     }
 
-    private EditConfigExecution mockExecution(EditConfigStrategy editStrat) {
+    private EditConfigExecution mockExecution(EditConfigStrategy editStrat) throws NetconfDocumentedException {
         EditConfigExecution mock = mock(EditConfigExecution.class);
         doReturn(getMapping(editStrat)).when(mock).getResolvedXmlElements(any(ConfigTransactionClient.class));
         doReturn(getMappingDefinition(editStrat)).when(mock).getModulesDefinition(any(ConfigTransactionClient.class));
