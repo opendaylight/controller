@@ -8,7 +8,14 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
@@ -20,14 +27,8 @@ import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
 import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfClientSession, NetconfClientSessionListener> {
 
@@ -42,6 +43,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final Timer timer;
     private final EXIOptions options;
+    private static final Logger logger = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
 
     public NetconfClientSessionNegotiatorFactory(Timer timer,
                                                  Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
@@ -64,7 +66,13 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
             Promise<NetconfClientSession> promise) {
 
         NetconfMessage startExiMessage = NetconfStartExiMessage.create(options, START_EXI_MESSAGE_ID);
-        NetconfHelloMessage helloMessage = NetconfHelloMessage.createClientHello(CLIENT_CAPABILITIES, additionalHeader);
+        NetconfHelloMessage helloMessage = null;
+        try {
+            helloMessage = NetconfHelloMessage.createClientHello(CLIENT_CAPABILITIES, additionalHeader);
+        } catch (NetconfDocumentedException e) {
+            logger.error("Unable to create client hello message with capabilities {} and additional handler {}",CLIENT_CAPABILITIES,additionalHeader);
+            throw new IllegalStateException(e);
+        }
 
         NetconfClientSessionPreferences proposal = new NetconfClientSessionPreferences(helloMessage,startExiMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,

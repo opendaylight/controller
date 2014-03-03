@@ -77,7 +77,8 @@
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.messages,
                             org.opendaylight.controller.netconf.util.handler,
-                            org.opendaylight.controller.netconf.util.handler.*,</Export-Package>
+                            org.opendaylight.controller.netconf.util.handler.*,
+                            org.opendaylight.controller.netconf.util.exception,</Export-Package>
             <Import-Package>com.google.common.base,
                             com.google.common.collect,
                             ch.ethz.ssh2,

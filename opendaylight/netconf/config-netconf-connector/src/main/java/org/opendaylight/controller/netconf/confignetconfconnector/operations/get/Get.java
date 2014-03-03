@@ -8,22 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.get;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.ObjectName;
-
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
@@ -33,7 +23,11 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtim
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -41,7 +35,10 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.Maps;
+import javax.management.ObjectName;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Get extends AbstractConfigNetconfOperation {
 
@@ -106,7 +103,7 @@ public class Get extends AbstractConfigNetconfOperation {
         return jmxToYangNamesForChildRbe;
     }
 
-    private static void checkXml(XmlElement xml) {
+    private static void checkXml(XmlElement xml) throws UnexpectedElementException, UnexpectedNamespaceException, MissingNameSpaceException {
         xml.checkName(XmlNetconfConstants.GET);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -122,21 +119,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-        try {
-            checkXml(xml);
-        } catch (final IllegalArgumentException e) {
-            logger.warn("Error parsing xml", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.bad_attribute,
-                    ErrorSeverity.error, errorInfo);
-        } catch (final UnsupportedOperationException e) {
-            logger.warn("Unsupported", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_not_supported.name(), "Unsupported option for 'get'");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application,
-                    ErrorTag.operation_not_supported, ErrorSeverity.error, errorInfo);
-        }
+        checkXml(xml);
 
         final Set<ObjectName> runtimeBeans = configRegistryClient.lookupRuntimeBeans();
 

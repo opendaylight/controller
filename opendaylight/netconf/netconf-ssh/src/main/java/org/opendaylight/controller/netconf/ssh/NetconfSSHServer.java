@@ -7,16 +7,17 @@
  */
 package org.opendaylight.controller.netconf.ssh;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.threads.SocketThread;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.concurrent.ThreadSafe;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.util.concurrent.atomic.AtomicLong;
 
 @ThreadSafe
 public class NetconfSSHServer implements Runnable {
@@ -69,7 +70,7 @@ public class NetconfSSHServer implements Runnable {
             try {
                SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                logger.error("Exception occurred during socket thread initialization {}",e);
             }
         }
     }

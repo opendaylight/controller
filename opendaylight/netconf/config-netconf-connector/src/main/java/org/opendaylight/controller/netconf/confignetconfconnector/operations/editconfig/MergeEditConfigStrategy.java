@@ -12,6 +12,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.NetconfConfigHandlingException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
@@ -38,10 +40,14 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance, ServiceRegistryWrapper services) {
-        throw new IllegalStateException(
-                "Unable to handle missing instance, no missing instances should appear at this point, missing: "
-                        + module + ":" + instance);
+            String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
+        throw new NetconfConfigHandlingException(
+                String.format("Unable to handle missing instance, no missing instances should appear at this point, missing: %s : %s ",
+                        module,
+                        instance),
+                NetconfDocumentedException.ErrorType.application,
+                NetconfDocumentedException.ErrorTag.operation_failed,
+                NetconfDocumentedException.ErrorSeverity.error);
     }
 
     private void addRefNames(ServiceRegistryWrapper services, Multimap<String, String> providedServices, ConfigTransactionClient ta, ObjectName on) throws InstanceNotFoundException {
@@ -59,11 +65,14 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
         try {
             addRefNames(services, providedServices, ta, on);
         } catch (InstanceNotFoundException e) {
-            throw new IllegalStateException("Unable to save default ref name for instance " + on, e);
+            throw new NetconfConfigHandlingException(String.format("Unable to save default ref name for instance %s. Instance was not found.",e),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
         }
 
         for (Entry<String, AttributeConfigElement> configAttributeEntry : configuration.entrySet()) {
@@ -79,8 +88,13 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
                 logger.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), value, on);
             } catch (Exception e) {
-                throw new IllegalStateException("Unable to set attributes for " + on + ", Error with attribute "
-                        + configAttributeEntry.getKey() + ":" + configAttributeEntry.getValue(), e);
+                throw new NetconfConfigHandlingException(String.format("Unable to set attributes for %s, Error with attribute %s : %s ",
+                        on,
+                        configAttributeEntry.getKey(),
+                        configAttributeEntry.getValue()),
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.operation_failed,
+                        NetconfDocumentedException.ErrorSeverity.error);
             }
         }
     }
