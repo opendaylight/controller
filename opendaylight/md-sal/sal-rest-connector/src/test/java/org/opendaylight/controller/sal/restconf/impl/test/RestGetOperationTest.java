@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -21,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
@@ -45,6 +39,12 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -163,6 +163,42 @@ public class RestGetOperationTest extends JerseyTest {
 
         response = target(uri).request("application/yang.api+xml").get();
         validateModulesResponseXml(response);
+    }
+    // /streams/
+    @Test
+    public void getStreamsTest() throws UnsupportedEncodingException, FileNotFoundException {
+
+        String uri = "/operations/sal-remote:create-data-change-event-subscription";
+        Response responseWithStreamName = post(uri, MediaType.APPLICATION_XML, getRpcInput());
+        String xmlResponse = responseWithStreamName.readEntity(String.class);
+        Assert.assertNotNull(xmlResponse);
+        assertTrue(xmlResponse.contains("<stream-name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</stream-name>"));
+
+        ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
+
+        uri = "/streams";
+
+        Response response = target(uri).request("application/yang.api+json").get();
+        String responseBody = response.readEntity(String.class);
+        assertNotNull(responseBody);
+        assertTrue(responseBody.contains("streams"));
+        assertTrue(responseBody.contains("\"name\": \"ietf-interfaces:interfaces/ietf-interfaces:interface/eth0\""));
+
+        response = target(uri).request("application/yang.api+xml").get();
+        responseBody = response.readEntity(String.class);
+        assertNotNull(responseBody);
+        assertTrue(responseBody.contains("streams"));
+        assertTrue(responseBody.contains("<name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</name>"));
+
+    }
+
+
+    private String getRpcInput() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<input xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote\">");
+        sb.append("<path xmlns:int=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">/int:interfaces/int:interface[int:name='eth0']</path>");
+        sb.append("</input>");
+        return sb.toString();
     }
 
     // /modules/module
@@ -480,6 +516,13 @@ public class RestGetOperationTest extends JerseyTest {
         SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
         mockedControllerContext.setGlobalSchema(schemaContext);
         // when(mockedControllerContext.getGlobalSchema()).thenReturn(schemaContext);
+    }
+
+    private Response post(String uri, String mediaType, String data) {
+        return target(uri).request(mediaType).post(Entity.entity(data, mediaType));
+    }
+    private Response getResponse(String uri, String mediaType) {
+        return target(uri).request(mediaType).get();
     }
 
     private int get(String uri, String mediaType) {

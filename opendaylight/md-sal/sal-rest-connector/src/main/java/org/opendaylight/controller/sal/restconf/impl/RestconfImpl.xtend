@@ -60,6 +60,8 @@ class RestconfImpl implements RestconfService {
     val static RESTCONF_MODULE_DRAFT02_RESTCONF_CONTAINER_SCHEMA_NODE = "restconf"
     val static RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE = "modules"
     val static RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE = "module"
+    val static RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE = "streams"
+    val static RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE = "stream"
     val static RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE = "operations"
     val static SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote"
     val static SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription"
@@ -92,6 +94,17 @@ class RestconfImpl implements RestconfService {
         return new StructuredData(modulesNode, modulesSchemaNode, null)
     }
 
+    override getAvailableStreams(){
+        var Set<String> availableStreams = Notificator.getStreamNames();
+        val List<Node<?>> streamsAsData = new ArrayList
+        val streamSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE)
+        for (String streamName:availableStreams){
+            streamsAsData.add(streamName.toStreamCompositeNode(streamSchemaNode))
+        }
+        val streamsSchemaNode = restconfModule.getSchemaNode(RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE)
+        val streamsNode = NodeFactory.createImmutableCompositeNode(streamsSchemaNode.QName, null, streamsAsData)
+        return new StructuredData(streamsNode, streamsSchemaNode, null)
+    }
     override getModules(String identifier) {
         var Set<Module> modules = null
         var MountInstance mountPoint = null
@@ -196,6 +209,25 @@ class RestconfImpl implements RestconfService {
         }
     }
 
+    private def CompositeNode toStreamCompositeNode(String streamName, DataSchemaNode streamSchemaNode) {
+        val List<Node<?>> streamNodeValues = new ArrayList
+        val nameSchemaNode = (streamSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("name").head
+        streamNodeValues.add(NodeFactory.createImmutableSimpleNode(nameSchemaNode.QName, null, streamName))
+
+        val descriptionSchemaNode = (streamSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("description").head
+        streamNodeValues.add(NodeFactory.createImmutableSimpleNode(descriptionSchemaNode.QName, null, "DESCRIPTION_PLACEHOLDER"))
+
+        val replaySupportSchemaNode = (streamSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("replay-support").head
+        streamNodeValues.add(NodeFactory.createImmutableSimpleNode(replaySupportSchemaNode.QName, null, true))
+
+        val replayLogCreationTimeSchemaNode = (streamSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("replay-log-creation-time").head
+        streamNodeValues.add(NodeFactory.createImmutableSimpleNode(replayLogCreationTimeSchemaNode.QName, null, ""))
+
+        val eventsSchemaNode = (streamSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("events").head
+        streamNodeValues.add(NodeFactory.createImmutableSimpleNode(eventsSchemaNode.QName, null, ""))
+
+        return NodeFactory.createImmutableCompositeNode(streamSchemaNode.QName, null, streamNodeValues)
+    }
     private def CompositeNode toModuleCompositeNode(Module module, DataSchemaNode moduleSchemaNode) {
         val List<Node<?>> moduleNodeValues = new ArrayList
         val nameSchemaNode = (moduleSchemaNode as DataNodeContainer).findInstanceDataChildrenByName("name").head
@@ -216,7 +248,12 @@ class RestconfImpl implements RestconfService {
         val restconfContainer = restconfGrouping.findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_RESTCONF_CONTAINER_SCHEMA_NODE).head
         if (schemaNodeName == RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE) {
             return (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE).head
-        } else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE) {
+        } else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE) {
+           return (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE).head
+        } else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE) {
+           val modules = (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE).head
+           return (modules as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE).head
+        }else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE) {
             return (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE).head
         } else if (schemaNodeName == RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE) {
             val modules = (restconfContainer as DataNodeContainer).findInstanceDataChildrenByName(RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE).head
