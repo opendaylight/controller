@@ -10,19 +10,19 @@ package org.opendaylight.controller.netconf.confignetconfconnector.transactions;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.NoTransactionFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class TransactionProvider implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(TransactionProvider.class);
@@ -94,9 +94,11 @@ public class TransactionProvider implements AutoCloseable {
     /**
      * Commit and notification send must be atomic
      */
-    public synchronized CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException {
+    public synchronized CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException, NoTransactionFoundException {
+        if (!getTransaction().isPresent()){
+            throw new NoTransactionFoundException("No transaction found for session " + netconfSessionIdForReporting);
+        }
         final Optional<ObjectName> maybeTaON = getTransaction();
-        Preconditions.checkState(maybeTaON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
         ObjectName taON = maybeTaON.get();
         try {
             CommitStatus status = configRegistryClient.commitConfig(taON);

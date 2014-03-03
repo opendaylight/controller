@@ -34,6 +34,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Abs
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -106,7 +109,7 @@ public class Get extends AbstractConfigNetconfOperation {
         return jmxToYangNamesForChildRbe;
     }
 
-    private static void checkXml(XmlElement xml) {
+    private static void checkXml(XmlElement xml) throws UnexpectedElementException, UnexpectedNamespaceException, MissingNameSpaceException {
         xml.checkName(XmlNetconfConstants.GET);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -124,7 +127,7 @@ public class Get extends AbstractConfigNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         try {
             checkXml(xml);
-        } catch (final IllegalArgumentException e) {
+        } catch (final MissingNameSpaceException | UnexpectedElementException | UnexpectedNamespaceException e) {
             logger.warn("Error parsing xml", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());

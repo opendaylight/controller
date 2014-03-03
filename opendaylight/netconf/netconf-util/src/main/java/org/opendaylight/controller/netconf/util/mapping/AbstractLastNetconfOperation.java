@@ -14,8 +14,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Preconditions;
-
 public abstract class AbstractLastNetconfOperation extends AbstractNetconfOperation {
 
     protected AbstractLastNetconfOperation(String netconfSessionIdForReporting) {
@@ -25,8 +23,12 @@ public abstract class AbstractLastNetconfOperation extends AbstractNetconfOperat
     @Override
     protected Element handle(Document document, XmlElement operationElement,
             NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
-        Preconditions.checkArgument(subsequentOperation.isExecutionTermination(),
-                "No netconf operation expected to be subsequent to %s, but is %s", this, subsequentOperation);
+        if (!subsequentOperation.isExecutionTermination()){
+            throw new NetconfDocumentedException(String.format("No netconf operation expected to be subsequent to %s, but is %s", this, subsequentOperation),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.malformed_message,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
 
         return handleWithNoSubsequentOperations(document, operationElement);
     }
