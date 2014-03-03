@@ -9,13 +9,13 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeReadingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectXmlReader;
@@ -131,14 +131,16 @@ public final class InstanceConfig {
     }
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
-                                                 EditStrategyType defaultStrategy, Multimap<String, String> providedServices, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
+                                                 EditStrategyType defaultStrategy, Multimap<String, String> providedServices, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        XmlElement type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
-        XmlElement name = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
+        XmlElement type = null;
+        XmlElement name = null;
+        type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
+        name = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
         List<XmlElement> typeAndName = Lists.newArrayList(type, name);
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
@@ -163,7 +165,7 @@ public final class InstanceConfig {
     }
 
     private List<XmlElement> getConfigNodes(XmlElement moduleElement, String moduleNamespace, String name,
-            List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) {
+            List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) throws NetconfDocumentedException {
         List<XmlElement> foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name, moduleNamespace);
         if (foundConfigNodes.isEmpty()) {
             logger.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
@@ -181,9 +183,13 @@ public final class InstanceConfig {
             List<XmlElement> foundWithoutNamespaceNodes = moduleElement.getChildElementsWithinNamespace(name,
                     XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             foundWithoutNamespaceNodes.removeAll(typeAndName);
-            Preconditions.checkState(foundWithoutNamespaceNodes.isEmpty(),
-                    "Element %s present multiple times with different namespaces: %s, %s", name, foundConfigNodes,
-                    foundWithoutNamespaceNodes);
+            if (!foundWithoutNamespaceNodes.isEmpty()){
+                throw new NetconfDocumentedException(String.format("Element %s present multiple times with different namespaces: %s, %s", name, foundConfigNodes,
+                        foundWithoutNamespaceNodes),
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.invalid_value,
+                        NetconfDocumentedException.ErrorSeverity.error);
+            }
         }
 
         recognisedChildren.addAll(foundConfigNodes);

@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.Set;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
@@ -156,7 +157,7 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
 
             try {
                 NetconfMapping.checkSuccessReply(message);
-            } catch (IllegalStateException e) {
+            } catch (NetconfDocumentedException | IllegalStateException e) {
                 LOG.warn("Error reply from remote device", e);
                 r.future.setException(e);
                 return;
