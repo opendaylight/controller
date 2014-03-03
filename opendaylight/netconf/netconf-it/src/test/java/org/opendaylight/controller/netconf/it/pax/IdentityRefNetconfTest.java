@@ -15,6 +15,7 @@ import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAn
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import javax.inject.Inject;
@@ -27,8 +28,9 @@ import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
+import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.ops4j.pax.exam.Configuration;
@@ -36,11 +38,11 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.Filter;
-import org.w3c.dom.Document;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.osgi.framework.Constants;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -66,7 +68,24 @@ public class IdentityRefNetconfTest {
                 loggingModules(),
                 mdSalCoreBundles(),
                 bindingAwareSalBundles(), configMinumumBundles(), baseModelBundles(), flowCapableModelBundles(),
-                junitAndMockitoBundles());
+                junitAndMockitoBundles(),
+
+                // Classes from test-jars bundled for pax-exam test
+                streamBundle(TinyBundles.bundle()
+                        .add(TestingNetconfClient.class)
+                        .add(XmlFileLoader.class)
+
+                        .add("/netconfMessages/editConfig_identities.xml",
+                                XmlFileLoader.class.getResource("/netconfMessages/editConfig_identities.xml"))
+                        .add("/netconfMessages/commit.xml",
+                                XmlFileLoader.class.getResource("/netconfMessages/commit.xml"))
+                        .add("/netconfMessages/getConfig.xml",
+                                XmlFileLoader.class.getResource("/netconfMessages/getConfig.xml"))
+
+                        .set(Constants.BUNDLE_SYMBOLICNAME, "TestingClient_bundle")
+                        .set(Constants.EXPORT_PACKAGE, "org.opendaylight.controller.netconf.client.test, " +
+                                "org.opendaylight.controller.netconf.util.test")
+                        .build(TinyBundles.withBnd())));
     }
 
     private Option loggingModules() {
@@ -96,7 +115,7 @@ public class IdentityRefNetconfTest {
         NetconfMessage commit = xmlFileToNetconfMessage("netconfMessages/commit.xml");
         NetconfMessage getConfig = xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
 
-        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, CLIENT_CONNECTION_TIMEOUT_MILLIS, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", tcpAddress, CLIENT_CONNECTION_TIMEOUT_MILLIS, clientDispatcher)) {
             sendMessage(edit, netconfClient);
             sendMessage(commit, netconfClient);
             sendMessage(getConfig, netconfClient, "id-test",
@@ -109,7 +128,7 @@ public class IdentityRefNetconfTest {
         clientDispatcher.close();
     }
 
-    private void sendMessage(NetconfMessage edit, NetconfClient netconfClient, String... containingResponse)
+    private void sendMessage(NetconfMessage edit, TestingNetconfClient netconfClient, String... containingResponse)
             throws ExecutionException, InterruptedException, TimeoutException {
         NetconfMessage response = netconfClient.sendRequest(edit).get();
         if (containingResponse == null) {
@@ -123,16 +142,6 @@ public class IdentityRefNetconfTest {
 
     public static NetconfMessage xmlFileToNetconfMessage(final String fileName) throws IOException, SAXException,
             ParserConfigurationException {
-        return new NetconfMessage(xmlFileToDocument(fileName));
-    }
-
-    public static Document xmlFileToDocument(final String fileName) throws IOException, SAXException,
-            ParserConfigurationException {
-        // TODO xml messages from netconf-util test-jar cannot be loaded here(in OSGi), since test jar is not a bundle
-        try (InputStream resourceAsStream = IdentityRefNetconfTest.class.getClassLoader().getResourceAsStream(fileName)) {
-            Preconditions.checkNotNull(resourceAsStream);
-            final Document doc = XmlUtil.readXmlToDocument(resourceAsStream);
-            return doc;
-        }
+        return XmlFileLoader.xmlFileToNetconfMessage(fileName);
     }
 }
