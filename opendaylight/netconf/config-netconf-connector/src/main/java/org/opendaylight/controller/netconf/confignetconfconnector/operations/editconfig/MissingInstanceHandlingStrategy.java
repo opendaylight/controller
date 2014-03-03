@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.StrategyInvocationException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
@@ -24,13 +25,13 @@ public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy 
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance, ServiceRegistryWrapper services) {
+            String module, String instance, ServiceRegistryWrapper services) throws StrategyInvocationException {
         ObjectName on = null;
         try {
             on = ta.createModule(module, instance);
             logger.trace("New instance for {} {} created under name {}", module, instance, on);
         } catch (InstanceAlreadyExistsException e1) {
-            throw new IllegalStateException("Unable to create instance for " + module + " : " + instance);
+            throw new StrategyInvocationException("Unable to create instance for " + module + " : " + instance);
         }
     }
 

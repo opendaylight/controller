@@ -1,0 +1,116 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <test-option>
+            set
+        </test-option>
+        <default-operation>merge</default-operation>
+        <config>
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+
+                <module>
+                    <name>dep</name>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-dep
+                    </type>
+                </module>
+
+                <module>
+                    <name>dep2</name>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-dep
+                    </type>
+                </module>
+
+                <module>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-netconf
+                    </type>
+
+                    <name>test1</name>
+
+                    <simple-long-2>44</simple-long-2>
+                    <binaryLeaf>8545649856</binaryLeaf>
+                    <dto_d>
+                        <unknownAttribute>error</unknownAttribute>
+                        <simple-int1>444</simple-int1>
+                        <simple-int2>4444</simple-int2>
+                        <simple-int3>454</simple-int3>
+                        <complex-dto-bInner>
+                            <simple-int3>44</simple-int3>
+                            <deep>
+                                <simple-int3>4</simple-int3>
+                            </deep>
+                            <simple-list>4</simple-list>
+                        </complex-dto-bInner>
+                        <simple-list>4</simple-list>
+                    </dto_d>
+                    <simpleInt>44</simpleInt>
+                    <simple-test>545</simple-test>
+                    <simple-long>454545</simple-long>
+                    <simpleBoolean>false</simpleBoolean>
+                    <dto-c>
+                        <dto-a-inner>
+                            <dto-a-inner-inner>
+                                <simple-arg>456</simple-arg>
+                            </dto-a-inner-inner>
+                            <simple-arg>44</simple-arg>
+                        </dto-a-inner>
+                    </dto-c>
+                    <simple-short>4</simple-short>
+                    <simple-BigInteger>999</simple-BigInteger>
+                    <simple-byte>4</simple-byte>
+                    <peers>
+                        <port>port1</port>
+                        <simple-int3>456</simple-int3>
+                        <core-size>44</core-size>
+                    </peers>
+                    <peers>
+                        <port>port23</port>
+                        <simple-int3>456</simple-int3>
+                        <core-size>44</core-size>
+                    </peers>
+                    <testing-dep>
+                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
+                        <name>ref_dep</name>
+                    </testing-dep>
+                </module>
+
+                <module>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-netconf
+                    </type>
+                    <name>test2</name>
+                    <testing-dep>
+                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
+                        <name>ref_dep</name>
+                    </testing-dep>
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <service>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
+                    <instance>
+                        <name>ref_dep</name>
+                        <provider>/modules/module[type='impl-dep'][name='dep']
+                        </provider>
+                    </instance>
+                    <instance>
+                        <name>ref_dep_2</name>
+                        <provider>/modules/module[type='impl-dep'][name='dep2']
+                        </provider>
+                    </instance>
+                    <instance>
+                        <name>ref_test1</name>
+                        <provider>
+                            /modules/module[type='impl-netconf'][name='test1']
+                        </provider>
+                    </instance>
+                </service>
+            </services>
+        </config>
+    </edit-config>
+</rpc>

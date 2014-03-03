@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.confi
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -83,7 +84,7 @@ public final class Services {
 
     // TODO support edit strategies on services
 
-    public static Services fromXml(XmlElement xml) {
+    public static Services fromXml(XmlElement xml) throws NetconfDocumentedException {
         Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
 
         List<XmlElement> services = xml.getChildElements(SERVICE_KEY);

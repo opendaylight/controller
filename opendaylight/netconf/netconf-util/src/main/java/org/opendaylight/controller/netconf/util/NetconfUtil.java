@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -56,7 +57,7 @@ public final class NetconfUtil {
         return (doc == null) ? null : new NetconfMessage(doc);
     }
 
-    public static void checkIsMessageOk(NetconfMessage responseMessage) throws ConflictingVersionException {
+    public static void checkIsMessageOk(NetconfMessage responseMessage) throws ConflictingVersionException, NetconfDocumentedException {
         XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
         element = element.getOnlyChildElement();

@@ -8,16 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,12 +24,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -95,12 +88,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
@@ -452,7 +448,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     @Test
     public void testUnrecognisedConfigElements() throws Exception {
 
-        String format = "netconfMessages/unrecognised/editConfig_unrecognised%d.xml";
+        String format = "netconfMessages/unrecognised/editConfig_unrecognised7_1.xml";
         final int TESTS_COUNT = 8;
 
         for (int i = 0; i < TESTS_COUNT; i++) {
@@ -540,7 +536,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertThat(string, JUnitMatchers.containsString(substring));
     }
 
-    private void checkEnum(final Element response) {
+    private void checkEnum(final Element response) throws NetconfDocumentedException {
         XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
 
@@ -565,7 +561,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(2, testingDepsSize);
     }
 
-    private void checkTypeConfigAttribute(Element response) {
+    private void checkTypeConfigAttribute(Element response) throws NetconfDocumentedException {
 
         XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
