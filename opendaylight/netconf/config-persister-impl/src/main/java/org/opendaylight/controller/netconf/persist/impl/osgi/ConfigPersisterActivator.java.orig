@@ -9,9 +9,15 @@
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
 import com.google.common.annotations.VisibleForTesting;
+<<<<<<< HEAD
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+=======
+import com.google.common.base.Optional;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+>>>>>>> Bug 451 - Fix netconf exception handling
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
@@ -72,15 +78,11 @@ public class ConfigPersisterActivator implements BundleActivator {
                 final Thread pushingThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            configPusher.pushConfigs(configs);
-                            logger.info("Configuration Persister initialization completed.");
-                            ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
-                            synchronized (ConfigPersisterActivator.this) {
-                                autoCloseables.add(jmxNotificationHandler);
-                            }
-                        } catch (NetconfDocumentedException e) {
-                            logger.trace("Configurations push failure due to {}",e);
+                        configPusher.pushConfigs(configs);
+                        logger.info("Configuration Persister initialization completed.");
+                        ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
+                        synchronized (ConfigPersisterActivator.this) {
+                            autoCloseables.add(jmxNotificationHandler);
                         }
                     }
                 }, "config-pusher");
@@ -101,7 +103,22 @@ public class ConfigPersisterActivator implements BundleActivator {
             }
 
             @Override
+<<<<<<< HEAD
             public void removedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
+=======
+            public void run() {
+                try {
+                    configPusher.pushConfigs(persisterAggregator.loadLastConfigs());
+                    jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator,
+                            ignoredMissingCapabilityRegex);
+                } catch (NetconfDocumentedException | InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.error("Interrupted while waiting for netconf connection");
+                    // uncaught exception handler will deal with this failure
+                    throw new RuntimeException("Interrupted while waiting for netconf connection", e);
+                }
+                logger.info("Configuration Persister initialization completed.");
+>>>>>>> Bug 451 - Fix netconf exception handling
             }
         };
 

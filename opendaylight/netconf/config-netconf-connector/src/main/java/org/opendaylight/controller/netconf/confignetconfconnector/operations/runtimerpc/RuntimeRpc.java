@@ -31,6 +31,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rp
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -55,7 +58,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         this.yangStoreSnapshot = yangStoreSnapshot;
     }
 
-    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) {
+    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) throws NetconfDocumentedException {
         AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper(null).prepareStrategy(returnType);
         Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
         Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, returnType.getOpenType());
@@ -93,7 +96,13 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     public NetconfOperationExecution fromXml(final XmlElement xml) throws NetconfDocumentedException {
-        final String namespace = xml.getNamespace();
+        final String namespace;
+        try {
+            namespace = xml.getNamespace();
+        } catch (MissingNameSpaceException e) {
+            logger.trace("Can't get namespace from xml element due to {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
         final XmlElement contextInstanceElement = xml.getOnlyChildElement(CONTEXT_INSTANCE);
         final String operationName = xml.getName();
 
@@ -116,12 +125,24 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    public HandlingPriority canHandle(Document message) {
-        XmlElement requestElement = getRequestElementWithCheck(message);
+    public HandlingPriority canHandle(Document message) throws NetconfDocumentedException {
+        XmlElement requestElement = null;
+        try {
+            requestElement = getRequestElementWithCheck(message);
+        } catch (final MissingNameSpaceException | UnexpectedNamespaceException  | UnexpectedElementException e) {
+            logger.debug("Cannot request xml element from message due to {}", e);
+            return HandlingPriority.CANNOT_HANDLE;
+        }
 
         XmlElement operationElement = requestElement.getOnlyChildElement();
         final String netconfOperationName = operationElement.getName();
-        final String netconfOperationNamespace = operationElement.getNamespace();
+        final String netconfOperationNamespace;
+        try {
+            netconfOperationNamespace = operationElement.getNamespace();
+        } catch (MissingNameSpaceException e) {
+            logger.debug("Cannot retrieve netconf operation namespace from message due to {}", e);
+            return HandlingPriority.CANNOT_HANDLE;
+        }
 
         final Optional<XmlElement> contextInstanceElement = operationElement
                 .getOnlyChildElementOptionally(CONTEXT_INSTANCE);
@@ -164,10 +185,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-
-        // TODO exception handling
         // TODO check for namespaces and unknown elements
-
         final NetconfOperationExecution execution = fromXml(xml);
 
         logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,

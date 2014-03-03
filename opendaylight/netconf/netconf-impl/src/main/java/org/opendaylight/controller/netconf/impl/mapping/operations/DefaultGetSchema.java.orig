@@ -10,7 +10,10 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+<<<<<<< HEAD
+=======
 import java.util.Map;
+>>>>>>> Bug 451 - Fix netconf exception handling
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
@@ -25,6 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+<<<<<<< HEAD
+import java.util.HashMap;
+import java.util.Map;
+
+=======
+>>>>>>> Bug 451 - Fix netconf exception handling
 public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
     public static final String IDENTIFIER = "identifier";

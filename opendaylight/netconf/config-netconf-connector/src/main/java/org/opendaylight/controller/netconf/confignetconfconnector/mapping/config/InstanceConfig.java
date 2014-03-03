@@ -9,13 +9,19 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeReadingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectXmlReader;
@@ -27,19 +33,13 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public final class InstanceConfig {
     private static final Logger logger = LoggerFactory.getLogger(InstanceConfig.class);
@@ -131,14 +131,21 @@ public final class InstanceConfig {
     }
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
-                                                 EditStrategyType defaultStrategy, Multimap<String, String> providedServices, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
+                                                 EditStrategyType defaultStrategy, Multimap<String, String> providedServices, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        XmlElement type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
-        XmlElement name = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
+        XmlElement type = null;
+        XmlElement name = null;
+        try {
+            type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
+            name = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
+        } catch (MissingNameSpaceException e) {
+            logger.trace("Can't get only child element with same namespace due to {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
         List<XmlElement> typeAndName = Lists.newArrayList(type, name);
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
@@ -163,7 +170,7 @@ public final class InstanceConfig {
     }
 
     private List<XmlElement> getConfigNodes(XmlElement moduleElement, String moduleNamespace, String name,
-            List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) {
+            List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) throws NetconfDocumentedException {
         List<XmlElement> foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name, moduleNamespace);
         if (foundConfigNodes.isEmpty()) {
             logger.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
@@ -181,9 +188,13 @@ public final class InstanceConfig {
             List<XmlElement> foundWithoutNamespaceNodes = moduleElement.getChildElementsWithinNamespace(name,
                     XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             foundWithoutNamespaceNodes.removeAll(typeAndName);
-            Preconditions.checkState(foundWithoutNamespaceNodes.isEmpty(),
-                    "Element %s present multiple times with different namespaces: %s, %s", name, foundConfigNodes,
-                    foundWithoutNamespaceNodes);
+            if (!foundWithoutNamespaceNodes.isEmpty()){
+                throw new NetconfDocumentedException(String.format("Element %s present multiple times with different namespaces: %s, %s", name, foundConfigNodes,
+                        foundWithoutNamespaceNodes),
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.invalid_value,
+                        NetconfDocumentedException.ErrorSeverity.error);
+            }
         }
 
         recognisedChildren.addAll(foundConfigNodes);

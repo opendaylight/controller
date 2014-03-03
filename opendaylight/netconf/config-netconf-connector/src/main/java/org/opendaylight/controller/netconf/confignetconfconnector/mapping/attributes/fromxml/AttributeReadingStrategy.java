@@ -10,10 +10,11 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import java.util.List;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 public interface AttributeReadingStrategy {
 
-    public abstract AttributeConfigElement readElement(List<XmlElement> element);
+    public abstract AttributeConfigElement readElement(List<XmlElement> element) throws NetconfDocumentedException;
 
 }

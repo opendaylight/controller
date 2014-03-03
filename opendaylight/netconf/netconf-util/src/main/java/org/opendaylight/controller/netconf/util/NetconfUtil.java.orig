@@ -8,7 +8,11 @@
 package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Preconditions;
+<<<<<<< HEAD
+=======
+import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+>>>>>>> Bug 451 - Fix netconf exception handling
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -53,8 +57,17 @@ public final class NetconfUtil {
         return (doc == null) ? null : new NetconfMessage(doc);
     }
 
-    public static Document checkIsMessageOk(Document response) throws NetconfDocumentedException {
+<<<<<<< HEAD
+    public static Document checkIsMessageOk(NetconfMessage responseMessage) {
+        return checkIsMessageOk(responseMessage.getDocument());
+    }
+
+    public static Document checkIsMessageOk(Document response) {
         XmlElement element = XmlElement.fromDomDocument(response);
+=======
+    public static void checkIsMessageOk(NetconfMessage responseMessage) throws ConflictingVersionException, NetconfDocumentedException {
+        XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
+>>>>>>> Bug 451 - Fix netconf exception handling
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
         element = element.getOnlyChildElement();
         if (element.getName().equals(XmlNetconfConstants.OK)) {

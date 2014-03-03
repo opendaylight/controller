@@ -8,7 +8,10 @@
 
 package org.opendaylight.controller.netconf.util.mapping;
 
+<<<<<<< HEAD
+=======
 import java.util.Map;
+>>>>>>> Bug 451 - Fix netconf exception handling
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -25,6 +28,8 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.util.Map;
 
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;

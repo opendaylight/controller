@@ -185,6 +185,8 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         return sortedPriority;
     }
 
+<<<<<<< HEAD
+=======
     public static final NetconfOperationChainedExecution EXECUTION_TERMINATION_POINT = new NetconfOperationChainedExecution() {
         @Override
         public boolean isExecutionTermination() {
@@ -200,6 +202,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         }
     };
 
+>>>>>>> Bug 451 - Fix netconf exception handling
     private static class NetconfOperationExecution implements NetconfOperationChainedExecution {
         private final NetconfOperation netconfOperation;
         private NetconfOperationChainedExecution subsequentExecution;

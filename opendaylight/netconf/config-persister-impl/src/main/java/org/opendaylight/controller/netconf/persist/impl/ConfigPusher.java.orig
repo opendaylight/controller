@@ -59,7 +59,12 @@ public class ConfigPusher {
         this.conflictingVersionTimeoutMillis = conflictingVersionTimeoutMillis;
     }
 
-    public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> pushConfigs(List<ConfigSnapshotHolder> configs) throws NetconfDocumentedException {
+<<<<<<< HEAD
+    public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> pushConfigs(List<ConfigSnapshotHolder> configs) {
+=======
+    public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> pushConfigs(
+            List<ConfigSnapshotHolder> configs) throws InterruptedException, NetconfDocumentedException {
+>>>>>>> Bug 451 - Fix netconf exception handling
         logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> result = new LinkedHashMap<>();
         // start pushing snapshots:
@@ -78,12 +83,27 @@ public class ConfigPusher {
      * is caught, whole process is retried - new service instance need to be obtained from the factory. Closes
      * {@link NetconfOperationService} after each use.
      */
-    private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws NetconfDocumentedException {
+<<<<<<< HEAD
+    private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) {
         ConflictingVersionException lastException;
         Stopwatch stopwatch = new Stopwatch().start();
         do {
             try (NetconfOperationService operationService = getOperationServiceWithRetries(configSnapshotHolder.getCapabilities(), configSnapshotHolder.toString())) {
                 return pushConfig(configSnapshotHolder, operationService);
+=======
+    private synchronized EditAndCommitResponseWithRetries pushSnapshotWithRetries(ConfigSnapshotHolder configSnapshotHolder)
+            throws InterruptedException, NetconfDocumentedException {
+
+        ConflictingVersionException lastException = null;
+        int maxAttempts = configuration.netconfPushConfigAttempts;
+
+        for (int retryAttempt = 1; retryAttempt <= maxAttempts; retryAttempt++) {
+            NetconfClient netconfClient = makeNetconfConnection(configSnapshotHolder.getCapabilities());
+            logger.trace("Pushing following xml to netconf {}", configSnapshotHolder);
+            try {
+                EditAndCommitResponse editAndCommitResponse = pushLastConfig(configSnapshotHolder, netconfClient);
+                return new EditAndCommitResponseWithRetries(editAndCommitResponse, retryAttempt);
+>>>>>>> Bug 451 - Fix netconf exception handling
             } catch (ConflictingVersionException e) {
                 lastException = e;
                 logger.debug("Conflicting version detected, will retry after timeout");
@@ -139,7 +159,7 @@ public class ConfigPusher {
         } else {
             serviceCandidate.close();
             logger.trace("Netconf server did not provide required capabilities for {} " +
-                    "Expected but not found: {}, all expected {}, current {}",
+                            "Expected but not found: {}, all expected {}, current {}",
                     idForReporting, notFoundDiff, expectedCapabilities, serviceCandidate.getCapabilities()
             );
             throw new NotEnoughCapabilitiesException("Not enough capabilities for " + idForReporting + ". Expected but not found: " + notFoundDiff);
@@ -176,8 +196,13 @@ public class ConfigPusher {
      * @throws ConflictingVersionException if commit fails on optimistic lock failure inside of config-manager
      * @throws java.lang.RuntimeException  if edit-config or commit fails otherwise
      */
+<<<<<<< HEAD
     private synchronized EditAndCommitResponse pushConfig(ConfigSnapshotHolder configSnapshotHolder, NetconfOperationService operationService)
+            throws ConflictingVersionException {
+=======
+    private synchronized EditAndCommitResponse pushLastConfig(ConfigSnapshotHolder configSnapshotHolder, NetconfClient netconfClient)
             throws ConflictingVersionException, NetconfDocumentedException {
+>>>>>>> Bug 451 - Fix netconf exception handling
 
         Element xmlToBePersisted;
         try {
@@ -209,7 +234,7 @@ public class ConfigPusher {
         return new EditAndCommitResponse(editResponseMessage, commitResponseMessage);
     }
 
-    private NetconfOperation findOperation(NetconfMessage request, NetconfOperationService operationService) throws NetconfDocumentedException {
+    private NetconfOperation findOperation(NetconfMessage request, NetconfOperationService operationService) {
         TreeMap<HandlingPriority, NetconfOperation> allOperations = new TreeMap<>();
         Set<NetconfOperation> netconfOperations = operationService.getNetconfOperations();
         if (netconfOperations.isEmpty()) {
@@ -228,8 +253,9 @@ public class ConfigPusher {
 
     private Document sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfOperationService operationService,
                                                      String operationNameForReporting, String configIdForReporting)
-            throws ConflictingVersionException, NetconfDocumentedException {
+            throws ConflictingVersionException {
 
+<<<<<<< HEAD
         NetconfOperation operation = findOperation(request, operationService);
         Document response;
         try {
@@ -240,6 +266,21 @@ public class ConfigPusher {
             }
             throw new IllegalStateException("Failed to send " + operationNameForReporting +
                     " for configuration " + configIdForReporting, e);
+=======
+    private NetconfMessage sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfClient netconfClient)
+            throws ConflictingVersionException, IOException, NetconfDocumentedException {
+        try {
+            NetconfMessage netconfMessage = netconfClient.sendMessage(request,
+                    configuration.netconfSendMessageMaxAttempts, configuration.netconfSendMessageDelayMs);
+            NetconfUtil.checkIsMessageOk(netconfMessage);
+            return netconfMessage;
+        } catch(ConflictingVersionException e) {
+            logger.trace("conflicting version detected: {}", e.toString());
+            throw e;
+        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) {
+            logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
+            throw new IOException("Failed to execute netconf transaction", e);
+>>>>>>> Bug 451 - Fix netconf exception handling
         }
         return NetconfUtil.checkIsMessageOk(response);
     }
