@@ -8,8 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser;
@@ -27,8 +28,9 @@ public class InstanceConfigElementResolved {
     private final Map<String, AttributeConfigElement> configuration;
     private final Multimap<String, String> providedServices;
 
-    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
-        EditStrategyType valueOf = parseStrategy(currentStrategy, defaultStrategy);
+    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) throws NetconfDocumentedException {
+        EditStrategyType valueOf = null;
+        valueOf = parseStrategy(currentStrategy, defaultStrategy);
         this.editStrategy = valueOf;
         this.configuration = configuration;
         this.providedServices = providedServices;
@@ -41,18 +43,19 @@ public class InstanceConfigElementResolved {
     }
 
 
-    static EditStrategyType parseStrategy(String currentStrategy, EditStrategyType defaultStrategy) {
-        EditStrategyType parsedStrategy = EditStrategyType.valueOf(currentStrategy);
-        if (defaultStrategy.isEnforcing()) {
-            Preconditions
-                    .checkArgument(
-                            parsedStrategy == defaultStrategy,
-                            "With "
-                                    + defaultStrategy
-                                    + " as "
-                                    + EditConfigXmlParser.DEFAULT_OPERATION_KEY
-                                    + " operations on module elements are not permitted since the default option is restrictive");
+    static EditStrategyType parseStrategy(String currentStrategy, EditStrategyType defaultStrategy) throws OperationNotPermittedException {
+        if (null == currentStrategy || currentStrategy.equals("")){
+            throw new OperationNotPermittedException(String.format("With "
+                    + defaultStrategy
+                    + " as "
+                    + EditConfigXmlParser.DEFAULT_OPERATION_KEY
+                    + " operations on module elements are not permitted since the default option is restrictive"),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
         }
+        EditStrategyType parsedStrategy = EditStrategyType.valueOf(currentStrategy);
+        EditStrategyType.compareParsedStrategyToDefaultEnforcing(parsedStrategy,defaultStrategy);
         return parsedStrategy;
     }
 

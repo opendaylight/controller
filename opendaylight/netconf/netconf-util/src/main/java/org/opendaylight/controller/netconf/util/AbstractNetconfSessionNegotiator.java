@@ -21,6 +21,7 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
@@ -133,12 +134,12 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     }
 
     @Override
-    protected void handleMessage(NetconfHelloMessage netconfMessage) {
-        S session = getSessionForHelloMessage(netconfMessage);
+    protected void handleMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
+        S session = getSessionForHelloMessage(netconfMessage)   ;
         negotiationSuccessful(session);
     }
 
-    protected final S getSessionForHelloMessage(NetconfHelloMessage netconfMessage) {
+    protected final S getSessionForHelloMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
         Preconditions.checkNotNull(netconfMessage, "netconfMessage");
 
         final Document doc = netconfMessage.getDocument();
@@ -180,7 +181,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         return channel.pipeline().replace(handlerKey, handlerKey, decoder);
     }
 
-    protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message);
+    protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException;
 
     protected synchronized void changeState(final State newState) {
         logger.debug("Changing state from : {} to : {}", state, newState);

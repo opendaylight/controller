@@ -8,11 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc;
 
-import java.util.Map;
-
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -31,6 +29,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Abs
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -39,9 +38,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
+import java.util.Map;
 
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
@@ -56,7 +55,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         this.yangStoreSnapshot = yangStoreSnapshot;
     }
 
-    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) {
+    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) throws NetconfDocumentedException {
         AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper(null).prepareStrategy(returnType);
         Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
         Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, returnType.getOpenType());
@@ -94,7 +93,13 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     public NetconfOperationExecution fromXml(final XmlElement xml) throws NetconfDocumentedException {
-        final String namespace = xml.getNamespace();
+        final String namespace;
+        try {
+            namespace = xml.getNamespace();
+        } catch (MissingNameSpaceException e) {
+            logger.trace("Can't get namespace from xml element due to {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
         final XmlElement contextInstanceElement = xml.getOnlyChildElement(CONTEXT_INSTANCE);
         final String operationName = xml.getName();
 
@@ -117,12 +122,19 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    public HandlingPriority canHandle(Document message) {
-        XmlElement requestElement = getRequestElementWithCheck(message);
+    public HandlingPriority canHandle(Document message) throws NetconfDocumentedException {
+        XmlElement requestElement = null;
+        requestElement = getRequestElementWithCheck(message);
 
         XmlElement operationElement = requestElement.getOnlyChildElement();
         final String netconfOperationName = operationElement.getName();
-        final String netconfOperationNamespace = operationElement.getNamespace();
+        final String netconfOperationNamespace;
+        try {
+            netconfOperationNamespace = operationElement.getNamespace();
+        } catch (MissingNameSpaceException e) {
+            logger.debug("Cannot retrieve netconf operation namespace from message due to {}", e);
+            return HandlingPriority.CANNOT_HANDLE;
+        }
 
         final Optional<XmlElement> contextInstanceElement = operationElement
                 .getOnlyChildElementOptionally(CONTEXT_INSTANCE);
@@ -165,10 +177,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-
-        // TODO exception handling
         // TODO check for namespaces and unknown elements
-
         final NetconfOperationExecution execution = fromXml(xml);
 
         logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,

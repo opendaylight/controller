@@ -119,6 +119,7 @@
                             org.opendaylight.controller.netconf.mapping.api,
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.exception,
                             org.opendaylight.yangtools.yang.common,
                             org.opendaylight.yangtools.yang.model.api,
                             org.osgi.framework,
