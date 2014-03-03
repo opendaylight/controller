@@ -43,14 +43,14 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.Module
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition
 import org.slf4j.LoggerFactory
 
 import static com.google.common.base.Preconditions.*
 import static javax.ws.rs.core.Response.Status.*
 
-class ControllerContext implements SchemaServiceListener {
+class ControllerContext implements SchemaContextListener {
     val static LOG = LoggerFactory.getLogger(ControllerContext)
     val static ControllerContext INSTANCE = new ControllerContext
     val static NULL_VALUE = "null"
