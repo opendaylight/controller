@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.StrategyInvocationException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
-                                     ConfigTransactionClient ta, ServiceRegistryWrapper services) {
+                                     ConfigTransactionClient ta, ServiceRegistryWrapper services) throws StrategyInvocationException {
 
         try {
             ObjectName on = ta.lookupConfigBean(module, instance);
@@ -40,9 +41,9 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
     // edit configs should not handle missing
 
     abstract void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                                        String module, String instance, ServiceRegistryWrapper services);
+                                        String module, String instance, ServiceRegistryWrapper services) throws StrategyInvocationException;
 
     abstract void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                                  ObjectName objectName, ServiceRegistryWrapper services);
+                                  ObjectName objectName, ServiceRegistryWrapper services) throws StrategyInvocationException;
 
 }

@@ -154,7 +154,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private NetconfOperationExecution getNetconfOperationWithHighestPriority(
-            Document message, NetconfSession session) {
+            Document message, NetconfSession session) throws NetconfDocumentedException {
 
         TreeMap<HandlingPriority, NetconfOperation> sortedByPriority = getSortedNetconfOperationsWithCanHandle(
                 message, session);
@@ -167,7 +167,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private TreeMap<HandlingPriority, NetconfOperation> getSortedNetconfOperationsWithCanHandle(Document message,
-            NetconfSession session) {
+            NetconfSession session) throws NetconfDocumentedException {
         TreeMap<HandlingPriority, NetconfOperation> sortedPriority = Maps.newTreeMap();
 
         for (NetconfOperation netconfOperation : allNetconfOperations) {
@@ -194,7 +194,10 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
         @Override
         public Document execute(Document requestMessage) throws NetconfDocumentedException {
-            throw new IllegalStateException("This execution represents the termination point in operation execution and cannot be executed itself");
+            throw new NetconfDocumentedException("This execution represents the termination point in operation execution and cannot be executed itself",
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
         }
     };
 
