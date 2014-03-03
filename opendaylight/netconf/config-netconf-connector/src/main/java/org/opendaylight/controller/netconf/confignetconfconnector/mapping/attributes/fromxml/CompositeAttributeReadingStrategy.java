@@ -11,6 +11,8 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.List;
@@ -28,7 +30,7 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) {
+    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws NetconfDocumentedException {
 
         Preconditions.checkState(configNodes.size() == 1, "This element should be present only once %s", configNodes);
 
@@ -38,7 +40,12 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
 
         List<XmlElement> recognisedChildren = Lists.newArrayList();
         for (Entry<String, AttributeReadingStrategy> innerAttrEntry : innerStrategies.entrySet()) {
-            List<XmlElement> childItem = complexElement.getChildElementsWithSameNamespace(innerAttrEntry.getKey());
+            List<XmlElement> childItem = null;
+            try {
+                childItem = complexElement.getChildElementsWithSameNamespace(innerAttrEntry.getKey());
+            } catch (MissingNameSpaceException e) {
+                throw NetconfDocumentedException.wrap(e);
+            }
             recognisedChildren.addAll(childItem);
 
             AttributeConfigElement resolvedInner = innerAttrEntry.getValue().readElement(childItem);

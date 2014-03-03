@@ -15,6 +15,9 @@ import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.monitoring.xml.JaxBSerializer;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -37,10 +40,16 @@ public class Get extends AbstractNetconfOperation {
         this.netconfMonitor = netconfMonitor;
     }
 
-    private Element getPlaceholder(Document innerResult) {
+    private Element getPlaceholder(Document innerResult) throws NetconfDocumentedException {
         try {
-            XmlElement rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+            XmlElement rootElement = null;
+            try {
+                rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
+                        XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+            } catch (final MissingNameSpaceException | UnexpectedElementException | UnexpectedNamespaceException e) {
+                logger.trace("Error extracting root element from dom element with due to {}",e);
+                throw NetconfDocumentedException.wrap(e);
+            }
             return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
         } catch (RuntimeException e) {
             throw new IllegalArgumentException(String.format(

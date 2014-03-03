@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.collect.Lists;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) {
+    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws NetconfDocumentedException {
         List<Object> innerList = Lists.newArrayList();
         for (int i = 0; i < configNodes.size(); i++) {
             innerList.add(innerStrategy.readElement(Lists.newArrayList(configNodes.get(i))).getValue());

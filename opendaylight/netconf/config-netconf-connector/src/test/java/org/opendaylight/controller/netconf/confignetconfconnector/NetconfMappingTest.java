@@ -540,7 +540,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertThat(string, JUnitMatchers.containsString(substring));
     }
 
-    private void checkEnum(final Element response) {
+    private void checkEnum(final Element response) throws NetconfDocumentedException {
         XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
 
@@ -565,7 +565,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(2, testingDepsSize);
     }
 
-    private void checkTypeConfigAttribute(Element response) {
+    private void checkTypeConfigAttribute(Element response) throws NetconfDocumentedException {
 
         XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
