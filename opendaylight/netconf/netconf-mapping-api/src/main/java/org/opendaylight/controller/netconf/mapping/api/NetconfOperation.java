@@ -33,7 +33,7 @@ public interface NetconfOperation {
      * @param requestMessage
      * @return
      */
-    HandlingPriority canHandle(Document requestMessage);
+    HandlingPriority canHandle(Document message) throws NetconfDocumentedException;
 
     /**
      * Execute current netconf operation and trigger execution of subsequent

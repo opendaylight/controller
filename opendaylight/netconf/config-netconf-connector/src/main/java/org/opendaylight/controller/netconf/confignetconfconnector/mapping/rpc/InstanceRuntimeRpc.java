@@ -12,6 +12,7 @@ import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeReadingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectXmlReader;
@@ -67,7 +68,7 @@ public final class InstanceRuntimeRpc {
         }
     }
 
-    public Map<String, AttributeConfigElement> fromXml(XmlElement configRootNode) {
+    public Map<String, AttributeConfigElement> fromXml(XmlElement configRootNode) throws NetconfDocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         // FIXME add identity map to runtime data

@@ -8,9 +8,7 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -26,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Validate extends AbstractConfigNetconfOperation {
 
@@ -43,7 +41,7 @@ public class Validate extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    private void checkXml(XmlElement xml) {
+    private void checkXml(XmlElement xml) throws NetconfDocumentedException {
         xml.checkName(VALIDATE);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -55,8 +53,10 @@ public class Validate extends AbstractConfigNetconfOperation {
         String datastoreValue = sourceChildNode.getName();
         Datastore sourceDatastore = Datastore.valueOf(datastoreValue);
 
-        Preconditions.checkState(sourceDatastore == Datastore.candidate, "Only " + Datastore.candidate
-                + " is supported as source for " + VALIDATE + " but was " + datastoreValue);
+        if (sourceDatastore != Datastore.candidate){
+            throw new NetconfDocumentedException( "Only " + Datastore.candidate
+                    + " is supported as source for " + VALIDATE + " but was " + datastoreValue,ErrorType.application,ErrorTag.data_missing,ErrorSeverity.error);
+        }
     }
 
     @Override
@@ -66,24 +66,7 @@ public class Validate extends AbstractConfigNetconfOperation {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-        try {
-            checkXml(xml);
-        } catch (IllegalStateException e) {
-            //FIXME where can IllegalStateException  be thrown? I see precondition that guards for programming bugs..
-            logger.warn("Rpc error: {}", ErrorTag.missing_attribute, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.missing_attribute.name(), "Missing value of datastore attribute");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.missing_attribute,
-                    ErrorSeverity.error, errorInfo);
-        } catch (final IllegalArgumentException e) {
-            // FIXME use checked exception if it has domain meaning
-            logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.bad_attribute,
-                    ErrorSeverity.error, errorInfo);
-        }
-
+        checkXml(xml);
         try {
             transactionProvider.validateTransaction();
         } catch (ValidationException e) {

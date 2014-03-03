@@ -8,39 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElement;
-import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
-import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElement;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.custommonkey.xmlunit.AbstractNodeTester;
 import org.custommonkey.xmlunit.NodeTest;
 import org.custommonkey.xmlunit.NodeTestException;
@@ -74,7 +46,6 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMX
 import org.opendaylight.controller.config.yang.test.impl.Peers;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
@@ -85,6 +56,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -111,11 +83,37 @@ import org.w3c.dom.Text;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElement;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
+import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElement;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
@@ -567,7 +565,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertThat(string, JUnitMatchers.containsString(substring));
     }
 
-    private void checkEnum(final Document response) {
+    private void checkEnum(final Document response) throws NetconfDocumentedException {
         XmlElement modulesElement = XmlElement.fromDomElement(response.getDocumentElement()).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
 
@@ -591,7 +589,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(2, testingDepsSize);
     }
 
-    private void checkTypeConfigAttribute(Document response) {
+    private void checkTypeConfigAttribute(Document response) throws NetconfDocumentedException {
 
         XmlElement modulesElement = XmlElement.fromDomElement(response.getDocumentElement()).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");

@@ -8,11 +8,11 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
@@ -52,23 +51,7 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         GetSchemaEntry entry;
 
-        try {
-            entry = new GetSchemaEntry(xml);
-        } catch (final IllegalArgumentException e) {
-            logger.warn("Error parsing xml", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(NetconfDocumentedException.ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), e, NetconfDocumentedException.ErrorType.rpc,
-                    NetconfDocumentedException.ErrorTag.bad_attribute, NetconfDocumentedException.ErrorSeverity.error,
-                    errorInfo);
-        } catch (final IllegalStateException e) {
-            logger.warn("Error parsing xml", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(NetconfDocumentedException.ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), e, NetconfDocumentedException.ErrorType.rpc,
-                    NetconfDocumentedException.ErrorTag.bad_attribute, NetconfDocumentedException.ErrorSeverity.error,
-                    errorInfo);
-        }
+        entry = new GetSchemaEntry(xml);
 
         String schema;
         try {
@@ -94,11 +77,17 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
         private final String identifier;
         private final Optional<String> version;
 
-        GetSchemaEntry(XmlElement getSchemaElement) {
+        GetSchemaEntry(XmlElement getSchemaElement) throws NetconfDocumentedException {
             getSchemaElement.checkName(GET_SCHEMA);
             getSchemaElement.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING);
 
-            XmlElement identifierElement = getSchemaElement.getOnlyChildElementWithSameNamespace(IDENTIFIER);
+            XmlElement identifierElement = null;
+            try {
+                identifierElement = getSchemaElement.getOnlyChildElementWithSameNamespace(IDENTIFIER);
+            } catch (MissingNameSpaceException e) {
+                logger.trace("Can't get identifier element as only child element with same namespace due to {}",e);
+                throw NetconfDocumentedException.wrap(e);
+            }
             identifier = identifierElement.getTextContent();
             Optional<XmlElement> versionElement = getSchemaElement
                     .getOnlyChildElementWithSameNamespaceOptionally(VERSION);

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -52,11 +53,7 @@ public final class NetconfUtil {
         return (doc == null) ? null : new NetconfMessage(doc);
     }
 
-    public static Document checkIsMessageOk(NetconfMessage responseMessage) {
-        return checkIsMessageOk(responseMessage.getDocument());
-    }
-
-    public static Document checkIsMessageOk(Document response) {
+    public static Document checkIsMessageOk(Document response) throws NetconfDocumentedException {
         XmlElement element = XmlElement.fromDomDocument(response);
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
         element = element.getOnlyChildElement();

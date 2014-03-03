@@ -7,6 +7,12 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.activation.UnsupportedDataTypeException;
 import javax.annotation.Nullable;
-
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -40,14 +45,6 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class NetconfMapping {
 
@@ -262,7 +259,7 @@ public class NetconfMapping {
         }
     }
 
-    public static void checkSuccessReply(NetconfMessage output) {
+    public static void checkSuccessReply(NetconfMessage output) throws NetconfDocumentedException {
         if(NetconfMessageUtil.isErrorMessage(output)) {
             throw new IllegalStateException(String.format("Response contains error: %s", XmlUtil.toString(output.getDocument())));
         }

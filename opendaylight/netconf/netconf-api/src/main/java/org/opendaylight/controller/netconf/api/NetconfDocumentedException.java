@@ -90,6 +90,12 @@ public class NetconfDocumentedException extends Exception {
         this.errorInfo = errorInfo;
     }
 
+    public static <E extends Exception> NetconfDocumentedException wrap(E exception) throws NetconfDocumentedException {
+        final Map<String, String> errorInfo = new HashMap<>();
+        errorInfo.put(ErrorTag.operation_failed.name(), "Exception thrown");
+        throw new NetconfDocumentedException(exception.getMessage(), exception, ErrorType.application, ErrorTag.operation_failed,
+                ErrorSeverity.error, errorInfo);
+    }
     public static NetconfDocumentedException wrap(ValidationException e) throws NetconfDocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
         errorInfo.put(ErrorTag.operation_failed.name(), "Validation failed");
