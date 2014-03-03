@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.streams.listeners;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,12 +13,20 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
  */
 public class Notificator {
 
-	private static Map<String, ListenerAdapter> listenersByStreamName = new ConcurrentHashMap<>();
+    private static Map<String, ListenerAdapter> listenersByStreamName = new ConcurrentHashMap<>();
 	private static Map<InstanceIdentifier, ListenerAdapter> listenersByInstanceIdentifier = new ConcurrentHashMap<>();
 	private static final Lock lock = new ReentrantLock();
 
 	private Notificator() {
 	}
+
+    /**
+     * Returns list of all stream names
+     */
+    public static Set<String> getStreamNames() {
+        return listenersByStreamName.keySet();
+    }
+
 
 	/**
 	 * Gets {@link ListenerAdapter} specified by stream name.
@@ -132,7 +141,7 @@ public class Notificator {
 	}
 
 	/**
-	 * Checks if listener has at least one subscriber. In case it has any, delete
+	 * Checks if listener has at least one subscriber. In case it doesn't have any, delete
 	 * listener.
 	 * 
 	 * @param listener

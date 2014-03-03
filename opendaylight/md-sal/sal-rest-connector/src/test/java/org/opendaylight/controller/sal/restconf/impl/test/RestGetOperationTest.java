@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -21,11 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -45,6 +37,12 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -163,6 +161,19 @@ public class RestGetOperationTest extends JerseyTest {
 
         response = target(uri).request("application/yang.api+xml").get();
         validateModulesResponseXml(response);
+    }
+    // /streams/
+    @Test
+    public void getStreamsTest() throws UnsupportedEncodingException, FileNotFoundException {
+        ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
+
+        String uri = "/streams";
+
+        Response response = target(uri).request("application/yang.api+json").get();
+        String responseBody = response.readEntity(String.class);
+        assertNotNull(responseBody);
+        assertTrue(responseBody.contains("streams"));
+
     }
 
     // /modules/module
