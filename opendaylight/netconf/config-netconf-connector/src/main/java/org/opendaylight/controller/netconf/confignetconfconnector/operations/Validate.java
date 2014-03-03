@@ -18,14 +18,15 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorS
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Preconditions;
 
 public class Validate extends AbstractConfigNetconfOperation {
 
@@ -41,7 +42,7 @@ public class Validate extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    private void checkXml(XmlElement xml) {
+    private void checkXml(XmlElement xml) throws UnexpectedNamespaceException, UnexpectedElementException, NetconfDocumentedException, MissingNameSpaceException {
         xml.checkName(VALIDATE);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -53,8 +54,10 @@ public class Validate extends AbstractConfigNetconfOperation {
         String datastoreValue = sourceChildNode.getName();
         Datastore sourceDatastore = Datastore.valueOf(datastoreValue);
 
-        Preconditions.checkState(sourceDatastore == Datastore.candidate, "Only " + Datastore.candidate
-                + " is supported as source for " + VALIDATE + " but was " + datastoreValue);
+        if (sourceDatastore != Datastore.candidate){
+            throw new NetconfDocumentedException( "Only " + Datastore.candidate
+                    + " is supported as source for " + VALIDATE + " but was " + datastoreValue,ErrorType.application,ErrorTag.data_missing,ErrorSeverity.error);
+        }
     }
 
     @Override
@@ -66,15 +69,13 @@ public class Validate extends AbstractConfigNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         try {
             checkXml(xml);
-        } catch (IllegalStateException e) {
-            //FIXME where can IllegalStateException  be thrown? I see precondition that guards for programming bugs..
+        } catch (UnexpectedElementException e) {
             logger.warn("Rpc error: {}", ErrorTag.missing_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.missing_attribute.name(), "Missing value of datastore attribute");
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.missing_attribute,
                     ErrorSeverity.error, errorInfo);
-        } catch (final IllegalArgumentException e) {
-            // FIXME use checked exception if it has domain meaning
+        } catch (final MissingNameSpaceException | UnexpectedNamespaceException e) {
             logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());

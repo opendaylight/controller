@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 import java.util.List;
@@ -25,14 +27,17 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
     }
 
     @Override
-    public AttributeConfigElement readElement(List<XmlElement> configNodes) {
+    public AttributeConfigElement readElement(List<XmlElement> configNodes) throws NetconfDocumentedException {
         if (configNodes.size() == 0)
             return AttributeConfigElement.createNullValue(postprocessNullableDefault(nullableDefault));
-
-        return readElementHook(configNodes);
+        try {
+            return readElementHook(configNodes);
+        } catch (final MissingNameSpaceException e) {
+            throw NetconfDocumentedException.wrap(e);
+        }
     }
 
-    abstract AttributeConfigElement readElementHook(List<XmlElement> configNodes);
+    abstract AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws NetconfDocumentedException, MissingNameSpaceException;
 
     protected Object postprocessNullableDefault(String nullableDefault) {
         return nullableDefault;
