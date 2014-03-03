@@ -8,15 +8,19 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.io.InputStream;
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -25,9 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 public class DefaultCommit extends AbstractNetconfOperation {
 
@@ -100,8 +101,14 @@ public class DefaultCommit extends AbstractNetconfOperation {
     }
 
     private boolean isCommitWithoutNotification(Document message) {
-        XmlElement xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
-                XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        XmlElement xmlElement = null;
+        try {
+            xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
+                    XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        } catch (final MissingNameSpaceException | UnexpectedElementException  | UnexpectedNamespaceException e) {
+            logger.trace("Commit operation is not valid due to  {}",e);
+            return false;
+        }
 
         String attr = xmlElement.getAttribute(NOTIFY_ATTR);
 
@@ -124,7 +131,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
             XmlElement xmlElement = XmlElement.fromDomElementWithExpected(responseDocument.getDocumentElement(),
                     XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
             dataElement = xmlElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY);
-        } catch (IllegalArgumentException e) {
+        } catch (final MissingNameSpaceException| UnexpectedNamespaceException | UnexpectedElementException e) {
             final String msg = "Unexpected response from get-config operation";
             logger.warn(msg, e);
             Map<String, String> info = Maps.newHashMap();

@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.confignetconfconnector.operations;
+    package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +17,9 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorS
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -38,7 +41,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    private static void fromXml(XmlElement xml) {
+    private static void fromXml(XmlElement xml) throws UnexpectedNamespaceException, UnexpectedElementException, MissingNameSpaceException {
         xml.checkName(DISCARD);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
@@ -52,8 +55,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         try {
             fromXml(xml);
-        } catch (final IllegalArgumentException e) {
-            //FIXME where can IllegalStateException  be thrown?
+        } catch (final MissingNameSpaceException | UnexpectedElementException | UnexpectedNamespaceException e) {
             logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
@@ -64,7 +66,6 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             this.transactionProvider.abortTransaction();
         } catch (final IllegalStateException e) {
-            //FIXME where can IllegalStateException  be thrown?
             logger.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo

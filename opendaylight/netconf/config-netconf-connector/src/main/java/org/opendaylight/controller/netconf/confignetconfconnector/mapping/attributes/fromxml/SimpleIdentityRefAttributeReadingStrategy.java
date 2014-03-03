@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -32,7 +33,7 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
     }
 
     @Override
-    protected String readElementContent(XmlElement xmlElement) {
+    protected String readElementContent(XmlElement xmlElement) throws NetconfDocumentedException {
         // TODO test
         Map.Entry<String, String> namespaceOfTextContent = xmlElement.findNamespaceOfTextContent();
         String content = xmlElement.getTextContent();

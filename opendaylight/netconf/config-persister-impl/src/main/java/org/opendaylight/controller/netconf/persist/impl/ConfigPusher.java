@@ -59,7 +59,7 @@ public class ConfigPusher {
         this.conflictingVersionTimeoutMillis = conflictingVersionTimeoutMillis;
     }
 
-    public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> pushConfigs(List<ConfigSnapshotHolder> configs) {
+    public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> pushConfigs(List<ConfigSnapshotHolder> configs) throws NetconfDocumentedException {
         logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> result = new LinkedHashMap<>();
         // start pushing snapshots:
@@ -78,7 +78,7 @@ public class ConfigPusher {
      * is caught, whole process is retried - new service instance need to be obtained from the factory. Closes
      * {@link NetconfOperationService} after each use.
      */
-    private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) {
+    private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws NetconfDocumentedException {
         ConflictingVersionException lastException;
         Stopwatch stopwatch = new Stopwatch().start();
         do {
@@ -139,7 +139,7 @@ public class ConfigPusher {
         } else {
             serviceCandidate.close();
             logger.trace("Netconf server did not provide required capabilities for {} " +
-                            "Expected but not found: {}, all expected {}, current {}",
+                    "Expected but not found: {}, all expected {}, current {}",
                     idForReporting, notFoundDiff, expectedCapabilities, serviceCandidate.getCapabilities()
             );
             throw new NotEnoughCapabilitiesException("Not enough capabilities for " + idForReporting + ". Expected but not found: " + notFoundDiff);
@@ -177,7 +177,7 @@ public class ConfigPusher {
      * @throws java.lang.RuntimeException  if edit-config or commit fails otherwise
      */
     private synchronized EditAndCommitResponse pushConfig(ConfigSnapshotHolder configSnapshotHolder, NetconfOperationService operationService)
-            throws ConflictingVersionException {
+            throws ConflictingVersionException, NetconfDocumentedException {
 
         Element xmlToBePersisted;
         try {
@@ -209,7 +209,7 @@ public class ConfigPusher {
         return new EditAndCommitResponse(editResponseMessage, commitResponseMessage);
     }
 
-    private NetconfOperation findOperation(NetconfMessage request, NetconfOperationService operationService) {
+    private NetconfOperation findOperation(NetconfMessage request, NetconfOperationService operationService) throws NetconfDocumentedException {
         TreeMap<HandlingPriority, NetconfOperation> allOperations = new TreeMap<>();
         Set<NetconfOperation> netconfOperations = operationService.getNetconfOperations();
         if (netconfOperations.isEmpty()) {
@@ -228,7 +228,7 @@ public class ConfigPusher {
 
     private Document sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfOperationService operationService,
                                                      String operationNameForReporting, String configIdForReporting)
-            throws ConflictingVersionException {
+            throws ConflictingVersionException, NetconfDocumentedException {
 
         NetconfOperation operation = findOperation(request, operationService);
         Document response;
@@ -245,7 +245,7 @@ public class ConfigPusher {
     }
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
-    private static NetconfMessage createEditConfigMessage(Element dataElement) {
+    private static NetconfMessage createEditConfigMessage(Element dataElement) throws NetconfDocumentedException {
         String editConfigResourcePath = "/netconfOp/editConfig.xml";
         try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcePath)) {
             Preconditions.checkNotNull(stream, "Unable to load resource " + editConfigResourcePath);

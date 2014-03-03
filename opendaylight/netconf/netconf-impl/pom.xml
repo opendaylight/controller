@@ -124,6 +124,7 @@
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.osgi,
                             org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.exception,
                             org.opendaylight.controller.netconf.util.handler,
                             org.opendaylight.protocol.framework,
                             org.osgi.framework,
