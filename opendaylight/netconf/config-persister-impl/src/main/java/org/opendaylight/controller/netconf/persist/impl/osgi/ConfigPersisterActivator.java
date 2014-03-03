@@ -12,6 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfiguration;
@@ -89,7 +90,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                     configPusher.pushConfigs(persisterAggregator.loadLastConfigs());
                     jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator,
                             ignoredMissingCapabilityRegex);
-                } catch (InterruptedException e) {
+                } catch (NetconfDocumentedException | InterruptedException e) {
                     Thread.currentThread().interrupt();
                     logger.error("Interrupted while waiting for netconf connection");
                     // uncaught exception handler will deal with this failure

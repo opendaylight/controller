@@ -15,6 +15,7 @@ import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
@@ -56,10 +57,15 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         // Hello message needs to be recreated every time
         NetconfMessage helloMessage = loadHelloMessageTemplate();
 
-        if(this.additionalHeader.isPresent()) {
-            helloMessage = new NetconfHelloMessage(helloMessage.getDocument(), additionalHeader.get());
-        } else
-            helloMessage = new NetconfHelloMessage(helloMessage.getDocument());
+        try {
+            if(this.additionalHeader.isPresent()) {
+                helloMessage = new NetconfHelloMessage(helloMessage.getDocument(), additionalHeader.get());
+            } else
+                helloMessage = new NetconfHelloMessage(helloMessage.getDocument());
+        } catch (NetconfDocumentedException e) {
+            throw new IllegalStateException(e);
+        }
+
 
         NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,

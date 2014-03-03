@@ -9,14 +9,18 @@
 package org.opendaylight.controller.netconf.util.mapping;
 
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,6 +28,7 @@ import org.w3c.dom.NodeList;
 
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfOperation.class);
 
     protected AbstractNetconfOperation(String netconfSessionIdForReporting) {
         this.netconfSessionIdForReporting = netconfSessionIdForReporting;
@@ -34,20 +39,30 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
     }
 
     @Override
-    public HandlingPriority canHandle(Document message) {
-        OperationNameAndNamespace operationNameAndNamespace = new OperationNameAndNamespace(message);
+    public HandlingPriority canHandle(Document message) throws NetconfDocumentedException {
+        OperationNameAndNamespace operationNameAndNamespace = null;
+        operationNameAndNamespace = new OperationNameAndNamespace(message);
         return canHandle(operationNameAndNamespace.getOperationName(), operationNameAndNamespace.getNamespace());
     }
 
     public static class OperationNameAndNamespace {
         private final String operationName, namespace;
 
-        public OperationNameAndNamespace(Document message) {
-            XmlElement requestElement = getRequestElementWithCheck(message);
+        public OperationNameAndNamespace(Document message) throws NetconfDocumentedException {
+            XmlElement requestElement = null;
+            try {
+                requestElement = getRequestElementWithCheck(message);
+            } catch (final MissingNameSpaceException | UnexpectedNamespaceException | UnexpectedElementException e) {
+                throw NetconfDocumentedException.wrap(e);
+            }
 
             XmlElement operationElement = requestElement.getOnlyChildElement();
             operationName = operationElement.getName();
-            namespace = operationElement.getNamespace();
+            try {
+                namespace = operationElement.getNamespace();
+            } catch (MissingNameSpaceException e) {
+                throw NetconfDocumentedException.wrap(e);
+            }
         }
 
         public String getOperationName() {
@@ -59,7 +74,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         }
     }
 
-    protected static XmlElement getRequestElementWithCheck(Document message) {
+    protected static XmlElement getRequestElementWithCheck(Document message) throws UnexpectedElementException, UnexpectedNamespaceException, MissingNameSpaceException {
         return XmlElement.fromDomElementWithExpected(message.getDocumentElement(), XmlNetconfConstants.RPC_KEY,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
@@ -84,33 +99,38 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
     public Document handle(Document requestMessage,
             NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
 
-        XmlElement requestElement = getRequestElementWithCheck(requestMessage);
+        try {
+            XmlElement requestElement = getRequestElementWithCheck(requestMessage);
 
-        Document document = XmlUtil.newDocument();
+            Document document = XmlUtil.newDocument();
 
-        XmlElement operationElement = requestElement.getOnlyChildElement();
-        Map<String, Attr> attributes = requestElement.getAttributes();
+            XmlElement operationElement = requestElement.getOnlyChildElement();
+            Map<String, Attr> attributes = requestElement.getAttributes();
 
-        Element response = handle(document, operationElement, subsequentOperation);
-        Element rpcReply = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
-                XmlNetconfConstants.RPC_REPLY_KEY);
+            Element response = handle(document, operationElement, subsequentOperation);
+            Element rpcReply = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
+                    XmlNetconfConstants.RPC_REPLY_KEY);
 
-        if(XmlElement.fromDomElement(response).hasNamespace()) {
-            rpcReply.appendChild(response);
-        } else {
-            Element responseNS = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, response.getNodeName());
-            NodeList list = response.getChildNodes();
-            while(list.getLength()!=0) {
-                responseNS.appendChild(list.item(0));
+            if(XmlElement.fromDomElement(response).hasNamespace()) {
+                rpcReply.appendChild(response);
+            } else {
+                Element responseNS = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, response.getNodeName());
+                NodeList list = response.getChildNodes();
+                while(list.getLength()!=0) {
+                    responseNS.appendChild(list.item(0));
+                }
+                rpcReply.appendChild(responseNS);
             }
-            rpcReply.appendChild(responseNS);
-        }
 
-        for (String attrName : attributes.keySet()) {
-            rpcReply.setAttributeNode((Attr) document.importNode(attributes.get(attrName), true));
+            for (String attrName : attributes.keySet()) {
+                rpcReply.setAttributeNode((Attr) document.importNode(attributes.get(attrName), true));
+            }
+            document.appendChild(rpcReply);
+            return document;
+        } catch (MissingNameSpaceException | UnexpectedNamespaceException | UnexpectedElementException e) {
+            logger.trace("Message handling unsuccessful due to {}",e);
+            throw NetconfDocumentedException.wrap(e);
         }
-        document.appendChild(rpcReply);
-        return document;
     }
 
     protected abstract Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation)

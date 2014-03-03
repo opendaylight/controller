@@ -26,6 +26,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.StrategyInvocationException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
@@ -69,7 +70,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     @VisibleForTesting
     Element getResponseInternal(final Document document,
-            final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
+            final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException, StrategyInvocationException {
 
         if (editConfigExecution.shouldTest()) {
             executeTests(configRegistryClient, editConfigExecution);
@@ -86,19 +87,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     private void executeSet(ConfigRegistryClient configRegistryClient,
             EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
-        try {
-            set(configRegistryClient, editConfigExecution);
-
-        } catch (IllegalStateException e) {
-            //FIXME: when can IllegalStateException be thrown?
-            // JmxAttributeValidationException is wrapped in DynamicWritableWrapper with ValidationException
-            // ValidationException is not thrown until validate or commit is issued
-            logger.warn("Set phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
-            throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
-                    ErrorTag.operation_failed, ErrorSeverity.error, errorInfo);
-        }
+        set(configRegistryClient, editConfigExecution);
         logger.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
@@ -106,8 +95,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         try {
             test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
-        } catch (IllegalStateException | ValidationException e) {
-            //FIXME: when can IllegalStateException be thrown?
+        } catch (final NetconfDocumentedException | ValidationException e) {
             logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
@@ -118,10 +106,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void test(ConfigRegistryClient configRegistryClient, EditConfigExecution execution,
-            EditStrategyType editStrategyType) throws ValidationException {
+            EditStrategyType editStrategyType) throws ValidationException, NetconfDocumentedException {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
-
             // default strategy = replace wipes config
             if (editStrategyType == EditStrategyType.replace) {
                 transactionProvider.wipeTestTransaction(taON);
@@ -139,7 +126,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void set(ConfigRegistryClient configRegistryClient,
-            EditConfigXmlParser.EditConfigExecution editConfigExecution) {
+            EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         ObjectName taON = transactionProvider.getOrCreateTransaction();
 
         // default strategy = replace wipes config
@@ -154,7 +141,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         setOnTransaction(ta, editConfigExecution);
     }
 
-    private void setServicesOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) {
+    private void setServicesOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) throws NetconfDocumentedException {
 
         Services services = execution.getServices();
 
@@ -175,7 +162,10 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                         logger.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
                                 on, refName, saved);
                     } catch (InstanceNotFoundException e) {
-                        throw new IllegalStateException("Unable to save ref name " + refName + " for instance " + on, e);
+                        throw new NetconfDocumentedException(String.format("Unable to save ref name " + refName + " for instance " + on, e),
+                                ErrorType.application,
+                                ErrorTag.operation_failed,
+                                ErrorSeverity.error);
                     }
                 }
             }
@@ -186,7 +176,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
-    private void setOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) {
+    private void setOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) throws NetconfDocumentedException {
 
         for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta).values()) {
 
@@ -198,13 +188,17 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
                 InstanceConfigElementResolved ice = moduleElementResolved.getInstanceConfigElementResolved();
                 EditConfigStrategy strategy = ice.getEditStrategy();
-                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta, execution.getServiceRegistryWrapper(ta));
+                try {
+                    strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta, execution.getServiceRegistryWrapper(ta));
+                } catch (StrategyInvocationException e){
+                    throw NetconfDocumentedException.wrap(e);
+                }
             }
         }
     }
 
     private void handleMisssingInstancesOnTransaction(ConfigTransactionClient ta,
-            EditConfigExecution execution) {
+            EditConfigExecution execution) throws NetconfDocumentedException {
 
         for (Multimap<String,ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta).values()) {
             for (Entry<String, ModuleElementDefinition> moduleToResolved : modulesToResolved.entries()) {
@@ -213,7 +207,11 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                 ModuleElementDefinition moduleElementDefinition = moduleToResolved.getValue();
 
                 EditConfigStrategy strategy = moduleElementDefinition.getEditStrategy();
-                strategy.executeConfiguration(moduleName, moduleElementDefinition.getInstanceName(), null, ta, execution.getServiceRegistryWrapper(ta));
+                try {
+                    strategy.executeConfiguration(moduleName, moduleElementDefinition.getInstanceName(), null, ta, execution.getServiceRegistryWrapper(ta));
+                } catch (StrategyInvocationException e){
+                    throw NetconfDocumentedException.wrap(e);
+                }
             }
         }
     }
@@ -318,29 +316,16 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
         Config cfg = getConfigMapping(configRegistryClient, yangStoreSnapshot);
-        try {
-            editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, configRegistryClient);
-        } catch (IllegalStateException e) {
-            logger.warn("Error parsing xml", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.missing_attribute.name(), "Error parsing xml: " + e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), ErrorType.rpc, ErrorTag.missing_attribute,
-                    ErrorSeverity.error, errorInfo);
-        } catch (final IllegalArgumentException e) {
-            logger.warn("Error parsing xml", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), ErrorType.rpc, ErrorTag.bad_attribute,
-                    ErrorSeverity.error, errorInfo);
-        } catch (final UnsupportedOperationException e) {
-            logger.warn("Unsupported", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_not_supported.name(), "Unsupported option for 'edit-config'");
-            throw new NetconfDocumentedException(e.getMessage(), ErrorType.application,
-                    ErrorTag.operation_not_supported, ErrorSeverity.error, errorInfo);
-        }
+        editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, configRegistryClient);
 
-        return getResponseInternal(document, editConfigExecution);
+        Element responseInternal;
+        try {
+            responseInternal = getResponseInternal(document, editConfigExecution);
+        } catch (StrategyInvocationException e) {
+            logger.trace("Error while getting internal response {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
+        return responseInternal;
     }
 
 }
