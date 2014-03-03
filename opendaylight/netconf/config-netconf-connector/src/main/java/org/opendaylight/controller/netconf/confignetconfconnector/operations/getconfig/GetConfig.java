@@ -8,18 +8,10 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.ObjectName;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
@@ -27,6 +19,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Dat
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -35,7 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
+import javax.management.ObjectName;
+import java.util.Set;
 
 public class GetConfig extends AbstractConfigNetconfOperation {
 
@@ -57,7 +53,8 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    public static Datastore fromXml(XmlElement xml) {
+    public static Datastore fromXml(XmlElement xml) throws UnexpectedNamespaceException, UnexpectedElementException, MissingNameSpaceException, NetconfDocumentedException {
+
         xml.checkName(GET_CONFIG);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -106,27 +103,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
     @Override
     public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         Datastore source;
-        try {
-            source = fromXml(xml);
-        } catch (final IllegalArgumentException e) {
-            logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.bad_attribute,
-                    ErrorSeverity.error, errorInfo);
-        } catch (final IllegalStateException e) {
-            logger.warn("Rpc error: {}", ErrorTag.missing_attribute, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.missing_attribute.name(), "Missing datasource attribute value");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.missing_attribute,
-                    ErrorSeverity.error, errorInfo);
-        } catch (final UnsupportedOperationException e) {
-            logger.warn("Unsupported", e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_not_supported.name(), "Unsupported option for get");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application,
-                    ErrorTag.operation_not_supported, ErrorSeverity.error, errorInfo);
-        }
+        source = fromXml(xml);
         return getResponseInternal(document, configRegistryClient, source);
     }
 }

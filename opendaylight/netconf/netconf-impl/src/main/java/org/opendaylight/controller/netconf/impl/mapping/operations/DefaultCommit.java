@@ -8,9 +8,7 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import java.io.InputStream;
-import java.util.Map;
-
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -26,8 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.io.InputStream;
 
 public class DefaultCommit extends AbstractNetconfOperation {
 
@@ -100,8 +97,14 @@ public class DefaultCommit extends AbstractNetconfOperation {
     }
 
     private boolean isCommitWithoutNotification(Document message) {
-        XmlElement xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
-                XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        XmlElement xmlElement = null;
+        try {
+            xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
+                    XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        } catch (NetconfDocumentedException e) {
+            logger.trace("Commit operation is not valid due to  {}",e);
+            return false;
+        }
 
         String attr = xmlElement.getAttribute(NOTIFY_ATTR);
 
@@ -120,20 +123,9 @@ public class DefaultCommit extends AbstractNetconfOperation {
                 getConfigMessage, null);
 
         XmlElement dataElement;
-        try {
-            XmlElement xmlElement = XmlElement.fromDomElementWithExpected(responseDocument.getDocumentElement(),
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-            dataElement = xmlElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY);
-        } catch (IllegalArgumentException e) {
-            final String msg = "Unexpected response from get-config operation";
-            logger.warn(msg, e);
-            Map<String, String> info = Maps.newHashMap();
-            info.put(NetconfDocumentedException.ErrorTag.operation_failed.toString(), e.getMessage());
-            throw new NetconfDocumentedException(msg, e, NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error, info);
-        }
-
+        XmlElement xmlElement = XmlElement.fromDomElementWithExpected(responseDocument.getDocumentElement(),
+                XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        dataElement = xmlElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY);
         return dataElement.getDomElement();
     }
 

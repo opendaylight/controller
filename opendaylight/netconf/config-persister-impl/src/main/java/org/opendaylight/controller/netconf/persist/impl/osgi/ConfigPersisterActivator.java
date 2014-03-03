@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.persist.impl.osgi;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
@@ -151,7 +152,12 @@ public class ConfigPersisterActivator implements BundleActivator {
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    configPusher.pushConfigs(configs);
+                    try {
+                        configPusher.pushConfigs(configs);
+                    } catch (NetconfDocumentedException e) {
+                        logger.error("Error pushing configs {}",configs);
+                        throw new IllegalStateException(e);
+                    }
                     logger.info("Configuration Persister initialization completed.");
                     ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
                     synchronized (ConfigPersisterActivator.this) {
