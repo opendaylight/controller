@@ -27,6 +27,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Abs
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
@@ -56,7 +59,8 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    public static Datastore fromXml(XmlElement xml) {
+    public static Datastore fromXml(XmlElement xml) throws UnexpectedNamespaceException, UnexpectedElementException, MissingNameSpaceException, NetconfDocumentedException {
+
         xml.checkName(GET_CONFIG);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -107,13 +111,13 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         Datastore source;
         try {
             source = fromXml(xml);
-        } catch (final IllegalArgumentException e) {
+        } catch (final MissingNameSpaceException | UnexpectedElementException e) {
             logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.rpc, ErrorTag.bad_attribute,
                     ErrorSeverity.error, errorInfo);
-        } catch (final IllegalStateException e) {
+        } catch (final UnexpectedNamespaceException e) {
             logger.warn("Rpc error: {}", ErrorTag.missing_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.missing_attribute.name(), "Missing datasource attribute value");

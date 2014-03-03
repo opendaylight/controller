@@ -15,8 +15,10 @@ import javax.annotation.Nullable;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -41,7 +43,7 @@ public class NetconfClientSessionNegotiator extends
         super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
     }
 
-    private static Collection<String> getCapabilities(Document doc) {
+    private static Collection<String> getCapabilities(Document doc) throws MissingNameSpaceException, NetconfDocumentedException {
         XmlElement responseElement = XmlElement.fromDomDocument(doc);
         XmlElement capabilitiesElement = responseElement
                 .getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CAPABILITIES);
@@ -52,7 +54,11 @@ public class NetconfClientSessionNegotiator extends
             @Override
             public String apply(@Nullable XmlElement input) {
                 // Trim possible leading/tailing whitespace
-                return input.getTextContent().trim();
+                try {
+                    return input.getTextContent().trim();
+                } catch (NetconfDocumentedException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         });
     }
@@ -71,8 +77,12 @@ public class NetconfClientSessionNegotiator extends
     }
 
     @Override
-    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel, NetconfHelloMessage message) {
-        return new NetconfClientSession(sessionListener, channel, extractSessionId(message.getDocument()),
-                getCapabilities(message.getDocument()));
+    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException {
+        try {
+            return new NetconfClientSession(sessionListener, channel, extractSessionId(message.getDocument()),
+                    getCapabilities(message.getDocument()));
+        } catch (MissingNameSpaceException e) {
+            throw NetconfDocumentedException.wrap(e);
+        }
     }
 }

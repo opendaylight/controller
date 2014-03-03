@@ -10,15 +10,15 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.util.Map;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.StrategyInvocationException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.Map;
 
 public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
 
@@ -36,17 +36,17 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                               String module, String instance, ServiceRegistryWrapper services) {
-        throw new IllegalStateException("Unable to delete " + module + ":" + instance + " , ServiceInstance not found");
+                               String module, String instance, ServiceRegistryWrapper services) throws StrategyInvocationException {
+        throw new StrategyInvocationException("Unable to delete " + module + ":" + instance + " , ServiceInstance not found");
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws StrategyInvocationException {
         try {
             ta.destroyModule(on);
             logger.debug("ServiceInstance {} deleted successfully", on);
         } catch (InstanceNotFoundException e) {
-            throw new IllegalStateException("Unable to delete " + on, e);
+            throw new StrategyInvocationException(String.format("Unable to delete %s because of exception %s" + on, e.getMessage()));
         }
     }
 }

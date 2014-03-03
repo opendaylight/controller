@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.persist.impl;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
@@ -48,7 +49,7 @@ public class ConfigPusher {
     }
 
     public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> pushConfigs(
-            List<ConfigSnapshotHolder> configs) throws InterruptedException {
+            List<ConfigSnapshotHolder> configs) throws InterruptedException, NetconfDocumentedException {
         logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
 
         // first just make sure we can connect to netconf, even if nothing is being pushed
@@ -72,7 +73,7 @@ public class ConfigPusher {
      * number of attempts is reached.
      */
     private synchronized EditAndCommitResponseWithRetries pushSnapshotWithRetries(ConfigSnapshotHolder configSnapshotHolder)
-            throws InterruptedException {
+            throws InterruptedException, NetconfDocumentedException {
 
         ConflictingVersionException lastException = null;
         int maxAttempts = configuration.netconfPushConfigAttempts;
@@ -168,7 +169,7 @@ public class ConfigPusher {
      * @throws java.lang.RuntimeException  if edit-config or commit fails otherwise
      */
     private synchronized EditAndCommitResponse pushLastConfig(ConfigSnapshotHolder configSnapshotHolder, NetconfClient netconfClient)
-            throws ConflictingVersionException {
+            throws ConflictingVersionException, NetconfDocumentedException {
 
         Element xmlToBePersisted;
         try {
@@ -211,7 +212,7 @@ public class ConfigPusher {
 
 
     private NetconfMessage sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfClient netconfClient)
-            throws ConflictingVersionException, IOException {
+            throws ConflictingVersionException, IOException, NetconfDocumentedException {
         try {
             NetconfMessage netconfMessage = netconfClient.sendMessage(request,
                     configuration.netconfSendMessageMaxAttempts, configuration.netconfSendMessageDelayMs);
@@ -220,7 +221,7 @@ public class ConfigPusher {
         } catch(ConflictingVersionException e) {
             logger.trace("conflicting version detected: {}", e.toString());
             throw e;
-        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) { // TODO: change NetconfClient#sendMessage to throw checked exceptions
+        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) {
             logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
             throw new IOException("Failed to execute netconf transaction", e);
         }
@@ -228,7 +229,7 @@ public class ConfigPusher {
 
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
-    private static NetconfMessage createEditConfigMessage(Element dataElement) {
+    private static NetconfMessage createEditConfigMessage(Element dataElement) throws NetconfDocumentedException {
         String editConfigResourcePath = "/netconfOp/editConfig.xml";
         try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcePath)) {
             Preconditions.checkNotNull(stream, "Unable to load resource " + editConfigResourcePath);
