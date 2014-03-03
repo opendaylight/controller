@@ -84,7 +84,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName)
                     .setService(ISwitchManager.class)
                     .setCallbacks("setSwitchManager", "unsetSwitchManager")
-                    .setRequired(false));
+                    .setRequired(true));
             c.add(createContainerServiceDependency(containerName)
                     .setService(IClusterContainerServices.class)
                     .setCallbacks("setClusterContainerService",
