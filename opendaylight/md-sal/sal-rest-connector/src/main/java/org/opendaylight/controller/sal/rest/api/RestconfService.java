@@ -141,4 +141,11 @@ public interface RestconfService {
     @Path("/streams/stream/{identifier:.+}")
     public Response subscribeToStream(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
+    @GET
+    @Path("/streams")
+    @Produces({Draft02.MediaTypes.API+XML, Draft02.MediaTypes.API+JSON,
+            MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    public StructuredData getAvailableStreams();
+
+
 }
