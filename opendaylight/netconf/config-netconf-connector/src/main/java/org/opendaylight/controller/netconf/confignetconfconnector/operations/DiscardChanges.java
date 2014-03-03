@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.confignetconfconnector.operations;
+    package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -53,7 +53,6 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             fromXml(xml);
         } catch (final IllegalArgumentException e) {
-            //FIXME where can IllegalStateException  be thrown?
             logger.warn("Rpc error: {}", ErrorTag.bad_attribute, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.bad_attribute.name(), e.getMessage());
@@ -64,7 +63,6 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             this.transactionProvider.abortTransaction();
         } catch (final IllegalStateException e) {
-            //FIXME where can IllegalStateException  be thrown?
             logger.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo

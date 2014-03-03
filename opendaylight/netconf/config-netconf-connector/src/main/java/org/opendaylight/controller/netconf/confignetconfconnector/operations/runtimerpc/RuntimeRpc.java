@@ -161,26 +161,28 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
-
-        // TODO exception handling
+    protected Element handle(Document document, XmlElement xml)  {
         // TODO check for namespaces and unknown elements
+        try {
+            final NetconfOperationExecution execution = fromXml(xml);
 
-        final NetconfOperationExecution execution = fromXml(xml);
+            logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
+                    execution.attributes);
+            final Object result = executeOperation(configRegistryClient, execution.on, execution.operationName,
+                    execution.attributes);
 
-        logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
-                execution.attributes);
-        final Object result = executeOperation(configRegistryClient, execution.on, execution.operationName,
-                execution.attributes);
+            logger.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
+                    execution.on, execution.attributes, result);
 
-        logger.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
-                execution.on, execution.attributes, result);
-
-        if (execution.isVoid()) {
+            if (execution.isVoid()) {
+                return document.createElement("ok");
+            } else {
+                return toXml(document, result, execution.returnType, execution.namespace,
+                        execution.returnType.getAttributeYangName());
+            }
+        } catch (NetconfDocumentedException nde){
+            logger.debug("Netconf documented exception occurred while handling XmlElement {} reason was {}",xml,nde);
             return document.createElement("ok");
-        } else {
-            return toXml(document, result, execution.returnType, execution.namespace,
-                    execution.returnType.getAttributeYangName());
         }
     }
 

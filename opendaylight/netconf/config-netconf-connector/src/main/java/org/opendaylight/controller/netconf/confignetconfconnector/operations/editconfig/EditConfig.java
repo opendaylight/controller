@@ -83,20 +83,8 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void executeSet(ConfigRegistryClient configRegistryClient,
-            EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
-        try {
-            set(configRegistryClient, editConfigExecution);
-
-        } catch (IllegalStateException e) {
-            //FIXME: when can IllegalStateException be thrown?
-            // JmxAttributeValidationException is wrapped in DynamicWritableWrapper with ValidationException
-            // ValidationException is not thrown until validate or commit is issued
-            logger.warn("Set phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
-            final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
-            throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
-                    ErrorTag.operation_failed, ErrorSeverity.error, errorInfo);
-        }
+            EditConfigXmlParser.EditConfigExecution editConfigExecution) {
+        set(configRegistryClient, editConfigExecution);
         logger.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
@@ -104,8 +92,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         try {
             test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
-        } catch (IllegalStateException | ValidationException e) {
-            //FIXME: when can IllegalStateException be thrown?
+        } catch (ValidationException e) {
             logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
@@ -119,7 +106,6 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             EditStrategyType editStrategyType) throws ValidationException {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
-
             // default strategy = replace wipes config
             if (editStrategyType == EditStrategyType.replace) {
                 transactionProvider.wipeTestTransaction(taON);

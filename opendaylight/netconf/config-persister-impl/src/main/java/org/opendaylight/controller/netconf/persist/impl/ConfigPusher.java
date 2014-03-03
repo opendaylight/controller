@@ -220,7 +220,7 @@ public class ConfigPusher {
         } catch(ConflictingVersionException e) {
             logger.trace("conflicting version detected: {}", e.toString());
             throw e;
-        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) { // TODO: change NetconfClient#sendMessage to throw checked exceptions
+        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) {
             logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
             throw new IOException("Failed to execute netconf transaction", e);
         }
