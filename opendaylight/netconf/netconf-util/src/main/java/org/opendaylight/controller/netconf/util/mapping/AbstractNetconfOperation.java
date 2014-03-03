@@ -17,6 +17,8 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedEx
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +28,7 @@ import com.google.common.base.Optional;
 
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfOperation.class);
 
     protected AbstractNetconfOperation(String netconfSessionIdForReporting) {
         this.netconfSessionIdForReporting = netconfSessionIdForReporting;
@@ -36,16 +39,18 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
     }
 
     @Override
-    public HandlingPriority canHandle(Document message) {
-        OperationNameAndNamespace operationNameAndNamespace = new OperationNameAndNamespace(message);
+    public HandlingPriority canHandle(Document message) throws NetconfDocumentedException {
+        OperationNameAndNamespace operationNameAndNamespace = null;
+        operationNameAndNamespace = new OperationNameAndNamespace(message);
         return canHandle(operationNameAndNamespace.getOperationName(), operationNameAndNamespace.getNamespace());
     }
 
     public static final class OperationNameAndNamespace {
         private final String operationName, namespace;
 
-        public OperationNameAndNamespace(Document message) {
-            XmlElement requestElement = getRequestElementWithCheck(message);
+        public OperationNameAndNamespace(Document message) throws NetconfDocumentedException {
+            XmlElement requestElement = null;
+            requestElement = getRequestElementWithCheck(message);
 
             XmlElement operationElement = requestElement.getOnlyChildElement();
             operationName = operationElement.getName();
@@ -61,7 +66,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         }
     }
 
-    protected static XmlElement getRequestElementWithCheck(Document message) {
+    protected static XmlElement getRequestElementWithCheck(Document message) throws NetconfDocumentedException {
         return XmlElement.fromDomElementWithExpected(message.getDocumentElement(), XmlNetconfConstants.RPC_KEY,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }

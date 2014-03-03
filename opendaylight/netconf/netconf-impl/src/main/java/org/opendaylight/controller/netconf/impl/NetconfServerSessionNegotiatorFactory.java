@@ -8,10 +8,11 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
-
-import java.util.Set;
-
+import com.google.common.collect.Sets;
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
@@ -22,12 +23,12 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
 
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
+import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
@@ -42,6 +43,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final DefaultCommitNotificationProducer commitNotificationProducer;
     private final SessionMonitoringService monitoringService;
+    private static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
 
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
                                                  SessionIdProvider idProvider, long connectionTimeoutMillis,
@@ -71,8 +73,14 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
                 getNetconfSessionIdForReporting(sessionId));
         CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationServiceSnapshot);
 
-        NetconfServerSessionPreferences proposal = new NetconfServerSessionPreferences(
-                createHelloMessage(sessionId, capabilityProvider), sessionId);
+        NetconfServerSessionPreferences proposal = null;
+        try {
+            proposal = new NetconfServerSessionPreferences(
+                    createHelloMessage(sessionId, capabilityProvider), sessionId);
+        } catch (NetconfDocumentedException e) {
+            logger.error("Unable to create hello mesage for session {} with capability provider {}", sessionId,capabilityProvider);
+            throw new IllegalStateException(e);
+        }
 
         NetconfServerSessionListenerFactory sessionListenerFactory = new NetconfServerSessionListenerFactory(
                 commitNotificationProducer, monitoringService,
@@ -82,7 +90,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
                 sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
     }
 
-    private NetconfHelloMessage createHelloMessage(long sessionId, CapabilityProvider capabilityProvider) {
+    private NetconfHelloMessage createHelloMessage(long sessionId, CapabilityProvider capabilityProvider) throws NetconfDocumentedException {
         return NetconfHelloMessage.createServerHello(Sets.union(capabilityProvider.getCapabilities(), DEFAULT_CAPABILITIES), sessionId);
     }
 

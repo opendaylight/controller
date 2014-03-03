@@ -9,6 +9,8 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
 import com.google.common.collect.Multimap;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -40,7 +42,22 @@ public enum EditStrategyType {
                     + this);
         }
     }
+    public static void compareParsedStrategyToDefaultEnforcing(EditStrategyType parsedStrategy,
+                                                                  EditStrategyType defaultStrategy) throws OperationNotPermittedException {
+        if (defaultStrategy.isEnforcing()) {
+            if (parsedStrategy != defaultStrategy){
+                throw new OperationNotPermittedException(String.format("With "
+                        + defaultStrategy
+                        + " as "
+                        + EditConfigXmlParser.DEFAULT_OPERATION_KEY
+                        + " operations on module elements are not permitted since the default option is restrictive"),
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.operation_failed,
+                        NetconfDocumentedException.ErrorSeverity.error);
+            }
+        }
 
+    }
     public EditConfigStrategy getFittingStrategy(Multimap<String, String> providedServices) {
         switch (this) {
         case merge:

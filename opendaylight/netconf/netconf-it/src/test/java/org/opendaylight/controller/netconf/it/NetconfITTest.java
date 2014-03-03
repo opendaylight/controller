@@ -321,7 +321,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         }
     }
 
-    private void assertIsOK(final Document rpcReply) {
+    private void assertIsOK(final Document rpcReply) throws NetconfDocumentedException {
         assertEquals("rpc-reply", rpcReply.getDocumentElement().getLocalName());
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
     }
