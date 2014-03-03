@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.netconf.monitoring;
 
-import java.util.Map;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
@@ -24,8 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 public class Get extends AbstractNetconfOperation {
 
@@ -37,10 +36,11 @@ public class Get extends AbstractNetconfOperation {
         this.netconfMonitor = netconfMonitor;
     }
 
-    private Element getPlaceholder(Document innerResult) {
+    private Element getPlaceholder(Document innerResult) throws NetconfDocumentedException {
         try {
-            XmlElement rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+            XmlElement rootElement = null;
+            rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
+                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
             return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
         } catch (RuntimeException e) {
             throw new IllegalArgumentException(String.format(
