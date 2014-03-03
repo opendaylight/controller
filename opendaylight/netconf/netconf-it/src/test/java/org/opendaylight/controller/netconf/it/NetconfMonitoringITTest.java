@@ -34,7 +34,7 @@ import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.impl.HardcodedYangStoreService;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
-import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -121,8 +121,8 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testGetResponseFromMonitoring() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("client-monitoring", tcpAddress, 4000, clientDispatcher)) {
-        try (NetconfClient netconfClient2 = new NetconfClient("client-monitoring2", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client-monitoring", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("client-monitoring2", tcpAddress, 4000, clientDispatcher)) {
             NetconfMessage response = netconfClient.sendMessage(loadGetMessage());
             assertSessionElementsInResponse(response.getDocument(), 2);
         }

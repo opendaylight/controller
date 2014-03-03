@@ -45,8 +45,8 @@ import org.opendaylight.controller.config.yang.store.impl.HardcodedYangStoreServ
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
-import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
@@ -125,12 +125,12 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         VerifyingNotificationListener notificationVerifier = createCommitNotificationListener();
         VerifyingPersister mockedAggregator = mockAggregator();
 
-        try (NetconfClient persisterClient = new NetconfClient("persister", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient persisterClient = new TestingNetconfClient("persister", tcpAddress, 4000, clientDispatcher)) {
             try (ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
                     platformMBeanServer, mockedAggregator, Pattern.compile(""))) {
 
 
-                try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
+                try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
                     NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
                     assertResponse(response, "<modules");
                     assertResponse(response, "<services");

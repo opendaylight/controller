@@ -8,6 +8,10 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import io.netty.channel.EventLoopGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
+import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 
 import javax.annotation.concurrent.Immutable;
 import java.net.InetSocketAddress;
@@ -20,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @Immutable
 public final class ConfigPusherConfiguration {
 
-    public static final long DEFAULT_CONNECTION_ATTEMPT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
+    public static final int DEFAULT_CONNECTION_ATTEMPT_TIMEOUT_MS = 5000;
     public static final int DEFAULT_CONNECTION_ATTEMPT_DELAY_MS = 5000;
 
     public static final int DEFAULT_NETCONF_SEND_MESSAGE_MAX_ATTEMPTS = 20;
@@ -35,7 +39,7 @@ public final class ConfigPusherConfiguration {
     final EventLoopGroup eventLoopGroup;
 
     /**
-     * Total time to wait for capability stabilization
+     * Total time to wait for connection establishment and capability stabilization
      */
     final long netconfCapabilitiesWaitTimeoutMs;
 
@@ -53,9 +57,9 @@ public final class ConfigPusherConfiguration {
      */
     final int connectionAttemptDelayMs;
     /**
-     * Total number of attempts to perform connection establishment
+     * Time to wait for 1 connection establishment attempt
      */
-    final long connectionAttemptTimeoutMs;
+    final int connectionAttemptTimeoutMs;
 
     /**
      * Total number of attempts to push configuration to netconf
@@ -68,7 +72,7 @@ public final class ConfigPusherConfiguration {
 
     ConfigPusherConfiguration(InetSocketAddress netconfAddress, long netconfCapabilitiesWaitTimeoutMs,
             int netconfSendMessageDelayMs, int netconfSendMessageMaxAttempts, int connectionAttemptDelayMs,
-            long connectionAttemptTimeoutMs, EventLoopGroup eventLoopGroup, int netconfPushConfigAttempts,
+            int connectionAttemptTimeoutMs, EventLoopGroup eventLoopGroup, int netconfPushConfigAttempts,
             long netconfPushConfigDelayMs) {
         this.netconfAddress = netconfAddress;
         this.netconfCapabilitiesWaitTimeoutMs = netconfCapabilitiesWaitTimeoutMs;
@@ -79,5 +83,19 @@ public final class ConfigPusherConfiguration {
         this.eventLoopGroup = eventLoopGroup;
         this.netconfPushConfigAttempts = netconfPushConfigAttempts;
         this.netconfPushConfigDelayMs = netconfPushConfigDelayMs;
+    }
+
+    public NetconfHelloMessageAdditionalHeader getAdditionalHeader() {
+        return new NetconfHelloMessageAdditionalHeader("unknown", netconfAddress.getAddress().getHostAddress(),
+                Integer.toString(netconfAddress.getPort()), "tcp", "persister");
+    }
+
+    public long getDeadlineForConnection() {
+        return System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(netconfCapabilitiesWaitTimeoutMs);
+    }
+
+    public ReconnectStrategy getReconnectStrategy(long deadlineNanos) {
+        return new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, connectionAttemptTimeoutMs,
+                connectionAttemptDelayMs, 1.0, null, null, deadlineNanos);
     }
 }

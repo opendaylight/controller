@@ -73,19 +73,17 @@ public class ConfigPersisterActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         logger.debug("ConfigPersister starting");
 
-        PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
+        final PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
         final Pattern ignoredMissingCapabilityRegex = getIgnoredCapabilitiesProperty(propertiesProvider);
 
         persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
 
-        final ConfigPusher configPusher = new ConfigPusher(getConfigurationForPusher(context, propertiesProvider));
-
         // offload initialization to another thread in order to stop blocking activator
         Runnable initializationRunnable = new Runnable() {
             @Override
             public void run() {
-                try {
+                try(ConfigPusher configPusher = new ConfigPusher(getConfigurationForPusher(context, propertiesProvider))) {
                     configPusher.pushConfigs(persisterAggregator.loadLastConfigs());
                     jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator,
                             ignoredMissingCapabilityRegex);
@@ -123,8 +121,9 @@ public class ConfigPersisterActivator implements BundleActivator {
             PropertiesProviderBaseImpl propertiesProvider) {
 
         // If configuration was injected via constructor, use it
-        if(initialConfigForPusher.isPresent())
+        if(initialConfigForPusher.isPresent()) {
             return initialConfigForPusher.get();
+        }
 
         Optional<Long> maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesProperty(propertiesProvider);
         final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
@@ -134,8 +133,9 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         ConfigPusherConfigurationBuilder configPusherConfigurationBuilder = ConfigPusherConfigurationBuilder.aConfigPusherConfiguration();
 
-        if(maxWaitForCapabilitiesMillis.isPresent())
+        if(maxWaitForCapabilitiesMillis.isPresent()) {
             configPusherConfigurationBuilder.withNetconfCapabilitiesWaitTimeoutMs(maxWaitForCapabilitiesMillis.get());
+        }
 
         return configPusherConfigurationBuilder
                 .withEventLoopGroup(nettyThreadGroup)
@@ -149,8 +149,9 @@ public class ConfigPersisterActivator implements BundleActivator {
         if (jmxNotificationHandler != null) {
             jmxNotificationHandler.close();
         }
-        if(nettyThreadGroup!=null)
+        if(nettyThreadGroup!=null) {
             nettyThreadGroup.shutdownGracefully();
+        }
         persisterAggregator.close();
     }
 }

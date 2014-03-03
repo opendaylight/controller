@@ -109,7 +109,8 @@
                             javax.xml.namespace,
                             javax.xml.xpath,
                             org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.netconf.util
+                            org.opendaylight.controller.netconf.util,
+                            org.opendaylight.protocol.framework,
                         </Import-Package>
                         <Export-Package>
                         </Export-Package>
