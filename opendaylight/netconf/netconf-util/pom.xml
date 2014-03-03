@@ -46,10 +46,6 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-handler</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>com.siemens.ct.exi</groupId>
-            <artifactId>exificient</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.opendaylight.controller.thirdparty</groupId>
             <artifactId>ganymed</artifactId>
