@@ -7,38 +7,31 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.DependencyResolverFactory;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 
-/**
-*
-*/
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class SchemaServiceImplSingletonModuleFactory extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImplSingletonModuleFactory {
 
-    private static final ModuleIdentifier IDENTIFIER = new ModuleIdentifier(NAME, "yang-schema-service");
-    public static SchemaServiceImplSingletonModule SINGLETON;
+    public static final String SINGLETON_NAME = "yang-schema-service";
 
     @Override
-    public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
-        throw new UnsupportedOperationException("Only default instance supported.");
+    public SchemaServiceImplSingletonModule  instantiateModule(String instanceName, DependencyResolver dependencyResolver, SchemaServiceImplSingletonModule  oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+        checkArgument(SINGLETON_NAME.equals(instanceName),"Illegal instance name '" + instanceName + "', only allowed name is " + SINGLETON_NAME);
+        SchemaServiceImplSingletonModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule, oldInstance, bundleContext);
+        // FIXME bundle context should not be passed around
+        module.setBundleContext(bundleContext);
+        return module;
     }
 
     @Override
-    public Set<SchemaServiceImplSingletonModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
-            BundleContext bundleContext) {
-        DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(IDENTIFIER);
-
-        if (SINGLETON == null) {
-            SINGLETON = new SchemaServiceImplSingletonModule(IDENTIFIER, dependencyResolver);
-            SINGLETON.setBundleContext(bundleContext);
-        }
-        return Collections.singleton(SINGLETON);
+    public SchemaServiceImplSingletonModule  instantiateModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
+        checkArgument(SINGLETON_NAME.equals(instanceName),"Illegal instance name '" + instanceName + "', only allowed name is " + SINGLETON_NAME);
+        SchemaServiceImplSingletonModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
+        // FIXME bundle context should not be passed around
+        module.setBundleContext(bundleContext);
+        return module;
     }
 }
