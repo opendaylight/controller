@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_075dd6e9",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/operations/editconfig/EditConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-03T14:28:48Z",
+      "side": 0,
+      "message": "IllegalStateException might be thrown by e.g. DeleteEditConfigStrategy. And should be catched somewhere.",
+      "revId": "b98d04e31ad212b8549a3cf849ce864bbba90717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_8751c6da",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/operations/Commit.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-03T14:28:48Z",
+      "side": 1,
+      "message": "This should be handled in TransactionProvider. commitTransaction() would call getOrCreateTransaction instead of getTransaction and IllegalStateException wont be thrown at all.\n\nThe same applies to DiscardChanges operation. (But discard-changes should probably not start a transaction just to abort it)",
+      "revId": "49a51349d471232ba32daa6c1958dff22614008b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_4763ceb1",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/operations/Validate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-03T14:28:48Z",
+      "side": 1,
+      "message": "It would be better for xml utils to throw some other(custom) kinds of exceptions instead of IllegalState and IllegalArgument e.g. MissingElementException, UnknownElementException etc.",
+      "revId": "49a51349d471232ba32daa6c1958dff22614008b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
