@@ -9,11 +9,23 @@
 package org.opendaylight.controller.netconf.util.xml;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,17 +35,10 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public final class XmlElement {
 
     private final Element element;
+    private static final Logger logger = LoggerFactory.getLogger(XmlElement.class);
 
     private XmlElement(Element element) {
         this.element = element;
@@ -47,27 +52,27 @@ public final class XmlElement {
         return new XmlElement(xml.getDocumentElement());
     }
 
-    public static XmlElement fromString(String s) {
+    public static XmlElement fromString(String s) throws NetconfDocumentedException {
         try {
             return new XmlElement(XmlUtil.readXmlToElement(s));
         } catch (IOException | SAXException e) {
-            throw new IllegalArgumentException("Unable to create from " + s, e);
+            throw NetconfDocumentedException.wrap(e);
         }
     }
 
-    public static XmlElement fromDomElementWithExpected(Element element, String expectedName) {
+    public static XmlElement fromDomElementWithExpected(Element element, String expectedName) throws UnexpectedElementException {
         XmlElement xmlElement = XmlElement.fromDomElement(element);
         xmlElement.checkName(expectedName);
         return xmlElement;
     }
 
-    public static XmlElement fromDomElementWithExpected(Element element, String expectedName, String expectedNamespace) {
+    public static XmlElement fromDomElementWithExpected(Element element, String expectedName, String expectedNamespace) throws UnexpectedNamespaceException, UnexpectedElementException, MissingNameSpaceException {
         XmlElement xmlElement = XmlElement.fromDomElementWithExpected(element, expectedName);
         xmlElement.checkNamespace(expectedNamespace);
         return xmlElement;
     }
 
-    private static Map<String, String> extractNamespaces(Element typeElement) {
+    private static Map<String, String> extractNamespaces(Element typeElement) throws NetconfDocumentedException {
         Map<String, String> namespaces = new HashMap<>();
         NamedNodeMap attributes = typeElement.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
@@ -78,7 +83,12 @@ public final class XmlElement {
                 if (attribKey.equals(XmlUtil.XMLNS_ATTRIBUTE_KEY)) {
                     prefix = "";
                 } else {
-                    Preconditions.checkState(attribKey.startsWith(XmlUtil.XMLNS_ATTRIBUTE_KEY + ":"));
+                    if (!attribKey.startsWith(XmlUtil.XMLNS_ATTRIBUTE_KEY + ":")){
+                        throw new NetconfDocumentedException("Attribute doesn't start with :",
+                                NetconfDocumentedException.ErrorType.application,
+                                NetconfDocumentedException.ErrorTag.invalid_value,
+                                NetconfDocumentedException.ErrorSeverity.error);
+                    }
                     prefix = attribKey.substring(XmlUtil.XMLNS_ATTRIBUTE_KEY.length() + 1);
                 }
                 namespaces.put(prefix, attribute.getNodeValue());
@@ -87,19 +97,25 @@ public final class XmlElement {
         return namespaces;
     }
 
-    public void checkName(String expectedName) {
-        Preconditions.checkArgument(getName().equals(expectedName), "Expected %s xml element but was %s", expectedName,
-                getName());
+    public void checkName(String expectedName) throws UnexpectedElementException {
+        if (!getName().equals(expectedName)){
+            throw new UnexpectedElementException(String.format("Expected %s xml element but was %s", expectedName,
+                    getName()));
+        }
     }
 
-    public void checkNamespaceAttribute(String expectedNamespace) {
-        Preconditions.checkArgument(getNamespaceAttribute().equals(expectedNamespace),
-                "Unexpected namespace %s for element %s, should be %s", getNamespaceAttribute(), expectedNamespace);
+    public void checkNamespaceAttribute(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
+        if (!getNamespaceAttribute().equals(expectedNamespace))
+        {
+            throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s for element %s, should be %s", getNamespaceAttribute(), expectedNamespace));
+        }
     }
 
-    public void checkNamespace(String expectedNamespace) {
-        Preconditions.checkArgument(getNamespace().equals(expectedNamespace),
-                "Unexpected namespace %s for element %s, should be %s", getNamespace(), expectedNamespace);
+    public void checkNamespace(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
+        if (!getNamespace().equals(expectedNamespace))
+       {
+            throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s for element %s, should be %s", getNamespace(), expectedNamespace));
+        }
     }
 
     public String getName() {
@@ -184,7 +200,11 @@ public final class XmlElement {
         return getChildElementsInternal(new ElementFilteringStrategy() {
             @Override
             public boolean accept(Element e) {
-                return XmlElement.fromDomElement(e).getNamespace().equals(namespace);
+                try {
+                    return XmlElement.fromDomElement(e).getNamespace().equals(namespace);
+                } catch (MissingNameSpaceException e1) {
+                    return false;
+                }
             }
 
         });
@@ -199,9 +219,14 @@ public final class XmlElement {
         });
     }
 
-    public XmlElement getOnlyChildElement(String childName) {
+    public XmlElement getOnlyChildElement(String childName) throws NetconfDocumentedException {
         List<XmlElement> nameElements = getChildElements(childName);
-        Preconditions.checkState(nameElements.size() == 1, "One element " + childName + " expected in " + toString());
+        if (nameElements.size() != 1){
+            throw new NetconfDocumentedException("One element " + childName + " expected in " + toString(),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
         return nameElements.get(0);
     }
 
@@ -221,7 +246,7 @@ public final class XmlElement {
         }
     }
 
-    public XmlElement getOnlyChildElementWithSameNamespace(String childName) {
+    public XmlElement getOnlyChildElementWithSameNamespace(String childName) throws MissingNameSpaceException, NetconfDocumentedException {
         return getOnlyChildElement(childName, getNamespace());
     }
 
@@ -233,7 +258,7 @@ public final class XmlElement {
         }
     }
 
-    public XmlElement getOnlyChildElementWithSameNamespace() {
+    public XmlElement getOnlyChildElementWithSameNamespace() throws UnexpectedNamespaceException, MissingNameSpaceException, NetconfDocumentedException {
         XmlElement childElement = getOnlyChildElement();
         childElement.checkNamespace(getNamespace());
         return childElement;
@@ -249,7 +274,7 @@ public final class XmlElement {
         }
     }
 
-    public XmlElement getOnlyChildElement(final String childName, String namespace) {
+    public XmlElement getOnlyChildElement(final String childName, String namespace) throws NetconfDocumentedException {
         List<XmlElement> children = getChildElementsWithinNamespace(namespace);
         children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
@@ -257,38 +282,63 @@ public final class XmlElement {
                 return xmlElement.getName().equals(childName);
             }
         }));
-        Preconditions.checkState(children.size() == 1, "One element %s:%s expected in %s but was %s", namespace,
-                childName, toString(), children.size());
+        if (children.size() != 1){
+            throw new NetconfDocumentedException(String.format("One element %s:%s expected in %s but was %s", namespace,
+                    childName, toString(), children.size()),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
+
         return children.get(0);
     }
 
-    public XmlElement getOnlyChildElement() {
+    public XmlElement getOnlyChildElement() throws NetconfDocumentedException {
         List<XmlElement> children = getChildElements();
-        Preconditions.checkState(children.size() == 1, "One element expected in %s but was %s", toString(),
-                children.size());
+        if (children.size() != 1){
+            throw new NetconfDocumentedException(String.format( "One element expected in %s but was %s", toString(),
+                    children.size()),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
         return children.get(0);
     }
 
-    public String getTextContent() {
+    public String getTextContent() throws NetconfDocumentedException {
         Node textChild = element.getFirstChild();
-        Preconditions.checkNotNull(textChild, "Child node expected, got null for " + getName() + " : " + element);
-        Preconditions.checkState(textChild instanceof Text, getName() + " should contain text." +
-                Text.class.getName() + " expected, got " + textChild);
+        if (null == textChild){
+            throw new NetconfDocumentedException(String.format( "Child node expected, got null for " + getName() + " : " + element),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
+        if (!(textChild instanceof Text)){
+            throw new NetconfDocumentedException(String.format(getName() + " should contain text." +
+                    Text.class.getName() + " expected, got " + textChild),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
         String content = textChild.getTextContent();
         // Trim needed
         return content.trim();
     }
 
-    public String getNamespaceAttribute() {
+    public String getNamespaceAttribute() throws MissingNameSpaceException {
         String attribute = element.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY);
-        Preconditions.checkState(attribute != null && !attribute.equals(""), "Element %s must specify namespace",
-                toString());
+        if (attribute == null || attribute.equals("")){
+            throw new MissingNameSpaceException(String.format("Element %s must specify namespace",
+                    toString()));
+        }
         return attribute;
     }
 
-    public String getNamespace() {
+    public String getNamespace() throws MissingNameSpaceException {
         String namespaceURI = element.getNamespaceURI();
-        Preconditions.checkState(namespaceURI != null, "No namespace defined for %s", this);
+        if (namespaceURI  == null || namespaceURI.equals("")){
+            throw new MissingNameSpaceException(String.format("No namespace defined for %s", this));
+        }
         return namespaceURI;
     }
 
@@ -297,7 +347,11 @@ public final class XmlElement {
         final StringBuilder sb = new StringBuilder("XmlElement{");
         sb.append("name='").append(getName()).append('\'');
         if (element.getNamespaceURI() != null) {
-            sb.append(", namespace='").append(getNamespace()).append('\'');
+            try {
+                sb.append(", namespace='").append(getNamespace()).append('\'');
+            } catch (MissingNameSpaceException e) {
+                logger.trace("Missing namespace for element.");
+            }
         }
         sb.append('}');
         return sb.toString();
@@ -316,7 +370,7 @@ public final class XmlElement {
      * namespace is returned with empty string as key. If no default namespace
      * is found value will be null.
      */
-    public Map.Entry<String/* prefix */, String/* namespace */> findNamespaceOfTextContent() {
+    public Map.Entry<String/* prefix */, String/* namespace */> findNamespaceOfTextContent() throws NetconfDocumentedException {
         Map<String, String> namespaces = extractNamespaces(element);
         String textContent = getTextContent();
         int indexOfColon = textContent.indexOf(':');
@@ -333,7 +387,7 @@ public final class XmlElement {
         return Maps.immutableEntry(prefix, namespaces.get(prefix));
     }
 
-    public List<XmlElement> getChildElementsWithSameNamespace(final String childName) {
+    public List<XmlElement> getChildElementsWithSameNamespace(final String childName) throws MissingNameSpaceException {
         List<XmlElement> children = getChildElementsWithinNamespace(getNamespace());
         return Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
@@ -344,17 +398,22 @@ public final class XmlElement {
     }
 
     public void checkUnrecognisedElements(List<XmlElement> recognisedElements,
-            XmlElement... additionalRecognisedElements) {
+            XmlElement... additionalRecognisedElements) throws NetconfDocumentedException {
         List<XmlElement> childElements = getChildElements();
         childElements.removeAll(recognisedElements);
         for (XmlElement additionalRecognisedElement : additionalRecognisedElements) {
             childElements.remove(additionalRecognisedElement);
         }
-        Preconditions.checkState(childElements.isEmpty(), "Unrecognised elements %s in %s", childElements, this);
+        if (!childElements.isEmpty()){
+            throw new NetconfDocumentedException(String.format("Unrecognised elements %s in %s", childElements, this),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
     }
 
-    public void checkUnrecognisedElements(XmlElement... additionalRecognisedElements) {
-        checkUnrecognisedElements(Collections.<XmlElement> emptyList(), additionalRecognisedElements);
+    public void checkUnrecognisedElements(XmlElement... additionalRecognisedElements) throws NetconfDocumentedException {
+        checkUnrecognisedElements(Collections.<XmlElement>emptyList(), additionalRecognisedElements);
     }
 
     @Override
@@ -383,10 +442,10 @@ public final class XmlElement {
     public boolean hasNamespace() {
         try {
             getNamespaceAttribute();
-        } catch (IllegalStateException e) {
+        } catch (MissingNameSpaceException e) {
             try {
                 getNamespace();
-            } catch (IllegalStateException e1) {
+            } catch (MissingNameSpaceException e1) {
                 return false;
             }
             return true;

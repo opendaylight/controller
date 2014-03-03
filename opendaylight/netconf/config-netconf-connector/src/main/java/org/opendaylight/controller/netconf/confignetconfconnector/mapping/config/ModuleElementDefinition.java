@@ -8,10 +8,13 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.MissingInstanceHandlingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.NoneEditConfigStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModuleElementDefinition {
 
@@ -20,13 +23,21 @@ public class ModuleElementDefinition {
 
     private final String instanceName;
     private final EditStrategyType editStrategy;
+    private static final Logger logger = LoggerFactory.getLogger(ModuleElementDefinition.class);
 
     public ModuleElementDefinition(String instanceName, String currentStrategy, EditStrategyType defaultStrategy) {
         this.instanceName = instanceName;
+        EditStrategyType _edStrategy = null;
+        try {
+            _edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
+        } catch (OperationNotPermittedException e) {
+            _edStrategy = defaultStrategy;
+            logger.trace("");
+        }
         if (currentStrategy == null || currentStrategy.isEmpty())
-            this.editStrategy = defaultStrategy;
-        else
-            this.editStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
+            _edStrategy = defaultStrategy;
+
+        this.editStrategy = _edStrategy;
     }
 
     public String getInstanceName() {

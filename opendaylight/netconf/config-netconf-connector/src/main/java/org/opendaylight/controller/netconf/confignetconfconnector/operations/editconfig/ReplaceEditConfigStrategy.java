@@ -12,6 +12,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.StrategyInvocationException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
@@ -39,8 +40,8 @@ public class ReplaceEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                               String module, String instance, ServiceRegistryWrapper services) {
-        throw new IllegalStateException(
+                               String module, String instance, ServiceRegistryWrapper services) throws StrategyInvocationException {
+        throw new StrategyInvocationException(
                 "Unable to handle missing instance, no missing instances should appear at this point, missing: "
                         + module + ":" + instance);
     }
@@ -60,11 +61,11 @@ public class ReplaceEditConfigStrategy extends AbstractEditConfigStrategy {
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws StrategyInvocationException {
         try {
             addRefNames(services, providedServices, ta, on);
         } catch (InstanceNotFoundException e) {
-            throw new IllegalStateException("Unable to save default ref name for instance " + on, e);
+            throw new StrategyInvocationException("Unable to save default ref name for instance " + on, e.getCause());
         }
 
         for (Entry<String, AttributeConfigElement> configAttributeEntry : configuration.entrySet()) {

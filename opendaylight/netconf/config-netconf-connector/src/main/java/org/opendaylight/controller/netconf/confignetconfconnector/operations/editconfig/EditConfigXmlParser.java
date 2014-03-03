@@ -10,8 +10,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
+import java.util.Arrays;
+import java.util.Map;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -22,13 +23,13 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
+import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Map;
 
 public class EditConfigXmlParser {
 
@@ -52,18 +53,38 @@ public class EditConfigXmlParser {
 
         EditStrategyType editStrategyType = EditStrategyType.getDefaultStrategy();
 
-        xml.checkName(EditConfigXmlParser.EDIT_CONFIG);
-        xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        try {
+            xml.checkName(EditConfigXmlParser.EDIT_CONFIG);
+            xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        } catch (final MissingNameSpaceException | UnexpectedNamespaceException | UnexpectedElementException e) {
+            logger.trace("Error evaluating name and namespace {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
 
-        XmlElement targetElement = xml.getOnlyChildElementWithSameNamespace(EditConfigXmlParser.TARGET_KEY);
-        XmlElement targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
+
+        XmlElement targetElement = null;
+        XmlElement targetChildNode = null;
+        try {
+            targetElement  = xml.getOnlyChildElementWithSameNamespace(EditConfigXmlParser.TARGET_KEY);
+            targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
+        } catch (final MissingNameSpaceException | UnexpectedNamespaceException e) {
+            logger.trace("Can't get only child element with same namespace due to {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
         String datastoreValue = targetChildNode.getName();
         Datastore targetDatastore = Datastore.valueOf(datastoreValue);
         logger.debug("Setting {} to '{}'", EditConfigXmlParser.TARGET_KEY, targetDatastore);
 
         // check target
-        Preconditions.checkArgument(targetDatastore == Datastore.candidate,
-                "Only %s datastore supported for edit config but was: %s", Datastore.candidate, targetDatastore);
+        if (targetDatastore != Datastore.candidate){
+            throw new NetconfDocumentedException(String.format(
+                    "Only %s datastore supported for edit config but was: %s",
+                    Datastore.candidate,
+                    targetDatastore),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.invalid_value,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
 
         // Test option
         TestOption testOption;
@@ -96,7 +117,13 @@ public class EditConfigXmlParser {
             editStrategyType = EditStrategyType.valueOf(mergeStrategyString);
         }
 
-        XmlElement configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
+        XmlElement configElement = null;
+        try {
+            configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
+        } catch (MissingNameSpaceException e) {
+            logger.trace("Can't get only child element with same namespace due to {}",e);
+            throw NetconfDocumentedException.wrap(e);
+        }
 
         return new EditConfigXmlParser.EditConfigExecution(cfgMapping, configElement, testOption, editStrategyType);
     }
@@ -134,7 +161,7 @@ public class EditConfigXmlParser {
         private final Config configResolver;
         private final XmlElement configElement;
 
-        EditConfigExecution(Config configResolver, XmlElement configElement, TestOption testOption, EditStrategyType defaultStrategy) {
+        EditConfigExecution(Config configResolver, XmlElement configElement, TestOption testOption, EditStrategyType defaultStrategy) throws NetconfDocumentedException {
             Config.checkUnrecognisedChildren(configElement);
             this.configResolver = configResolver;
             this.configElement = configElement;
@@ -151,7 +178,7 @@ public class EditConfigXmlParser {
             return testOption == TestOption.set || testOption == TestOption.testThenSet;
         }
 
-        Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements(ServiceReferenceReadableRegistry serviceRegistry) {
+        Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements(ServiceReferenceReadableRegistry serviceRegistry) throws NetconfDocumentedException {
             return configResolver.fromXmlModulesResolved(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
         }
 
@@ -160,7 +187,7 @@ public class EditConfigXmlParser {
             return new ServiceRegistryWrapper(serviceRegistry);
         }
 
-        Map<String, Multimap<String,ModuleElementDefinition>> getModulesDefinition(ServiceReferenceReadableRegistry serviceRegistry) {
+        Map<String, Multimap<String,ModuleElementDefinition>> getModulesDefinition(ServiceReferenceReadableRegistry serviceRegistry) throws NetconfDocumentedException {
             return configResolver.fromXmlModulesMap(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
         }
 

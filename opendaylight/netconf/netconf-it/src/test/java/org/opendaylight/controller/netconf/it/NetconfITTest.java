@@ -50,6 +50,7 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMX
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.StubUserManager;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
@@ -351,17 +352,17 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         }
     }
 
-    private void assertIsOK(final Document rpcReply) {
+    private void assertIsOK(final Document rpcReply) throws NetconfDocumentedException {
         assertEquals("rpc-reply", rpcReply.getDocumentElement().getLocalName());
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
     }
 
-    private Document assertGetConfigWorks(final NetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException {
+    private Document assertGetConfigWorks(final NetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException, NetconfDocumentedException {
         return assertGetConfigWorks(netconfClient, this.getConfig);
     }
 
     private Document assertGetConfigWorks(final NetconfClient netconfClient, final NetconfMessage getConfigMessage)
-            throws InterruptedException, ExecutionException, TimeoutException {
+            throws InterruptedException, ExecutionException, TimeoutException, NetconfDocumentedException {
         final NetconfMessage rpcReply = netconfClient.sendMessage(getConfigMessage);
         assertNotNull(rpcReply);
         assertEquals("data", XmlElement.fromDomDocument(rpcReply.getDocument()).getOnlyChildElement().getName());
