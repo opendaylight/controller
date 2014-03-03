@@ -50,7 +50,7 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMX
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.StubUserManager;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -179,7 +179,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testNetconfClientDemonstration() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
 
             Set<String> capabilitiesFromNetconfServer = netconfClient.getCapabilities();
             long sessionId = netconfClient.getSessionId();
@@ -194,8 +194,8 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 10000, clientDispatcher))  {
-            try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 10000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("1", tcpAddress, 10000, clientDispatcher))  {
+            try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("2", tcpAddress, 10000, clientDispatcher)) {
             }
         }
     }
@@ -211,7 +211,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void rpcReplyContainsAllAttributesTest() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             final String rpc = "<rpc message-id=\"5\" a=\"a\" b=\"44\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">"
                     + "<get/>" + "</rpc>";
             final Document doc = XmlUtil.readXmlToDocument(rpc);
@@ -239,7 +239,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void rpcReplyErrorContainsAllAttributesTest() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             final String rpc = "<rpc message-id=\"1\" a=\"adada\" b=\"4\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">"
                     + "<commit/>" + "</rpc>";
             final Document doc = XmlUtil.readXmlToDocument(rpc);
@@ -263,7 +263,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
         transaction.commit();
 
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             final String expectedNamespace = "urn:opendaylight:params:xml:ns:yang:controller:test:impl";
 
             final String rpc = "<rpc message-id=\"5\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">"
@@ -287,7 +287,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     /*
     @Test
     public void testStartExi() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
 
 
             Document rpcReply = netconfClient.sendMessage(this.startExi)
@@ -314,7 +314,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testCloseSession() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
 
             // edit config
             Document rpcReply = netconfClient.sendMessage(this.editConfig)
@@ -330,7 +330,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testEditConfig() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             // send edit_config.xml
             final Document rpcReply = netconfClient.sendMessage(this.editConfig).getDocument();
             assertIsOK(rpcReply);
@@ -339,7 +339,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testValidate() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             // begin transaction
             Document rpcReply = netconfClient.sendMessage(getConfigCandidate).getDocument();
             assertEquals("data", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
@@ -356,11 +356,11 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
     }
 
-    private Document assertGetConfigWorks(final NetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException {
+    private Document assertGetConfigWorks(final TestingNetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException {
         return assertGetConfigWorks(netconfClient, this.getConfig);
     }
 
-    private Document assertGetConfigWorks(final NetconfClient netconfClient, final NetconfMessage getConfigMessage)
+    private Document assertGetConfigWorks(final TestingNetconfClient netconfClient, final NetconfMessage getConfigMessage)
             throws InterruptedException, ExecutionException, TimeoutException {
         final NetconfMessage rpcReply = netconfClient.sendMessage(getConfigMessage);
         assertNotNull(rpcReply);
@@ -370,14 +370,14 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testGetConfig() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             assertGetConfigWorks(netconfClient);
         }
     }
 
     @Test
     public void createYangTestBasedOnYuma() throws Exception {
-        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
             Document rpcReply = netconfClient.sendMessage(
                     XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/editConfig_merge_yang-test.xml"))
                     .getDocument();
@@ -395,8 +395,8 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         }
     }
 
-    private NetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
-        final NetconfClient netconfClient = new NetconfClient("test " + address.toString(), address, 5000, clientDispatcher);
+    private TestingNetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
+        final TestingNetconfClient netconfClient = new TestingNetconfClient("test " + address.toString(), address, 5000, clientDispatcher);
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
         return netconfClient;
     }

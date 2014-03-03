@@ -19,7 +19,7 @@ public class ConfigPusherConfigurationBuilder {
     int netconfSendMessageDelayMs = ConfigPusherConfiguration.DEFAULT_NETCONF_SEND_MESSAGE_DELAY_MS;
     int netconfSendMessageMaxAttempts = ConfigPusherConfiguration.DEFAULT_NETCONF_SEND_MESSAGE_MAX_ATTEMPTS;
     int connectionAttemptDelayMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_DELAY_MS;
-    long connectionAttemptTimeoutMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_TIMEOUT_MS;
+    int connectionAttemptTimeoutMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_TIMEOUT_MS;
     int netconfPushConfigAttempts = ConfigPusherConfiguration.DEFAULT_NETCONF_PUSH_CONFIG_ATTEMPTS;
     long netconfPushConfigDelayMs = ConfigPusherConfiguration.DEFAULT_NETCONF_PUSH_CONFIG_DELAY_MS;
 
@@ -55,7 +55,7 @@ public class ConfigPusherConfigurationBuilder {
         return this;
     }
 
-    public ConfigPusherConfigurationBuilder withConnectionAttemptTimeoutMs(long connectionAttemptTimeoutMs) {
+    public ConfigPusherConfigurationBuilder withConnectionAttemptTimeoutMs(int connectionAttemptTimeoutMs) {
         this.connectionAttemptTimeoutMs = connectionAttemptTimeoutMs;
         return this;
     }

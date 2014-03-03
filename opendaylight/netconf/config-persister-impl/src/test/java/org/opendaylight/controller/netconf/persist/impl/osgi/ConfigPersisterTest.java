@@ -31,6 +31,7 @@ import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfiguratio
 
 import com.google.common.collect.Lists;
 import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.netconf.persist.impl.client.ConfigPusherNetconfClient;
 
 public class ConfigPersisterTest {
 
@@ -90,8 +91,10 @@ public class ConfigPersisterTest {
 
             waitTestToFinish(2500);
 
-            handler.assertException("retrieve required capabilities from netconf endpoint", RuntimeException.class,
-                    "Expected but not found:[required-cap]");
+            handler.assertException("retrieve required capabilities from netconf endpoint",
+                    IllegalStateException.class, "did not provide required capabilities",
+                    ConfigPusherNetconfClient.MissingCapabilitiesException.class,
+                    "missing from server: [required-cap]", 1);
         }
     }
 
@@ -108,7 +111,7 @@ public class ConfigPersisterTest {
 
             handler.assertException("receive response from netconf endpoint", IllegalStateException.class,
                     "Unable to load", TimeoutException.class,
-                    null, 3);
+                    null, 2);
 
             assertEquals(1 + 2, endpoint.getReceivedMessages().size());
             assertHelloMessage(endpoint.getReceivedMessages().get(1));
@@ -222,7 +225,7 @@ public class ConfigPersisterTest {
                 .withEventLoopGroup(eventLoopGroup)
                 .withConnectionAttemptDelayMs(connectionAttemptDelayMs)
                 .withConnectionAttemptTimeoutMs(connectionAttemptTimeoutMs)
-                .withNetconfCapabilitiesWaitTimeoutMs(44)
+                .withNetconfCapabilitiesWaitTimeoutMs(1000)
                 .withNetconfAddress(new InetSocketAddress(NETCONF_ADDRESS, Integer.valueOf(NETCONF_PORT)));
     }
 
