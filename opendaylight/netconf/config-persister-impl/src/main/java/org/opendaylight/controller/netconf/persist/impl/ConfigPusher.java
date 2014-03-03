@@ -8,14 +8,22 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.base.Preconditions;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.concurrent.Immutable;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.persist.impl.client.ConfigPusherNetconfClient;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
-import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -25,26 +33,20 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.annotation.concurrent.Immutable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import com.google.common.base.Preconditions;
 
 @Immutable
-public class ConfigPusher {
+public class ConfigPusher implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(ConfigPusher.class);
 
     private final ConfigPusherConfiguration configuration;
+    private final NetconfClientDispatcher netconfClientDispatcher;
 
     public ConfigPusher(ConfigPusherConfiguration configuration) {
         this.configuration = configuration;
+        netconfClientDispatcher = new NetconfClientDispatcher(configuration.eventLoopGroup,
+                configuration.eventLoopGroup, configuration.getAdditionalHeader(),
+                configuration.connectionAttemptTimeoutMs);
     }
 
     public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> pushConfigs(
@@ -52,10 +54,15 @@ public class ConfigPusher {
         logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
 
         // first just make sure we can connect to netconf, even if nothing is being pushed
-        {
-            NetconfClient netconfClient = makeNetconfConnection(Collections.<String>emptySet());
-            Util.closeClientAndDispatcher(netconfClient);
+        try(ConfigPusherNetconfClient netconfClient = makeNetconfConnection(Collections.<String>emptySet()))
+        {}
+        catch (ConfigPusherNetconfClient.MissingCapabilitiesException e) {
+            // Cannot happen
+            throw new RuntimeException(e);
+        } catch (ConfigPusherNetconfClient.ConnectFailedException e) {
+            throw new RuntimeException("Could not connect to netconf server on " + configuration.netconfAddress, e);
         }
+
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> result = new LinkedHashMap<>();
         // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder : configs) {
@@ -71,26 +78,28 @@ public class ConfigPusher {
      * Checks for ConflictingVersionException and retries until optimistic lock succeeds or maximal
      * number of attempts is reached.
      */
-    private synchronized EditAndCommitResponseWithRetries pushSnapshotWithRetries(ConfigSnapshotHolder configSnapshotHolder)
-            throws InterruptedException {
+    private synchronized EditAndCommitResponseWithRetries pushSnapshotWithRetries(
+            ConfigSnapshotHolder configSnapshotHolder) throws InterruptedException {
 
-        ConflictingVersionException lastException = null;
+        Exception lastException = null;
         int maxAttempts = configuration.netconfPushConfigAttempts;
 
         for (int retryAttempt = 1; retryAttempt <= maxAttempts; retryAttempt++) {
-            NetconfClient netconfClient = makeNetconfConnection(configSnapshotHolder.getCapabilities());
-            logger.trace("Pushing following xml to netconf {}", configSnapshotHolder);
-            try {
+            try (ConfigPusherNetconfClient netconfClient = makeNetconfConnection(configSnapshotHolder.getCapabilities())) {
+                logger.trace("Pushing following xml to netconf {}", configSnapshotHolder);
                 EditAndCommitResponse editAndCommitResponse = pushLastConfig(configSnapshotHolder, netconfClient);
                 return new EditAndCommitResponseWithRetries(editAndCommitResponse, retryAttempt);
             } catch (ConflictingVersionException e) {
                 logger.debug("Conflicting version detected, will retry after timeout");
                 lastException = e;
                 Thread.sleep(configuration.netconfPushConfigDelayMs);
-            } catch (RuntimeException e) {
+            } catch (ConfigPusherNetconfClient.MissingCapabilitiesException e) {
+                throw new IllegalStateException("Netconf server did not provide required capabilities on "
+                        + configuration.netconfAddress, e);
+            } catch (ConfigPusherNetconfClient.ConnectFailedException e) {
+                throw new RuntimeException("Could not connect to netconf server on " + configuration.netconfAddress, e);
+            } catch (ConfigPusherNetconfClient.SendMessageException e) {
                 throw new IllegalStateException("Unable to load " + configSnapshotHolder, e);
-            } finally {
-                Util.closeClientAndDispatcher(netconfClient);
             }
         }
         throw new IllegalStateException("Maximum attempt count has been reached for pushing " + configSnapshotHolder,
@@ -100,64 +109,49 @@ public class ConfigPusher {
     /**
      * @param expectedCaps capabilities that server hello must contain. Will retry until all are found or throws RuntimeException.
      *                     If empty set is provided, will only make sure netconf client successfuly connected to the server.
-     * @return NetconfClient that has all required capabilities from server.
+     * @return ConfigPusherNetconfClient that has all required capabilities from server.
      */
-    private synchronized NetconfClient makeNetconfConnection(Set<String> expectedCaps) throws InterruptedException {
+    private synchronized ConfigPusherNetconfClient makeNetconfConnection(Set<String> expectedCaps) throws InterruptedException, ConfigPusherNetconfClient.MissingCapabilitiesException, ConfigPusherNetconfClient.ConnectFailedException {
+        final long deadlineNanos = configuration.getDeadlineForConnection();
 
-        // TODO think about moving capability subset check to netconf client
-        // could be utilized by integration tests
+        ConfigPusherNetconfClient netconfClient = new ConfigPusherNetconfClient(this.toString(), expectedCaps);
 
-        final long pollingStartNanos = System.nanoTime();
-        final long deadlineNanos = pollingStartNanos + TimeUnit.MILLISECONDS.toNanos(configuration.netconfCapabilitiesWaitTimeoutMs);
         int attempt = 0;
 
-        NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("unknown",
-                configuration.netconfAddress.getAddress().getHostAddress(),
-                Integer.toString(configuration.netconfAddress.getPort()), "tcp", "persister");
-
-        Set<String> latestCapabilities = null;
-        while (System.nanoTime() < deadlineNanos) {
-            attempt++;
-            NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(configuration.eventLoopGroup,
-                    configuration.eventLoopGroup, additionalHeader, configuration.connectionAttemptTimeoutMs);
-            NetconfClient netconfClient;
+        while (true) {
             try {
-                netconfClient = new NetconfClient(this.toString(), configuration.netconfAddress, configuration.connectionAttemptDelayMs, netconfClientDispatcher);
-            } catch (IllegalStateException e) {
-                logger.debug("Netconf {} was not initialized or is not stable, attempt {}", configuration.netconfAddress, attempt, e);
-                netconfClientDispatcher.close();
-                Thread.sleep(configuration.connectionAttemptDelayMs);
-                continue;
-            }
-            latestCapabilities = netconfClient.getCapabilities();
-            if (Util.isSubset(netconfClient, expectedCaps)) {
-                logger.debug("Hello from netconf stable with {} capabilities", latestCapabilities);
-                logger.trace("Session id received from netconf server: {}", netconfClient.getClientSession());
+                Set<String> allCaps = netconfClient.connect(configuration.netconfAddress, netconfClientDispatcher,
+                        configuration.getReconnectStrategy(deadlineNanos));
+                logger.debug("Hello from netconf stable with {} capabilities", allCaps);
+                logger.trace("Session id received from netconf server: {}", netconfClient.getClientSessionId());
                 return netconfClient;
+
+            } catch (ConfigPusherNetconfClient.ConnectFailedException e) {
+                // TODO these connection attempts might be replaced by reconnecting client
+                logger.debug("Netconf server connection attempt failed. Attempt {}", ++attempt, e);
+                Thread.sleep(configuration.connectionAttemptDelayMs);
+
+                if(System.nanoTime() > deadlineNanos) {
+                    logger.error("Could not connect to netconf server {} in {} ms, last failure caused by:",
+                            configuration.netconfAddress, configuration.netconfCapabilitiesWaitTimeoutMs, e);
+                    throw e;
+                }
+
+            } catch (ConfigPusherNetconfClient.MissingCapabilitiesException e) {
+                logger.debug("Netconf server did not provide required capabilities. Attempt {}. "
+                        + "Expected but not found: {}, all expected {}, current {}", ++attempt, e.getAllNotFound(),
+                        e.getExpectedCapabilities(), e.getServerCapabilities());
+                Thread.sleep(configuration.connectionAttemptDelayMs);
+
+                if (System.nanoTime() > deadlineNanos) {
+                    logger.error(
+                            "Netconf server did not provide required capabilities. Expected but not found: {}, all expected {}, current {}",
+                            e.getAllNotFound(), e.getExpectedCapabilities(), e.getServerCapabilities());
+                    throw e;
+                }
             }
-            Set<String> allNotFound = computeNotFoundCapabilities(expectedCaps, latestCapabilities);
-            logger.debug("Netconf server did not provide required capabilities. Attempt {}. " +
-                    "Expected but not found: {}, all expected {}, current {}",
-                    attempt, allNotFound, expectedCaps, latestCapabilities);
-            Util.closeClientAndDispatcher(netconfClient);
-            Thread.sleep(configuration.connectionAttemptDelayMs);
         }
-        if (latestCapabilities == null) {
-            logger.error("Could not connect to the server in {} ms", configuration.netconfCapabilitiesWaitTimeoutMs);
-            throw new RuntimeException("Could not connect to netconf server");
-        }
-        Set<String> allNotFound = computeNotFoundCapabilities(expectedCaps, latestCapabilities);
-        logger.error("Netconf server did not provide required capabilities. Expected but not found: {}, all expected {}, current {}",
-                allNotFound, expectedCaps, latestCapabilities);
-        throw new RuntimeException("Netconf server did not provide required capabilities. Expected but not found:" + allNotFound);
     }
-
-    private static Set<String> computeNotFoundCapabilities(Set<String> expectedCaps, Set<String> latestCapabilities) {
-        Set<String> allNotFound = new HashSet<>(expectedCaps);
-        allNotFound.removeAll(latestCapabilities);
-        return allNotFound;
-    }
-
 
     /**
      * Sends two RPCs to the netconf server: edit-config and commit.
@@ -167,8 +161,8 @@ public class ConfigPusher {
      * @throws ConflictingVersionException if commit fails on optimistic lock failure inside of config-manager
      * @throws java.lang.RuntimeException  if edit-config or commit fails otherwise
      */
-    private synchronized EditAndCommitResponse pushLastConfig(ConfigSnapshotHolder configSnapshotHolder, NetconfClient netconfClient)
-            throws ConflictingVersionException {
+    private synchronized EditAndCommitResponse pushLastConfig(ConfigSnapshotHolder configSnapshotHolder, ConfigPusherNetconfClient netconfClient)
+            throws ConflictingVersionException, ConfigPusherNetconfClient.SendMessageException {
 
         Element xmlToBePersisted;
         try {
@@ -184,16 +178,18 @@ public class ConfigPusher {
         NetconfMessage editResponseMessage;
         try {
             editResponseMessage = sendRequestGetResponseCheckIsOK(editConfigMessage, netconfClient);
-        } catch (IOException e) {
-            throw new IllegalStateException("Edit-config failed on " + configSnapshotHolder, e);
+        } catch (ConfigPusherNetconfClient.SendMessageException e) {
+            logger.warn("Edit-config failed on {}", configSnapshotHolder, e);
+            throw e;
         }
 
         // commit
         NetconfMessage commitResponseMessage;
         try {
             commitResponseMessage = sendRequestGetResponseCheckIsOK(getCommitMessage(), netconfClient);
-        } catch (IOException e) {
-            throw new IllegalStateException("Edit commit succeeded, but commit failed on " + configSnapshotHolder, e);
+        } catch (ConfigPusherNetconfClient.SendMessageException e) {
+            logger.warn("Edit commit succeeded, but commit failed on  {}", configSnapshotHolder, e);
+            throw e;
         }
 
         if (logger.isTraceEnabled()) {
@@ -210,22 +206,23 @@ public class ConfigPusher {
     }
 
 
-    private NetconfMessage sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfClient netconfClient)
-            throws ConflictingVersionException, IOException {
+    private NetconfMessage sendRequestGetResponseCheckIsOK(NetconfMessage request, ConfigPusherNetconfClient netconfClient)
+            throws ConflictingVersionException, ConfigPusherNetconfClient.SendMessageException {
         try {
             NetconfMessage netconfMessage = netconfClient.sendMessage(request,
-                    configuration.netconfSendMessageMaxAttempts, configuration.netconfSendMessageDelayMs);
+                    configuration.netconfSendMessageMaxAttempts * configuration.netconfSendMessageDelayMs);
             NetconfUtil.checkIsMessageOk(netconfMessage);
             return netconfMessage;
-        } catch(ConflictingVersionException e) {
-            logger.trace("conflicting version detected: {}", e.toString());
+        } catch (ConflictingVersionException e) {
+            logger.trace("Conflicting version detected: {}", e.toString());
             throw e;
-        } catch (RuntimeException | ExecutionException | InterruptedException | TimeoutException e) { // TODO: change NetconfClient#sendMessage to throw checked exceptions
+        } catch (ConfigPusherNetconfClient.SendMessageException e) {
             logger.debug("Error while executing netconf transaction {} to {}", request, netconfClient, e);
-            throw new IOException("Failed to execute netconf transaction", e);
+            throw e;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
-
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
     private static NetconfMessage createEditConfigMessage(Element dataElement) {
@@ -258,6 +255,15 @@ public class ConfigPusher {
         } catch (SAXException | IOException e) {
             // error reading the xml file bundled into the jar
             throw new RuntimeException("Error while opening local resource " + resource, e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            netconfClientDispatcher.close();
+        } catch (Exception e) {
+            logger.warn("Ignoring exception while closing {}", netconfClientDispatcher, e);
         }
     }
 

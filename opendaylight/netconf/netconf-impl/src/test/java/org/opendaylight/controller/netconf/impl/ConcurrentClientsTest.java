@@ -40,7 +40,7 @@ import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
@@ -285,13 +285,13 @@ public class ConcurrentClientsTest {
         @Override
         public void run() {
             try {
-                final NetconfClient netconfClient = new NetconfClient(clientId, netconfAddress, netconfClientDispatcher);
+                final TestingNetconfClient netconfClient = new TestingNetconfClient(clientId, netconfAddress, netconfClientDispatcher);
                 long sessionId = netconfClient.getSessionId();
                 logger.info("Client with sessionid {} hello exchanged", sessionId);
 
                 final NetconfMessage getMessage = XmlFileLoader
                         .xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
-                NetconfMessage result = netconfClient.sendMessage(getMessage);
+                NetconfMessage result = netconfClient.sendRequest(getMessage).get();
                 logger.info("Client with sessionid {} got result {}", sessionId, result);
                 netconfClient.close();
                 logger.info("Client with session id {} ended", sessionId);

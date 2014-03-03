@@ -58,8 +58,9 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
 
         if(this.additionalHeader.isPresent()) {
             helloMessage = new NetconfHelloMessage(helloMessage.getDocument(), additionalHeader.get());
-        } else
+        } else {
             helloMessage = new NetconfHelloMessage(helloMessage.getDocument());
+        }
 
         NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
