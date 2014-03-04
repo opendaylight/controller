@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_4a799392",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-04T15:41:20Z",
+      "side": 1,
+      "message": "shouldn\u0027t this cause retry after wait time?",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_2a6e5fca",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-04T15:41:20Z",
+      "side": 1,
+      "message": "shouldn\u0027t this cause retry after wait time?",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_6a74579c",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-04T15:41:20Z",
+      "side": 1,
+      "message": "Runtime exceptions raise warning in sonar",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_0aaa7bd4",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-04T15:41:20Z",
+      "side": 1,
+      "message": "connection timeout \u003d\u003d max wait for capabilities timeout? So on first attempt server is down, client disconnects after deadline, and while block will not be invoked again?",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
