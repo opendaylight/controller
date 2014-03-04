@@ -180,16 +180,22 @@ public class TopologyServiceShim implements IDiscoveryListener,
                     for (String container : containerList) {
                         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
                                 .get(container);
-                        Edge edge = edgePropsMap.get(connector).getLeft();
-                        if (edge.getTailNodeConnector().equals(connector)) {
-                            ITopologyServiceShimListener topologServiceShimListener = topologyServiceShimListeners
-                                    .get(container);
-                            if (update.type == UpdateType.ADDED) {
-                                topologServiceShimListener
-                                        .edgeOverUtilized(edge);
-                            } else {
-                                topologServiceShimListener
-                                        .edgeUtilBackToNormal(edge);
+                        // the edgePropsMap for a particular container may not have
+                        // the connector.
+                        // so check for null
+                        Pair<Edge, Set<Property>> edgeProp = edgePropsMap.get(connector);
+                        if(edgeProp != null) {
+                            Edge edge = edgeProp.getLeft();
+                            if (edge.getTailNodeConnector().equals(connector)) {
+                                ITopologyServiceShimListener topologServiceShimListener = topologyServiceShimListeners
+                                        .get(container);
+                                if (update.type == UpdateType.ADDED) {
+                                    topologServiceShimListener
+                                    .edgeOverUtilized(edge);
+                                } else {
+                                    topologServiceShimListener
+                                    .edgeUtilBackToNormal(edge);
+                                }
                             }
                         }
                     }
