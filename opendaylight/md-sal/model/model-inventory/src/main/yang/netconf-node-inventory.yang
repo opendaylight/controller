@@ -21,6 +21,14 @@ module netconf-node-inventory {
         leaf-list current-capability {
             type string;
         }
+
+        container pass-through {
+            when "../connected = true";
+            description
+                "When the underlying node is connected, its NETCONF context
+                is available verbatim under this container through the
+                mount extension.";
+        }
     }
     
     augment /inv:nodes/inv:node {
