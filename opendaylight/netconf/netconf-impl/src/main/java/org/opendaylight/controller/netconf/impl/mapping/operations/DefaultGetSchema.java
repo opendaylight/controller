@@ -12,10 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
-import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
+import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -27,7 +25,7 @@ import org.w3c.dom.Element;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
-public final class DefaultGetSchema extends AbstractNetconfOperation {
+public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
     public static final String IDENTIFIER = "identifier";
     public static final String VERSION = "version";
@@ -41,18 +39,17 @@ public final class DefaultGetSchema extends AbstractNetconfOperation {
     }
 
     @Override
-    protected HandlingPriority canHandle(String netconfOperationName, String namespace) {
-        if (netconfOperationName.equals("get-schema") == false)
-            return HandlingPriority.CANNOT_HANDLE;
-        if (namespace.equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING) == false)
-            return HandlingPriority.CANNOT_HANDLE;
-
-        return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY;
+    protected String getOperationName() {
+        return GET_SCHEMA;
     }
 
     @Override
-    protected Element handle(Document document, XmlElement xml, NetconfOperationRouter router)
-            throws NetconfDocumentedException {
+    protected String getOperationNamespace() {
+        return XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING;
+    }
+
+    @Override
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         GetSchemaEntry entry;
 
         try {

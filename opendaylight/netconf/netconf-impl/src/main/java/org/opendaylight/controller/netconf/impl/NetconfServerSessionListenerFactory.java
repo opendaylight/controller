@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
@@ -41,7 +42,7 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
 
         CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationServiceSnapshot);
 
-        NetconfOperationRouterImpl operationRouter = new NetconfOperationRouterImpl(
+        NetconfOperationRouter operationRouter = NetconfOperationRouterImpl.createOperationRouter(
                 netconfOperationServiceSnapshot, capabilityProvider,
                 commitNotifier);
 

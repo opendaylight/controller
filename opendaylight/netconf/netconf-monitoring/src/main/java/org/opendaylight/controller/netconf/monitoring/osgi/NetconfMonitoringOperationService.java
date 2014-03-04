@@ -7,27 +7,26 @@
 */
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.monitoring.Get;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 
 public class NetconfMonitoringOperationService implements NetconfOperationService {
 
@@ -89,12 +88,7 @@ public class NetconfMonitoringOperationService implements NetconfOperationServic
 
     @Override
     public Set<NetconfOperation> getNetconfOperations() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<NetconfOperationFilter> getFilters() {
-        return Sets.<NetconfOperationFilter>newHashSet(new Get(monitor));
+        return Sets.<NetconfOperation>newHashSet(new Get(monitor));
     }
 
     @Override

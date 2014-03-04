@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
@@ -20,9 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class DiscardChanges extends AbstractConfigNetconfOperation {
 
@@ -49,7 +49,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         try {
             fromXml(xml);
         } catch (final IllegalArgumentException e) {

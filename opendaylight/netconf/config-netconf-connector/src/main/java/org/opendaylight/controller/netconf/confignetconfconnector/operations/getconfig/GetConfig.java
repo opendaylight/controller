@@ -8,7 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig;
 
-import com.google.common.base.Optional;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
@@ -29,10 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Optional;
 
 public class GetConfig extends AbstractConfigNetconfOperation {
 
@@ -101,7 +103,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    public Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
+    public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         Datastore source;
         try {
             source = fromXml(xml);

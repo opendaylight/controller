@@ -8,30 +8,27 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import java.util.Collections;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
+import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class DefaultCloseSession extends AbstractNetconfOperation {
+public class DefaultCloseSession extends AbstractSingletonNetconfOperation {
     public static final String CLOSE_SESSION = "close-session";
+    private final AutoCloseable sessionResources;
 
-    public DefaultCloseSession(String netconfSessionIdForReporting) {
+    public DefaultCloseSession(String netconfSessionIdForReporting, AutoCloseable sessionResources) {
         super(netconfSessionIdForReporting);
+        this.sessionResources = sessionResources;
     }
 
     @Override
-    protected HandlingPriority canHandle(String operationName, String netconfOperationNamespace) {
-        if (operationName.equals(CLOSE_SESSION) == false)
-            return HandlingPriority.CANNOT_HANDLE;
-        if (netconfOperationNamespace.equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0) == false)
-            return HandlingPriority.CANNOT_HANDLE;
-
-        return HandlingPriority.HANDLE_WITH_MAX_PRIORITY;
+    protected String getOperationName() {
+        return CLOSE_SESSION;
     }
 
     /**
@@ -40,9 +37,17 @@ public class DefaultCloseSession extends AbstractNetconfOperation {
      * instances
      */
     @Override
-    protected Element handle(Document document, XmlElement operationElement, NetconfOperationRouter opRouter)
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement)
             throws NetconfDocumentedException {
-        opRouter.close();
+        try {
+            sessionResources.close();
+        } catch (Exception e) {
+            throw new NetconfDocumentedException("Unable to properly close session "
+                    + getNetconfSessionIdForReporting(), NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error, Collections.singletonMap(
+                    NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
+        }
         return document.createElement(XmlNetconfConstants.OK);
     }
 }

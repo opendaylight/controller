@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.netconf.monitoring;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilterChain;
+import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.monitoring.xml.JaxBSerializer;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
@@ -24,32 +24,50 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
-public class Get implements NetconfOperationFilter {
+public class Get extends AbstractNetconfOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
     private final NetconfMonitoringService netconfMonitor;
 
     public Get(NetconfMonitoringService netconfMonitor) {
+        super(MonitoringConstants.MODULE_NAME);
         this.netconfMonitor = netconfMonitor;
     }
 
-    @Override
-    public Document doFilter(Document message, NetconfOperationRouter operationRouter,
-            NetconfOperationFilterChain filterChain) throws NetconfDocumentedException {
-        AbstractNetconfOperation.OperationNameAndNamespace operationNameAndNamespace = new AbstractNetconfOperation.OperationNameAndNamespace(
-                message);
-        if (canHandle(operationNameAndNamespace)) {
-            return handle(message, operationRouter, filterChain);
+    private Element getPlaceholder(Document innerResult) {
+        try {
+            XmlElement rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
+                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+            return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException(String.format(
+                    "Input xml in wrong format, Expecting root element %s with child element %s, but was %s",
+                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.DATA_KEY,
+                    XmlUtil.toString(innerResult.getDocumentElement())), e);
         }
-        return filterChain.execute(message, operationRouter);
     }
 
-    private Document handle(Document message, NetconfOperationRouter operationRouter,
-            NetconfOperationFilterChain filterChain) throws NetconfDocumentedException {
+    @Override
+    protected String getOperationName() {
+        return XmlNetconfConstants.GET;
+    }
+
+    @Override
+    protected HandlingPriority getHandlingPriority() {
+        return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1);
+    }
+
+    @Override
+    public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation)
+            throws NetconfDocumentedException {
+        Preconditions.checkArgument(subsequentOperation.isExecutionTermination() == false,
+                "Subsequent netconf operation expected by %s", this);
+
         try {
-            Document innerResult = filterChain.execute(message, operationRouter);
+            Document innerResult = subsequentOperation.execute(requestMessage);
 
             NetconfState netconfMonitoring = new NetconfState(netconfMonitor);
             Element monitoringXmlElement = new JaxBSerializer().toXml(netconfMonitoring);
@@ -70,35 +88,9 @@ public class Get implements NetconfOperationFilter {
         }
     }
 
-    private Element getPlaceholder(Document innerResult) {
-        try {
-            XmlElement rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
-            return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException(String.format(
-                    "Input xml in wrong format, Expecting root element %s with child element %s, but was %s",
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.DATA_KEY,
-                    XmlUtil.toString(innerResult.getDocumentElement())), e);
-        }
-    }
-
-    private boolean canHandle(AbstractNetconfOperation.OperationNameAndNamespace operationNameAndNamespace) {
-        if (operationNameAndNamespace.getOperationName().equals(XmlNetconfConstants.GET) == false)
-            return false;
-        return operationNameAndNamespace.getNamespace().equals(
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-    }
-
     @Override
-    public int getSortingOrder() {
-        // FIXME filters for different operations cannot have same order
-        return 1;
+    protected Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation)
+            throws NetconfDocumentedException {
+        throw new UnsupportedOperationException("Never gets called");
     }
-
-    @Override
-    public int compareTo(NetconfOperationFilter o) {
-        return Integer.compare(getSortingOrder(), o.getSortingOrder());
-    }
-
 }

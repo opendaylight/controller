@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
-import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
+import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -21,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class DefaultStartExi extends AbstractNetconfOperation implements DefaultNetconfOperation {
+public class DefaultStartExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
 
     public static final String START_EXI = "start-exi";
 
@@ -34,20 +32,12 @@ public class DefaultStartExi extends AbstractNetconfOperation implements Default
     }
 
     @Override
-    protected HandlingPriority canHandle(String operationName,
-            String netconfOperationNamespace) {
-        if (operationName.equals(START_EXI) == false)
-            return HandlingPriority.CANNOT_HANDLE;
-        if (netconfOperationNamespace
-                .equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0) == false)
-            return HandlingPriority.CANNOT_HANDLE;
-
-        return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY;
+    protected String getOperationName() {
+        return START_EXI;
     }
 
     @Override
-    protected Element handle(Document document, XmlElement operationElement,
-            NetconfOperationRouter opRouter) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
 
 
         Element getSchemaResult = document
