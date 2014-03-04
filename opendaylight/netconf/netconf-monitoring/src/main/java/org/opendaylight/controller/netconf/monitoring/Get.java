@@ -40,7 +40,7 @@ public class Get extends AbstractNetconfOperation {
     private Element getPlaceholder(Document innerResult) {
         try {
             XmlElement rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
             return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
         } catch (RuntimeException e) {
             throw new IllegalArgumentException(String.format(

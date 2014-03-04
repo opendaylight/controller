@@ -21,7 +21,7 @@ public final class XMLNetconfUtil {
         final XPathFactory xPathfactory = XPathFactory.newInstance();
         final XPath xpath = xPathfactory.newXPath();
         xpath.setNamespaceContext(new HardcodedNamespaceResolver("netconf",
-                XmlNetconfConstants.RFC4741_TARGET_NAMESPACE));
+                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
         try {
             return xpath.compile(xPath);
         } catch (final XPathExpressionException e) {
