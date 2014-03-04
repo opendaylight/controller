@@ -812,6 +812,11 @@
         <version>${controller.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.controller.md</groupId>
+        <artifactId>disconnect-manager</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>	  
+      <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>clustering.stub</artifactId>
         <version>${clustering.stub.version}</version>
