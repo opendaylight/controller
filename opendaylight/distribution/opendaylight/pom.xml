@@ -113,6 +113,11 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>disconnect-manager</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>inventory-manager</artifactId>
         </dependency>
         <dependency>
