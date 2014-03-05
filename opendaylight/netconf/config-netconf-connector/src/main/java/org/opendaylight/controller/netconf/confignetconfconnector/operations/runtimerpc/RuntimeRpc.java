@@ -66,7 +66,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         // Either allow List of Elements to be returned from NetconfOperation or
         // pass reference to parent output xml element for netconf operations to
         // append result(s) on their own
-        Element tempParent = doc.createElementNS(XmlNetconfConstants.RFC4741_TARGET_NAMESPACE, "output");
+        Element tempParent = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, "output");
         new ObjectXmlWriter().prepareWritingStrategy(elementName, returnType, doc).writeElement(tempParent, namespace, mappedAttributeOpt.get());
 
         XmlElement xmlElement = XmlElement.fromDomElement(tempParent);
