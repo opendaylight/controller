@@ -13,6 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
@@ -101,7 +102,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     }
 
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
         Preconditions.checkNotNull(storage, "Storage file is null");
 
         if (!storage.exists()) {
@@ -117,8 +118,8 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     }
 
 
-    public ConfigSnapshotHolder toConfigSnapshot(final ConfigSnapshot configSnapshot) {
-        return new ConfigSnapshotHolder() {
+    public NamedConfigSnapshotHolder toConfigSnapshot(final ConfigSnapshot configSnapshot) {
+        return new NamedConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
                 return configSnapshot.getConfigSnapshot();
@@ -132,6 +133,11 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
             @Override
             public String toString() {
                 return configSnapshot.toString();
+            }
+
+            @Override
+            public String getSnapshotName() {
+                return storage.toString();
             }
         };
     }

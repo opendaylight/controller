@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
@@ -158,12 +159,12 @@ public final class PersisterAggregator implements Persister {
      * @return last non-empty result from input persisters
      */
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs()  {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs()  {
         // iterate in reverse order
         ListIterator<PersisterWithConfiguration> li = persisterWithConfigurations.listIterator(persisterWithConfigurations.size());
         while(li.hasPrevious()) {
             PersisterWithConfiguration persisterWithConfiguration = li.previous();
-            List<ConfigSnapshotHolder> configs = null;
+            List<NamedConfigSnapshotHolder> configs = null;
             try {
                 configs = persisterWithConfiguration.storage.loadLastConfigs();
             } catch (IOException e) {

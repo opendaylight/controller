@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.util.xml;
 
 public final class XmlNetconfConstants {
 
+
     private XmlNetconfConstants() {}
 
     public static final String MOUNTPOINTS = "mountpoints";
@@ -37,6 +38,7 @@ public final class XmlNetconfConstants {
 
     public static final String PREFIX = "prefix";
 
+    public static final String MESSAGE_ID_ATTRIBUTE = "message-id";
     //
     //
     public static final String RFC4741_TARGET_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";

@@ -20,6 +20,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.persist.impl.client.ConfigPusherNetconfClient;
@@ -29,6 +30,7 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -50,7 +52,7 @@ public class ConfigPusher implements Closeable {
     }
 
     public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> pushConfigs(
-            List<ConfigSnapshotHolder> configs) throws InterruptedException {
+            List<NamedConfigSnapshotHolder> configs) throws InterruptedException {
         logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
 
         // first just make sure we can connect to netconf, even if nothing is being pushed
@@ -65,7 +67,7 @@ public class ConfigPusher implements Closeable {
 
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> result = new LinkedHashMap<>();
         // start pushing snapshots:
-        for (ConfigSnapshotHolder configSnapshotHolder : configs) {
+        for (NamedConfigSnapshotHolder configSnapshotHolder : configs) {
             EditAndCommitResponseWithRetries editAndCommitResponseWithRetries = pushSnapshotWithRetries(configSnapshotHolder);
             logger.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
             result.put(configSnapshotHolder, editAndCommitResponseWithRetries);
@@ -79,7 +81,7 @@ public class ConfigPusher implements Closeable {
      * number of attempts is reached.
      */
     private synchronized EditAndCommitResponseWithRetries pushSnapshotWithRetries(
-            ConfigSnapshotHolder configSnapshotHolder) throws InterruptedException {
+            NamedConfigSnapshotHolder configSnapshotHolder) throws InterruptedException {
 
         Exception lastException = null;
         int maxAttempts = configuration.netconfPushConfigAttempts;
@@ -108,7 +110,7 @@ public class ConfigPusher implements Closeable {
 
     /**
      * @param expectedCaps capabilities that server hello must contain. Will retry until all are found or throws RuntimeException.
-     *                     If empty set is provided, will only make sure netconf client successfuly connected to the server.
+     *                     If empty set is provided, will only make sure netconf client successfully connected to the server.
      * @return ConfigPusherNetconfClient that has all required capabilities from server.
      */
     private synchronized ConfigPusherNetconfClient makeNetconfConnection(Set<String> expectedCaps) throws InterruptedException, ConfigPusherNetconfClient.MissingCapabilitiesException, ConfigPusherNetconfClient.ConnectFailedException {
@@ -154,18 +156,18 @@ public class ConfigPusher implements Closeable {
      * @throws ConflictingVersionException if commit fails on optimistic lock failure inside of config-manager
      * @throws java.lang.RuntimeException  if edit-config or commit fails otherwise
      */
-    private synchronized EditAndCommitResponse pushLastConfig(ConfigSnapshotHolder configSnapshotHolder, ConfigPusherNetconfClient netconfClient)
+    private synchronized EditAndCommitResponse pushLastConfig(NamedConfigSnapshotHolder configSnapshotHolder, ConfigPusherNetconfClient netconfClient)
             throws ConflictingVersionException, ConfigPusherNetconfClient.SendMessageException {
 
-        Element xmlToBePersisted;
+        Element xmlToBePushed;
         try {
-            xmlToBePersisted = XmlUtil.readXmlToElement(configSnapshotHolder.getConfigSnapshot());
+            xmlToBePushed = XmlUtil.readXmlToElement(configSnapshotHolder.getConfigSnapshot());
         } catch (SAXException | IOException e) {
             throw new IllegalStateException("Cannot parse " + configSnapshotHolder);
         }
         logger.trace("Pushing last configuration to netconf: {}", configSnapshotHolder);
 
-        NetconfMessage editConfigMessage = createEditConfigMessage(xmlToBePersisted);
+        NetconfMessage editConfigMessage = createEditConfigMessage(xmlToBePushed, configSnapshotHolder.getSnapshotName());
 
         // sending message to netconf
         NetconfMessage editResponseMessage;
@@ -218,19 +220,22 @@ public class ConfigPusher implements Closeable {
     }
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
-    private static NetconfMessage createEditConfigMessage(Element dataElement) {
+    private static NetconfMessage createEditConfigMessage(Element dataElement, String snapshotName) {
         String editConfigResourcePath = "/netconfOp/editConfig.xml";
         try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcePath)) {
             Preconditions.checkNotNull(stream, "Unable to load resource " + editConfigResourcePath);
 
             Document doc = XmlUtil.readXmlToDocument(stream);
 
+            // Add name of file that is being pushed to edit-config message as message-id
+            Attr messageIdAttr = doc.getDocumentElement().getAttributeNode(XmlNetconfConstants.MESSAGE_ID_ATTRIBUTE);
+            messageIdAttr.setValue(messageIdAttr.getNodeValue() + ":" + snapshotName);
+
             XmlElement editConfigElement = XmlElement.fromDomDocument(doc).getOnlyChildElement();
             XmlElement configWrapper = editConfigElement.getOnlyChildElement(XmlNetconfConstants.CONFIG_KEY);
             editConfigElement.getDomElement().removeChild(configWrapper.getDomElement());
             for (XmlElement el : XmlElement.fromDomElement(dataElement).getChildElements()) {
-                boolean deep = true;
-                configWrapper.appendChild((Element) doc.importNode(el.getDomElement(), deep));
+                configWrapper.appendChild((Element) doc.importNode(el.getDomElement(), true));
             }
             editConfigElement.appendChild(configWrapper.getDomElement());
             return new NetconfMessage(doc);

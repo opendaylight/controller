@@ -12,6 +12,7 @@ import com.google.common.io.Files;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolderImpl;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class DirectoryPersister implements Persister {
     }
 
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
         File[] filesArray = storage.listFiles();
         if (filesArray == null || filesArray.length == 0) {
             return Collections.emptyList();
@@ -76,17 +77,17 @@ public class DirectoryPersister implements Persister {
         // combine all found files
         logger.debug("Reading files in following order: {}", sortedFiles);
 
-        List<ConfigSnapshotHolder> result = new ArrayList<>();
+        List<NamedConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
 
-            ConfigSnapshotHolder configSnapshotHolder = loadLastConfig(file);
+            NamedConfigSnapshotHolder configSnapshotHolder = loadLastConfig(file);
             result.add(configSnapshotHolder);
         }
         return result;
     }
 
-    public static ConfigSnapshotHolder loadLastConfig(File file) throws IOException {
+    public static NamedConfigSnapshotHolder loadLastConfig(File file) throws IOException {
         final MyLineProcessor lineProcessor = new MyLineProcessor(file.getAbsolutePath());
         Files.readLines(file, ENCODING, lineProcessor);
         return lineProcessor.getConfigSnapshotHolder(header, middle, footer);
@@ -167,9 +168,9 @@ class MyLineProcessor implements com.google.common.io.LineProcessor<String> {
         return caps;
     }
 
-    ConfigSnapshotHolder getConfigSnapshotHolder(String header, String middle, String footer) {
+    NamedConfigSnapshotHolder getConfigSnapshotHolder(String header, String middle, String footer) {
         String combinedSnapshot = header + getModules() + middle + getServices() + footer;
-        ConfigSnapshotHolder result = new ConfigSnapshotHolderImpl(combinedSnapshot, getCapabilities(), fileNameForReporting);
+        NamedConfigSnapshotHolder result = new ConfigSnapshotHolderImpl(combinedSnapshot, getCapabilities(), fileNameForReporting);
         return result;
     }
 

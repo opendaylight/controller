@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.netconf.persist.impl.DummyAdapter;
@@ -65,8 +65,8 @@ final class MockedBundleContext {
         public static String expectedCapability = "cap2";
 
         @Override
-        public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
-            return Lists.newArrayList(getConfigSnapshopt());
+        public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
+            return Lists.newArrayList(getConfigSnapshot());
         }
 
         @Override
@@ -74,8 +74,8 @@ final class MockedBundleContext {
             return this;
         }
 
-        public ConfigSnapshotHolder getConfigSnapshopt() {
-            return new ConfigSnapshotHolder() {
+        public NamedConfigSnapshotHolder getConfigSnapshot() {
+            return new NamedConfigSnapshotHolder() {
                 @Override
                 public String getConfigSnapshot() {
                     return "<data><" + CONFIG_SNAPSHOT + "/></data>";
@@ -91,6 +91,11 @@ final class MockedBundleContext {
                 @Override
                 public String toString() {
                     return getConfigSnapshot();
+                }
+
+                @Override
+                public String getSnapshotName() {
+                    return "Mocked snapshot";
                 }
             };
         }
