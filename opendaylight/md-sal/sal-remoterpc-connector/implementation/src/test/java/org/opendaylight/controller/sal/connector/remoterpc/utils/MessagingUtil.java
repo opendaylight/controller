@@ -78,6 +78,41 @@ public class MessagingUtil {
     };
   }
 
+  public static Runnable sendAMessage(final ZMQ.Context context, final String serverAddress, final Message msg)
+      throws IOException, ClassNotFoundException, InterruptedException {
+
+    return new Runnable() {
+      @Override
+      public void run() {
+        final ZMQ.Socket socket = context.socket(ZMQ.REQ);
+        try {
+
+          socket.connect(serverAddress);
+          System.out.println(Thread.currentThread().getName() + " Sending message");
+          try {
+            socket.send(Message.serialize(msg));
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          byte[] bytes = socket.recv();
+          Message response = null;
+          try {
+            response = (Message) Message.deserialize(bytes);
+          } catch (IOException e) {
+            e.printStackTrace();
+          } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+          }
+          System.out.println(Thread.currentThread().getName() + " Got response " + response);
+        } catch (Exception x) {
+          x.printStackTrace();
+        } finally {
+          socket.close();
+        }
+      }
+    };
+  }
+
   public static Runnable sendAnEmptyMessage(final ZMQ.Context context, final String serverAddress)
           throws IOException, ClassNotFoundException, InterruptedException {
 
