@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_0a5ddbe9",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-05T07:38:25Z",
+      "side": 1,
+      "message": "Retry for missing capabilities is implemented in makeNetconfConnection method. If the capabilities are not stable after dead line, the last MissingCapabilitiesException is thrown. It is just reported here as final state after deadline.",
+      "parentUuid": "9a5c5d37_4a799392",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_2a6e5fca",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-04T15:41:20Z",
       "side": 1,
       "message": "shouldn\u0027t this cause retry after wait time?",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_ea716778",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-05T07:38:25Z",
+      "side": 1,
+      "message": "Same as missing capabilities, but the reconnect is now performed by reconnecting strategy passed to client dispatcher.",
+      "parentUuid": "9a5c5d37_2a6e5fca",
       "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_ca6ea396",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-05T07:38:25Z",
+      "side": 1,
+      "message": "Will delete",
+      "parentUuid": "9a5c5d37_6a74579c",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_0aaa7bd4",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-03-04T15:41:20Z",
       "side": 1,
       "message": "connection timeout \u003d\u003d max wait for capabilities timeout? So on first attempt server is down, client disconnects after deadline, and while block will not be invoked again?",
+      "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_aa6b6f84",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-05T07:38:25Z",
+      "side": 1,
+      "message": "Client is reconnecting (using reconnecting strategy), the reconnect attempts get max deadline as the deadline for stable capabilities (exactly as it used to be). \n\nWe might introduce another deadline, just for reconnect attempts. Now the capabilities-stable-timeout is used for the whole process of connection establishment + capability stabilisation.",
+      "parentUuid": "9a5c5d37_0aaa7bd4",
       "revId": "d6f852b28ec19cbc07d5fceb3838dcd5763fb36b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
