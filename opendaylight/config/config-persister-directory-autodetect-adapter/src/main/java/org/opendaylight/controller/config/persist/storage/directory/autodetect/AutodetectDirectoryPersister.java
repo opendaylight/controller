@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.persist.storage.directory.autodetect;
 
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.storage.directory.DirectoryPersister;
 import org.opendaylight.controller.config.persist.storage.directory.xml.XmlDirectoryPersister;
@@ -40,7 +41,7 @@ public class AutodetectDirectoryPersister implements Persister {
     }
 
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
         File[] filesArray = storage.listFiles();
         if (filesArray == null || filesArray.length == 0) {
             return Collections.emptyList();
@@ -51,20 +52,20 @@ public class AutodetectDirectoryPersister implements Persister {
         // combine all found files
         logger.debug("Reading files in following order: {}", sortedFiles);
 
-        List<ConfigSnapshotHolder> result = new ArrayList<>();
+        List<NamedConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
 
             FileType fileType = FileType.getFileType(file);
             logger.trace("File '{}' detected as {} storage", file, fileType);
 
-            ConfigSnapshotHolder snapshot = loadLastConfig(file, fileType);
+            NamedConfigSnapshotHolder snapshot = loadLastConfig(file, fileType);
             result.add(snapshot);
         }
         return result;
     }
 
-    private ConfigSnapshotHolder loadLastConfig(File file, FileType fileType) throws IOException {
+    private NamedConfigSnapshotHolder loadLastConfig(File file, FileType fileType) throws IOException {
         switch (fileType) {
         case plaintext:
             logger.warn("Plaintext configuration files are deprecated, and will not be supported in future versions. " +

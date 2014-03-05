@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.persist.impl;
 
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
@@ -142,7 +143,7 @@ public class PersisterAggregatorTest {
         persisterWithConfigurations.add(third);
 
         PersisterAggregator persisterAggregator = new PersisterAggregator(persisterWithConfigurations);
-        List<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfigs();
         assertEquals(1, configSnapshotHolderOptional.size());
         assertEquals(used, configSnapshotHolderOptional.get(0));
     }

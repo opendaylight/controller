@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
@@ -28,7 +29,7 @@ public class DummyAdapter implements StorageAdapter, Persister {
     static int load = 0;
 
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
         load++;
         return Collections.emptyList();
     }

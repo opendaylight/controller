@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import static junit.framework.Assert.assertFalse;
 import static org.hamcrest.CoreMatchers.is;
@@ -93,7 +94,7 @@ public class FileStorageAdapterTest {
         storage.persistConfig(holder);
 
         assertEquals(27, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
-        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
         assertEquals("<config>2</config>",
@@ -104,7 +105,7 @@ public class FileStorageAdapterTest {
         storage.setFileStorage(file);
         storage.setNumberOfBackups(Integer.MAX_VALUE);
 
-        List<ConfigSnapshotHolder> last = storage.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> last = storage.loadLastConfigs();
         Assert.assertEquals(createCaps(), last.get(0).getCapabilities());
     }
 
@@ -144,7 +145,7 @@ public class FileStorageAdapterTest {
 
         assertEquals(27, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
 
-        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
         assertEquals("<config>2</config>",
@@ -175,7 +176,7 @@ public class FileStorageAdapterTest {
         List<String> readLines = com.google.common.io.Files.readLines(file, Charsets.UTF_8);
         assertEquals(27, readLines.size());
 
-        List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
         assertEquals("<config>3</config>",
@@ -191,7 +192,7 @@ public class FileStorageAdapterTest {
         XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
         storage.setFileStorage(file);
 
-        List<ConfigSnapshotHolder> elementOptional = storage.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> elementOptional = storage.loadLastConfigs();
         assertThat(elementOptional.size(), is(0));
     }
 

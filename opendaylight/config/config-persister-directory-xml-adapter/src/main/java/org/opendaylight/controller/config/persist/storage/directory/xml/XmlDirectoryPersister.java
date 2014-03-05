@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.persist.storage.directory.xml;
 
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class XmlDirectoryPersister implements Persister {
     }
 
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
         File[] filesArray = storage.listFiles();
         if (filesArray == null || filesArray.length == 0) {
             return Collections.emptyList();
@@ -52,16 +53,16 @@ public class XmlDirectoryPersister implements Persister {
         // combine all found files
         logger.debug("Reading files in following order: {}", sortedFiles);
 
-        List<ConfigSnapshotHolder> result = new ArrayList<>();
+        List<NamedConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
-            ConfigSnapshotHolder h = fromXmlSnapshot(file);
+            NamedConfigSnapshotHolder h = fromXmlSnapshot(file);
             result.add(h);
         }
         return result;
     }
 
-    private ConfigSnapshotHolder fromXmlSnapshot(File file) {
+    private NamedConfigSnapshotHolder fromXmlSnapshot(File file) {
         try {
             return loadLastConfig(file);
         } catch (JAXBException e) {
@@ -70,15 +71,15 @@ public class XmlDirectoryPersister implements Persister {
         }
     }
 
-    public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
+    public static NamedConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
 
-        return asHolder((ConfigSnapshot) um.unmarshal(file));
+        return asHolder((ConfigSnapshot) um.unmarshal(file), file);
     }
 
-    private static ConfigSnapshotHolder asHolder(final ConfigSnapshot unmarshalled) {
-        return new ConfigSnapshotHolder() {
+    private static NamedConfigSnapshotHolder asHolder(final ConfigSnapshot unmarshalled, final File file) {
+        return new NamedConfigSnapshotHolder() {
             @Override
             public String getConfigSnapshot() {
                 return unmarshalled.getConfigSnapshot();
@@ -92,6 +93,11 @@ public class XmlDirectoryPersister implements Persister {
             @Override
             public String toString() {
                 return unmarshalled.toString();
+            }
+
+            @Override
+            public String getSnapshotName() {
+                return file.getName();
             }
         };
     }

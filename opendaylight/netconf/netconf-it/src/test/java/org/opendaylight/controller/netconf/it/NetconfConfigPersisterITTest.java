@@ -38,6 +38,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
@@ -261,7 +262,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         }
 
         @Override
-        public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+        public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
             return mockedPersister.loadLastConfigs();
         }
 

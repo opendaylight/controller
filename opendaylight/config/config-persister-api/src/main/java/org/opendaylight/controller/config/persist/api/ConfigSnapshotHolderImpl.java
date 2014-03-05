@@ -9,7 +9,7 @@ package org.opendaylight.controller.config.persist.api;
 
 import java.util.SortedSet;
 
-public class ConfigSnapshotHolderImpl implements ConfigSnapshotHolder {
+public class ConfigSnapshotHolderImpl implements NamedConfigSnapshotHolder {
 
     private final String snapshot;
     private final SortedSet<String> caps;
@@ -31,7 +31,8 @@ public class ConfigSnapshotHolderImpl implements ConfigSnapshotHolder {
         return caps;
     }
 
-    public String getFileName() {
+    @Override
+    public String getSnapshotName() {
         return fileName;
     }
 
