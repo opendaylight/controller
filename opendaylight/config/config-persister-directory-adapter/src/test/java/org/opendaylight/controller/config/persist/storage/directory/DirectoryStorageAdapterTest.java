@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import static org.junit.Assert.assertEquals;
@@ -70,7 +71,7 @@ public class DirectoryStorageAdapterTest {
 
         tested = instantiatePersisterFromAdapter(folder);
 
-        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
         ConfigSnapshotHolder result = results.get(0);
         assertSnapshot(result, "oneFileExpected");
@@ -82,7 +83,7 @@ public class DirectoryStorageAdapterTest {
         File folder = getFolder("twoFiles");
         tested = instantiatePersisterFromAdapter(folder);
 
-        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());
         assertSnapshot(results.get(0), "twoFilesExpected1");
         assertSnapshot(results.get(1), "twoFilesExpected2");

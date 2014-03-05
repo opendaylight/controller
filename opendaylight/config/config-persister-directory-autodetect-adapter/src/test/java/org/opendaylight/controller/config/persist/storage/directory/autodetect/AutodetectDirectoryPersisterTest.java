@@ -13,7 +13,7 @@ import java.util.List;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -30,7 +30,7 @@ public class AutodetectDirectoryPersisterTest {
         PropertiesProviderTest pp = new PropertiesProviderTest();
         pp.addProperty("directoryStorage",parentFile.getPath());
         AutodetectDirectoryPersister persister = (AutodetectDirectoryPersister) adapter.instantiate(pp);
-        List<ConfigSnapshotHolder> configs = persister.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> configs = persister.loadLastConfigs();
 
         Assert.assertEquals(2, configs.size());
         String snapFromTxt = configs.get(0).getConfigSnapshot();
@@ -54,7 +54,7 @@ public class AutodetectDirectoryPersisterTest {
         pp.addProperty("directoryStorage",parentFile.getPath());
         AutodetectDirectoryPersister persister = (AutodetectDirectoryPersister) adapter.instantiate(pp);
         try {
-            List<ConfigSnapshotHolder> configs = persister.loadLastConfigs();
+            List<NamedConfigSnapshotHolder> configs = persister.loadLastConfigs();
             fail("An exception of type " + IllegalStateException.class + " was expected");
         } catch (IllegalStateException ise){
             String message = ise.getMessage();
@@ -73,7 +73,7 @@ public class AutodetectDirectoryPersisterTest {
         PropertiesProviderTest pp = new PropertiesProviderTest();
         pp.addProperty("directoryStorage",parentFile.getPath());
         AutodetectDirectoryPersister persister = (AutodetectDirectoryPersister) adapter.instantiate(pp);
-        List<ConfigSnapshotHolder> configs = null;
+        List<NamedConfigSnapshotHolder> configs = null;
         try {
             configs = persister.loadLastConfigs();
         } catch (IOException e) {

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.SortedSet;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class DirectoryStorageAdapterTest {
         tested = instantiatePersisterFromAdapter(folder);
 
         logger.info("Testing : "+tested.toString());
-        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
         ConfigSnapshotHolder result = results.get(0);
         assertResult(result, "<config>1</config>", "cap1&rev", "cap2", "capa a");
@@ -91,7 +92,7 @@ public class DirectoryStorageAdapterTest {
         File folder = getFolder("twoFiles");
         tested = instantiatePersisterFromAdapter(folder);
         logger.info("Testing : "+tested.toString());
-        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        List<NamedConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());
 
         assertResult(results.get(0), "<config>1</config>", "cap1-a", "cap2-a", "capa a-a");

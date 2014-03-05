@@ -25,6 +25,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolderImpl;
+import org.opendaylight.controller.config.persist.api.NamedConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
@@ -165,7 +166,7 @@ public class FileStorageAdapter implements StorageAdapter, Persister {
     }
 
     @Override
-    public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
+    public List<NamedConfigSnapshotHolder> loadLastConfigs() throws IOException {
         Preconditions.checkNotNull(storage, "Storage file is null");
 
         if (!storage.exists()) {
@@ -178,7 +179,7 @@ public class FileStorageAdapter implements StorageAdapter, Persister {
         if (lineProcessor.getConfigSnapshot().isPresent() == false) {
             return Collections.emptyList();
         } else {
-            return Arrays.<ConfigSnapshotHolder>asList(new ConfigSnapshotHolderImpl(lineProcessor.getConfigSnapshot().get(),
+            return Arrays.<NamedConfigSnapshotHolder>asList(new ConfigSnapshotHolderImpl(lineProcessor.getConfigSnapshot().get(),
                     lineProcessor.getCapabilities(), storage.getAbsolutePath()));
         }
 
