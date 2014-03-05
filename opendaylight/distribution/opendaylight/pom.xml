@@ -165,6 +165,18 @@
           <artifactId>restconf-client-impl</artifactId>
         </dependency>
 
+        <!-- clustering -->
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>remoterpc-routingtable.implementation</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-remoterpc-connector</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+
         <!-- config-->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
