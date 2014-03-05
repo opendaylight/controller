@@ -11,9 +11,9 @@ package org.opendaylight.controller.netconf.util.mapping;
 import java.util.Map;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -64,19 +64,34 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
 
-    protected abstract HandlingPriority canHandle(String operationName, String netconfOperationNamespace);
+    protected HandlingPriority canHandle(String operationName, String operationNamespace) {
+        return operationName.equals(getOperationName()) && operationNamespace.equals(getOperationNamespace())
+                ? getHandlingPriority()
+                : HandlingPriority.CANNOT_HANDLE;
+    }
+
+    protected HandlingPriority getHandlingPriority() {
+        return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY;
+    }
+
+    protected String getOperationNamespace() {
+        return XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0;
+    }
+
+    protected abstract String getOperationName();
 
     @Override
-    public final Document handle(Document message, NetconfOperationRouter opRouter) throws NetconfDocumentedException {
+    public Document handle(Document requestMessage,
+            NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
 
-        XmlElement requestElement = getRequestElementWithCheck(message);
+        XmlElement requestElement = getRequestElementWithCheck(requestMessage);
 
         Document document = XmlUtil.newDocument();
 
         XmlElement operationElement = requestElement.getOnlyChildElement();
         Map<String, Attr> attributes = requestElement.getAttributes();
 
-        Element response = handle(document, operationElement, opRouter);
+        Element response = handle(document, operationElement, subsequentOperation);
         Element rpcReply = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
                 XmlNetconfConstants.RPC_REPLY_KEY);
 
@@ -98,11 +113,16 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         return document;
     }
 
-    protected abstract Element handle(Document document, XmlElement operationElement, NetconfOperationRouter opRouter)
+    protected abstract Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation)
             throws NetconfDocumentedException;
 
     @Override
     public String toString() {
-        return getClass() + "{" + netconfSessionIdForReporting + '}';
+        final StringBuffer sb = new StringBuffer("AbstractConfigNetconfOperation{");
+        sb.append("name=").append(getOperationName());
+        sb.append(", namespace=").append(getOperationNamespace());
+        sb.append(", session=").append(netconfSessionIdForReporting);
+        sb.append('}');
+        return sb.toString();
     }
 }

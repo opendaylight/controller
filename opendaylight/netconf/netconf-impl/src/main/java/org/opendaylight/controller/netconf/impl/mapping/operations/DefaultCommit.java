@@ -15,9 +15,9 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilterChain;
-import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation.OperationNameAndNamespace;
+import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-public class DefaultCommit implements NetconfOperationFilter {
+public class DefaultCommit extends AbstractNetconfOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultCommit.class);
 
@@ -36,13 +37,14 @@ public class DefaultCommit implements NetconfOperationFilter {
 
     private final DefaultCommitNotificationProducer notificationProducer;
     private final CapabilityProvider cap;
-    private final String netconfSessionIdForReporting;
+    private final NetconfOperationRouter operationRouter;
 
     public DefaultCommit(DefaultCommitNotificationProducer notifier, CapabilityProvider cap,
-            String netconfSessionIdForReporting) {
+                         String netconfSessionIdForReporting, NetconfOperationRouter netconfOperationRouter) {
+        super(netconfSessionIdForReporting);
         this.notificationProducer = notifier;
         this.cap = cap;
-        this.netconfSessionIdForReporting = netconfSessionIdForReporting;
+        this.operationRouter = netconfOperationRouter;
         this.getConfigMessage = loadGetConfigMessage();
     }
 
@@ -59,40 +61,36 @@ public class DefaultCommit implements NetconfOperationFilter {
     }
 
     @Override
-    public Document doFilter(Document message, NetconfOperationRouter operationRouter,
-            NetconfOperationFilterChain filterChain) throws NetconfDocumentedException {
-        OperationNameAndNamespace operationNameAndNamespace = new OperationNameAndNamespace(message);
-        if (canHandle(operationNameAndNamespace)) {
-            if (isCommitWithoutNotification(message)) {
-                message = removePersisterAttributes(message);
-                logger.debug("Skipping commit notification");
-                // fall back to filter chain
-            } else {
-                Document innerResult = filterChain.execute(message, operationRouter);
-                Element cfgSnapshot = getConfigSnapshot(operationRouter);
-                logger.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
-                notificationProducer.sendCommitNotification("ok", cfgSnapshot, cap.getCapabilities());
-                return innerResult;
-            }
+    protected String getOperationName() {
+        return XmlNetconfConstants.COMMIT;
+    }
+
+    @Override
+    public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        Preconditions.checkArgument(subsequentOperation.isExecutionTermination() == false,
+                "Subsequent netconf operation expected by %s", this);
+
+        if (isCommitWithoutNotification(requestMessage)) {
+            logger.debug("Skipping commit notification");
+        } else {
+            // Send commit notification if commit was not issued by persister
+            requestMessage = removePersisterAttributes(requestMessage);
+            Element cfgSnapshot = getConfigSnapshot(operationRouter);
+            logger.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
+            notificationProducer.sendCommitNotification("ok", cfgSnapshot, cap.getCapabilities());
         }
-        return filterChain.execute(message, operationRouter);
+
+        return subsequentOperation.execute(requestMessage);
     }
 
     @Override
-    public int getSortingOrder() {
-        return 0;
+    protected Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        throw new UnsupportedOperationException("Never gets called");
     }
 
     @Override
-    public int compareTo(NetconfOperationFilter o) {
-        return Integer.compare(getSortingOrder(), o.getSortingOrder());
-    }
-
-    private boolean canHandle(OperationNameAndNamespace operationNameAndNamespace) {
-        if (operationNameAndNamespace.getOperationName().equals("commit") == false)
-            return false;
-        return operationNameAndNamespace.getNamespace().equals(
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+    protected HandlingPriority getHandlingPriority() {
+        return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1);
     }
 
     private Document removePersisterAttributes(Document message) {
@@ -139,8 +137,4 @@ public class DefaultCommit implements NetconfOperationFilter {
         return dataElement.getDomElement();
     }
 
-    @Override
-    public String toString() {
-        return "DefaultCommit{" + netconfSessionIdForReporting + '}';
-    }
 }

@@ -25,8 +25,6 @@ public interface NetconfOperationService extends AutoCloseable {
      */
     Set<NetconfOperation> getNetconfOperations();
 
-    Set<NetconfOperationFilter> getFilters();
-
     /**
      * Called when netconf session is destroyed.
      */

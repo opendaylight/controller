@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
@@ -40,13 +45,10 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 public class EditConfig extends AbstractConfigNetconfOperation {
 
@@ -312,7 +314,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
 
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
         Config cfg = getConfigMapping(configRegistryClient, yangStoreSnapshot);

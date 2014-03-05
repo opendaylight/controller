@@ -8,9 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.Map;
+
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
+
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -36,9 +38,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-import java.util.Map;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
@@ -161,7 +163,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
 
         // TODO exception handling
         // TODO check for namespaces and unknown elements

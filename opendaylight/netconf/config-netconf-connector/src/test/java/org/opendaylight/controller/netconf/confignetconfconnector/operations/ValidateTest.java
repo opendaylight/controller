@@ -30,7 +30,7 @@ public class ValidateTest {
     public void test() throws Exception {
         final XmlElement xml = XmlElement.fromString("<abc></abc>");
         final Validate validate = new Validate(null, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        validate.handle(null, xml);
+        validate.handleWithNoSubsequentOperations(null, xml);
     }
 
     @Test(expected = NetconfDocumentedException.class)
@@ -38,14 +38,14 @@ public class ValidateTest {
         final XmlElement xml = XmlElement.fromString("<validate xmlns=\""
                 + XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0 + "\"/>");
         final Validate validate = new Validate(null, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        validate.handle(null, xml);
+        validate.handleWithNoSubsequentOperations(null, xml);
     }
 
     @Test(expected = NetconfDocumentedException.class)
     public void testNoNamespace() throws Exception {
         final XmlElement xml = XmlElement.fromString("<validate/>");
         final Validate validate = new Validate(null, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        validate.handle(null, xml);
+        validate.handleWithNoSubsequentOperations(null, xml);
     }
 
     @Test(expected = NetconfDocumentedException.class)
@@ -55,7 +55,7 @@ public class ValidateTest {
                 + XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0
                 + "\"><source><running></running></source></validate>");
         final Validate validate = new Validate(null, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        validate.handle(null, xml);
+        validate.handleWithNoSubsequentOperations(null, xml);
     }
 
     @Test(expected = NetconfDocumentedException.class)
@@ -66,7 +66,7 @@ public class ValidateTest {
         final TransactionProvider transactionProvider = mock(TransactionProvider.class);
         doThrow(IllegalStateException.class).when(transactionProvider).validateTransaction();
         final Validate validate = new Validate(transactionProvider, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        validate.handle(null, xml);
+        validate.handleWithNoSubsequentOperations(null, xml);
     }
 
     @Test(expected = NetconfDocumentedException.class)
@@ -77,7 +77,7 @@ public class ValidateTest {
         final TransactionProvider transactionProvider = mock(TransactionProvider.class);
         doThrow(ValidationException.class).when(transactionProvider).validateTransaction();
         final Validate validate = new Validate(transactionProvider, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        validate.handle(null, xml);
+        validate.handleWithNoSubsequentOperations(null, xml);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ValidateTest {
         final Element okElement = XmlUtil.readXmlToElement("<ok/>");
         doNothing().when(transactionProvider).validateTransaction();
         final Validate validate = new Validate(transactionProvider, null, NETCONF_SESSION_ID_FOR_REPORTING);
-        Element ok = validate.handle(XmlUtil.newDocument(), xml);
+        Element ok = validate.handleWithNoSubsequentOperations(XmlUtil.newDocument(), xml);
         assertEquals(XmlUtil.toString(okElement), XmlUtil.toString(ok));
     }
 

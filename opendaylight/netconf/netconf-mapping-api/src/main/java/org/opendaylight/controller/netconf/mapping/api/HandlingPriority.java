@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.mapping.api;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class HandlingPriority implements Comparable<HandlingPriority> {
 
@@ -33,7 +34,15 @@ public class HandlingPriority implements Comparable<HandlingPriority> {
      * @return priority number or Optional.absent otherwise
      */
     public Optional<Integer> getPriority() {
-        return Optional.of(priority).or(Optional.<Integer> absent());
+        return Optional.fromNullable(priority);
+    }
+
+    public HandlingPriority increasePriority(int priorityIncrease) {
+        Preconditions.checkState(priority!=null, "Unable to increase priority for %s", this);
+        Preconditions.checkArgument(priorityIncrease > 0, "Negative increase");
+        Preconditions.checkArgument(Long.valueOf(priority) + priorityIncrease < Integer.MAX_VALUE,
+                "Resulting priority cannot be higher than %s", Integer.MAX_VALUE);
+        return getHandlingPriority(priority + priorityIncrease);
     }
 
     @Override

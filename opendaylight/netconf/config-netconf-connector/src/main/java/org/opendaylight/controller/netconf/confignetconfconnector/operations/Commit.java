@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -23,9 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class Commit extends AbstractConfigNetconfOperation {
 
@@ -50,7 +50,7 @@ public class Commit extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handle(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         checkXml(xml);
 
         CommitStatus status;

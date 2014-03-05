@@ -38,7 +38,7 @@ public final class XmlNetconfConstants {
     public static final String PREFIX = "prefix";
 
     //
-    //
+    // TODO duplicate
     public static final String RFC4741_TARGET_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";
     public static final String URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0 = "urn:ietf:params:xml:ns:netconf:base:1.0";
 

@@ -8,11 +8,33 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -52,6 +74,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.get
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
@@ -72,31 +96,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
@@ -112,6 +116,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
     YangStoreSnapshot yangStoreSnapshot;
     @Mock
     NetconfOperationRouter netconfOperationRouter;
+    @Mock
+    NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
 
     private TransactionProvider transactionProvider;
 
@@ -120,6 +126,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         MockitoAnnotations.initMocks(this);
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
         doReturn(getModules()).when(this.yangStoreSnapshot).getModules();
+        doNothing().when(netconfOperationServiceSnapshot).close();
 
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
@@ -305,10 +312,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(expectedResult, responseFromCandidate);
 
         edit("netconfMessages/editConfig_none.xml");
-        doNothing().when(netconfOperationRouter).close();
         closeSession();
-        verify(netconfOperationRouter).close();
+        verify(netconfOperationServiceSnapshot).close();
         verifyNoMoreInteractions(netconfOperationRouter);
+        verifyNoMoreInteractions(netconfOperationServiceSnapshot);
     }
 
     private void checkBigDecimal(Element response) {
@@ -322,7 +329,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,
             IOException {
-        DefaultCloseSession closeOp = new DefaultCloseSession(NETCONF_SESSION_ID);
+        DefaultCloseSession closeOp = new DefaultCloseSession(NETCONF_SESSION_ID, netconfOperationServiceSnapshot);
         executeOp(closeOp, "netconfMessages/closeSession.xml");
     }
 
@@ -665,7 +672,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         Preconditions.checkState(priority != HandlingPriority.CANNOT_HANDLE);
 
-        final Document response = op.handle(request, netconfOperationRouter);
+        final Document response = op.handle(request, NetconfOperationRouterImpl.EXECUTION_TERMINATION_POINT);
         logger.debug("Got response\n{}", XmlUtil.toString(response));
         return response.getDocumentElement();
     }

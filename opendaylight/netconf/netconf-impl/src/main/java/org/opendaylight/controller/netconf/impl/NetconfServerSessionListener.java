@@ -12,9 +12,9 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -33,9 +33,9 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
 
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionListener.class);
     private final SessionMonitoringService monitoringService;
-    private final NetconfOperationRouterImpl operationRouter;
+    private final NetconfOperationRouter operationRouter;
 
-    public NetconfServerSessionListener(NetconfOperationRouterImpl operationRouter, SessionMonitoringService monitoringService) {
+    public NetconfServerSessionListener(NetconfOperationRouter operationRouter, SessionMonitoringService monitoringService) {
         this.operationRouter = operationRouter;
         this.monitoringService = monitoringService;
     }
