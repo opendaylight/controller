@@ -21,3 +21,5 @@ opendaylight/northbound/integrationtest/logs/*
 xtend-gen
 classes
 out/
+.externalToolBuilders
+maven-eclipse.xml
