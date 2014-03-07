@@ -91,8 +91,11 @@ public class DirectoryStorageAdapterTest {
     private void assertSnapshot(ConfigSnapshotHolder result, String directory) throws Exception {
         SortedSet<String> expectedCapabilities = new TreeSet<>(IOUtils.readLines(getClass().getResourceAsStream("/" + directory + "/expectedCapabilities.txt")));
         String expectedSnapshot = IOUtils.toString(getClass().getResourceAsStream("/" + directory + "/expectedSnapshot.xml"));
+        expectedSnapshot = expectedSnapshot.replaceAll("\r","");
+        String _snapshot = result.getConfigSnapshot();
+        _snapshot = _snapshot.replaceAll("\r","");
         assertEquals(expectedCapabilities, result.getCapabilities());
-        assertEquals(expectedSnapshot, result.getConfigSnapshot());
+        assertEquals(expectedSnapshot, _snapshot);
     }
 
 }
