@@ -25,6 +25,7 @@ import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAn
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 @RunWith(PaxExam.class)
@@ -70,6 +71,7 @@ public abstract class AbstractTest {
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
+                systemPackages("sun.nio.ch"),
 
                 mdSalCoreBundles(),
 

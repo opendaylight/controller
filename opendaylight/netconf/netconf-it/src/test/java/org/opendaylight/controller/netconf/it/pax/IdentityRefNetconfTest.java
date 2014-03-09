@@ -15,6 +15,7 @@ import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAn
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import javax.inject.Inject;
@@ -61,6 +62,7 @@ public class IdentityRefNetconfTest {
                 systemProperty("osgi.console").value("2401"),
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
+                systemPackages("sun.nio.ch"),
 
                 testingModules(),
                 loggingModules(),
