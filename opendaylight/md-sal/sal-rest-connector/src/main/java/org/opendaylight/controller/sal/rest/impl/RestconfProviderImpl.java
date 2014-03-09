@@ -21,13 +21,13 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector {
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
 
-    private ListenerRegistration<SchemaServiceListener> listenerRegistration;
+    private ListenerRegistration<SchemaContextListener> listenerRegistration;
     private PortNumber port;
     public void setWebsocketPort(PortNumber port) {
         this.port = port;
@@ -43,7 +43,7 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         BrokerFacade.getInstance().setDataService(dataService);
 
         SchemaService schemaService = session.getService(SchemaService.class);
-        listenerRegistration = schemaService.registerSchemaServiceListener(ControllerContext.getInstance());
+        listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
         ControllerContext.getInstance().setMountService(session.getService(MountService.class));
 

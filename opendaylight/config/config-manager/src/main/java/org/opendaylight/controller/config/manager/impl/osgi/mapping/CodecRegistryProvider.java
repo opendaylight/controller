@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -31,7 +31,7 @@ public class CodecRegistryProvider implements AutoCloseable {
     public CodecRegistryProvider(final ClassLoadingStrategy classLoadingStrategy, final BundleContext context) {
         service = new RuntimeGeneratedMappingServiceImpl(CLASS_POOL, classLoadingStrategy);
         registration = OsgiRegistrationUtil.registerService(context, service,
-                SchemaServiceListener.class, BindingIndependentMappingService.class);
+                SchemaContextListener.class, BindingIndependentMappingService.class);
     }
 
     public CodecRegistry getCodecRegistry() {
