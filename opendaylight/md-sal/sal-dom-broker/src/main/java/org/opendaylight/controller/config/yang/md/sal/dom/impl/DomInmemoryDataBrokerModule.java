@@ -61,8 +61,8 @@ public final class DomInmemoryDataBrokerModule extends
 
         getBundleContext().registerService(DOMDataBroker.class, newDataBroker, new Hashtable<String, String>());
 
-        getSchemaServiceDependency().registerSchemaServiceListener(operStore);
-        getSchemaServiceDependency().registerSchemaServiceListener(configStore);
+        getSchemaServiceDependency().registerSchemaContextListener(operStore);
+        getSchemaServiceDependency().registerSchemaContextListener(configStore);
 
         return newDataBroker;
     }

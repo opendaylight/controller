@@ -62,7 +62,7 @@ public final class ForwardedCompatibleDataBrokerImplModule extends
         ForwardedBackwardsCompatibleDataBroker dataBroker = new ForwardedBackwardsCompatibleDataBroker(domDataBroker,
                 mappingService, listeningExecutor);
 
-        session.getService(SchemaService.class).registerSchemaServiceListener(dataBroker);
+        session.getService(SchemaService.class).registerSchemaContextListener(dataBroker);
 
         dataBroker.setConnector(BindingDomConnectorDeployer.createConnector(getBindingMappingServiceDependency()));
         dataBroker.setDomProviderContext(session);
