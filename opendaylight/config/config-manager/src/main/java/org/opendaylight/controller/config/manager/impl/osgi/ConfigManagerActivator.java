@@ -34,7 +34,7 @@ public class ConfigManagerActivator implements BundleActivator {
     private ExtensibleBundleTracker<Collection<Registration<YangModuleInfo>>> bundleTracker;
     private ConfigRegistryImpl configRegistry;
     private ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
-    private ServiceRegistration configRegistryServiceRegistration;
+    private ServiceRegistration<?> configRegistryServiceRegistration;
 
     private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
 

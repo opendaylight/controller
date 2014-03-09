@@ -12,14 +12,13 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.ws.rs.core.Application;
 import javax.ws.rs.ext.ContextResolver;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.opendaylight.controller.northbound.bundlescanner.IBundleScanService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -30,12 +29,14 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+
 /**
  * Instance of javax.ws.rs.core.Application used to return the classes
  * that will be instantiated for JAXRS processing. This hooks onto the
  * bundle scanner service to provide JAXB classes to JAX-RS for prorcessing.
  */
-@SuppressWarnings("unchecked")
 public class NorthboundApplication extends Application {
     public static final String JAXRS_RESOURCES_MANIFEST_NAME = "Jaxrs-Resources";
     public static final String JAXRS_EXCLUDES_MANIFEST_NAME = "Jaxrs-Exclude-Types";
@@ -97,7 +98,7 @@ public class NorthboundApplication extends Application {
     }
 
     private static final IBundleScanService lookupBundleScanner(BundleContext ctx) {
-        ServiceReference svcRef = ctx.getServiceReference(IBundleScanService.class);
+        ServiceReference<?> svcRef = ctx.getServiceReference(IBundleScanService.class);
         if (svcRef == null) {
             throw new ServiceException("Unable to lookup IBundleScanService");
         }

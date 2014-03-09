@@ -124,7 +124,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
             if (nextEvent.isStartElement()) {
                 StartElement startElement = (StartElement) nextEvent;
                 if (startElement.getName().getLocalPart().equals("lf111")) {
-                    Iterator prefixes = startElement.getNamespaceContext().getPrefixes("augment:augment:module");
+                    Iterator<?> prefixes = startElement.getNamespaceContext().getPrefixes("augment:augment:module");
 
                     while (prefixes.hasNext() && aaModulePrefix == null) {
                         String prefix = (String) prefixes.next();
@@ -164,7 +164,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
             if (nextEvent.isStartElement()) {
                 StartElement startElement = (StartElement) nextEvent;
                 if (startElement.getName().getLocalPart().equals("lf111")) {
-                    Iterator prefixes = startElement.getNamespaceContext().getPrefixes("augment:module:leaf:list");
+                    Iterator<?> prefixes = startElement.getNamespaceContext().getPrefixes("augment:module:leaf:list");
 
                     while (prefixes.hasNext() && aModuleLfLstPrefix == null) {
                         String prefix = (String) prefixes.next();
@@ -198,14 +198,14 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         MutableSimpleNode<?> lf111 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111", "augment:augment:module", "2014-01-17"),
                 lst11, instanceIdentifier,null,null);
-        
-        
+
+
         lst11.getChildren().add(lf111);
         lst11.init();
 
         cont1.getChildren().add(lst11);
         cont1.init();
-        
+
         cont.getChildren().add(cont1);
         cont.init();
 
