@@ -52,6 +52,7 @@ public class ToasterTest {
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
+                systemPackages("sun.nio.ch"),
 
                 toasterBundles(),
                 mdSalCoreBundles(),

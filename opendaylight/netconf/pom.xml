@@ -47,7 +47,6 @@
         <osgi.version>5.0.0</osgi.version>
         <maven.bundle.version>2.4.0</maven.bundle.version>
         <slf4j.version>1.7.2</slf4j.version>
-        <netconf.netty.version>4.0.10.Final</netconf.netty.version>
         <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
     </properties>
 
