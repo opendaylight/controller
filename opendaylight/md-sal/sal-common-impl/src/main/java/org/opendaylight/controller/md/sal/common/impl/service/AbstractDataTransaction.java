@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.common.impl.service;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification;
@@ -16,32 +17,41 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 public abstract class AbstractDataTransaction<P extends Path<P>, D extends Object> extends
         AbstractDataModification<P, D> {
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDataTransaction.class);
 
     private final Object identifier;
+    private final long allocationTime;
+    private long readyTime = 0;
+    private long completeTime = 0;
 
-    @Override
-    public Object getIdentifier() {
-        return this.identifier;
-    }
-
-    private TransactionStatus status;
+    private TransactionStatus status = TransactionStatus.NEW;
 
     private final AbstractDataBroker<P, D, ? extends Object> broker;
 
     protected AbstractDataTransaction(final Object identifier,
             final AbstractDataBroker<P, D, ? extends Object> dataBroker) {
         super(dataBroker);
-        this.identifier = identifier;
-        this.broker = dataBroker;
-        this.status = TransactionStatus.NEW;
-        AbstractDataTransaction.LOG.debug("Transaction {} Allocated.", identifier);
+        this.identifier = Preconditions.checkNotNull(identifier);
+        this.broker = Preconditions.checkNotNull(dataBroker);
+        this.allocationTime = System.nanoTime();
+        LOG.debug("Transaction {} Allocated.", identifier);
+    }
+
+    @Override
+    public Object getIdentifier() {
+        return this.identifier;
     }
 
     @Override
     public Future<RpcResult<TransactionStatus>> commit() {
+        readyTime = System.nanoTime();
+        LOG.debug("Transaction {} Ready after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(readyTime - allocationTime));
+        changeStatus(TransactionStatus.SUBMITED);
+
         return this.broker.commit(this);
     }
 
@@ -62,8 +72,6 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
         }
         return this.broker.readOperationalData(path);
     }
-
-
 
     @Override
     public int hashCode() {
@@ -97,10 +105,20 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
 
     protected abstract void onStatusChange(final TransactionStatus status);
 
-    public void changeStatus(final TransactionStatus status) {
-        Object _identifier = this.getIdentifier();
-        AbstractDataTransaction.LOG
-                .debug("Transaction {} transitioned from {} to {}", _identifier, this.status, status);
+    public void succeeded() {
+        this.completeTime = System.nanoTime();
+        LOG.debug("Transaction {} Committed after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(completeTime - readyTime));
+        changeStatus(TransactionStatus.COMMITED);
+    }
+
+    public void failed() {
+        this.completeTime = System.nanoTime();
+        LOG.debug("Transaction {} Failed after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(completeTime - readyTime));
+        changeStatus(TransactionStatus.FAILED);
+    }
+
+    private void changeStatus(final TransactionStatus status) {
+        LOG.debug("Transaction {} transitioned from {} to {}", getIdentifier(), this.status, status);
         this.status = status;
         this.onStatusChange(status);
     }

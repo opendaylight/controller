@@ -406,7 +406,6 @@ public abstract class AbstractDataBroker<P extends Path<P>, D extends Object, DC
 
     final Future<RpcResult<TransactionStatus>> commit(final AbstractDataTransaction<P, D> transaction) {
         Preconditions.checkNotNull(transaction);
-        transaction.changeStatus(TransactionStatus.SUBMITED);
         final TwoPhaseCommit<P, D, DCL> task = new TwoPhaseCommit<P, D, DCL>(transaction, this);
 
         this.getSubmittedTransactionsCount().getAndIncrement();

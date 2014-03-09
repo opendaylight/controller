@@ -64,7 +64,7 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
         // The transaction has no effects, let's just shortcut it
         if (changedPaths.isEmpty()) {
             dataBroker.getFinishedTransactionsCount().getAndIncrement();
-            transaction.changeStatus(TransactionStatus.COMMITED);
+            transaction.succeeded();
 
             log.trace("Transaction: {} Finished successfully (no effects).", transactionId);
 
@@ -98,7 +98,7 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
         } catch (Exception e) {
             log.error("Transaction: {} Request Commit failed", transactionId, e);
             dataBroker.getFailedTransactionsCount().getAndIncrement();
-            this.transaction.changeStatus(TransactionStatus.FAILED);
+            this.transaction.failed();
             return this.rollback(handlerTransactions, e);
 
         }
@@ -112,13 +112,13 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
         } catch (Exception e) {
             log.error("Transaction: {} Finish Commit failed", transactionId, e);
             dataBroker.getFailedTransactionsCount().getAndIncrement();
-            transaction.changeStatus(TransactionStatus.FAILED);
+            transaction.failed();
             return this.rollback(handlerTransactions, e);
         }
 
 
         dataBroker.getFinishedTransactionsCount().getAndIncrement();
-        transaction.changeStatus(TransactionStatus.COMMITED);
+        transaction.succeeded();
 
         log.trace("Transaction: {} Finished successfully.", transactionId);
 
