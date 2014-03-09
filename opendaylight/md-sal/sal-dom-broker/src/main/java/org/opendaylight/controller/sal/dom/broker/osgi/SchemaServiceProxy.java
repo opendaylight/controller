@@ -8,10 +8,10 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.ServiceReference;
 
 public class SchemaServiceProxy extends AbstractBrokerServiceProxy<SchemaService> implements SchemaService {
@@ -41,12 +41,9 @@ public class SchemaServiceProxy extends AbstractBrokerServiceProxy<SchemaService
     }
 
     @Override
-    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener listener) {
-        ListenerRegistration<SchemaServiceListener> registration = getDelegate().registerSchemaServiceListener(listener);
+    public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(SchemaContextListener listener) {
+        ListenerRegistration<SchemaContextListener> registration = getDelegate().registerSchemaContextListener(listener);
         addRegistration(registration);
         return registration;
     }
-
-
-
 }

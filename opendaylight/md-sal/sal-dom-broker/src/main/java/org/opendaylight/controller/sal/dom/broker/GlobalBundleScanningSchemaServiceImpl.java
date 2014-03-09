@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.parser.impl.util.URLSchemaContextResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -39,11 +39,11 @@ import com.google.common.collect.ImmutableSet.Builder;
 public class GlobalBundleScanningSchemaServiceImpl implements //
         SchemaContextProvider, //
         SchemaService, //
-        ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
+        ServiceTrackerCustomizer<SchemaContextListener, SchemaContextListener>, //
         AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
-    private ListenerRegistry<SchemaServiceListener> listeners;
+    private ListenerRegistry<SchemaContextListener> listeners;
 
     private BundleContext context;
     private final BundleScanner scanner = new BundleScanner();
@@ -52,15 +52,15 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
 
     private final URLSchemaContextResolver contextResolver = new URLSchemaContextResolver();
 
-    private ServiceTracker<SchemaServiceListener, SchemaServiceListener> listenerTracker;
+    private ServiceTracker<SchemaContextListener, SchemaContextListener> listenerTracker;
 
     private boolean starting = true;
 
-    public ListenerRegistry<SchemaServiceListener> getListeners() {
+    public ListenerRegistry<SchemaContextListener> getListeners() {
         return listeners;
     }
 
-    public void setListeners(final ListenerRegistry<SchemaServiceListener> listeners) {
+    public void setListeners(final ListenerRegistry<SchemaContextListener> listeners) {
         this.listeners = listeners;
     }
 
@@ -78,7 +78,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
             listeners = new ListenerRegistry<>();
         }
 
-        listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, GlobalBundleScanningSchemaServiceImpl.this);
+        listenerTracker = new ServiceTracker<>(context, SchemaContextListener.class, GlobalBundleScanningSchemaServiceImpl.this);
         bundleTracker = new BundleTracker<ImmutableSet<Registration<URL>>>(context, BundleEvent.RESOLVED
                         | BundleEvent.UNRESOLVED, scanner);
         bundleTracker.open();
@@ -113,7 +113,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     @Override
-    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(final SchemaServiceListener listener) {
+    public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(final SchemaContextListener listener) {
         Optional<SchemaContext> potentialCtx = contextResolver.getSchemaContext();
         if(potentialCtx.isPresent()) {
             listener.onGlobalContextUpdated(potentialCtx.get());
@@ -135,7 +135,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
 
     private void updateContext(final SchemaContext snapshot) {
         Object[] services = listenerTracker.getServices();
-        for (ListenerRegistration<SchemaServiceListener> listener : listeners) {
+        for (ListenerRegistration<SchemaContextListener> listener : listeners) {
             try {
                 listener.getInstance().onGlobalContextUpdated(snapshot);
             } catch (Exception e) {
@@ -144,7 +144,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
         }
         if (services != null) {
             for (Object rawListener : services) {
-                SchemaServiceListener listener = (SchemaServiceListener) rawListener;
+                final SchemaContextListener listener = (SchemaContextListener) rawListener;
                 try {
                     listener.onGlobalContextUpdated(snapshot);
                 } catch (Exception e) {
@@ -201,9 +201,9 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     @Override
-    public SchemaServiceListener addingService(final ServiceReference<SchemaServiceListener> reference) {
+    public SchemaContextListener addingService(final ServiceReference<SchemaContextListener> reference) {
 
-        SchemaServiceListener listener = context.getService(reference);
+        SchemaContextListener listener = context.getService(reference);
         SchemaContext _ctxContext = getGlobalContext();
         if (getContext() != null && _ctxContext != null) {
             listener.onGlobalContextUpdated(_ctxContext);
@@ -222,12 +222,12 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     @Override
-    public void modifiedService(final ServiceReference<SchemaServiceListener> reference, final SchemaServiceListener service) {
+    public void modifiedService(final ServiceReference<SchemaContextListener> reference, final SchemaContextListener service) {
         // NOOP
     }
 
     @Override
-    public void removedService(final ServiceReference<SchemaServiceListener> reference, final SchemaServiceListener service) {
+    public void removedService(final ServiceReference<SchemaContextListener> reference, final SchemaContextListener service) {
         context.ungetService(reference);
     }
 }

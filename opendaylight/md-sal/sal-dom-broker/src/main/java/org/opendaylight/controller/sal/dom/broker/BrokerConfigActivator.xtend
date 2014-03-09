@@ -7,30 +7,34 @@
  */
 package org.opendaylight.controller.sal.dom.broker
 
+import java.util.concurrent.Executors
 import java.util.Hashtable
+
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker
+import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService
 import org.opendaylight.controller.sal.core.api.data.DataProviderService
 import org.opendaylight.controller.sal.core.api.data.DataStore
 import org.opendaylight.controller.sal.core.api.model.SchemaService
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
 import org.opendaylight.controller.sal.core.api.mount.MountService
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
+import org.opendaylight.controller.sal.core.spi.data.DOMStore
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener
+
 import org.osgi.framework.BundleContext
 import org.osgi.framework.ServiceRegistration
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
-import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl
-import com.google.common.util.concurrent.MoreExecutors
+
 import com.google.common.collect.ImmutableMap
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType
-import org.opendaylight.controller.sal.core.spi.data.DOMStore
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore
-import java.util.concurrent.Executors
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker
+import com.google.common.util.concurrent.MoreExecutors
 
 class BrokerConfigActivator implements AutoCloseable {
 
@@ -66,6 +70,7 @@ class BrokerConfigActivator implements AutoCloseable {
             wrappedStore = new SchemaAwareDataStoreAdapter();
             wrappedStore.changeDelegate(store);
             wrappedStore.setValidationEnabled(false);
+            context.registerService(SchemaContextListener, wrappedStore, emptyProperties)
             context.registerService(SchemaServiceListener, wrappedStore, emptyProperties)
             
             dataService.registerConfigurationReader(ROOT, wrappedStore);
@@ -73,6 +78,7 @@ class BrokerConfigActivator implements AutoCloseable {
             dataService.registerOperationalReader(ROOT, wrappedStore);
         } else {
             val compatibleDataBroker = new BackwardsCompatibleDataBroker(asyncBroker);
+            context.registerService(SchemaContextListener,compatibleDataBroker,emptyProperties);
             context.registerService(SchemaServiceListener,compatibleDataBroker,emptyProperties);
             dataService = compatibleDataBroker;
         }

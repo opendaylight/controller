@@ -11,7 +11,7 @@ import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 public interface SchemaService extends BrokerService {
 
@@ -42,5 +42,11 @@ public interface SchemaService extends BrokerService {
      */
     SchemaContext getGlobalContext();
 
-    ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener listener);
+    /**
+     * Register a listener for changes in schema context.
+     *
+     * @param listener Listener which should be registered
+     * @return Listener registration handle
+     */
+    ListenerRegistration<SchemaContextListener> registerSchemaContextListener(SchemaContextListener listener);
 }
