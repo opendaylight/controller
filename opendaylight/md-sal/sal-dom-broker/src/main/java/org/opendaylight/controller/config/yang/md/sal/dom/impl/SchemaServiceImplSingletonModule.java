@@ -13,7 +13,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -89,22 +89,26 @@ public final class SchemaServiceImplSingletonModule extends
             }
         }
 
+        @Override
         public void addModule(Module arg0) {
             delegate.addModule(arg0);
         }
 
+        @Override
         public SchemaContext getGlobalContext() {
             return delegate.getGlobalContext();
         }
 
+        @Override
         public SchemaContext getSessionContext() {
             return delegate.getSessionContext();
         }
 
-        public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener arg0) {
-            return delegate.registerSchemaServiceListener(arg0);
+        public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(SchemaContextListener arg0) {
+            return delegate.registerSchemaContextListener(arg0);
         }
 
+        @Override
         public void removeModule(Module arg0) {
             delegate.removeModule(arg0);
         }
