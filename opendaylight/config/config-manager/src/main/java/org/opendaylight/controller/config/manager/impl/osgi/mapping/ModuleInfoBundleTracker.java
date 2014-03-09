@@ -7,8 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
+import static java.lang.String.format;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
@@ -19,39 +27,31 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import static java.lang.String.format;
-
 /**
  * Tracks bundles and attempts to retrieve YangModuleInfo.
  */
-public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Collection<Registration<YangModuleInfo>>> {
+public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Collection<ObjectRegistration<YangModuleInfo>>> {
 
     private static final Logger logger = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
     public static final String GET_MODULE_INFO_METHOD = "getModuleInfo";
 
     public static final String MODULE_INFO_PROVIDER_PATH_PREFIX = "META-INF/services/";
 
-    private ModuleInfoBackedContext moduleInfoLoadingStrategy = ModuleInfoBackedContext.create();
+    private final ModuleInfoBackedContext moduleInfoLoadingStrategy = ModuleInfoBackedContext.create();
 
     public GeneratedClassLoadingStrategy getModuleInfoLoadingStrategy() {
         return moduleInfoLoadingStrategy;
     }
 
     @Override
-    public Collection<Registration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
+    public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry(MODULE_INFO_PROVIDER_PATH_PREFIX + YangModelBindingProvider.class.getName());
 
         if(resource==null) {
             return null;
         }
 
-        List<Registration<YangModuleInfo>> registrations = new LinkedList<>();
+        List<ObjectRegistration<YangModuleInfo>> registrations = new LinkedList<>();
 
         try (InputStream inputStream = resource.openStream()) {
             List<String> lines = IOUtils.readLines(inputStream);
@@ -70,17 +70,17 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Collection<Registration<YangModuleInfo>> object) {
+    public void modifiedBundle(Bundle bundle, BundleEvent event, Collection<ObjectRegistration<YangModuleInfo>> object) {
         // NOOP
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Collection<Registration<YangModuleInfo>> regs) {
+    public void removedBundle(Bundle bundle, BundleEvent event, Collection<ObjectRegistration<YangModuleInfo>> regs) {
         if(regs == null) {
             return;
         }
 
-        for (Registration<YangModuleInfo> reg : regs) {
+        for (ObjectRegistration<YangModuleInfo> reg : regs) {
             try {
                 reg.close();
             } catch (Exception e) {

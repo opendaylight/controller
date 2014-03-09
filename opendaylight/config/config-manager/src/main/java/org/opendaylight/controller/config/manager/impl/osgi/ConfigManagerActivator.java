@@ -18,7 +18,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegi
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RuntimeGeneratedMappingServiceActivator;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleActivator;
@@ -31,13 +31,11 @@ import org.slf4j.LoggerFactory;
 public class ConfigManagerActivator implements BundleActivator {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManagerActivator.class);
 
-    private ExtensibleBundleTracker<Collection<Registration<YangModuleInfo>>> bundleTracker;
+    private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
+    private ExtensibleBundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
     private ConfigRegistryImpl configRegistry;
     private ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
     private ServiceRegistration<?> configRegistryServiceRegistration;
-
-    private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
-
     private RuntimeGeneratedMappingServiceActivator mappingServiceActivator;
 
     @Override
