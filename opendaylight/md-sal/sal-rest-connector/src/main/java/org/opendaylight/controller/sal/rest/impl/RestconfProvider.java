@@ -20,7 +20,7 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,7 +31,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
 
-    private ListenerRegistration<SchemaServiceListener> listenerRegistration;
+    private ListenerRegistration<SchemaContextListener> listenerRegistration;
     private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;
     private ProviderSession session;
@@ -45,7 +45,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         BrokerFacade.getInstance().setDataService(dataService);
 
         SchemaService schemaService = session.getService(SchemaService.class);
-        listenerRegistration = schemaService.registerSchemaServiceListener(ControllerContext.getInstance());
+        listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
         ControllerContext.getInstance().setMountService(session.getService(MountService.class));
     }
