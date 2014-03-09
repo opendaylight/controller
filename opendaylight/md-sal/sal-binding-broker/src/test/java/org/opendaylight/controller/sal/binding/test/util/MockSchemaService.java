@@ -13,14 +13,14 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 @SuppressWarnings("deprecation")
 public final class MockSchemaService implements SchemaService, SchemaContextProvider {
 
     private SchemaContext schemaContext;
 
-    ListenerRegistry<SchemaServiceListener> listeners = ListenerRegistry.create();
+    ListenerRegistry<SchemaContextListener> listeners = ListenerRegistry.create();
 
     @Override
     public void addModule(final Module module) {
@@ -38,8 +38,8 @@ public final class MockSchemaService implements SchemaService, SchemaContextProv
     }
 
     @Override
-    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(
-            final SchemaServiceListener listener) {
+    public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(
+            final SchemaContextListener listener) {
         return listeners.register(listener);
     }
 
@@ -55,7 +55,7 @@ public final class MockSchemaService implements SchemaService, SchemaContextProv
 
     public synchronized void changeSchema(final SchemaContext newContext) {
         schemaContext = newContext;
-        for (ListenerRegistration<SchemaServiceListener> listener : listeners) {
+        for (ListenerRegistration<SchemaContextListener> listener : listeners) {
             listener.getInstance().onGlobalContextUpdated(schemaContext);
         }
     }

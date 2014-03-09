@@ -20,7 +20,7 @@ public class DistributedDataStoreFactory {
             new DistributedDataStore(actorSystem, name, new ClusterWrapperImpl(actorSystem),config );
        ShardStrategyFactory.setConfiguration(config);
         schemaService
-            .registerSchemaServiceListener(dataStore);
+            .registerSchemaContextListener(dataStore);
         return dataStore;
 
     }

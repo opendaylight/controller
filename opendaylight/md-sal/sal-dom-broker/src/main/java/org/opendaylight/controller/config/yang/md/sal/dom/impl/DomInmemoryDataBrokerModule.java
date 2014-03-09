@@ -50,7 +50,7 @@ public final class DomInmemoryDataBrokerModule extends
            //we will default to InMemoryDOMDataStore creation
           operStore = new InMemoryDOMDataStore("DOM-OPER", storeExecutor);
           //here we will register the SchemaContext listener
-          getSchemaServiceDependency().registerSchemaServiceListener((InMemoryDOMDataStore)operStore);
+          getSchemaServiceDependency().registerSchemaContextListener((InMemoryDOMDataStore)operStore);
         }
 
         DOMStore configStore = getConfigDataStoreDependency();
@@ -58,7 +58,7 @@ public final class DomInmemoryDataBrokerModule extends
            //we will default to InMemoryDOMDataStore creation
            configStore = new InMemoryDOMDataStore("DOM-CFG", storeExecutor);
           //here we will register the SchemaContext listener
-          getSchemaServiceDependency().registerSchemaServiceListener((InMemoryDOMDataStore)configStore);
+          getSchemaServiceDependency().registerSchemaContextListener((InMemoryDOMDataStore)configStore);
         }
         ImmutableMap<LogicalDatastoreType, DOMStore> datastores = ImmutableMap
                 .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, operStore)

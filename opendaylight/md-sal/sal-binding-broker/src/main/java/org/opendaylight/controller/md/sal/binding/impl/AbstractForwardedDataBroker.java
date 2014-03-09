@@ -36,7 +36,6 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,14 +57,14 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     private final BindingToNormalizedNodeCodec codec;
     private BindingIndependentConnector connector;
     private ProviderSession context;
-    private final ListenerRegistration<SchemaServiceListener> schemaListenerRegistration;
+    private final ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
 
     protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker,
             final BindingIndependentMappingService mappingService,final SchemaService schemaService) {
         this.domDataBroker = domDataBroker;
         this.mappingService = mappingService;
         this.codec = new BindingToNormalizedNodeCodec(mappingService);
-        this.schemaListenerRegistration = schemaService.registerSchemaServiceListener(this);
+        this.schemaListenerRegistration = schemaService.registerSchemaContextListener(this);
     }
 
     protected BindingToNormalizedNodeCodec getCodec() {

@@ -72,7 +72,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 public class BackwardsCompatibleMountPoint implements MountProvisionInstance, SchemaContextProvider, SchemaService {
 
@@ -83,7 +83,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     private final NotificationPublishService notificationPublishService;
     private final RpcProvisionRegistry rpcs;
 
-    private final ListenerRegistry<SchemaServiceListener> schemaListenerRegistry = new ListenerRegistry<>();
+    private final ListenerRegistry<SchemaContextListener> schemaListenerRegistry = new ListenerRegistry<>();
 
     private SchemaContext schemaContext;
 
@@ -154,7 +154,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     }
 
     @Override
-    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(final SchemaServiceListener listener) {
+    public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(final SchemaContextListener listener) {
         return schemaListenerRegistry.register(listener);
     }
 
@@ -275,7 +275,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     @Override
     public void setSchemaContext(final SchemaContext schemaContext) {
         this.schemaContext = schemaContext;
-        for (ListenerRegistration<SchemaServiceListener> schemaServiceListenerListenerRegistration : schemaListenerRegistry.getListeners()) {
+        for (ListenerRegistration<SchemaContextListener> schemaServiceListenerListenerRegistration : schemaListenerRegistry.getListeners()) {
             schemaServiceListenerListenerRegistration.getInstance().onGlobalContextUpdated(schemaContext);
         }
     }

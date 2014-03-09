@@ -91,7 +91,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         wrappedStore.changeDelegate(legacyStore);
         wrappedStore.setValidationEnabled(false);
 
-        schemaService.registerSchemaServiceListener(wrappedStore);
+        schemaService.registerSchemaContextListener(wrappedStore);
 
         dataService.registerConfigurationReader(rootPath, wrappedStore);
         dataService.registerCommitHandler(rootPath, wrappedStore);
