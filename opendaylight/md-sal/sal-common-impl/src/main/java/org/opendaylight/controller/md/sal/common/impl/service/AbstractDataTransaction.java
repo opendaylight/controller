@@ -16,7 +16,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("all")
 public abstract class AbstractDataTransaction<P extends Path<P>, D extends Object> extends
         AbstractDataModification<P, D> {
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDataTransaction.class);
@@ -82,7 +81,7 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AbstractDataTransaction other = (AbstractDataTransaction) obj;
+        AbstractDataTransaction<?, ?> other = (AbstractDataTransaction<?, ?>) obj;
         if (identifier == null) {
             if (other.identifier != null)
                 return false;
