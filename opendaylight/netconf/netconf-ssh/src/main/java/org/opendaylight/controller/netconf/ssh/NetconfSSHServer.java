@@ -20,7 +20,7 @@ import java.net.ServerSocket;
 import java.util.concurrent.atomic.AtomicLong;
 
 @ThreadSafe
-public class NetconfSSHServer implements Runnable {
+public final class NetconfSSHServer implements Runnable {
 
     private ServerSocket ss = null;
     private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHServer.class);
@@ -29,12 +29,12 @@ public class NetconfSSHServer implements Runnable {
     private final AuthProvider authProvider;
     private boolean up = false;
 
-    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress, AuthProvider authProvider) throws Exception{
+    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress, AuthProvider authProvider) throws IllegalStateException, IOException {
 
         logger.trace("Creating SSH server socket on port {}",serverPort);
         this.ss = new ServerSocket(serverPort);
         if (!ss.isBound()){
-            throw new Exception("Socket can't be bound to requested port :"+serverPort);
+            throw new IllegalStateException("Socket can't be bound to requested port :"+serverPort);
         }
         logger.trace("Server socket created.");
         this.clientAddress = clientAddress;
@@ -42,11 +42,11 @@ public class NetconfSSHServer implements Runnable {
         this.up = true;
     }
 
-    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress,AuthProvider authProvider) throws Exception {
+    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress,AuthProvider authProvider) throws IllegalStateException, IOException {
         return new NetconfSSHServer(serverPort, clientAddress,authProvider);
     }
 
-    public void stop() throws Exception {
+    public void stop() throws IOException {
         up = false;
         logger.trace("Closing SSH server socket.");
         ss.close();

@@ -139,8 +139,9 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         final Optional<XmlElement> contextInstanceElement = operationElement
                 .getOnlyChildElementOptionally(CONTEXT_INSTANCE);
 
-        if (contextInstanceElement.isPresent() == false)
+        if (!contextInstanceElement.isPresent()){
             return HandlingPriority.CANNOT_HANDLE;
+        }
 
         final RuntimeRpcElementResolved id = RuntimeRpcElementResolved.fromXpath(contextInstanceElement.get()
                 .getTextContent(), netconfOperationName, netconfOperationNamespace);
@@ -182,7 +183,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
         logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
                 execution.attributes);
-        final Object result = executeOperation(configRegistryClient, execution.on, execution.operationName,
+        final Object result = executeOperation(getConfigRegistryClient(), execution.on, execution.operationName,
                 execution.attributes);
 
         logger.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
@@ -225,7 +226,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
         for (XmlElement xmlElement : xml.getChildElements()) {
             final String name = xmlElement.getName();
-            if (CONTEXT_INSTANCE.equals(name) == false) { // skip context
+            if (!CONTEXT_INSTANCE.equals(name)) { // skip context
                                                           // instance child node
                                                           // because it
                                                           // specifies

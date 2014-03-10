@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -21,13 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.xml.sax.SAXException;
 
 public final class NetconfXMLToMessageDecoder extends ByteToMessageDecoder {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfXMLToMessageDecoder.class);
 
     @Override
     @VisibleForTesting
-    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws IOException, SAXException {
         if (in.readableBytes() != 0) {
             LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
             out.add(new NetconfMessage(XmlUtil.readXmlToDocument(new ByteBufInputStream(in))));

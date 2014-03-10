@@ -10,31 +10,28 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-
 import javax.management.ObjectName;
 import javax.management.openmbean.SimpleType;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 
 public class ObjectNameAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
 
-    private final ServiceRegistryWrapper tracker;
     private final String serviceName;
     private final String namespace;
 
-    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, ServiceRegistryWrapper dependencyTracker, String serviceName, String namespace) {
+    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType,  String serviceName, String namespace) {
         super(openType);
-        this.tracker = dependencyTracker;
         this.serviceName = serviceName;
         this.namespace = namespace;
     }
 
     @Override
     public Optional<MappedDependency> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null){
             return Optional.absent();
+        }
 
         String expectedClass = getOpenType().getClassName();
         String realClass = value.getClass().getName();

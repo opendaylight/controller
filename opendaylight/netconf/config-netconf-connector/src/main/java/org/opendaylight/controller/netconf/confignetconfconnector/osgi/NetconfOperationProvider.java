@@ -24,17 +24,11 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import java.util.Set;
 
 final class NetconfOperationProvider {
-    private final YangStoreSnapshot yangStoreSnapshot;
     private final Set<NetconfOperation> operations;
-    private final ConfigRegistryClient configRegistryClient;
-    private final TransactionProvider transactionProvider;
 
     NetconfOperationProvider(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
             TransactionProvider transactionProvider, String netconfSessionIdForReporting) {
 
-        this.yangStoreSnapshot = yangStoreSnapshot;
-        this.configRegistryClient = configRegistryClient;
-        this.transactionProvider = transactionProvider;
         operations = setUpOperations(yangStoreSnapshot, configRegistryClient, transactionProvider,
                 netconfSessionIdForReporting);
     }

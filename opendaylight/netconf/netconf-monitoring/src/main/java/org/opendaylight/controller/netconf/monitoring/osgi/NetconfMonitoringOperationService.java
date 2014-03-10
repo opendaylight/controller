@@ -7,30 +7,20 @@
 */
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashSet;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
-
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.monitoring.Get;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import com.google.common.io.Files;
 
 public class NetconfMonitoringOperationService implements NetconfOperationService {
 
-    public static final HashSet<Capability> CAPABILITIES = Sets.<Capability>newHashSet(new Capability() {
+    public static final Set<Capability> CAPABILITIES = Sets.<Capability>newHashSet(new Capability() {
 
         @Override
         public String getCapabilityUri() {
@@ -67,18 +57,6 @@ public class NetconfMonitoringOperationService implements NetconfOperationServic
 
     public NetconfMonitoringOperationService(NetconfMonitoringService monitor) {
         this.monitor = monitor;
-    }
-
-    private static String readSchema() {
-        String schemaLocation = "/META-INF/yang/ietf-netconf-monitoring.yang";
-        URL resource = Schemas.class.getClassLoader().getResource(schemaLocation);
-        Preconditions.checkNotNull(resource, "Unable to read schema content from %s", schemaLocation);
-        File file = new File(resource.getFile());
-        try {
-            return Files.toString(file, Charsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to load schema from " + schemaLocation, e);
-        }
     }
 
     @Override

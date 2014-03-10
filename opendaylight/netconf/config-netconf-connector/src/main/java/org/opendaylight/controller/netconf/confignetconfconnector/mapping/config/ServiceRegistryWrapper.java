@@ -35,7 +35,9 @@ public class ServiceRegistryWrapper {
     public boolean hasRefName(String namespace, String serviceName, ObjectName on) {
         String qname = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceName);
         Map<String, ObjectName> forQName = configServiceRefRegistry.getServiceMapping().get(qname);
-        if(forQName==null) return false;
+        if(forQName==null){
+            return false;
+        }
         return forQName.values().contains(on);
     }
 
@@ -70,7 +72,7 @@ public class ServiceRegistryWrapper {
         Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
 
         Map<String, Map<String, ObjectName>> serviceMapping = configServiceRefRegistry.getServiceMapping();
-        for (String serviceQName : serviceMapping.keySet())
+        for (String serviceQName : serviceMapping.keySet()){
             for (String refName : serviceMapping.get(serviceQName).keySet()) {
 
                 ObjectName on = serviceMapping.get(serviceQName).get(refName);
@@ -91,11 +93,12 @@ public class ServiceRegistryWrapper {
                     serviceToRefs.put(localName, refsToSis);
                 }
 
-                Preconditions.checkState(refsToSis.containsKey(refName) == false,
+                Preconditions.checkState(!refsToSis.containsKey(refName),
                         "Duplicate reference name %s for service %s:%s, now for instance %s", refName, namespace,
                         localName, on);
                 refsToSis.put(refName, si.toString());
             }
+        }
 
         return retVal;
     }
@@ -108,10 +111,11 @@ public class ServiceRegistryWrapper {
         Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
 
         Map<String, String> refNameToInstance;
-        if(serviceNameToRefNameToInstance == null || serviceNameToRefNameToInstance.containsKey(serviceName) == false) {
+        if(serviceNameToRefNameToInstance == null || !serviceNameToRefNameToInstance.containsKey(serviceName)) {
             refNameToInstance = Collections.emptyMap();
-        } else
+        } else {
             refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
+        }
 
         final Set<String> refNamesAsSet = toSet(refNameToInstance.keySet());
         if (refNamesAsSet.contains(refName)) {
@@ -135,12 +139,13 @@ public class ServiceRegistryWrapper {
     }
 
     private String findAvailableRefName(String refName, Set<String> refNamesAsSet) {
-        String intitialRefName = refName;
+        String availableRefName = "";
 
         while (true) {
-            refName = intitialRefName + "_" + suffix++;
-            if (refNamesAsSet.contains(refName) == false)
-                return refName;
+            availableRefName = refName + "_" + suffix++;
+            if (!refNamesAsSet.contains(availableRefName)){
+                return availableRefName;
+            }
         }
     }
 }
