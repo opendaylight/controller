@@ -105,7 +105,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     static final String ACTIVE_HOST_CACHE = "hosttracker.ActiveHosts";
     static final String INACTIVE_HOST_CACHE = "hosttracker.InactiveHosts";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
-    protected final Set<IHostFinder> hostFinder = new CopyOnWriteArraySet<IHostFinder>();;
+    protected final Set<IHostFinder> hostFinders = new CopyOnWriteArraySet<IHostFinder>();
     protected ConcurrentMap<IHostId, HostNodeConnector> hostsDB;
     /*
      * Following is a list of hosts which have been requested by NB APIs to be
@@ -256,16 +256,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     public void setArpHandler(IHostFinder hostFinder) {
-        if (this.hostFinder != null) {
-            this.hostFinder.add(hostFinder);
-        }
+        this.hostFinders.add(hostFinder);
     }
 
     public void unsetArpHandler(IHostFinder hostFinder) {
-        if (this.hostFinder != null) {
-            logger.debug("Arp Handler Service removed!");
-            this.hostFinder.remove(hostFinder);
-        }
+        logger.debug("Arp Handler Service removed!");
+        this.hostFinders.remove(hostFinder);
     }
 
     public void setTopologyManager(ITopologyManager s) {
@@ -352,7 +348,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
          * already handles the null return
          */
 
-        if (hostFinder == null) {
+        if (hostFinders.isEmpty()) {
             logger.debug("Exiting hostFind, null hostFinder");
             return null;
         }
@@ -369,7 +365,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         logger.debug("hostFind(): Host Not Found for IP: {}, Inititated Host Discovery ...", id);
 
         /* host is not found, initiate a discovery */
-        for (IHostFinder hf : hostFinder) {
+        for (IHostFinder hf : hostFinders) {
             InetAddress addr = decodeIPFromId(id);
             hf.find(addr);
         }
@@ -936,12 +932,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             for (Entry<IHostId, ARPPending> entry : failedARPReqList.entrySet()) {
                 ARPPending arphost;
                 arphost = entry.getValue();
-                if (hostFinder == null) {
-                    logger.warn("ARPHandler Services are not available on subnet addition");
+                if (hostFinders.isEmpty()) {
+                    logger.debug("ARPHandler Services are not available on subnet addition");
                     continue;
                 }
                 logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", decodeIPFromId(arphost.getHostId()));
-                for (IHostFinder hf : hostFinder) {
+                for (IHostFinder hf : hostFinders) {
                     hf.find(decodeIPFromId(arphost.getHostId()));
                 }
             }
@@ -977,11 +973,11 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                          * next one. Before sending the ARP, check if ARPHandler
                          * is available or not
                          */
-                        if (hostFinder == null) {
+                        if (hostFinders.isEmpty()) {
                             logger.warn("ARPHandler Services are not available for Outstanding ARPs");
                             continue;
                         }
-                        for (IHostFinder hf : hostFinder) {
+                        for (IHostFinder hf : hostFinders) {
                             hf.find(decodeIPFromId(arphost.getHostId()));
                         }
                         arphost.sent_count++;
@@ -1063,7 +1059,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                                             HexEncode.bytesToHexString(host.getDataLayerAddressBytes()) });
                         }
                         host.setArpSendCountDown(arp_cntdown);
-                        if (hostFinder == null) {
+                        if (hostFinders.isEmpty()) {
                             /*
                              * If hostfinder is not available, then can't send
                              * the probe. However, continue the age out the
@@ -1073,7 +1069,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                             logger.trace("ARPHandler is not avaialable, can't send the probe");
                             continue;
                         }
-                        for (IHostFinder hf : hostFinder) {
+                        for (IHostFinder hf : hostFinders) {
                             hf.probe(host);
                         }
                     }
@@ -1417,7 +1413,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         for (Entry<IHostId, ARPPending> entry : failedARPReqList.entrySet()) {
             arphost = entry.getValue();
             logger.trace("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostId());
-            if (hostFinder == null) {
+            if (hostFinders.isEmpty()) {
                 logger.warn("ARPHandler is not available at interface  up");
                 logger.warn("Since this event is missed, host(s) connected to interface {} may not be discovered",
                         nodeConnector);
@@ -1430,7 +1426,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 byte[] dataLayerAddress = NetUtils.getBroadcastMACAddr();
                 host = new HostNodeConnector(dataLayerAddress, decodeIPFromId(arphost.getHostId()), nodeConnector,
                         (short) 0);
-                for (IHostFinder hf : hostFinder) {
+                for (IHostFinder hf : hostFinders) {
                     hf.probe(host);
                 }
             } catch (ConstructionException e) {

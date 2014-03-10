@@ -12,12 +12,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendaylight.controller.sal.packet.Ethernet;
-import org.opendaylight.controller.sal.packet.IDataPacketService;
-import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.packet.Ethernet;
+import org.opendaylight.controller.sal.packet.IDataPacketService;
+import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
@@ -54,7 +54,7 @@ public class SimpleBroadcastHandlerImpl implements IBroadcastHandler, IListenDat
     public PacketResult receiveDataPacket(RawPacket inPkt) {
         /*
          * note that this assumes that the protocol plugin will do appropriate
-         * filtering to ensure that this only receives packets for it's
+         * filtering to ensure that this only receives packets for its
          * container.
          */
 
@@ -216,6 +216,7 @@ public class SimpleBroadcastHandlerImpl implements IBroadcastHandler, IListenDat
         lock.writeLock().unlock();
     }
 
+    @Override
     public void setMode(BroadcastMode m) {
         lock.writeLock().lock();
         mode = m;
