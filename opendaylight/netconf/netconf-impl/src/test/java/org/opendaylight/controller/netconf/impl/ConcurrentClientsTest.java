@@ -8,36 +8,17 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.management.ObjectName;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
-import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreService;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
@@ -57,24 +38,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ConcurrentClientsTest {
 
     private static final int CONCURRENCY = 16;
     private EventLoopGroup nettyGroup;
     private NetconfClientDispatcher netconfClientDispatcher;
-
-    @Mock
-    private YangStoreService yangStoreService;
-    @Mock
-    private ConfigRegistryJMXClient jmxClient;
 
     private final InetSocketAddress netconfAddress = new InetSocketAddress("127.0.0.1", 8303);
 
@@ -90,18 +75,7 @@ public class ConcurrentClientsTest {
 
     @Before
     public void setUp() throws Exception {
-        { // init mocks
-            MockitoAnnotations.initMocks(this);
-            final YangStoreSnapshot yStore = mock(YangStoreSnapshot.class);
-            doReturn(yStore).when(this.yangStoreService).getYangStoreSnapshot();
-            doReturn(Collections.emptyMap()).when(yStore).getModuleMXBeanEntryMap();
-
-            final ConfigTransactionJMXClient mockedTCl = mock(ConfigTransactionJMXClient.class);
-            doReturn(mockedTCl).when(this.jmxClient).getConfigTransactionClient(any(ObjectName.class));
-
-            doReturn(Collections.emptySet()).when(jmxClient).lookupConfigBeans();
-        }
-
+        initMocks(this);
         nettyGroup = new NioEventLoopGroup();
         NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp", "client");
         netconfClientDispatcher = new NetconfClientDispatcher( nettyGroup, nettyGroup, additionalHeader, 5000);

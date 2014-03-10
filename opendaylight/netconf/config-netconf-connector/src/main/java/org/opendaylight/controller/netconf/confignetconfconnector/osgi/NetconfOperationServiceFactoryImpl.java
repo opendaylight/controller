@@ -9,8 +9,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

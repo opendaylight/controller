@@ -8,33 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -49,8 +27,6 @@ import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnota
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
-import org.opendaylight.controller.config.yang.store.impl.MbeParser;
 import org.opendaylight.controller.config.yang.test.impl.ComplexDtoBInner;
 import org.opendaylight.controller.config.yang.test.impl.ComplexList;
 import org.opendaylight.controller.config.yang.test.impl.Deep;
@@ -72,6 +48,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
@@ -88,6 +66,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,11 +75,32 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
@@ -590,7 +590,16 @@ public class NetconfMappingTest extends AbstractConfigTest {
         final List<InputStream> yangDependencies = getYangs();
 
         final Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries = Maps.newHashMap();
-        mBeanEntries.putAll(new MbeParser().parseYangFiles(yangDependencies).getModuleMXBeanEntryMap());
+
+        YangParserImpl yangParser = new YangParserImpl();
+        final SchemaContext schemaContext = yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(yangDependencies).values()));
+        YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(new SchemaContextProvider() {
+            @Override
+            public SchemaContext getSchemaContext() {
+                return schemaContext ;
+            }
+        });
+        mBeanEntries.putAll(yangStoreService.getYangStoreSnapshot().getModuleMXBeanEntryMap());
 
         return mBeanEntries;
     }

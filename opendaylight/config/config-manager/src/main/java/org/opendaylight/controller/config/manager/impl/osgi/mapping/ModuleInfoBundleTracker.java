@@ -7,18 +7,10 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
-import static java.lang.String.format;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.Bundle;
@@ -27,51 +19,57 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import static java.lang.String.format;
+
 /**
- * Tracks bundles and attempts to retrieve YangModuleInfo.
+ * Tracks bundles and attempts to retrieve YangModuleInfo, which is then fed into ModuleInfoRegistry
  */
 public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Collection<ObjectRegistration<YangModuleInfo>>> {
 
     private static final Logger logger = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
-    public static final String GET_MODULE_INFO_METHOD = "getModuleInfo";
 
     public static final String MODULE_INFO_PROVIDER_PATH_PREFIX = "META-INF/services/";
 
-    private final ModuleInfoBackedContext moduleInfoLoadingStrategy = ModuleInfoBackedContext.create();
 
-    public GeneratedClassLoadingStrategy getModuleInfoLoadingStrategy() {
-        return moduleInfoLoadingStrategy;
+    private final ModuleInfoRegistry moduleInfoRegistry;
+
+    public ModuleInfoBundleTracker(ModuleInfoRegistry moduleInfoRegistry) {
+        this.moduleInfoRegistry = moduleInfoRegistry;
     }
 
     @Override
     public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry(MODULE_INFO_PROVIDER_PATH_PREFIX + YangModelBindingProvider.class.getName());
-
+        logger.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
         if(resource==null) {
             return null;
         }
-
         List<ObjectRegistration<YangModuleInfo>> registrations = new LinkedList<>();
 
         try (InputStream inputStream = resource.openStream()) {
             List<String> lines = IOUtils.readLines(inputStream);
             for (String moduleInfoName : lines) {
+                logger.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
                 YangModuleInfo moduleInfo = retrieveModuleInfo(moduleInfoName, bundle);
-                registrations.add(moduleInfoLoadingStrategy.registerModuleInfo(moduleInfo));
+                registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));
             }
-
 
         } catch (Exception e) {
             logger.error("Error while reading {}", resource, e);
             throw new RuntimeException(e);
         }
-
+        logger.trace("Got following registrations {}", registrations);
         return registrations;
     }
 
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, Collection<ObjectRegistration<YangModuleInfo>> object) {
-        // NOOP
     }
 
     @Override
@@ -80,7 +78,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
             return;
         }
 
-        for (ObjectRegistration<YangModuleInfo> reg : regs) {
+        for (Registration<YangModuleInfo> reg : regs) {
             try {
                 reg.close();
             } catch (Exception e) {
@@ -105,7 +103,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
             errorMessage = logMessage("Could not instantiate {} in bundle {}, reason {}", moduleInfoClass, bundle, e);
             throw new IllegalStateException(errorMessage, e);
         } catch (IllegalAccessException e) {
-            errorMessage = logMessage("Illegal access during instatiation of class {} in bundle {}, reason {}",
+            errorMessage = logMessage("Illegal access during instantiation of class {} in bundle {}, reason {}",
                     moduleInfoClass, bundle, e);
             throw new IllegalStateException(errorMessage, e);
         }
@@ -123,7 +121,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
         try {
             return bundle.loadClass(moduleInfoClass);
         } catch (ClassNotFoundException e) {
-            String errorMessage = logMessage("Could not find class {} in bunde {}, reason {}", moduleInfoClass, bundle, e);
+            String errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", moduleInfoClass, bundle, e);
             throw new IllegalStateException(errorMessage);
         }
     }

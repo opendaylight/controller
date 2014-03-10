@@ -20,7 +20,7 @@ import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;

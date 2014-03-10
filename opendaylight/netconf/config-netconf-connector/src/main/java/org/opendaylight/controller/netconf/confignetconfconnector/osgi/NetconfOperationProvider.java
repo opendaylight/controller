@@ -11,7 +11,6 @@ package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Validate;
