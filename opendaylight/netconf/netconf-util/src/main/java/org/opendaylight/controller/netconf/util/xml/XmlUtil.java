@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.util.xml;
 
+import com.google.common.base.Charsets;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -23,7 +23,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
@@ -33,13 +32,10 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Charsets;
 
 public final class XmlUtil {
 
@@ -79,7 +75,7 @@ public final class XmlUtil {
         try {
             dBuilder = BUILDERFACTORY.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Failed to parse XML document", e);
+            throw new IllegalStateException("Failed to parse XML document", e);
         }
         Document doc = dBuilder.parse(xmlContent);
 
@@ -94,10 +90,9 @@ public final class XmlUtil {
     public static Document newDocument() {
         try {
             DocumentBuilder builder = BUILDERFACTORY.newDocumentBuilder();
-            Document document = builder.newDocument();
-            return document;
+            return builder.newDocument();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Failed to create document", e);
+            throw new IllegalStateException("Failed to create document", e);
         }
     }
 
@@ -146,8 +141,8 @@ public final class XmlUtil {
             transformer.transform(source, result);
 
             return result.getWriter().toString();
-        } catch (IllegalArgumentException | TransformerFactoryConfigurationError | TransformerException e) {
-            throw new RuntimeException("Unable to serialize xml element " + xml, e);
+        } catch (Exception |  TransformerFactoryConfigurationError e) {
+            throw new IllegalStateException("Unable to serialize xml element " + xml, e);
         }
     }
 

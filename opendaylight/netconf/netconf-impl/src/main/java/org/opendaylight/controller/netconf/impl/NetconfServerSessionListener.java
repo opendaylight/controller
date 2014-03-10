@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
@@ -24,9 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.base.Preconditions.checkState;
 
 public class NetconfServerSessionListener implements NetconfSessionListener<NetconfServerSession> {
     public static final String MESSAGE_ID = "message-id";
@@ -83,8 +81,9 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             // TODO: should send generic error or close session?
             logger.error("Unexpected exception", e);
             session.onIncommingRpcFail();
-            throw new RuntimeException("Unable to process incoming message " + netconfMessage, e);
+            throw new IllegalStateException("Unable to process incoming message " + netconfMessage, e);
         } catch (NetconfDocumentedException e) {
+            logger.trace("Error occured while processing mesage {}",e);
             session.onOutgoingRpcError();
             session.onIncommingRpcFail();
             SendErrorExceptionUtil.sendErrorMessage(session, e, netconfMessage);
@@ -132,9 +131,9 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     private static boolean isCloseSession(final NetconfMessage incommingDocument) {
         final Document document = incommingDocument.getDocument();
         XmlElement rpcElement = XmlElement.fromDomDocument(document);
-        if (rpcElement.getOnlyChildElementOptionally("close-session").isPresent())
+        if (rpcElement.getOnlyChildElementOptionally("close-session").isPresent()){
             return true;
-
+        }
         return false;
     }
 }

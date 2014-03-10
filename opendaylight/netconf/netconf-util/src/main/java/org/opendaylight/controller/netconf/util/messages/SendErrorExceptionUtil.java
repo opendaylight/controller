@@ -112,7 +112,7 @@ public final class SendErrorExceptionUtil {
                 XPathConstants.NODE);
         errorSeverityNode.setTextContent(sendErrorException.getErrorSeverity().getTagValue());
 
-        if (sendErrorException.getErrorInfo() != null && sendErrorException.getErrorInfo().isEmpty() == false) {
+        if (sendErrorException.getErrorInfo() != null && !sendErrorException.getErrorInfo().isEmpty()) {
             /*
              * <error-info> <bad-attribute>message-id</bad-attribute>
              * <bad-element>rpc</bad-element> </error-info>

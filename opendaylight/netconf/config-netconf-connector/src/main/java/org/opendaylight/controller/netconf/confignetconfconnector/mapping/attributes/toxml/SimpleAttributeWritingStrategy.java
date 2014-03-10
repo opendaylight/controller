@@ -13,7 +13,7 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy {
+public class SimpleAttributeWritingStrategy extends AbstractAttributeWritingStrategy implements AttributeWritingStrategy {
 
     private final Document document;
     private final String key;
@@ -40,9 +40,6 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
         return XmlUtil.createTextElement(document, key, (String) value);
     }
 
-    protected Object preprocess(Object value) {
-        return value;
-    }
 
 
 }

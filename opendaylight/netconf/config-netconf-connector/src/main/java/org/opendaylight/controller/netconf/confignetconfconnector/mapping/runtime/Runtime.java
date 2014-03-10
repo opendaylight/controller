@@ -84,7 +84,7 @@ public class Runtime {
 
                     Element runtimeXml;
                     ModuleConfig moduleConfig = moduleConfigs.get(localNamespace).get(moduleName);
-                    if(instanceToRbe==null || instanceToRbe.containsKey(instanceName) == false) {
+                    if(instanceToRbe==null || !instanceToRbe.containsKey(instanceName)) {
                         runtimeXml = moduleConfig.toXml(instanceON, serviceRegistry, document, localNamespace);
                     } else {
                         ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
@@ -100,6 +100,7 @@ public class Runtime {
         return root;
     }
 
+/*
     private ObjectName findInstance(Collection<ObjectName> objectNames, String instanceName) {
         for (ObjectName objectName : objectNames) {
             String name = ObjectNameUtil.getInstanceName(objectName);
@@ -109,5 +110,6 @@ public class Runtime {
 
         throw new UnsupportedOperationException("Unable to find config bean instance under name " + instanceName + " among " + objectNames);
     }
+*/
 
 }

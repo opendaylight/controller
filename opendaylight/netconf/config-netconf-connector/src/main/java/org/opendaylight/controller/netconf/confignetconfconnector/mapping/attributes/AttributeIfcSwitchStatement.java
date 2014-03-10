@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.model.api.type.BinaryTypeDefinition;
 
 public abstract class AttributeIfcSwitchStatement<T> {
 
-    protected AttributeIfc lastAttribute;
+    private AttributeIfc lastAttribute;
 
     public T switchAttribute(AttributeIfc attributeIfc) {
 
@@ -39,8 +39,9 @@ public abstract class AttributeIfcSwitchStatement<T> {
                     return caseJavaUnionAttribute(openType);
                 } else if(((JavaAttribute)attributeIfc).isIdentityRef()) {
                     return caseJavaIdentityRefAttribute(openType);
-                } else
+                } else {
                     return caseJavaAttribute(openType);
+                }
             } catch (UnknownOpenTypeException e) {
                 throw getIllegalArgumentException(attributeIfc);
             }
@@ -56,6 +57,10 @@ public abstract class AttributeIfcSwitchStatement<T> {
         }
 
         throw getIllegalArgumentException(attributeIfc);
+    }
+
+    public AttributeIfc getLastAttribute() {
+        return lastAttribute;
     }
 
     protected T caseJavaIdentityRefAttribute(OpenType<?> openType) {
