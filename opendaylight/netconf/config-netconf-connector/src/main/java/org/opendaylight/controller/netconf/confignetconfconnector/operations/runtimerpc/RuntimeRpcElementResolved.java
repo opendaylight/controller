@@ -93,12 +93,12 @@ public final class RuntimeRpcElementResolved {
                 RuntimeRpc.CONTEXT_INSTANCE, xpath, elementName, xpathPatternBlueprint);
 
         PatternGroupResolver groups = new PatternGroupResolver(matcher.group("key1"), matcher.group("value1"),
-                matcher.group("key2"), matcher.group("value2"), matcher.group("additional"));
+                matcher.group("value2"), matcher.group("additional"));
 
         String moduleName = groups.getModuleName();
         String instanceName = groups.getInstanceName();
 
-        HashMap<String, String> additionalAttributes = groups.getAdditionalKeys(elementName, moduleName);
+        Map<String, String> additionalAttributes = groups.getAdditionalKeys(elementName, moduleName);
 
         return new RuntimeRpcElementResolved(namespace, moduleName, instanceName, groups.getRuntimeBeanYangName(),
                 additionalAttributes);
@@ -106,15 +106,14 @@ public final class RuntimeRpcElementResolved {
 
     private static final class PatternGroupResolver {
 
-        private final String key1, key2, value1, value2;
+        private final String key1, value1, value2;
         private final String additional;
         private String runtimeBeanYangName;
 
-        PatternGroupResolver(String key1, String value1, String key2, String value2, String additional) {
+        PatternGroupResolver(String key1, String value1,  String value2, String additional) {
             this.key1 = Preconditions.checkNotNull(key1);
             this.value1 = Preconditions.checkNotNull(value1);
 
-            this.key2 = Preconditions.checkNotNull(key2);
             this.value2 = Preconditions.checkNotNull(value2);
 
             this.additional = Preconditions.checkNotNull(additional);
@@ -128,13 +127,14 @@ public final class RuntimeRpcElementResolved {
             return key1.equals(XmlNetconfConstants.NAME_KEY) ? value1 : value2;
         }
 
-        HashMap<String, String> getAdditionalKeys(String elementName, String moduleName) {
+        Map<String, String> getAdditionalKeys(String elementName, String moduleName) {
             HashMap<String, String> additionalAttributes = Maps.newHashMap();
 
             runtimeBeanYangName = moduleName;
             for (String additionalKeyValue : additional.split("/")) {
-                if (Strings.isNullOrEmpty(additionalKeyValue))
+                if (Strings.isNullOrEmpty(additionalKeyValue)){
                     continue;
+                }
                 Matcher matcher = additionalPattern.matcher(additionalKeyValue);
                 Preconditions
                         .checkState(

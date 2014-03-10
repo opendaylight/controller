@@ -28,7 +28,7 @@ import ch.ethz.ssh2.ServerSessionCallback;
 import ch.ethz.ssh2.SimpleServerSessionCallback;
 
 @ThreadSafe
-public class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback {
+public final class SocketThread implements Runnable, ServerAuthenticationCallback, ServerConnectionCallback {
     private static final Logger logger =  LoggerFactory.getLogger(SocketThread.class);
 
     private final Socket socket;
@@ -44,9 +44,9 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                              InetSocketAddress clientAddress,
                              long sessionId,
                              AuthProvider authProvider) throws IOException{
-        Thread netconf_ssh_socket_thread = new Thread(new SocketThread(socket,clientAddress,sessionId,authProvider));
-        netconf_ssh_socket_thread.setDaemon(true);
-        netconf_ssh_socket_thread.start();
+        Thread netconfSshSocketThread = new Thread(new SocketThread(socket,clientAddress,sessionId,authProvider));
+        netconfSshSocketThread.setDaemon(true);
+        netconfSshSocketThread.start();
     }
     private SocketThread(Socket socket,
                          InetSocketAddress clientAddress,
@@ -90,8 +90,8 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                     public void run()
                     {
                         if (subsystem.equals("netconf")){
-                            IOThread netconf_ssh_input = null;
-                            IOThread  netconf_ssh_output = null;
+                            IOThread netconfSshInput = null;
+                            IOThread  netconfSshOutput = null;
                             try {
                                 String hostName = clientAddress.getHostName();
                                 int portNumber = clientAddress.getPort();
@@ -99,33 +99,33 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                 logger.trace("echo socket created");
 
                                 logger.trace("starting netconf_ssh_input thread");
-                                netconf_ssh_input =  new IOThread(echoSocket.getInputStream(),ss.getStdin(),"input_thread_"+sessionId,ss,conn);
-                                netconf_ssh_input.setDaemon(false);
-                                netconf_ssh_input.start();
+                                netconfSshInput =  new IOThread(echoSocket.getInputStream(),ss.getStdin(),"input_thread_"+sessionId,ss,conn);
+                                netconfSshInput.setDaemon(false);
+                                netconfSshInput.start();
 
                                 logger.trace("starting netconf_ssh_output thread");
                                 final String customHeader = "["+currentUser+";"+remoteAddressWithPort+";ssh;;;;;;]\n";
-                                netconf_ssh_output = new IOThread(ss.getStdout(),echoSocket.getOutputStream(),"output_thread_"+sessionId,ss,conn,customHeader);
-                                netconf_ssh_output.setDaemon(false);
-                                netconf_ssh_output.start();
+                                netconfSshOutput = new IOThread(ss.getStdout(),echoSocket.getOutputStream(),"output_thread_"+sessionId,ss,conn,customHeader);
+                                netconfSshOutput.setDaemon(false);
+                                netconfSshOutput.start();
 
-                            } catch (Throwable t){
-                                logger.error("SSH bridge couldn't create echo socket",t.getMessage(),t);
+                            } catch (IOException e){
+                                logger.error("SSH bridge couldn't create echo socket",e.getMessage(),e);
 
                                 try {
-                                    if (netconf_ssh_input!=null){
-                                        netconf_ssh_input.join();
+                                    if (netconfSshInput!=null){
+                                        netconfSshInput.join();
                                     }
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException e1) {
                                     Thread.currentThread().interrupt();
                                    logger.error("netconf_ssh_input join error ",e);
                                 }
 
                                 try {
-                                    if (netconf_ssh_output!=null){
-                                        netconf_ssh_output.join();
+                                    if (netconfSshOutput!=null){
+                                        netconfSshOutput.join();
                                     }
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException e2) {
                                     Thread.currentThread().interrupt();
                                     logger.error("netconf_ssh_output join error ",e);
                                 }

@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.base.Preconditions;
+import java.util.Map;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -47,7 +48,7 @@ public class ConfigPusher {
         this.configuration = configuration;
     }
 
-    public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> pushConfigs(
+    public synchronized Map<ConfigSnapshotHolder, EditAndCommitResponseWithRetries> pushConfigs(
             List<ConfigSnapshotHolder> configs) throws InterruptedException {
         logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
 
@@ -75,7 +76,7 @@ public class ConfigPusher {
             throws InterruptedException {
 
         ConflictingVersionException lastException = null;
-        int maxAttempts = configuration.netconfPushConfigAttempts;
+        int maxAttempts = configuration.getNetconfPushConfigAttempts();
 
         for (int retryAttempt = 1; retryAttempt <= maxAttempts; retryAttempt++) {
             NetconfClient netconfClient = makeNetconfConnection(configSnapshotHolder.getCapabilities());
@@ -108,7 +109,7 @@ public class ConfigPusher {
         // could be utilized by integration tests
 
         final long pollingStartNanos = System.nanoTime();
-        final long deadlineNanos = pollingStartNanos + TimeUnit.MILLISECONDS.toNanos(configuration.netconfCapabilitiesWaitTimeoutMs);
+        final long deadlineNanos = pollingStartNanos + TimeUnit.MILLISECONDS.toNanos(configuration.getNetconfCapabilitiesWaitTimeoutMs());
         int attempt = 0;
 
         NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("unknown",
@@ -119,14 +120,14 @@ public class ConfigPusher {
         while (System.nanoTime() < deadlineNanos) {
             attempt++;
             NetconfClientDispatcher netconfClientDispatcher = new NetconfClientDispatcher(configuration.eventLoopGroup,
-                    configuration.eventLoopGroup, additionalHeader, configuration.connectionAttemptTimeoutMs);
+                    configuration.eventLoopGroup, additionalHeader, configuration.getConnectionAttemptTimeoutMs());
             NetconfClient netconfClient;
             try {
-                netconfClient = new NetconfClient(this.toString(), configuration.netconfAddress, configuration.connectionAttemptDelayMs, netconfClientDispatcher);
+                netconfClient = new NetconfClient(this.toString(), configuration.netconfAddress, configuration.getConnectionAttemptDelayMs(), netconfClientDispatcher);
             } catch (IllegalStateException e) {
                 logger.debug("Netconf {} was not initialized or is not stable, attempt {}", configuration.netconfAddress, attempt, e);
                 netconfClientDispatcher.close();
-                Thread.sleep(configuration.connectionAttemptDelayMs);
+                Thread.sleep(configuration.getConnectionAttemptDelayMs());
                 continue;
             }
             latestCapabilities = netconfClient.getCapabilities();
@@ -140,16 +141,16 @@ public class ConfigPusher {
                     "Expected but not found: {}, all expected {}, current {}",
                     attempt, allNotFound, expectedCaps, latestCapabilities);
             Util.closeClientAndDispatcher(netconfClient);
-            Thread.sleep(configuration.connectionAttemptDelayMs);
+            Thread.sleep(configuration.getConnectionAttemptDelayMs());
         }
         if (latestCapabilities == null) {
-            logger.error("Could not connect to the server in {} ms", configuration.netconfCapabilitiesWaitTimeoutMs);
-            throw new RuntimeException("Could not connect to netconf server");
+            logger.error("Could not connect to the server in {} ms", configuration.getNetconfCapabilitiesWaitTimeoutMs());
+            throw new IllegalStateException("Could not connect to netconf server");
         }
         Set<String> allNotFound = computeNotFoundCapabilities(expectedCaps, latestCapabilities);
         logger.error("Netconf server did not provide required capabilities. Expected but not found: {}, all expected {}, current {}",
                 allNotFound, expectedCaps, latestCapabilities);
-        throw new RuntimeException("Netconf server did not provide required capabilities. Expected but not found:" + allNotFound);
+        throw new IllegalStateException("Netconf server did not provide required capabilities. Expected but not found:" + allNotFound);
     }
 
     private static Set<String> computeNotFoundCapabilities(Set<String> expectedCaps, Set<String> latestCapabilities) {
@@ -214,7 +215,7 @@ public class ConfigPusher {
             throws ConflictingVersionException, IOException {
         try {
             NetconfMessage netconfMessage = netconfClient.sendMessage(request,
-                    configuration.netconfSendMessageMaxAttempts, configuration.netconfSendMessageDelayMs);
+                    configuration.getNetconfSendMessageMaxAttempts(), configuration.getNetconfSendMessageDelayMs());
             NetconfUtil.checkIsMessageOk(netconfMessage);
             return netconfMessage;
         } catch(ConflictingVersionException e) {
@@ -246,7 +247,7 @@ public class ConfigPusher {
             return new NetconfMessage(doc);
         } catch (IOException | SAXException e) {
             // error reading the xml file bundled into the jar
-            throw new RuntimeException("Error while opening local resource " + editConfigResourcePath, e);
+            throw new IllegalStateException("Error while opening local resource " + editConfigResourcePath, e);
         }
     }
 
@@ -257,7 +258,7 @@ public class ConfigPusher {
             return new NetconfMessage(XmlUtil.readXmlToDocument(stream));
         } catch (SAXException | IOException e) {
             // error reading the xml file bundled into the jar
-            throw new RuntimeException("Error while opening local resource " + resource, e);
+            throw new IllegalStateException("Error while opening local resource " + resource, e);
         }
     }
 

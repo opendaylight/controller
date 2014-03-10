@@ -8,17 +8,15 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import java.util.Set;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Set;
 
 public final class Util {
-    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
-
+    private Util(){
+        // not called - private constructor for utility class
+    }
     public static boolean isSubset(NetconfClient netconfClient, Set<String> expectedCaps) {
         return isSubset(netconfClient.getCapabilities(), expectedCaps);
 
@@ -26,8 +24,9 @@ public final class Util {
 
     private static boolean isSubset(Set<String> currentCapabilities, Set<String> expectedCaps) {
         for (String exCap : expectedCaps) {
-            if (currentCapabilities.contains(exCap) == false)
+            if (!currentCapabilities.contains(exCap)){
                 return false;
+            }
         }
         return true;
     }
@@ -46,7 +45,7 @@ public final class Util {
                 if (fromClient != null) {
                     e.addSuppressed(fromClient);
                 }
-                throw new RuntimeException("Error closing temporary client ", e);
+                throw new IllegalStateException("Error closing temporary client ", e);
             }
         }
     }

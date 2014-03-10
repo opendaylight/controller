@@ -10,26 +10,21 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.confi
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
+import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public final class Services {
-
-    private static final Logger logger = LoggerFactory.getLogger(Services.class);
 
     private static final String PROVIDER_KEY = "provider";
     private static final String NAME_KEY = "name";
@@ -94,7 +89,7 @@ public final class Services {
             XmlElement typeElement = service.getOnlyChildElement(TYPE_KEY);
             Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
 
-            Preconditions.checkState(prefixNamespace.getKey()!=null && prefixNamespace.getKey().equals("") == false, "Type attribute was not prefixed");
+            Preconditions.checkState(prefixNamespace.getKey()!=null && !prefixNamespace.getKey().equals(""), "Type attribute was not prefixed");
 
             Map<String, Map<String, String>> namespaceToServices = retVal.get(prefixNamespace.getValue());
             if(namespaceToServices == null) {
@@ -167,7 +162,7 @@ public final class Services {
         public static ServiceInstance fromString(String instanceId) {
             instanceId = instanceId.trim();
             Matcher matcher = p.matcher(instanceId);
-            if(matcher.matches() == false) {
+            if(!matcher.matches()) {
                 matcher = pDeprecated.matcher(instanceId);
             }
 
@@ -235,23 +230,30 @@ public final class Services {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj){
                 return true;
-            if (obj == null)
+            }
+            if (obj == null){
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()){
                 return false;
+            }
             ServiceInstance other = (ServiceInstance) obj;
             if (instanceName == null) {
-                if (other.instanceName != null)
+                if (other.instanceName != null){
                     return false;
-            } else if (!instanceName.equals(other.instanceName))
+                }
+            } else if (!instanceName.equals(other.instanceName)){
                 return false;
+            }
             if (moduleName == null) {
-                if (other.moduleName != null)
+                if (other.moduleName != null){
                     return false;
-            } else if (!moduleName.equals(other.moduleName))
+                }
+            } else if (!moduleName.equals(other.moduleName)){
                 return false;
+            }
             return true;
         }
 

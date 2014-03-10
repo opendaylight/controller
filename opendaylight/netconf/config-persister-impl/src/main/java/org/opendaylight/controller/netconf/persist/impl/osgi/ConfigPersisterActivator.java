@@ -93,7 +93,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                     Thread.currentThread().interrupt();
                     logger.error("Interrupted while waiting for netconf connection");
                     // uncaught exception handler will deal with this failure
-                    throw new RuntimeException("Interrupted while waiting for netconf connection", e);
+                    throw new IllegalStateException("Interrupted while waiting for netconf connection", e);
                 }
                 logger.info("Configuration Persister initialization completed.");
             }
@@ -123,8 +123,9 @@ public class ConfigPersisterActivator implements BundleActivator {
             PropertiesProviderBaseImpl propertiesProvider) {
 
         // If configuration was injected via constructor, use it
-        if(initialConfigForPusher.isPresent())
+        if(initialConfigForPusher.isPresent()){
             return initialConfigForPusher.get();
+        }
 
         Optional<Long> maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesProperty(propertiesProvider);
         final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
@@ -134,8 +135,9 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         ConfigPusherConfigurationBuilder configPusherConfigurationBuilder = ConfigPusherConfigurationBuilder.aConfigPusherConfiguration();
 
-        if(maxWaitForCapabilitiesMillis.isPresent())
+        if(maxWaitForCapabilitiesMillis.isPresent()){
             configPusherConfigurationBuilder.withNetconfCapabilitiesWaitTimeoutMs(maxWaitForCapabilitiesMillis.get());
+        }
 
         return configPusherConfigurationBuilder
                 .withEventLoopGroup(nettyThreadGroup)
@@ -144,13 +146,14 @@ public class ConfigPersisterActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) {
         initializationThread.interrupt();
         if (jmxNotificationHandler != null) {
             jmxNotificationHandler.close();
         }
-        if(nettyThreadGroup!=null)
+        if(nettyThreadGroup!=null){
             nettyThreadGroup.shutdownGracefully();
+        }
         persisterAggregator.close();
     }
 }
