@@ -44,6 +44,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { ArpHandler.class };
         return res;
@@ -62,6 +63,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ArpHandler.class)) {
             // export the service
@@ -100,6 +102,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                    "setClusterContainerService", "unsetClusterContainerService")
                    .setRequired(true));
 
+            // Routing is optional
             c.add(createContainerServiceDependency(containerName).setService(
                    IRouting.class).setCallbacks("setRouting","unsetRouting")
                    .setRequired(false));
