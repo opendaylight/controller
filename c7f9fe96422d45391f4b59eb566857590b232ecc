@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_f025d60a",
+        "filename": "opendaylight/northbound/archetype-app-northbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-03-10T20:02:15Z",
+      "side": 1,
+      "message": "Not a big deal, but we typically use unix-style line breaks.",
+      "revId": "c7f9fe96422d45391f4b59eb566857590b232ecc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_10118aac",
+        "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/archetype-resources/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-03-10T20:02:15Z",
+      "side": 1,
+      "message": "Not a big deal, but we typically use unix-style line breaks.",
+      "revId": "c7f9fe96422d45391f4b59eb566857590b232ecc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
