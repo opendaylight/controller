@@ -11,22 +11,18 @@ package org.opendaylight.controller.netconf.confignetconfconnector.util;
 import com.google.common.base.Preconditions;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
 
 public final class Util {
 
-    /**
-     * Used for date <-> xml serialization
-     */
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     public static String writeDate(final Date date) {
-        return dateFormat.format(date);
+        return getRevisionFormat().format(date);
     }
 
     public static Date readDate(final String s) throws ParseException {
-        return dateFormat.parse(s);
+        return getRevisionFormat().parse(s);
     }
 
     public static void checkType(final Object value, final Class<?> clazz) {

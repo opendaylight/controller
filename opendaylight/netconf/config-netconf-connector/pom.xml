@@ -42,10 +42,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yang-store-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-mapping-api</artifactId>
         </dependency>
         <dependency>
@@ -79,11 +75,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-impl</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>yang-store-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -121,7 +112,6 @@
                             javax.management.openmbean,
                             org.opendaylight.controller.config.api,
                             org.opendaylight.controller.config.api.jmx,
-                            org.opendaylight.controller.config.yang.store.api,
                             org.opendaylight.controller.config.yangjmxgenerator,
                             org.opendaylight.controller.config.yangjmxgenerator.attribute,
                             org.opendaylight.controller.netconf.api,
@@ -135,7 +125,9 @@
                             org.slf4j,
                             org.w3c.dom,
                             com.google.common.io,
-                            org.opendaylight.yangtools.yang.model.api.type
+                            org.opendaylight.yangtools.yang.model.api.type,
+                            org.opendaylight.yangtools.sal.binding.generator.spi,
+                            org.opendaylight.yangtools.sal.binding.yang.types
                         </Import-Package>
                         <Export-Package>
                         </Export-Package>

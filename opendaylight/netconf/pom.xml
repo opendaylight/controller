@@ -99,22 +99,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>yang-store-api</artifactId>
-                <version>${config.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yang-store-impl</artifactId>
-                <version>${config.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yang-store-impl</artifactId>
-                <version>${config.version}</version>
-                <type>test-jar</type>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>yang-test</artifactId>
                 <version>${config.version}</version>
             </dependency>

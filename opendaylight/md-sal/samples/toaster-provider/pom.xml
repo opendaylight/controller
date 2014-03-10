@@ -56,6 +56,14 @@
                                         </namespaceToPackage1>
                                     </additionalConfiguration>
                                 </generator>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        ${salGeneratorPath}
+                                    </outputBaseDir>
+                                </generator>
                             </codeGenerators>
                             <inspectDependencies>true</inspectDependencies>
                         </configuration>
@@ -66,6 +74,11 @@
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
                         <version>${config.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.opendaylight.yangtools</groupId>
+                        <artifactId>maven-sal-api-gen-plugin</artifactId>
+                        <version>${yangtools.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

@@ -7,50 +7,53 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import java.lang.management.ManagementFactory;
-import java.util.Collection;
+import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
+import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.CodecRegistryProvider;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
+import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
-import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
-import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
-import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
-import org.opendaylight.controller.config.manager.impl.osgi.mapping.RuntimeGeneratedMappingServiceActivator;
-import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.registerService;
+import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.wrap;
 
 public class ConfigManagerActivator implements BundleActivator {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigManagerActivator.class);
-
     private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
-    private ExtensibleBundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
-    private ConfigRegistryImpl configRegistry;
-    private ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
-    private ServiceRegistration<?> configRegistryServiceRegistration;
-    private RuntimeGeneratedMappingServiceActivator mappingServiceActivator;
+
+    private AutoCloseable autoCloseable;
 
     @Override
     public void start(BundleContext context) {
 
-        // track bundles containing YangModuleInfo
-        ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker();
-        mappingServiceActivator = new RuntimeGeneratedMappingServiceActivator(moduleInfoBundleTracker);
-        CodecRegistry codecRegistry = mappingServiceActivator.startRuntimeMappingService(context).getCodecRegistry();
+        ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
+
+        RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
+                moduleInfoBackedContext, moduleInfoBackedContext, context);
+
+        ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
+
+        CodecRegistryProvider codecRegistryProvider = new CodecRegistryProvider(moduleInfoBackedContext, context);
 
         // start config registry
         BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
                 context);
-        configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
-                codecRegistry);
+        ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
+                codecRegistryProvider.getCodecRegistry());
 
         // track bundles containing factories
         BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
@@ -59,53 +62,32 @@ public class ConfigManagerActivator implements BundleActivator {
                 blankTransactionServiceTracker);
 
         // start extensible tracker
-        bundleTracker = new ExtensibleBundleTracker<>(context, moduleInfoBundleTracker, moduleFactoryBundleTracker);
+        ExtensibleBundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker = new ExtensibleBundleTracker<>(context, moduleInfoBundleTracker, moduleFactoryBundleTracker);
         bundleTracker.open();
 
         // register config registry to OSGi
-        configRegistryServiceRegistration = context.registerService(ConfigRegistryImpl.class, configRegistry, null);
+        AutoCloseable configRegReg = registerService(context, configRegistry, ConfigRegistryImpl.class);
 
         // register config registry to jmx
-        configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
+        ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
         } catch (InstanceAlreadyExistsException e) {
             throw new IllegalStateException("Config Registry was already registered to JMX", e);
         }
 
+        // TODO wire directly via moduleInfoBundleTracker
         ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context, ModuleFactory.class,
                 blankTransactionServiceTracker);
         serviceTracker.open();
+
+        List<AutoCloseable> list = Arrays.asList(
+                codecRegistryProvider, configRegistry, wrap(bundleTracker), configRegReg, configRegistryJMXRegistrator, wrap(serviceTracker));
+        autoCloseable = OsgiRegistrationUtil.aggregate(list);
     }
 
     @Override
-    public void stop(BundleContext context) {
-        try {
-            configRegistry.close();
-        } catch (Exception e) {
-            logger.warn("Exception while closing config registry", e);
-        }
-        try {
-            bundleTracker.close();
-        } catch (Exception e) {
-            logger.warn("Exception while closing extender", e);
-        }
-        try {
-            configRegistryJMXRegistrator.close();
-        } catch (Exception e) {
-            logger.warn(
-                    "Exception while closing config registry jmx registrator",
-                    e);
-        }
-        try {
-            configRegistryServiceRegistration.unregister();
-        } catch (Exception e) {
-            logger.warn("Exception while unregistering config registry", e);
-        }
-        try {
-            mappingServiceActivator.close();
-        } catch (Exception e) {
-            logger.warn("Exception while closing mapping service", e);
-        }
+    public void stop(BundleContext context) throws Exception {
+        autoCloseable.close();
     }
 }

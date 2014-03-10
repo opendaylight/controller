@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.sal.dom.broker.impl;
 
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-public interface SchemaContextProvider {
-
-    SchemaContext getSchemaContext();
+/**
+ * @deprecated Use org.opendaylight.yangtools.yang.model.api.SchemaContextProvider instead
+ */
+@Deprecated
+public interface SchemaContextProvider extends org.opendaylight.yangtools.yang.model.api.SchemaContextProvider{
 
 }

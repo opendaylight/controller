@@ -43,7 +43,7 @@
                                         org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
                                     </codeGeneratorClass>
                                     <outputBaseDir>
-                                        target/generated-sources/
+                                        ${salGeneratorPath}
                                     </outputBaseDir>
                                 </generator>
                                 <generator>
