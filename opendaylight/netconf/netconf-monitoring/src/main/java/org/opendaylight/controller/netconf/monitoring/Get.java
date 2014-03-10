@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.netconf.monitoring;
 
+import com.google.common.collect.Maps;
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
@@ -23,9 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 public class Get extends AbstractNetconfOperation {
 
@@ -63,8 +60,12 @@ public class Get extends AbstractNetconfOperation {
     @Override
     public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation)
             throws NetconfDocumentedException {
-        Preconditions.checkArgument(subsequentOperation.isExecutionTermination() == false,
-                "Subsequent netconf operation expected by %s", this);
+        if (subsequentOperation.isExecutionTermination()){
+            throw new NetconfDocumentedException(String.format("Subsequent netconf operation expected by %s", this),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
 
         try {
             Document innerResult = subsequentOperation.execute(requestMessage);

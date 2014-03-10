@@ -53,9 +53,9 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
                     revision = date;
                 }
             }
-        } else
+        } else {
             revision = revisions.keySet().iterator().next();
-
+        }
 
         return QName.create(URI.create(namespace), revision, localName).toString();
     }

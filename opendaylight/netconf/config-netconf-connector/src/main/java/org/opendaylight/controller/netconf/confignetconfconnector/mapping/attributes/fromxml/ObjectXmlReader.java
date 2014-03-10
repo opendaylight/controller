@@ -50,31 +50,31 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
 
     @Override
     protected AttributeReadingStrategy caseJavaBinaryAttribute(OpenType<?> openType) {
-        return new SimpleBinaryAttributeReadingStrategy(lastAttribute.getNullableDefault());
+        return new SimpleBinaryAttributeReadingStrategy(getLastAttribute().getNullableDefault());
     }
 
     @Override
     protected AttributeReadingStrategy caseJavaUnionAttribute(OpenType<?> openType) {
         String mappingKey = JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION;
-        return new SimpleUnionAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey);
+        return new SimpleUnionAttributeReadingStrategy(getLastAttribute().getNullableDefault(), mappingKey);
     }
 
     @Override
     public AttributeReadingStrategy caseJavaSimpleAttribute(SimpleType<?> openType) {
-        return new SimpleAttributeReadingStrategy(lastAttribute.getNullableDefault());
+        return new SimpleAttributeReadingStrategy(getLastAttribute().getNullableDefault());
     }
 
     @Override
     public AttributeReadingStrategy caseJavaArrayAttribute(ArrayType<?> openType) {
-        SimpleAttributeReadingStrategy innerStrategy = new SimpleAttributeReadingStrategy(lastAttribute.getNullableDefault());
-        return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
+        SimpleAttributeReadingStrategy innerStrategy = new SimpleAttributeReadingStrategy(getLastAttribute().getNullableDefault());
+        return new ArrayAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategy);
     }
 
     @Override
     public AttributeReadingStrategy caseJavaCompositeAttribute(CompositeType openType) {
         Preconditions.checkState(openType.keySet().size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
         String mappingKey = openType.keySet().iterator().next();
-        return new SimpleCompositeAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey);
+        return new SimpleCompositeAttributeReadingStrategy(getLastAttribute().getNullableDefault(), mappingKey);
     }
 
     @Override
@@ -83,18 +83,18 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
         Set<String> keys = ((CompositeType) openType).keySet();
         Preconditions.checkState(keys.size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
         String mappingKey = keys.iterator().next();
-        return new SimpleIdentityRefAttributeReadingStrategy(lastAttribute.getNullableDefault(), mappingKey, identityMap);
+        return new SimpleIdentityRefAttributeReadingStrategy(getLastAttribute().getNullableDefault(), mappingKey, identityMap);
     }
 
     @Override
     protected AttributeReadingStrategy caseDependencyAttribute(SimpleType<?> openType) {
-        return new ObjectNameAttributeReadingStrategy(lastAttribute.getNullableDefault());
+        return new ObjectNameAttributeReadingStrategy(getLastAttribute().getNullableDefault());
     }
 
     @Override
     protected AttributeReadingStrategy caseTOAttribute(CompositeType openType) {
-        Preconditions.checkState(lastAttribute instanceof TOAttribute);
-        Map<String, AttributeIfc> inner = ((TOAttribute)lastAttribute).getYangPropertiesToTypesMap();
+        Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
+        Map<String, AttributeIfc> inner = ((TOAttribute)getLastAttribute()).getYangPropertiesToTypesMap();
 
         Map<String, AttributeReadingStrategy> innerStrategies = Maps.newHashMap();
 
@@ -104,21 +104,21 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
             innerStrategies.put(innerAttrEntry.getKey(), innerStrat);
         }
 
-        return new CompositeAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategies);
+        return new CompositeAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategies);
     }
 
     @Override
     protected AttributeReadingStrategy caseListAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListAttribute);
-        AttributeReadingStrategy innerStrategy = prepareReadingStrategy(key, ((ListAttribute) lastAttribute).getInnerAttribute());
-        return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
+        Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
+        AttributeReadingStrategy innerStrategy = prepareReadingStrategy(key, ((ListAttribute) getLastAttribute()).getInnerAttribute());
+        return new ArrayAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategy);
     }
 
     @Override
     protected AttributeReadingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         AttributeReadingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
-        return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
+        return new ArrayAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategy);
     }
 
 }

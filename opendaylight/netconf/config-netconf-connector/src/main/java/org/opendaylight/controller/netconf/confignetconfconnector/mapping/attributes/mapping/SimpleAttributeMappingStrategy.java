@@ -25,8 +25,9 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
 
     @Override
     public Optional<String> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null){
             return Optional.absent();
+        }
 
         String expectedClass = getOpenType().getClassName();
         String realClass = value.getClass().getName();

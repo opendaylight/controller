@@ -50,7 +50,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
     public static String checkPrefixAndExtractServiceName(XmlElement typeElement, Map.Entry<String, String> prefixNamespace) {
         String serviceName = typeElement.getTextContent();
 
-        Preconditions.checkState(prefixNamespace.equals("") == false, "Service %s value not prefixed with namespace",
+        Preconditions.checkState(!prefixNamespace.equals(""), "Service %s value not prefixed with namespace",
                 XmlNetconfConstants.TYPE_KEY);
         String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;
         Preconditions.checkState(serviceName.startsWith(prefix),

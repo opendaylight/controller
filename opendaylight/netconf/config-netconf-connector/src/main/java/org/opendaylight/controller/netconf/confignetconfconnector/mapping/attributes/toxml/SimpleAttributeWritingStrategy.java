@@ -43,7 +43,6 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
         typeElement.appendChild(document.createTextNode(value));
         return typeElement;
     }
-
     protected Object preprocess(Object value) {
         return value;
     }
