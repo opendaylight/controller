@@ -29,14 +29,14 @@ public class Activator implements BundleActivator, YangStoreServiceTracker.YangS
     private ConfigRegistryLookupThread configRegistryLookup = null;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) {
         this.context = context;
         YangStoreServiceTracker tracker = new YangStoreServiceTracker(context, this);
         tracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) {
         if (configRegistryLookup != null) {
             configRegistryLookup.interrupt();
         }
@@ -59,7 +59,7 @@ public class Activator implements BundleActivator, YangStoreServiceTracker.YangS
         configRegistryLookup = null;
     }
 
-    private class ConfigRegistryLookupThread extends Thread {
+    private final class ConfigRegistryLookupThread extends Thread {
         private final YangStoreService yangStoreService;
 
         private ConfigRegistryLookupThread(YangStoreService yangStoreService) {

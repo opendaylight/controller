@@ -63,26 +63,24 @@ public final class InstanceConfig {
         Map<String, Object> toXml = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> configDefEntry : jmxToAttrConfig.entrySet()) {
-
             // Skip children runtime beans as they are mapped by InstanceRuntime
-            if (configDefEntry.getValue() instanceof RuntimeBeanEntry)
+            if (configDefEntry.getValue() instanceof RuntimeBeanEntry){
                 continue;
-
+            }
             Object value = configRegistryClient.getAttributeCurrentValue(on, configDefEntry.getKey());
             try {
                 AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = mappingStrategies
                         .get(configDefEntry.getKey());
                 Optional<?> a = attributeMappingStrategy.mapAttribute(value);
-                if (a.isPresent() == false)
+                if (!a.isPresent()){
                     continue;
-
+                }
                 toXml.put(configDefEntry.getValue().getAttributeYangName(), a.get());
             } catch (Exception e) {
                 throw new IllegalStateException("Unable to map value " + value + " to attribute "
                         + configDefEntry.getKey(), e);
             }
         }
-
         return toXml;
     }
 

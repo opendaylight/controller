@@ -49,14 +49,14 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
     @Override
     public void onSessionUp(NetconfManagementSession session) {
         logger.debug("Session {} up", session);
-        Preconditions.checkState(sessions.contains(session) == false, "Session %s was already added", session);
+        Preconditions.checkState(!sessions.contains(session), "Session %s was already added", session);
         sessions.add(session);
     }
 
     @Override
     public void onSessionDown(NetconfManagementSession session) {
         logger.debug("Session {} down", session);
-        Preconditions.checkState(sessions.contains(session) == true, "Session %s not present", session);
+        Preconditions.checkState(sessions.contains(session), "Session %s not present", session);
         sessions.remove(session);
     }
 
@@ -86,8 +86,9 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
         for (Capability cap : caps) {
             SchemaBuilder builder = new SchemaBuilder();
 
-            if(cap.getCapabilitySchema().isPresent() == false)
+            if(!cap.getCapabilitySchema().isPresent()){
                 continue;
+            }
 
             Preconditions.checkState(cap.getModuleNamespace().isPresent());
             builder.setNamespace(new Uri(cap.getModuleNamespace().get()));

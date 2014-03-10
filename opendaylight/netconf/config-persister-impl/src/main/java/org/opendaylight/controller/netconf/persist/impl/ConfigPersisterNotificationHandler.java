@@ -51,7 +51,7 @@ public class ConfigPersisterNotificationHandler implements Closeable {
         try {
             mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.OBJECT_NAME, listener, null, null);
         } catch (InstanceNotFoundException | IOException e) {
-            throw new RuntimeException("Cannot register as JMX listener to netconf", e);
+            throw new IllegalStateException("Cannot register as JMX listener to netconf", e);
         }
     }
 
@@ -82,7 +82,7 @@ class ConfigPersisterNotificationListener implements NotificationListener {
 
     @Override
     public void handleNotification(Notification notification, Object handback) {
-        if (notification instanceof NetconfJMXNotification == false)
+        if (!(notification instanceof NetconfJMXNotification))
             return;
 
         // Socket should not be closed at this point
@@ -90,16 +90,10 @@ class ConfigPersisterNotificationListener implements NotificationListener {
 
         logger.trace("Received notification {}", notification);
         if (notification instanceof CommitJMXNotification) {
-            try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
-            } catch (Throwable e) {
-                // log exceptions from notification Handler here since
-                // notificationBroadcastSupport logs only DEBUG level
-                logger.warn("Exception occured during notification handling: ", e);
-                throw e;
-            }
-        } else
+        } else {
             throw new IllegalStateException("Unknown config registry notification type " + notification);
+        }
     }
 
     private void handleAfterCommitNotification(final CommitJMXNotification notification) {

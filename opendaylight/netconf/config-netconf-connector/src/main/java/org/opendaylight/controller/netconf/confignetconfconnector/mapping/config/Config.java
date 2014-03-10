@@ -14,36 +14,29 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 public class Config {
-    private final Logger logger = LoggerFactory.getLogger(Config.class);
 
     private final Map<String/* Namespace from yang file */,
             Map<String /* Name of module entry from yang file */, ModuleConfig>> moduleConfigs;
-    private final Map<String, ModuleConfig> moduleNamesToConfigs;
 
     private final Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap;
 
@@ -53,11 +46,6 @@ public class Config {
 
     public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
         this.moduleConfigs = moduleConfigs;
-        Map<String, ModuleConfig> moduleNamesToConfigs = new HashMap<>();
-        for (Entry<String, Map<String, ModuleConfig>> entry : moduleConfigs.entrySet()) {
-            moduleNamesToConfigs.putAll(entry.getValue());
-        }
-        this.moduleNamesToConfigs = Collections.unmodifiableMap(moduleNamesToConfigs);
         this.identityMap = identityMap;
     }
 
@@ -79,8 +67,9 @@ public class Config {
                 // TODO, this code does not support same module names from different namespaces
                 // Namespace should be present in ObjectName
 
-                if (instances == null)
+                if (instances == null){
                     continue;
+                }
 
                 innerRetVal.put(moduleName, instances);
 
@@ -100,11 +89,6 @@ public class Config {
         }
         return retVal;
     }
-
-    // public Element toXml(Set<ObjectName> instancesToMap, String namespace,
-    // Document document) {
-    // return toXml(instancesToMap, Optional.of(namespace), document);
-    // }
 
     public Element toXml(Set<ObjectName> instancesToMap, Optional<String> maybeNamespace, Document document,
             Element dataElement, ServiceRegistryWrapper serviceTracker) {
@@ -261,10 +245,12 @@ public class Config {
         Optional<XmlElement> modulesOpt = getModulesElement(parent);
 
         List<XmlElement> recognised = Lists.newArrayList();
-        if(servicesOpt.isPresent())
+        if(servicesOpt.isPresent()){
             recognised.add(servicesOpt.get());
-        if(modulesOpt.isPresent())
+        }
+        if(modulesOpt.isPresent()){
             recognised.add(modulesOpt.get());
+        }
 
         parent.checkUnrecognisedElements(recognised);
     }

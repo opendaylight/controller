@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 
 import javax.management.openmbean.OpenType;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 
 /**
  * Create real object from String or Map that corresponds to given opentype.
@@ -18,5 +19,5 @@ import javax.management.openmbean.OpenType;
 public interface AttributeResolvingStrategy<T, O extends OpenType<?>> {
     O getOpenType();
 
-    Optional<T> parseAttribute(String attrName, Object value);
+    Optional<T> parseAttribute(String attrName, Object value) throws NetconfDocumentedException;
 }

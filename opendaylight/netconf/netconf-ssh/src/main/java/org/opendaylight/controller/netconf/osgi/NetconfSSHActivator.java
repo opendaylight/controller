@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.osgi;
 
 import com.google.common.base.Optional;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
@@ -40,7 +41,7 @@ public class NetconfSSHActivator implements BundleActivator{
     private IUserManager iUserManager;
     private BundleContext context = null;
 
-    ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>(){
+    private ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>(){
         @Override
         public IUserManager addingService(ServiceReference<IUserManager> reference) {
             logger.trace("Service {} added, let there be SSH bridge.", reference);
@@ -67,19 +68,19 @@ public class NetconfSSHActivator implements BundleActivator{
 
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context)  {
         this.context = context;
         listenForManagerService();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) throws IOException {
         if (server != null){
             server.stop();
             logger.trace("Netconf SSH bridge is down ...");
         }
     }
-    private void startSSHServer() throws Exception {
+    private void startSSHServer() throws IllegalStateException, IOException {
         logger.trace("Starting netconf SSH  bridge.");
         Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context, EXCEPTION_MESSAGE);
         InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,
@@ -89,7 +90,7 @@ public class NetconfSSHActivator implements BundleActivator{
             String path = NetconfConfigUtil.getPrivateKeyPath(context);
             path = path.replace("\\", "/");
             if (path.equals("")){
-                throw new Exception("Missing netconf.ssh.pk.path key in configuration file.");
+                throw new IllegalStateException("Missing netconf.ssh.pk.path key in configuration file.");
             }
 
             try (FileInputStream fis = new FileInputStream(path)){
@@ -103,10 +104,10 @@ public class NetconfSSHActivator implements BundleActivator{
             logger.trace("Netconf SSH  bridge up and running.");
         } else {
             logger.trace("No valid connection configuration for SSH bridge found.");
-            throw new Exception("No valid connection configuration for SSH bridge found.");
+            throw new IllegalStateException("No valid connection configuration for SSH bridge found.");
         }
     }
-    private void onUserManagerFound(IUserManager userManager) throws Exception{
+    private void onUserManagerFound(IUserManager userManager) throws IOException {
         if (server!=null && server.isUp()){
            server.addUserManagerService(userManager);
         } else {
