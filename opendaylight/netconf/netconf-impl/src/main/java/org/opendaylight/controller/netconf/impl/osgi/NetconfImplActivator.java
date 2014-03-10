@@ -40,7 +40,7 @@ public class NetconfImplActivator implements BundleActivator {
     private ServiceRegistration<NetconfMonitoringService> regMonitoring;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void start(final BundleContext context)  {
         InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
                 "TCP is not configured, netconf not available.", false);
 
@@ -85,7 +85,7 @@ public class NetconfImplActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stop(final BundleContext context) {
         logger.info("Shutting down netconf because YangStoreService service was removed");
 
         commitNot.close();

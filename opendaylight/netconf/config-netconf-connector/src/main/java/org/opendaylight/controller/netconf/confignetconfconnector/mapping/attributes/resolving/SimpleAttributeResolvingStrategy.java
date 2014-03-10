@@ -10,6 +10,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     }
 
     @Override
-    public Optional<Object> parseAttribute(String attrName, Object value) {
+    public Optional<Object> parseAttribute(String attrName, Object value) throws NetconfDocumentedException {
         if (value == null) {
             return Optional.absent();
         }
@@ -70,32 +73,42 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     }
 
     static interface Resolver {
-        Object resolveObject(Class<?> type, String attrName, String value);
+        Object resolveObject(Class<?> type, String attrName, String value) throws NetconfDocumentedException;
     }
 
     static class DefaultResolver implements Resolver {
 
         @Override
-        public Object resolveObject(Class<?> type, String attrName, String value) {
+        public Object resolveObject(Class<?> type, String attrName, String value) throws NetconfDocumentedException {
             try {
-                Object parsedValue = parseObject(type, value);
-                return parsedValue;
+                return parseObject(type, value);
             } catch (Exception e) {
-                throw new RuntimeException("Unable to resolve attribute " + attrName + " from " + value, e);
+                throw new NetconfDocumentedException("Unable to resolve attribute " + attrName + " from " + value,
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.operation_failed,
+                        NetconfDocumentedException.ErrorSeverity.error);
             }
         }
 
-        protected Object parseObject(Class<?> type, String value) throws Exception {
-            Method method = type.getMethod("valueOf", String.class);
-            Object parsedValue = method.invoke(null, value);
-            return parsedValue;
+        protected Object parseObject(Class<?> type, String value) throws NetconfDocumentedException {
+            Method method = null;
+            try {
+                method = type.getMethod("valueOf", String.class);
+                return method.invoke(null, value);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                logger.trace("Error parsing object {}",e);
+                throw new NetconfDocumentedException("Error parsing object.",
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.operation_failed,
+                        NetconfDocumentedException.ErrorSeverity.error);
+            }
         }
     }
 
     static class StringResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) throws Exception {
+        protected Object parseObject(Class<?> type, String value) {
             return value;
         }
     }
@@ -103,7 +116,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class BigIntegerResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) throws Exception {
+        protected Object parseObject(Class<?> type, String value) {
             return new BigInteger(value);
         }
     }
@@ -111,7 +124,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class BigDecimalResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) throws Exception {
+        protected Object parseObject(Class<?> type, String value) {
             return new BigDecimal(value);
         }
     }
@@ -119,16 +132,23 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class CharResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) throws Exception {
+        protected Object parseObject(Class<?> type, String value)  {
             return new Character(value.charAt(0));
         }
     }
 
     static class DateResolver extends DefaultResolver {
-
         @Override
-        protected Object parseObject(Class<?> type, String value) throws Exception {
-            return Util.readDate(value);
+        protected Object parseObject(Class<?> type, String value) throws NetconfDocumentedException {
+            try {
+                return Util.readDate(value);
+            } catch (ParseException e) {
+                logger.trace("Unable parse value {} due to  {}",value, e);
+                throw new NetconfDocumentedException("Unable to parse value "+value+" as date.",
+                        NetconfDocumentedException.ErrorType.application,
+                        NetconfDocumentedException.ErrorTag.operation_failed,
+                        NetconfDocumentedException.ErrorSeverity.error);
+            }
         }
     }
 

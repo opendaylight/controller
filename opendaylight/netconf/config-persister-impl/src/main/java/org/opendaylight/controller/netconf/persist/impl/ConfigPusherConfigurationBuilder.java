@@ -12,16 +12,16 @@ import io.netty.channel.EventLoopGroup;
 import java.net.InetSocketAddress;
 
 public class ConfigPusherConfigurationBuilder {
-    InetSocketAddress netconfAddress;
-    EventLoopGroup eventLoopGroup;
+    private InetSocketAddress netconfAddress;
+    private EventLoopGroup eventLoopGroup;
 
-    long netconfCapabilitiesWaitTimeoutMs = ConfigPusherConfiguration.DEFAULT_NETCONF_CAPABILITIES_WAIT_TIMEOUT_MS;
-    int netconfSendMessageDelayMs = ConfigPusherConfiguration.DEFAULT_NETCONF_SEND_MESSAGE_DELAY_MS;
-    int netconfSendMessageMaxAttempts = ConfigPusherConfiguration.DEFAULT_NETCONF_SEND_MESSAGE_MAX_ATTEMPTS;
-    int connectionAttemptDelayMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_DELAY_MS;
-    long connectionAttemptTimeoutMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_TIMEOUT_MS;
-    int netconfPushConfigAttempts = ConfigPusherConfiguration.DEFAULT_NETCONF_PUSH_CONFIG_ATTEMPTS;
-    long netconfPushConfigDelayMs = ConfigPusherConfiguration.DEFAULT_NETCONF_PUSH_CONFIG_DELAY_MS;
+    private long netconfCapabilitiesWaitTimeoutMs = ConfigPusherConfiguration.DEFAULT_NETCONF_CAPABILITIES_WAIT_TIMEOUT_MS;
+    private int netconfSendMessageDelayMs = ConfigPusherConfiguration.DEFAULT_NETCONF_SEND_MESSAGE_DELAY_MS;
+    private int netconfSendMessageMaxAttempts = ConfigPusherConfiguration.DEFAULT_NETCONF_SEND_MESSAGE_MAX_ATTEMPTS;
+    private int connectionAttemptDelayMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_DELAY_MS;
+    private long connectionAttemptTimeoutMs = ConfigPusherConfiguration.DEFAULT_CONNECTION_ATTEMPT_TIMEOUT_MS;
+    private int netconfPushConfigAttempts = ConfigPusherConfiguration.DEFAULT_NETCONF_PUSH_CONFIG_ATTEMPTS;
+    private long netconfPushConfigDelayMs = ConfigPusherConfiguration.DEFAULT_NETCONF_PUSH_CONFIG_DELAY_MS;
 
     private ConfigPusherConfigurationBuilder() {
     }
@@ -81,5 +81,42 @@ public class ConfigPusherConfigurationBuilder {
                 connectionAttemptDelayMs, connectionAttemptTimeoutMs, eventLoopGroup, netconfPushConfigAttempts,
                 netconfPushConfigDelayMs);
         return configPusherConfiguration;
+    }
+
+
+    public long getNetconfCapabilitiesWaitTimeoutMs() {
+        return netconfCapabilitiesWaitTimeoutMs;
+    }
+
+    public int getNetconfSendMessageDelayMs() {
+        return netconfSendMessageDelayMs;
+    }
+
+    public int getNetconfSendMessageMaxAttempts() {
+        return netconfSendMessageMaxAttempts;
+    }
+
+    public int getConnectionAttemptDelayMs() {
+        return connectionAttemptDelayMs;
+    }
+
+    public long getConnectionAttemptTimeoutMs() {
+        return connectionAttemptTimeoutMs;
+    }
+
+    public int getNetconfPushConfigAttempts() {
+        return netconfPushConfigAttempts;
+    }
+
+    public long getNetconfPushConfigDelayMs() {
+        return netconfPushConfigDelayMs;
+    }
+
+    public InetSocketAddress getNetconfAddress() {
+        return netconfAddress;
+    }
+
+    public EventLoopGroup getEventLoopGroup() {
+        return eventLoopGroup;
     }
 }

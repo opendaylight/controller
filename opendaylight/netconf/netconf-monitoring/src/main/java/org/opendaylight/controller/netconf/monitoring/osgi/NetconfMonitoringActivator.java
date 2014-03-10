@@ -21,14 +21,14 @@ public class NetconfMonitoringActivator implements BundleActivator {
     private NetconfMonitoringServiceTracker monitor;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void start(final BundleContext context)  {
         monitor = new NetconfMonitoringServiceTracker(context);
         monitor.open();
 
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stop(final BundleContext context) {
         if(monitor!=null) {
             try {
                 monitor.close();

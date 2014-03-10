@@ -81,7 +81,7 @@ public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSes
         });
     }
 
-    private static class ClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
+    private static final class ClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
 
         private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
         private final NetconfClientSessionListener sessionListener;

@@ -37,30 +37,30 @@ public final class ConfigPusherConfiguration {
     /**
      * Total time to wait for capability stabilization
      */
-    final long netconfCapabilitiesWaitTimeoutMs;
+    private final long netconfCapabilitiesWaitTimeoutMs;
 
     /**
      * Delay between message send attempts
      */
-    final int netconfSendMessageDelayMs;
+    private final int netconfSendMessageDelayMs;
     /**
      * Total number attempts to send a message
      */
-    final int netconfSendMessageMaxAttempts;
+    private final int netconfSendMessageMaxAttempts;
 
     /**
      * Delay between connection establishment attempts
      */
-    final int connectionAttemptDelayMs;
+    private final int connectionAttemptDelayMs;
     /**
      * Total number of attempts to perform connection establishment
      */
-    final long connectionAttemptTimeoutMs;
+    private final long connectionAttemptTimeoutMs;
 
     /**
      * Total number of attempts to push configuration to netconf
      */
-    final int netconfPushConfigAttempts;
+    private final int netconfPushConfigAttempts;
     /**
      * Delay between configuration push attempts
      */
@@ -79,5 +79,29 @@ public final class ConfigPusherConfiguration {
         this.eventLoopGroup = eventLoopGroup;
         this.netconfPushConfigAttempts = netconfPushConfigAttempts;
         this.netconfPushConfigDelayMs = netconfPushConfigDelayMs;
+    }
+
+    public int getConnectionAttemptDelayMs() {
+        return connectionAttemptDelayMs;
+    }
+
+    public long getConnectionAttemptTimeoutMs() {
+        return connectionAttemptTimeoutMs;
+    }
+
+    public int getNetconfPushConfigAttempts() {
+        return netconfPushConfigAttempts;
+    }
+
+    public long getNetconfCapabilitiesWaitTimeoutMs() {
+        return netconfCapabilitiesWaitTimeoutMs;
+    }
+
+    public int getNetconfSendMessageDelayMs() {
+        return netconfSendMessageDelayMs;
+    }
+
+    public int getNetconfSendMessageMaxAttempts() {
+        return netconfSendMessageMaxAttempts;
     }
 }

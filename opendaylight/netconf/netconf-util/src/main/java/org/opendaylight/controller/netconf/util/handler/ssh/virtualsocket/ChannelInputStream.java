@@ -12,7 +12,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -60,7 +59,7 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
                     lock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 }
             }
             return this.bb.readByte() & 0xFF;

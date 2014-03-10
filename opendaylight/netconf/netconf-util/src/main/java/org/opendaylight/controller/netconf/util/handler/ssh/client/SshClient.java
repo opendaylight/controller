@@ -58,8 +58,9 @@ public class SshClient {
     }
 
     public void close() {
-        for (SshSession session : openSessions.values())
+        for (SshSession session : openSessions.values()){
             closeSession(session);
+        }
 
         openSessions.clear();
 
