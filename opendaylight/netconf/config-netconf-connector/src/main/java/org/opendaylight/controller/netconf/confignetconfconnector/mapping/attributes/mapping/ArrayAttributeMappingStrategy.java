@@ -30,8 +30,9 @@ public class ArrayAttributeMappingStrategy extends AbstractAttributeMappingStrat
 
     @Override
     public Optional<List<Object>> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null){
             return Optional.absent();
+        }
 
         Preconditions.checkArgument(value.getClass().isArray(), "Value has to be instanceof Array ");
 
@@ -39,19 +40,11 @@ public class ArrayAttributeMappingStrategy extends AbstractAttributeMappingStrat
 
         for (int i = 0; i < Array.getLength(value); i++) {
             Object innerValue = Array.get(value, i);
-            // String expectedClassName =
-            // getOpenType().getElementOpenType().getClassName();
-            // String realClassName = value.getClass().getName();
-
-            // Preconditions.checkState(realClassName.contains(expectedClassName),
-            // "Element in collection/array should be of type " +
-            // expectedClassName + " but was "
-            // + realClassName + " for attribute: " + getOpenType());
-
             Optional<?> mapAttribute = innerElementStrategy.mapAttribute(innerValue);
 
-            if (mapAttribute.isPresent())
+            if (mapAttribute.isPresent()){
                 retVal.add(mapAttribute.get());
+            }
         }
 
         return Optional.of(retVal);

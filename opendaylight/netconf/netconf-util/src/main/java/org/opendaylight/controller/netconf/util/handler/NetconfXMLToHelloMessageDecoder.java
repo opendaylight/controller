@@ -13,10 +13,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
@@ -28,6 +30,7 @@ import org.w3c.dom.Document;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import org.xml.sax.SAXException;
 
 /**
  * Customized NetconfXMLToMessageDecoder that reads additional header with
@@ -48,7 +51,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
 
     @Override
     @VisibleForTesting
-    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws IOException, SAXException, NetconfDocumentedException {
         if (in.readableBytes() == 0) {
             LOG.debug("No more content in incoming buffer.");
             return;

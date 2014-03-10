@@ -20,9 +20,9 @@ import com.google.common.base.Optional;
 
 public class CompositeAttributeWritingStrategy implements AttributeWritingStrategy {
 
-    protected final String key;
-    protected final Document document;
-    protected final Map<String, AttributeWritingStrategy> innerStrats;
+    private final String key;
+    private final Document document;
+    private final Map<String, AttributeWritingStrategy> innerStrats;
 
     public CompositeAttributeWritingStrategy(Document document, String key,
             Map<String, AttributeWritingStrategy> innerStrats) {
@@ -48,5 +48,17 @@ public class CompositeAttributeWritingStrategy implements AttributeWritingStrate
             innerStrats.get(innerKey).writeElement(innerNode, namespace, innerValue);
         }
         parentElement.appendChild(innerNode);
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public Map<String, AttributeWritingStrategy> getInnerStrats() {
+        return innerStrats;
     }
 }

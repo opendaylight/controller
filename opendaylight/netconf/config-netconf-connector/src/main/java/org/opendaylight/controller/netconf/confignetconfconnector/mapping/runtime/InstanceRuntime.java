@@ -8,22 +8,19 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.management.ObjectName;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Sets;
+import javax.management.ObjectName;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class InstanceRuntime {
 
@@ -48,20 +45,23 @@ public class InstanceRuntime {
      * root + any number of additional properties
      */
     private Set<ObjectName> findChildren(ObjectName innerRootBean, Set<ObjectName> childRbeOns) {
-        final Hashtable<String, String> wantedProperties = innerRootBean.getKeyPropertyList();
+        final Map<String, String> wantedProperties = innerRootBean.getKeyPropertyList();
 
         return Sets.newHashSet(Collections2.filter(childRbeOns, new Predicate<ObjectName>() {
 
             @Override
             public boolean apply(ObjectName on) {
-                Hashtable<String, String> localProperties = on.getKeyPropertyList();
+                Map<String, String> localProperties = on.getKeyPropertyList();
                 for (Entry<String, String> propertyEntry : wantedProperties.entrySet()) {
-                    if (!localProperties.containsKey(propertyEntry.getKey()))
+                    if (!localProperties.containsKey(propertyEntry.getKey())){
                         return false;
-                    if (!localProperties.get(propertyEntry.getKey()).equals(propertyEntry.getValue()))
+                    }
+                    if (!localProperties.get(propertyEntry.getKey()).equals(propertyEntry.getValue())){
                         return false;
-                    if (localProperties.size() <= wantedProperties.size())
+                    }
+                    if (localProperties.size() <= wantedProperties.size()){
                         return false;
+                    }
                 }
                 return true;
             }
@@ -77,10 +77,12 @@ public class InstanceRuntime {
 
             @Override
             public boolean apply(ObjectName on) {
-                if (on.getKeyPropertyList().size() != keyListSize + 1)
+                if (on.getKeyPropertyList().size() != keyListSize + 1){
                     return false;
-                if (!on.getKeyPropertyList().containsKey(string))
+                }
+                if (!on.getKeyPropertyList().containsKey(string)){
                     return false;
+                }
                 return true;
             }
         }));

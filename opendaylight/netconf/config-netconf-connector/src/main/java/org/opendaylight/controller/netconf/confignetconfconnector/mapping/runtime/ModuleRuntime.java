@@ -20,11 +20,9 @@ import java.util.Set;
 
 public class ModuleRuntime {
 
-    private final String moduleName;
     private final InstanceRuntime instanceRuntime;
 
     public ModuleRuntime(String moduleName, InstanceRuntime instanceRuntime) {
-        this.moduleName = moduleName;
         this.instanceRuntime = instanceRuntime;
     }
 
@@ -34,8 +32,9 @@ public class ModuleRuntime {
 
     private ObjectName findRoot(Collection<ObjectName> runtimeBeanOns) {
         for (ObjectName objectName : runtimeBeanOns) {
-            if (objectName.getKeyPropertyList().size() == 3)
+            if (objectName.getKeyPropertyList().size() == 3){
                 return objectName;
+            }
         }
         throw new IllegalStateException("Root runtime bean not found among " + runtimeBeanOns);
     }

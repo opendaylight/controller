@@ -34,6 +34,7 @@ public class TransactionProvider implements AutoCloseable {
     private final String netconfSessionIdForReporting;
     private ObjectName transaction;
     private final List<ObjectName> allOpenedTransactions = new ArrayList<>();
+    private static final String  NO_TRANSACTION_FOUND_FOR_SESSION = "No transaction found for session ";
 
     public TransactionProvider(ConfigRegistryClient configRegistryClient, String netconfSessionIdForReporting) {
         this.configRegistryClient = configRegistryClient;
@@ -56,11 +57,12 @@ public class TransactionProvider implements AutoCloseable {
 
     public Optional<ObjectName> getTransaction() {
 
-        if (transaction == null)
+        if (transaction == null){
             return Optional.absent();
+        }
 
         // Transaction was already closed somehow
-        if (isStillOpenTransaction(transaction) == false) {
+        if (!isStillOpenTransaction(transaction)) {
             logger.warn("Fixing illegal state: transaction {} was closed in {}", transaction,
                     netconfSessionIdForReporting);
             transaction = null;
@@ -70,8 +72,7 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     private boolean isStillOpenTransaction(ObjectName transaction) {
-        boolean isStillOpenTransaction = configRegistryClient.getOpenConfigs().contains(transaction);
-        return isStillOpenTransaction;
+        return configRegistryClient.getOpenConfigs().contains(transaction);
     }
 
     public synchronized ObjectName getOrCreateTransaction() {
@@ -126,7 +127,7 @@ public class TransactionProvider implements AutoCloseable {
     public synchronized void abortTransaction() {
         logger.debug("Aborting current transaction");
         Optional<ObjectName> taON = getTransaction();
-        Preconditions.checkState(taON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
+        Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
 
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON.get());
         transactionClient.abortConfig();
@@ -143,7 +144,7 @@ public class TransactionProvider implements AutoCloseable {
 
     public void validateTransaction() throws ValidationException {
         Optional<ObjectName> taON = getTransaction();
-        Preconditions.checkState(taON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
+        Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
 
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON.get());
         transactionClient.validateConfig();
@@ -171,10 +172,11 @@ public class TransactionProvider implements AutoCloseable {
             try {
                 transactionClient.destroyModule(instance);
             } catch (InstanceNotFoundException e) {
-                if (isTest)
+                if (isTest){
                     logger.debug("Unable to clean configuration in transactiom {}", taON, e);
-                else
+                } else {
                     logger.warn("Unable to clean configuration in transactiom {}", taON, e);
+                }
 
                 throw new IllegalStateException("Unable to clean configuration in transactiom " + taON, e);
             }
@@ -187,7 +189,7 @@ public class TransactionProvider implements AutoCloseable {
 
     public void wipeTransaction() {
         Optional<ObjectName> taON = getTransaction();
-        Preconditions.checkState(taON.isPresent(), "No transaction found for session " + netconfSessionIdForReporting);
+        Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
         wipeInternal(taON.get(), false, null);
     }
 

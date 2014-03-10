@@ -34,10 +34,11 @@ final class UnionCompositeAttributeResolvingStrategy extends CompositeAttributeR
         Map<String, Object> newMap = Maps.newHashMap();
 
         for (String key : openType.keySet()) {
-            if (openType.getDescription(key).equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION))
+            if (openType.getDescription(key).equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION)){
                 newMap.put(key, valueMap.get(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION));
-            else
+            } else {
                 newMap.put(key, null);
+            }
         }
         return newMap;
     }

@@ -15,11 +15,13 @@ import org.slf4j.LoggerFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-public class FramingMechanismHandlerFactory {
+public final class FramingMechanismHandlerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(FramingMechanismHandlerFactory.class);
 
-    private FramingMechanismHandlerFactory() {}
+    private FramingMechanismHandlerFactory() {
+        // not called - private constructor for utility class
+    }
 
     public static MessageToByteEncoder<ByteBuf> createHandler(FramingMechanism framingMechanism) {
         logger.debug("{} framing mechanism was selected.", framingMechanism);

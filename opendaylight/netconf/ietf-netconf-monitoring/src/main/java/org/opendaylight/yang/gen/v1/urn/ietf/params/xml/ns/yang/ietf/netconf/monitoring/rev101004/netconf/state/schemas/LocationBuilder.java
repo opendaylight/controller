@@ -13,7 +13,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.mon
 
 /**
 **/
-public class LocationBuilder {
+public final class LocationBuilder {
 
     public static Location getDefaultInstance(String defaultValue) {
         return defaultValue.equals("NETCONF") ? new Location(Location.Enumeration.NETCONF) : new Location(new Uri(

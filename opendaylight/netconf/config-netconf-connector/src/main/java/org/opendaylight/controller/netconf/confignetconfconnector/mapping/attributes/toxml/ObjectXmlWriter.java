@@ -90,11 +90,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
 
     @Override
     protected AttributeWritingStrategy caseTOAttribute(CompositeType openType) {
-        Preconditions.checkState(lastAttribute instanceof TOAttribute);
+        Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
 
         Map<String, AttributeWritingStrategy> innerStrats = Maps.newHashMap();
         String currentKey = key;
-        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute) lastAttribute).getYangPropertiesToTypesMap().entrySet()) {
+        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute) getLastAttribute()).getYangPropertiesToTypesMap().entrySet()) {
 
             AttributeWritingStrategy innerStrategy = prepareWritingStrategy(innerAttrEntry.getKey(),
                     innerAttrEntry.getValue(), document);
@@ -106,8 +106,8 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
 
     @Override
     protected AttributeWritingStrategy caseListAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListAttribute);
-        AttributeIfc innerAttribute = ((ListAttribute) lastAttribute).getInnerAttribute();
+        Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
+        AttributeIfc innerAttribute = ((ListAttribute) getLastAttribute()).getInnerAttribute();
 
         AttributeWritingStrategy innerStrategy = prepareWritingStrategy(key, innerAttribute, document);
         return new ArrayAttributeWritingStrategy(innerStrategy);
@@ -115,7 +115,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
 
     @Override
     protected AttributeWritingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         AttributeWritingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
         return new ArrayAttributeWritingStrategy(innerStrategy);
     }
