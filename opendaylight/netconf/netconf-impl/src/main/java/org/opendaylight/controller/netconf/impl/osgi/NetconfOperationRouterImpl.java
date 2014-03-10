@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -33,11 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-public class NetconfOperationRouterImpl implements NetconfOperationRouter {
+public final class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
 
@@ -84,7 +82,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         for (NetconfOperationService netconfOperationService : netconfOperationServiceSnapshot.getServices()) {
             final Set<NetconfOperation> netOpsFromService = netconfOperationService.getNetconfOperations();
             for (NetconfOperation netconfOperation : netOpsFromService) {
-                Preconditions.checkState(result.contains(netconfOperation) == false,
+                Preconditions.checkState(!result.contains(netconfOperation),
                         "Netconf operation %s already present", netconfOperation);
                 result.add(netconfOperation);
             }
@@ -156,28 +154,28 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     private NetconfOperationExecution getNetconfOperationWithHighestPriority(
             Document message, NetconfSession session) {
 
-        TreeMap<HandlingPriority, NetconfOperation> sortedByPriority = getSortedNetconfOperationsWithCanHandle(
+        NavigableMap<HandlingPriority, NetconfOperation> sortedByPriority = getSortedNetconfOperationsWithCanHandle(
                 message, session);
 
-        Preconditions.checkArgument(sortedByPriority.isEmpty() == false,
+        Preconditions.checkArgument(!sortedByPriority.isEmpty(),
                 "No %s available to handleWithNoSubsequentOperations message %s", NetconfOperation.class.getName(),
                 XmlUtil.toString(message));
 
         return NetconfOperationExecution.createExecutionChain(sortedByPriority, sortedByPriority.lastKey());
     }
 
-    private TreeMap<HandlingPriority, NetconfOperation> getSortedNetconfOperationsWithCanHandle(Document message,
+    private NavigableMap<HandlingPriority, NetconfOperation> getSortedNetconfOperationsWithCanHandle(Document message,
             NetconfSession session) {
-        TreeMap<HandlingPriority, NetconfOperation> sortedPriority = Maps.newTreeMap();
+        NavigableMap<HandlingPriority, NetconfOperation> sortedPriority = Maps.newTreeMap();
 
         for (NetconfOperation netconfOperation : allNetconfOperations) {
             final HandlingPriority handlingPriority = netconfOperation.canHandle(message);
             if (netconfOperation instanceof DefaultNetconfOperation) {
                 ((DefaultNetconfOperation) netconfOperation).setNetconfSession(session);
             }
-            if (handlingPriority.equals(HandlingPriority.CANNOT_HANDLE) == false) {
+            if (!handlingPriority.equals(HandlingPriority.CANNOT_HANDLE)) {
 
-                Preconditions.checkState(sortedPriority.containsKey(handlingPriority) == false,
+                Preconditions.checkState(!sortedPriority.containsKey(handlingPriority),
                         "Multiple %s available to handle message %s with priority %s",
                         NetconfOperation.class.getName(), message, handlingPriority);
                 sortedPriority.put(handlingPriority, netconfOperation);
@@ -198,7 +196,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         }
     };
 
-    private static class NetconfOperationExecution implements NetconfOperationChainedExecution {
+    private static final class NetconfOperationExecution implements NetconfOperationChainedExecution {
         private final NetconfOperation netconfOperation;
         private NetconfOperationChainedExecution subsequentExecution;
 
@@ -218,7 +216,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         }
 
         public static NetconfOperationExecution createExecutionChain(
-                TreeMap<HandlingPriority, NetconfOperation> sortedByPriority, HandlingPriority handlingPriority) {
+                NavigableMap<HandlingPriority, NetconfOperation> sortedByPriority, HandlingPriority handlingPriority) {
             NetconfOperation netconfOperation = sortedByPriority.get(handlingPriority);
             HandlingPriority subsequentHandlingPriority = sortedByPriority.lowerKey(handlingPriority);
 

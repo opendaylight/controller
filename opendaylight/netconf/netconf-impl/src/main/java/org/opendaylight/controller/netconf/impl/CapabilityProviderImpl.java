@@ -68,12 +68,11 @@ public class CapabilityProviderImpl implements CapabilityProvider {
             final Set<Capability> caps = netconfOperationService.getCapabilities();
 
             for (Capability cap : caps) {
-                if (cap.getModuleName().isPresent() == false)
+                if (!cap.getModuleName().isPresent()
+                        || !cap.getRevision().isPresent()
+                        || !cap.getCapabilitySchema().isPresent()){
                     continue;
-                if (cap.getRevision().isPresent() == false)
-                    continue;
-                if (cap.getCapabilitySchema().isPresent() == false)
-                    continue;
+                }
 
                 final String currentModuleName = cap.getModuleName().get();
                 Map<String, String> revisionMap = mappedModulesToRevisionToSchema.get(currentModuleName);

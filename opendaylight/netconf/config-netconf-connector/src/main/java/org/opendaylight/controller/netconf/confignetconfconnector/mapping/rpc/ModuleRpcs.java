@@ -17,12 +17,12 @@ import java.util.Map;
 
 public final class ModuleRpcs {
 
-    Map<String, String> yangToJavaNames = Maps.newHashMap();
-    Map<String, Map<String, InstanceRuntimeRpc>> rpcMapping = Maps.newHashMap();
+    private Map<String, String> yangToJavaNames = Maps.newHashMap();
+    private Map<String, Map<String, InstanceRuntimeRpc>> rpcMapping = Maps.newHashMap();
 
     public void addNameMapping(RuntimeBeanEntry runtimeEntry) {
         String yangName = runtimeEntry.getYangName();
-        Preconditions.checkState(yangToJavaNames.containsKey(yangName) == false,
+        Preconditions.checkState(!yangToJavaNames.containsKey(yangName),
                 "RuntimeBean %s found twice in same namespace", yangName);
         yangToJavaNames.put(yangName, runtimeEntry.getJavaNamePrefix());
     }
@@ -35,7 +35,7 @@ public final class ModuleRpcs {
             rpcMapping.put(yangName, map);
         }
 
-        Preconditions.checkState(map.containsKey(rpc.getYangName()) == false, "Rpc %s for runtime bean %s added twice",
+        Preconditions.checkState(!map.containsKey(rpc.getYangName()), "Rpc %s for runtime bean %s added twice",
                 rpc.getYangName(), yangName);
         map.put(rpc.getYangName(), new InstanceRuntimeRpc(rpc));
     }
@@ -54,5 +54,13 @@ public final class ModuleRpcs {
         InstanceRuntimeRpc rpc = rpcs.get(rpcName);
         Preconditions.checkState(rpc != null, "No rpc found for runtime bean %s with name %s", rbeName, rpcName);
         return rpc;
+    }
+
+    public Map<String, String> getYangToJavaNames() {
+        return yangToJavaNames;
+    }
+
+    public Map<String, Map<String, InstanceRuntimeRpc>> getRpcMapping() {
+        return rpcMapping;
     }
 }

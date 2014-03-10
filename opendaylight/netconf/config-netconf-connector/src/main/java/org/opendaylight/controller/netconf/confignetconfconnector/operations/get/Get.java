@@ -72,12 +72,14 @@ public class Get extends AbstractConfigNetconfOperation {
                 RuntimeBeanEntry root = null;
                 for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
                     cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap()));
-                    if (rbe.isRoot())
+                    if (rbe.isRoot()){
                         root = rbe;
+                    }
                 }
 
-                if (root == null)
+                if (root == null){
                     continue;
+                }
 
                 InstanceRuntime rootInstanceRuntime = createInstanceRuntime(root, cache);
                 ModuleRuntime moduleRuntime = new ModuleRuntime(module, rootInstanceRuntime);
@@ -111,8 +113,9 @@ public class Get extends AbstractConfigNetconfOperation {
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         // Filter option - unsupported
-        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0)
+        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0){
             throw new UnsupportedOperationException("Unsupported option " + XmlNetconfConstants.FILTER + " for " + XmlNetconfConstants.GET);
+        }
     }
 
     @Override
@@ -138,21 +141,21 @@ public class Get extends AbstractConfigNetconfOperation {
                     ErrorTag.operation_not_supported, ErrorSeverity.error, errorInfo);
         }
 
-        final Set<ObjectName> runtimeBeans = configRegistryClient.lookupRuntimeBeans();
+        final Set<ObjectName> runtimeBeans = getConfigRegistryClient().lookupRuntimeBeans();
 
         //Transaction provider required only for candidate datastore
         final Set<ObjectName> configBeans = Datastore.getInstanceQueryStrategy(Datastore.running, null)
-                .queryInstances(configRegistryClient);
+                .queryInstances(getConfigRegistryClient());
 
-        final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(configRegistryClient,
+        final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(getConfigRegistryClient(),
                 yangStoreSnapshot.getModuleMXBeanEntryMap());
         final Map<String, Map<String, ModuleConfig>> moduleConfigs = EditConfig.transformMbeToModuleConfigs(
-                configRegistryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
+                getConfigRegistryClient(), yangStoreSnapshot.getModuleMXBeanEntryMap());
 
         final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 
         ObjectName txOn = transactionProvider.getOrCreateTransaction();
-        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(txOn);
+        ConfigTransactionClient ta = getConfigRegistryClient().getConfigTransactionClient(txOn);
         final Element element = runtime.toXml(runtimeBeans, configBeans, document, new ServiceRegistryWrapper(ta));
 
         logger.trace("{} operation successful", XmlNetconfConstants.GET);

@@ -8,31 +8,19 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.Map;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.Map;
-
 public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteEditConfigStrategy.class);
 
-    private final Multimap<String, String> providedServices;
-
-    public DeleteEditConfigStrategy() {
-        this.providedServices = HashMultimap.create();
-    }
-
-    public DeleteEditConfigStrategy(Multimap<String, String> providedServices) {
-        this.providedServices = providedServices;
-    }
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
