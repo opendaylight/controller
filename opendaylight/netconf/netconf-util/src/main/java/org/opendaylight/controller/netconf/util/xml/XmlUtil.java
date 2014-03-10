@@ -79,7 +79,7 @@ public final class XmlUtil {
         try {
             dBuilder = BUILDERFACTORY.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Failed to parse XML document", e);
+            throw new IllegalStateException("Failed to parse XML document", e);
         }
         Document doc = dBuilder.parse(xmlContent);
 
@@ -94,10 +94,9 @@ public final class XmlUtil {
     public static Document newDocument() {
         try {
             DocumentBuilder builder = BUILDERFACTORY.newDocumentBuilder();
-            Document document = builder.newDocument();
-            return document;
+            return builder.newDocument();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Failed to create document", e);
+            throw new IllegalStateException("Failed to create document", e);
         }
     }
 

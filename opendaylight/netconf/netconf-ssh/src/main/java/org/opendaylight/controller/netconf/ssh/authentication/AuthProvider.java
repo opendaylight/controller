@@ -24,15 +24,15 @@ public class AuthProvider implements AuthProviderInterface {
     private static IUserManager um;
     private static final String DEFAULT_USER = "netconf";
     private static final String DEFAULT_PASSWORD = "netconf";
-    private String PEM;
+    private final String PEM;
 
     private static final Logger logger =  LoggerFactory.getLogger(AuthProvider.class);
 
-    public AuthProvider(IUserManager ium,InputStream privateKeyFileInputStream) throws Exception {
+    public AuthProvider(IUserManager ium,InputStream privateKeyFileInputStream) throws IllegalStateException {
 
         AuthProvider.um = ium;
         if (AuthProvider.um  == null){
-            throw new Exception("No usermanager service available.");
+            throw new IllegalStateException("No usermanager service available.");
         }
 
         List<String> roles = new ArrayList<String>(1);
@@ -47,9 +47,9 @@ public class AuthProvider implements AuthProviderInterface {
         }
     }
     @Override
-    public boolean authenticated(String username, String password)  throws Exception {
+    public boolean authenticated(String username, String password)  throws IllegalStateException {
         if (AuthProvider.um  == null){
-            throw new Exception("No usermanager service available.");
+            throw new IllegalStateException("No usermanager service available.");
         }
         AuthResultEnum authResult = AuthProvider.um.authenticate(username,password);
         if (authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC)){

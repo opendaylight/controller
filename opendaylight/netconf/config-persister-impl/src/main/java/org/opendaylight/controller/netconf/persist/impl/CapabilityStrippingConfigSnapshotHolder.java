@@ -39,7 +39,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
         stripCapabilitiesResult = stripCapabilities(configElement, capabilities, ignoredMissingCapabilityRegex);
     }
 
-    private static class StripCapabilitiesResult {
+    private static final class StripCapabilitiesResult {
         private final SortedSet<String> requiredCapabilities, missingNamespaces;
 
         private StripCapabilitiesResult(SortedSet<String> requiredCapabilities, SortedSet<String> missingNamespaces) {

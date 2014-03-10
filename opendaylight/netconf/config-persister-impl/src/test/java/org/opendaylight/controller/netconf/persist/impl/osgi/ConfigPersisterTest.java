@@ -7,18 +7,15 @@
  */
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
+import com.google.common.collect.Lists;
+import io.netty.channel.nio.NioEventLoopGroup;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
-
 import javax.management.MBeanServer;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -28,9 +25,8 @@ import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfiguration;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfigurationBuilder;
-
-import com.google.common.collect.Lists;
-import io.netty.channel.nio.NioEventLoopGroup;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ConfigPersisterTest {
 
@@ -74,7 +70,7 @@ public class ConfigPersisterTest {
 
         waitTestToFinish(2000);
 
-        handler.assertException("connect to netconf endpoint", RuntimeException.class,
+        handler.assertException("connect to netconf endpoint", IllegalStateException.class,
                 "Could not connect to netconf server");
     }
 
@@ -90,7 +86,7 @@ public class ConfigPersisterTest {
 
             waitTestToFinish(2500);
 
-            handler.assertException("retrieve required capabilities from netconf endpoint", RuntimeException.class,
+            handler.assertException("retrieve required capabilities from netconf endpoint", IllegalStateException.class,
                     "Expected but not found:[required-cap]");
         }
     }
@@ -137,7 +133,7 @@ public class ConfigPersisterTest {
 
             waitTestToFinish(4000);
 
-            handler.assertException("register as JMX listener", RuntimeException.class,
+            handler.assertException("register as JMX listener", IllegalStateException.class,
                     "Cannot register as JMX listener to netconf");
 
             assertEquals(1 + 3, endpoint.getReceivedMessages().size());

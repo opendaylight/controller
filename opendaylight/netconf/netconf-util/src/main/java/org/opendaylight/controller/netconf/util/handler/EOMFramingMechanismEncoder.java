@@ -16,7 +16,7 @@ import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants
 
 public class EOMFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf> {
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
         out.writeBytes(msg);
         out.writeBytes(NetconfMessageConstants.END_OF_MESSAGE);
     }
