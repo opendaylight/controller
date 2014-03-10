@@ -573,6 +573,13 @@ public class TopologyManagerImpl implements
         switch (type) {
         case ADDED:
 
+
+            if (this.edgesDB.containsKey(e)) {
+                // Avoid redundant updates (e.g. cluster switch-over) as notifications trigger expensive tasks
+                log.trace("Skipping redundant edge addition: {}", e);
+                return null;
+            }
+
             // Make sure the props are non-null or create a copy
             if (props == null) {
                 props = new HashSet<Property>();
@@ -580,19 +587,6 @@ public class TopologyManagerImpl implements
                 props = new HashSet<Property>(props);
             }
 
-            Set<Property> currentProps = this.edgesDB.get(e);
-            if (currentProps != null) {
-
-                if (currentProps.equals(props)) {
-                    // Avoid redundant updates as notifications trigger expensive tasks
-                    log.trace("Skipping redundant edge addition: {}", e);
-                    return null;
-                }
-
-                // In case of node switch-over to a different cluster controller,
-                // let's retain edge props (e.g. creation time)
-                props.addAll(currentProps);
-            }
 
             // Ensure that head node connector exists
             if (!headNodeConnectorExist(e)) {
@@ -654,10 +648,9 @@ public class TopologyManagerImpl implements
         case CHANGED:
             Set<Property> oldProps = this.edgesDB.get(e);
 
-            // When property changes lets make sure we can change it
+            // When property(s) changes lets make sure we can change it
             // all except the creation time stamp because that should
-            // be changed only when the edge is destroyed and created
-            // again
+            // be set only when the edge is created
             TimeStamp timeStamp = null;
             for (Property prop : oldProps) {
                 if (prop instanceof TimeStamp) {

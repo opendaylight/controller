@@ -836,8 +836,10 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             moveToReadyListHi(dst);
         }
 
+        //checking only OF map, since production edge discovery always overwrites any existing edge
+        UpdateType ut = edgeMap.containsKey(dst) ? UpdateType.CHANGED : UpdateType.ADDED;
         // notify
-        updateEdge(edge, UpdateType.ADDED, props);
+        updateEdge(edge, ut, props);
         logger.trace("Add edge {}", edge);
     }
 
@@ -935,6 +937,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         if (discoveryListener == null) {
             return;
         }
+
 
         this.discoveryListener.notifyEdge(edge, type, props);
 
