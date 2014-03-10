@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.mapping.api;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-public class HandlingPriority implements Comparable<HandlingPriority> {
+public final class HandlingPriority implements Comparable<HandlingPriority> {
 
     public static final HandlingPriority CANNOT_HANDLE = new HandlingPriority();
     public static final HandlingPriority HANDLE_WITH_DEFAULT_PRIORITY = new HandlingPriority(Integer.MIN_VALUE);
@@ -51,34 +51,42 @@ public class HandlingPriority implements Comparable<HandlingPriority> {
 
     @Override
     public int compareTo(HandlingPriority o) {
-        if (this == o)
+        if (this == o){
             return 0;
-        if (this == CANNOT_HANDLE)
+        }
+        if (this.equals(CANNOT_HANDLE)){
             return -1;
-        if (o == CANNOT_HANDLE)
+        }
+        if (o.equals(CANNOT_HANDLE)){
             return 1;
+        }
 
-        if (priority > o.priority)
+        if (priority > o.priority){
             return 1;
-        if (priority == o.priority)
+        }
+        if (priority.equals(o.priority)){
             return 0;
-        if (priority < o.priority)
+        }
+        if (priority < o.priority){
             return -1;
-
+        }
         throw new IllegalStateException("Unexpected state");
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o){
             return true;
-        if (!(o instanceof HandlingPriority))
+        }
+        if (!(o instanceof HandlingPriority)){
             return false;
+        }
 
         HandlingPriority that = (HandlingPriority) o;
 
-        if (priority != null ? !priority.equals(that.priority) : that.priority != null)
+        if (priority != null ? !priority.equals(that.priority) : that.priority != null){
             return false;
+        }
 
         return true;
     }

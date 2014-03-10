@@ -9,19 +9,18 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.api.StorageAdapter;
-import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
-import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderBaseImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.config.persist.api.StorageAdapter;
+import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Persister} implementation that delegates persisting functionality to
@@ -88,7 +87,7 @@ public final class PersisterAggregator implements Persister {
         }
     }
 
-    private static PersisterWithConfiguration loadConfiguration(final String index, final PropertiesProviderBaseImpl propertiesProvider) {
+    private static PersisterWithConfiguration loadConfiguration(final String index, final PropertiesProvider propertiesProvider) {
 
         String classKey = index + "." + ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX;
         String storageAdapterClass = propertiesProvider.getProperty(classKey);
@@ -102,7 +101,7 @@ public final class PersisterAggregator implements Persister {
         try {
             Class<?> clazz = Class.forName(storageAdapterClass);
             boolean implementsCorrectIfc = StorageAdapter.class.isAssignableFrom(clazz);
-            if (implementsCorrectIfc == false) {
+            if (!implementsCorrectIfc) {
                 throw new IllegalArgumentException("Storage adapter " + clazz + " does not implement " + StorageAdapter.class);
             }
             storageAdapter = StorageAdapter.class.cast(clazz.newInstance());
@@ -131,10 +130,10 @@ public final class PersisterAggregator implements Persister {
 
     }
 
-    public static PersisterAggregator createFromProperties(PropertiesProviderBaseImpl propertiesProvider) {
+    public static PersisterAggregator createFromProperties(PropertiesProvider propertiesProvider) {
         List<PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
         String prefixes = propertiesProvider.getProperty("active");
-        if (prefixes!=null && prefixes.isEmpty() == false) {
+        if (prefixes!=null && !prefixes.isEmpty()) {
             String [] keys = prefixes.split(",");
             for (String index: keys) {
                 persisterWithConfigurations.add(PersisterAggregator.loadConfiguration(index, propertiesProvider));
@@ -169,7 +168,7 @@ public final class PersisterAggregator implements Persister {
             } catch (IOException e) {
                 throw new RuntimeException("Error while calling loadLastConfig on " +  persisterWithConfiguration, e);
             }
-            if (configs.isEmpty() == false) {
+            if (!configs.isEmpty()) {
                 logger.debug("Found non empty configs using {}:{}", persisterWithConfiguration, configs);
                 return configs;
             }

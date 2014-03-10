@@ -48,8 +48,9 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
         for (Entry<String, String> namespaceToService : providedServices.entries()) {
 
             if(services.hasRefName(namespaceToService.getKey(),
-                    namespaceToService.getValue(), on))
+                    namespaceToService.getValue(), on)){
                 continue;
+            }
 
             String refName = services.getNewDefaultRefName(namespaceToService.getKey(), namespaceToService.getValue(),
                     ObjectNameUtil.getFactoryName(on), ObjectNameUtil.getInstanceName(on));

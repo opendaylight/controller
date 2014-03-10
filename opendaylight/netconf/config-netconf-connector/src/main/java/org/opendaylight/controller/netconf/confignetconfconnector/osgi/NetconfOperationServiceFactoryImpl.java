@@ -52,7 +52,7 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
                     Thread.sleep(ATTEMPT_TIMEOUT_MS);
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException("Interrupted while reattempting connection", e1);
+                    throw new IllegalStateException("Interrupted while reattempting connection", e1);
                 }
             }
         }

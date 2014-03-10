@@ -26,4 +26,14 @@ public class PropertiesProviderTest implements PropertiesProvider {
     public String getFullKeyForReporting(String key) {
         return null;
     }
+
+    @Override
+    public String getPrefix() {
+        return null;
+    }
+
+    @Override
+    public String getPropertyWithoutPrefix(String fullKey) {
+        return null;
+    }
 }

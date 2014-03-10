@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ class CompositeAttributeResolvingStrategy extends
     }
 
     @Override
-    public Optional<CompositeDataSupport> parseAttribute(String attrName, Object value) {
+    public Optional<CompositeDataSupport> parseAttribute(String attrName, Object value) throws NetconfDocumentedException {
 
         if (value == null) {
             return Optional.absent();
@@ -75,7 +76,7 @@ class CompositeAttributeResolvingStrategy extends
         try {
             parsedValue = new CompositeDataSupport(getOpenType(), items);
         } catch (OpenDataException e) {
-            throw new RuntimeException("An error occured during restoration of composite type " + this
+            throw new IllegalStateException("An error occured during restoration of composite type " + this
                     + " for attribute " + attrName + " from value " + value, e);
         }
 

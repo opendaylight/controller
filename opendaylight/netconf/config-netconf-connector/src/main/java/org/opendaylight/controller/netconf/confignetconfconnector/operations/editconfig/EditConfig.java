@@ -72,11 +72,11 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
 
         if (editConfigExecution.shouldTest()) {
-            executeTests(configRegistryClient, editConfigExecution);
+            executeTests(getConfigRegistryClient(), editConfigExecution);
         }
 
         if (editConfigExecution.shouldSet()) {
-            executeSet(configRegistryClient, editConfigExecution);
+            executeSet(getConfigRegistryClient(), editConfigExecution);
         }
 
         logger.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
@@ -235,7 +235,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
         void addIdSchemaNode(IdentitySchemaNode node) {
             String name = node.getQName().getLocalName();
-            Preconditions.checkState(identityNameToSchemaNode.containsKey(name) == false);
+            Preconditions.checkState(!identityNameToSchemaNode.containsKey(name));
             identityNameToSchemaNode.put(name, node);
         }
 
@@ -261,7 +261,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             }
 
             Date revision = module.getRevision();
-            Preconditions.checkState(revisionsByNamespace.containsKey(revision) == false,
+            Preconditions.checkState(!revisionsByNamespace.containsKey(revision),
                     "Duplicate revision %s for namespace %s", revision, namespace);
 
             IdentityMapping identityMapping = revisionsByNamespace.get(revision);
@@ -317,9 +317,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
 
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
-        Config cfg = getConfigMapping(configRegistryClient, yangStoreSnapshot);
+        Config cfg = getConfigMapping(getConfigRegistryClient(), yangStoreSnapshot);
         try {
-            editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, configRegistryClient);
+            editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, getConfigRegistryClient());
         } catch (IllegalStateException e) {
             logger.warn("Error parsing xml", e);
             final Map<String, String> errorInfo = new HashMap<>();

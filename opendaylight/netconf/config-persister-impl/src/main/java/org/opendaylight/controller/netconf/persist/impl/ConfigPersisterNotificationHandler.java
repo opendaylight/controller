@@ -50,7 +50,7 @@ public class ConfigPersisterNotificationHandler implements Closeable {
         try {
             mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.OBJECT_NAME, listener, null, null);
         } catch (InstanceNotFoundException | IOException e) {
-            throw new RuntimeException("Cannot register as JMX listener to netconf", e);
+            throw new IllegalStateException("Cannot register as JMX listener to netconf", e);
         }
     }
 
@@ -79,9 +79,8 @@ class ConfigPersisterNotificationListener implements NotificationListener {
 
     @Override
     public void handleNotification(Notification notification, Object handback) {
-        if (notification instanceof NetconfJMXNotification == false) {
+        if (!(notification instanceof NetconfJMXNotification))
             return;
-        }
 
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called

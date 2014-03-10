@@ -33,7 +33,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
     public void writeElement(Element parentElement, String namespace, Object value) {
         Util.checkType(value, Map.class);
 
-        Element innerNode = document.createElement(key);
+        Element innerNode = getDocument().createElement(getKey());
 
         Map<?, ?> map = (Map<?, ?>) value;
 
@@ -43,7 +43,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
             // bean
             Util.checkType(runtimeBeanInstanceMappingEntry.getValue(), Map.class);
             Map<?, ?> innerMap = (Map<?, ?>) runtimeBeanInstanceMappingEntry.getValue();
-            Element runtimeInstanceNode = document.createElement("_"
+            Element runtimeInstanceNode = getDocument().createElement("_"
                     + (String) runtimeBeanInstanceMappingEntry.getKey());
             innerNode.appendChild(runtimeInstanceNode);
 
@@ -54,7 +54,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
                 String innerKey = (String) innerObjectEntry.getKey();
                 Object innerValue = innerObjectEntry.getValue();
 
-                innerStrats.get(innerKey).writeElement(runtimeInstanceNode, namespace, innerValue);
+                getInnerStrats().get(innerKey).writeElement(runtimeInstanceNode, namespace, innerValue);
             }
         }
         parentElement.appendChild(innerNode);

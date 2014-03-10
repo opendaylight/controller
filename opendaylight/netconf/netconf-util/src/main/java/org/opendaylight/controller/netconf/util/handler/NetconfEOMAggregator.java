@@ -24,7 +24,7 @@ public class NetconfEOMAggregator extends ByteToMessageDecoder {
     private final static Logger logger = LoggerFactory.getLogger(NetconfEOMAggregator.class);
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         int index = indexOfSequence(in, NetconfMessageConstants.END_OF_MESSAGE);
         if (index == -1) {
             logger.debug("Message is not complete, read again.");
