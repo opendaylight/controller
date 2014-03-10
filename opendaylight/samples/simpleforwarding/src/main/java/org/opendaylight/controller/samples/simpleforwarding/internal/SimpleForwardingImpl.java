@@ -45,6 +45,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.routing.IForwarding;
 import org.opendaylight.controller.sal.routing.IListenRoutingUpdates;
 import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.EtherTypes;
@@ -70,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * installs those rules using <tt>installPerHostRules()</tt>.
  */
 public class SimpleForwardingImpl implements IfNewHostNotify,
-        IListenRoutingUpdates, IInventoryListener {
+        IListenRoutingUpdates, IInventoryListener, IForwarding {
     private static Logger log = LoggerFactory
             .getLogger(SimpleForwardingImpl.class);
     private static short DEFAULT_IPSWITCH_PRIORITY = 1;

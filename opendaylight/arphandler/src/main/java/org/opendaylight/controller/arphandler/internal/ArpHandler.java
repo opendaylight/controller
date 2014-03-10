@@ -54,6 +54,7 @@ import org.opendaylight.controller.sal.packet.IPv4;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.routing.IForwarding;
 import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -72,6 +73,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     private ITopologyManager topologyManager;
     private IDataPacketService dataPacketService;
     private IRouting routing;
+    private IForwarding forwarding;
     private IClusterContainerServices clusterContainerService;
     private IConnectionManager connectionManager;
     private Set<IfHostListener> hostListeners = new CopyOnWriteArraySet<IfHostListener>();
@@ -120,6 +122,16 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     void unsetRouting(IRouting r) {
         if (this.routing == r) {
             this.routing = null;
+        }
+    }
+
+    void setForwarding(IForwarding f) {
+        this.forwarding = f;
+    }
+
+    void unsetForwarding(IForwarding f) {
+        if (this.forwarding == f) {
+            this.forwarding = null;
         }
     }
 
@@ -480,10 +492,14 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
              */
             arpRequestReplyEvent.put(new ARPRequest(dIP, subnet), false);
 
-        } else if (routing == null || routing.getRoute(p.getNode(), host.getnodeconnectorNode()) != null) {
-            /*
-             * if IRouting is available, make sure that this packet can get it's
-             * destination normally before teleporting it there. If it's not
+        } else if (forwarding != null && (routing == null ||
+                routing.getRoute(p.getNode(), host.getnodeconnectorNode()) != null) )
+        {
+            /* Make sure that there is some forwarding module running otherwise,
+             * we don't want to forward traffic either.
+             *
+             * If IRouting is available, make sure that this packet can get to
+             * its destination normally before teleporting it there. If it's not
              * available, then assume it's reachable.
              *
              * TODO: come up with a way to do this in the absence of IRouting
