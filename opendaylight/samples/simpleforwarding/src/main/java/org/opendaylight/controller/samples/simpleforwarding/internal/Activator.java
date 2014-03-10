@@ -13,9 +13,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
@@ -30,6 +27,8 @@ import org.opendaylight.controller.samples.simpleforwarding.IBroadcastPortSelect
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -45,6 +44,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { SimpleForwardingImpl.class,
                          SimpleBroadcastHandlerImpl.class };
@@ -64,12 +64,17 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(SimpleForwardingImpl.class)) {
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put("salListenerName", "simpleforwarding");
+
             // export the service
             c.setInterface(new String[] { IInventoryListener.class.getName(),
                     IfNewHostNotify.class.getName(),
-                    IListenRoutingUpdates.class.getName() }, null);
+                    IListenRoutingUpdates.class.getName(),
+                    IListenDataPacket.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     IClusterContainerServices.class).setCallbacks(
@@ -96,7 +101,11 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     IRouting.class).setCallbacks("setRouting", "unsetRouting")
                     .setRequired(false));
-        }else if (imp.equals(SimpleBroadcastHandlerImpl.class)) {
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IDataPacketService.class).setCallbacks("setDataPacketService",
+                   "unsetDataPacketService").setRequired(false));
+
+        } else if (imp.equals(SimpleBroadcastHandlerImpl.class)) {
             Dictionary<String, String> props = new Hashtable<String, String>();
             props.put("salListenerName", "simplebroadcasthandler");
 
