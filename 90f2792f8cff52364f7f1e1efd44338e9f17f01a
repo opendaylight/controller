@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_305a4e84",
+        "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/META-INF/maven/archetype-metadata.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-10T21:03:39Z",
+      "side": 1,
+      "message": "You may want to clean these imports as well. They should no longer be needed.",
+      "revId": "90f2792f8cff52364f7f1e1efd44338e9f17f01a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_105f4a74",
+        "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/archetype-resources/src/main/java/Northbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-10T21:03:39Z",
+      "side": 1,
+      "message": "Don\u0027t you want to add the container ?",
+      "revId": "90f2792f8cff52364f7f1e1efd44338e9f17f01a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
