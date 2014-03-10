@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_5094a236",
+        "filename": "opendaylight/config/config-persister-directory-adapter/src/test/java/org/opendaylight/controller/config/persist/storage/directory/DirectoryStorageAdapterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-10T16:18:51Z",
+      "side": 1,
+      "message": "doesn\u0027t this squash all spaces?",
+      "revId": "a6fbd55465dc62672fcaf5166fdacf3f4f84d85a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
