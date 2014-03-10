@@ -8,13 +8,12 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
-import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderBaseImpl;
 
 public class PropertiesProviderAdapterImpl implements PropertiesProvider {
-    private final PropertiesProviderBaseImpl inner;
+    private final PropertiesProvider inner;
     private final String index;
 
-    public PropertiesProviderAdapterImpl(PropertiesProviderBaseImpl inner, String index) {
+    public PropertiesProviderAdapterImpl(PropertiesProvider inner, String index) {
         this.inner = inner;
         this.index = index;
     }
@@ -28,6 +27,12 @@ public class PropertiesProviderAdapterImpl implements PropertiesProvider {
     public String getPrefix() {
         return inner.getPrefix() + "." + index + ".properties";
     }
+
+    @Override
+    public String getPropertyWithoutPrefix(String fullKey) {
+        return inner.getPropertyWithoutPrefix(fullKey);
+    }
+
 
     @Override
     public String getFullKeyForReporting(String key) {

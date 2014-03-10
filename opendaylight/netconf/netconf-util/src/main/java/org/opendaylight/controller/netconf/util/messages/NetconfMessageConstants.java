@@ -10,7 +10,9 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Charsets;
 
-public class NetconfMessageConstants {
+public final class NetconfMessageConstants {
+
+    private NetconfMessageConstants(){}
     /**
      * The NETCONF 1.0 old-style message separator. This is framing mechanism
      * is used by default.
@@ -26,4 +28,5 @@ public class NetconfMessageConstants {
     public static final int MAX_HEADER_LENGTH = 13;
 
     public static final byte[] END_OF_CHUNK = "\n##\n".getBytes(Charsets.UTF_8);
+
 }

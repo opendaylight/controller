@@ -82,9 +82,10 @@ public class EditConfigXmlParser {
                 .getOnlyChildElementWithSameNamespaceOptionally(EditConfigXmlParser.ERROR_OPTION_KEY);
         if (errorOptionElement.isPresent()) {
             String errorOptionParsed = errorOptionElement.get().getTextContent();
-            if (false == errorOptionParsed.equals(EditConfigXmlParser.DEFAULT_ERROR_OPTION))
+            if (!errorOptionParsed.equals(EditConfigXmlParser.DEFAULT_ERROR_OPTION)){
                 throw new UnsupportedOperationException("Only " + EditConfigXmlParser.DEFAULT_ERROR_OPTION
                         + " supported for " + EditConfigXmlParser.ERROR_OPTION_KEY + ", was " + errorOptionParsed);
+            }
         }
 
         // Default op

@@ -106,8 +106,8 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
 
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseTOAttribute(CompositeType openType) {
-        Preconditions.checkState(lastAttribute instanceof TOAttribute);
-        TOAttribute toAttribute = (TOAttribute) lastAttribute;
+        Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
+        TOAttribute toAttribute = (TOAttribute) getLastAttribute();
 
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap = Maps.newHashMap();
 
@@ -122,14 +122,14 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
 
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListAttribute);
-        AttributeIfc innerAttribute = ((ListAttribute) lastAttribute).getInnerAttribute();
+        Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
+        AttributeIfc innerAttribute = ((ListAttribute) getLastAttribute()).getInnerAttribute();
         return new ArrayAttributeResolvingStrategy(prepareStrategy(innerAttribute), openType);
     }
 
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         return new ArrayAttributeResolvingStrategy(caseDependencyAttribute(SimpleType.OBJECTNAME), openType);
     }
 

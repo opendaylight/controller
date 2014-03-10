@@ -26,8 +26,8 @@ import com.google.common.base.Preconditions;
 
 public class SimpleNetconfClientSessionListener implements NetconfClientSessionListener {
     private static final class RequestEntry {
-        final Promise<NetconfMessage> promise;
-        final NetconfMessage request;
+        private final Promise<NetconfMessage> promise;
+        private final NetconfMessage request;
 
         public RequestEntry(Promise<NetconfMessage> future, NetconfMessage request) {
             this.promise = Preconditions.checkNotNull(future);

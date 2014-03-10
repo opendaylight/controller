@@ -51,7 +51,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
     @Override
     public void onSessionUp(NetconfManagementSession session) {
         logger.debug("Session {} up", session);
-        Preconditions.checkState(sessions.contains(session) == false, "Session %s was already added", session);
+        Preconditions.checkState(!sessions.contains(session), "Session %s was already added", session);
         sessions.add(session);
     }
 
