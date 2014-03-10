@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.samples.simpleforwarding.internal;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -45,9 +46,17 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.packet.Ethernet;
+import org.opendaylight.controller.sal.packet.IDataPacketService;
+import org.opendaylight.controller.sal.packet.IListenDataPacket;
+import org.opendaylight.controller.sal.packet.IPv4;
+import org.opendaylight.controller.sal.packet.Packet;
+import org.opendaylight.controller.sal.packet.PacketResult;
+import org.opendaylight.controller.sal.packet.RawPacket;
 import org.opendaylight.controller.sal.routing.IListenRoutingUpdates;
 import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.samples.simpleforwarding.HostNodePair;
@@ -70,11 +79,10 @@ import org.slf4j.LoggerFactory;
  * installs those rules using <tt>installPerHostRules()</tt>.
  */
 public class SimpleForwardingImpl implements IfNewHostNotify,
-        IListenRoutingUpdates, IInventoryListener {
-    private static Logger log = LoggerFactory
-            .getLogger(SimpleForwardingImpl.class);
+        IListenRoutingUpdates, IInventoryListener, IListenDataPacket {
+    private static Logger log = LoggerFactory.getLogger(SimpleForwardingImpl.class);
     private static short DEFAULT_IPSWITCH_PRIORITY = 1;
-    private static String FORWARDING_RULES_CACHE_NAME = "forwarding.ipswitch.rules";
+    static final String FORWARDING_RULES_CACHE_NAME = "forwarding.ipswitch.rules";
     private IfIptoHost hostTracker;
     private IForwardingRulesManager frm;
     private ITopologyManager topologyManager;
@@ -90,6 +98,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     private Map<Node, List<FlowEntry>> tobePrunedPos = new HashMap<Node, List<FlowEntry>>();
     private IClusterContainerServices clusterContainerService = null;
     private ISwitchManager switchManager;
+    private IDataPacketService dataPacketService;
 
     /**
      * Return codes from the programming of the perHost rules in HW
@@ -97,8 +106,19 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     public enum RulesProgrammingReturnCode {
         SUCCESS, FAILED_FEW_SWITCHES, FAILED_ALL_SWITCHES, FAILED_WRONG_PARAMS
     }
+    public void setDataPacketService(IDataPacketService s) {
+        log.debug("Setting dataPacketService");
+        this.dataPacketService = s;
+    }
+
+    public void unsetDataPacketService(IDataPacketService s) {
+        if (this.dataPacketService == s) {
+            this.dataPacketService = null;
+        }
+    }
 
     public void setRouting(IRouting routing) {
+        log.debug("Setting routing");
         this.routing = routing;
     }
 
@@ -106,10 +126,6 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         if (this.routing == routing) {
             this.routing = null;
         }
-    }
-
-    public ITopologyManager getTopologyManager() {
-        return topologyManager;
     }
 
     public void setTopologyManager(ITopologyManager topologyManager) {
@@ -670,8 +686,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
      *
      * @return a return code that convey the programming status of the HW
      */
-    private RulesProgrammingReturnCode uninstallPerHostRules(
-            HostNodeConnector host) {
+    private RulesProgrammingReturnCode uninstallPerHostRules(HostNodeConnector host) {
         RulesProgrammingReturnCode retCode = RulesProgrammingReturnCode.SUCCESS;
         Map<NodeConnector, FlowEntry> pos;
         FlowEntry po;
@@ -768,16 +783,12 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         for (Node swId : switches) {
             List<FlowEntry> pl = tobePrunedPos.get(swId);
             if (pl != null) {
-                log
-                        .debug(
-                                "Policies for Switch: {} in the list to be deleted: {}",
-                                swId, pl);
+                log.debug("Policies for Switch: {} in the list to be deleted: {}", swId, pl);
                 Iterator<FlowEntry> plIter = pl.iterator();
                 //for (Policy po: pl) {
                 while (plIter.hasNext()) {
                     FlowEntry po = plIter.next();
-                    log.error("Removing Policy, Switch: {} Policy: {}", swId,
-                            po);
+                    log.error("Removing Policy, Switch: {} Policy: {}", swId, po);
                     this.frm.uninstallFlowEntry(po);
                     plIter.remove();
                 }
@@ -960,6 +971,58 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     public void unsetSwitchManager(ISwitchManager switchManager) {
         if (this.switchManager == switchManager) {
             this.switchManager = null;
+        }
+    }
+
+    @Override
+    public PacketResult receiveDataPacket(RawPacket inPkt) {
+        if (inPkt == null) {
+            return PacketResult.IGNORED;
+        }
+        log.trace("Received a frame of size: {}", inPkt.getPacketData().length);
+        Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
+        if (formattedPak instanceof Ethernet) {
+            Object nextPak = formattedPak.getPayload();
+            if (nextPak instanceof IPv4) {
+                log.trace("Handle punted IP packet: {}", formattedPak);
+                handlePuntedIPPacket((IPv4) nextPak, inPkt.getIncomingNodeConnector());
+            }
+        }
+        return PacketResult.IGNORED;
+
+    }
+
+    private void handlePuntedIPPacket(IPv4 pkt, NodeConnector incomingNodeConnector) {
+        InetAddress dIP = NetUtils.getInetAddress(pkt.getDestinationAddress());
+        InetAddress sIP = NetUtils.getInetAddress(pkt.getSourceAddress());
+        if (dIP == null || sIP == null ||  hostTracker == null) {
+            return;
+        }
+        HostNodeConnector destHost = hostTracker.hostFind(dIP);
+        if (destHost != null
+                && (routing == null ||
+                    routing.getRoute(incomingNodeConnector.getNode(), destHost.getnodeconnectorNode()) != null)) {
+
+            log.trace("Host {} is at {}", dIP, destHost.getnodeConnector());
+            HostNodePair key = new HostNodePair(destHost, incomingNodeConnector.getNode());
+
+            // If SFing is aware of this host, it will try to install a
+            // forwarding path, forward packet until it's done
+            if (dataPacketService != null && this.rulesDB.containsKey(key)) {
+
+
+                /*
+                 * if we know where the host is and there's a path from where this
+                 * packet was punted to where the host is, then attempt best effort delivery to the host
+                 */
+                NodeConnector nc = destHost.getnodeConnector();
+                log.trace("Forwarding punted IP received at {} to {}", incomingNodeConnector, nc);
+                // re-encode the Ethernet packet (the parent of the IPv4 packet)
+                RawPacket rp = this.dataPacketService.encodeDataPacket(pkt.getParent());
+                rp.setOutgoingNodeConnector(nc);
+                this.dataPacketService.transmitDataPacket(rp);
+            }
+
         }
     }
 }
