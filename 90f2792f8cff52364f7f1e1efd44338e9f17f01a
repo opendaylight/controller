@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_d0509260",
+        "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/META-INF/maven/archetype-metadata.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 20
+      },
+      "writtenOn": "2014-03-10T21:05:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_305a4e84",
+      "revId": "90f2792f8cff52364f7f1e1efd44338e9f17f01a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_105f4a74",
         "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/archetype-resources/src/main/java/Northbound.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-10T21:03:39Z",
       "side": 1,
       "message": "Don\u0027t you want to add the container ?",
+      "revId": "90f2792f8cff52364f7f1e1efd44338e9f17f01a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_904a1aab",
+        "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/archetype-resources/src/main/java/Northbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 20
+      },
+      "writtenOn": "2014-03-10T21:05:01Z",
+      "side": 1,
+      "message": "I\u0027ll publish another patch to do this, this is just bare-bones",
+      "parentUuid": "9a5c5d37_105f4a74",
       "revId": "90f2792f8cff52364f7f1e1efd44338e9f17f01a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
