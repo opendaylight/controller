@@ -84,7 +84,7 @@ public class ConfigPersisterTest {
 
     // this means pushing of config was successful
     public void assertCannotRegisterAsJMXListener_pushWasSuccessful() {
-        handler.assertException(RuntimeException.class, "Cannot register as JMX listener to netconf");
+        handler.assertException(IllegalStateException.class, "Cannot register as JMX listener to netconf");
     }
 
     public NetconfOperationService getWorkingService(Document document) throws SAXException, IOException, NetconfDocumentedException {

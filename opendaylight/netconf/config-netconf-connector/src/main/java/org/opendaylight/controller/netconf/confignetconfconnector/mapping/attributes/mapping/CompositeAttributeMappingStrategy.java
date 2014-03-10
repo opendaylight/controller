@@ -35,8 +35,9 @@ public class CompositeAttributeMappingStrategy extends
 
     @Override
     public Optional<Map<String, Object>> mapAttribute(Object value) {
-        if (value == null)
+        if (value == null){
             return Optional.absent();
+        }
 
         Util.checkType(value, CompositeDataSupport.class);
 
@@ -54,8 +55,9 @@ public class CompositeAttributeMappingStrategy extends
 
         for (String jmxName : jmxToJavaNameMapping.keySet()) {
             Optional<?> mapped = mapInnerAttribute(compositeData, jmxName, expectedType.getDescription(jmxName));
-            if(mapped.isPresent())
+            if(mapped.isPresent()){
                 retVal.put(jmxToJavaNameMapping.get(jmxName), mapped.get());
+            }
         }
 
         return Optional.of(retVal);
@@ -66,8 +68,7 @@ public class CompositeAttributeMappingStrategy extends
 
         AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies
                 .get(jmxName);
-        Optional<?> mapAttribute = attributeMappingStrategy.mapAttribute(innerValue);
-        return mapAttribute;
+        return attributeMappingStrategy.mapAttribute(innerValue);
     }
 
 }

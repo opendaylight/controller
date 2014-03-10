@@ -29,7 +29,7 @@ public class LoginPassword extends AuthenticationHandler {
     public void authenticate(Connection connection) throws IOException {
         boolean isAuthenticated = connection.authenticateWithPassword(username, password);
 
-        if (isAuthenticated == false) {
+        if (!isAuthenticated) {
             throw new IOException("Authentication failed.");
         }
     }

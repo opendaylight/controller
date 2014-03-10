@@ -123,7 +123,6 @@ public class NetconfClient implements Closeable {
      */
     @Deprecated
     public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) throws ExecutionException, InterruptedException, TimeoutException {
-        //logger.debug("Sending message: {}",XmlUtil.toString(message.getDocument()));
         final Stopwatch stopwatch = new Stopwatch().start();
 
         try {

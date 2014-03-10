@@ -20,7 +20,6 @@ import org.w3c.dom.Element;
 
 public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
-    private static final char QNAME_SEPARATOR = ':';
     private static final String PREFIX = "prefix";
 
     /**

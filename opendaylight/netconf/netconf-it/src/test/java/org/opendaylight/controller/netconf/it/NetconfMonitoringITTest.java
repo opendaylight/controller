@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +20,7 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
@@ -51,10 +48,9 @@ import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
@@ -121,10 +117,10 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
     @Test
     public void testGetResponseFromMonitoring() throws Exception {
         try (NetconfClient netconfClient = new NetconfClient("client-monitoring", tcpAddress, 4000, clientDispatcher)) {
-        try (NetconfClient netconfClient2 = new NetconfClient("client-monitoring2", tcpAddress, 4000, clientDispatcher)) {
-            NetconfMessage response = netconfClient.sendMessage(loadGetMessage());
-            assertSessionElementsInResponse(response.getDocument(), 2);
-        }
+            try (NetconfClient netconfClient2 = new NetconfClient("client-monitoring2", tcpAddress, 4000, clientDispatcher)) {
+                NetconfMessage response = netconfClient.sendMessage(loadGetMessage());
+                assertSessionElementsInResponse(response.getDocument(), 2);
+            }
             NetconfMessage response = netconfClient.sendMessage(loadGetMessage());
             assertSessionElementsInResponse(response.getDocument(), 1);
         }

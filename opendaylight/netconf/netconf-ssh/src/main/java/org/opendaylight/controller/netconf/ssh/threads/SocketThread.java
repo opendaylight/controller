@@ -112,18 +112,18 @@ public class SocketThread implements Runnable, ServerAuthenticationCallback, Ser
                                     if (netconf_ssh_input != null) {
                                         netconf_ssh_input.join();
                                     }
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException e1) {
                                     Thread.currentThread().interrupt();
-                                    logger.error("netconf_ssh_input join error ", e);
+                                    logger.error("netconf_ssh_input join error ", e1);
                                 }
 
                                 try {
                                     if (netconf_ssh_output != null) {
                                         netconf_ssh_output.join();
                                     }
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException e2) {
                                     Thread.currentThread().interrupt();
-                                    logger.error("netconf_ssh_output join error ", e);
+                                    logger.error("netconf_ssh_output join error ", e2);
                                 }
                             }
                         } else {

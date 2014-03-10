@@ -60,8 +60,9 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         for (Map<String, ModuleMXBeanEntry> moduleNameToMBE : moduleMXBeanEntryMap.values()) {
             for (ModuleMXBeanEntry moduleMXBeanEntry : moduleNameToMBE.values()) {
                 String moduleSeenByYangStore = moduleMXBeanEntry.getYangModuleQName().toString();
-                if(modulesSeenByConfig.contains(moduleSeenByYangStore) == false)
+                if(!modulesSeenByConfig.contains(moduleSeenByYangStore)){
                     missingModulesFromConfig.add(moduleSeenByYangStore);
+                }
             }
         }
 
@@ -143,7 +144,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         }
     }
 
-    private static class YangStoreCapability extends BasicCapability {
+    private static final class YangStoreCapability extends BasicCapability {
 
         private final String content;
         private final String revision;

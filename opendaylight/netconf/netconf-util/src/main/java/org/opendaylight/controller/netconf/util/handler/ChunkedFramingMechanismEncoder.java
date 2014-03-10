@@ -40,7 +40,7 @@ public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out)  {
         while (msg.readableBytes() > chunkSize) {
             ByteBuf chunk = Unpooled.buffer(chunkSize);
             chunk.writeBytes(createChunkHeader(chunkSize));
