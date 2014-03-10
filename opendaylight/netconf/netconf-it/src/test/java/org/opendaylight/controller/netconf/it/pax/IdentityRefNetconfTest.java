@@ -7,20 +7,8 @@
  */
 package org.opendaylight.controller.netconf.it.pax;
 
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
-import javax.inject.Inject;
-import javax.xml.parsers.ParserConfigurationException;
-
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,16 +27,29 @@ import org.ops4j.pax.exam.util.Filter;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.inject.Inject;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static org.junit.Assert.fail;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
 @RunWith(PaxExam.class)
 public class IdentityRefNetconfTest {
 
-    public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 5000;
+    public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 15000;
 
     // Wait for controller to start
     @Inject
@@ -84,30 +85,36 @@ public class IdentityRefNetconfTest {
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 18383);
 
+
     @Test
     public void testIdRef() throws Exception {
-        Preconditions.checkNotNull(broker, "Controller not initialized");
+        try {
+            Preconditions.checkNotNull(broker, "Controller not initialized");
 
-        NioEventLoopGroup nettyThreadgroup = new NioEventLoopGroup();
-        NetconfClientDispatcher clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup,
-                CLIENT_CONNECTION_TIMEOUT_MILLIS);
+            NioEventLoopGroup nettyThreadgroup = new NioEventLoopGroup();
+            NetconfClientDispatcher clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup,
+                    CLIENT_CONNECTION_TIMEOUT_MILLIS);
 
-        NetconfMessage edit = xmlFileToNetconfMessage("netconfMessages/editConfig_identities.xml");
-        NetconfMessage commit = xmlFileToNetconfMessage("netconfMessages/commit.xml");
-        NetconfMessage getConfig = xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
+            NetconfMessage edit = xmlFileToNetconfMessage("netconfMessages/editConfig_identities.xml");
+            NetconfMessage commit = xmlFileToNetconfMessage("netconfMessages/commit.xml");
+            NetconfMessage getConfig = xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
 
-        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, CLIENT_CONNECTION_TIMEOUT_MILLIS, clientDispatcher)) {
-            sendMessage(edit, netconfClient);
-            sendMessage(commit, netconfClient);
-            sendMessage(getConfig, netconfClient, "id-test",
-                    "<afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</afi>",
-                    "<afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</afi>",
-                    "<safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</safi>",
-                    "<safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</safi>");
+            try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, CLIENT_CONNECTION_TIMEOUT_MILLIS, clientDispatcher)) {
+                sendMessage(edit, netconfClient);
+                sendMessage(commit, netconfClient);
+                sendMessage(getConfig, netconfClient, "id-test",
+                        "<afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</afi>",
+                        "<afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</afi>",
+                        "<safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</safi>",
+                        "<safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</safi>");
+            }
+
+            clientDispatcher.close();
+        } catch (Exception e) {
+            fail(Throwables.getStackTraceAsString(e));
         }
-
-        clientDispatcher.close();
     }
+
 
     private void sendMessage(NetconfMessage edit, NetconfClient netconfClient, String... containingResponse)
             throws ExecutionException, InterruptedException, TimeoutException {

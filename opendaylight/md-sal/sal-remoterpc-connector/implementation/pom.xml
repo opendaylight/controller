@@ -166,6 +166,21 @@
                                     </additionalConfiguration>
                                 </generator>
                                 <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        ${salGeneratorPath}
+                                    </outputBaseDir>
+                                </generator>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>target/site/models</outputBaseDir>
+                                </generator>
+
+                                <generator>
                                     <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
                                     <outputBaseDir>target/site/models</outputBaseDir>
                                 </generator>

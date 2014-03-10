@@ -36,7 +36,7 @@
         <module>sal-binding-broker</module>
 
         <module>sal-binding-util</module>
-        <module>sal-binding-dom-it</module>
+
 
         <!-- Samples -->
         <module>samples</module>
@@ -79,6 +79,7 @@
             </activation>
             <modules>
                 <module>sal-binding-it</module>
+                <module>sal-binding-dom-it</module>
                 <!--module>clustered-data-store/integrationtest</module -->
                 <!--module>zeromq-routingtable/integrationtest</module -->
                 <!--module>sal-remoterpc-connector/integrationtest</module -->
@@ -101,6 +102,7 @@
     </profiles>
 
     <properties>
+        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Plugin Versions -->

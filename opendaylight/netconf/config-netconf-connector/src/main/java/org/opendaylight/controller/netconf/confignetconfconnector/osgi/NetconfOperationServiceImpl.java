@@ -8,16 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreException;
-import org.opendaylight.controller.config.yang.store.api.YangStoreService;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
@@ -26,10 +22,10 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages life cycle of {@link YangStoreSnapshot}.
@@ -155,7 +151,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         private final String moduleNamespace;
 
         public YangStoreCapability(Module module, String moduleContent) {
-            super(getAsString(module));
+            super(toCapabilityURI(module));
             this.content = moduleContent;
             this.moduleName = module.getName();
             this.moduleNamespace = module.getNamespace().toString();
@@ -167,14 +163,9 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
             return Optional.of(content);
         }
 
-        private static String getAsString(Module module) {
-            final StringBuffer capabilityContent = new StringBuffer();
-            capabilityContent.append(module.getNamespace());
-            capabilityContent.append("?module=");
-            capabilityContent.append(module.getName());
-            capabilityContent.append("&revision=");
-            capabilityContent.append(Util.writeDate(module.getRevision()));
-            return capabilityContent.toString();
+        private static String toCapabilityURI(Module module) {
+            return String.valueOf(module.getNamespace()) + "?module="
+                    + module.getName() + "&revision=" + Util.writeDate(module.getRevision());
         }
 
         @Override

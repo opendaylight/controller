@@ -8,9 +8,8 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
@@ -22,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
