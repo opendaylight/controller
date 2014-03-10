@@ -213,8 +213,6 @@ public class ServiceProviderController {
                 mavenBundle(ODL, "config-manager").versionAsInProject(),
                 mavenBundle(ODL, "config-util").versionAsInProject(),
                 mavenBundle(ODL, "yang-jmx-generator").versionAsInProject(),
-                mavenBundle(ODL, "yang-store-api").versionAsInProject(),
-                mavenBundle(ODL, "yang-store-impl").versionAsInProject(),
                 mavenBundle(ODL, "logback-config").versionAsInProject(),
                 mavenBundle(ODL, "config-persister-api").versionAsInProject(),
                 // mavenBundle(ODL,"config-persister-file-adapter").versionAsInProject(),

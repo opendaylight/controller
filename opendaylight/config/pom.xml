@@ -27,8 +27,6 @@
         <module>config-persister-file-xml-adapter</module>
         <module>yang-jmx-generator</module>
         <module>yang-jmx-generator-plugin</module>
-        <module>yang-store-api</module>
-        <module>yang-store-impl</module>
         <module>yang-test</module>
         <module>logback-config</module>
         <module>threadpool-config-api</module>
@@ -200,11 +198,6 @@
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin-spi</artifactId>
                 <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yang-store-api</artifactId>
-                <version>${config.version}</version>
             </dependency>
 
             <dependency>

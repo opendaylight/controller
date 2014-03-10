@@ -14,7 +14,7 @@ import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
 
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;

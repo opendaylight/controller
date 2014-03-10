@@ -82,6 +82,14 @@
                                     </additionalConfiguration>
                                 </generator>
                                 <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        ${salGeneratorPath}
+                                    </outputBaseDir>
+                                </generator>
+                                <generator>
                                     <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
                                     <outputBaseDir>target/site/models</outputBaseDir>
                                 </generator>
@@ -124,7 +132,8 @@
                             org.opendaylight.controller.sal.dom.broker.util,
                             org.opendaylight.controller.config.yang.md.sal.dom.impl,
                             org.opendaylight.controller.config.yang.md.sal.dom.statistics,
-                            org.opendaylight.yangtools.yang.util
+                            org.opendaylight.yangtools.yang.util,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.dom.impl.rev131028.*
                         </Private-Package>
                         <Import-Package>
                             *

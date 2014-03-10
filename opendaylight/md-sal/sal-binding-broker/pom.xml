@@ -37,6 +37,17 @@
                                         </namespaceToPackage1>
                                     </additionalConfiguration>
                                 </generator>
+
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        ${salGeneratorPath}
+                                    </outputBaseDir>
+                                </generator>
+
+
                                 <generator>
                                     <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
                                     <outputBaseDir>target/site/models</outputBaseDir>
@@ -101,6 +112,7 @@
                             org.opendaylight.controller.sal.binding.codegen.*,
                             <!--org.opendaylight.controller.sal.binding.dom.*,-->
                             org.opendaylight.controller.sal.binding.osgi.*,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.binding.impl.rev131028
                         </Private-Package>
                     </instructions>
                 </configuration>
