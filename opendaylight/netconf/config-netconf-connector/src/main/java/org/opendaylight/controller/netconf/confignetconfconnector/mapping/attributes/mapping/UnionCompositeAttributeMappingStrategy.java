@@ -26,9 +26,9 @@ public class UnionCompositeAttributeMappingStrategy extends
 
     @Override
     protected Optional<?> mapInnerAttribute(CompositeDataSupport compositeData, String jmxName, String description) {
-        if(description.equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION) == false)
+        if(!description.equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION)){
             return Optional.absent();
-
+        }
         return super.mapInnerAttribute(compositeData, jmxName, description);
     }
 }

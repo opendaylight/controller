@@ -64,7 +64,7 @@ public class SshClientAdapter implements Runnable {
                 }
             }
 
-            while (stopRequested.get() == false) {
+            while (!stopRequested.get()) {
                 byte[] readBuff = new byte[BUFFER_SIZE];
                 int c = stdOut.read(readBuff);
                 if (c == -1) {
@@ -82,7 +82,7 @@ public class SshClientAdapter implements Runnable {
             // Netty closed connection prematurely.
             // Just pass and move on.
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         } finally {
             sshClient.close();
 

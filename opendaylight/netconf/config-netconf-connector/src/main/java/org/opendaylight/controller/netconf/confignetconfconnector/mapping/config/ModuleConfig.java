@@ -58,20 +58,15 @@ public class ModuleConfig {
 
     public Element toXml(ObjectName instanceON, ServiceRegistryWrapper depTracker, Document document, String namespace) {
         Element root = document.createElement(XmlNetconfConstants.MODULE_KEY);
-        // Xml.addNamespaceAttr(document, root, namespace);
 
-        final String prefix = getPrefix(namespace);
+        final String prefix = getPrefix();
         Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlNetconfConstants.TYPE_KEY, prefix,
                 moduleName);
         XmlUtil.addPrefixedNamespaceAttr(typeElement, prefix, namespace);
-        // Xml.addNamespaceAttr(document, typeElement,
-        // XMLUtil.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         root.appendChild(typeElement);
 
         Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY,
                 ObjectNameUtil.getInstanceName(instanceON));
-        // Xml.addNamespaceAttr(document, nameElement,
-        // XMLUtil.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         root.appendChild(nameElement);
 
         root = instanceConfig.toXml(instanceON, depTracker, namespace, document, root);
@@ -79,12 +74,8 @@ public class ModuleConfig {
         return root;
     }
 
-    private String getPrefix(String namespace) {
-        // if(namespace.contains(":")==false)
+    private String getPrefix() {
         return XmlNetconfConstants.PREFIX;
-        // return namespace.substring(namespace.lastIndexOf(':') + 1,
-        // namespace.length());
-
     }
 
     public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,

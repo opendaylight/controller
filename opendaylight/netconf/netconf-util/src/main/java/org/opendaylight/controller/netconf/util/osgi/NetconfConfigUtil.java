@@ -54,7 +54,7 @@ public final class NetconfConfigUtil {
 
         Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp, exceptionMessageIfNotFound, forClient);
 
-        if (inetSocketAddressOptional.isPresent() == false) {
+        if (!inetSocketAddressOptional.isPresent()) {
             throw new IllegalStateException("Netconf tcp address not found." + exceptionMessageIfNotFound);
         }
         InetSocketAddress inetSocketAddress = inetSocketAddressOptional.get();
