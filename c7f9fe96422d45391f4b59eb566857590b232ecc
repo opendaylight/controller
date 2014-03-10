@@ -33,6 +33,23 @@
       "revId": "c7f9fe96422d45391f4b59eb566857590b232ecc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_901c5ac3",
+        "filename": "opendaylight/northbound/archetype-app-northbound/src/main/resources/archetype-resources/src/main/resources/META-INF/spring.factories",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-10T20:14:11Z",
+      "side": 1,
+      "message": "Please check with Prasanth if these spring files are still needed",
+      "revId": "c7f9fe96422d45391f4b59eb566857590b232ecc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
