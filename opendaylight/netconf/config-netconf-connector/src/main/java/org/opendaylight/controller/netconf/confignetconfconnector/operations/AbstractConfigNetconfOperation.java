@@ -13,11 +13,15 @@ import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOpera
 
 public abstract class AbstractConfigNetconfOperation extends AbstractLastNetconfOperation {
 
-    protected final ConfigRegistryClient configRegistryClient;
+    private final ConfigRegistryClient configRegistryClient;
 
     protected AbstractConfigNetconfOperation(ConfigRegistryClient configRegistryClient,
             String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
         this.configRegistryClient = configRegistryClient;
+    }
+
+    public ConfigRegistryClient getConfigRegistryClient() {
+        return configRegistryClient;
     }
 }

@@ -38,9 +38,9 @@ public class AuthProvider implements AuthProviderInterface {
     }
 
     @Override
-    public boolean authenticated(String username, String password) throws Exception {
+    public boolean authenticated(String username, String password) {
         if (AuthProvider.um == null) {
-            throw new Exception("No usermanager service available.");
+            throw new IllegalStateException("No usermanager service available.");
         }
         AuthResultEnum authResult = AuthProvider.um.authenticate(username, password);
         return authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC);

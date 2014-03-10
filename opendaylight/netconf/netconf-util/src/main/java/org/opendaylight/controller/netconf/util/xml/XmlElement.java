@@ -150,7 +150,7 @@ public final class XmlElement {
         final List<XmlElement> result = new ArrayList<>();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
-            if (item instanceof Element == false) {
+            if (!(item instanceof Element)) {
                 continue;
             }
             if (strat.accept((Element) item)) {
@@ -326,7 +326,7 @@ public final class XmlElement {
         } else {
             prefix = "";
         }
-        if (namespaces.containsKey(prefix) == false) {
+        if (!namespaces.containsKey(prefix)) {
             throw new IllegalArgumentException("Cannot find namespace for " + XmlUtil.toString(element) + ". Prefix from content is "
                     + prefix + ". Found namespaces " + namespaces);
         }

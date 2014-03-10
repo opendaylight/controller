@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 
 public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
-    private static final char QNAME_SEPARATOR = ':';
     private static final String PREFIX = "prefix";
 
     /**

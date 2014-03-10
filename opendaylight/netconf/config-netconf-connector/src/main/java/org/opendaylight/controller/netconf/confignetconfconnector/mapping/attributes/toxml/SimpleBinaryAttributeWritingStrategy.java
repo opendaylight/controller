@@ -25,6 +25,7 @@ public class SimpleBinaryAttributeWritingStrategy extends SimpleAttributeWriting
         super(document, key);
     }
 
+    @Override
     protected Object preprocess(Object value) {
         Util.checkType(value, List.class);
         BaseEncoding en = BaseEncoding.base64();

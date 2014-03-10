@@ -23,10 +23,11 @@ public class ModuleElementDefinition {
 
     public ModuleElementDefinition(String instanceName, String currentStrategy, EditStrategyType defaultStrategy) {
         this.instanceName = instanceName;
-        if (currentStrategy == null || currentStrategy.isEmpty())
+        if (currentStrategy == null || currentStrategy.isEmpty()){
             this.editStrategy = defaultStrategy;
-        else
+        } else {
             this.editStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
+        }
     }
 
     public String getInstanceName() {

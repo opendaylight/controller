@@ -67,14 +67,14 @@ public class DefaultCommit extends AbstractNetconfOperation {
 
     @Override
     public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
-        Preconditions.checkArgument(subsequentOperation.isExecutionTermination() == false,
+        Preconditions.checkArgument(!subsequentOperation.isExecutionTermination(),
                 "Subsequent netconf operation expected by %s", this);
 
         if (isCommitWithoutNotification(requestMessage)) {
             logger.debug("Skipping commit notification");
         } else {
             // Send commit notification if commit was not issued by persister
-            requestMessage = removePersisterAttributes(requestMessage);
+            removePersisterAttributes(requestMessage);
             Element cfgSnapshot = getConfigSnapshot(operationRouter);
             logger.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
             notificationProducer.sendCommitNotification("ok", cfgSnapshot, cap.getCapabilities());
@@ -93,10 +93,8 @@ public class DefaultCommit extends AbstractNetconfOperation {
         return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1);
     }
 
-    private Document removePersisterAttributes(Document message) {
-        final Element documentElement = message.getDocumentElement();
-        documentElement.removeAttribute(NOTIFY_ATTR);
-        return message;
+    private void removePersisterAttributes(Document message) {
+        message.getDocumentElement().removeAttribute(NOTIFY_ATTR);
     }
 
     private boolean isCommitWithoutNotification(Document message) {
@@ -105,9 +103,9 @@ public class DefaultCommit extends AbstractNetconfOperation {
 
         String attr = xmlElement.getAttribute(NOTIFY_ATTR);
 
-        if (attr == null || attr.equals(""))
+        if (attr == null || attr.equals("")){
             return false;
-        else if (attr.equals(Boolean.toString(false))) {
+        } else if (attr.equals(Boolean.toString(false))) {
             logger.debug("Commit operation received with notify=false attribute {}", message);
             return true;
         } else {

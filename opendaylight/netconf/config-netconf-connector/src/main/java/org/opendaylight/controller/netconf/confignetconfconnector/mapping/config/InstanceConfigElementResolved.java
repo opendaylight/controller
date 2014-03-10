@@ -46,7 +46,7 @@ public class InstanceConfigElementResolved {
         if (defaultStrategy.isEnforcing()) {
             Preconditions
                     .checkArgument(
-                            parsedStrategy == defaultStrategy,
+                            parsedStrategy.equals(defaultStrategy),
                             "With "
                                     + defaultStrategy
                                     + " as "

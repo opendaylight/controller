@@ -42,7 +42,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
         try {
             mbs.registerMBean(instance, on);
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
-            throw new RuntimeException("Unable to register " + instance + " as " + on, e);
+            throw new IllegalStateException("Unable to register " + instance + " as " + on, e);
         }
     }
 
