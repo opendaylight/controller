@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRouting;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
@@ -60,6 +59,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -145,21 +145,21 @@ public class Devices implements IDaylightWeb {
                     for (NodeConnector nodeConnector : nodeConnectorSet) {
                         String nodeConnectorNumberToStr = nodeConnector.getID().toString();
                         Name ncName = ((Name) switchManager.getNodeConnectorProp(nodeConnector, Name.NamePropName));
-                        Config portStatus = ((Config) switchManager.getNodeConnectorProp(nodeConnector,
+                        Config portConfig = ((Config) switchManager.getNodeConnectorProp(nodeConnector,
                                 Config.ConfigPropName));
                         State portState = ((State) switchManager.getNodeConnectorProp(nodeConnector,
                                 State.StatePropName));
                         String nodeConnectorName = (ncName != null) ? ncName.getValue() : "";
                         nodeConnectorName += " (" + nodeConnector.getID() + ")";
 
-                        if (portStatus != null) {
-                            if (portStatus.getValue() == Config.ADMIN_UP) {
-                                if (portState.getValue() == State.EDGE_UP) {
+                        if (portConfig != null) {
+                            if (portConfig.getValue() == Config.ADMIN_UP) {
+                                if (portState != null && portState.getValue() == State.EDGE_UP) {
                                     nodeConnectorName = "<span class='admin-up'>" + nodeConnectorName + "</span>";
-                                } else if (portState.getValue() == State.EDGE_DOWN) {
+                                } else if (portState == null || portState.getValue() == State.EDGE_DOWN) {
                                     nodeConnectorName = "<span class='edge-down'>" + nodeConnectorName + "</span>";
                                 }
-                            } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
+                            } else if (portConfig.getValue() == Config.ADMIN_DOWN) {
                                 nodeConnectorName = "<span class='admin-down'>" + nodeConnectorName + "</span>";
                             }
                         }
