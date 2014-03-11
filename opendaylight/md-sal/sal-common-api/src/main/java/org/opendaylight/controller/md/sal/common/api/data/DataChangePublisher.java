@@ -12,6 +12,20 @@ import org.opendaylight.yangtools.concepts.Path;
 
 public interface DataChangePublisher<P extends Path<P>, D, L extends DataChangeListener<P,D>> {
 
+
+
+    /**
+     * Registers {@link DataChangeListener} for Data Change callbacks.
+     *
+     * The listener callback {@link DataChangeListener#onDataChanged(DataChangeEvent)}
+     * is triggered on Operational and Configuration changes in tree,
+     * when node identified by path or it's subtree changes.
+     *
+     *
+     * @param path Path (subtree identifier) on which client listener will be invoked.
+     * @param listener Instance of listener which should be invoked on
+     * @return
+     */
     ListenerRegistration<L> registerDataChangeListener(P path, L listener);
 
 }

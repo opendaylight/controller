@@ -13,84 +13,22 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>, DataReader<P, D> {
-    /**
-     * Returns transaction identifier
-     *
-     * @return Transaction identifier
-     */
-    Object getIdentifier();
+public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>, DataReader<P, D>,
+        WriteableTransaction<P, D> {
 
-    TransactionStatus getStatus();
+    @Override
+    public void putConfigurationData(P path, D data);
 
-    /**
-     * Store a piece of data at specified path. This acts as a merge operation,
-     * which is to say that any pre-existing data which is not explicitly
-     * overwritten will be preserved. This means that if you store a container,
-     * its child lists will be merged. Performing the following put operations:
-     *
-     * 1) container { list [ a ] }
-     * 2) container { list [ b ] }
-     *
-     * will result in the following data being present:
-     *
-     * container { list [ a, b ] }
-     *
-     * This also means that storing the container will preserve any augmentations
-     * which have been attached to it.
-     *
-     * If you require an explicit replace operation, perform
-     * {@link removeOperationalData} first.
-     */
-    void putOperationalData(P path, D data);
+    @Override
+    public void putOperationalData(P path, D data);
 
-    /**
-     * Store a piece of data at specified path. This acts as a merge operation,
-     * which is to say that any pre-existing data which is not explicitly
-     * overwritten will be preserved. This means that if you store a container,
-     * its child lists will be merged. Performing the following put operations:
-     *
-     * 1) container { list [ a ] }
-     * 2) container { list [ b ] }
-     *
-     * will result in the following data being present:
-     *
-     * container { list [ a, b ] }
-     *
-     * This also means that storing the container will preserve any augmentations
-     * which have been attached to it.
-     *
-     * If you require an explicit replace operation, perform
-     * {@link removeConfigurationData} first.
-     */
-    void putConfigurationData(P path, D data);
+    @Override
+    public void removeConfigurationData(P path);
 
-    void removeOperationalData(P path);
+    @Override
+    public void removeOperationalData(P path);
 
-    void removeConfigurationData(P path);
+    @Override
+    public Future<RpcResult<TransactionStatus>> commit();
 
-    /**
-     * Initiates a two-phase commit of modification.
-     *
-     * <p>
-     * The successful commit changes the state of the system and may affect
-     * several components.
-     *
-     * <p>
-     * The effects of successful commit of data are described in the
-     * specifications and YANG models describing the Provider components of
-     * controller. It is assumed that Consumer has an understanding of this
-     * changes.
-     *
-     *
-     * @see DataCommitHandler for further information how two-phase commit is
-     *      processed.
-     * @param store
-     *            Identifier of the store, where commit should occur.
-     * @return Result of the Commit, containing success information or list of
-     *         encountered errors, if commit was not successful. The Future
-     *         blocks until {@link TransactionStatus#COMMITED} or
-     *         {@link TransactionStatus#FAILED} is reached.
-     */
-    Future<RpcResult<TransactionStatus>> commit();
 }

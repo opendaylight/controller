@@ -17,7 +17,12 @@ import org.opendaylight.yangtools.concepts.Path;
  *
  * @param <P> Path Type
  * @param <D> Data Type
+ *
+ * @deprecated Use {@link AsyncDataReader} instead. This API contract
+ *   hides asynchronous and distributed nature of system from developer,
+ *   which could lead to wrong assumptions about system.
  */
+@Deprecated
 public interface DataReader<P extends Path<P> ,D> {
 
     /**
