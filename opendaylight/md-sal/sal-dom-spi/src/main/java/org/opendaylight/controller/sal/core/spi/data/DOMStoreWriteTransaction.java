@@ -1,0 +1,50 @@
+package org.opendaylight.controller.sal.core.spi.data;
+
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+
+public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
+
+    /**
+     * Store a provided data at specified path. This acts as a add / replace
+     * operation, which is to say that whole subtree will be replaced by
+     * specified path.
+     *
+     * If you need add or merge of current object with specified use
+     * {@link #merge(LogicalDatastoreType, Path, Object)}
+     *
+     *
+     * @param path
+     * @param data
+     *            Data object to be written
+     *
+     * @throws IllegalStateException
+     *             if the client code already sealed transaction and invoked
+     *             {@link #ready()}
+     */
+    void write(InstanceIdentifier path, NormalizedNode<?, ?> data);
+
+    /**
+     *
+     * Deletes data and whole subtree located at provided path.
+     *
+     * @param path
+     *            Path to delete
+     * @throws IllegalStateException
+     *             if the client code already sealed transaction and invoked
+     *             {@link #ready()}
+     */
+    void delete(InstanceIdentifier path);
+
+    /**
+     *
+     * Seals transaction, and returns three-phase commit cohort associated
+     * with this transaction and DOM Store to be coordinated by coordinator.
+     *
+     * @return Three Phase Commit Cohort instance for this transaction.
+     */
+    DOMStoreThreePhaseCommitCohort ready();
+
+}
