@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_5bd84353",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/DiscoveryService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-11T15:47:55Z",
+      "side": 1,
+      "message": "Thank you for fixing this.",
+      "revId": "3037a8b4158f8e4dbb891047180c5b1a9a0e053b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
