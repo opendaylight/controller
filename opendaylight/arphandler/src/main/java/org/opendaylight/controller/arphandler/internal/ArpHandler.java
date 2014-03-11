@@ -172,6 +172,12 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         byte[] targetIP = tIP.getAddress();
         ARP arp = createARP(ARP.REPLY, sMAC, senderIP, tMAC, targetIP);
 
+        if(log.isTraceEnabled()) {
+            log.trace("Sending Arp Reply with srcMac {} - srcIp {} - dstMac {} - dstIp {} - outport {}",
+                    HexEncode.bytesToHexString(sMAC),
+                    sIP, HexEncode.bytesToHexString(tMAC), tIP, p);
+        }
+
         Ethernet ethernet = createEthernet(sMAC, tMAC, arp);
 
         RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
@@ -180,7 +186,27 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         this.dataPacketService.transmitDataPacket(destPkt);
     }
 
+    private void logArpPacket(ARP pkt, NodeConnector p) {
+        try {
+            if (pkt.getOpCode() == ARP.REQUEST) {
+                log.trace("Received Arp Request with srcMac {} - srcIp {} - dstMac {} - dstIp {} - inport {}", HexEncode.bytesToHexString(pkt.getSenderHardwareAddress()),
+                        InetAddress.getByAddress(pkt.getSenderProtocolAddress()), HexEncode.bytesToHexString(pkt.getTargetHardwareAddress()),
+                        InetAddress.getByAddress(pkt.getTargetProtocolAddress()), p);
+            } else if(pkt.getOpCode() == ARP.REPLY) {
+                log.trace("Received Arp Reply with srcMac {} - srcIp {} - dstMac {} - dstIp {} - inport {}", HexEncode.bytesToHexString(pkt.getSenderHardwareAddress()),
+                        InetAddress.getByAddress(pkt.getSenderProtocolAddress()), HexEncode.bytesToHexString(pkt.getTargetHardwareAddress()),
+                        InetAddress.getByAddress(pkt.getTargetProtocolAddress()), p);
+            }
+        } catch(UnknownHostException e) {
+            log.warn("Illegal Ip Address in the ARP packet", e);
+        }
+    }
+
     protected void handleARPPacket(Ethernet eHeader, ARP pkt, NodeConnector p) {
+
+        if(log.isTraceEnabled()) {
+            logArpPacket(pkt, p);
+        }
 
         byte[] sourceMAC = eHeader.getSourceMACAddress();
         byte[] targetMAC = eHeader.getDestinationMACAddress();
@@ -357,6 +383,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             byte[] targetIPByte = targetIP.getAddress();
             ARP arp = createARP(ARP.REQUEST, getControllerMAC(), senderIP, targetHardwareAddress, targetIPByte);
 
+            if(log.isTraceEnabled()) {
+                log.trace("Sending Broadcast Arp Request with srcMac {} - srcIp {} - dstMac {} - dstIp {} - outport {}", HexEncode.bytesToHexString(getControllerMAC()),
+                        subnet.getNetworkAddress(), HexEncode.bytesToHexString(targetHardwareAddress), targetIP, p);
+            }
+
             byte[] destMACAddress = NetUtils.getBroadcastMACAddr();
             Ethernet ethernet = createEthernet(getControllerMAC(), destMACAddress, arp);
 
@@ -386,6 +417,13 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         byte[] targetIP = host.getNetworkAddress().getAddress();
         byte[] targetMAC = host.getDataLayerAddressBytes();
         ARP arp = createARP(ARP.REQUEST, getControllerMAC(), senderIP, targetMAC, targetIP);
+
+        if(log.isTraceEnabled()) {
+            log.trace("Sending Unicast Arp Request with srcMac {} - srcIp {} - dstMac {} - dstIp {} - outport {}",
+                    HexEncode.bytesToHexString(getControllerMAC()),
+                    subnet.getNetworkAddress(), HexEncode.bytesToHexString(targetMAC), host.getNetworkAddress(),
+                    outPort);
+        }
 
         Ethernet ethernet = createEthernet(getControllerMAC(), targetMAC, arp);
 
