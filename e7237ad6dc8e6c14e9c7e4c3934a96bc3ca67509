@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_bbc3bf37",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-11T20:14:00Z",
+      "side": 1,
+      "message": "I would definitely enclose this in if(isTraceEnabled) :)",
+      "revId": "e7237ad6dc8e6c14e9c7e4c3934a96bc3ca67509",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dbc67349",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-11T20:14:00Z",
+      "side": 1,
+      "message": "I\u0027d enclose this in if(log.isTraceEnabled)",
+      "revId": "e7237ad6dc8e6c14e9c7e4c3934a96bc3ca67509",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
