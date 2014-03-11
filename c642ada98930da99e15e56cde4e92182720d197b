@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_506822f5",
+        "filename": "opendaylight/config/config-persister-directory-adapter/src/test/java/org/opendaylight/controller/config/persist/storage/directory/DirectoryStorageAdapterTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-11T08:32:49Z",
+      "side": 1,
+      "message": "this is next to unreadable, can we settle on replaceAll(\"\\r\",\"\") ?",
+      "revId": "c642ada98930da99e15e56cde4e92182720d197b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
