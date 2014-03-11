@@ -58,6 +58,7 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
      * export the interface ICoordinatorChangeAware
      */
     class ListenCoordinatorChange implements IListenRoleChange {
+        @Override
         public void newActiveAvailable() {
             if (coordinatorChangeAware != null) {
                 // Make sure to look the set while walking it
@@ -93,13 +94,9 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
                 logger.trace("cachenames provided below:");
                 for (String cache : caches) {
                     if (this.cacheUpdateAware.get(cache) != null) {
-                        logger.error("cachename:{} on container:{} has " +
-                                     "already a listener", cache,
-                                     this.containerName);
+                        logger.error("cachename:{} on container:{} has already a listener", cache, this.containerName);
                     } else {
-                        GetUpdatesContainer<?, ?> up =
-                            new GetUpdatesContainer(s, this.containerName,
-                                                    cache);
+                        GetUpdatesContainer<?, ?> up = new GetUpdatesContainer(s, this.containerName, cache);
                         if (up != null) {
                             try {
                                 this.clusterService.addListener(this.containerName,
@@ -109,6 +106,7 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
                                              "been registered", cache,
                                              this.containerName);
                             } catch (CacheListenerAddException exc) {
+                                logger.debug("Cache {} didn't exist when {} tried to register to its updates", cache, s);
                                 // Do nothing, the important is that
                                 // we don't register the listener in
                                 // the shadow, and we are not doing

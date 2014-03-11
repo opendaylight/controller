@@ -10,6 +10,7 @@
 package org.opendaylight.controller.clustering.services_implementation.internal;
 
 import java.util.Map;
+
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public class ClusterGlobalManager
 
     @Override
     void setCacheUpdateAware(Map props, ICacheUpdateAware s) {
-        logger.trace("setCacheUpdateAware");
+        logger.trace("setCacheUpdateAware: {}",s);
         if (props.get("containerName") != null) {
             // If we got a reference with the containerName property
             // that is not what we are looking for, so filter it out.
@@ -33,7 +34,7 @@ public class ClusterGlobalManager
 
     @Override
     void unsetCacheUpdateAware(Map props, ICacheUpdateAware s) {
-        logger.trace("unsetCacheUpdateAware");
+        logger.trace("unsetCacheUpdateAware: {}",s);
         if (props.get("containerName") != null) {
             // If we got a reference with the containerName property
             // that is not what we are looking for, so filter it out.
