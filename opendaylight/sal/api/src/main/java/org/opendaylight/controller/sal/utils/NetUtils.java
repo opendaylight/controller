@@ -355,9 +355,7 @@ public abstract class NetUtils {
      */
     public static boolean isMulticastMACAddr(byte[] MACAddress) {
         if (MACAddress.length == MACAddrLengthInBytes && !isBroadcastMACAddr(MACAddress)) {
-            if (MACAddress[0] % 2 == 1) {
-                return true;
-            }
+            return (MACAddress[0] & 1) != 0;
         }
         return false;
     }
