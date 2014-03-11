@@ -468,4 +468,35 @@ public class NetUtilsTest {
         Assert.assertEquals(32768, NetUtils.getUnsignedShort((short) 0x8000));
         Assert.assertEquals(65535, NetUtils.getUnsignedShort((short) 0xffff));
     }
+
+    @Test
+    public void testMulticastMACAddr() {
+        byte[] empty = new byte[0];
+        Assert.assertFalse(NetUtils.isUnicastMACAddr(empty));
+        Assert.assertFalse(NetUtils.isMulticastMACAddr(empty));
+
+        byte[] bcast = {
+            (byte)0xff, (byte)0xff, (byte)0xff,
+            (byte)0xff, (byte)0xff, (byte)0xff,
+        };
+        Assert.assertFalse(NetUtils.isUnicastMACAddr(empty));
+        Assert.assertFalse(NetUtils.isMulticastMACAddr(empty));
+
+        byte[] firstOctet = {
+            (byte)0x00, (byte)0x20, (byte)0x80, (byte)0xfe,
+        };
+        for (int len = 1; len <= 10; len++) {
+            byte[] ba = new byte[len];
+            boolean valid = (len == 6);
+            for (byte first: firstOctet) {
+                ba[0] = first;
+                Assert.assertFalse(NetUtils.isMulticastMACAddr(ba));
+                Assert.assertEquals(valid, NetUtils.isUnicastMACAddr(ba));
+
+                ba[0] |= (byte)0x01;
+                Assert.assertEquals(valid, NetUtils.isMulticastMACAddr(ba));
+                Assert.assertFalse(NetUtils.isUnicastMACAddr(ba));
+            }
+        }
+    }
 }
