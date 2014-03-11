@@ -54,7 +54,7 @@ public abstract class AbstractScheme {
             allocateCaches();
             retrieveCaches();
         } else {
-            log.error("Couldn't retrieve caches for scheme %s. Clustering service unavailable", name);
+            log.error("Couldn't retrieve caches for scheme {}. Clustering service unavailable", name);
         }
     }
 
@@ -334,5 +334,57 @@ public abstract class AbstractScheme {
         } catch (Exception e) {
             log.error("An error occured",e);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((nodeConnections == null) ? 0 : nodeConnections.hashCode());
+        result = prime * result + ((nodeConnectionsCacheName == null) ? 0 : nodeConnectionsCacheName.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof AbstractScheme)) {
+            return false;
+        }
+        AbstractScheme other = (AbstractScheme) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (nodeConnections == null) {
+            if (other.nodeConnections != null) {
+                return false;
+            }
+        } else if (!nodeConnections.equals(other.nodeConnections)) {
+            return false;
+        }
+        if (nodeConnectionsCacheName == null) {
+            if (other.nodeConnectionsCacheName != null) {
+                return false;
+            }
+        } else if (!nodeConnectionsCacheName.equals(other.nodeConnectionsCacheName)) {
+            return false;
+        }
+        return true;
     }
 }

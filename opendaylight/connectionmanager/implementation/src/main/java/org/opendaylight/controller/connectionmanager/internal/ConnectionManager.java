@@ -127,17 +127,6 @@ public class ConnectionManager implements IConnectionManager,
     }
 
     public void started() {
-        String schemeStr = System.getProperty("connection.scheme");
-        for (ConnectionMgmtScheme scheme : ConnectionMgmtScheme.values()) {
-            AbstractScheme schemeImpl = SchemeFactory.getScheme(scheme,
-                    clusterServices);
-            if (schemeImpl != null) {
-                schemes.put(scheme, schemeImpl);
-                if (scheme.name().equalsIgnoreCase(schemeStr)) {
-                    activeScheme = scheme;
-                }
-            }
-        }
 
         connectionEventThread.start();
 
@@ -152,6 +141,17 @@ public class ConnectionManager implements IConnectionManager,
                 "ConnectionEvent Thread");
         this.connectionEvents = new LinkedBlockingQueue<ConnectionMgmtEvent>();
         schemes = new ConcurrentHashMap<ConnectionMgmtScheme, AbstractScheme>();
+
+        String schemeStr = System.getProperty("connection.scheme");
+        for (ConnectionMgmtScheme scheme : ConnectionMgmtScheme.values()) {
+            AbstractScheme schemeImpl = SchemeFactory.getScheme(scheme, clusterServices);
+            if (schemeImpl != null) {
+                schemes.put(scheme, schemeImpl);
+                if (scheme.name().equalsIgnoreCase(schemeStr)) {
+                    activeScheme = scheme;
+                }
+            }
+        }
     }
 
     public void stopping() {
@@ -290,7 +290,7 @@ public class ConnectionManager implements IConnectionManager,
     }
 
     /*
-     * Clustering Services' doesnt provide the existing states in the cache
+     * Clustering Services doesn't provide the existing states in the cache
      * update callbacks. Hence, using a scratch local cache to maintain the
      * existing state.
      */
@@ -303,21 +303,17 @@ public class ConnectionManager implements IConnectionManager,
             return;
         Set<InetAddress> existingControllers = existingConnections.get(node);
         if (existingControllers != null) {
-            logger.debug(
-                    "Processing Update for : {} NewControllers : {} existingControllers : {}",
-                    node, newControllers.toString(),
-                    existingControllers.toString());
+            logger.debug("Processing Update for : {} NewControllers : {} existingControllers : {}", node,
+                    newControllers.toString(), existingControllers.toString());
             if (newControllers.size() < existingControllers.size()) {
-                Set<InetAddress> removed = new HashSet<InetAddress>(
-                        existingControllers);
+                Set<InetAddress> removed = new HashSet<InetAddress>(existingControllers);
                 if (removed.removeAll(newControllers)) {
                     logger.debug("notifyNodeDisconnectFromMaster({})", node);
                     notifyNodeDisconnectedEvent(node);
                 }
             }
         } else {
-            logger.debug("Ignoring the Update for : {} NewControllers : {}",
-                    node, newControllers.toString());
+            logger.debug("Ignoring the Update for : {} NewControllers : {}", node, newControllers.toString());
         }
         existingConnections.put(node, newControllers);
     }
@@ -326,7 +322,7 @@ public class ConnectionManager implements IConnectionManager,
     public void entryDeleted(Node key, String cacheName, boolean originLocal) {
         if (originLocal)
             return;
-        logger.debug("Deleted : {} cache : {}", key, cacheName);
+        logger.debug("Deleted entry {} from cache : {}", key, cacheName);
         notifyNodeDisconnectedEvent(key);
     }
 
