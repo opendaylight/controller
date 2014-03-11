@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_5b096394",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "I think we need:\na) a better name here, as this is just identifiers and others are a map\nb) a description (in the class, I think) of how the data sets relate to each other\nc) I think it should be noted that the data sets are not modifiable",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3bfeaf6c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "missing @return. Also the class should contain a larger description, along the lines of:\n\n\"The event provides access to stable view of the data store state before and after the change which is being reported. The view is rooted at the point where the listener, to which the event is being delivered, was registered.\"",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_1b03eb74",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "Missing comment. The usual warning about not hijacking callback threads should be added.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dbf43389",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "Describe return, in terms of what happens if there is a data read, vs. if the item is not present vs. successful read.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_fbf7f78a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "Is this any different than super.close() if not, then loose the comment, it is just confusing, I think.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_bbf17f97",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "A short javadoc attached to interface describing that this is a combined transaction would be nice.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9beebbb3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "I don\u0027t think this is terribly useful...",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7b2b07ec",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-11T22:34:09Z",
+      "side": 1,
+      "message": "Let\u0027s not leak two-phase here. The naming here is also interesting: maybe we need to adopt naming from https://en.wikipedia.org/wiki/Serializability#Database_transaction.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
