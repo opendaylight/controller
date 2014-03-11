@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_bbda9f15",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-11T21:16:46Z",
+      "side": 1,
+      "message": "Although generally this change makes sense, a couple of issues:\n- If the forwarding module fails to install any of its flows, controller ends up handling a bunch of IP traffic in SW.\n- Why is ArpHandler assuming that forwarding module will actually let ALL hosts talk IP? Not all forwarding modules are \"simple\".\n- I think making controller aware of \"apps\" is very tight coupling. Please don\u0027t forget that ODL is a framework.",
+      "revId": "6967c81a866a10f1a18801c04fa1dc2e0a0d7b6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dbcd535f",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-11T21:16:46Z",
+      "side": 1,
+      "message": "You don\u0027t know that the node connector is local (belongs to a node controlled by this controller) or that it\u0027s even an SDN port. Where in either of those cases, the packet won\u0027t reach the port.",
+      "revId": "6967c81a866a10f1a18801c04fa1dc2e0a0d7b6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
