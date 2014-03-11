@@ -14,16 +14,32 @@ import org.opendaylight.yangtools.concepts.Path;
  * transaction should see the effects of previous transactions as if they happened. A chain
  * makes no guarantees of atomicity, in fact transactions are committed as soon as possible.
  */
-public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable {
+public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable, AsyncDataTransactionFactory<P, D> {
+
     /**
-     * Create a new transaction which will continue the chain. The previous transaction
-     * has to be either COMMITTED or CANCELLED.
+     * Create a new read only transaction which will continue the chain.
+     * The previous read-write transaction has to be either COMMITED or CANCELLED.
      *
      * @return New transaction in the chain.
-     * @throws IllegalStateException if the previous transaction was not COMMITTED or CANCELLED.
+     * @throws IllegalStateException if the previous transaction was not COMMITED
+     *    or CANCELLED.
      * @throws TransactionChainClosedException if the chain has been closed.
      */
-    DataModification<P, D> newTransaction();
+    @Override
+    public AsyncReadTransaction<P, D> newReadOnlyTransaction();
+
+
+    /**
+     * Create a new read write transaction which will continue the chain.
+     * The previous read-write transaction has to be either COMMITED or CANCELLED.
+     *
+     * @return New transaction in the chain.
+     * @throws IllegalStateException if the previous transaction was not COMMITTED
+     *    or CANCELLED.
+     * @throws TransactionChainClosedException if the chain has been closed.
+     */
+    @Override
+    public AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
 
     @Override
     void close();
