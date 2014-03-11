@@ -11,7 +11,6 @@ import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-
 /**
  * Notification Publishing Service
  * 
@@ -25,12 +24,8 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * <li>For each subscriber {@link Broker} invokes
  * {@link NotificationListener#onNotification(CompositeNode)}
  * </ol>
- * 
- * 
- * 
  */
 public interface NotificationPublishService extends NotificationService {
-
     /**
      * Publishes a notification.
      * 
@@ -41,8 +36,5 @@ public interface NotificationPublishService extends NotificationService {
      * @param notification
      *            Notification to publish
      */
-    @Deprecated
-    void sendNotification(CompositeNode notification);
-
     void publish(CompositeNode notification);
 }
