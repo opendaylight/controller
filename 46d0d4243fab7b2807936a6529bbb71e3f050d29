@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_9b723b48",
+        "filename": "opendaylight/sal/api/src/test/java/org/opendaylight/controller/sal/utils/NetUtilsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-11T19:07:20Z",
+      "side": 1,
+      "message": "I think you meant to assert the bcast array here",
+      "revId": "46d0d4243fab7b2807936a6529bbb71e3f050d29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7b8f8724",
+        "filename": "opendaylight/sal/api/src/test/java/org/opendaylight/controller/sal/utils/NetUtilsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-11T19:07:20Z",
+      "side": 1,
+      "message": "and here too",
+      "revId": "46d0d4243fab7b2807936a6529bbb71e3f050d29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
