@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_b6199624",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-12T15:34:00Z",
+      "side": 1,
+      "message": "Missing text here ...",
+      "revId": "5ec3c124c37a419e4cfed556510e2eda9be8adf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_76d31e39",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-12T15:34:00Z",
+      "side": 1,
+      "message": "Can we specify this to throw IllegalStateException if neither is called?",
+      "revId": "5ec3c124c37a419e4cfed556510e2eda9be8adf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
