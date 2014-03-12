@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
@@ -96,17 +97,17 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     protected Map<InstanceIdentifier<? extends DataObject>, DataObject> deepGetBySubpath(
             Map<InstanceIdentifier<? extends DataObject>, DataObject> dataSet,
             InstanceIdentifier<? extends DataObject> path) {
-        Builder<InstanceIdentifier<? extends DataObject>, DataObject> builder = ImmutableMap.builder();
+        
+        Map<InstanceIdentifier<? extends DataObject>, DataObject> map = new HashMap<InstanceIdentifier<? extends DataObject>, DataObject>();
         Map<InstanceIdentifier<? extends DataObject>, DataObject> potential = Maps.filterKeys(dataSet, createIsContainedPredicate(path));
         for(Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : potential.entrySet()) {
             try {
-                builder.putAll(DataObjectReadingUtil.readData(entry.getValue(),(InstanceIdentifier)entry.getKey(),path));
+                map.putAll(DataObjectReadingUtil.readData(entry.getValue(),(InstanceIdentifier)entry.getKey(),path));
             } catch (Exception e) {
                 // FIXME : Log exception;
             }
         }
-        return builder.build();
-
+        return ImmutableMap.copyOf(map);
     }
 
 }
