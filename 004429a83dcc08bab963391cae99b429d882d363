@@ -206,6 +206,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_7bc78713",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/LogicalDatastore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-12T09:19:21Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "9a5c5d37_db22f300",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_9b1c7bc3",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
         "patchSetId": 5
@@ -217,6 +235,24 @@
       "writtenOn": "2014-03-12T05:13:40Z",
       "side": 1,
       "message": "Are we missing a method to register a TransactionChainListener?",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_5bccc335",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-12T09:19:21Z",
+      "side": 1,
+      "message": "There can be only one listener, which is mandatory when the chain is instantiated",
+      "parentUuid": "9a5c5d37_9b1c7bc3",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -251,6 +287,41 @@
       "writtenOn": "2014-03-12T05:13:40Z",
       "side": 1,
       "message": "Couldn\u0027t we just invoke close on the chain after processing of all listeners is complete?",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_fbda57e8",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChainListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-12T09:19:21Z",
+      "side": 1,
+      "message": "Well, there is only one listener, which effectively is the overall failure notification back to the application which instantiated the chain. The idea is that you\u0027d instantiate a chain, perform your normal operations as usual, but rather than attaching to individual transaction status, you\u0027d have the overall chain status.\n\nIn light of changes, I think we need to slightly redesign this such that a resubmit can done.",
+      "parentUuid": "9a5c5d37_7b79c7fb",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3bd10fce",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChainListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-12T09:19:21Z",
+      "side": 1,
+      "message": "This can be pretty much any transaction... WO,RW, so the interface is not appropriate",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
