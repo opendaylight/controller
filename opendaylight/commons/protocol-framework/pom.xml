@@ -25,6 +25,11 @@
         <maven>3.0.4</maven>
     </prerequisites>
 
+    <properties>
+        <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
+        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
@@ -54,6 +59,14 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>netty-config-api</artifactId>
+        </dependency>
 
         <!-- Testing dependencies -->
         <dependency>
@@ -64,6 +77,29 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-manager</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-manager</artifactId>
+            <version>${config.version}</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-util</artifactId>
+            <version>${config.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>netty-event-executor-config</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,15 +108,23 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <version>2.4.0</version>
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                        <Private-Package></Private-Package>
+                        <Export-Package>
+                            org.opendaylight.controller.config.yang.protocol.framework,
+                            org.opendaylight.protocol.framework,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.protocol.framework.rev140313.*,
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -90,6 +134,74 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+              <groupId>org.opendaylight.yangtools</groupId>
+              <artifactId>yang-maven-plugin</artifactId>
+              <version>${yangtools.version}</version>
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>generate-sources</goal>
+                      </goals>
+                      <configuration>
+                          <codeGenerators>
+                              <generator>
+                                  <codeGeneratorClass>
+                                      org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
+                                  </codeGeneratorClass>
+                                  <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                  <additionalConfiguration>
+                                      <namespaceToPackage1>
+                                          urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
+                                      </namespaceToPackage1>
+                                  </additionalConfiguration>
+                              </generator>
+                              <generator>
+                                  <codeGeneratorClass>
+                                      org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                  </codeGeneratorClass>
+                                  <outputBaseDir>
+                                     ${salGeneratorPath}
+                                  </outputBaseDir>
+                              </generator>
+                          </codeGenerators>
+                          <inspectDependencies>true</inspectDependencies>
+                      </configuration>
+                  </execution>
+              </executions>
+              <dependencies>
+                  <dependency>
+                      <groupId>org.opendaylight.controller</groupId>
+                      <artifactId>yang-jmx-generator-plugin</artifactId>
+                      <version>${config.version}</version>
+                  </dependency>
+                  <dependency>
+                      <groupId>org.opendaylight.yangtools</groupId>
+                      <artifactId>maven-sal-api-gen-plugin</artifactId>
+                      <version>${yangtools.version}</version>
+                  </dependency>
+              </dependencies>
+          </plugin>
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>build-helper-maven-plugin</artifactId>
+              <version>1.8</version>
+              <executions>
+                  <execution>
+                      <id>add-source</id>
+                      <phase>generate-sources</phase>
+                      <goals>
+                          <goal>add-source</goal>
+                      </goals>
+                      <configuration>
+                          <sources>
+                              <source>${jmxGeneratorPath}</source>
+                              <source>${salGeneratorPath}</source>
+                          </sources>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
         </plugins>
     </build>
 </project>

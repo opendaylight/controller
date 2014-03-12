@@ -45,7 +45,6 @@ public class TestHelper {
                 bindingAwareSalBundles(),
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
-                mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
@@ -58,6 +57,9 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "ietf-netconf-monitoring").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "ietf-netconf-monitoring-extension").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-monitoring").versionAsInProject(), //
+
+                mavenBundle(CONTROLLER, "netty-config-api"), //
+                mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
