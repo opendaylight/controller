@@ -135,6 +135,74 @@
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_db22f300",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/LogicalDatastore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T05:13:40Z",
+      "side": 1,
+      "message": "This should probably be named LogicalDataStoreType.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9b1c7bc3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T05:13:40Z",
+      "side": 1,
+      "message": "Are we missing a method to register a TransactionChainListener?",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_bb1f3fb7",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T05:13:40Z",
+      "side": 1,
+      "message": "No newWriteOnlyTransaction?",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7b79c7fb",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChainListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T05:13:40Z",
+      "side": 1,
+      "message": "Couldn\u0027t we just invoke close on the chain after processing of all listeners is complete?",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
