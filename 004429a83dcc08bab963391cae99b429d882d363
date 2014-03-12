@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a5c5d37_fb53776a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T08:59:27Z",
+      "side": 1,
+      "message": "\"which will be triggered on he LogicalDataStore\"",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_db50b360",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T08:59:27Z",
+      "side": 1,
+      "message": "LogicalDataStore param undocumented",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_5b096394",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 5
@@ -13,6 +47,23 @@
       "writtenOn": "2014-03-11T22:34:09Z",
       "side": 1,
       "message": "I think we need:\na) a better name here, as this is just identifiers and others are a map\nb) a description (in the class, I think) of how the data sets relate to each other\nc) I think it should be noted that the data sets are not modifiable",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_bb4dffc6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-12T08:59:27Z",
+      "side": 1,
+      "message": "What is this original data map? In which condition will this be populated?",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
