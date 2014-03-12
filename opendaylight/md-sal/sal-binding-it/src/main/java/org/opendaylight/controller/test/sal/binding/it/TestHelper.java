@@ -45,7 +45,6 @@ public class TestHelper {
                 bindingAwareSalBundles(),
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
-                mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
@@ -63,6 +62,9 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
                 mavenBundle(CONTROLLER + ".thirdparty", "ganymed").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
+
+                mavenBundle(CONTROLLER, "netty-config-api"), //
+                mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //
 
