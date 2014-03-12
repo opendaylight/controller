@@ -25,7 +25,7 @@ public interface RpcProviderRegistry extends //
         RpcConsumerRegistry, //
         RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {
     /**
-     * Registers an global RpcService implementation.
+     * Registers a global RpcService implementation.
      *
      * @param type
      * @param implementation
@@ -36,16 +36,15 @@ public interface RpcProviderRegistry extends //
 
     /**
      *
-     * Register an Routed RpcService where routing is determined on annotated
+     * Register a Routed RpcService where routing is determined on annotated
      * (in YANG model) context-reference and value of annotated leaf.
      *
      * @param type
      *            Type of RpcService, use generated interface class, not your
-     *            implementation clas
+     *            implementation class
      * @param implementation
      *            Implementation of RpcService
-     * @return Registration object for routed Rpc which could be used to close
-     *         an
+     * @return Registration object for routed Rpc which could be used to unregister
      *
      * @throws IllegalStateException
      */

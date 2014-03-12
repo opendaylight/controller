@@ -27,7 +27,7 @@ import org.osgi.framework.BundleContext;
  * removes direct dependencies between providers and consumers.
  * 
  * The Binding-aware broker is also responsible for translation from Java
- * classes modeling the functionality and data to binding-indpenedent form which
+ * classes modeling the functionality and data to binding-independent form which
  * is used in SAL Core.
  * 
  * 

@@ -7,15 +7,6 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
@@ -37,12 +28,22 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import static com.google.common.base.Preconditions.checkState;
+
 public class RpcProviderRegistryImpl implements //
         RpcProviderRegistry, //
         RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {
 
     private RuntimeCodeGenerator rpcFactory = SingletonHolder.RPC_GENERATOR_IMPL;
 
+    // publicProxies is a cache of proxy objects where each value in the map corresponds to a specific RpcService
     private final Map<Class<? extends RpcService>, RpcService> publicProxies = new WeakHashMap<>();
     private final Map<Class<? extends RpcService>, RpcRouter<?>> rpcRouters = new WeakHashMap<>();
     private final ListenerRegistry<RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> routeChangeListeners = ListenerRegistry

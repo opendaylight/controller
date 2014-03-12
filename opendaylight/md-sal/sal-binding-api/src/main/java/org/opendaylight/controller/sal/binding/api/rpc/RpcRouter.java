@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 /**
  * RpcRouter is responsible for selecting RpcService based on provided routing
  * context identifier {@link RpcRoutingTable#getContextIdentifier()} and path in
- * overal data tree (@link {@link InstanceIdentifier}.
+ * overall data tree (@link {@link InstanceIdentifier}.
  *
  *
  * @author Tony Tkacik <ttkacik@cisco.com>
