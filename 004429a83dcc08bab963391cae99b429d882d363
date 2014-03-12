@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_d692ca9e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_fb53776a",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_db50b360",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_b68f5675",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_db50b360",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_5b096394",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2014-03-11T22:34:09Z",
       "side": 1,
       "message": "I think we need:\na) a better name here, as this is just identifiers and others are a map\nb) a description (in the class, I think) of how the data sets relate to each other\nc) I think it should be noted that the data sets are not modifiable",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_968c5281",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done - renamed to getRemovedPaths()",
+      "parentUuid": "9a5c5d37_5b096394",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_76e9de19",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_3bfeaf6c",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_1b03eb74",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
         "patchSetId": 5
@@ -98,6 +170,24 @@
       "writtenOn": "2014-03-11T22:34:09Z",
       "side": 1,
       "message": "Missing comment. The usual warning about not hijacking callback threads should be added.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_56eeda23",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_1b03eb74",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_36f3660c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_dbf43389",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_fbf7f78a",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
         "patchSetId": 5
@@ -132,6 +240,24 @@
       "writtenOn": "2014-03-11T22:34:09Z",
       "side": 1,
       "message": "Is this any different than super.close() if not, then loose the comment, it is just confusing, I think.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_16f862e4",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done - Removed unnecessary override.",
+      "parentUuid": "9a5c5d37_fbf7f78a",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_f6dcae76",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_bbf17f97",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_9beebbb3",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 5
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_d6d9aa84",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done - Removed",
+      "parentUuid": "9a5c5d37_9beebbb3",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_7b2b07ec",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 5
@@ -183,6 +345,24 @@
       "writtenOn": "2014-03-11T22:34:09Z",
       "side": 1,
       "message": "Let\u0027s not leak two-phase here. The naming here is also interesting: maybe we need to adopt naming from https://en.wikipedia.org/wiki/Serializability#Database_transaction.",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_b6e63643",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done - removed two-phase commit reference. Which part of the naming are you referening to?",
+      "parentUuid": "9a5c5d37_7b2b07ec",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -218,6 +398,24 @@
       "side": 1,
       "message": "+1",
       "parentUuid": "9a5c5d37_db22f300",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_96e33233",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/LogicalDatastore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_7bc78713",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -322,6 +520,24 @@
       "writtenOn": "2014-03-12T09:19:21Z",
       "side": 1,
       "message": "This can be pretty much any transaction... WO,RW, so the interface is not appropriate",
+      "revId": "004429a83dcc08bab963391cae99b429d882d363",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_76d0be53",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChainListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-03-12T12:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_3bd10fce",
       "revId": "004429a83dcc08bab963391cae99b429d882d363",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
