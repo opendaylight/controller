@@ -7,6 +7,12 @@
   <version>1.1-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
 
+  <properties>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <nexus.repository.release>opendaylight.release</nexus.repository.release>
+    <nexus.repository.snapshot>opendaylight.snapshot</nexus.repository.snapshot>
+  </properties>
+
   <name>odl-model-project</name>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
@@ -37,11 +43,11 @@
   <distributionManagement>
     <repository>
       <id>opendaylight-release</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.release}/</url>
     </repository>
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
     </snapshotRepository>
     <site>
       <id>website</id>

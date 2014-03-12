@@ -24,12 +24,12 @@
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.release}/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
     </snapshotRepository>
     <!-- Site deployment -->
     <site>

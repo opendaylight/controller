@@ -9,6 +9,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <nexus.repository.release>opendaylight.release</nexus.repository.release>
+    <nexus.repository.snapshot>opendaylight.release</nexus.repository.snaphot>
     <yang.version>0.6.2-SNAPSHOT</yang.version>
     <yang.codegen.version>0.6.2-SNAPSHOT</yang.codegen.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
@@ -158,7 +160,7 @@
     <pluginRepository>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
       <snapshots>
           <enabled>true</enabled>
       </snapshots>
@@ -186,7 +188,7 @@
     <repository>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
       <snapshots>
           <enabled>true</enabled>
       </snapshots>
@@ -200,12 +202,12 @@
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.release}/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
     </snapshotRepository>
     <!-- Site deployment -->
     <site>
