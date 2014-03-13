@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.dom.broker;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
@@ -40,6 +39,8 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class MountPointImpl implements MountProvisionInstance, SchemaContextProvider {
 
@@ -135,7 +136,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
 
 
     @Override
-    public Future<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input) {
         return null;
     }
 
