@@ -12,9 +12,9 @@ package org.opendaylight.controller.clustering.services_implementation.internal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -59,6 +59,8 @@ import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.clustering.services.IGetUpdates;
 import org.opendaylight.controller.clustering.services.IListenRoleChange;
 import org.opendaylight.controller.clustering.services.ListenRoleChangeAddException;
+import org.opendaylight.controller.sal.core.MacAddress;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -705,6 +707,54 @@ public class ClusterManager implements IClusterServices {
             return null;
         }
         return addressToInetAddress(manager.getAddress());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] getMacAddress() {
+        boolean fallBackHardwareMac = false;
+        ConcurrentMap<?, ?> map = getCache(GlobalConstants.DEFAULT.toString(), "switchmanager.controllerProps");
+        if(map != null) {
+            Object o = map.get(MacAddress.name);
+            if((o != null) && (o instanceof MacAddress)) {
+                return ((MacAddress)o).getMacAddress();
+            }
+            fallBackHardwareMac = true;
+        } else {
+            fallBackHardwareMac = true;
+        }
+        if(fallBackHardwareMac) {
+            Enumeration<NetworkInterface> nis;
+            byte[] macAddress = null;
+
+            try {
+                nis = NetworkInterface.getNetworkInterfaces();
+            } catch (SocketException e) {
+                logger.error("Failed to acquire controller MAC: ", e);
+                return macAddress;
+            }
+
+            while (nis.hasMoreElements()) {
+                NetworkInterface ni = nis.nextElement();
+                try {
+                    macAddress = ni.getHardwareAddress();
+                } catch (SocketException e) {
+                    logger.error("Failed to acquire controller MAC: ", e);
+                }
+                if (macAddress != null && macAddress.length != 0) {
+                    break;
+                }
+            }
+            if (macAddress == null) {
+                logger.warn("Failed to acquire controller MAC: No physical interface found");
+                // This happens when running controller on windows VM, for example
+                // Try parsing the OS command output
+            }
+            return macAddress;
+        }
+        return null;
     }
 
     @Override

@@ -12,13 +12,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1406,31 +1403,14 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     private byte[] getHardwareMAC() {
-        Enumeration<NetworkInterface> nis;
+        // to prevent each slice from potentially getting a different mac
+        // always get the mac from the clusterContainerService
         byte[] macAddress = null;
-
-        try {
-            nis = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e) {
-            log.error("Failed to acquire controller MAC: ", e);
-            return macAddress;
-        }
-
-        while (nis.hasMoreElements()) {
-            NetworkInterface ni = nis.nextElement();
-            try {
-                macAddress = ni.getHardwareAddress();
-            } catch (SocketException e) {
-                log.error("Failed to acquire controller MAC: ", e);
-            }
-            if (macAddress != null && macAddress.length != 0) {
-                break;
-            }
+        if(clusterContainerService != null) {
+            macAddress = clusterContainerService.getMacAddress();
         }
         if (macAddress == null) {
-            log.warn("Failed to acquire controller MAC: No physical interface found");
-            // This happens when running controller on windows VM, for example
-            // Try parsing the OS command output
+            log.warn("macAddress from clusterContainerService is null");
         }
         return macAddress;
     }

@@ -126,6 +126,11 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     }
 
     @Override
+    public byte[] getMacAddress() {
+        return null;
+    }
+
+    @Override
     public void trollback() throws java.lang.IllegalStateException,
             java.lang.SecurityException, SystemException {
     }

@@ -290,6 +290,14 @@ public interface IClusterServices {
     InetAddress getMyAddress();
 
     /**
+     * This returns the mac address which is consistent across slices.
+     *
+     * @return macAddress in byte array form
+     *
+     */
+    byte[] getMacAddress();
+
+    /**
      * @deprecated
      * Register a listener to the event of ChangeRole, raised every
      * time there is a change in the role of active or standby.

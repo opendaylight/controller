@@ -330,4 +330,16 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
             return false;
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] getMacAddress() {
+        if (this.clusterService != null) {
+            return this.clusterService.getMacAddress();
+        }
+        return null;
+    }
+
 }

@@ -548,8 +548,7 @@ public class TopologyManagerImpl implements
         case REMOVED:
             hostSet.remove(thisHost);
             if(hostSet.isEmpty()) {
-                //remove only if hasn't been concurrently modified
-                this.hostsDB.remove(port, hostSet);
+                this.hostsDB.remove(port);
             } else {
                 this.hostsDB.put(port, hostSet);
             }

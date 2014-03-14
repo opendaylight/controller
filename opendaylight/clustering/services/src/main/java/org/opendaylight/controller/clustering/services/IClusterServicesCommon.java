@@ -187,4 +187,12 @@ public interface IClusterServicesCommon {
      * coordinator for the cluster
      */
     boolean amICoordinator();
+
+    /**
+     * This returns the mac address which is consistent across slices.
+     *
+     * @return macAddress in byte array form
+     *
+     */
+    byte[] getMacAddress();
 }
