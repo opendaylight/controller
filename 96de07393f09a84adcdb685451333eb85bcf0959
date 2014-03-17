@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_7cff7d02",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/config/Config.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-17T15:57:04Z",
+      "side": 1,
+      "message": "why is this OK?",
+      "revId": "96de07393f09a84adcdb685451333eb85bcf0959",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_5c04b914",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/config/ModuleElementDefinition.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-17T15:57:04Z",
+      "side": 1,
+      "message": "not very helpful :/",
+      "revId": "96de07393f09a84adcdb685451333eb85bcf0959",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3c09052d",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/operations/runtimerpc/RuntimeRpc.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-17T15:57:04Z",
+      "side": 1,
+      "message": "why does this swallow the exception? and return OK?",
+      "revId": "96de07393f09a84adcdb685451333eb85bcf0959",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_1c0e4135",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionNegotiatorFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-03-17T15:57:04Z",
+      "side": 1,
+      "message": "inline if/else produces sonar warning",
+      "revId": "96de07393f09a84adcdb685451333eb85bcf0959",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
