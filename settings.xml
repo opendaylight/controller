@@ -1,0 +1,245 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+	<localRepository/>
+	<interactiveMode/>
+	<usePluginRegistry/>
+	<offline/>
+	<pluginGroups/>
+	<servers/>
+	<mirrors/>
+	<proxies/>
+	<profiles>
+		<!--
+	      - Standard OpenDaylight profile that defines repositories on the
+	      - OpenDaylight Nexus server
+	      -->
+		<profile>
+			<id>opendaylight</id>
+
+			<!--
+			  - Properties that define the OpenDaylight repository from which
+			  - artifacts will be pulled.
+			  -->
+			<properties>
+				<odl.nexus.proxy>http://nexus.opendaylight.org/content</odl.nexus.proxy>
+				<odl.nexus.repository.release>opendaylight.release</odl.nexus.repository.release>
+				<odl.nexus.repository.snapshot>opendaylight.snapshot</odl.nexus.repository.snapshot>
+			</properties>
+
+			<repositories>
+
+				<!--
+				  - Mirror of public repositories
+				  -->
+				<repository>
+					<id>opendaylight-mirror</id>
+					<name>opendaylight-mirror</name>
+					<url>${odl.nexus.proxy}/groups/public/</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>never</updatePolicy>
+					</releases>
+				</repository>
+
+				<!--
+				  - Snapshot Repository
+				  -->
+				<repository>
+					<id>opendaylight-snapshot</id>
+					<name>opendaylight-snapshot</name>
+					<url>${odl.nexus.proxy}/repositories/${odl.nexus.repository.snapshot}/</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</repository>
+
+				<repository>
+					<id>central2</id>
+					<name>central2</name>
+					<url>http://repo2.maven.org/maven2</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<updatePolicy>never</updatePolicy>
+						<enabled>true</enabled>
+					</releases>
+				</repository>
+
+				<repository>
+					<id>central</id>
+					<name>central</name>
+					<url>http://repo1.maven.org/maven2</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<updatePolicy>never</updatePolicy>
+						<enabled>true</enabled>
+					</releases>
+				</repository>
+
+				<!--
+				  - Third party packages hosted in local repository because
+				  - they are not available in other places
+				  -->
+				<repository>
+					<id>thirdparty</id>
+					<name>thirdparty</name>
+					<url>${odl.nexus.proxy}/repositories/thirdparty</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<updatePolicy>never</updatePolicy>
+						<enabled>true</enabled>
+					</releases>
+				</repository>
+			</repositories>
+
+			<pluginRepositories>
+				<!--
+				  - Mirror of public plugin respositories
+				  -->
+				<pluginRepository>
+					<id>opendaylight-mirror</id>
+					<name>opendaylight-mirror</name>
+					<url>${odl.nexus.proxy}/groups/public/</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>never</updatePolicy>
+					</releases>
+				</pluginRepository>
+
+				<!--
+				  - Snapshot plugin repository
+				  -->
+				<pluginRepository>
+					<id>opendaylight-snapshot</id>
+					<name>opendaylight-snapshot</name>
+					<url>${odl.nexus.proxy}/repositories/${odl.nexus.repository.snapshot}/</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</pluginRepository>
+
+				<pluginRepository>
+					<id>central2</id>
+					<name>central2</name>
+					<url>http://repo2.maven.org/maven2</url>
+				</pluginRepository>
+
+			    <pluginRepository>
+			      <id>reficio</id>
+			      <url>${odl.nexus.proxy}/repositories/reficioplugin/</url>
+			    </pluginRepository>
+
+			</pluginRepositories>
+		</profile>
+		<profile>
+			<id>local</id>
+
+			<!--
+			  - Properties that the core repository from which OpenDaylight
+			  - artifacts will be pulled.
+			  -->
+			<properties>
+				<local.nexus.proxy>http://nexus.company.com/content</local.nexus.proxy>
+				<local.nexus.repository.release>opendaylight.release</local.nexus.repository.release>
+				<local.nexus.repository.snapshot>opendaylight.snapshot</local.nexus.repository.snapshot>
+			</properties>
+
+			<repositories>
+				<!--
+				  - Local Mirror of public repositories
+				  -->
+				<repository>
+					<id>local-mirror</id>
+					<name>local-mirror</name>
+					<url>${local.nexus.proxy}/groups/public/</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>never</updatePolicy>
+					</releases>
+				</repository>
+
+				<!--
+				  - Local Snapshot Repository
+				  -->
+				<repository>
+					<id>local-snapshot</id>
+					<name>local-snapshot</name>
+					<url>${local.nexus.proxy}/repositories/${local.nexus.repository.snapshot}/</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</repository>
+			</repositories>
+
+			<pluginRepositories>
+				<!--
+				  - Local Mirror of public plugin respositories
+				  -->
+				<pluginRepository>
+					<id>local-mirror</id>
+					<name>local-mirror</name>
+					<url>${local.nexus.proxy}/groups/public/</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>never</updatePolicy>
+					</releases>
+				</pluginRepository>
+
+				<!--
+				  - Local Snapshot plugin repository
+				  -->
+				<pluginRepository>
+					<id>local-snapshot</id>
+					<name>local-snapshot</name>
+					<url>${local.nexus.proxy}/repositories/${local.nexus.repository.snapshot}/</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</pluginRepository>
+			</pluginRepositories>
+
+		</profile>
+	</profiles>
+
+	<activeProfiles>
+		<!--
+	      - The Local Profile allows the user to pull from a local repository
+	      - before pulling from the standard OpenDaylight respositories.
+	      -
+	      - Uncomment the line below to activate the local profile
+	      -->
+		<!-- <activeProfiles>local</activeProfiles> -->
+		<activeProfile>opendaylight</activeProfile>
+	</activeProfiles>
+</settings>
