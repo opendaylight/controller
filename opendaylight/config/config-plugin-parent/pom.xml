@@ -19,6 +19,20 @@
     </properties>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>yang-doc-plugin</artifactId>
+                <version>${config.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>collect</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -43,6 +57,10 @@
                                             </namespaceToPackage1>
                                         </additionalConfiguration>
                                     </generator>
+                                    <generator>
+                                        <codeGeneratorClass>org.opendaylight.controller.config.yang.doc.generator.plugin.ConfigYangDocGenerator</codeGeneratorClass>
+                                        <outputBaseDir>${project.build.directory}/site/config</outputBaseDir>
+                                    </generator>
                                 </codeGenerators>
                                 <inspectDependencies>true</inspectDependencies>
                             </configuration>
@@ -52,6 +70,11 @@
                         <dependency>
                             <groupId>org.opendaylight.controller</groupId>
                             <artifactId>yang-jmx-generator-plugin</artifactId>
+                            <version>${config.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.opendaylight.controller</groupId>
+                            <artifactId>yang-doc-generator-plugin</artifactId>
                             <version>${config.version}</version>
                         </dependency>
                     </dependencies>

@@ -42,6 +42,8 @@
         <module>shutdown-api</module>
         <module>shutdown-impl</module>
         <module>config-module-archetype</module>
+        <module>yang-doc-generator-plugin</module>
+        <module>yang-doc-plugin</module>
     </modules>
 
     <profiles>
