@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_9ce35133",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/rpc/ModuleRpcs.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-03-18T07:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_c12e86a5",
+      "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_a12b9293",
         "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/runtime/Runtime.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-17T14:27:01Z",
       "side": 1,
       "message": "remove",
+      "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7cd09d53",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/runtime/Runtime.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-03-18T07:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_a12b9293",
       "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2014-03-17T14:27:01Z",
       "side": 1,
       "message": "this should be at least a warning",
+      "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_5cd5d941",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-03-18T07:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_41129663",
       "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
