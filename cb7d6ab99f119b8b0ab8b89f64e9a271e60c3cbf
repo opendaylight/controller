@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_bc54d5ca",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/mapping/operations/DefaultStartExi.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-03-18T07:55:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_81188e85",
+      "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_611d9a73",
         "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/mapping/operations/DefaultStopExi.java",
         "patchSetId": 4
@@ -100,6 +118,24 @@
       "writtenOn": "2014-03-17T14:27:01Z",
       "side": 1,
       "message": "windows newlines",
+      "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9c5111db",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/mapping/operations/DefaultStopExi.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-03-18T07:55:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_611d9a73",
       "revId": "cb7d6ab99f119b8b0ab8b89f64e9a271e60c3cbf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
