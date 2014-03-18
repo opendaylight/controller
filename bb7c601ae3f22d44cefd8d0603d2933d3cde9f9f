@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_fcafed29",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/ControllerProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 76
+      },
+      "writtenOn": "2014-03-18T22:24:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_bc9295f4",
+      "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_9c8fd1cc",
         "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/ControllerProperties.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-18T21:52:33Z",
       "side": 1,
       "message": "Can you please move allocate and retrieve to the init() method",
+      "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dcac2938",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/ControllerProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 76
+      },
+      "writtenOn": "2014-03-18T22:24:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_9c8fd1cc",
       "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_bca97526",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/ControllerProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 76
+      },
+      "writtenOn": "2014-03-18T22:24:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_7cbc1d6d",
+      "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_fc880dc8",
         "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/IControllerProperties.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-03-18T21:52:33Z",
       "side": 1,
       "message": "minor, can you move this at the very top of the file",
+      "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9ca6b152",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/IControllerProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 76
+      },
+      "writtenOn": "2014-03-18T22:24:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_fc880dc8",
       "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_7c63fd1a",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/IControllerProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 76
+      },
+      "writtenOn": "2014-03-18T22:24:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_dc8549ae",
+      "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_1ca40156",
         "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-03-18T21:52:33Z",
       "side": 1,
       "message": "SwitchManager has a strict dependencies on controllerProperties.\nYou should not check for null here.",
+      "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_1cbbe173",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 76
+      },
+      "writtenOn": "2014-03-18T22:24:10Z",
+      "side": 1,
+      "message": "For unit tests. The unit tests just create the class and not bring up the bundle.",
+      "parentUuid": "9a5c5d37_1ca40156",
       "revId": "bb7c601ae3f22d44cefd8d0603d2933d3cde9f9f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
