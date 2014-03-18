@@ -12,13 +12,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +53,6 @@ import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -102,6 +98,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     private ConcurrentMap<String, Property> controllerProps;
     private IInventoryService inventoryService;
     private IStatisticsManager statisticsManager;
+    private IControllerProperties controllerProperties;
     private IConfigurationContainerService configurationService;
     private final Set<ISwitchManagerAware> switchManagerAware = Collections
             .synchronizedSet(new HashSet<ISwitchManagerAware>());
@@ -171,13 +168,13 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         retrieveCaches();
 
         // Add controller MAC, if first node in the cluster
-        if (!controllerProps.containsKey(MacAddress.name)) {
-            byte controllerMac[] = getHardwareMAC();
+        if ((!controllerProps.containsKey(MacAddress.name)) && (controllerProperties != null)) {
+            Property controllerMac = controllerProperties.getControllerProperty(MacAddress.name);
             if (controllerMac != null) {
-                Property existing = controllerProps.putIfAbsent(MacAddress.name, new MacAddress(controllerMac));
+                Property existing = controllerProps.putIfAbsent(MacAddress.name, controllerMac);
                 if (existing == null && log.isTraceEnabled()) {
                     log.trace("Container {}: Setting controller MAC address in the cluster: {}", getContainerName(),
-                            HexEncode.bytesToHexStringFormat(controllerMac));
+                            controllerMac);
                 }
             }
         }
@@ -1405,36 +1402,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         return (propMap != null) ? propMap.get(propName) : null;
     }
 
-    private byte[] getHardwareMAC() {
-        Enumeration<NetworkInterface> nis;
-        byte[] macAddress = null;
-
-        try {
-            nis = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e) {
-            log.error("Failed to acquire controller MAC: ", e);
-            return macAddress;
-        }
-
-        while (nis.hasMoreElements()) {
-            NetworkInterface ni = nis.nextElement();
-            try {
-                macAddress = ni.getHardwareAddress();
-            } catch (SocketException e) {
-                log.error("Failed to acquire controller MAC: ", e);
-            }
-            if (macAddress != null && macAddress.length != 0) {
-                break;
-            }
-        }
-        if (macAddress == null) {
-            log.warn("Failed to acquire controller MAC: No physical interface found");
-            // This happens when running controller on windows VM, for example
-            // Try parsing the OS command output
-        }
-        return macAddress;
-    }
-
     @Override
     public byte[] getControllerMAC() {
         MacAddress macProperty = (MacAddress)controllerProps.get(MacAddress.name);
@@ -1791,6 +1758,16 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             log.trace("Cluster Service removed!");
             this.clusterContainerService = null;
         }
+    }
+
+    public void setControllerProperties(IControllerProperties controllerProperties) {
+        log.trace("Got controller properties set request {}", controllerProperties);
+        this.controllerProperties = controllerProperties;
+    }
+
+    public void unsetControllerProperties(IControllerProperties controllerProperties) {
+        log.trace("Got controller properties UNset request");
+        this.controllerProperties = null;
     }
 
     private void getInventories() {
