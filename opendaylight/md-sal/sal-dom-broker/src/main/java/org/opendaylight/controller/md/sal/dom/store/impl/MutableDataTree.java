@@ -32,7 +32,7 @@ class MutableDataTree {
     final NodeModification rootModification;
     final ModificationApplyOperation strategyTree;
 
-    private  boolean sealed = false;
+    private boolean sealed = false;
 
     private MutableDataTree(final DataAndMetadataSnapshot snapshot, final ModificationApplyOperation strategyTree) {
         this.snapshot = snapshot;
@@ -55,46 +55,51 @@ class MutableDataTree {
         return getModifiedVersion(path, modification);
     }
 
-    private Optional<NormalizedNode<?, ?>> getModifiedVersion(final InstanceIdentifier path, final Entry<InstanceIdentifier, NodeModification> modification) {
+    private Optional<NormalizedNode<?, ?>> getModifiedVersion(final InstanceIdentifier path,
+            final Entry<InstanceIdentifier, NodeModification> modification) {
         Optional<StoreMetadataNode> result = resolveSnapshot(modification);
-        if(result.isPresent()) {
+        if (result.isPresent()) {
             NormalizedNode<?, ?> data = result.get().getData();
-            return NormalizedNodeUtils.findNode(modification.getKey(),data, path);
+            return NormalizedNodeUtils.findNode(modification.getKey(), data, path);
         }
         return Optional.absent();
 
     }
 
-    private Optional<StoreMetadataNode> resolveSnapshot(final Entry<InstanceIdentifier, NodeModification> keyModification) {
+    private Optional<StoreMetadataNode> resolveSnapshot(
+            final Entry<InstanceIdentifier, NodeModification> keyModification) {
         InstanceIdentifier path = keyModification.getKey();
         NodeModification modification = keyModification.getValue();
-        return resolveSnapshot(path,modification);
+        return resolveSnapshot(path, modification);
     }
 
-    private Optional<StoreMetadataNode> resolveSnapshot(final InstanceIdentifier path, final NodeModification modification) {
+    private Optional<StoreMetadataNode> resolveSnapshot(final InstanceIdentifier path,
+            final NodeModification modification) {
         try {
-            return resolveModificationStrategy(path).apply(modification,modification.getOriginal());
+            return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
+                    StoreUtils.increase(snapshot.getMetadataTree().getSubtreeVersion()));
         } catch (Exception e) {
-            log.error("Could not create snapshot for {},",e);
+            log.error("Could not create snapshot for {},", e);
             throw e;
         }
     }
 
     private ModificationApplyOperation resolveModificationStrategy(final InstanceIdentifier path) {
-        log.trace("Resolving modification apply strategy for {}",path);
+        log.trace("Resolving modification apply strategy for {}", path);
         Optional<ModificationApplyOperation> strategy = TreeNodeUtils.findNode(strategyTree, path);
-        checkArgument(strategy.isPresent(),"Provided path %s is not supported by data store. No schema available for it.",path);
+        checkArgument(strategy.isPresent(),
+                "Provided path %s is not supported by data store. No schema available for it.", path);
         return strategy.get();
     }
 
-    private NodeModification resolveModificationFor(final InstanceIdentifier path) {
+    private OperationWithModification resolveModificationFor(final InstanceIdentifier path) {
         NodeModification modification = rootModification;
         // We ensure strategy is present.
-        resolveModificationStrategy(path);
+        ModificationApplyOperation operation = resolveModificationStrategy(path);
         for (PathArgument pathArg : path.getPath()) {
             modification = modification.modifyChild(pathArg);
         }
-        return modification;
+        return OperationWithModification.from(operation, modification);
     }
 
     public static MutableDataTree from(final DataAndMetadataSnapshot snapshot, final ModificationApplyOperation resolver) {
@@ -107,6 +112,10 @@ class MutableDataTree {
     }
 
     private void checkSealed() {
-        checkState(!sealed , "Data Tree is sealed. No further modifications allowed.");
+        checkState(!sealed, "Data Tree is sealed. No further modifications allowed.");
+    }
+
+    protected NodeModification getRootModification() {
+        return rootModification;
     }
 }

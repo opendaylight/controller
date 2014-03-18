@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -19,7 +20,7 @@ public class SchemaAwareApplyOperationRoot extends SchemaAwareApplyOperation.Dat
     private final SchemaContext context;
 
     public SchemaAwareApplyOperationRoot(final SchemaContext context) {
-        super(context);
+        super(context,ContainerNode.class);
         this.context = context;
     }
 
