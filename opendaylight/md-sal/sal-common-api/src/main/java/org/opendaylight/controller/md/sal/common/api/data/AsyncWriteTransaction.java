@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 public interface AsyncWriteTransaction<P extends Path<P>, D>  extends AsyncTransaction<P, D> {
     /**
@@ -114,6 +114,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D>  extends AsyncTrans
      *         {@link TransactionStatus#FAILED} is reached.
      * @throws IllegalStateException if the transaction is not {@link TransactionStatus#NEW}
      */
-    public Future<RpcResult<TransactionStatus>> commit();
+    public ListenableFuture<RpcResult<TransactionStatus>> commit();
 
 }
