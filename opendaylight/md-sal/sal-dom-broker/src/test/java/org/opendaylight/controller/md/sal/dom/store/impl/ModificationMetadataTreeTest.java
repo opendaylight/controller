@@ -135,16 +135,11 @@ public class ModificationMetadataTreeTest {
                                 .withChild(BAR_NODE).build()).build();
     }
 
-    private StoreMetadataNode createDocumentOneMetadata() {
-        UnsignedLong version = UnsignedLong.valueOf(0);
-        return StoreMetadataNode.createRecursivelly(createDocumentOne(), version);
-    }
-
     @Test
     public void basicReadWrites() {
         MutableDataTree modificationTree = MutableDataTree.from(
                 DataAndMetadataSnapshot.builder() //
-                        .setMetadataTree(createDocumentOneMetadata()) //
+                        .setMetadataTree(StoreMetadataNode.createRecursivelly(createDocumentOne(), UnsignedLong.valueOf(5))) //
                         .setSchemaContext(schemaContext) //
                         .build(), new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.read(OUTER_LIST_2_PATH);

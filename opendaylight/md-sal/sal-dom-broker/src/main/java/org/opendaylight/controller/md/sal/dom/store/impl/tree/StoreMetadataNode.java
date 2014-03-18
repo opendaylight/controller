@@ -29,8 +29,8 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
 
     private final Map<PathArgument, StoreMetadataNode> children;
 
-    protected StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion, final UnsignedLong subtreeVersion,
-            final Map<PathArgument, StoreMetadataNode> children) {
+    protected StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
+            final UnsignedLong subtreeVersion, final Map<PathArgument, StoreMetadataNode> children) {
         this.nodeVersion = nodeVersion;
         this.subtreeVersion = subtreeVersion;
         this.data = data;
@@ -80,24 +80,26 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         return Optional.absent();
     }
 
-    public static Optional<StoreMetadataNode> getChild(final Optional<StoreMetadataNode> parent, final PathArgument child) {
+    public static Optional<StoreMetadataNode> getChild(final Optional<StoreMetadataNode> parent,
+            final PathArgument child) {
         if (parent.isPresent()) {
             return parent.get().getChild(child);
         }
         return Optional.absent();
     }
 
-    public static final StoreMetadataNode createRecursivelly(final NormalizedNode<?, ?> node, final UnsignedLong version) {
+    public static final StoreMetadataNode createRecursivelly(final NormalizedNode<?, ?> node,
+            final UnsignedLong nodeVersion, final UnsignedLong subtreeVersion) {
         Builder builder = builder() //
-                .setNodeVersion(version) //
-                .setSubtreeVersion(version) //
+                .setNodeVersion(nodeVersion) //
+                .setSubtreeVersion(subtreeVersion) //
                 .setData(node);
-        if(node instanceof NormalizedNodeContainer<?, ?, ?>) {
+        if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
 
             @SuppressWarnings("unchecked")
             NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>> nodeContainer = (NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>>) node;
-            for(NormalizedNode<?, ?> subNode : nodeContainer.getValue()) {
-                builder.add(createRecursivelly(subNode, version));
+            for (NormalizedNode<?, ?> subNode : nodeContainer.getValue()) {
+                builder.add(createRecursivelly(subNode, nodeVersion, subtreeVersion));
             }
         }
         return builder.build();
@@ -105,15 +107,13 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
 
     public static class Builder {
 
-        private Builder() {
+        private UnsignedLong nodeVersion;
+        private UnsignedLong subtreeVersion;
+        private NormalizedNode<?, ?> data;
+        private final ImmutableMap.Builder<PathArgument, StoreMetadataNode> children = ImmutableMap.builder();
 
-        }
+        private Builder() {}
 
-        UnsignedLong nodeVersion = UnsignedLong.valueOf(0);
-        UnsignedLong subtreeVersion = UnsignedLong.valueOf(0);
-        NormalizedNode<?, ?> data;
-
-        final ImmutableMap.Builder<PathArgument, StoreMetadataNode> children = ImmutableMap.builder();
 
         public UnsignedLong getVersion() {
             return nodeVersion;
@@ -130,7 +130,7 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
             return this;
         }
 
-        public Builder setData(final NormalizedNode<?,?> data) {
+        public Builder setData(final NormalizedNode<?, ?> data) {
             this.data = data;
             return this;
         }
@@ -141,10 +141,15 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         }
 
         public StoreMetadataNode build() {
-            checkState(data != null,"Data node should not be null.");
-            checkState(subtreeVersion.compareTo(nodeVersion) >= 0, "Subtree version must be equals or greater than node version.");
+            checkState(data != null, "Data node should not be null.");
+            checkState(subtreeVersion.compareTo(nodeVersion) >= 0,
+                    "Subtree version must be equals or greater than node version.");
             return new StoreMetadataNode(data, nodeVersion, subtreeVersion, children.build());
         }
+    }
+
+    public static StoreMetadataNode createRecursivelly(final NormalizedNode<?, ?> node, final UnsignedLong version) {
+        return createRecursivelly(node, version, version);
     }
 
 }
