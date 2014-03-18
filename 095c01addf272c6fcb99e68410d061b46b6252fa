@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_5c65d943",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-18T16:35:35Z",
+      "side": 1,
+      "message": "phrase repitition \"which will be triggered\"",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3c5a2584",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-18T16:35:35Z",
+      "side": 1,
+      "message": "Can you explain the purpose of the initial callback, how is it useful? How would a listener distinguish between the initial callback and the \"actual callback\".",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_1c5f6174",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-18T16:35:35Z",
+      "side": 1,
+      "message": "@param scope",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dc50a960",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreThreePhaseCommitCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-18T16:35:35Z",
+      "side": 1,
+      "message": "if and only if",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
