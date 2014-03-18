@@ -72,12 +72,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yang-store-api</artifactId>
-            <version>${netconf.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-client</artifactId>
             <version>${netconf.version}</version>
         </dependency>
@@ -121,19 +115,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
-            <scope>test</scope>
-            <type>test-jar</type>
-            <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>yang-store-impl</artifactId>
-            <scope>test</scope>
-            <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>yang-store-impl</artifactId>
             <scope>test</scope>
             <type>test-jar</type>
             <version>${netconf.version}</version>

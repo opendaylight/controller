@@ -14,7 +14,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.opendaylight.controller.config.api.LookupRegistry;
-import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.common.QName;
 

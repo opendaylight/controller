@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.test.sal.binding.it;
 
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.options.DefaultCompositeOption;
+import org.ops4j.pax.exam.util.PathUtils;
+
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
-import org.ops4j.pax.exam.util.PathUtils;
 
 public class TestHelper {
 
@@ -50,8 +50,6 @@ public class TestHelper {
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-jmx-generator").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "yang-store-api").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "yang-store-impl").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "logback-config").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-persister-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-api").versionAsInProject(), //
@@ -129,7 +127,6 @@ public class TestHelper {
                 systemProperty("netconf.config.persister.1.properties.fileStorage")
                         .value(PathUtils.getBaseDir() + "/src/test/resources/controller.xml"), //
                 systemProperty("netconf.config.persister.1.properties.numberOfBackups").value("1") //
-                //systemProperty("yangstore.blacklist").value(".*controller.model.*") //
 
         );
 

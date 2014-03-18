@@ -155,11 +155,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>yang-store-impl</artifactId>
-            <version>${config.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>logback-config</artifactId>
             <version>${config.version}</version>
         </dependency>
@@ -251,11 +246,6 @@
             <artifactId>config-netconf-connector</artifactId>
             <version>${netconf.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>yang-store-impl</artifactId>
-            <version>${config.version}</version>
         </dependency>
 
         <dependency>
