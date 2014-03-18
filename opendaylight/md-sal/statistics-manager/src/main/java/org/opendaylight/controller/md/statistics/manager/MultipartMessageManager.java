@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.MultipartTransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 
@@ -91,7 +92,12 @@ class MultipartMessageManager {
         txIdTotableIdMap.put(new TxIdEntry(id), Preconditions.checkNotNull(tableId));
     }
 
-    public Short isExpectedTableTransaction(TransactionAware transaction, Boolean more) {
+    public Short isExpectedTableTransaction(TransactionAware transaction) {
+        Boolean more = null;
+        if (transaction instanceof MultipartTransactionAware) {
+            more = ((MultipartTransactionAware)transaction).isMoreReplies();
+        }
+
         if (!isExpectedTransaction(transaction, more)) {
             return null;
         }
@@ -109,13 +115,22 @@ class MultipartMessageManager {
         txIdToRequestTypeMap.put(entry, getExpiryTime());
     }
 
-    public boolean isExpectedTransaction(TransactionAware transaction, Boolean more) {
-        TxIdEntry entry = new TxIdEntry(transaction.getTransactionId());
+    private boolean isExpectedTransaction(TransactionAware transaction, Boolean more) {
+        final TxIdEntry entry = new TxIdEntry(transaction.getTransactionId());
         if (more != null && more.booleanValue()) {
             return txIdToRequestTypeMap.containsKey(entry);
         } else {
             return txIdToRequestTypeMap.remove(entry) != null;
         }
+    }
+
+    public boolean isExpectedTransaction(TransactionAware transaction) {
+        Boolean more = null;
+        if (transaction instanceof MultipartTransactionAware) {
+            more = ((MultipartTransactionAware)transaction).isMoreReplies();
+        }
+
+        return isExpectedTransaction(transaction, more);
     }
 
     private Long getExpiryTime() {
