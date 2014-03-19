@@ -11,7 +11,7 @@ import org.openexi.sax.Transmogrifier;
 
 import com.google.common.base.Preconditions;
 
-final class NetconfEXICodec {
+public final class NetconfEXICodec {
     /**
      * NETCONF is XML environment, so the use of EXI cookie is not really needed. Adding it
      * decreases efficiency of encoding by adding human-readable 4 bytes "EXI$" to the head

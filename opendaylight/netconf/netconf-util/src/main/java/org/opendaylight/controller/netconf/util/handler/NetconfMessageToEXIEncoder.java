@@ -7,26 +7,24 @@
  */
 package org.opendaylight.controller.netconf.util.handler;
 
+import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
-import java.io.OutputStream;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.openexi.sax.Transmogrifier;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
-
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.openexi.sax.Transmogrifier;
-
-import com.google.common.base.Preconditions;
+import java.io.OutputStream;
 
 public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<NetconfMessage> {
-    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
 
+    public static final String HANDLER_NAME="exiEncoderHandler";
+    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
     private final NetconfEXICodec codec;
 
     public NetconfMessageToEXIEncoder(final NetconfEXICodec codec) {
