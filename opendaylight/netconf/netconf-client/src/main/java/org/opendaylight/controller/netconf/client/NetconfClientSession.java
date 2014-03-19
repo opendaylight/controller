@@ -9,12 +9,14 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
-
-import java.util.Collection;
-
-import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
+import org.opendaylight.controller.netconf.util.AbstractNetconfSession;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToEXIEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 public final class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 
@@ -23,7 +25,7 @@ public final class NetconfClientSession extends AbstractNetconfSession<NetconfCl
 
     public NetconfClientSession(NetconfClientSessionListener sessionListener, Channel channel, long sessionId,
             Collection<String> capabilities) {
-        super(sessionListener,channel,sessionId);
+        super(sessionListener, channel, sessionId);
         this.capabilities = capabilities;
         logger.debug("Client Session {} created", toString());
     }
@@ -32,8 +34,23 @@ public final class NetconfClientSession extends AbstractNetconfSession<NetconfCl
         return capabilities;
     }
 
+
     @Override
     protected NetconfClientSession thisInstance() {
         return this;
+    }
+
+    @Override
+    protected void addExiHandlers(NetconfEXICodec exiCodec) {
+        // TODO used only in negotiator, client supports only auto start-exi
+        addMessageEncoder(NetconfMessageToEXIEncoder.HANDLER_NAME, new NetconfMessageToEXIEncoder(exiCodec));
+        addMessageDecoder(NetconfEXIToMessageDecoder.HANDLER_NAME, new NetconfEXIToMessageDecoder(exiCodec));
+    }
+
+    @Override
+    public void stopExiCommunication() {
+        // TODO never used, Netconf client does not support stop-exi
+        removeHandler(NetconfMessageToEXIEncoder.HANDLER_NAME);
+        removeHandler(NetconfEXIToMessageDecoder.HANDLER_NAME);
     }
 }

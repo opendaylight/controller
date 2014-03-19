@@ -77,7 +77,11 @@ public class IdentityRefNetconfTest {
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(),
-                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject());
+                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena-rta").versionAsInProject());
+
+
     }
 
     private Option testingModules() {

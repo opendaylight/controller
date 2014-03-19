@@ -142,6 +142,7 @@
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas,
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210,
                             org.opendaylight.yangtools.yang.binding,
+                            org.openexi.*,
                         </Import-Package>
                     </instructions>
                 </configuration>

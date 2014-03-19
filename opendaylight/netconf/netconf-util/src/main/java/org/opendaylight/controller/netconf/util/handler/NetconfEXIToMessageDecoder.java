@@ -7,34 +7,26 @@
  */
 package org.opendaylight.controller.netconf.util.handler;
 
+import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-
-import java.io.InputStream;
-import java.util.List;
-
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.openexi.sax.EXIReader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import com.google.common.base.Preconditions;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import java.io.InputStream;
+import java.util.List;
 
 public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
-    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
 
-    // FIXME: is this needed?
-    //    private static final SAXParserFactory saxParserFactory;
-    //    static {
-    //        saxParserFactory = SAXParserFactory.newInstance();
-    //        saxParserFactory.setNamespaceAware(true);
-    //    }
+    public static final String HANDLER_NAME = "exiDecoderHandler";
+    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
 
     private final NetconfEXICodec codec;
 
@@ -52,10 +44,15 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
          */
         final DOMResult result = new DOMResult();
         final EXIReader r = codec.getReader();
-
         final TransformerHandler transformerHandler = saxTransformerFactory.newTransformerHandler();
         transformerHandler.setResult(result);
+
         r.setContentHandler(transformerHandler);
+
+        // If empty Byte buffer is passed to r.parse, EOFException is thrown
+        if(in.readableBytes() == 0) {
+            return;
+        }
 
         try (final InputStream is = new ByteBufInputStream(in)) {
             r.parse(new InputSource(is));

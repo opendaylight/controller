@@ -11,6 +11,8 @@ import io.netty.channel.ChannelFuture;
 
 import org.opendaylight.protocol.framework.ProtocolSession;
 
-public interface NetconfSession extends ProtocolSession<NetconfMessage> {
+public interface NetconfSession extends ProtocolSession<NetconfMessage>, NetconfExiSession {
+
     ChannelFuture sendMessage(NetconfMessage message);
+
 }
