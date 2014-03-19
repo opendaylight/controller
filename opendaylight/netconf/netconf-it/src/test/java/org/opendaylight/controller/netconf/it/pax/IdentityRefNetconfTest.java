@@ -7,19 +7,6 @@
  */
 package org.opendaylight.controller.netconf.it.pax;
 
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
-import javax.inject.Inject;
-import javax.xml.parsers.ParserConfigurationException;
-
 import com.google.common.base.Preconditions;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.junit.Assert;
@@ -39,11 +26,23 @@ import org.ops4j.pax.exam.util.Filter;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.inject.Inject;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 @RunWith(PaxExam.class)
 public class IdentityRefNetconfTest {
@@ -74,7 +73,11 @@ public class IdentityRefNetconfTest {
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(),
-                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject());
+                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena-rta").versionAsInProject());
+
+
     }
 
     private Option testingModules() {

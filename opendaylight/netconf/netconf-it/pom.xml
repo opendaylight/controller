@@ -130,6 +130,14 @@
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>commons.logback_settings</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena-rta</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
