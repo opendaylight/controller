@@ -36,4 +36,5 @@ public final class NetconfClientSession extends AbstractNetconfSession<NetconfCl
     protected NetconfClientSession thisInstance() {
         return this;
     }
+
 }

@@ -71,7 +71,9 @@ public class ToasterTest {
         return new DefaultCompositeOption(
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster-provider").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster-consumer").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller.samples", "sample-toaster").versionAsInProject()
+                mavenBundle("org.opendaylight.controller.samples", "sample-toaster").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena-rta").versionAsInProject()
         );
     }
 
