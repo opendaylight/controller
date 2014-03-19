@@ -8,10 +8,11 @@
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
+import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -20,7 +21,7 @@ import org.w3c.dom.Element;
 public class DefaultStopExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
 
     public static final String STOP_EXI = "stop-exi";
-    private NetconfSession netconfSession;
+    private NetconfServerSession netconfSession;
 
     private static final Logger logger = LoggerFactory
             .getLogger(DefaultStartExi.class);
@@ -30,33 +31,30 @@ public class DefaultStopExi extends AbstractSingletonNetconfOperation implements
     }
 
     @Override
-    protected String getOperationName() {
-        return STOP_EXI;
-    }
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
+        logger.debug("Received stop-exi message {} ", XmlUtil.toString(operationElement));
 
-    @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement)
-            throws NetconfDocumentedException {
-        throw new UnsupportedOperationException("Not implemented");
-        /*
-        netconfSession.remove(ExiDecoderHandler.class);
-        netconfSession.removeAfterMessageSent(ExiEncoderHandler.HANDLER_NAME);
+        netconfSession.stopExiCommunication();
 
         Element getSchemaResult = document.createElement(XmlNetconfConstants.OK);
         XmlUtil.addNamespaceAttr(getSchemaResult,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         logger.trace("{} operation successful", STOP_EXI);
-        logger.debug("received stop-exi message {} ", XmlUtil.toString(document));
         return getSchemaResult;
-        */
     }
 
     @Override
-    public void setNetconfSession(NetconfSession s) {
-        this.netconfSession = s;
+    protected String getOperationName() {
+        return STOP_EXI;
     }
 
-    public NetconfSession getNetconfSession() {
-        return netconfSession;
+    @Override
+    protected String getOperationNamespace() {
+        return XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_EXI_1_0;
+    }
+
+    @Override
+    public void setNetconfSession(NetconfServerSession s) {
+        this.netconfSession = s;
     }
 }

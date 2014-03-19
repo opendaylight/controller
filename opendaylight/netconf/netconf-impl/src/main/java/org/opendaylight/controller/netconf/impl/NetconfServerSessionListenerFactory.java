@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;

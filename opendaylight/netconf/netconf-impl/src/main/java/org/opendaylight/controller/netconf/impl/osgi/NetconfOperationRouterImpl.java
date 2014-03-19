@@ -11,16 +11,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
+import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCommit;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultGetSchema;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultStartExi;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultStopExi;
-import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
+import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -93,7 +92,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
     @Override
     public synchronized Document onNetconfMessage(Document message,
-            NetconfSession session) throws NetconfDocumentedException {
+            NetconfServerSession session) throws NetconfDocumentedException {
         Preconditions.checkNotNull(allNetconfOperations, "Operation router was not initialized properly");
 
         NetconfOperationExecution netconfOperationExecution;
@@ -153,20 +152,20 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private NetconfOperationExecution getNetconfOperationWithHighestPriority(
-            Document message, NetconfSession session) {
+            Document message, NetconfServerSession session) {
 
         TreeMap<HandlingPriority, NetconfOperation> sortedByPriority = getSortedNetconfOperationsWithCanHandle(
                 message, session);
 
         Preconditions.checkArgument(sortedByPriority.isEmpty() == false,
-                "No %s available to handleWithNoSubsequentOperations message %s", NetconfOperation.class.getName(),
+                "No %s available to handle message %s", NetconfOperation.class.getName(),
                 XmlUtil.toString(message));
 
         return NetconfOperationExecution.createExecutionChain(sortedByPriority, sortedByPriority.lastKey());
     }
 
     private TreeMap<HandlingPriority, NetconfOperation> getSortedNetconfOperationsWithCanHandle(Document message,
-            NetconfSession session) {
+            NetconfServerSession session) {
         TreeMap<HandlingPriority, NetconfOperation> sortedPriority = Maps.newTreeMap();
 
         for (NetconfOperation netconfOperation : allNetconfOperations) {

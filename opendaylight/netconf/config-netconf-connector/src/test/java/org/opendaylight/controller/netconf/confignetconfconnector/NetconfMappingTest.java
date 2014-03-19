@@ -41,7 +41,7 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMX
 import org.opendaylight.controller.config.yang.test.impl.Peers;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;

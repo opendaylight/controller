@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
+import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -23,13 +23,13 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 public class NetconfServerSessionListener implements NetconfSessionListener<NetconfServerSession> {
-    public static final String MESSAGE_ID = "message-id";
 
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionListener.class);
     private final SessionMonitoringService monitoringService;
@@ -97,18 +97,17 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         logger.info("Session {} closed successfully", session.getSessionId());
     }
 
-    private NetconfMessage processDocument(final NetconfMessage netconfMessage,
-            NetconfServerSession session) throws NetconfDocumentedException {
+    private NetconfMessage processDocument(final NetconfMessage netconfMessage, NetconfServerSession session)
+            throws NetconfDocumentedException {
 
-        final Document incommingDocument = netconfMessage.getDocument();
-        final Node rootNode = incommingDocument.getDocumentElement();
+        final Document incomingDocument = netconfMessage.getDocument();
+        final Node rootNode = incomingDocument.getDocumentElement();
 
         if (rootNode.getLocalName().equals(XmlNetconfConstants.RPC_KEY)) {
-            final String messageId = rootNode.getAttributes().getNamedItem(MESSAGE_ID).getTextContent();
-            checkState(messageId != null);
             final Document responseDocument = XmlUtil.newDocument();
-            Document rpcReply = operationRouter.onNetconfMessage(
-                    incommingDocument, session);
+            checkMessageId(rootNode);
+
+            Document rpcReply = operationRouter.onNetconfMessage(incomingDocument, session);
 
             session.onIncommingRpcSuccess();
 
@@ -129,11 +128,28 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         }
     }
 
-    private static boolean isCloseSession(final NetconfMessage incommingDocument) {
-        final Document document = incommingDocument.getDocument();
+    private void checkMessageId(Node rootNode) throws NetconfDocumentedException {
+            NamedNodeMap attributes = rootNode.getAttributes();
+        if(attributes.getNamedItemNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.MESSAGE_ID)!=null) {
+            return;
+        }
+
+        if(attributes.getNamedItem(XmlNetconfConstants.MESSAGE_ID)!=null) {
+            return;
+        }
+
+        throw new NetconfDocumentedException("Missing attribute" + rootNode.getNodeName(),
+                NetconfDocumentedException.ErrorType.protocol, NetconfDocumentedException.ErrorTag.missing_attribute,
+                NetconfDocumentedException.ErrorSeverity.error, ImmutableMap.of(NetconfDocumentedException.ErrorTag.missing_attribute.toString(),
+                XmlNetconfConstants.MESSAGE_ID));
+    }
+
+    private static boolean isCloseSession(final NetconfMessage incomingDocument) {
+        final Document document = incomingDocument.getDocument();
         XmlElement rpcElement = XmlElement.fromDomDocument(document);
-        if (rpcElement.getOnlyChildElementOptionally("close-session").isPresent())
+        if (rpcElement.getOnlyChildElementOptionally(DefaultCloseSession.CLOSE_SESSION).isPresent()) {
             return true;
+        }
 
         return false;
     }

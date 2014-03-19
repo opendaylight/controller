@@ -8,8 +8,12 @@
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfSession;
-import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.impl.NetconfServerSession;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
@@ -18,17 +22,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 public class DefaultStartExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
-
     public static final String START_EXI = "start-exi";
 
-    private NetconfSession netconfSession;
-
     private static final Logger logger = LoggerFactory.getLogger(DefaultStartExi.class);
+    private NetconfServerSession netconfSession;
 
     public DefaultStartExi(String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
+    }
+
+    @Override
+    public Document handle(Document message,
+                           NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        logger.debug("Received start-exi message {} ", XmlUtil.toString(message));
+
+        try {
+            netconfSession.startExiCommunication(new NetconfMessage(message));
+        } catch (IllegalArgumentException e) {
+            throw new NetconfDocumentedException("Failed to parse EXI parameters", ErrorType.protocol,
+                    ErrorTag.operation_failed, ErrorSeverity.error);
+        }
+
+        return super.handle(message, subsequentOperation);
+    }
+
+    @Override
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
+        Element getSchemaResult = document.createElement(XmlNetconfConstants.OK);
+        XmlUtil.addNamespaceAttr(getSchemaResult,
+                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+
+        logger.trace("{} operation successful", START_EXI);
+        return getSchemaResult;
     }
 
     @Override
@@ -37,44 +63,12 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
-
-
-        Element getSchemaResult = document
-                .createElement(XmlNetconfConstants.OK);
-        XmlUtil.addNamespaceAttr(getSchemaResult,
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-
-
-        throw new UnsupportedOperationException("Not implemented");
-
-        /*
-        try {
-            ExiParameters exiParams = new ExiParameters();
-            exiParams.setParametersFromXmlElement(operationElement);
-
-            netconfSession.addExiDecoder(ExiDecoderHandler.HANDLER_NAME, new ExiDecoderHandler(exiParams));
-            netconfSession.addExiEncoderAfterMessageSent(ExiEncoderHandler.HANDLER_NAME,new ExiEncoderHandler(exiParams));
-
-        } catch (EXIException e) {
-            getSchemaResult = document
-                    .createElement(XmlNetconfConstants.RPC_ERROR);
-        }
-
-        logger.trace("{} operation successful", START_EXI);
-        logger.debug("received start-exi message {} ", XmlUtil.toString(document));
-        return getSchemaResult;
-        */
+    protected String getOperationNamespace() {
+        return XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_EXI_1_0;
     }
 
     @Override
-    public void setNetconfSession(NetconfSession s) {
+    public void setNetconfSession(NetconfServerSession s) {
         netconfSession = s;
     }
-
-    public NetconfSession getNetconfSession() {
-        return netconfSession;
-    }
-
-
 }

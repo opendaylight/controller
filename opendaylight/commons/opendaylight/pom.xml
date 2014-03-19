@@ -115,6 +115,8 @@
     <enforcer.version>1.3.1</enforcer.version>
     <xtend.version>2.4.3</xtend.version>
     <xtend.dstdir>${project.build.directory}/generated-sources/xtend-gen</xtend.dstdir>
+    <!--EXI third party lib for netconf-->
+    <exi.nagasena.version>0000.0002.0027.0</exi.nagasena.version>
   </properties>
 
   <dependencyManagement>
@@ -647,6 +649,16 @@
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>ganymed</artifactId>
         <version>1.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller.thirdparty</groupId>
+          <artifactId>nagasena</artifactId>
+          <version>${exi.nagasena.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller.thirdparty</groupId>
+          <artifactId>nagasena-rta</artifactId>
+          <version>${exi.nagasena.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.code.findbugs</groupId>

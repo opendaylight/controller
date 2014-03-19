@@ -7,34 +7,34 @@
  */
 package org.opendaylight.controller.netconf.util.handler;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-
 import java.io.InputStream;
 import java.util.List;
 
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.openexi.sax.EXIReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import com.google.common.base.Preconditions;
 
-public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
-    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
 
-    // FIXME: is this needed?
-    //    private static final SAXParserFactory saxParserFactory;
-    //    static {
-    //        saxParserFactory = SAXParserFactory.newInstance();
-    //        saxParserFactory.setNamespaceAware(true);
-    //    }
+public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfEXIToMessageDecoder.class);
+
+//    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
 
     private final NetconfEXICodec codec;
 
@@ -43,23 +43,37 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws Exception {
         /*
          * Note that we could loop here and process all the messages, but we can't do that.
          * The reason is <stop-exi> operation, which has the contract of immediately stopping
          * the use of EXI, which means the next message needs to be decoded not by us, but rather
          * by the XML decoder.
          */
-        final DOMResult result = new DOMResult();
+        // If empty Byte buffer is passed to r.parse, EOFException is thrown
+
+        if (in.readableBytes() == 0) {
+            LOG.debug("No more content in incoming buffer.");
+            return;
+        }
+
+        LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+
         final EXIReader r = codec.getReader();
 
-        final TransformerHandler transformerHandler = saxTransformerFactory.newTransformerHandler();
-        transformerHandler.setResult(result);
-        r.setContentHandler(transformerHandler);
+        final SAXTransformerFactory transformerFactory
+                = (SAXTransformerFactory) TransformerFactory.newInstance();
+        final TransformerHandler handler = transformerFactory.newTransformerHandler();
+        r.setContentHandler(handler);
+
+        final DOMResult domResult = new DOMResult();
+        handler.setResult(domResult);
+
 
         try (final InputStream is = new ByteBufInputStream(in)) {
             r.parse(new InputSource(is));
         }
-        out.add(new NetconfMessage((Document) result.getNode()));
+
+        out.add(new NetconfMessage((Document) domResult.getNode()));
     }
 }

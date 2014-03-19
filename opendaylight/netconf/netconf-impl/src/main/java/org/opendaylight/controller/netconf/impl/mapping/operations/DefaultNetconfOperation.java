@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.netconf.mapping.api;
+package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 
 public interface DefaultNetconfOperation {
-    void setNetconfSession(NetconfSession s);
+    void setNetconfSession(NetconfServerSession s);
 }

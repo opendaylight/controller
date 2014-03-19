@@ -7,26 +7,28 @@
  */
 package org.opendaylight.controller.netconf.util.handler;
 
+import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
+
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.openexi.sax.Transmogrifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+
+import com.google.common.base.Preconditions;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-import java.io.OutputStream;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXTransformerFactory;
-
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.openexi.sax.Transmogrifier;
-
-import com.google.common.base.Preconditions;
-
 public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<NetconfMessage> {
-    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
 
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToEXIEncoder.class);
+
+    //private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
     private final NetconfEXICodec codec;
 
     public NetconfMessageToEXIEncoder(final NetconfEXICodec codec) {
@@ -34,13 +36,17 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) throws Exception {
+    protected void encode(final ChannelHandlerContext ctx, final NetconfMessage msg, final ByteBuf out) throws Exception {
+        LOG.trace("Sent to encode : {}", XmlUtil.toString(msg.getDocument()));
+
         try (final OutputStream os = new ByteBufOutputStream(out)) {
             final Transmogrifier transmogrifier = codec.getTransmogrifier();
             transmogrifier.setOutputStream(os);
 
-            final Transformer transformer = saxTransformerFactory.newTransformer();
-            transformer.transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
+            // FIXME transformer not working, see EXILibTest
+            transmogrifier.encode(new InputSource(new ByteArrayInputStream(XmlUtil.toString(msg.getDocument()).getBytes())));
+            //final Transformer transformer = saxTransformerFactory.newTransformer();
+            //transformer.transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
         }
     }
 }

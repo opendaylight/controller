@@ -52,7 +52,7 @@
         <module>sal-rest-connector</module>
         <module>sal-netconf-connector</module>
 
-        
+
         <module>inventory-manager</module>
         <module>statistics-manager</module>
         <module>topology-manager</module>
@@ -67,7 +67,7 @@
         <module>sal-remoterpc-connector/implementation</module>
         <!--module>clustered-data-store/implementation</module>
 	 -->
-        
+
     </modules>
 
 
@@ -181,14 +181,13 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-impl</artifactId>
-		<version>${yangtools.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-parser-impl</artifactId>
-		<version>${yangtools.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
-
             <!-- Testing Dependencies -->
             <dependency>
                 <groupId>org.mockito</groupId>
