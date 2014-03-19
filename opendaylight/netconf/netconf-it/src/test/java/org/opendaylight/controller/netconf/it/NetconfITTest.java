@@ -8,33 +8,12 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import static java.util.Collections.emptyList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-
 import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -49,6 +28,7 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFa
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.StubUserManager;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
@@ -62,9 +42,14 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnap
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
+import org.opendaylight.controller.netconf.util.xml.EXIParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.openexi.proc.common.EXIOptionsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -73,11 +58,28 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static java.util.Collections.emptyList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfITTest extends AbstractNetconfConfigTest {
 
@@ -152,6 +154,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     }
 
     static Collection<InputStream> getBasicYangs() throws IOException {
+
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
                 "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
@@ -446,5 +449,48 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         }.join();
     }
 
+    @Test
+    public void testStartStopExi() throws Exception {
+        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
 
+
+            Document rpcReply = netconfClient.sendMessage(this.startExi)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+
+            final EXIParameters exiParams;
+            try {
+                exiParams = EXIParameters.forXmlElement(XmlElement.fromDomDocument(this.startExi.getDocument()));
+            } catch (EXIOptionsException e) {
+                logger.debug("Failed to parse EXI parameters", e);
+                throw new NetconfDocumentedException("Failed to parse EXI parameters", NetconfDocumentedException.ErrorType.protocol,
+                        NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorSeverity.error);
+            }
+            //TODO resolve AlignmentType
+
+            NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
+            netconfClient.getClientSession().addExiDecoder("exiDecoder", new NetconfEXIToMessageDecoder(exiCodec));
+            netconfClient.getClientSession().addExiEncoderAfterMessageSent("exiEncoder", new NetconfMessageToEXIEncoder(exiCodec));
+
+            rpcReply = netconfClient.sendMessage(this.editConfig)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+            rpcReply = netconfClient.sendMessage(this.stopExi)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+            netconfClient.getClientSession().remove(NetconfEXIToMessageDecoder.class);
+            netconfClient.getClientSession().remove(NetconfMessageToEXIEncoder.class);
+
+/*
+            rpcReply = netconfClient.sendMessage(this.editConfig)
+                    .getDocument();
+            assertIsOK(rpcReply);
+*/
+
+
+        }
+    }
 }

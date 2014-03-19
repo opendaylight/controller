@@ -81,5 +81,13 @@
             <version>3.8.1.v20120830-144521</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena-rta</artifactId>
+        </dependency>
     </dependencies>
 </project>

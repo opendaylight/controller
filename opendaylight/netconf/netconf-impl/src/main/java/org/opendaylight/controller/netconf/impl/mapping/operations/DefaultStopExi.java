@@ -7,14 +7,17 @@
  */
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -47,10 +50,15 @@ public class DefaultStopExi extends AbstractNetconfOperation implements DefaultN
     @Override
     protected Element handle(Document document, XmlElement operationElement,
             NetconfOperationRouter opRouter) throws NetconfDocumentedException {
-        throw new UnsupportedOperationException("Not implemented");
-        /*
-        netconfSession.remove(ExiDecoderHandler.class);
-        netconfSession.removeAfterMessageSent(ExiEncoderHandler.HANDLER_NAME);
+        try {
+            netconfSession.remove(NetconfEXIToMessageDecoder.class);
+            netconfSession.removeAfterMessageSent(NetconfMessageToEXIEncoder.HANDLER_NAME);
+        } catch (Exception e){
+            throw new NetconfDocumentedException(String.format("Error occurred while removing exi handlers : %s",e.getCause()),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
+        }
 
         Element getSchemaResult = document.createElement(XmlNetconfConstants.OK);
         XmlUtil.addNamespaceAttr(getSchemaResult,
@@ -58,7 +66,6 @@ public class DefaultStopExi extends AbstractNetconfOperation implements DefaultN
         logger.trace("{} operation successful", STOP_EXI);
         logger.debug("received stop-exi message {} ", XmlUtil.toString(document));
         return getSchemaResult;
-        */
     }
 
     @Override
