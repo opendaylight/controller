@@ -9,12 +9,11 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
-
-import java.util.Collection;
-
 import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 public final class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 
@@ -23,7 +22,7 @@ public final class NetconfClientSession extends AbstractNetconfSession<NetconfCl
 
     public NetconfClientSession(NetconfClientSessionListener sessionListener, Channel channel, long sessionId,
             Collection<String> capabilities) {
-        super(sessionListener,channel,sessionId);
+        super(sessionListener, channel, sessionId);
         this.capabilities = capabilities;
         logger.debug("Client Session {} created", toString());
     }
@@ -32,8 +31,10 @@ public final class NetconfClientSession extends AbstractNetconfSession<NetconfCl
         return capabilities;
     }
 
+
     @Override
     protected NetconfClientSession thisInstance() {
         return this;
     }
+
 }
