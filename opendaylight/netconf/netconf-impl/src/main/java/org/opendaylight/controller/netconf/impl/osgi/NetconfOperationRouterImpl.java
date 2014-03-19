@@ -159,7 +159,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
                 message, session);
 
         Preconditions.checkArgument(sortedByPriority.isEmpty() == false,
-                "No %s available to handleWithNoSubsequentOperations message %s", NetconfOperation.class.getName(),
+                "No %s available to handle message %s", NetconfOperation.class.getName(),
                 XmlUtil.toString(message));
 
         return NetconfOperationExecution.createExecutionChain(sortedByPriority, sortedByPriority.lastKey());

@@ -1,7 +1,7 @@
 package org.opendaylight.controller.netconf.util.handler;
 
+import com.google.common.base.Preconditions;
 import org.openexi.proc.HeaderOptionsOutputType;
-import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;
 import org.openexi.proc.common.GrammarOptions;
@@ -9,20 +9,16 @@ import org.openexi.proc.grammars.GrammarCache;
 import org.openexi.sax.EXIReader;
 import org.openexi.sax.Transmogrifier;
 
-import com.google.common.base.Preconditions;
-
-final class NetconfEXICodec {
+public final class NetconfEXICodec {
     /**
      * NETCONF is XML environment, so the use of EXI cookie is not really needed. Adding it
      * decreases efficiency of encoding by adding human-readable 4 bytes "EXI$" to the head
      * of the stream. This is really useful, so let's output it now.
      */
     private static final boolean OUTPUT_EXI_COOKIE = true;
-    private final AlignmentType alignmentType;
     private final EXIOptions exiOptions;
 
-    public NetconfEXICodec(final AlignmentType alignmentType, final EXIOptions exiOptions) {
-        this.alignmentType = Preconditions.checkNotNull(alignmentType);
+    public NetconfEXICodec(final EXIOptions exiOptions) {
         this.exiOptions = Preconditions.checkNotNull(exiOptions);
     }
 
@@ -53,7 +49,7 @@ final class NetconfEXICodec {
 
     Transmogrifier getTransmogrifier() throws EXIOptionsException {
         final Transmogrifier transmogrifier = new Transmogrifier();
-        transmogrifier.setAlignmentType(alignmentType);
+        transmogrifier.setAlignmentType(exiOptions.getAlignmentType());
         transmogrifier.setBlockSize(exiOptions.getBlockSize());
         transmogrifier.setGrammarCache(getGrammarCache());
         transmogrifier.setOutputCookie(OUTPUT_EXI_COOKIE);

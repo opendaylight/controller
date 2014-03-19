@@ -8,15 +8,16 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import io.netty.channel.Channel;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
+import org.opendaylight.controller.netconf.util.AbstractNetconfSession;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.DomainName;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import io.netty.channel.Channel;
 
 public final class NetconfServerSession extends AbstractNetconfSession<NetconfServerSession, NetconfServerSessionListener> implements NetconfManagementSession {
 
@@ -123,5 +125,17 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
     @Override
     protected NetconfServerSession thisInstance() {
         return this;
+    }
+
+    @Override
+    protected void addExiHandlers(NetconfEXICodec exiCodec) {
+        addMessageEncoder(NetconfMessageToEXIEncoder.HANDLER_NAME, new NetconfMessageToEXIEncoder(exiCodec));
+        addHandlerAfterMessageSent(NetconfEXIToMessageDecoder.HANDLER_NAME, new NetconfEXIToMessageDecoder(exiCodec));
+    }
+
+    @Override
+    public void stopExiCommunication() {
+        removeHandler(NetconfEXIToMessageDecoder.HANDLER_NAME);
+        removeHandlerAfterMessageSent(NetconfMessageToEXIEncoder.HANDLER_NAME);
     }
 }

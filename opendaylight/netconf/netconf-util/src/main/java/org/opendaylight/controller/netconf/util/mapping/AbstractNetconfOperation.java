@@ -39,7 +39,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         return canHandle(operationNameAndNamespace.getOperationName(), operationNameAndNamespace.getNamespace());
     }
 
-    public static class OperationNameAndNamespace {
+    public static final class OperationNameAndNamespace {
         private final String operationName, namespace;
 
         public OperationNameAndNamespace(Document message) {
