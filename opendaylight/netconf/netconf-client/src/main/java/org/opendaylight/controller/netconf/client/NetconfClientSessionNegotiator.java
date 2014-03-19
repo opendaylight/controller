@@ -8,13 +8,11 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
@@ -22,18 +20,20 @@ import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
+import javax.annotation.Nullable;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import java.util.Collection;
+import java.util.List;
 
 public class NetconfClientSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfSessionPreferences, NetconfClientSession, NetconfClientSessionListener> {
+    private static final Logger logger = LoggerFactory.getLogger(NetconfClientSessionNegotiator.class);
 
     protected NetconfClientSessionNegotiator(NetconfSessionPreferences sessionPreferences,
             Promise<NetconfClientSession> promise, Channel channel, Timer timer, NetconfClientSessionListener sessionListener,
@@ -55,8 +55,8 @@ public class NetconfClientSessionNegotiator extends
                 return input.getTextContent().trim();
             }
         });
-    }
 
+    }
     private static final XPathExpression sessionIdXPath = XMLNetconfUtil
             .compileXPath("/netconf:hello/netconf:session-id");
 

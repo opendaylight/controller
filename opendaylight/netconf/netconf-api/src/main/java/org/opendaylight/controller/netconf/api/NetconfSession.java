@@ -9,8 +9,14 @@ package org.opendaylight.controller.netconf.api;
 
 import io.netty.channel.ChannelFuture;
 
+import io.netty.channel.ChannelHandler;
 import org.opendaylight.protocol.framework.ProtocolSession;
 
 public interface NetconfSession extends ProtocolSession<NetconfMessage> {
     ChannelFuture sendMessage(NetconfMessage message);
+    public <T extends ChannelHandler> T remove(Class<T> handlerType);
+    public void removeAfterMessageSent(String handlerName);
+    public void addExiDecoder(String name,ChannelHandler handler);
+    public void addExiEncoderAfterMessageSent(String name, ChannelHandler handler);
+    public void addExiEncoder(String name, ChannelHandler handler);
 }

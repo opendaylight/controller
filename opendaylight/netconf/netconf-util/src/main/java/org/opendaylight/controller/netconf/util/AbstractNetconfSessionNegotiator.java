@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.netconf.util;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
@@ -18,10 +21,6 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
-
-import java.util.concurrent.TimeUnit;
-
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
@@ -39,8 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends AbstractNetconfSession<S, L>, L extends NetconfSessionListener<S>>
 extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
@@ -148,7 +146,6 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
         changeState(State.ESTABLISHED);
         S session = getSession(sessionListener, channel, netconfMessage);
-
         negotiationSuccessful(session);
     }
 

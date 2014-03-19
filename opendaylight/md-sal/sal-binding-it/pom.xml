@@ -166,6 +166,10 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-store-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>logback-config</artifactId>
         </dependency>
         <dependency>
@@ -248,6 +252,16 @@
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>antlr4-runtime-osgi-nohead</artifactId>
             <version>4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+            <version>0000.0002.0027.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena-rta</artifactId>
+            <version>0000.0002.0027.0</version>
         </dependency>
     </dependencies>
 </project>

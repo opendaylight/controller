@@ -179,14 +179,23 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>binding-generator-impl</artifactId>
-		<version>${yangtools.version}</version>
+        		<version>${yangtools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-parser-impl</artifactId>
-		<version>${yangtools.version}</version>
+		        <version>${yangtools.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-store-impl</artifactId>
+                <version>${yangtools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-store-api</artifactId>
+                <version>${yangtools.version}</version>
+            </dependency>
             <!-- Testing Dependencies -->
             <dependency>
                 <groupId>org.mockito</groupId>
