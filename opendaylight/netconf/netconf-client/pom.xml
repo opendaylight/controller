@@ -60,6 +60,7 @@
                             org.opendaylight.controller.netconf.util,
                             org.opendaylight.controller.netconf.util.*,
                             org.opendaylight.protocol.framework,
+                            org.openexi.*,
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax,

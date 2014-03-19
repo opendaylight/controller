@@ -24,6 +24,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Comment;
@@ -48,7 +49,7 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
     @Override
     @VisibleForTesting
     public void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) throws IOException, TransformerException {
-        LOG.debug("Sent to encode : {}", msg);
+        LOG.trace("Sent to encode : {}", XmlUtil.toString(msg.getDocument()));
 
         if (clientId.isPresent()) {
             Comment comment = msg.getDocument().createComment("clientId:" + clientId.get());

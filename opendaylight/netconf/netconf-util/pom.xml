@@ -58,6 +58,10 @@
             <groupId>org.opendaylight.controller.thirdparty</groupId>
             <artifactId>nagasena</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena-rta</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -106,6 +110,7 @@
                             org.xml.sax,
                             org.xml.sax.helpers,
                             org.opendaylight.controller.config.api,
+                            org.openexi.*,
                         </Import-Package>
                     </instructions>
                 </configuration>

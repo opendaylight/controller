@@ -36,7 +36,7 @@ public final class
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.warn("An exception occured during message handling", cause);
+        logger.warn("An exception occurred during message handling", cause);
         handleDeserializerException(ctx, cause);
     }
 

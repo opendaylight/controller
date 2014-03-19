@@ -11,17 +11,20 @@ package org.opendaylight.controller.netconf.api;
 /**
  * The only input for the start of a NETCONF session is hello-message.
  */
-public final class NetconfServerSessionPreferences extends NetconfSessionPreferences {
+public final class NetconfClientSessionPreferences extends NetconfSessionPreferences {
 
-    private final long sessionId;
+    private final NetconfMessage startExiMessage;
 
-    public NetconfServerSessionPreferences(final NetconfMessage helloMessage,
-                                           long sessionId) {
+    public NetconfClientSessionPreferences(final NetconfMessage helloMessage,
+                                     final NetconfMessage startExiMessage) {
         super(helloMessage);
-        this.sessionId = sessionId;
+        this.startExiMessage = startExiMessage;
     }
 
-    public long getSessionId() {
-        return sessionId;
+    /**
+     * @return the startExiMessage
+     */
+    public NetconfMessage getStartExiMessage() {
+        return startExiMessage;
     }
 }

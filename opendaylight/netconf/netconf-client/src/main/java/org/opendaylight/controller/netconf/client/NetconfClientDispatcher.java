@@ -8,15 +8,12 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Optional;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
-
-import java.io.Closeable;
-import java.net.InetSocketAddress;
-
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
@@ -26,7 +23,8 @@ import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.io.Closeable;
+import java.net.InetSocketAddress;
 
 public class NetconfClientDispatcher extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener> implements Closeable {
 
