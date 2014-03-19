@@ -152,6 +152,9 @@ public class NeutronSubnet_IPAllocationPool implements Serializable {
                 if (i != gIP) {
                     p.setPoolStart(poolStart);
                     poolStarted = true;
+                } else {
+                    //FIX for bug 533
+                    p.setPoolStart(NeutronSubnet_IPAllocationPool.longtoIP(i+1));
                 }
             }
             if (i == eIP) {
