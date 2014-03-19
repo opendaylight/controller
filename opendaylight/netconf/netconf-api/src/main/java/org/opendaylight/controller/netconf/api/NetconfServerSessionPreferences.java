@@ -15,8 +15,9 @@ public final class NetconfServerSessionPreferences extends NetconfSessionPrefere
 
     private final long sessionId;
 
-    public NetconfServerSessionPreferences(final NetconfMessage helloMessage, long sessionId) {
-        super(helloMessage);
+    public NetconfServerSessionPreferences(final NetconfMessage helloMessage,
+                                           long sessionId) {
+        super(helloMessage,null);
         this.sessionId = sessionId;
     }
 

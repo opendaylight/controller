@@ -68,7 +68,10 @@ public abstract class AbstractTest {
 //                                + "/src/test/resources/logback.xml"),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
-                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
+                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena-rta").versionAsInProject(),
+                 //
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
 
                 mdSalCoreBundles(),

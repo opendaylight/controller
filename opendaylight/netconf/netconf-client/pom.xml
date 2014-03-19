@@ -32,6 +32,14 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena-rta</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -60,6 +68,7 @@
                             org.opendaylight.controller.netconf.util,
                             org.opendaylight.controller.netconf.util.*,
                             org.opendaylight.protocol.framework,
+                            org.openexi.*,
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax,

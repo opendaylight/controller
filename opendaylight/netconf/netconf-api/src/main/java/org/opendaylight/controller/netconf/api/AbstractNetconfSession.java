@@ -9,22 +9,25 @@ package org.opendaylight.controller.netconf.api;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-
-import java.io.IOException;
-
+import io.netty.channel.ChannelHandler;
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public abstract class AbstractNetconfSession<S extends NetconfSession, L extends NetconfSessionListener<S>> extends AbstractProtocolSession<NetconfMessage> implements NetconfSession {
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSession.class);
     private final L sessionListener;
     private final long sessionId;
     private boolean up = false;
+    private String removeAfterMessageSentname;
+    private ChannelHandler exiEncoder;
+    private String exiEncoderName;
 
     private final Channel channel;
 
-    protected AbstractNetconfSession(L sessionListener, Channel channel, long sessionId) {
+    protected AbstractNetconfSession(L sessionListener,Channel channel, long sessionId) {
         this.sessionListener = sessionListener;
         this.channel = channel;
         this.sessionId = sessionId;
@@ -48,7 +51,19 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
 
     @Override
     public ChannelFuture sendMessage(NetconfMessage netconfMessage) {
-        return channel.writeAndFlush(netconfMessage);
+        ChannelFuture future = channel.writeAndFlush(netconfMessage);
+        if (exiEncoder!=null){
+            if (channel.pipeline().get(exiEncoderName)== null){
+                channel.pipeline().addBefore("netconfMessageEncoder",exiEncoderName,exiEncoder);
+                logger.debug(exiEncoderName+" upstreamed netconfMessageEncoder");
+                exiEncoder = null;
+            }
+        }
+        if (removeAfterMessageSentname!=null){
+            channel.pipeline().remove(removeAfterMessageSentname);
+            removeAfterMessageSentname = null;
+        }
+        return future;
     }
 
     @Override
@@ -73,6 +88,28 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         sb.append("sessionId=").append(sessionId);
         sb.append('}');
         return sb.toString();
+    }
+
+    public <T extends ChannelHandler> T remove(Class<T> handlerType) {
+        return this.channel.pipeline().remove(handlerType);
+    }
+
+    public void removeAfterMessageSent(String handlerName) {
+        this.removeAfterMessageSentname = handlerName;
+    }
+
+    public void addExiDecoder(String name, ChannelHandler handler) {
+        channel.pipeline().addAfter("netconfMessageDecoder",name,handler);
+        logger.debug(name+" included in stream after netconfMessageDecoder ");
+    }
+
+    public void addExiEncoderAfterMessageSent(String name, ChannelHandler handler) {
+        this.exiEncoder = handler;
+        this.exiEncoderName = name;
+    }
+    public void addExiEncoder(String name, ChannelHandler handler) {
+        channel.pipeline().addBefore("netconfMessageEncoder",name,handler);
+        logger.debug(exiEncoderName+" upstreamed netconfMessageEncoder");
     }
 
     public final boolean isUp() {
