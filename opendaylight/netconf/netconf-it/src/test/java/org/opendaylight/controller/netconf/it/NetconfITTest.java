@@ -22,16 +22,16 @@ import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.StubUserManager;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
@@ -68,9 +68,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static java.util.Collections.emptyList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -148,6 +148,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     }
 
     static Collection<InputStream> getBasicYangs() throws IOException {
+
         List<String> paths = Arrays.asList("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang",
                 "/META-INF/yang/config-test.yang", "/META-INF/yang/config-test-impl.yang", "/META-INF/yang/test-types.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
@@ -280,34 +281,6 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
             assertEquals(expectedNamespace, namespace);
         }
     }
-
-    /*
-    @Test
-    public void testStartExi() throws Exception {
-        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
-
-
-            Document rpcReply = netconfClient.sendMessage(this.startExi)
-                    .getDocument();
-            assertIsOK(rpcReply);
-
-            ExiParameters exiParams = new ExiParameters();
-            exiParams.setParametersFromXmlElement(XmlElement.fromDomDocument(this.startExi.getDocument()));
-
-            netconfClient.getClientSession().addExiDecoder(ExiDecoderHandler.HANDLER_NAME, new ExiDecoderHandler(exiParams));
-            netconfClient.getClientSession().addExiEncoder(ExiEncoderHandler.HANDLER_NAME, new ExiEncoderHandler(exiParams));
-
-            rpcReply = netconfClient.sendMessage(this.editConfig)
-                    .getDocument();
-            assertIsOK(rpcReply);
-
-            rpcReply = netconfClient.sendMessage(this.stopExi)
-                    .getDocument();
-            assertIsOK(rpcReply);
-
-        }
-    }
-     */
 
     @Test
     public void testCloseSession() throws Exception {
@@ -447,6 +420,5 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
             }
         }.join();
     }
-
 
 }

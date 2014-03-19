@@ -8,10 +8,16 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
 
 public final class NetconfMessageUtil {
 
@@ -26,10 +32,13 @@ public final class NetconfMessageUtil {
     }
 
     public static boolean isOKMessage(XmlElement xmlElement) {
+        if(xmlElement.getChildElements().size() != 1) {
+            return false;
+        }
         return xmlElement.getOnlyChildElement().getName().equals(XmlNetconfConstants.OK);
     }
 
-    public static boolean isErrorMEssage(NetconfMessage message) {
+    public static boolean isErrorMessage(NetconfMessage message) {
         return isErrorMessage(message.getDocument());
     }
 
@@ -38,7 +47,26 @@ public final class NetconfMessageUtil {
     }
 
     public static boolean isErrorMessage(XmlElement xmlElement) {
+        if(xmlElement.getChildElements().size() != 1) {
+            return false;
+        }
         return xmlElement.getOnlyChildElement().getName().equals(XmlNetconfConstants.RPC_ERROR);
+    }
+
+    public static Collection<String> extractCapabilitiesFromHello(Document doc) {
+        XmlElement responseElement = XmlElement.fromDomDocument(doc);
+        XmlElement capabilitiesElement = responseElement
+                .getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CAPABILITIES);
+        List<XmlElement> caps = capabilitiesElement.getChildElements(XmlNetconfConstants.CAPABILITY);
+        return Collections2.transform(caps, new Function<XmlElement, String>() {
+
+            @Nullable
+            @Override
+            public String apply(@Nullable XmlElement input) {
+                // Trim possible leading/tailing whitespace
+                return input.getTextContent().trim();
+            }
+        });
 
     }
 }

@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.api;
 
 public class NetconfSessionPreferences {
+
     private final NetconfMessage helloMessage;
 
     public NetconfSessionPreferences(final NetconfMessage helloMessage) {
@@ -21,4 +22,5 @@ public class NetconfSessionPreferences {
     public NetconfMessage getHelloMessage() {
         return this.helloMessage;
     }
+
 }

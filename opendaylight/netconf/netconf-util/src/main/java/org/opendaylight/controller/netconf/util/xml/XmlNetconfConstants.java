@@ -9,6 +9,8 @@ package org.opendaylight.controller.netconf.util.xml;
 
 public final class XmlNetconfConstants {
 
+
+
     private XmlNetconfConstants() {}
 
     public static final String MOUNTPOINTS = "mountpoints";
@@ -37,8 +39,15 @@ public final class XmlNetconfConstants {
 
     public static final String PREFIX = "prefix";
 
+    public static final String MESSAGE_ID = "message-id";
+    public static final String SESSION_ID = "session-id";
+
     //
     public static final String URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0 = "urn:ietf:params:xml:ns:netconf:base:1.0";
+    public static final String URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_1 = "urn:ietf:params:xml:ns:netconf:base:1.1";
+    public static final String URN_IETF_PARAMS_XML_NS_NETCONF_EXI_1_0 = "urn:ietf:params:xml:ns:netconf:exi:1.0";
+
+    public static final String URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0 = "urn:ietf:params:netconf:capability:exi:1.0";
     public static final String URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring";
     // TODO where to store namespace of config ?
     public static final String URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG = "urn:opendaylight:params:xml:ns:yang:controller:config";

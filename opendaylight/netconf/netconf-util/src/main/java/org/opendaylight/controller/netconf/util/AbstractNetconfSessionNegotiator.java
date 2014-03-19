@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.netconf.util;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
@@ -18,11 +21,6 @@ import io.netty.util.TimerTask;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
-
-import java.util.concurrent.TimeUnit;
-
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.opendaylight.controller.netconf.api.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
@@ -39,16 +37,16 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends AbstractNetconfSession<S, L>, L extends NetconfSessionListener<S>>
 extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
+
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
 
-    private final P sessionPreferences;
+    protected final P sessionPreferences;
 
     private final L sessionListener;
     private Timeout timeout;
@@ -56,7 +54,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     /**
      * Possible states for Finite State Machine
      */
-    private enum State {
+    protected enum State {
         IDLE, OPEN_WAIT, FAILED, ESTABLISHED
     }
 
@@ -64,6 +62,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     private final Timer timer;
     private final long connectionTimeoutMillis;
 
+    // TODO shrink constructor
     protected AbstractNetconfSessionNegotiator(P sessionPreferences, Promise<S> promise, Channel channel, Timer timer,
             L sessionListener, long connectionTimeoutMillis) {
         super(promise, channel);
@@ -127,7 +126,6 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         sendMessage((NetconfHelloMessage)helloMessage);
         changeState(State.OPEN_WAIT);
     }
-
     private void cancelTimeout() {
         if(timeout!=null) {
             timeout.cancel();
@@ -136,7 +134,12 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     @Override
     protected void handleMessage(NetconfHelloMessage netconfMessage) {
-        Preconditions.checkNotNull(netconfMessage != null, "netconfMessage");
+        S session = getSessionForHelloMessage(netconfMessage);
+        negotiationSuccessful(session);
+    }
+
+    protected final S getSessionForHelloMessage(NetconfHelloMessage netconfMessage) {
+        Preconditions.checkNotNull(netconfMessage, "netconfMessage");
 
         final Document doc = netconfMessage.getDocument();
 
@@ -147,22 +150,20 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         }
 
         changeState(State.ESTABLISHED);
-        S session = getSession(sessionListener, channel, netconfMessage);
-
-        negotiationSuccessful(session);
+        return getSession(sessionListener, channel, netconfMessage);
     }
 
     /**
      * Insert chunk framing handlers into the pipeline
      */
-    private void insertChunkFramingToPipeline() {
+    protected void insertChunkFramingToPipeline() {
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_FRAME_ENCODER,
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK));
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_AGGREGATOR,
                 new NetconfChunkAggregator());
     }
 
-    private boolean shouldUseChunkFraming(Document doc) {
+    protected boolean shouldUseChunkFraming(Document doc) {
         return containsBase11Capability(doc)
                 && containsBase11Capability(sessionPreferences.getHelloMessage().getDocument());
     }
@@ -170,7 +171,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     /**
      * Remove special handlers for hello message. Insert regular netconf xml message (en|de)coders.
      */
-    private void replaceHelloMessageHandlers() {
+    protected void replaceHelloMessageHandlers() {
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_DECODER, new NetconfXMLToMessageDecoder());
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_ENCODER, new NetconfMessageToXMLEncoder());
     }
@@ -181,7 +182,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message);
 
-    private synchronized void changeState(final State newState) {
+    protected synchronized void changeState(final State newState) {
         logger.debug("Changing state from : {} to : {}", state, newState);
         Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s", state,
                 newState);
@@ -208,7 +209,6 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         if (state == State.OPEN_WAIT && newState == State.FAILED) {
             return true;
         }
-
         logger.debug("Transition from {} to {} is not allowed", state, newState);
         return false;
     }
@@ -217,7 +217,6 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
      * Handler to catch exceptions in pipeline during negotiation
      */
     private final class ExceptionHandlingInboundChannelHandler extends ChannelInboundHandlerAdapter {
-
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             logger.warn("An exception occurred during negotiation on channel {}", channel.localAddress(), cause);
