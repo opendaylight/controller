@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_30b929ea",
+        "filename": "opendaylight/netconf/netconf-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-19T15:16:01Z",
+      "side": 1,
+      "message": "nagasena-rta",
+      "revId": "f8997b4892d6bcb0fb8f3035ce9dc15932762029",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_50b49df1",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/pax/IdentityRefNetconfTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-19T15:16:01Z",
+      "side": 1,
+      "message": "also add nagasena-rta the same way",
+      "revId": "f8997b4892d6bcb0fb8f3035ce9dc15932762029",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_10ce2584",
+        "filename": "third-party/org.openexi/nagasena/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-03-19T15:16:01Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f8997b4892d6bcb0fb8f3035ce9dc15932762029",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
