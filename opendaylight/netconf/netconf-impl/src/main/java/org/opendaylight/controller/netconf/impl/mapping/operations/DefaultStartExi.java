@@ -15,17 +15,20 @@ import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.EXIParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptionsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 public class DefaultStartExi extends AbstractNetconfOperation implements DefaultNetconfOperation {
     public static final String START_EXI = "start-exi";
 
@@ -65,20 +68,10 @@ public class DefaultStartExi extends AbstractNetconfOperation implements Default
             throw new NetconfDocumentedException("Failed to parse EXI parameters", ErrorType.protocol,
                     ErrorTag.operation_failed, ErrorSeverity.error);
         }
-
-        /*
-        try {
-            ExiParameters exiParams = new ExiParameters();
-            exiParams.setParametersFromXmlElement(operationElement);
-
-            netconfSession.addExiDecoder(ExiDecoderHandler.HANDLER_NAME, new ExiDecoderHandler(exiParams));
-            netconfSession.addExiEncoderAfterMessageSent(ExiEncoderHandler.HANDLER_NAME,new ExiEncoderHandler(exiParams));
-
-        } catch (EXIException e) {
-            getSchemaResult = document
-                    .createElement(XmlNetconfConstants.RPC_ERROR);
-        }
-         */
+        //TODO resolve AlignmentType
+        NetconfEXICodec exiCodec = new NetconfEXICodec(AlignmentType.byteAligned,exiParams.getOptions());
+        netconfSession.addExiDecoder(NetconfEXIToMessageDecoder.HANDLER_NAME,new NetconfEXIToMessageDecoder(exiCodec));
+        netconfSession.addExiEncoderAfterMessageSent(NetconfMessageToEXIEncoder.HANDLER_NAME, new NetconfMessageToEXIEncoder(exiCodec));
 
         logger.trace("{} operation successful", START_EXI);
         return getSchemaResult;

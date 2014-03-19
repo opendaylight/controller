@@ -416,6 +416,10 @@
          <artifactId>ganymed</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.controller.thirdparty</groupId>
+            <artifactId>nagasena</artifactId>
+        </dependency>
+        <dependency>
               <groupId>org.zeromq</groupId>
           <artifactId>jeromq</artifactId>
           <version>0.3.1</version>
