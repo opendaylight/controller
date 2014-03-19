@@ -7,20 +7,9 @@
  */
 package org.opendaylight.controller.sample.toaster.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.*;
-import static org.ops4j.pax.exam.CoreOptions.*;
-
-import javax.inject.Inject;
-import javax.management.JMX;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.config.yang.config.toaster_consumer.impl.ToasterConsumerRuntimeMXBean;
-import org.opendaylight.controller.config.yang.config.toaster_provider.impl.ToasterProviderRuntimeMXBean;
 import org.opendaylight.controller.sample.toaster.provider.api.ToastConsumer;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.HashBrown;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WhiteBread;
@@ -31,7 +20,21 @@ import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.Filter;
 import org.ops4j.pax.exam.util.PathUtils;
 
+import javax.inject.Inject;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 @RunWith(PaxExam.class)
 public class ToasterTest {
@@ -71,7 +74,9 @@ public class ToasterTest {
         return new DefaultCompositeOption(
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster-provider").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster-consumer").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller.samples", "sample-toaster").versionAsInProject()
+                mavenBundle("org.opendaylight.controller.samples", "sample-toaster").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller.thirdparty", "nagasena-rta").versionAsInProject()
         );
     }
 

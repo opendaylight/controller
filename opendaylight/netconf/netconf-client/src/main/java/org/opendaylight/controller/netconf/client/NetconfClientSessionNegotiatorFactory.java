@@ -8,13 +8,11 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
@@ -25,8 +23,8 @@ import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfClientSession, NetconfClientSessionListener> {
 
@@ -34,7 +32,9 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final Timer timer;
 
-    public NetconfClientSessionNegotiatorFactory(Timer timer, Optional<NetconfHelloMessageAdditionalHeader> additionalHeader, long connectionTimeoutMillis) {
+    public NetconfClientSessionNegotiatorFactory(Timer timer,
+                                                 Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
+                                                 long connectionTimeoutMillis) {
         this.timer = Preconditions.checkNotNull(timer);
         this.additionalHeader = additionalHeader;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
@@ -49,20 +49,31 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
             throw new RuntimeException("Unable to load hello message", e);
         }
     }
+    private static NetconfMessage loadStartExiMessageTemplate() {
+        final String startExiMessagePath = "/startExi.xml";
+        try (InputStream is = NetconfClientSessionNegotiatorFactory.class.getResourceAsStream(startExiMessagePath)) {
+            Preconditions.checkState(is != null, "Input stream from %s was null", startExiMessagePath);
+            return new NetconfMessage(XmlUtil.readXmlToDocument(is));
+        } catch (SAXException | IOException e) {
+            throw new RuntimeException("Unable to load start-exi message", e);
+        }
+    }
 
     @Override
-    public SessionNegotiator<NetconfClientSession> getSessionNegotiator(SessionListenerFactory<NetconfClientSessionListener> sessionListenerFactory, Channel channel,
+    public SessionNegotiator<NetconfClientSession> getSessionNegotiator(SessionListenerFactory<NetconfClientSessionListener> sessionListenerFactory,
+                                                                        Channel channel,
             Promise<NetconfClientSession> promise) {
         // Hello message needs to be recreated every time
         NetconfMessage helloMessage = loadHelloMessageTemplate();
+        NetconfMessage startExiMessage = loadStartExiMessageTemplate();
 
         if(this.additionalHeader.isPresent()) {
             helloMessage = new NetconfHelloMessage(helloMessage.getDocument(), additionalHeader.get());
         } else
             helloMessage = new NetconfHelloMessage(helloMessage.getDocument());
 
-        NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage);
+        NetconfSessionPreferences proposal = new NetconfSessionPreferences(helloMessage,startExiMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
-                sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
+                sessionListenerFactory.getSessionListener(),connectionTimeoutMillis);
     }
 }

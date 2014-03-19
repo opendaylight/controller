@@ -10,9 +10,12 @@ package org.opendaylight.controller.netconf.api;
 
 public class NetconfSessionPreferences {
     private final NetconfMessage helloMessage;
+    private final NetconfMessage startExiMessage;
 
-    public NetconfSessionPreferences(final NetconfMessage helloMessage) {
+    public NetconfSessionPreferences(final NetconfMessage helloMessage,
+                                     final NetconfMessage startExiMessage) {
         this.helloMessage = helloMessage;
+        this.startExiMessage = startExiMessage;
     }
 
     /**
@@ -20,5 +23,12 @@ public class NetconfSessionPreferences {
      */
     public NetconfMessage getHelloMessage() {
         return this.helloMessage;
+    }
+
+    /**
+     * @return the startExiMessage
+     */
+    public NetconfMessage getStartExiMessage() {
+        return startExiMessage;
     }
 }
