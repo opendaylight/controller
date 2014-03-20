@@ -11,6 +11,7 @@ package org.opendaylight.controller.switchmanager.internal;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -100,12 +101,34 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IConfigurationContainerService.class).setCallbacks(
                     "setConfigurationContainerService",
                     "unsetConfigurationContainerService").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IControllerProperties.class)
+                    .setCallbacks("setControllerProperties", "unsetControllerProperties")
+                    .setRequired(true));
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Object[] getGlobalImplementations() {
-        final Object[] res = { SwitchManagerCLI.class };
+        final Object[] res = { ControllerProperties.class, SwitchManagerCLI.class };
         return res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void configureGlobalInstance(Component c, Object imp) {
+        if (imp.equals(ControllerProperties.class)) {
+            c.setInterface(new String[] { IControllerProperties.class.getName() }, null);
+
+            c.add(createServiceDependency()
+                    .setService(IClusterGlobalServices.class)
+                    .setCallbacks("setClusterService", "unsetClusterService")
+                    .setRequired(true));
+        }
     }
 }
