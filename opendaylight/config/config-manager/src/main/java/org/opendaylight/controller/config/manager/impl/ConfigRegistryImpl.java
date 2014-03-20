@@ -161,6 +161,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
         Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(
                 resolver.getAllFactories());
+
+        // closed by transaction controller
         ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
                 transactionName), factory, allCurrentFactories);
         ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
