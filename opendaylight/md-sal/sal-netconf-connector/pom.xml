@@ -177,6 +177,7 @@
                     </instructions>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
@@ -187,6 +188,14 @@
                         </goals>
                         <configuration>
                             <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        ${salGeneratorPath}
+                                    </outputBaseDir>
+                                </generator>
                                 <generator>
                                     <codeGeneratorClass>
                                         org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
@@ -221,6 +230,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
