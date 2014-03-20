@@ -31,8 +31,15 @@ class TopologyProvider implements AutoCloseable{
     DataProviderService dataService;
     
     Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>,DataObject>> commitHandlerRegistration;
-    
+
     def void start() {
+
+    }
+    def void startAdapter() {
+        if(dataService == null){
+            LOG.error("dataService not set");
+            return;
+        }
         commitHandler = new TopologyCommitHandler(dataService)
         commitHandler.setTopologyPublisher(topologyPublisher)
         val InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(NetworkTopology)
@@ -49,7 +56,9 @@ class TopologyProvider implements AutoCloseable{
     
     def setTopologyPublisher(IPluginOutTopologyService topologyPublisher) {
         _topologyPublisher = topologyPublisher;
-        commitHandler.setTopologyPublisher(topologyPublisher);
+        if(commitHandler != null){
+            commitHandler.setTopologyPublisher(topologyPublisher);
+        }
     }
     
 }

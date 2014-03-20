@@ -122,10 +122,13 @@ class InventoryAndReadAdapter implements IPluginInReadService,
     private final Lock nodeToNodeConnectorsLock = new ReentrantLock();
 
 
-    def start(){
+    def startAdapter(){
         inventoryNotificationProvider.dataProviderService = dataProviderService;
         inventoryNotificationProvider.inventoryPublisher = inventoryPublisher;
         // inventoryNotificationProvider.start();
+    }
+
+    def start(){
     }
 
     def setInventoryPublisher(IPluginOutInventoryService listener){

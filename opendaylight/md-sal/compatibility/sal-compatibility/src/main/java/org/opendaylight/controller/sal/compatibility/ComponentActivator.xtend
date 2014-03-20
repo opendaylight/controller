@@ -251,9 +251,9 @@ package class SalCompatibilityProvider implements BindingAwareProvider {
         topology.dataService = session.getSALService(DataProviderService)
         tpProvider.dataService = session.getSALService(DataProviderService)
 
-        inventory.start();
+        inventory.startAdapter();
 
-        tpProvider.start();
+        tpProvider.startAdapter();
 
         subscribe.registerNotificationListener(dataPacket)
     }
