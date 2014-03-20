@@ -14,6 +14,7 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener
 import org.slf4j.LoggerFactory
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
+import org.osgi.framework.BundleContext;
 
 class FlowCapableTopologyProvider extends AbstractBindingAwareProvider implements AutoCloseable {
 
@@ -35,13 +36,25 @@ class FlowCapableTopologyProvider extends AbstractBindingAwareProvider implement
        LOG.info("FlowCapableTopologyProvider stopped.");
         listenerRegistration?.close();
     }
-    
+
+     /**
+       * Gets called on start of a bundle.
+       * @param session
+       */
     override onSessionInitiated(ProviderContext session) {
         dataService = session.getSALService(DataProviderService)
         notificationService = session.getSALService(NotificationProviderService)
         exporter.setDataService(dataService);
         exporter.start();
         listenerRegistration = notificationService.registerNotificationListener(exporter);
+    }
+
+    /**
+      * Gets called during stop bundle
+      * @param context The execution context of the bundle being stopped.
+      */
+    override stopImpl(BundleContext context) {
+        close();
     }
     
 }
