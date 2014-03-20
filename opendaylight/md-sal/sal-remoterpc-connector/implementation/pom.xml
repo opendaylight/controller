@@ -127,7 +127,6 @@
                     <instructions>
                         <Import-Package>
                             *,
-                            com.google.common.collect,
                             !org.codehaus.enunciate.jaxrs
                         </Import-Package>
                         <Export-Package>
