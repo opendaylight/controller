@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_307249e6",
+        "filename": "opendaylight/md-sal/sal-binding-it/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-20T08:13:34Z",
+      "side": 1,
+      "message": "This looks unrelated..",
+      "revId": "365133dda2bd0b4e46f36519a618cc37fd59107e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_506dbd03",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/AbstractNetconfSession.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-20T08:13:34Z",
+      "side": 1,
+      "message": "This looks like half the logic is somewhere else. Can you explain how the pipeline is manipulated, what the interactions are and how threadsafety is assured?",
+      "revId": "365133dda2bd0b4e46f36519a618cc37fd59107e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_107745d6",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/NetconfSession.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-20T08:13:34Z",
+      "side": 1,
+      "message": "This is client-facing API. Handlers should not be exposed -- that is very much an implementation-internal thing.",
+      "revId": "365133dda2bd0b4e46f36519a618cc37fd59107e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7068c1f5",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/handler/NetconfEXIToMessageDecoder.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-20T08:13:34Z",
+      "side": 1,
+      "message": "Not reusing the static one? Why do we keep it around?",
+      "revId": "365133dda2bd0b4e46f36519a618cc37fd59107e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
