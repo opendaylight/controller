@@ -20,7 +20,6 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerRegistrati
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -98,13 +97,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     @Override
     public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
             final InstanceIdentifier path, final L listener, final DataChangeScope scope) {
-
-        Optional<ListenerRegistrationNode> listenerNode = TreeNodeUtils.findNode(listenerTree, path);
-        checkState(listenerNode.isPresent());
+        LOG.debug("{}: Registering data change listener {} for {}",name,listener,path);
+        ListenerRegistrationNode listenerNode = listenerTree;
+        for(PathArgument arg :path.getPath()) {
+            listenerNode = listenerNode.ensureChild(arg);
+        }
         synchronized (listener) {
             notifyInitialState(path, listener);
         }
-        return listenerNode.get().registerDataChangeListener(listener, scope);
+        return listenerNode.registerDataChangeListener(path,listener, scope);
     }
 
     private void notifyInitialState(final InstanceIdentifier path,
@@ -138,6 +139,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private synchronized void commit(final DataAndMetadataSnapshot currentSnapshot,
             final StoreMetadataNode newDataTree, final Iterable<ChangeListenerNotifyTask> listenerTasks) {
         LOG.debug("Updating Store snaphot version: {} with version:{}",currentSnapshot.getMetadataTree().getSubtreeVersion(),newDataTree.getSubtreeVersion());
+
         if(LOG.isTraceEnabled()) {
             LOG.trace("Data Tree is {}",StoreUtils.toStringTree(newDataTree));
         }
@@ -322,7 +324,6 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
                     proposedSubtree = operationTree.apply(modification, Optional.of(metadataTree),
                             increase(metadataTree.getSubtreeVersion()));
-
 
                     listenerTasks = DataChangeEventResolver.create() //
                             .setRootPath(PUBLIC_ROOT_PATH) //

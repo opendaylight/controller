@@ -63,6 +63,12 @@ public final class DOMImmutableDataChangeEvent implements
         return removedPaths;
     }
 
+    @Override
+    public String toString() {
+        return "DOMImmutableDataChangeEvent [created=" + createdData.keySet() + ", updated=" + updatedData.keySet()
+                + ", removed=" + removedPaths + "]";
+    }
+
     public static class Builder {
 
         private NormalizedNode<?, ?> after;
@@ -72,7 +78,6 @@ public final class DOMImmutableDataChangeEvent implements
         private final ImmutableMap.Builder<InstanceIdentifier, NormalizedNode<?, ?>> created = ImmutableMap.builder();
         private final ImmutableMap.Builder<InstanceIdentifier, NormalizedNode<?, ?>> updated = ImmutableMap.builder();
         private final ImmutableSet.Builder<InstanceIdentifier> removed = ImmutableSet.builder();
-
 
         private Builder() {
 
@@ -122,4 +127,3 @@ public final class DOMImmutableDataChangeEvent implements
     }
 
 }
-

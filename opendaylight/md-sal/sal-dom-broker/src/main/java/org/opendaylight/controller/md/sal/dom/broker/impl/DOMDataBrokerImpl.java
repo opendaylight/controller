@@ -120,7 +120,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
 
     private ListenableFuture<RpcResult<TransactionStatus>> submit(
             final WriteTransactionImpl<? extends DOMStoreWriteTransaction> transaction) {
-        LOG.debug("Tx: {} is submitted for execution.",transaction.getIdentifier());
+        LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
         return executor.submit(new CommitCoordination(transaction));
     }
 
@@ -253,7 +253,8 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
         }
 
         @Override
-        public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        public void merge(final LogicalDatastoreType store, final InstanceIdentifier path,
+                final NormalizedNode<?, ?> data) {
 
         }
     }
@@ -269,15 +270,18 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
         @Override
         public RpcResult<TransactionStatus> call() throws Exception {
 
-            Boolean canCommit = canCommit().get();
             try {
+                Boolean canCommit = canCommit().get();
+
                 if (canCommit) {
                     try {
                         preCommit().get();
                         try {
                             commit().get();
-                            COORDINATOR_LOG.debug("Tx: {} Is commited.",transaction.getIdentifier());
-                            return Rpcs.getRpcResult(true, TransactionStatus.COMMITED, Collections.<RpcError>emptySet());
+                            COORDINATOR_LOG.debug("Tx: {} Is commited.", transaction.getIdentifier());
+                            return Rpcs.getRpcResult(true, TransactionStatus.COMMITED,
+                                    Collections.<RpcError> emptySet());
+
                         } catch (InterruptedException | ExecutionException e) {
                             COORDINATOR_LOG.error("Tx: {} Error during commit", transaction.getIdentifier(), e);
                         }
@@ -287,7 +291,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
                                 transaction.getIdentifier(), e);
                     }
                 } else {
-                    COORDINATOR_LOG.info("Tx: {} Did not pass canCommit phase.");
+                    COORDINATOR_LOG.info("Tx: {} Did not pass canCommit phase.", transaction.getIdentifier());
                     abort().get();
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -299,7 +303,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
             } catch (InterruptedException | ExecutionException e) {
                 COORDINATOR_LOG.error("Tx: {} Error during abort", transaction.getIdentifier(), e);
             }
-            return Rpcs.getRpcResult(false, TransactionStatus.FAILED, Collections.<RpcError>emptySet());
+            return Rpcs.getRpcResult(false, TransactionStatus.FAILED, Collections.<RpcError> emptySet());
         }
 
         public ListenableFuture<Void> preCommit() {
