@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_86badfdf",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-21T19:53:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_c619f723",
+      "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_a61603f0",
         "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-21T19:16:56Z",
       "side": 1,
       "message": "Debug message is obsolete, change to something like:\n\n\"[...], no registered hostFinder present\"",
+      "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_a6ede3f1",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-21T19:53:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_a61603f0",
       "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_c6f0d7cb",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-21T19:53:01Z",
+      "side": 1,
+      "message": "thanks, also need to remove unused sIP",
+      "parentUuid": "9a5c5d37_66d80b54",
+      "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_46dd0742",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_e6e3db03",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-21T19:53:01Z",
+      "side": 1,
+      "message": "This is from the original change. My understanding is that this is a best effort, and we\u0027re not certain that there is no route between the hosts.",
+      "parentUuid": "9a5c5d37_46dd0742",
+      "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_86d3ff37",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2014-03-21T19:16:56Z",
       "side": 1,
       "message": "\"SFing\" ?",
+      "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_06e70f14",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1009,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2014-03-21T19:53:01Z",
+      "side": 1,
+      "message": "I was trying to inculcate the use of a shorthand for SimpleForwarding, but I guess it didn\u0027t fly :)",
+      "parentUuid": "9a5c5d37_86d3ff37",
       "revId": "a57ce2f803a62afc38baa96c1c54f5090fbb8b97",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
