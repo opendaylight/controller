@@ -45,6 +45,11 @@ public final class StoreUtils {
         return new InitialDataChangeEvent(path, data.getData());
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <V> Function<Identifiable<V>, V> identifierExtractor() {
+        return (Function) EXTRACT_IDENTIFIER;
+    }
+
     private static final class InitialDataChangeEvent implements
             AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> {
 
@@ -88,30 +93,25 @@ public final class StoreUtils {
 
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <V> Function<Identifiable<V>,V> identifierExtractor() {
-        return (Function) EXTRACT_IDENTIFIER;
-    }
-
     public static <V> Set<V> toIdentifierSet(final Iterable<? extends Identifiable<V>> children) {
-        return FluentIterable.from(children).transform(StoreUtils.<V>identifierExtractor()).toSet();
+        return FluentIterable.from(children).transform(StoreUtils.<V> identifierExtractor()).toSet();
     }
 
     public static String toStringTree(final StoreMetadataNode metaNode) {
         StringBuilder builder = new StringBuilder();
-        toStringTree(builder, metaNode,0);
+        toStringTree(builder, metaNode, 0);
         return builder.toString();
 
     }
 
-    private static void toStringTree(final StringBuilder builder, final StoreMetadataNode metaNode,final int offset) {
+    private static void toStringTree(final StringBuilder builder, final StoreMetadataNode metaNode, final int offset) {
         String prefix = Strings.repeat(" ", offset);
         builder.append(prefix).append(toStringTree(metaNode.getIdentifier()));
         NormalizedNode<?, ?> dataNode = metaNode.getData();
-        if(dataNode instanceof NormalizedNodeContainer<?,?,?>)  {
+        if (dataNode instanceof NormalizedNodeContainer<?, ?, ?>) {
             builder.append(" {").append("\n");
-            for(StoreMetadataNode child : metaNode.getChildren()) {
-                toStringTree(builder, child, offset+4);
+            for (StoreMetadataNode child : metaNode.getChildren()) {
+                toStringTree(builder, child, offset + 4);
             }
             builder.append(prefix).append("}");
         } else {
@@ -121,7 +121,7 @@ public final class StoreUtils {
     }
 
     private static String toStringTree(final PathArgument identifier) {
-        if( identifier instanceof NodeIdentifierWithPredicates) {
+        if (identifier instanceof NodeIdentifierWithPredicates) {
             StringBuilder builder = new StringBuilder();
             builder.append(identifier.getNodeType().getLocalName());
             builder.append(((NodeIdentifierWithPredicates) identifier).getKeyValues().values());
