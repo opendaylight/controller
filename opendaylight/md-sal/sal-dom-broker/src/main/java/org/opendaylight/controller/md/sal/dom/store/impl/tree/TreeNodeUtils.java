@@ -64,4 +64,11 @@ public class TreeNodeUtils {
         return new SimpleEntry<InstanceIdentifier,T>(parentPath,parent.get());
     }
 
+    public static <T extends StoreTreeNode<T>> Optional<T> getChild(final Optional<T> parent,final PathArgument child) {
+        if(parent.isPresent()) {
+            return parent.get().getChild(child);
+        }
+        return Optional.absent();
+    }
+
 }
