@@ -259,21 +259,32 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
         public RpcResult<TransactionStatus> call() throws Exception {
 
             Boolean canCommit = canCommit().get();
-
-            if (canCommit) {
-                try {
-                    preCommit().get();
+            try {
+                if (canCommit) {
                     try {
-                        commit().get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        // ERROR
-                    }
+                        preCommit().get();
+                        try {
+                            commit().get();
+                            return null;
+                        } catch (InterruptedException | ExecutionException e) {
+                            COORDINATOR_LOG.error("Tx: {} Error during commit", transaction.getIdentifier(), e);
+                        }
 
-                } catch (InterruptedException | ExecutionException e) {
+                    } catch (InterruptedException | ExecutionException e) {
+                        COORDINATOR_LOG.warn("Tx: {} Error during preCommit, starting Abort",
+                                transaction.getIdentifier(), e);
+                    }
+                } else {
                     abort().get();
                 }
-            } else {
+            } catch (InterruptedException | ExecutionException e) {
+                COORDINATOR_LOG.warn("Tx: {} Error during canCommit, starting Abort", transaction.getIdentifier(), e);
+
+            }
+            try {
                 abort().get();
+            } catch (InterruptedException | ExecutionException e) {
+                COORDINATOR_LOG.error("Tx: {} Error during abort", transaction.getIdentifier(), e);
             }
             return null;
         }
