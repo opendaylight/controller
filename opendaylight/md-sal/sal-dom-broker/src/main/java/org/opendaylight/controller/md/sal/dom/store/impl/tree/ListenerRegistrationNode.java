@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,10 +13,14 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrationNode>,Identifiable<PathArgument> {
+public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrationNode>, Identifiable<PathArgument> {
+
+    private final Logger LOG = LoggerFactory.getLogger(ListenerRegistrationNode.class);
 
     private final ListenerRegistrationNode parent;
     private final Map<PathArgument, ListenerRegistrationNode> children;
@@ -23,10 +28,10 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
     private final HashSet<DataChangeListenerRegistration<?>> listeners;
 
     private ListenerRegistrationNode(final PathArgument identifier) {
-        this(null,identifier);
+        this(null, identifier);
     }
 
-    private ListenerRegistrationNode(final ListenerRegistrationNode parent,final PathArgument identifier) {
+    private ListenerRegistrationNode(final ListenerRegistrationNode parent, final PathArgument identifier) {
         this.parent = parent;
         this.identifier = identifier;
         children = new HashMap<>();
@@ -42,23 +47,29 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
         return identifier;
     }
 
-    public Iterable<DataChangeListenerRegistration<?>> getListeners() {
-        return listeners;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public Collection<org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<?>> getListeners() {
+        return (Collection) listeners;
     }
 
     @Override
     public synchronized Optional<ListenerRegistrationNode> getChild(final PathArgument child) {
+        return Optional.fromNullable(children.get(child));
+    }
+
+    public synchronized ListenerRegistrationNode ensureChild(final PathArgument child) {
         ListenerRegistrationNode potential = (children.get(child));
-        if(potential == null) {
+        if (potential == null) {
             potential = new ListenerRegistrationNode(this, child);
             children.put(child, potential);
         }
-        return Optional.of(potential);
+        return potential;
     }
 
     public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerDataChangeListener(
             final L listener, final DataChangeScope scope) {
-        DataChangeListenerRegistration<L> listenerReg = new DataChangeListenerRegistration<L>(listener, scope,this);
+
+        DataChangeListenerRegistration<L> listenerReg = new DataChangeListenerRegistration<L>(listener, scope, this);
         listeners.add(listenerReg);
         return listenerReg;
     }
@@ -68,9 +79,8 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
         removeThisIfUnused();
     }
 
-
     private void removeThisIfUnused() {
-        if(parent != null && listeners.isEmpty() && children.isEmpty()) {
+        if (parent != null && listeners.isEmpty() && children.isEmpty()) {
             parent.removeChildIfUnused(this);
         }
     }
@@ -80,8 +90,8 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
     }
 
     private boolean areChildrenUnused() {
-        for(ListenerRegistrationNode child :  children.values()) {
-            if(!child.isUnused()) {
+        for (ListenerRegistrationNode child : children.values()) {
+            if (!child.isUnused()) {
                 return false;
             }
         }
@@ -92,23 +102,23 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
         // FIXME Remove unnecessary
     }
 
-
-
-
-    public static class DataChangeListenerRegistration<T extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractObjectRegistration<T>
-            implements ListenerRegistration<T> {
+    public static class DataChangeListenerRegistration<T extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
+            extends AbstractObjectRegistration<T> implements
+            org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<T> {
 
         private final DataChangeScope scope;
         private ListenerRegistrationNode node;
 
-        public DataChangeListenerRegistration(final T listener, final DataChangeScope scope, final ListenerRegistrationNode node) {
+        public DataChangeListenerRegistration(final T listener, final DataChangeScope scope,
+                final ListenerRegistrationNode node) {
             super(listener);
 
             this.scope = scope;
             this.node = node;
         }
 
-        protected DataChangeScope getScope() {
+        @Override
+        public DataChangeScope getScope() {
             return scope;
         }
 
@@ -116,6 +126,12 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
         protected void removeRegistration() {
             node.removeListener(this);
             node = null;
+        }
+
+        @Override
+        public InstanceIdentifier getPath() {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 }
