@@ -28,6 +28,7 @@ import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
 import org.opendaylight.controller.sal.action.HwPath;
 import org.opendaylight.controller.sal.action.Loopback;
 import org.opendaylight.controller.sal.action.Output;
@@ -1016,6 +1017,12 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                 sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new Flood());
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.FLOOD_ALL.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    actionList.add(new FloodAll());
                     continue;
                 }
 
