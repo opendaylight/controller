@@ -68,11 +68,12 @@ import com.google.common.base.Preconditions;
 public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableContext {
     private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
 
-    private static final long STATS_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(15);
+    private static final long STATS_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(10);
     private static final long FIRST_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
     private final MultipartMessageManager msgManager;
+    private final StatisticsRequestScheduler srScheduler;
     private final InstanceIdentifier<Node> targetNodeIdentifier;
     private final FlowStatsTracker flowStats;
     private final FlowTableStatsTracker flowTableStats;
@@ -88,8 +89,9 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     private final TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            requestPeriodicStatistics();
-            cleanStaleStatistics();
+            //requestPeriodicStatistics();
+            //cleanStaleStatistics();
+            standInTheSchedulerQueue();
         }
     };
 
@@ -99,9 +101,11 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
             final OpendaylightGroupStatisticsService groupStatsService,
             final OpendaylightMeterStatisticsService meterStatsService,
             final OpendaylightPortStatisticsService portStatsService,
-            final OpendaylightQueueStatisticsService queueStatsService) {
+            final OpendaylightQueueStatisticsService queueStatsService, 
+            final StatisticsRequestScheduler srScheduler) {
         this.dps = Preconditions.checkNotNull(dps);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
+        this.srScheduler = Preconditions.checkNotNull(srScheduler);
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
         this.targetNodeRef = new NodeRef(targetNodeIdentifier);
 
@@ -134,7 +138,9 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
     @Override
     public DataModificationTransaction startDataModification() {
-        return dps.beginTransaction();
+        DataModificationTransaction dmt = dps.beginTransaction();
+        dmt.registerListener(this.srScheduler);
+        return dmt;
     }
 
     public synchronized void updateGroupDescStats(TransactionAware transaction, List<GroupDescStats> list) {
@@ -183,6 +189,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         final Short tableId = msgManager.isExpectedTableTransaction(transaction);
         if (tableId != null) {
             final DataModificationTransaction trans = dps.beginTransaction();
+            trans.registerListener(this.srScheduler);
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
 
@@ -211,6 +218,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
     public synchronized void updateGroupFeatures(GroupFeatures notification) {
         final DataModificationTransaction trans = dps.beginTransaction();
+        trans.registerListener(this.srScheduler);
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -229,6 +237,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
     public synchronized void updateMeterFeatures(MeterFeatures features) {
         final DataModificationTransaction trans = dps.beginTransaction();
+        trans.registerListener(this.srScheduler);
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -247,6 +256,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
     public synchronized void cleanStaleStatistics() {
         final DataModificationTransaction trans = dps.beginTransaction();
+        trans.registerListener(this.srScheduler);
         final long now = System.nanoTime();
 
         flowStats.cleanup(trans, now);
@@ -276,14 +286,31 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         }
 
         flowStats.requestAllFlowsAllTables();
+        flowStats.increaseRequestCounter();
+        
         nodeConnectorStats.request();
+        nodeConnectorStats.increaseRequestCounter();
+        
         groupStats.request();
+        groupStats.increaseRequestCounter();
+        
         groupDescStats.request();
+        groupDescStats.increaseRequestCounter();
+        
         meterStats.request();
+        meterStats.increaseRequestCounter();
+        
         meterConfigStats.request();
+        meterConfigStats.increaseRequestCounter();
+        
         queueStats.request();
+        queueStats.increaseRequestCounter();
     }
-
+    
+    public void standInTheSchedulerQueue(){
+        this.srScheduler.addToSchedulerList(this);
+    }
+    
     public synchronized void start(final Timer timer) {
         flowStats.start(dps);
         groupDescStats.start(dps);

@@ -66,9 +66,12 @@ public class StatisticsProvider implements AutoCloseable {
     private OpendaylightFlowTableStatisticsService flowTableStatsService;
 
     private OpendaylightQueueStatisticsService queueStatsService;
+    
+    private final StatisticsRequestScheduler srScheduler;
 
     public StatisticsProvider(final DataProviderService dataService) {
         this.dps = Preconditions.checkNotNull(dataService);
+        this.srScheduler = new StatisticsRequestScheduler();
     }
 
     private final StatisticsListener updateCommiter = new StatisticsListener(StatisticsProvider.this);
@@ -144,7 +147,7 @@ public class StatisticsProvider implements AutoCloseable {
 
             final NodeStatisticsHandler h = new NodeStatisticsHandler(dps, key,
                     flowStatsService, flowTableStatsService, groupStatsService,
-                    meterStatsService, portStatsService, queueStatsService);
+                    meterStatsService, portStatsService, queueStatsService,srScheduler);
             final NodeStatisticsHandler old = handlers.putIfAbsent(key.getId(), h);
             if (old == null) {
                 spLogger.debug("Started node handler for {}", key.getId());
