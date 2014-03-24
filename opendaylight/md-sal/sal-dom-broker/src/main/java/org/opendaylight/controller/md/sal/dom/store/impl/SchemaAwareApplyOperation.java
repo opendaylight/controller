@@ -3,15 +3,18 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreNodeCompositeBuilder;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
@@ -20,12 +23,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -36,9 +42,9 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.primitives.UnsignedLong;
@@ -58,6 +64,24 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             return new LeafModificationStrategy((LeafSchemaNode) schemaNode);
         }
         throw new IllegalArgumentException("Not supported schema node type for " + schemaNode.getClass());
+    }
+
+    public static SchemaAwareApplyOperation from(final DataNodeContainer resolvedTree,
+            final AugmentationTarget augSchemas, final AugmentationIdentifier identifier) {
+        AugmentationSchema augSchema = null;
+        allAugments : for (AugmentationSchema potential : augSchemas.getAvailableAugmentations()) {
+            boolean containsAll = true;
+            for(DataSchemaNode child : potential.getChildNodes()) {
+                if(identifier.getPossibleChildNames().contains(child.getQName())) {
+                    augSchema = potential;
+                    break allAugments;
+                }
+            }
+        }
+        if(augSchema != null) {
+            return new AugmentationModificationStrategy(augSchema,resolvedTree);
+        }
+        return null;
     }
 
     @Override
@@ -123,13 +147,14 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
     @Override
     public final Optional<StoreMetadataNode> apply(final NodeModification modification,
             final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
+
         switch (modification.getModificationType()) {
         case DELETE:
-            return Optional.absent();
+            return modification.storeSnapshot(Optional.<StoreMetadataNode>absent());
         case SUBTREE_MODIFIED:
-            return Optional.of(applySubtreeChange(modification, currentMeta.get(), subtreeVersion));
+            return modification.storeSnapshot(Optional.of(applySubtreeChange(modification, currentMeta.get(), subtreeVersion)));
         case WRITE:
-            return Optional.of(applyWrite(modification, currentMeta, subtreeVersion));
+            return modification.storeSnapshot(Optional.of(applyWrite(modification, currentMeta, subtreeVersion)));
         case UNMODIFIED:
             return currentMeta;
         default:
@@ -217,13 +242,12 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             this.nodeClass = nodeClass;
         }
 
-
         @Override
         public void verifyStructure(final NodeModification modification) throws IllegalArgumentException {
-            if(modification.getModificationType() == ModificationType.WRITE) {
+            if (modification.getModificationType() == ModificationType.WRITE) {
 
             }
-            for(NodeModification childModification : modification.getModifications()) {
+            for (NodeModification childModification : modification.getModifications()) {
                 resolveChildOperation(childModification.getIdentifier()).verifyStructure(childModification);
             }
         }
@@ -234,7 +258,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             checkArgument(nodeClass.isInstance(writenValue), "Node should must be of type %s", nodeClass);
             checkArgument(writenValue instanceof NormalizedNodeContainer);
             NormalizedNodeContainer writenCont = (NormalizedNodeContainer) writenValue;
-            for(Object child : writenCont.getValue()) {
+            for (Object child : writenCont.getValue()) {
                 checkArgument(child instanceof NormalizedNode);
                 NormalizedNode childNode = (NormalizedNode) child;
             }
@@ -277,7 +301,6 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             @SuppressWarnings("rawtypes")
             NormalizedNodeContainerBuilder dataBuilder = createBuilder(modification.getIdentifier());
             StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.from(dataBuilder)
-                    //
                     .setIdentifier(modification.getIdentifier()).setNodeVersion(currentMeta.getNodeVersion())
                     .setSubtreeVersion(updatedSubtreeVersion);
             // We process preexisting nodes
@@ -348,17 +371,21 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             NormalizedNodeContainerModificationStrategy {
 
         private final T schema;
-        private final Cache<PathArgument, ModificationApplyOperation> childCache = CacheBuilder.newBuilder()
-                .build(CacheLoader.from(new Function<PathArgument, ModificationApplyOperation>() {
+        private final LoadingCache<PathArgument, ModificationApplyOperation> childCache = CacheBuilder.newBuilder().build(
+                CacheLoader.from(new Function<PathArgument, ModificationApplyOperation>() {
 
-                @Override
-                public ModificationApplyOperation apply(final PathArgument identifier) {
-                    DataSchemaNode child = schema.getDataChildByName(identifier.getNodeType());
-                    if (child == null || child.isAugmenting()) {
-                        return null;
+                    @Override
+                    public ModificationApplyOperation apply(final PathArgument identifier) {
+                        if (identifier instanceof AugmentationIdentifier && schema instanceof AugmentationTarget) {
+                            return from(schema, (AugmentationTarget) schema, (AugmentationIdentifier) identifier);
+                        }
+
+                        DataSchemaNode child = schema.getDataChildByName(identifier.getNodeType());
+                        if (child == null || child.isAugmenting()) {
+                            return null;
+                        }
+                        return from(child);
                     }
-                    return from(child);
-                }
                 }));
 
         protected DataNodeContainerModificationStrategy(final T schema,
@@ -373,11 +400,11 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         public Optional<ModificationApplyOperation> getChild(final PathArgument identifier) {
-            DataSchemaNode child = schema.getDataChildByName(identifier.getNodeType());
-            if (child == null || child.isAugmenting()) {
+            try {
+                return Optional.<ModificationApplyOperation> fromNullable(childCache.get(identifier));
+            } catch (ExecutionException e) {
                 return Optional.absent();
             }
-            return Optional.<ModificationApplyOperation> of(from(child));
         }
 
         @Override
@@ -404,6 +431,23 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             // TODO Auto-generated method stub
             checkArgument(identifier instanceof NodeIdentifier);
             return ImmutableContainerNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        }
+
+    }
+
+    public static class AugmentationModificationStrategy extends
+            DataNodeContainerModificationStrategy<AugmentationSchema> {
+
+        protected AugmentationModificationStrategy(final AugmentationSchema schema, final DataNodeContainer resolved) {
+            super(schema, AugmentationNode.class);
+            // FIXME: Use resolved children instead of unresolved.
+
+        }
+
+
+        @Override
+        protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
+            return Builders.augmentationBuilder().withNodeIdentifier((AugmentationIdentifier) identifier);
         }
 
     }

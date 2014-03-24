@@ -138,10 +138,15 @@
                         <Private-Package>
                             org.opendaylight.controller.sal.dom.broker,
                             org.opendaylight.controller.sal.dom.broker.impl,
+                            org.opendaylight.controller.sal.dom.broker.impl.*,
                             org.opendaylight.controller.sal.dom.broker.osgi,
                             org.opendaylight.controller.sal.dom.broker.util,
                             org.opendaylight.controller.config.yang.md.sal.dom.impl,
                             org.opendaylight.controller.config.yang.md.sal.dom.statistics,
+                            org.opendaylight.controller.md.sal.dom.broker.impl,
+                            org.opendaylight.controller.md.sal.dom.broker.impl.*,
+                            org.opendaylight.controller.md.sal.dom.store.impl,
+                            org.opendaylight.controller.md.sal.dom.store.impl.*,
                             org.opendaylight.yangtools.yang.util,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.dom.impl.rev131028.*
                         </Private-Package>

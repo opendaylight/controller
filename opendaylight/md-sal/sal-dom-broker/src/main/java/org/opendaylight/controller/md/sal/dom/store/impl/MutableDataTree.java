@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map.Entry;
@@ -51,12 +50,8 @@ class MutableDataTree {
     }
 
     public Optional<NormalizedNode<?, ?>> read(final InstanceIdentifier path) {
-        Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosest(rootModification, path);
-        return getModifiedVersion(path, modification);
-    }
+        Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosestsOrFirstMatch(rootModification, path, NodeModification.IS_TERMINAL_PREDICATE);
 
-    private Optional<NormalizedNode<?, ?>> getModifiedVersion(final InstanceIdentifier path,
-            final Entry<InstanceIdentifier, NodeModification> modification) {
         Optional<StoreMetadataNode> result = resolveSnapshot(modification);
         if (result.isPresent()) {
             NormalizedNode<?, ?> data = result.get().getData();
@@ -76,20 +71,21 @@ class MutableDataTree {
     private Optional<StoreMetadataNode> resolveSnapshot(final InstanceIdentifier path,
             final NodeModification modification) {
         try {
+            Optional<Optional<StoreMetadataNode>> potentialSnapshot = modification.getSnapshotCache();
+            if(potentialSnapshot.isPresent()) {
+                return potentialSnapshot.get();
+            }
             return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
                     StoreUtils.increase(snapshot.getMetadataTree().getSubtreeVersion()));
         } catch (Exception e) {
-            log.error("Could not create snapshot for {},", e);
+            log.error("Could not create snapshot for {}", path,e);
             throw e;
         }
     }
 
     private ModificationApplyOperation resolveModificationStrategy(final InstanceIdentifier path) {
         log.trace("Resolving modification apply strategy for {}", path);
-        Optional<ModificationApplyOperation> strategy = TreeNodeUtils.findNode(strategyTree, path);
-        checkArgument(strategy.isPresent(),
-                "Provided path %s is not supported by data store. No schema available for it.", path);
-        return strategy.get();
+        return TreeNodeUtils.findNodeChecked(strategyTree, path);
     }
 
     private OperationWithModification resolveModificationFor(final InstanceIdentifier path) {
@@ -118,4 +114,11 @@ class MutableDataTree {
     protected NodeModification getRootModification() {
         return rootModification;
     }
+
+    @Override
+    public String toString() {
+        return "MutableDataTree [modification=" + rootModification + "]";
+    }
+
+
 }

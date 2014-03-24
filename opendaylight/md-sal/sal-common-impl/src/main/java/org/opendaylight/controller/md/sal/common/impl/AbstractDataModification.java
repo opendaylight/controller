@@ -10,10 +10,9 @@ package org.opendaylight.controller.md.sal.common.impl;
 import static org.opendaylight.controller.md.sal.common.api.TransactionStatus.NEW;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
@@ -21,17 +20,17 @@ import org.opendaylight.yangtools.concepts.Path;
 
 public abstract class AbstractDataModification<P extends Path<P>, D> implements DataModification<P, D> {
 
-    private final ConcurrentMap<P, D> operationalOriginal;
-    private final ConcurrentMap<P, D> configurationOriginal;
+    private final Map<P, D> operationalOriginal;
+    private final Map<P, D> configurationOriginal;
 
-    private final ConcurrentMap<P, D> operationalCreated;
-    private final ConcurrentMap<P, D> configurationCreated;
+    private final Map<P, D> operationalCreated;
+    private final Map<P, D> configurationCreated;
 
-    private final ConcurrentMap<P, D> configurationUpdate;
-    private final ConcurrentMap<P, D> operationalUpdate;
+    private final Map<P, D> configurationUpdate;
+    private final Map<P, D> operationalUpdate;
 
-    private final ConcurrentMap<P, P> configurationRemove;
-    private final ConcurrentMap<P, P> operationalRemove;
+    private final Map<P, P> configurationRemove;
+    private final Map<P, P> operationalRemove;
 
     private final Map<P, D> unmodifiable_configurationOriginal;
     private final Map<P, D> unmodifiable_operationalOriginal;
@@ -43,18 +42,18 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     private final Set<P> unmodifiable_OperationalRemove;
     private final DataReader<P, D> reader;
 
-    public AbstractDataModification(DataReader<P, D> reader) {
+    public AbstractDataModification(final DataReader<P, D> reader) {
         this.reader = reader;
-        this.configurationUpdate = new ConcurrentHashMap<>();
-        this.operationalUpdate = new ConcurrentHashMap<>();
-        this.configurationRemove = new ConcurrentHashMap<>();
-        this.operationalRemove = new ConcurrentHashMap<>();
+        this.configurationUpdate = new LinkedHashMap<>();
+        this.operationalUpdate = new LinkedHashMap<>();
+        this.configurationRemove = new LinkedHashMap<>();
+        this.operationalRemove = new LinkedHashMap<>();
 
-        this.configurationOriginal = new ConcurrentHashMap<>();
-        this.operationalOriginal = new ConcurrentHashMap<>();
+        this.configurationOriginal = new LinkedHashMap<>();
+        this.operationalOriginal = new LinkedHashMap<>();
 
-        this.configurationCreated = new ConcurrentHashMap<>();
-        this.operationalCreated = new ConcurrentHashMap<>();
+        this.configurationCreated = new LinkedHashMap<>();
+        this.operationalCreated = new LinkedHashMap<>();
 
         unmodifiable_configurationOriginal = Collections.unmodifiableMap(configurationOriginal);
         unmodifiable_operationalOriginal = Collections.unmodifiableMap(operationalOriginal);
@@ -67,7 +66,7 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     @Override
-    public final void putConfigurationData(P path, D data) {
+    public final void putConfigurationData(final P path, final D data) {
         checkMutable();
         D original = null;
         if ((original = getConfigurationOriginal(path)) == null) {
@@ -78,7 +77,7 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     @Override
-    public final void putOperationalData(P path, D data) {
+    public final void putOperationalData(final P path, final D data) {
         checkMutable();
         D original = null;
         if ((original = getOperationalOriginal(path)) == null) {
@@ -88,7 +87,7 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     @Override
-    public final void removeOperationalData(P path) {
+    public final void removeOperationalData(final P path) {
         checkMutable();
         getOperationalOriginal(path);
         operationalUpdate.remove(path);
@@ -96,7 +95,7 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     @Override
-    public final void removeConfigurationData(P path) {
+    public final void removeConfigurationData(final P path) {
         checkMutable();
         getConfigurationOriginal(path);
         configurationUpdate.remove(path);
@@ -150,46 +149,46 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     @Override
-    public D readOperationalData(P path) {
+    public D readOperationalData(final P path) {
         return reader.readOperationalData(path);
     }
 
     @Override
-    public D readConfigurationData(P path) {
+    public D readConfigurationData(final P path) {
         return reader.readConfigurationData(path);
     }
 
-    private D getConfigurationOriginal(P path) {
+    private D getConfigurationOriginal(final P path) {
         D data = configurationOriginal.get(path);
         if (data != null) {
             return data;
         }
         data = reader.readConfigurationData(path);
         if (data != null) {
-            configurationOriginal.putIfAbsent(path, data);
+            configurationOriginal.put(path, data);
             return data;
         }
         return null;
     }
 
-    private D getOperationalOriginal(P path) {
+    private D getOperationalOriginal(final P path) {
         D data = operationalOriginal.get(path);
         if (data != null) {
             return data;
         }
         data = reader.readOperationalData(path);
         if (data != null) {
-            operationalOriginal.putIfAbsent(path, data);
+            operationalOriginal.put(path, data);
             return data;
         }
         return null;
     }
 
-    protected D mergeOperationalData(P path,D stored, D modified) {
+    protected D mergeOperationalData(final P path,final D stored, final D modified) {
         return modified;
     }
 
-    protected D mergeConfigurationData(P path,D stored, D modified) {
+    protected D mergeConfigurationData(final P path,final D stored, final D modified) {
         return modified;
     }
 }
