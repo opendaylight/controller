@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map.Entry;
@@ -86,10 +85,7 @@ class MutableDataTree {
 
     private ModificationApplyOperation resolveModificationStrategy(final InstanceIdentifier path) {
         log.trace("Resolving modification apply strategy for {}", path);
-        Optional<ModificationApplyOperation> strategy = TreeNodeUtils.findNode(strategyTree, path);
-        checkArgument(strategy.isPresent(),
-                "Provided path %s is not supported by data store. No schema available for it.", path);
-        return strategy.get();
+        return TreeNodeUtils.findNodeChecked(strategyTree, path);
     }
 
     private OperationWithModification resolveModificationFor(final InstanceIdentifier path) {
@@ -118,4 +114,11 @@ class MutableDataTree {
     protected NodeModification getRootModification() {
         return rootModification;
     }
+
+    @Override
+    public String toString() {
+        return "MutableDataTree [modification=" + rootModification + "]";
+    }
+
+
 }

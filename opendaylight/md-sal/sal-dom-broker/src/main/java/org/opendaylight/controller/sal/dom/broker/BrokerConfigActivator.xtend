@@ -22,13 +22,21 @@ import org.osgi.framework.BundleContext
 import org.osgi.framework.ServiceRegistration
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
+import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl
+import com.google.common.util.concurrent.MoreExecutors
+import com.google.common.collect.ImmutableMap
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType
+import org.opendaylight.controller.sal.core.spi.data.DOMStore
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore
+import java.util.concurrent.Executors
 
 class BrokerConfigActivator implements AutoCloseable {
 
     private static val ROOT = InstanceIdentifier.builder().toInstance();
 
     @Property
-    private var DataBrokerImpl dataService;
+    private var BackwardsCompatibleDataBroker dataService;
 
     private var ServiceRegistration<DataBrokerService> dataReg;
     private var ServiceRegistration<DataProviderService> dataProviderReg;
@@ -48,10 +56,21 @@ class BrokerConfigActivator implements AutoCloseable {
         schemaService = context.getService(serviceRef);
 
         broker.setRouter(new SchemaAwareRpcBroker("/", SchemaContextProviders.fromSchemaService(schemaService)));
+        val executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor);
+        val operStore = new InMemoryDOMDataStore("DOM-OPER", executor);
+        val configStore = new InMemoryDOMDataStore("DOM-CFG", executor);
+        val datastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
+                .put(LogicalDatastoreType.OPERATIONAL, operStore)
+                .put(LogicalDatastoreType.CONFIGURATION, configStore)
+                .build();
 
-        dataService = new DataBrokerImpl();
+        val newDataBroker = new DOMDataBrokerImpl(
+            datastores,MoreExecutors.sameThreadExecutor
+        );
+
+        dataService = new BackwardsCompatibleDataBroker(newDataBroker);
+
         //dataService.setExecutor(broker.getExecutor());
-
         dataReg = context.registerService(DataBrokerService, dataService, emptyProperties);
         dataProviderReg = context.registerService(DataProviderService, dataService, emptyProperties);
 
@@ -60,10 +79,14 @@ class BrokerConfigActivator implements AutoCloseable {
         wrappedStore.setValidationEnabled(false);
 
         context.registerService(SchemaServiceListener, wrappedStore, emptyProperties)
+        context.registerService(SchemaServiceListener, dataService,emptyProperties)
+        context.registerService(SchemaServiceListener, operStore, emptyProperties)
+        context.registerService(SchemaServiceListener, configStore, emptyProperties)
+        
 
-        dataService.registerConfigurationReader(ROOT, wrappedStore);
-        dataService.registerCommitHandler(ROOT, wrappedStore);
-        dataService.registerOperationalReader(ROOT, wrappedStore);
+//        dataService.registerConfigurationReader(ROOT, wrappedStore);
+//        dataService.registerCommitHandler(ROOT, wrappedStore);
+//        dataService.registerOperationalReader(ROOT, wrappedStore);
 
         mountService = new MountPointManagerImpl();
         mountService.setDataBroker(dataService);

@@ -10,10 +10,12 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
@@ -23,6 +25,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -30,6 +33,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -51,6 +55,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
     private static final Logger COORDINATOR_LOG = LoggerFactory.getLogger(CommitCoordination.class);
     private final ImmutableMap<LogicalDatastoreType, DOMStore> datastores;
     private final ListeningExecutorService executor;
+    private final AtomicLong txNum = new AtomicLong();
 
     public DOMDataBrokerImpl(final ImmutableMap<LogicalDatastoreType, DOMStore> datastores,
             final ListeningExecutorService executor) {
@@ -83,7 +88,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
     }
 
     private Object newTransactionIdentifier() {
-        return new Object();
+        return "DOM-" + txNum.getAndIncrement();
     }
 
     @Override
@@ -115,6 +120,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
 
     private ListenableFuture<RpcResult<TransactionStatus>> submit(
             final WriteTransactionImpl<? extends DOMStoreWriteTransaction> transaction) {
+        LOG.debug("Tx: {} is submitted for execution.",transaction.getIdentifier());
         return executor.submit(new CommitCoordination(transaction));
     }
 
@@ -245,6 +251,11 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
                 final InstanceIdentifier path) {
             return getSubtransaction(store).read(path);
         }
+
+        @Override
+        public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+
+        }
     }
 
     private final class CommitCoordination implements Callable<RpcResult<TransactionStatus>> {
@@ -265,7 +276,8 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
                         preCommit().get();
                         try {
                             commit().get();
-                            return null;
+                            COORDINATOR_LOG.debug("Tx: {} Is commited.",transaction.getIdentifier());
+                            return Rpcs.getRpcResult(true, TransactionStatus.COMMITED, Collections.<RpcError>emptySet());
                         } catch (InterruptedException | ExecutionException e) {
                             COORDINATOR_LOG.error("Tx: {} Error during commit", transaction.getIdentifier(), e);
                         }
@@ -275,6 +287,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
                                 transaction.getIdentifier(), e);
                     }
                 } else {
+                    COORDINATOR_LOG.info("Tx: {} Did not pass canCommit phase.");
                     abort().get();
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -286,7 +299,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker {
             } catch (InterruptedException | ExecutionException e) {
                 COORDINATOR_LOG.error("Tx: {} Error during abort", transaction.getIdentifier(), e);
             }
-            return null;
+            return Rpcs.getRpcResult(false, TransactionStatus.FAILED, Collections.<RpcError>emptySet());
         }
 
         public ListenableFuture<Void> preCommit() {

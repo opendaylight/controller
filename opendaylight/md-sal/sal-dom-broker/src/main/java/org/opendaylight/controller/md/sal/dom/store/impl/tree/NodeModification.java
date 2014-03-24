@@ -188,7 +188,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
     @Override
     public String toString() {
         return "NodeModification [identifier=" + identifier + ", modificationType="
-                + modificationType + ", value=" + value + ", childModification=" + childModification + "]";
+                + modificationType + ", childModification=" + childModification + "]";
     }
 
     public static NodeModification createUnmodified(final StoreMetadataNode metadataTree) {

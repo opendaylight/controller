@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerRegistrationNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
@@ -125,8 +126,9 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private synchronized DOMStoreThreePhaseCommitCohort submit(
-            final SnaphostBackedWriteTransaction snaphostBackedWriteTransaction) {
-        return new ThreePhaseCommitImpl(snaphostBackedWriteTransaction);
+            final SnaphostBackedWriteTransaction writeTx) {
+        LOG.debug("Tx: {} is submitted. Modifications: {}",writeTx.getIdentifier(),writeTx.getMutatedView());
+        return new ThreePhaseCommitImpl(writeTx);
     }
 
     private Object nextIdentifier() {
@@ -136,6 +138,9 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private synchronized void commit(final DataAndMetadataSnapshot currentSnapshot,
             final StoreMetadataNode newDataTree, final Iterable<ChangeListenerNotifyTask> listenerTasks) {
         LOG.debug("Updating Store snaphot version: {} with version:{}",currentSnapshot.getMetadataTree().getSubtreeVersion(),newDataTree.getSubtreeVersion());
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Data Tree is {}",StoreUtils.toStringTree(newDataTree));
+        }
         checkState(snapshot == currentSnapshot, "Store snapshot and transaction snapshot differs");
         snapshot = DataAndMetadataSnapshot.builder() //
                 .setMetadataTree(newDataTree) //
@@ -156,6 +161,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public SnapshotBackedReadTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot) {
             this.identifier = identifier;
             this.stableSnapshot = snapshot;
+            LOG.debug("ReadOnly Tx: {} allocated with snapshot {}",identifier,snapshot.getMetadataTree().getSubtreeVersion());
+
         }
 
         @Override
@@ -195,6 +202,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             this.identifier = identifier;
             mutableTree = MutableDataTree.from(snapshot, applyOper);
             this.store = store;
+            LOG.debug("Write Tx: {} allocated with snapshot {}",identifier,snapshot.getMetadataTree().getSubtreeVersion());
         }
 
         @Override
@@ -301,6 +309,9 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         @Override
         public ListenableFuture<Void> preCommit() {
             storeSnapshot = snapshot;
+            if(modification.getModificationType() == ModificationType.UNMODIFIED) {
+                return Futures.immediateFuture(null);
+            }
             return executor.submit(new Callable<Void>() {
 
 
@@ -335,8 +346,12 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         @Override
         public ListenableFuture<Void> commit() {
-            checkState(proposedSubtree != null);
-            checkState(storeSnapshot != null);
+            if(modification.getModificationType() == ModificationType.UNMODIFIED) {
+                return Futures.immediateFuture(null);
+            }
+
+            checkState(proposedSubtree != null,"Proposed subtree must be computed");
+            checkState(storeSnapshot != null,"Proposed subtree must be computed");
             // return ImmediateFuture<>;
             InMemoryDOMDataStore.this.commit(storeSnapshot, proposedSubtree.get(),listenerTasks);
             return Futures.<Void> immediateFuture(null);

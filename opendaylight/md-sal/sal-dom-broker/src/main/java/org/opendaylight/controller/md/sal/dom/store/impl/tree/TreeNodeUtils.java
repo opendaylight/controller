@@ -8,13 +8,16 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class TreeNodeUtils {
 
@@ -31,6 +34,19 @@ public class TreeNodeUtils {
         Iterator<PathArgument> pathIter = path.getPath().iterator();
         while (current.isPresent() && pathIter.hasNext()) {
             current = current.get().getChild(pathIter.next());
+        }
+        return current;
+    }
+
+
+    public static <T extends StoreTreeNode<T>> T findNodeChecked(final T tree, final InstanceIdentifier path) {
+        T current = tree;
+        List<PathArgument> nested = new ArrayList<>(path.getPath());
+        for(PathArgument pathArg : path.getPath()) {
+            Optional<T> potential = current.getChild(pathArg);
+            nested.add(pathArg);
+            Preconditions.checkArgument(potential.isPresent(),"Child %s is not present in tree.",nested);
+            current = potential.get();
         }
         return current;
     }
