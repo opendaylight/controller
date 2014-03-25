@@ -62,11 +62,13 @@ abstract class AbstractStatsTracker<I, K> {
 
     private final Map<K, Long> trackedItems = new HashMap<>();
     private final FlowCapableContext context;
-    private final long lifetimeNanos;
+    //private final long lifetimeNanos;
+    private long requestCounter;
 
     protected AbstractStatsTracker(final FlowCapableContext context, final long lifetimeNanos) {
         this.context = Preconditions.checkNotNull(context);
-        this.lifetimeNanos = lifetimeNanos;
+        //this.lifetimeNanos = lifetimeNanos;
+        this.requestCounter = 0;
     }
 
     protected final InstanceIdentifierBuilder<Node> getNodeIdentifierBuilder() {
@@ -89,24 +91,28 @@ abstract class AbstractStatsTracker<I, K> {
         return context.startDataModification();
     }
 
+    public final synchronized void increaseRequestCounter(){
+        this.requestCounter++;
+    }
     protected abstract void cleanupSingleStat(DataModificationTransaction trans, K item);
     protected abstract K updateSingleStat(DataModificationTransaction trans, I item);
+    public abstract void request();
 
     public final synchronized void updateStats(List<I> list) {
-        final Long expiryTime = System.nanoTime() + lifetimeNanos;
+        //final Long expiryTime = System.nanoTime() + lifetimeNanos;
         final DataModificationTransaction trans = startTransaction();
 
         for (final I item : list) {
-            trackedItems.put(updateSingleStat(trans, item), expiryTime);
+            trackedItems.put(updateSingleStat(trans, item), requestCounter);
         }
 
         trans.commit();
     }
 
-    public final synchronized void cleanup(final DataModificationTransaction trans, long now) {
+    public final synchronized void cleanup(final DataModificationTransaction trans) {
         for (Iterator<Entry<K, Long>> it = trackedItems.entrySet().iterator();it.hasNext();){
             Entry<K, Long> e = it.next();
-            if (now > e.getValue()) {
+            if (requestCounter >= e.getValue()+2) {
                 cleanupSingleStat(trans, e.getKey());
                 it.remove();
             }

@@ -61,6 +61,7 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
         return item;
     }
 
+    @Override
     public void request() {
         if (flowTableStatsService != null) {
             final GetFlowTablesStatisticsInputBuilder input = new GetFlowTablesStatisticsInputBuilder();
