@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -73,6 +72,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     private static final int NUMBER_OF_WAIT_CYCLES = 2;
 
     private final MultipartMessageManager msgManager;
+    private final StatisticsRequestScheduler srScheduler;
     private final InstanceIdentifier<Node> targetNodeIdentifier;
     private final FlowStatsTracker flowStats;
     private final FlowTableStatsTracker flowTableStats;
@@ -99,17 +99,19 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
             final OpendaylightGroupStatisticsService groupStatsService,
             final OpendaylightMeterStatisticsService meterStatsService,
             final OpendaylightPortStatisticsService portStatsService,
-            final OpendaylightQueueStatisticsService queueStatsService) {
+            final OpendaylightQueueStatisticsService queueStatsService, 
+            final StatisticsRequestScheduler srScheduler) {
         this.dps = Preconditions.checkNotNull(dps);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
+        this.srScheduler = Preconditions.checkNotNull(srScheduler);
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
         this.targetNodeRef = new NodeRef(targetNodeIdentifier);
 
         final long lifetimeNanos = TimeUnit.MILLISECONDS.toNanos(STATS_COLLECTION_MILLIS * NUMBER_OF_WAIT_CYCLES);
 
         msgManager = new MultipartMessageManager(lifetimeNanos);
-        flowStats = new FlowStatsTracker(flowStatsService, this, lifetimeNanos);
         flowTableStats = new FlowTableStatsTracker(flowTableStatsService, this, lifetimeNanos);
+        flowStats = new FlowStatsTracker(flowStatsService, this, lifetimeNanos,flowTableStats);
         groupDescStats = new GroupDescStatsTracker(groupStatsService, this, lifetimeNanos);
         groupStats = new GroupStatsTracker(groupStatsService, this, lifetimeNanos);
         meterConfigStats = new MeterConfigStatsTracker(meterStatsService, this, lifetimeNanos);
@@ -134,7 +136,9 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
     @Override
     public DataModificationTransaction startDataModification() {
-        return dps.beginTransaction();
+        DataModificationTransaction dmt = dps.beginTransaction();
+        dmt.registerListener(this.srScheduler);
+        return dmt;
     }
 
     public synchronized void updateGroupDescStats(TransactionAware transaction, List<GroupDescStats> list) {
@@ -182,7 +186,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     public synchronized void updateAggregateFlowStats(TransactionAware transaction, AggregateFlowStatistics flowStats) {
         final Short tableId = msgManager.isExpectedTableTransaction(transaction);
         if (tableId != null) {
-            final DataModificationTransaction trans = dps.beginTransaction();
+            final DataModificationTransaction trans = this.startDataModification();
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
 
@@ -210,7 +214,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     public synchronized void updateGroupFeatures(GroupFeatures notification) {
-        final DataModificationTransaction trans = dps.beginTransaction();
+        final DataModificationTransaction trans = this.startDataModification();
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -228,7 +232,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     public synchronized void updateMeterFeatures(MeterFeatures features) {
-        final DataModificationTransaction trans = dps.beginTransaction();
+        final DataModificationTransaction trans = this.startDataModification();
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -246,16 +250,15 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     public synchronized void cleanStaleStatistics() {
-        final DataModificationTransaction trans = dps.beginTransaction();
-        final long now = System.nanoTime();
+        final DataModificationTransaction trans = this.startDataModification();
 
-        flowStats.cleanup(trans, now);
-        groupDescStats.cleanup(trans, now);
-        groupStats.cleanup(trans, now);
-        meterConfigStats.cleanup(trans, now);
-        meterStats.cleanup(trans, now);
-        nodeConnectorStats.cleanup(trans, now);
-        queueStats.cleanup(trans, now);
+        flowStats.cleanup(trans);
+        groupDescStats.cleanup(trans);
+        groupStats.cleanup(trans);
+        meterConfigStats.cleanup(trans);
+        meterStats.cleanup(trans);
+        nodeConnectorStats.cleanup(trans);
+        queueStats.cleanup(trans);
         msgManager.cleanStaleTransactionIds();
 
         trans.commit();
@@ -264,26 +267,23 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     public synchronized void requestPeriodicStatistics() {
         logger.debug("Send requests for statistics collection to node : {}", targetNodeKey);
 
-        flowTableStats.request();
+        this.srScheduler.addRequestToSchedulerQueue(flowTableStats);
 
-        // FIXME: it does not make sense to trigger this before sendAllFlowTablesStatisticsRequest()
-        //        comes back -- we do not have any tables anyway.
-        final Collection<TableKey> tables = flowTableStats.getTables();
-        logger.debug("Node {} supports {} table(s)", targetNodeKey, tables.size());
-        for (final TableKey key : tables) {
-            logger.debug("Send aggregate stats request for flow table {} to node {}", key.getId(), targetNodeKey);
-            flowStats.requestAggregateFlows(key);
-        }
-
-        flowStats.requestAllFlowsAllTables();
-        nodeConnectorStats.request();
-        groupStats.request();
-        groupDescStats.request();
-        meterStats.request();
-        meterConfigStats.request();
-        queueStats.request();
+        this.srScheduler.addRequestToSchedulerQueue(flowStats);
+        
+        this.srScheduler.addRequestToSchedulerQueue(nodeConnectorStats);
+        
+        this.srScheduler.addRequestToSchedulerQueue(groupStats);
+        
+        this.srScheduler.addRequestToSchedulerQueue(groupDescStats);
+        
+        this.srScheduler.addRequestToSchedulerQueue(meterStats);
+        
+        this.srScheduler.addRequestToSchedulerQueue(meterConfigStats);
+        
+        this.srScheduler.addRequestToSchedulerQueue(queueStats);
     }
-
+    
     public synchronized void start(final Timer timer) {
         flowStats.start(dps);
         groupDescStats.start(dps);

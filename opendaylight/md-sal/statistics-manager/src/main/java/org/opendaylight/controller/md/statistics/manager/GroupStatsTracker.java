@@ -72,6 +72,7 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
         return "Group";
     }
 
+    @Override
     public void request() {
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         input.setNode(getNodeRef());

@@ -82,6 +82,7 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
         return queueEntry;
     }
 
+    @Override
     public void request() {
         if (queueStatsService != null) {
             GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
