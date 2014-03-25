@@ -7,32 +7,27 @@
  */
 package org.opendaylight.controller.md.compatibility.topology
 
+import java.util.ArrayList
+import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider
+import org.opendaylight.controller.sal.core.Edge
+import org.opendaylight.controller.sal.core.NodeConnector
 import org.opendaylight.controller.switchmanager.ISwitchManager
 import org.opendaylight.controller.topologymanager.ITopologyManager
-import org.opendaylight.controller.md.sal.common.api.data.DataReader
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
-import org.opendaylight.yangtools.yang.binding.DataObject
-import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology
-import org.opendaylight.controller.md.compatibility.topology.TopologyMapping
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkBuilder
-
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder
-import java.util.ArrayList
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey
-import org.opendaylight.controller.sal.core.NodeConnector
-import org.opendaylight.controller.sal.topology.TopoEdgeUpdate
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder
-import org.opendaylight.controller.sal.core.Edge
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.link.attributes.SourceBuilder
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.link.attributes.DestinationBuilder
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.link.attributes.SourceBuilder
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkBuilder
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder
+import org.opendaylight.yangtools.yang.binding.DataObject
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 
 class TopologyReader implements RuntimeDataProvider {
 
@@ -53,7 +48,7 @@ class TopologyReader implements RuntimeDataProvider {
 
     new() {
         _topologyKey = new TopologyKey(new TopologyId("compatibility:ad-sal"));
-        _topologyPath = InstanceIdentifier.builder().node(NetworkTopology).child(Topology, topologyKey).toInstance;
+        _topologyPath = InstanceIdentifier.builder(NetworkTopology).child(Topology, topologyKey).toInstance;
         _mapping = new TopologyMapping(topologyKey, topologyPath);
     }
 

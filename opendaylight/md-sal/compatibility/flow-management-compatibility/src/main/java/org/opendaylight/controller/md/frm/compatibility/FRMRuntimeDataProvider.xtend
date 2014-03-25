@@ -34,7 +34,7 @@ import org.opendaylight.yangtools.yang.common.RpcError
 
 class FRMRuntimeDataProvider implements RuntimeDataProvider, DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> {
 
-    static val FLOWS_PATH = InstanceIdentifier.builder().node(Flows).toInstance;
+    static val FLOWS_PATH = InstanceIdentifier.builder(Flows).toInstance;
 
     @Property
     var DataProviderService dataService;

@@ -44,8 +44,7 @@ public class InventoryMapping {
   public static NodeRef toNodeRef(final Node node) {
     final NodeId nodeId = new NodeId(InventoryMapping.toNodeId(node));
     final NodeKey nodeKey = new NodeKey(nodeId);
-    final InstanceIdentifierBuilder<? extends Object> builder = InstanceIdentifier.builder();
-    final InstanceIdentifierBuilder<Nodes> nodes = builder.<Nodes>node(Nodes.class);
+    final InstanceIdentifierBuilder<Nodes> nodes = InstanceIdentifier.builder(Nodes.class);
     final InstanceIdentifierBuilder<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> child =
             nodes.<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, NodeKey>child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, nodeKey);
     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> path = child.toInstance();

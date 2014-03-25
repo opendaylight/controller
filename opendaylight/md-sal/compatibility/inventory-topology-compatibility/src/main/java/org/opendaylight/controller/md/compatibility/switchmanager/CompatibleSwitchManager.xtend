@@ -7,35 +7,34 @@
  */
 package org.opendaylight.controller.md.compatibility.switchmanager
 
-import org.opendaylight.controller.switchmanager.ISwitchManager
-import org.opendaylight.controller.sal.core.NodeConnector
-import org.opendaylight.controller.sal.core.Property
-import java.util.List
-import org.opendaylight.controller.sal.core.Node
 import java.net.InetAddress
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
-import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
-import org.opendaylight.controller.sal.core.Description
-import org.opendaylight.controller.sal.core.Tier
-import org.opendaylight.controller.sal.core.Bandwidth
-import org.opendaylight.controller.sal.core.ForwardingMode
-import org.opendaylight.controller.sal.core.MacAddress
-
-import org.slf4j.LoggerFactory
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
-import org.opendaylight.yangtools.yang.binding.DataObject
 import java.net.NetworkInterface
 import java.net.SocketException
-import java.util.Collections
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
 import java.util.ArrayList
-import org.opendaylight.controller.switchmanager.Switch
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
-import java.util.Map
+import java.util.Collections
 import java.util.HashSet
+import java.util.List
+import java.util.Map
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
+import org.opendaylight.controller.sal.core.Bandwidth
+import org.opendaylight.controller.sal.core.Description
+import org.opendaylight.controller.sal.core.ForwardingMode
+import org.opendaylight.controller.sal.core.MacAddress
+import org.opendaylight.controller.sal.core.Node
+import org.opendaylight.controller.sal.core.NodeConnector
+import org.opendaylight.controller.sal.core.Property
+import org.opendaylight.controller.sal.core.Tier
+import org.opendaylight.controller.switchmanager.ISwitchManager
+import org.opendaylight.controller.switchmanager.Switch
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortState
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
+import org.opendaylight.yangtools.yang.binding.DataObject
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.slf4j.LoggerFactory
+
+import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
 
 class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwitchManager {
 
@@ -118,7 +117,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
     }
 
     override getNetworkDevices() {
-        val path = InstanceIdentifier.builder().node(Nodes).toInstance;
+        val path = InstanceIdentifier.builder(Nodes).toInstance;
         val data = dataService.readOperationalData(path) as Nodes;
         val ret = new ArrayList<Switch>();
         for (node : data.node) {
@@ -173,7 +172,7 @@ class CompatibleSwitchManager extends ConfigurableSwitchManager implements ISwit
     }
 
     override getNodes() {
-        val path = InstanceIdentifier.builder().node(Nodes).toInstance;
+        val path = InstanceIdentifier.builder(Nodes).toInstance;
         val data = dataService.readOperationalData(path) as Nodes;
         val ret = new HashSet<Node>();
         for (node : data.node) {

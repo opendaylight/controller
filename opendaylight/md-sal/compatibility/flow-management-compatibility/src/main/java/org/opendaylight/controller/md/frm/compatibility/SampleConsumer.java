@@ -27,7 +27,7 @@ public class SampleConsumer {
 
         DataModificationTransaction transaction = dataService.beginTransaction();
         Flow flow = createSampleFlow("foo", null);
-        InstanceIdentifier<Flow> path = InstanceIdentifier.builder().node(Flows.class).node(Flow.class, flow.getKey())
+        InstanceIdentifier<Flow> path = InstanceIdentifier.builder(Flows.class).child(Flow.class, flow.getKey())
                 .toInstance();
         transaction.putConfigurationData(path, flow);
 
