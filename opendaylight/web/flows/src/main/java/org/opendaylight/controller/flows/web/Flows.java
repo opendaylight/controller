@@ -14,11 +14,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.ActionType;
+import org.opendaylight.controller.sal.action.SupportedFlowActions;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Description;
@@ -212,7 +216,6 @@ public class Flows implements IDaylightWeb {
         return nodes;
     }
 
-
     @RequestMapping(value = "/flow", method = RequestMethod.POST)
     @ResponseBody
     public String actionFlow(@RequestParam(required = true) String action, @RequestParam(required = false) String body,
@@ -335,6 +338,84 @@ public class Flows implements IDaylightWeb {
         } else {
             return "Success";
         }
+    }
+
+    @RequestMapping(value = "/valid-flows/{nodeId}")
+    @ResponseBody
+    public Object getValidActions(HttpServletRequest request, @RequestParam(required = false) String container,
+            @PathVariable("nodeId") String nodeId) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
+            return "Operation not authorized";
+        }
+
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName, this);
+        if (switchManager == null) {
+            return null;
+        }
+
+        Map<String, String> result = new TreeMap<String, String>();
+
+        Node node = Node.fromString(nodeId);
+        SupportedFlowActions supportedFlows = (SupportedFlowActions) switchManager.getNodeProp(node, "supportedFlowActions");
+        List<Class<? extends Action>> actions = supportedFlows.getActions();
+        for (Class<? extends Action> action : actions) {
+            String actionName = action.getSimpleName().toLowerCase();
+            if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Drop.class)) {
+                result.put(ActionType.DROP.toString(), "Drop");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Loopback.class)) {
+                result.put(ActionType.LOOPBACK.toString(), "Loopback");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Flood.class)) {
+                result.put(ActionType.FLOOD.toString(), "Flood");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.FloodAll.class)) {
+                result.put(ActionType.FLOOD_ALL.toString(), "Flood All");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Controller.class)) {
+                result.put(ActionType.CONTROLLER.toString(), "Controller");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SwPath.class)) {
+                result.put(ActionType.SW_PATH.toString(), "Software Path");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.HwPath.class)) {
+                result.put(ActionType.HW_PATH.toString(), "Hardware Path");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Output.class)) {
+                result.put(ActionType.OUTPUT.toString(), "Output");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Enqueue.class)) {
+                result.put(ActionType.ENQUEUE.toString(), "Enqueue");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetDlSrc.class)) {
+                result.put(ActionType.SET_DL_SRC.toString(), "Set Datalayer Source Address");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetDlDst.class)) {
+                result.put(ActionType.SET_DL_DST.toString(), "Set Datalayer Destination Address");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetVlanId.class)) {
+                result.put(ActionType.SET_VLAN_ID.toString(), "Set VLAN ID");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetVlanPcp.class)) {
+                result.put(ActionType.SET_VLAN_PCP.toString(), "Set VLAN Priority");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetVlanCfi.class)) {
+                result.put(ActionType.SET_VLAN_CFI.toString(), "Set VLAN CFI");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.PopVlan.class)) {
+                result.put(ActionType.POP_VLAN.toString(), "Pop VLAN");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.PushVlan.class)) {
+                result.put(ActionType.PUSH_VLAN.toString(), "Push VLAN");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetDlType.class)) {
+                result.put(ActionType.SET_DL_TYPE.toString(), "Set EtherType");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetNwSrc.class)) {
+                result.put(ActionType.SET_NW_SRC.toString(), "Set Network Source Address");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetNwDst.class)) {
+                result.put(ActionType.SET_NW_DST.toString(), "Set Network Destination Address");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetNwTos.class)) {
+                result.put(ActionType.SET_NW_TOS.toString(), "Modify ToS Bits");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetTpSrc.class)) {
+                result.put(ActionType.SET_TP_SRC.toString(), "Modify Transport Source Port");
+            } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.SetTpDst.class)) {
+                result.put(ActionType.SET_TP_DST.toString(), "Modify Transport Destination Port");
+            }
+        }
+
+        return result;
+    }
+
+    private boolean actionCompare(String name, ActionType type) {
+        return name.equals(type.getId().toLowerCase());
     }
 
     private String getNodeDesc(Node node, ISwitchManager switchManager) {
