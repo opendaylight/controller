@@ -54,6 +54,12 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
                                     // switch
     private ByteBuffer peerNetData; // encrypted message from the switch
     private FileInputStream kfd = null, tfd = null;
+    private final String keyStoreFileDefault = "./configuration/tlsKeyStore";
+    private final String trustStoreFileDefault = "./configuration/tlsTrustStore";
+    private final String keyStorePasswordPropName = "controllerKeyStorePassword";
+    private final String trustStorePasswordPropName = "controllerTrustStorePassword";
+    private static String keyStorePassword = null;
+    private static String trustStorePassword = null;
 
     public SecureMessageReadWriteService(SocketChannel socket, Selector selector)
             throws Exception {
@@ -80,32 +86,44 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
      */
     private void createSecureChannel(SocketChannel socket) throws Exception {
         String keyStoreFile = System.getProperty("controllerKeyStore");
-        String keyStorePassword = System
-                .getProperty("controllerKeyStorePassword");
         String trustStoreFile = System.getProperty("controllerTrustStore");
-        String trustStorePassword = System
-                .getProperty("controllerTrustStorePassword");
+        String keyStorePasswordProp = System.getProperty(keyStorePasswordPropName);
+        String trustStorePasswordProp = System.getProperty(trustStorePasswordPropName);
 
         if (keyStoreFile != null) {
             keyStoreFile = keyStoreFile.trim();
+        } else {
+            keyStoreFile = keyStoreFileDefault;
         }
         if ((keyStoreFile == null) || keyStoreFile.isEmpty()) {
             throw new FileNotFoundException("TLS KeyStore file not found.");
         }
+
+        if ((keyStorePassword == null) || ((keyStorePasswordProp != null) && !keyStorePasswordProp.isEmpty())) {
+            keyStorePassword = keyStorePasswordProp;
+        }
         if (keyStorePassword != null) {
             keyStorePassword = keyStorePassword.trim();
+            System.setProperty(keyStorePasswordPropName, "");
         }
         if ((keyStorePassword == null) || keyStorePassword.isEmpty()) {
             throw new FileNotFoundException("TLS KeyStore Password not provided.");
         }
         if (trustStoreFile != null) {
             trustStoreFile = trustStoreFile.trim();
+        } else {
+            trustStoreFile = trustStoreFileDefault;
         }
         if ((trustStoreFile == null) || trustStoreFile.isEmpty()) {
             throw new FileNotFoundException("TLS TrustStore file not found");
         }
+
+        if ((trustStorePassword == null) || ((trustStorePasswordProp != null) && !trustStorePasswordProp.isEmpty())) {
+            trustStorePassword = trustStorePasswordProp;
+        }
         if (trustStorePassword != null) {
             trustStorePassword = trustStorePassword.trim();
+            System.setProperty(trustStorePasswordPropName, "");
         }
         if ((trustStorePassword == null) || trustStorePassword.isEmpty()) {
             throw new FileNotFoundException("TLS TrustStore Password not provided.");
