@@ -774,7 +774,7 @@ public class Devices implements IDaylightWeb {
         return result;
     }
 
-    @RequestMapping(value = "/connect/{nodeId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/connect/{nodeId:.+}", method = RequestMethod.POST)
     @ResponseBody
     public Status addNode(HttpServletRequest request, @PathVariable("nodeId") String nodeId,
             @RequestParam(required = true) String ipAddress, @RequestParam(required = true) String port,
@@ -811,7 +811,7 @@ public class Devices implements IDaylightWeb {
         return new Status(StatusCode.SUCCESS);
     }
 
-    @RequestMapping(value = "/disconnect/{nodeId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/disconnect/{nodeId:.+}", method = RequestMethod.POST)
     @ResponseBody
     public Status removeNode(HttpServletRequest request, @PathVariable("nodeId") String nodeId,
             @RequestParam(required = true) String nodeType) {
