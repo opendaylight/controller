@@ -45,6 +45,11 @@
             <groupId>org.eclipse.xtend</groupId>
             <artifactId>org.eclipse.xtend.lib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

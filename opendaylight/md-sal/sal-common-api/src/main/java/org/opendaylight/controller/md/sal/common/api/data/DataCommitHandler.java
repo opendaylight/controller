@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 /**
