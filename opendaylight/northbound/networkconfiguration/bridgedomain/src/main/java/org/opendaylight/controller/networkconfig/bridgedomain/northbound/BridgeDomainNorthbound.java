@@ -114,6 +114,8 @@ public class BridgeDomainNorthbound {
            if (status.getCode().equals(StatusCode.SUCCESS)) {
                return Response.status(Response.Status.CREATED).build();
            }
+       } catch (Error e) {
+           throw e;
        } catch (Throwable t) {
            return Response.status(Response.Status.PRECONDITION_FAILED).build();
        }
@@ -161,7 +163,7 @@ public class BridgeDomainNorthbound {
           if (status.getCode().equals(StatusCode.SUCCESS)) {
               return Response.status(Response.Status.OK).build();
           }
-      } catch (Throwable t) {
+      } catch (Exception t) {
           return Response.status(Response.Status.PRECONDITION_FAILED).build();
       }
       throw new ResourceNotFoundException(status.getDescription());
@@ -215,7 +217,7 @@ public class BridgeDomainNorthbound {
            if (status.getCode().equals(StatusCode.SUCCESS)) {
                return Response.status(Response.Status.CREATED).build();
            }
-       } catch (Throwable t) {
+       } catch (Exception t) {
            return Response.status(Response.Status.PRECONDITION_FAILED).build();
        }
        throw new ResourceNotFoundException(status.getDescription());
@@ -264,7 +266,7 @@ public class BridgeDomainNorthbound {
            if (status.getCode().equals(StatusCode.SUCCESS)) {
                return Response.status(Response.Status.OK).build();
            }
-       } catch (Throwable t) {
+       } catch (Exception t) {
            return Response.status(Response.Status.PRECONDITION_FAILED).build();
        }
        throw new ResourceNotFoundException(status.getDescription());
