@@ -20,8 +20,8 @@ abstract class AbstractListeningStatsTracker<I, K> extends AbstractStatsTracker<
     private static final Logger logger = LoggerFactory.getLogger(AbstractListeningStatsTracker.class);
     private ListenerRegistration<?> reg;
 
-    protected AbstractListeningStatsTracker(FlowCapableContext context, long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    protected AbstractListeningStatsTracker(FlowCapableContext context) {
+        super(context);
     }
 
     protected abstract InstanceIdentifier<?> listenPath();

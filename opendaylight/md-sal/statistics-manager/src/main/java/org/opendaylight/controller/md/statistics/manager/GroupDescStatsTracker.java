@@ -29,8 +29,8 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
     private static final Logger logger = LoggerFactory.getLogger(GroupDescStatsTracker.class);
     private final OpendaylightGroupStatisticsService groupStatsService;
 
-    public GroupDescStatsTracker(OpendaylightGroupStatisticsService groupStatsService, final FlowCapableContext context, final long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    public GroupDescStatsTracker(OpendaylightGroupStatisticsService groupStatsService, final FlowCapableContext context) {
+        super(context);
         this.groupStatsService = groupStatsService;
     }
 
@@ -70,6 +70,7 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
         return "Group Descriptor";
     }
 
+    @Override
     public void request() {
         if (groupStatsService != null) {
             final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();

@@ -25,8 +25,8 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
     private static final Logger logger = LoggerFactory.getLogger(NodeConnectorStatsTracker.class);
     private final OpendaylightPortStatisticsService portStatsService;
 
-    NodeConnectorStatsTracker(final OpendaylightPortStatisticsService portStatsService, final FlowCapableContext context, long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    NodeConnectorStatsTracker(final OpendaylightPortStatisticsService portStatsService, final FlowCapableContext context) {
+        super(context);
         this.portStatsService = portStatsService;
     }
 
@@ -73,6 +73,7 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
         return item;
     }
 
+    @Override
     public void request() {
         if (portStatsService != null) {
             final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();

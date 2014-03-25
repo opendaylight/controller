@@ -36,8 +36,8 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
     private static final Logger logger = LoggerFactory.getLogger(QueueStatsTracker.class);
     private final OpendaylightQueueStatisticsService queueStatsService;
 
-    QueueStatsTracker(OpendaylightQueueStatisticsService queueStatsService, final FlowCapableContext context, long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    QueueStatsTracker(OpendaylightQueueStatisticsService queueStatsService, final FlowCapableContext context) {
+        super(context);
         this.queueStatsService = queueStatsService;
     }
 
@@ -82,6 +82,7 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
         return queueEntry;
     }
 
+    @Override
     public void request() {
         if (queueStatsService != null) {
             GetAllQueuesStatisticsFromAllPortsInputBuilder input = new GetAllQueuesStatisticsFromAllPortsInputBuilder();
