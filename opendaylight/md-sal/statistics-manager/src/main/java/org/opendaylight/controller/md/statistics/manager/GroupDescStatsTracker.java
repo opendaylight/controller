@@ -70,6 +70,7 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
         return "Group Descriptor";
     }
 
+    @Override
     public void request() {
         if (groupStatsService != null) {
             final GetGroupDescriptionInputBuilder input = new GetGroupDescriptionInputBuilder();

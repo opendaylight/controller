@@ -61,6 +61,7 @@ final class MeterStatsTracker extends AbstractListeningStatsTracker<MeterStats, 
         return item;
     }
 
+    @Override
     public void request() {
         if (meterStatsService != null) {
             GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();

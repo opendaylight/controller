@@ -62,6 +62,7 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
         return item;
     }
 
+    @Override
     public void request() {
         if (meterStatsService != null) {
             GetAllMeterConfigStatisticsInputBuilder input = new GetAllMeterConfigStatisticsInputBuilder();

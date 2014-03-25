@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.util.Collection;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
@@ -37,11 +38,16 @@ import org.slf4j.LoggerFactory;
 final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(FlowStatsTracker.class);
     private final OpendaylightFlowStatisticsService flowStatsService;
+    private FlowTableStatsTracker flowTableStats;
     private int unaccountedFlowsCounter = 1;
 
     FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, long lifetimeNanos) {
         super(context, lifetimeNanos);
         this.flowStatsService = flowStatsService;
+    }
+    FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, long lifetimeNanos, FlowTableStatsTracker flowTableStats) {
+        this(flowStatsService, context, lifetimeNanos);
+        this.flowTableStats = flowTableStats;
     }
 
     @Override
@@ -203,6 +209,20 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         return "Flow";
     }
 
+    @Override
+    public void request() {
+        // FIXME: it does not make sense to trigger this before sendAllFlowTablesStatisticsRequest()
+        //        comes back -- we do not have any tables anyway.
+        final Collection<TableKey> tables = flowTableStats.getTables();
+        logger.debug("Node {} supports {} table(s)", this.getNodeRef(), tables.size());
+        for (final TableKey key : tables) {
+            logger.debug("Send aggregate stats request for flow table {} to node {}", key.getId(), this.getNodeRef());
+            this.requestAggregateFlows(key);
+        }
+
+        this.requestAllFlowsAllTables();
+        
+    }
     public void requestAllFlowsAllTables() {
         if (flowStatsService != null) {
             final GetAllFlowsStatisticsFromAllFlowTablesInputBuilder input = new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder();

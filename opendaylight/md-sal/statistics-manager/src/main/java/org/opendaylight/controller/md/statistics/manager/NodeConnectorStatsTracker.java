@@ -73,6 +73,7 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
         return item;
     }
 
+    @Override
     public void request() {
         if (portStatsService != null) {
             final GetAllNodeConnectorsStatisticsInputBuilder input = new GetAllNodeConnectorsStatisticsInputBuilder();
