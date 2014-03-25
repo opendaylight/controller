@@ -16,12 +16,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import java.util.Map
 import org.opendaylight.controller.sal.core.Edge
 import java.util.Set
-import java.util.List
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node
-import java.util.Collections
-import com.google.common.collect.FluentIterable
 import java.util.HashSet
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId
 import org.opendaylight.controller.sal.compatibility.NodeMapping
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
@@ -30,7 +26,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.link.attributes.Destination
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey
 import java.util.HashMap
 
@@ -42,7 +37,7 @@ class AdSalTopologyMapping {
 
     new(TopologyKey topology) {
         topologyMapping = topology;
-        _topologyPath = InstanceIdentifier.builder.node(NetworkTopology).child(Topology, topology).toInstance;
+        _topologyPath = InstanceIdentifier.builder(NetworkTopology).child(Topology, topology).toInstance;
     }
 
     def InstanceIdentifier<TerminationPoint> toTerminationPoint(NodeConnector connector) {

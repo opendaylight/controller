@@ -163,7 +163,7 @@ public class NodeMapping {
     Preconditions.checkArgument(MD_SAL_TYPE.equals(node.getType()));
     final String nodeId = Arguments.<String>checkInstanceOf(node.getID(), String.class);
     final NodeKey nodeKey = new NodeKey(new NodeId(nodeId));
-    final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder().node(Nodes.class).child(NODE_CLASS, nodeKey).toInstance();
+    final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class).child(NODE_CLASS, nodeKey).toInstance();
     return new NodeRef(nodePath);
   }
   
