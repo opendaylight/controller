@@ -11,7 +11,7 @@ import java.util.Collection;
 
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.dom.broker.spi.NotificationRouter;
-import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -25,12 +25,12 @@ import com.google.common.collect.Multimaps;
 public class NotificationRouterImpl implements NotificationRouter {
     private static Logger log = LoggerFactory.getLogger(NotificationRouterImpl.class);
 
-    private final Multimap<QName, Registration<NotificationListener>> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.<QName, Registration<NotificationListener>>create());
+    private final Multimap<QName, ListenerRegistration> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.<QName, ListenerRegistration>create());
 //    private Registration<NotificationListener> defaultListener;
 
     private void sendNotification(CompositeNode notification) {
         final QName type = notification.getNodeType();
-        final Collection<Registration<NotificationListener>> toNotify = listeners.get(type);
+        final Collection<ListenerRegistration> toNotify = listeners.get(type);
         log.trace("Publishing notification " + type);
 
         if ((toNotify == null) || toNotify.isEmpty()) {
@@ -38,7 +38,7 @@ public class NotificationRouterImpl implements NotificationRouter {
             return;
         }
 
-        for (Registration<NotificationListener> listener : toNotify) {
+        for (ListenerRegistration listener : toNotify) {
             try {
                 // FIXME: ensure that notification is immutable
                 listener.getInstance().onNotification(notification);
@@ -60,7 +60,7 @@ public class NotificationRouterImpl implements NotificationRouter {
         return ret;
     }
 
-    private class ListenerRegistration extends AbstractObjectRegistration<NotificationListener> {
+    private class ListenerRegistration extends AbstractListenerRegistration<NotificationListener> {
 
         final QName type;
 

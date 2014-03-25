@@ -16,7 +16,7 @@ import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -237,7 +237,7 @@ public interface Broker {
         ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
     }
 
-    public interface RpcRegistration extends Registration<RpcImplementation> {
+    public interface RpcRegistration extends ObjectRegistration<RpcImplementation> {
         QName getType();
 
         @Override

@@ -7,9 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
+import static java.lang.String.format;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
@@ -18,14 +25,6 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import static java.lang.String.format;
 
 /**
  * Tracks bundles and attempts to retrieve YangModuleInfo, which is then fed into ModuleInfoRegistry
@@ -78,7 +77,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
             return;
         }
 
-        for (Registration<YangModuleInfo> reg : regs) {
+        for (ObjectRegistration<YangModuleInfo> reg : regs) {
             try {
                 reg.close();
             } catch (Exception e) {
