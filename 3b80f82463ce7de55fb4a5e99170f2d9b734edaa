@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_6441230b",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/StoreMetadataNode.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-26T01:14:13Z",
+      "side": 1,
+      "message": "Why is the param named currentMetadata. Isn\u0027t it just some metadata? Also why should currentMetadata be Optional? This seems to imply that we may or may not pass currentMetadata even though when we don\u0027t we will always get only an absent.",
+      "revId": "3b80f82463ce7de55fb4a5e99170f2d9b734edaa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_843c1795",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/StoreMetadataNode.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-03-26T01:14:13Z",
+      "side": 1,
+      "message": "Typo two l\u0027s in recursively",
+      "revId": "3b80f82463ce7de55fb4a5e99170f2d9b734edaa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
