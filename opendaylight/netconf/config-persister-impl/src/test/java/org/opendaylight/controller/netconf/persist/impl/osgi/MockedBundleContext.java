@@ -14,41 +14,71 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.DummyAdapter;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
 final class MockedBundleContext {
-
     @Mock
     private BundleContext context;
+    @Mock
+    private Filter filter;
+    @Mock
+    private ServiceReference<?> serviceReference;
+    @Mock
+    private Bundle bundle;
+    @Mock
+    NetconfOperationServiceFactory serviceFactory;
+    @Mock
+    private NetconfOperationService service;
 
-    MockedBundleContext(String netconfAddress, String netconfPort) {
+    MockedBundleContext(long maxWaitForCapabilitiesMillis, long conflictingVersionTimeoutMillis) throws Exception {
         MockitoAnnotations.initMocks(this);
-        initContext(netconfAddress, netconfPort);
+        doReturn(null).when(context).getProperty(anyString());
+        initContext(maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
+        doReturn(filter).when(context).createFilter(ConfigPersisterActivator.getFilterString());
+        String filterString = "filter";
+        doReturn(filterString).when(filter).toString();
+        doNothing().when(context).addServiceListener(any(ServiceListener.class), eq(filterString));
+        ServiceReference<?>[] toBeReturned = {serviceReference};
+        doReturn(toBeReturned).when(context).getServiceReferences((String) null, filterString);
+        doReturn(bundle).when(serviceReference).getBundle();
+        doReturn(context).when(bundle).getBundleContext();
+        doReturn("").when(serviceReference).toString();
+        doReturn(serviceFactory).when(context).getService(any(ServiceReference.class));
+        doReturn(service).when(serviceFactory).createService(anyString());
+        doReturn(Collections.emptySet()).when(service).getCapabilities();
+        doNothing().when(service).close();
     }
 
     public BundleContext getBundleContext() {
         return context;
     }
 
-    private void initContext(String netconfAddress, String netconfPort) {
-        initProp(context, ConfigPersisterActivator.IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX, null);
-
-        initPropNoPrefix(context, "netconf.tcp.client.address", netconfAddress);
-        initPropNoPrefix(context, "netconf.tcp.client.port", netconfPort);
-
+    private void initContext(long maxWaitForCapabilitiesMillis, long conflictingVersionTimeoutMillis) {
         initProp(context, "active", "1");
         initProp(context, "1." + ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX, DummyAdapterWithInitialSnapshot.class.getName());
         initProp(context, "1." + "readonly", "false");
         initProp(context, "1." + ".properties.fileStorage", "target/configuration-persister-test/initial/");
-
+        initProp(context, ConfigPersisterActivator.MAX_WAIT_FOR_CAPABILITIES_MILLIS_PROPERTY, String.valueOf(maxWaitForCapabilitiesMillis));
+        initProp(context, ConfigPersisterActivator.CONFLICTING_VERSION_TIMEOUT_MILLIS_PROPERTY, String.valueOf(conflictingVersionTimeoutMillis));
     }
 
     private void initProp(BundleContext context, String key, String value) {
@@ -66,7 +96,7 @@ final class MockedBundleContext {
 
         @Override
         public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
-            return Lists.newArrayList(getConfigSnapshopt());
+            return Lists.newArrayList(getConfigSnapshot());
         }
 
         @Override
@@ -74,7 +104,7 @@ final class MockedBundleContext {
             return this;
         }
 
-        public ConfigSnapshotHolder getConfigSnapshopt() {
+        public ConfigSnapshotHolder getConfigSnapshot() {
             return new ConfigSnapshotHolder() {
                 @Override
                 public String getConfigSnapshot() {

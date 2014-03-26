@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NetconfOperationServiceSnapshot implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(NetconfOperationServiceSnapshot.class);
@@ -27,7 +27,7 @@ public class NetconfOperationServiceSnapshot implements AutoCloseable {
         Set<NetconfOperationService> services = new HashSet<>();
         netconfSessionIdForReporting = getNetconfSessionIdForReporting(sessionId);
         for (NetconfOperationServiceFactory factory : factories) {
-            services.add(factory.createService(sessionId, netconfSessionIdForReporting));
+            services.add(factory.createService(netconfSessionIdForReporting));
         }
         this.services = Collections.unmodifiableSet(services);
     }

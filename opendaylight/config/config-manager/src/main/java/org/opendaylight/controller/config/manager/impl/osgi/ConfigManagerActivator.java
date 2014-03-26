@@ -14,9 +14,7 @@ import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBu
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
 import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -25,7 +23,6 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.registerService;
@@ -57,11 +54,12 @@ public class ConfigManagerActivator implements BundleActivator {
         // track bundles containing factories
         BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
                 configRegistry);
-        ModuleFactoryBundleTracker moduleFactoryBundleTracker = new ModuleFactoryBundleTracker(
+        ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker(
                 blankTransactionServiceTracker);
 
         // start extensible tracker
-        ExtensibleBundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker = new ExtensibleBundleTracker<>(context, moduleInfoBundleTracker, moduleFactoryBundleTracker);
+        ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
+                primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
         bundleTracker.open();
 
         // register config registry to OSGi

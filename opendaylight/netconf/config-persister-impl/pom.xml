@@ -22,10 +22,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>netconf-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
         </dependency>
         <dependency>
@@ -61,6 +57,7 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>mockito-configuration</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -83,32 +80,7 @@
                     <instructions>
                         <Bundle-Activator>org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator
                         </Bundle-Activator>
-                        <Require-Capability>org.opendaylight.controller.config.persister.storage.adapter
-                        </Require-Capability>
-                        <Import-Package>
-                            com.google.common.base,
-                            com.google.common.collect,
-                            javax.management,
-                            javax.xml.parsers,
-                            org.opendaylight.controller.config.persist.api,
-                            org.opendaylight.controller.netconf.api,
-                            org.opendaylight.controller.netconf.api.jmx,
-                            org.opendaylight.controller.netconf.client,
-                            org.opendaylight.controller.netconf.util.osgi,
-                            org.opendaylight.controller.netconf.util.xml,
-                            org.opendaylight.controller.netconf.util.messages,
-                            io.netty.channel,
-                            io.netty.channel.nio,
-                            io.netty.util.concurrent,
-                            org.osgi.framework,
-                            org.slf4j,
-                            org.w3c.dom,
-                            org.xml.sax,
-                            javax.xml.namespace,
-                            javax.xml.xpath,
-                            org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.netconf.util
-                        </Import-Package>
+                        <Require-Capability>org.opendaylight.controller.config.persister.storage.adapter</Require-Capability>
                         <Export-Package>
                         </Export-Package>
                     </instructions>

@@ -66,7 +66,7 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
     }
 
     @Override
-    public NetconfOperationServiceImpl createService(long netconfSessionId, String netconfSessionIdForReporting) {
+    public NetconfOperationServiceImpl createService(String netconfSessionIdForReporting) {
         try {
             return new NetconfOperationServiceImpl(yangStoreService, jmxClient, netconfSessionIdForReporting);
         } catch (YangStoreException e) {

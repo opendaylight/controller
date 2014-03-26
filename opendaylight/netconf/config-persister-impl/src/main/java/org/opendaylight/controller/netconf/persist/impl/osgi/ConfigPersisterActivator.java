@@ -9,148 +9,139 @@
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
-import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfiguration;
-import org.opendaylight.controller.netconf.persist.impl.ConfigPusherConfigurationBuilder;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
-import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ThreadFactory;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterActivator.class);
 
-    public static final String IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX = "ignoredMissingCapabilityRegex";
-
-    public static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS = "maxWaitForCapabilitiesMillis";
+    public static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS_PROPERTY = "maxWaitForCapabilitiesMillis";
+    private static final long MAX_WAIT_FOR_CAPABILITIES_MILLIS_DEFAULT = TimeUnit.MINUTES.toMillis(2);
+    public static final String CONFLICTING_VERSION_TIMEOUT_MILLIS_PROPERTY = "conflictingVersionTimeoutMillis";
+    private static final long CONFLICTING_VERSION_TIMEOUT_MILLIS_DEFAULT = TimeUnit.SECONDS.toMillis(30);
 
     public static final String NETCONF_CONFIG_PERSISTER = "netconf.config.persister";
 
     public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX = "storageAdapterClass";
 
-    public static final String DEFAULT_IGNORED_REGEX = "^urn:ietf:params:xml:ns:netconf:base:1.0";
 
-    private final MBeanServer platformMBeanServer;
+    private static final MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
-    private final Optional<ConfigPusherConfiguration> initialConfigForPusher;
-    private volatile ConfigPersisterNotificationHandler jmxNotificationHandler;
-    private Thread initializationThread;
-    private ThreadFactory initializationThreadFactory;
-    private EventLoopGroup nettyThreadGroup;
-    private PersisterAggregator persisterAggregator;
+    private List<AutoCloseable> autoCloseables;
 
-    public ConfigPersisterActivator() {
-        this(new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable initializationRunnable) {
-                return new Thread(initializationRunnable, "ConfigPersister-registrator");
-            }
-        }, ManagementFactory.getPlatformMBeanServer(), null);
-    }
-
-    @VisibleForTesting
-    protected ConfigPersisterActivator(ThreadFactory threadFactory, MBeanServer mBeanServer,
-            ConfigPusherConfiguration initialConfigForPusher) {
-        this.initializationThreadFactory = threadFactory;
-        this.platformMBeanServer = mBeanServer;
-        this.initialConfigForPusher = Optional.fromNullable(initialConfigForPusher);
-    }
 
     @Override
     public void start(final BundleContext context) throws Exception {
         logger.debug("ConfigPersister starting");
-
+        autoCloseables = new ArrayList<>();
         PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
-        final Pattern ignoredMissingCapabilityRegex = getIgnoredCapabilitiesProperty(propertiesProvider);
 
-        persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
-
-        final ConfigPusher configPusher = new ConfigPusher(getConfigurationForPusher(context, propertiesProvider));
-
-        // offload initialization to another thread in order to stop blocking activator
-        Runnable initializationRunnable = new Runnable() {
+        final PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
+        autoCloseables.add(persisterAggregator);
+        final long maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesMillis(propertiesProvider);
+        final List<ConfigSnapshotHolder> configs = persisterAggregator.loadLastConfigs();
+        final long conflictingVersionTimeoutMillis = getConflictingVersionTimeoutMillis(propertiesProvider);
+        logger.trace("Following configs will be pushed: {}", configs);
+        ServiceTrackerCustomizer<NetconfOperationServiceFactory, NetconfOperationServiceFactory> configNetconfCustomizer = new ServiceTrackerCustomizer<NetconfOperationServiceFactory, NetconfOperationServiceFactory>() {
             @Override
-            public void run() {
-                try {
-                    configPusher.pushConfigs(persisterAggregator.loadLastConfigs());
-                    jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator,
-                            ignoredMissingCapabilityRegex);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    logger.error("Interrupted while waiting for netconf connection");
-                    // uncaught exception handler will deal with this failure
-                    throw new RuntimeException("Interrupted while waiting for netconf connection", e);
+            public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
+                NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
+                final ConfigPusher configPusher = new ConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
+                logger.debug("Configuration Persister got %s", service);
+                final Thread pushingThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        configPusher.pushConfigs(configs);
+                        logger.info("Configuration Persister initialization completed.");
+                        ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
+                        synchronized (ConfigPersisterActivator.this) {
+                            autoCloseables.add(jmxNotificationHandler);
+                        }
+                    }
+                }, "config-pusher");
+                synchronized (ConfigPersisterActivator.this){
+                    autoCloseables.add(new AutoCloseable() {
+                        @Override
+                        public void close() throws Exception {
+                            pushingThread.interrupt();
+                        }
+                    });
                 }
-                logger.info("Configuration Persister initialization completed.");
+                pushingThread.start();
+                return service;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
+            }
+
+            @Override
+            public void removedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
             }
         };
 
-        initializationThread = initializationThreadFactory.newThread(initializationRunnable);
-        initializationThread.start();
+        Filter filter = context.createFilter(getFilterString());
+
+        ServiceTracker<NetconfOperationServiceFactory, NetconfOperationServiceFactory> tracker =
+                new ServiceTracker<>(context, filter, configNetconfCustomizer);
+        tracker.open();
     }
 
-    private Pattern getIgnoredCapabilitiesProperty(PropertiesProviderBaseImpl propertiesProvider) {
-        String regexProperty = propertiesProvider.getProperty(IGNORED_MISSING_CAPABILITY_REGEX_SUFFIX);
-        String regex;
-        if (regexProperty != null) {
-            regex = regexProperty;
-        } else {
-            regex = DEFAULT_IGNORED_REGEX;
-        }
-        return Pattern.compile(regex);
+
+    @VisibleForTesting
+    public static String getFilterString() {
+        return "(&" +
+                "(" + Constants.OBJECTCLASS + "=" + NetconfOperationServiceFactory.class.getName() + ")" +
+                "(name" + "=" + "config-netconf-connector" + ")" +
+                ")";
     }
 
-    private Optional<Long> getMaxWaitForCapabilitiesProperty(PropertiesProviderBaseImpl propertiesProvider) {
-        String timeoutProperty = propertiesProvider.getProperty(MAX_WAIT_FOR_CAPABILITIES_MILLIS);
-        return Optional.fromNullable(timeoutProperty == null ? null : Long.valueOf(timeoutProperty));
+    private long getConflictingVersionTimeoutMillis(PropertiesProviderBaseImpl propertiesProvider) {
+        String timeoutProperty = propertiesProvider.getProperty(CONFLICTING_VERSION_TIMEOUT_MILLIS_PROPERTY);
+        return timeoutProperty == null ? CONFLICTING_VERSION_TIMEOUT_MILLIS_DEFAULT : Long.valueOf(timeoutProperty);
     }
 
-    private ConfigPusherConfiguration getConfigurationForPusher(BundleContext context,
-            PropertiesProviderBaseImpl propertiesProvider) {
-
-        // If configuration was injected via constructor, use it
-        if(initialConfigForPusher.isPresent())
-            return initialConfigForPusher.get();
-
-        Optional<Long> maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesProperty(propertiesProvider);
-        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                "Netconf is not configured, persister is not operational", true);
-
-        nettyThreadGroup = new NioEventLoopGroup();
-
-        ConfigPusherConfigurationBuilder configPusherConfigurationBuilder = ConfigPusherConfigurationBuilder.aConfigPusherConfiguration();
-
-        if(maxWaitForCapabilitiesMillis.isPresent())
-            configPusherConfigurationBuilder.withNetconfCapabilitiesWaitTimeoutMs(maxWaitForCapabilitiesMillis.get());
-
-        return configPusherConfigurationBuilder
-                .withEventLoopGroup(nettyThreadGroup)
-                .withNetconfAddress(address)
-                .build();
+    private long getMaxWaitForCapabilitiesMillis(PropertiesProviderBaseImpl propertiesProvider) {
+        String timeoutProperty = propertiesProvider.getProperty(MAX_WAIT_FOR_CAPABILITIES_MILLIS_PROPERTY);
+        return timeoutProperty == null ? MAX_WAIT_FOR_CAPABILITIES_MILLIS_DEFAULT : Long.valueOf(timeoutProperty);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        initializationThread.interrupt();
-        if (jmxNotificationHandler != null) {
-            jmxNotificationHandler.close();
+    public synchronized void stop(BundleContext context) throws Exception {
+        Exception lastException = null;
+        for (AutoCloseable autoCloseable : autoCloseables) {
+            try {
+                autoCloseable.close();
+            } catch (Exception e) {
+                if (lastException == null) {
+                    lastException = e;
+                } else {
+                    lastException.addSuppressed(e);
+                }
+            }
         }
-        if(nettyThreadGroup!=null)
-            nettyThreadGroup.shutdownGracefully();
-        persisterAggregator.close();
+        if (lastException != null) {
+            throw lastException;
+        }
     }
 }

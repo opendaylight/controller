@@ -23,7 +23,6 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * Responsible for listening for notifications from netconf (via JMX) containing latest
@@ -39,9 +38,9 @@ public class ConfigPersisterNotificationHandler implements Closeable {
 
 
     public ConfigPersisterNotificationHandler(MBeanServerConnection mBeanServerConnection,
-                                              Persister persisterAggregator, Pattern ignoredMissingCapabilityRegex) {
+                                              Persister persisterAggregator) {
         this.mBeanServerConnection = mBeanServerConnection;
-        listener = new ConfigPersisterNotificationListener(persisterAggregator, ignoredMissingCapabilityRegex);
+        listener = new ConfigPersisterNotificationListener(persisterAggregator);
         registerAsJMXListener(mBeanServerConnection, listener);
 
     }
@@ -73,17 +72,16 @@ class ConfigPersisterNotificationListener implements NotificationListener {
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationListener.class);
 
     private final Persister persisterAggregator;
-    private final Pattern ignoredMissingCapabilityRegex;
 
-    ConfigPersisterNotificationListener(Persister persisterAggregator, Pattern ignoredMissingCapabilityRegex) {
+    ConfigPersisterNotificationListener(Persister persisterAggregator) {
         this.persisterAggregator = persisterAggregator;
-        this.ignoredMissingCapabilityRegex = ignoredMissingCapabilityRegex;
     }
 
     @Override
     public void handleNotification(Notification notification, Object handback) {
-        if (notification instanceof NetconfJMXNotification == false)
+        if (notification instanceof NetconfJMXNotification == false) {
             return;
+        }
 
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called
@@ -98,14 +96,15 @@ class ConfigPersisterNotificationListener implements NotificationListener {
                 logger.warn("Exception occured during notification handling: ", e);
                 throw e;
             }
-        } else
+        } else {
             throw new IllegalStateException("Unknown config registry notification type " + notification);
+        }
     }
 
     private void handleAfterCommitNotification(final CommitJMXNotification notification) {
         try {
             persisterAggregator.persistConfig(new CapabilityStrippingConfigSnapshotHolder(notification.getConfigSnapshot(),
-                    notification.getCapabilities(), ignoredMissingCapabilityRegex));
+                    notification.getCapabilities()));
             logger.trace("Configuration persisted successfully");
         } catch (IOException e) {
             throw new RuntimeException("Unable to persist configuration snapshot", e);

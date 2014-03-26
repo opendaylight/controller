@@ -111,7 +111,7 @@ public class ConcurrentClientsTest {
     private NetconfOperationServiceFactory mockOpF() {
         return new NetconfOperationServiceFactory() {
             @Override
-            public NetconfOperationService createService(long netconfSessionId, String netconfSessionIdForReporting) {
+            public NetconfOperationService createService(String netconfSessionIdForReporting) {
                 return new NetconfOperationService() {
                     @Override
                     public Set<Capability> getCapabilities() {

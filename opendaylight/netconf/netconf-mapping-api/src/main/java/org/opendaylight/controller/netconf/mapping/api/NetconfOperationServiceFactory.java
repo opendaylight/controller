@@ -15,6 +15,6 @@ package org.opendaylight.controller.netconf.mapping.api;
  */
 public interface NetconfOperationServiceFactory {
 
-    NetconfOperationService createService(long netconfSessionId, String netconfSessionIdForReporting);
+    NetconfOperationService createService(String netconfSessionIdForReporting);
 
 }

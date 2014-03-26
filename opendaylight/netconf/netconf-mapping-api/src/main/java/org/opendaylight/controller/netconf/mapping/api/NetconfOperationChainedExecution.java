@@ -27,4 +27,18 @@ public interface NetconfOperationChainedExecution {
      * Do not execute if this is termination point
      */
     Document execute(Document requestMessage) throws NetconfDocumentedException;
+
+    public static final NetconfOperationChainedExecution EXECUTION_TERMINATION_POINT = new NetconfOperationChainedExecution() {
+        @Override
+        public boolean isExecutionTermination() {
+            return true;
+        }
+
+        @Override
+        public Document execute(Document requestMessage) throws NetconfDocumentedException {
+            throw new IllegalStateException("This execution represents the termination point in operation execution and cannot be executed itself");
+        }
+    };
+
+
 }
