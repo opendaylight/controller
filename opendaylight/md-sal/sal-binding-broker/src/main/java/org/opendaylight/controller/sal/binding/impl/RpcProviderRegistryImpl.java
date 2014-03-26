@@ -247,7 +247,8 @@ public class RpcProviderRegistryImpl implements //
 
         public RpcProxyRegistration(Class<T> type, T service, RpcProviderRegistryImpl registry) {
             super(service);
-            serviceType = type;
+            this.serviceType = type;
+            this.registry =  registry;
         }
 
         @Override
