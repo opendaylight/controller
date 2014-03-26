@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_c468cf89",
+        "filename": "opendaylight/web/flows/src/main/java/org/opendaylight/controller/flows/web/Flows.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 20
+      },
+      "writtenOn": "2014-03-26T02:56:58Z",
+      "side": 1,
+      "message": "@aboch\n\nActionType is still needed because FlowConfig uses ActionType to parse the flow action types",
+      "revId": "3e942caa1b980af5ffa0d1a98a7fa05d4b1fddeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_e46bd383",
+        "filename": "opendaylight/web/flows/src/main/resources/js/page.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 20
+      },
+      "writtenOn": "2014-03-26T02:56:58Z",
+      "side": 1,
+      "message": "@aboch\n\nThe flow action types are still hardcoded for populating certain fields (for example, entering VLAN ID and populating the help and placeholder text in the modal)",
+      "revId": "3e942caa1b980af5ffa0d1a98a7fa05d4b1fddeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
