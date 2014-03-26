@@ -61,6 +61,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return false;
     }
 
+
+    public boolean isKeyedEntry() {
+        return false;
+    }
+
     protected Set<QName> getQNameIdentifiers() {
         return Collections.singleton(identifier.getNodeType());
     }
@@ -129,6 +134,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return Builders.leafSetEntryBuilder().withNodeIdentifier(nodeId).withValue(node.getValue()).build();
         }
 
+
+        @Override
+        public boolean isKeyedEntry() {
+            return true;
+        }
     }
 
     private static abstract class CompositeNodeNormalizationOpertation<T extends PathArgument> extends
@@ -243,7 +253,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
             ImmutableMap.Builder<QName, Object> keys = ImmutableMap.builder();
             for (QName key : keyDefinition) {
-                SimpleNode<?> valueNode = checkNotNull(compositeNode.getFirstSimpleByName(key),"List node %s MUST contain leaf %s with value.",getIdentifier().getNodeType(),key);
+
+                SimpleNode<?> valueNode = checkNotNull(compositeNode.getFirstSimpleByName(key),
+                        "List node %s MUST contain leaf %s with value.", getIdentifier().getNodeType(), key);
                 keys.put(key, valueNode.getValue());
             }
 
@@ -262,6 +274,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                         .build());
             }
             return builder.build();
+        }
+
+
+        @Override
+        public boolean isKeyedEntry() {
+            return true;
         }
     }
 
