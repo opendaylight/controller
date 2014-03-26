@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -11,6 +12,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -31,12 +33,9 @@ import com.google.common.collect.Iterables;
 
 public class DataNormalizer {
 
-    private final SchemaContext schemaContext;
-
     private final DataNormalizationOperation<?> operation;
 
     public DataNormalizer(final SchemaContext ctx) {
-        schemaContext = ctx;
         operation = DataNormalizationOperation.from(ctx);
     }
 
@@ -44,14 +43,18 @@ public class DataNormalizer {
         ImmutableList.Builder<PathArgument> normalizedArgs = ImmutableList.builder();
 
         DataNormalizationOperation<?> currentOp = operation;
-        for (PathArgument legacyArg : legacy.getPath()) {
+        Iterator<PathArgument> arguments = legacy.getPath().iterator();
+        while ( arguments.hasNext() ) {
+            PathArgument legacyArg = arguments.next();
             currentOp = currentOp.getChild(legacyArg);
             checkArgument(currentOp != null, "Legacy Instance Identifier %s is not correct. Normalized Instance Identifier so far %s",legacy,normalizedArgs.build());
             while (currentOp.isMixin()) {
                 normalizedArgs.add(currentOp.getIdentifier());
                 currentOp = currentOp.getChild(legacyArg.getNodeType());
             }
-            normalizedArgs.add(legacyArg);
+            if(arguments.hasNext() || (!currentOp.isKeyedEntry() || legacyArg instanceof NodeIdentifierWithPredicates || legacyArg instanceof NodeWithValue)) {
+                normalizedArgs.add(legacyArg);
+            }
         }
         return new InstanceIdentifier(normalizedArgs.build());
     }
