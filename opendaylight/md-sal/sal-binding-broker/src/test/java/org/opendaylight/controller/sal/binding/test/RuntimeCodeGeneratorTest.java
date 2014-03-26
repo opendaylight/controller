@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javassist.ClassPool;
@@ -41,7 +41,6 @@ import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 public class RuntimeCodeGeneratorTest {
 
@@ -179,8 +178,7 @@ public class RuntimeCodeGeneratorTest {
         ReferencableObjectKey key = new ReferencableObjectKey(i);
         IdentifiableItem<ReferencableObject, ReferencableObjectKey> pathArg = new IdentifiableItem<>(
                 ReferencableObject.class, key);
-        return new InstanceIdentifier<ReferencableObject>(Arrays.<PathArgument> asList(pathArg),
-                ReferencableObject.class);
+        return InstanceIdentifier.create(Collections.singletonList(pathArg));
     }
 
     private static class SimpleInputImpl implements SimpleInput {
