@@ -17,6 +17,8 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * Node Modification Node and Tree
@@ -30,6 +32,12 @@ import com.google.common.base.Optional;
  */
 public class NodeModification implements StoreTreeNode<NodeModification>, Identifiable<PathArgument> {
 
+    public static final Predicate<NodeModification> IS_TERMINAL_PREDICATE = new Predicate<NodeModification>() {
+        @Override
+        public boolean apply(final NodeModification input) {
+            return input.getModificationType() == ModificationType.WRITE || input.getModificationType() == ModificationType.DELETE;
+        }
+    };
     private final PathArgument identifier;
     private ModificationType modificationType = ModificationType.UNMODIFIED;
 
@@ -38,7 +46,8 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
 
     private NormalizedNode<?, ?> value;
 
-    private StoreMetadataNode snapshotCache;
+    private UnsignedLong subtreeVersion;
+    private Optional<StoreMetadataNode> snapshotCache;
 
     private final Map<PathArgument, NodeModification> childModification;
 
@@ -109,6 +118,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
      */
     public synchronized NodeModification modifyChild(final PathArgument child) {
         checkSealed();
+        clearSnapshot();
         if(modificationType == ModificationType.UNMODIFIED) {
             updateModificationType(ModificationType.SUBTREE_MODIFIED);
         }
@@ -143,6 +153,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
      */
     public synchronized void delete() {
         checkSealed();
+        clearSnapshot();
         updateModificationType(ModificationType.DELETE);
         childModification.clear();
         this.value = null;
@@ -156,6 +167,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
      */
     public synchronized void write(final NormalizedNode<?, ?> value) {
         checkSealed();
+        clearSnapshot();
         updateModificationType(ModificationType.WRITE);
         childModification.clear();
         this.value = value;
@@ -167,6 +179,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
 
     public synchronized void seal() {
         sealed = true;
+        clearSnapshot();
         for(NodeModification child : childModification.values()) {
             child.seal();
         }
@@ -174,6 +187,15 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
 
     private void clearSnapshot() {
         snapshotCache = null;
+    }
+
+    public Optional<StoreMetadataNode> storeSnapshot(final Optional<StoreMetadataNode> snapshot) {
+        snapshotCache = snapshot;
+        return snapshot;
+    }
+
+    public Optional<Optional<StoreMetadataNode>> getSnapshotCache() {
+        return Optional.fromNullable(snapshotCache);
     }
 
     public boolean hasAdditionalModifications() {
@@ -188,7 +210,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
     @Override
     public String toString() {
         return "NodeModification [identifier=" + identifier + ", modificationType="
-                + modificationType + ", value=" + value + ", childModification=" + childModification + "]";
+                + modificationType + ", childModification=" + childModification + "]";
     }
 
     public static NodeModification createUnmodified(final StoreMetadataNode metadataTree) {

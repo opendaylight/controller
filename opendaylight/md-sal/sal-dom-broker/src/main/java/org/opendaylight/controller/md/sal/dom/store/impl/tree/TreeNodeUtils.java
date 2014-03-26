@@ -8,13 +8,18 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 public class TreeNodeUtils {
 
@@ -35,6 +40,19 @@ public class TreeNodeUtils {
         return current;
     }
 
+
+    public static <T extends StoreTreeNode<T>> T findNodeChecked(final T tree, final InstanceIdentifier path) {
+        T current = tree;
+        List<PathArgument> nested = new ArrayList<>(path.getPath());
+        for(PathArgument pathArg : path.getPath()) {
+            Optional<T> potential = current.getChild(pathArg);
+            nested.add(pathArg);
+            Preconditions.checkArgument(potential.isPresent(),"Child %s is not present in tree.",nested);
+            current = potential.get();
+        }
+        return current;
+    }
+
     /**
      * Finds a node or closest parent in  the tree
      *
@@ -44,12 +62,16 @@ public class TreeNodeUtils {
      *
      */
     public static <T extends StoreTreeNode<T>> Map.Entry<InstanceIdentifier, T> findClosest(final T tree, final InstanceIdentifier path) {
+        return findClosestsOrFirstMatch(tree, path, Predicates.<T>alwaysFalse());
+    }
+
+    public static <T extends StoreTreeNode<T>> Map.Entry<InstanceIdentifier, T> findClosestsOrFirstMatch(final T tree, final InstanceIdentifier path, final Predicate<T> predicate) {
         Optional<T> parent = Optional.<T>of(tree);
         Optional<T> current = Optional.<T> of(tree);
 
         int nesting = 0;
         Iterator<PathArgument> pathIter = path.getPath().iterator();
-        while (current.isPresent() && pathIter.hasNext()) {
+        while (current.isPresent() && pathIter.hasNext() && !predicate.apply(current.get())) {
             parent = current;
             current = current.get().getChild(pathIter.next());
             nesting++;
@@ -62,6 +84,7 @@ public class TreeNodeUtils {
         // so this prat of code is never triggered, in cases nesting == 0;
         final InstanceIdentifier parentPath = new InstanceIdentifier(path.getPath().subList(0, nesting - 1));
         return new SimpleEntry<InstanceIdentifier,T>(parentPath,parent.get());
+
     }
 
     public static <T extends StoreTreeNode<T>> Optional<T> getChild(final Optional<T> parent,final PathArgument child) {
