@@ -10,8 +10,6 @@ package org.opendaylight.controller.sal.binding.test;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +42,6 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 import static org.mockito.Mockito.*;
 
@@ -121,7 +117,7 @@ public class RuntimeCodeGeneratorTest {
 
     }
 
-    private void verifyRouting(RpcRouter<FooService> product) {
+    private void verifyRouting(final RpcRouter<FooService> product) {
         assertNotNull("Routing table should be initialized", product.getRoutingTable(BaseIdentity.class));
 
         RpcRoutingTable<BaseIdentity, FooService> routingTable = product.getRoutingTable(BaseIdentity.class);
@@ -165,7 +161,7 @@ public class RuntimeCodeGeneratorTest {
         verify(service[1]).simple(instance_1_input[0]);
     }
 
-    private InstanceIdentifier<?>[][] identifiers(int serviceSize, int instancesPerService) {
+    private InstanceIdentifier<?>[][] identifiers(final int serviceSize, final int instancesPerService) {
         InstanceIdentifier<?>[][] ret = new InstanceIdentifier[serviceSize][];
         int service = 0;
         for (int i = 0; i < serviceSize; i++) {
@@ -181,23 +177,19 @@ public class RuntimeCodeGeneratorTest {
         return ret;
     }
 
-    private InstanceIdentifier<?> referencableIdentifier(int i) {
-        ReferencableObjectKey key = new ReferencableObjectKey(i);
-        IdentifiableItem<ReferencableObject, ReferencableObjectKey> pathArg = new IdentifiableItem<>(
-                ReferencableObject.class, key);
-        return new InstanceIdentifier<ReferencableObject>(Arrays.<PathArgument> asList(pathArg),
-                ReferencableObject.class);
+    private InstanceIdentifier<?> referencableIdentifier(final int i) {
+        return InstanceIdentifier.builder(ReferencableObject.class, new ReferencableObjectKey(i)).build();
     }
 
     private static class SimpleInputImpl implements SimpleInput {
         private final InstanceIdentifier<?> identifier;
 
-        public SimpleInputImpl(InstanceIdentifier<?> _identifier) {
+        public SimpleInputImpl(final InstanceIdentifier<?> _identifier) {
             this.identifier = _identifier;
         }
 
         @Override
-        public <E extends Augmentation<SimpleInput>> E getAugmentation(Class<E> augmentationType) {
+        public <E extends Augmentation<SimpleInput>> E getAugmentation(final Class<E> augmentationType) {
             return null;
         }
 
@@ -236,7 +228,7 @@ public class RuntimeCodeGeneratorTest {
         List<FooUpdate> receivedFoos = new ArrayList<>();
 
         @Override
-        public void onFooUpdate(FooUpdate notification) {
+        public void onFooUpdate(final FooUpdate notification) {
             receivedFoos.add(notification);
         }
 
@@ -248,12 +240,12 @@ public class RuntimeCodeGeneratorTest {
         List<FlowDelete> receivedDeletes = new ArrayList<>();
 
         @Override
-        public void onBarUpdate(BarUpdate notification) {
+        public void onBarUpdate(final BarUpdate notification) {
             receivedBars.add(notification);
         }
 
         @Override
-        public void onFlowDelete(FlowDelete notification) {
+        public void onFlowDelete(final FlowDelete notification) {
             receivedDeletes.add(notification);
         }
 
