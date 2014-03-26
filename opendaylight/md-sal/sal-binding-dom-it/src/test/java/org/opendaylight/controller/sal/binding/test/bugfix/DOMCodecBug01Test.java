@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -115,8 +116,14 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
      *
      * Reported by Depthi V V
      *
+     * @deprecated This test tests indirect generation, which should be tested
+     *    different way. the test creates conflicting transactions
+     *    and assumes correct commit - to test codec generation
+     *
      */
     @Test
+    @Ignore
+    @Deprecated
     public void testIndirectGeneration() throws Exception {
 
         ExecutorService basePool = Executors.newFixedThreadPool(2);
@@ -218,7 +225,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
 
     private class CreateFlowTask implements Callable<Void> {
 
-        public CreateFlowTask(Object startSync) {
+        public CreateFlowTask(final Object startSync) {
         }
 
         @Override

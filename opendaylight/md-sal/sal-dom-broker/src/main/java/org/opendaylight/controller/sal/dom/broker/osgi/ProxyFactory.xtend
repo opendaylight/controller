@@ -16,12 +16,14 @@ import org.opendaylight.controller.sal.core.api.notify.NotificationService
 import org.opendaylight.controller.sal.core.api.model.SchemaService
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker
 
 class ProxyFactory {
 
     static def <T extends BrokerService> T createProxy(ServiceReference<T> serviceRef, T service) {
         return createProxyImpl(serviceRef, service) as T;
     }
+
 
     private static def dispatch createProxyImpl(ServiceReference<?> ref, DataBrokerService service) {
         new DataBrokerServiceProxy(ref as ServiceReference<DataBrokerService>, service);
@@ -51,6 +53,11 @@ class ProxyFactory {
     private static def dispatch createProxyImpl(ServiceReference<?> ref, RpcProvisionRegistry service) {
         new RpcProvisionRegistryProxy(ref as ServiceReference<RpcProvisionRegistry>, service);
     }
+    
+    private static def dispatch createProxyImpl(ServiceReference<?> ref, DOMDataBroker service) {
+        new DOMDataBrokerProxy(ref as ServiceReference<DOMDataBroker>, service)
+    }
+    
 
     private static def dispatch createProxyImpl(ServiceReference<?> reference, BrokerService service) {
         throw new IllegalArgumentException("Not supported class");

@@ -31,6 +31,8 @@ public class TestModel {
 
     public static final InstanceIdentifier TEST_PATH = InstanceIdentifier.of(TEST_QNAME);
     public static final InstanceIdentifier OUTER_LIST_PATH = InstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
+    public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
+    public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 
 
     public static final InputStream getDatastoreTestInputStream() {

@@ -46,7 +46,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     private ListenerRegistry<SchemaServiceListener> listeners;
 
     private BundleContext context;
-    private BundleScanner scanner = new BundleScanner();
+    private final BundleScanner scanner = new BundleScanner();
 
     private BundleTracker<ImmutableSet<Registration<URL>>> bundleTracker;
 
@@ -60,7 +60,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
         return listeners;
     }
 
-    public void setListeners(ListenerRegistry<SchemaServiceListener> listeners) {
+    public void setListeners(final ListenerRegistry<SchemaServiceListener> listeners) {
         this.listeners = listeners;
     }
 
@@ -68,7 +68,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
         return context;
     }
 
-    public void setContext(BundleContext context) {
+    public void setContext(final BundleContext context) {
         this.context = context;
     }
 
@@ -92,12 +92,13 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
         return getGlobalContext();
     }
 
+    @Override
     public SchemaContext getGlobalContext() {
         return contextResolver.getSchemaContext().orNull();
     }
 
     @Override
-    public void addModule(Module module) {
+    public void addModule(final Module module) {
         throw new UnsupportedOperationException();
     }
 
@@ -107,12 +108,16 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     @Override
-    public void removeModule(Module module) {
+    public void removeModule(final Module module) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener listener) {
+    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(final SchemaServiceListener listener) {
+        Optional<SchemaContext> potentialCtx = contextResolver.getSchemaContext();
+        if(potentialCtx.isPresent()) {
+            listener.onGlobalContextUpdated(potentialCtx.get());
+        }
         return listeners.register(listener);
     }
 
@@ -128,7 +133,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
 
-    private void updateContext(SchemaContext snapshot) {
+    private void updateContext(final SchemaContext snapshot) {
         Object[] services = listenerTracker.getServices();
         if (services != null) {
             for (Object rawListener : services) {
@@ -151,7 +156,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
 
     private class BundleScanner implements BundleTrackerCustomizer<ImmutableSet<Registration<URL>>> {
         @Override
-        public ImmutableSet<Registration<URL>> addingBundle(Bundle bundle, BundleEvent event) {
+        public ImmutableSet<Registration<URL>> addingBundle(final Bundle bundle, final BundleEvent event) {
 
             if (bundle.getBundleId() == 0) {
                 return ImmutableSet.of();
@@ -172,7 +177,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
         }
 
         @Override
-        public void modifiedBundle(Bundle bundle, BundleEvent event, ImmutableSet<Registration<URL>> object) {
+        public void modifiedBundle(final Bundle bundle, final BundleEvent event, final ImmutableSet<Registration<URL>> object) {
             logger.debug("Modified bundle {} {} {}", bundle, event, object);
         }
 
@@ -183,7 +188,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
          */
 
         @Override
-        public synchronized void removedBundle(Bundle bundle, BundleEvent event, ImmutableSet<Registration<URL>> urls) {
+        public synchronized void removedBundle(final Bundle bundle, final BundleEvent event, final ImmutableSet<Registration<URL>> urls) {
             for (Registration<URL> url : urls) {
                 try {
                     url.close();
@@ -196,7 +201,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     @Override
-    public SchemaServiceListener addingService(ServiceReference<SchemaServiceListener> reference) {
+    public SchemaServiceListener addingService(final ServiceReference<SchemaServiceListener> reference) {
 
         SchemaServiceListener listener = context.getService(reference);
         SchemaContext _ctxContext = getGlobalContext();
@@ -217,12 +222,12 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     @Override
-    public void modifiedService(ServiceReference<SchemaServiceListener> reference, SchemaServiceListener service) {
+    public void modifiedService(final ServiceReference<SchemaServiceListener> reference, final SchemaServiceListener service) {
         // NOOP
     }
 
     @Override
-    public void removedService(ServiceReference<SchemaServiceListener> reference, SchemaServiceListener service) {
+    public void removedService(final ServiceReference<SchemaServiceListener> reference, final SchemaServiceListener service) {
         context.ungetService(reference);
     }
 }
