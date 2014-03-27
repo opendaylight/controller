@@ -16,6 +16,24 @@
       "revId": "fde8a4431addf9e65e658ccf5818763afbbebf7b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_846897f6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-27T00:51:31Z",
+      "side": 1,
+      "message": "There is a TransactionChainFactory, which will be implemented by the broker -- the application will then instantiate a chain and obtain the transactions from it.",
+      "parentUuid": "9a5c5d37_64f3630b",
+      "revId": "fde8a4431addf9e65e658ccf5818763afbbebf7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
