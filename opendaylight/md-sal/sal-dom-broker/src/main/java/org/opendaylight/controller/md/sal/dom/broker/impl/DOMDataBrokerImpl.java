@@ -190,7 +190,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
             this.broker = broker;
         }
 
-        public Iterable<DOMStoreThreePhaseCommitCohort> ready() {
+        public synchronized Iterable<DOMStoreThreePhaseCommitCohort> ready() {
             checkState(cohorts == null, "Transaction was already marked as ready.");
             ImmutableList.Builder<DOMStoreThreePhaseCommitCohort> cohortsBuilder = ImmutableList.builder();
             for (DOMStoreWriteTransaction subTx : getSubtransactions()) {
