@@ -27,6 +27,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -39,6 +40,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
@@ -167,25 +170,46 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
     }
 
-    private static class SnapshotBackedReadTransaction implements DOMStoreReadTransaction {
-
-        private DataAndMetadataSnapshot stableSnapshot;
+    private static abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
         private final Object identifier;
 
-        public SnapshotBackedReadTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot) {
+        protected AbstractDOMStoreTransaction(final Object identifier) {
             this.identifier = identifier;
-            this.stableSnapshot = snapshot;
-            LOG.debug("ReadOnly Tx: {} allocated with snapshot {}",identifier,snapshot.getMetadataTree().getSubtreeVersion());
-
         }
 
         @Override
-        public Object getIdentifier() {
+        public final Object getIdentifier() {
             return identifier;
         }
 
         @Override
+        public final String toString() {
+            return addToStringAttributes(Objects.toStringHelper(this)).toString();
+        }
+
+        /**
+         * Add class-specific toString attributes.
+         *
+         * @param toStringHelper ToStringHelper instance
+         * @return ToStringHelper instance which was passed in
+         */
+        protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+            return toStringHelper.add("id", identifier);
+        }
+    }
+
+    private static class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction implements DOMStoreReadTransaction {
+        private DataAndMetadataSnapshot stableSnapshot;
+
+        public SnapshotBackedReadTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot) {
+            super(identifier);
+            this.stableSnapshot = Preconditions.checkNotNull(snapshot);
+            LOG.debug("ReadOnly Tx: {} allocated with snapshot {}", identifier, snapshot.getMetadataTree().getSubtreeVersion());
+        }
+
+        @Override
         public void close() {
+            LOG.debug("Store transaction: {} : Closed", getIdentifier());
             stableSnapshot = null;
         }
 
@@ -195,37 +219,24 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             checkState(stableSnapshot != null, "Transaction is closed");
             return Futures.immediateFuture(NormalizedNodeUtils.findNode(stableSnapshot.getDataTree(), path));
         }
-
-        @Override
-        public String toString() {
-            return "SnapshotBackedReadTransaction [id =" + identifier + "]";
-        }
-
     }
 
-    private static class SnaphostBackedWriteTransaction implements DOMStoreWriteTransaction {
-
+    private static class SnaphostBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
         private MutableDataTree mutableTree;
-        private final Object identifier;
         private InMemoryDOMDataStore store;
-
         private boolean ready = false;
 
         public SnaphostBackedWriteTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot,
                 final InMemoryDOMDataStore store, final ModificationApplyOperation applyOper) {
-            this.identifier = identifier;
+            super(identifier);
             mutableTree = MutableDataTree.from(snapshot, applyOper);
             this.store = store;
             LOG.debug("Write Tx: {} allocated with snapshot {}",identifier,snapshot.getMetadataTree().getSubtreeVersion());
         }
 
         @Override
-        public Object getIdentifier() {
-            return identifier;
-        }
-
-        @Override
         public void close() {
+            LOG.debug("Store transaction: {} : Closed", getIdentifier());
             this.mutableTree = null;
             this.store = null;
         }
@@ -242,17 +253,19 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             mutableTree.delete(path);
         }
 
-        protected boolean isReady() {
+        protected final boolean isReady() {
             return ready;
         }
 
-        protected void checkNotReady() {
-            checkState(!ready, "Transaction is ready. No further modifications allowed.");
+        protected final void checkNotReady() {
+            checkState(!ready, "Transaction %s is ready. No further modifications allowed.", getIdentifier());
         }
 
         @Override
         public synchronized DOMStoreThreePhaseCommitCohort ready() {
+            checkState(!ready, "Transaction %s is already ready.", getIdentifier());
             ready = true;
+
             LOG.debug("Store transaction: {} : Ready", getIdentifier());
             mutableTree.seal();
             return store.submit(this);
@@ -263,10 +276,9 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
 
         @Override
-        public String toString() {
-            return "SnaphostBackedWriteTransaction [id=" + getIdentifier() + ", ready=" + isReady() + "]";
+		protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+            return toStringHelper.add("ready", isReady());
         }
-
     }
 
     private static class SnapshotBackedReadWriteTransaction extends SnaphostBackedWriteTransaction implements
@@ -281,12 +293,6 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
             return Futures.immediateFuture(getMutatedView().read(path));
         }
-
-        @Override
-        public String toString() {
-            return "SnapshotBackedReadWriteTransaction [id=" + getIdentifier() + ", ready=" + isReady() + "]";
-        }
-
     }
 
     private class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
