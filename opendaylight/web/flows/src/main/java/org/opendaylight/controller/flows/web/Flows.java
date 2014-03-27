@@ -363,7 +363,6 @@ public class Flows implements IDaylightWeb {
         SupportedFlowActions supportedFlows = (SupportedFlowActions) switchManager.getNodeProp(node, "supportedFlowActions");
         List<Class<? extends Action>> actions = supportedFlows.getActions();
         for (Class<? extends Action> action : actions) {
-            String actionName = action.getSimpleName().toLowerCase();
             if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Drop.class)) {
                 result.put(ActionType.DROP.toString(), "Drop");
             } else if (action.isAssignableFrom(org.opendaylight.controller.sal.action.Loopback.class)) {

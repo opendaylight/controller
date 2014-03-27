@@ -303,6 +303,11 @@ one.f.flows = {
         modifyTosBits : "one_f_flows_modal_action_modifyTosBits",
         modifyTransportSourcePort : "one_f_flows_modal_action_modifyTransportSourcePort",
         modifyTransportDestinationPort : "one_f_flows_modal_action_modifyTransportDestinationPort",
+        enqueue : 'one-f-flows-modal-action-enqueue',
+        queue : 'one-f-flows-modal-action-queue',
+        setEthertype : 'one-f-flows-modal-action-setEthertype',
+        pushVlan : 'one-f-flows-modal-action-pushVlan',
+        setVlanCfi : 'one-f-flows-modal-action-setVlanCfi',
         modal : {
           modal : "one_f_flows_modal_action_modal_modal",
           remove : "one_f_flows_modal_action_modal_remove",
@@ -1052,7 +1057,7 @@ one.f.flows = {
           case "SET_VLAN_CFI" :
             var h3 = "Set VLAN CFI";
             var placeholder = "VLAN CFI";
-            var id = one.f.flows.id.modal.action.setVlanPriority;
+            var id = one.f.flows.id.modal.action.setVlanCfi;
             var help = "Range: 0 - 1";
             var action = 'SET_VLAN_CFI';
             var name = "VLAN CFI";
@@ -1073,7 +1078,7 @@ one.f.flows = {
           case "PUSH_VLAN" :
             var h3 = "Push VLAN";
             var placeholder = "VLAN";
-            var id = one.f.flows.id.modal.action.setVlanPriority;
+            var id = one.f.flows.id.modal.action.pushVlan;
             var help = "Range: 0 - 4095";
             var action = 'PUSH_VLAN';
             var name = "VLAN";
@@ -1121,7 +1126,7 @@ one.f.flows = {
           case "SET_DL_TYPE" :
             var h3 = "Set Ethertype";
             var placeholder = "Ethertype";
-            var id = one.f.flows.id.modal.action.setVlanPriority;
+            var id = one.f.flows.id.modal.action.setEthertype;
             var help = "Range: 0 - 65535";
             var action = 'SET_DL_TYPE';
             var name = "Ethertype";
@@ -1214,6 +1219,13 @@ one.f.flows = {
             var $modal = one.f.flows.modal.action.initialize(h3, body, add);
             $modal.modal();
             break;
+          case "ENQUEUE" :
+            var h3 = "Enqueue";
+            var placeholder = "Enqueue";
+            var id = one.f.flows.id.modal.action.enqueue;
+            var $modal = one.f.flows.modal.action.initialize(h3, one.f.flows.modal.action.body.addEnqueue, one.f.flows.modal.action.add.addEnqueue);
+            $modal.modal();
+            break;
           case "DROP" :
             var name = "Drop";
             var action = 'DROP';
@@ -1249,11 +1261,6 @@ one.f.flows = {
             var action = 'CONTROLLER';
             one.f.flows.modal.action.add.add(name, action);
             break;
-          case "ENQUEUE" :
-            var name = "Enqueue";
-            var action = 'ENQUEUE';
-            one.f.flows.modal.action.add.add(name, action);
-            break;
         }
       },
       initialize : function(h3, bodyCallback, addCallback) {
@@ -1283,6 +1290,37 @@ one.f.flows = {
           pid = pid.slice(0,-1);
           one.f.flows.modal.action.add.addPortsToTable(ports, pid);
           $modal.modal('hide');
+        },
+        addEnqueue : function($modal) {
+          var $options = $('#'+one.f.flows.id.modal.action.addOutputPorts).find('option:selected');
+          var ports = '';
+          var pid = '';
+          $options.each(function(index, value) {
+            ports = ports+$(value).text()+", ";
+            pid = pid+$(value).attr('value')+",";
+          });
+          var $input = $('#'+one.f.flows.id.modal.action.queue);
+          var queue = $input.val();
+          ports = ports.slice(0,-2);
+          pid = pid.slice(0,-1);
+          one.f.flows.modal.action.add.addEnqueueToTable(ports, pid, queue);
+          $modal.modal('hide');
+        },
+        addEnqueueToTable : function(ports, pid, queue) {
+          if (queue !== '' && queue >= 0) {
+            ports += ':'+queue;
+          }
+          var $tr = one.f.flows.modal.action.table.add("Enqueue", ports);
+          $tr.attr('id', 'ENQUEUE');
+          if (queue !== '' && queue >= 0) {
+            $tr.data('action', 'ENQUEUE='+pid+':'+queue);
+          } else {
+            $tr.data('action', 'ENQUEUE='+pid+':0'); // default queue to 0
+          }
+          $tr.click(function() {
+            one.f.flows.modal.action.add.modal.initialize(this);
+          });
+          one.f.flows.modal.action.table.append($tr);
         },
         addPortsToTable : function(ports, pid){
           var $tr = one.f.flows.modal.action.table.add("Add Output Ports", ports);
@@ -1407,6 +1445,27 @@ one.f.flows = {
           $select = one.lib.form.select.create(ports, true);
           $select.attr('id', one.f.flows.id.modal.action.addOutputPorts);
           $fieldset.append($label).append($select);
+          $form.append($fieldset);
+          return $form;
+        },
+        addEnqueue : function() {
+          var common = one.f.flows.modal.action.body.common();
+          var $form = common[0];
+          var $fieldset = common[1];
+          // output port
+          $label = one.lib.form.label("Select Output Ports");
+          if (one.f.flows.registry.currentNode == undefined){
+            return; //Selecting Output ports without selecting node throws an exception
+          }
+          var ports = one.f.flows.registry.nodeports[one.f.flows.registry.currentNode]['ports'];
+          $select = one.lib.form.select.create(ports);
+          $select.attr('id', one.f.flows.id.modal.action.addOutputPorts);
+          $fieldset.append($label).append($select);
+          $label = one.lib.form.label('Queue (Optional)');
+          $input = one.lib.form.input('Queue')
+          .attr('id', one.f.flows.id.modal.action.queue);
+          $help = one.lib.form.help('Range: 1 - 2147483647');
+          $fieldset.append($label).append($input).append($help);
           $form.append($fieldset);
           return $form;
         },
