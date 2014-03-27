@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_c47d6fb3",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-27T01:00:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_5c65d943",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_3c5a2584",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a5c5d37_0474a7cd",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-27T01:00:39Z",
+      "side": 1,
+      "message": "You should not be able to distinguish between them. The initial callback is there to close a registration/read race condition -- it reports the equivalent of reading the antire subtree, e.g. it looks as though the entire subtree has been written.",
+      "parentUuid": "9a5c5d37_3c5a2584",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_1c5f6174",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2014-03-18T16:35:35Z",
       "side": 1,
       "message": "@param scope",
+      "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_e480738d",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-27T01:00:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a5c5d37_1c5f6174",
       "revId": "095c01addf272c6fcb99e68410d061b46b6252fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
