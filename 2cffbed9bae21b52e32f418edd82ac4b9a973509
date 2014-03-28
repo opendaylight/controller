@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_da61c4d4",
+        "filename": "opendaylight/forwardingrulesmanager/api/src/main/java/org/opendaylight/controller/forwardingrulesmanager/FlowConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-03-28T05:20:46Z",
+      "side": 1,
+      "message": "enqueue is a flow action, therefore is expected to be specified in actions. There is no need for a new member.\nThis is wrong.",
+      "revId": "2cffbed9bae21b52e32f418edd82ac4b9a973509",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
