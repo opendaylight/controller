@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
@@ -133,7 +134,7 @@ public class BindingIndependentConnector implements //
     private final Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier>() {
 
         @Override
-        public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier apply(InstanceIdentifier<?> input) {
+        public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier apply(final InstanceIdentifier<?> input) {
             return mappingService.toDataDom(input);
         }
 
@@ -162,7 +163,7 @@ public class BindingIndependentConnector implements //
     }
 
     @Override
-    public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
+    public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
         try {
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
             CompositeNode result = biDataService.readOperationalData(biPath);
@@ -173,7 +174,7 @@ public class BindingIndependentConnector implements //
     }
 
     private DataObject potentialAugmentationRead(InstanceIdentifier<? extends DataObject> path,
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath, CompositeNode result)
+            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath, final CompositeNode result)
             throws DeserializationException {
         Class<? extends DataObject> targetType = path.getTargetType();
         if (Augmentation.class.isAssignableFrom(targetType)) {
@@ -188,7 +189,7 @@ public class BindingIndependentConnector implements //
     }
 
     @Override
-    public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path) {
+    public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
         try {
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath = mappingService.toDataDom(path);
             CompositeNode result = biDataService.readConfigurationData(biPath);
@@ -199,7 +200,7 @@ public class BindingIndependentConnector implements //
     }
 
     private DataModificationTransaction createBindingToDomTransaction(
-            DataModification<InstanceIdentifier<? extends DataObject>, DataObject> source) {
+            final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> source) {
         DataModificationTransaction target = biDataService.beginTransaction();
         LOG.debug("Created DOM Transaction {} for {},", target.getIdentifier(),source.getIdentifier());
         for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedConfigurationData()) {
@@ -231,7 +232,7 @@ public class BindingIndependentConnector implements //
     }
 
     private org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction createDomToBindingTransaction(
-            DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> source) {
+            final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> source) {
         org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction target = baDataService
                 .beginTransaction();
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
@@ -280,7 +281,7 @@ public class BindingIndependentConnector implements //
         return biDataService;
     }
 
-    protected void setDomDataService(org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService) {
+    protected void setDomDataService(final org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService) {
         this.biDataService = biDataService;
     }
 
@@ -288,7 +289,7 @@ public class BindingIndependentConnector implements //
         return baDataService;
     }
 
-    protected void setBindingDataService(DataProviderService baDataService) {
+    protected void setBindingDataService(final DataProviderService baDataService) {
         this.baDataService = baDataService;
     }
 
@@ -296,11 +297,15 @@ public class BindingIndependentConnector implements //
         return baRpcRegistry;
     }
 
-    protected void setBindingRpcRegistry(RpcProviderRegistry rpcRegistry) {
+    protected void setBindingRpcRegistry(final RpcProviderRegistry rpcRegistry) {
         this.baRpcRegistry = rpcRegistry;
     }
 
     public void startDataForwarding() {
+        if(baDataService instanceof AbstractForwardedDataBroker) {
+            dataForwarding = true;
+            return;
+        }
         checkState(!dataForwarding, "Connector is already forwarding data.");
         baDataReaderRegistration = baDataService.registerDataReader(ROOT, this);
         baCommitHandlerRegistration = baDataService.registerCommitHandler(ROOT, bindingToDomCommitHandler);
@@ -331,7 +336,7 @@ public class BindingIndependentConnector implements //
         }
     }
 
-    protected void setMappingService(BindingIndependentMappingService mappingService) {
+    protected void setMappingService(final BindingIndependentMappingService mappingService) {
         this.mappingService = mappingService;
     }
 
@@ -341,17 +346,17 @@ public class BindingIndependentConnector implements //
     }
 
     @Override
-    public void onSessionInitiated(ProviderSession session) {
+    public void onSessionInitiated(final ProviderSession session) {
         setDomDataService(session.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
         setDomRpcRegistry(session.getService(RpcProvisionRegistry.class));
 
     }
 
-    public <T extends RpcService> void onRpcRouterCreated(Class<T> serviceType, RpcRouter<T> router) {
+    public <T extends RpcService> void onRpcRouterCreated(final Class<T> serviceType, final RpcRouter<T> router) {
 
     }
 
-    public void setDomRpcRegistry(RpcProvisionRegistry registry) {
+    public void setDomRpcRegistry(final RpcProvisionRegistry registry) {
         biRpcRegistry = registry;
     }
 
@@ -373,8 +378,8 @@ public class BindingIndependentConnector implements //
         private final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> modification;
 
         public DomToBindingTransaction(
-                org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction backing,
-                DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> modification) {
+                final org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction backing,
+                final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> modification) {
             super();
             this.backing = backing;
             this.modification = modification;
@@ -412,8 +417,8 @@ public class BindingIndependentConnector implements //
         private final DataModificationTransaction backing;
         private final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification;
 
-        public BindingToDomTransaction(DataModificationTransaction backing,
-                DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
+        public BindingToDomTransaction(final DataModificationTransaction backing,
+                final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
             this.backing = backing;
             this.modification = modification;
             domOpenedTransactions.put(backing.getIdentifier(), this);
@@ -451,7 +456,7 @@ public class BindingIndependentConnector implements //
 
         @Override
         public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> requestCommit(
-                DataModification<InstanceIdentifier<? extends DataObject>, DataObject> bindingTransaction) {
+                final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> bindingTransaction) {
 
             /**
              * Transaction was created as DOM transaction, in that case we do
@@ -474,7 +479,7 @@ public class BindingIndependentConnector implements //
             DataCommitHandler<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> {
 
         @Override
-        public void onRegister(DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
+        public void onRegister(final DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
 
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = mappingService.toDataDom(registration
                     .getPath());
@@ -482,14 +487,14 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public void onUnregister(DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
+        public void onUnregister(final DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
             // NOOP for now
             // FIXME: do registration based on only active commit handlers.
         }
 
         @Override
         public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> requestCommit(
-                DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> domTransaction) {
+                final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> domTransaction) {
             Object identifier = domTransaction.getIdentifier();
 
             /**
@@ -527,34 +532,34 @@ public class BindingIndependentConnector implements //
             return registryImpl;
         }
 
-        public void setRegistryImpl(RpcProviderRegistryImpl registryImpl) {
+        public void setRegistryImpl(final RpcProviderRegistryImpl registryImpl) {
             this.registryImpl = registryImpl;
         }
 
         @Override
-        public void onGlobalRpcRegistered(Class<? extends RpcService> cls) {
+        public void onGlobalRpcRegistered(final Class<? extends RpcService> cls) {
             getRpcForwarder(cls, null);
         }
 
         @Override
-        public void onGlobalRpcUnregistered(Class<? extends RpcService> cls) {
+        public void onGlobalRpcUnregistered(final Class<? extends RpcService> cls) {
             // NOOP
         }
 
         @Override
-        public void onRpcRouterCreated(RpcRouter<?> router) {
+        public void onRpcRouterCreated(final RpcRouter<?> router) {
             Class<? extends BaseIdentity> ctx = router.getContexts().iterator().next();
             getRpcForwarder(router.getServiceType(), ctx);
         }
 
         @Override
-        public void onRouteChange(RouteChange<RpcContextIdentifier, InstanceIdentifier<?>> change) {
+        public void onRouteChange(final RouteChange<RpcContextIdentifier, InstanceIdentifier<?>> change) {
             for (Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry : change.getAnnouncements().entrySet()) {
                 bindingRoutesAdded(entry);
             }
         }
 
-        private void bindingRoutesAdded(Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry) {
+        private void bindingRoutesAdded(final Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry) {
             Class<? extends BaseIdentity> context = entry.getKey().getRoutingContext();
             Class<? extends RpcService> service = entry.getKey().getRpcService();
             if (context != null) {
@@ -562,8 +567,8 @@ public class BindingIndependentConnector implements //
             }
         }
 
-        private DomToBindingRpcForwarder getRpcForwarder(Class<? extends RpcService> service,
-                Class<? extends BaseIdentity> context) {
+        private DomToBindingRpcForwarder getRpcForwarder(final Class<? extends RpcService> service,
+                final Class<? extends BaseIdentity> context) {
             DomToBindingRpcForwarder potential = forwarders.get(service);
             if (potential != null) {
                 return potential;
@@ -588,7 +593,7 @@ public class BindingIndependentConnector implements //
         private final Map<QName, RpcInvocationStrategy> strategiesByQName = new HashMap<>();
         private final WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
 
-        public DomToBindingRpcForwarder(Class<? extends RpcService> service) {
+        public DomToBindingRpcForwarder(final Class<? extends RpcService> service) {
             this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
             this.supportedRpcs = mappingService.getRpcQNamesFor(service);
             try {
@@ -611,7 +616,7 @@ public class BindingIndependentConnector implements //
          * @param service
          * @param context
          */
-        public DomToBindingRpcForwarder(Class<? extends RpcService> service, Class<? extends BaseIdentity> context) {
+        public DomToBindingRpcForwarder(final Class<? extends RpcService> service, final Class<? extends BaseIdentity> context) {
             this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
             this.supportedRpcs = mappingService.getRpcQNamesFor(service);
             Builder<RoutedRpcRegistration> registrationsBuilder = ImmutableSet
@@ -630,8 +635,8 @@ public class BindingIndependentConnector implements //
             registrations = registrationsBuilder.build();
         }
 
-        public void registerPaths(Class<? extends BaseIdentity> context, Class<? extends RpcService> service,
-                Set<InstanceIdentifier<?>> set) {
+        public void registerPaths(final Class<? extends BaseIdentity> context, final Class<? extends RpcService> service,
+                final Set<InstanceIdentifier<?>> set) {
             QName ctx = BindingReflections.findQName(context);
             for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path : FluentIterable.from(set).transform(
                     toDOMInstanceIdentifier)) {
@@ -643,7 +648,7 @@ public class BindingIndependentConnector implements //
 
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
             if (EQUALS_METHOD.equals(method)) {
                 return false;
             }
@@ -657,8 +662,8 @@ public class BindingIndependentConnector implements //
             return strategy.forwardToDomBroker(null);
         }
 
-        public void removePaths(Class<? extends BaseIdentity> context, Class<? extends RpcService> service,
-                Set<InstanceIdentifier<?>> set) {
+        public void removePaths(final Class<? extends BaseIdentity> context, final Class<? extends RpcService> service,
+                final Set<InstanceIdentifier<?>> set) {
             QName ctx = BindingReflections.findQName(context);
             for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path : FluentIterable.from(set).transform(
                     toDOMInstanceIdentifier)) {
@@ -686,7 +691,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode domInput) {
+        public RpcResult<CompositeNode> invokeRpc(final QName rpc, final CompositeNode domInput) {
             checkArgument(rpc != null);
             checkArgument(domInput != null);
 
@@ -702,7 +707,7 @@ public class BindingIndependentConnector implements //
             }
         }
 
-        private RpcInvocationStrategy resolveInvocationStrategy(QName rpc) {
+        private RpcInvocationStrategy resolveInvocationStrategy(final QName rpc) {
             return strategiesByQName.get(rpc);
         }
 
@@ -750,7 +755,7 @@ public class BindingIndependentConnector implements //
         protected final Method targetMethod;
         protected final QName rpc;
 
-        public RpcInvocationStrategy(QName rpc, Method targetMethod) {
+        public RpcInvocationStrategy(final QName rpc, final Method targetMethod) {
             this.targetMethod = targetMethod;
             this.rpc = rpc;
         }
@@ -760,7 +765,7 @@ public class BindingIndependentConnector implements //
         public abstract RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput)
                 throws Exception;
 
-        public RpcResult<CompositeNode> invokeOn(RpcService rpcService, CompositeNode domInput) throws Exception {
+        public RpcResult<CompositeNode> invokeOn(final RpcService rpcService, final CompositeNode domInput) throws Exception {
             return uncheckedInvoke(rpcService, domInput);
         }
     }
@@ -774,8 +779,8 @@ public class BindingIndependentConnector implements //
         private final WeakReference<Class> outputClass;
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        public DefaultInvocationStrategy(QName rpc, Method targetMethod, Class<?> outputClass,
-                Class<? extends DataContainer> inputClass) {
+        public DefaultInvocationStrategy(final QName rpc, final Method targetMethod, final Class<?> outputClass,
+                final Class<? extends DataContainer> inputClass) {
             super(rpc, targetMethod);
             this.outputClass = new WeakReference(outputClass);
             this.inputClass = new WeakReference(inputClass);
@@ -783,7 +788,7 @@ public class BindingIndependentConnector implements //
 
         @SuppressWarnings("unchecked")
         @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
+        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput) throws Exception {
             DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
             Future<RpcResult<?>> futureResult = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
             if (futureResult == null) {
@@ -799,7 +804,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
+        public Future<RpcResult<?>> forwardToDomBroker(final DataObject input) {
             if(biRpcRegistry != null) {
                 CompositeNode xml = mappingService.toDataDom(input);
                 CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
@@ -818,12 +823,12 @@ public class BindingIndependentConnector implements //
 
     private class NoInputNoOutputInvocationStrategy extends RpcInvocationStrategy {
 
-        public NoInputNoOutputInvocationStrategy(QName rpc, Method targetMethod) {
+        public NoInputNoOutputInvocationStrategy(final QName rpc, final Method targetMethod) {
             super(rpc, targetMethod);
         }
 
         @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
+        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput) throws Exception {
             @SuppressWarnings("unchecked")
             Future<RpcResult<Void>> result = (Future<RpcResult<Void>>) targetMethod.invoke(rpcService);
             RpcResult<Void> bindingResult = result.get();
@@ -831,7 +836,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
+        public Future<RpcResult<?>> forwardToDomBroker(final DataObject input) {
             return Futures.immediateFuture(null);
         }
     }
@@ -843,15 +848,15 @@ public class BindingIndependentConnector implements //
         private final WeakReference<Class> inputClass;
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        public NoOutputInvocationStrategy(QName rpc, Method targetMethod,
-                Class<? extends DataContainer> inputClass) {
+        public NoOutputInvocationStrategy(final QName rpc, final Method targetMethod,
+                final Class<? extends DataContainer> inputClass) {
             super(rpc,targetMethod);
             this.inputClass = new WeakReference(inputClass);
         }
 
 
         @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput) throws Exception {
+        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput) throws Exception {
             DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
             Future<RpcResult<?>> result = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
             if (result == null) {
@@ -862,7 +867,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public Future<RpcResult<?>> forwardToDomBroker(DataObject input) {
+        public Future<RpcResult<?>> forwardToDomBroker(final DataObject input) {
             if(biRpcRegistry != null) {
                 CompositeNode xml = mappingService.toDataDom(input);
                 CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc,ImmutableList.<Node<?>>of(xml));
@@ -892,12 +897,12 @@ public class BindingIndependentConnector implements //
         return mappingService;
     }
 
-    public void setBindingNotificationService(NotificationProviderService baService) {
+    public void setBindingNotificationService(final NotificationProviderService baService) {
         this.baNotifyService = baService;
 
     }
 
-    public void setDomNotificationService(NotificationPublishService domService) {
+    public void setDomNotificationService(final NotificationPublishService domService) {
         this.domNotificationService = domService;
     }
 
@@ -912,7 +917,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public void onNotification(CompositeNode notification) {
+        public void onNotification(final CompositeNode notification) {
             QName qname = notification.getNodeType();
             WeakReference<Class<? extends Notification>> potential = notifications.get(qname);
             if (potential != null) {
@@ -929,7 +934,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public void onNotificationSubscribtion(Class<? extends Notification> notificationType) {
+        public void onNotificationSubscribtion(final Class<? extends Notification> notificationType) {
             QName qname = BindingReflections.findQName(notificationType);
             if (qname != null) {
                 WeakReference<Class<? extends Notification>> already = notifications.putIfAbsent(qname,
