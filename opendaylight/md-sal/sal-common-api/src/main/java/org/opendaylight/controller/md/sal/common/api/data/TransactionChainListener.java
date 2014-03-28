@@ -21,7 +21,7 @@ public interface TransactionChainListener extends EventListener {
      * @param transaction Transaction which caused the chain to fail
      * @param cause The cause of transaction failure
      */
-    void onTransactionChainFailed(TransactionChain<?, ?> chain, DataModification<?, ?> transaction, Throwable cause);
+    void onTransactionChainFailed(TransactionChain<?, ?> chain, AsyncTransaction<?, ?> transaction, Throwable cause);
 
     /**
      * Invoked when a transaction chain is completed. A transaction chain is considered completed when it has been
