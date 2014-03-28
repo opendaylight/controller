@@ -1,0 +1,167 @@
+package org.opendaylight.controller.md.sal.binding.impl;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
+public abstract class LegacyDataChangeEvent implements DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> {
+
+    private LegacyDataChangeEvent() {
+    }
+
+    public static final DataChangeEvent<InstanceIdentifier<?>,DataObject> createOperational(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        return new OperationalChangeEvent(change);
+    }
+
+    public static final DataChangeEvent<InstanceIdentifier<?>,DataObject> createConfiguration(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        return new ConfigurationChangeEvent(change);
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getCreatedOperationalData() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getCreatedConfigurationData() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getUpdatedOperationalData() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getUpdatedConfigurationData() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Set<InstanceIdentifier<?>> getRemovedConfigurationData() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<InstanceIdentifier<?>> getRemovedOperationalData() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getOriginalConfigurationData() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getOriginalOperationalData() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public DataObject getOriginalConfigurationSubtree() {
+        return null;
+    }
+
+    @Override
+    public DataObject getOriginalOperationalSubtree() {
+        return null;
+    }
+
+    @Override
+    public DataObject getUpdatedConfigurationSubtree() {
+        return null;
+    }
+
+    @Override
+    public DataObject getUpdatedOperationalSubtree() {
+        return null;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private final static class OperationalChangeEvent extends LegacyDataChangeEvent {
+
+        private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
+
+        public OperationalChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+            this.delegate = change;
+        }
+
+        @Override
+        public Map<InstanceIdentifier<?>, DataObject> getCreatedOperationalData() {
+            return delegate.getCreatedData();
+        }
+
+        @Override
+        public Set<InstanceIdentifier<?>> getRemovedOperationalData() {
+            return delegate.getRemovedPaths();
+        }
+
+        @Override
+        public DataObject getOriginalOperationalSubtree() {
+            return delegate.getOriginalSubtree();
+        }
+
+        @Override
+        public DataObject getUpdatedOperationalSubtree() {
+            return delegate.getUpdatedSubtree();
+        }
+
+        @Override
+        public Map<InstanceIdentifier<?>, DataObject> getOriginalOperationalData() {
+            return (Map) delegate.getOriginalData();
+        }
+
+        @Override
+        public Map<InstanceIdentifier<?>, DataObject> getUpdatedOperationalData() {
+            return delegate.getUpdatedData();
+        }
+
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private final static class ConfigurationChangeEvent extends LegacyDataChangeEvent {
+
+        private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
+
+        public ConfigurationChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+            this.delegate = change;
+        }
+
+        @Override
+        public Map<InstanceIdentifier<?>, DataObject> getCreatedConfigurationData() {
+            return delegate.getCreatedData();
+        }
+
+        @Override
+        public Set<InstanceIdentifier<?>> getRemovedConfigurationData() {
+            return delegate.getRemovedPaths();
+        }
+
+        @Override
+        public DataObject getOriginalConfigurationSubtree() {
+            return delegate.getOriginalSubtree();
+        }
+
+        @Override
+        public DataObject getUpdatedConfigurationSubtree() {
+            return delegate.getUpdatedSubtree();
+        }
+
+        @Override
+        public Map<InstanceIdentifier<?>, DataObject> getOriginalConfigurationData() {
+            return (Map) delegate.getOriginalData();
+        }
+
+        @Override
+        public Map<InstanceIdentifier<?>, DataObject> getUpdatedConfigurationData() {
+            return delegate.getUpdatedData();
+        }
+
+    }
+
+}
