@@ -792,6 +792,27 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                     continue;
                 }
 
+                sstr = Pattern.compile(ActionType.ENQUEUE + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    for (String t : sstr.group(1).split(",")) {
+                        if (t != null) {
+                            String parts[] = t.split(":");
+                            String nc = String.format("%s|%s@%s", node.getType(), parts[0], node.toString());
+                            if (NodeConnector.fromString(nc) == null) {
+                                return new Status(StatusCode.BADREQUEST, String.format("Enqueue port is not valid"));
+                            }
+                            if (parts.length > 1) {
+                                try {
+                                    Integer.parseInt(parts[1]);
+                                } catch (NumberFormatException e) {
+                                    return new Status(StatusCode.BADREQUEST, String.format("Enqueue %s is not in the range 0 - 2147483647", parts[1]));
+                                }
+                            }
+                        }
+                    }
+                    continue;
+                }
+
                 sstr = Pattern.compile(ActionType.SET_VLAN_PCP.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     if ((sstr.group(1) != null) && !isVlanPriorityValid(sstr.group(1))) {
