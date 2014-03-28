@@ -740,7 +740,7 @@ public class frmTest {
         // actions.add(ActionType.CONTROLLER.toString());
         FlowConfig flowConfig = new FlowConfig("true", "Config1", Node.fromString(Node.NodeIDType.OPENFLOW, "1"),
                 "100", "0", "60", "2", "100", "0", "0x0800", "00:A0:C9:14:C8:29", "00:A0:C9:22:AB:11",
-                IPProtocols.TCP.toString(), "0", "1.2.3.4", "2.2.2.2", "8080", "100", "300", "1000", actions);
+                IPProtocols.TCP.toString(), "0", "1.2.3.4", "2.2.2.2", "8080", "100", "300", "1000", "", actions);
         return flowConfig;
 
     }

@@ -118,6 +118,8 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
     private String hardTimeout;
     @XmlElement
     private List<String> actions;
+    @XmlElement
+    private String enqueue;
 
     private enum EtherIPType {
         ANY, V4, V6;
@@ -129,7 +131,7 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
     public FlowConfig(String installInHw, String name, Node node, String priority, String cookie, String ingressPort,
             String portGroup, String vlanId, String vlanPriority, String etherType, String srcMac, String dstMac,
             String protocol, String tosBits, String srcIP, String dstIP, String tpSrc, String tpDst,
-            String idleTimeout, String hardTimeout, List<String> actions) {
+            String idleTimeout, String hardTimeout, String enqueue, List<String> actions) {
         super();
         this.installInHw = installInHw;
         this.name = name;
@@ -151,6 +153,7 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
         this.tpDst = tpDst;
         this.idleTimeout = idleTimeout;
         this.hardTimeout = hardTimeout;
+        this.enqueue = enqueue;
         this.actions = actions;
         this.status = StatusCode.SUCCESS.toString();
     }
@@ -176,6 +179,7 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
         this.tpDst = from.tpDst;
         this.idleTimeout = from.idleTimeout;
         this.hardTimeout = from.hardTimeout;
+        this.enqueue = from.enqueue;
         this.actions = new ArrayList<String>(from.actions);
     }
 
@@ -788,6 +792,27 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                     if ((sstr.group(1) != null) && !isVlanIdValid(sstr.group(1))) {
                         return new Status(StatusCode.BADREQUEST, String.format(
                                 "Vlan ID %s is not in the range 0 - 4095", sstr.group(1)));
+                    }
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.ENQUEUE + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    for (String t : sstr.group(1).split(",")) {
+                        if (t != null) {
+                            String parts[] = t.split(":");
+                            String nc = String.format("%s|%s@%s", node.getType(), parts[0], node.toString());
+                            if (NodeConnector.fromString(nc) == null) {
+                                return new Status(StatusCode.BADREQUEST, String.format("Enqueue port is not valid"));
+                            }
+                            if (parts.length > 1) {
+                                try {
+                                    Integer.parseInt(parts[1]);
+                                } catch (NumberFormatException e) {
+                                    return new Status(StatusCode.BADREQUEST, String.format("Enqueue %s is not in the range 0 - 2147483647", parts[1]));
+                                }
+                            }
+                        }
                     }
                     continue;
                 }
