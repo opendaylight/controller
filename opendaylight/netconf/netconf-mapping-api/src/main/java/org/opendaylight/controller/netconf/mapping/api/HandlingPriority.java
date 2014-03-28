@@ -45,6 +45,10 @@ public class HandlingPriority implements Comparable<HandlingPriority> {
         return getHandlingPriority(priority + priorityIncrease);
     }
 
+    public boolean isCannotHandle() {
+        return this.equals(CANNOT_HANDLE);
+    }
+
     @Override
     public int compareTo(HandlingPriority o) {
         if (this == o)

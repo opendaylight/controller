@@ -19,6 +19,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import static com.google.common.base.Preconditions.checkState;
 
 public class Activator implements BundleActivator {
@@ -88,7 +91,9 @@ public class Activator implements BundleActivator {
         public void run() {
             NetconfOperationServiceFactoryImpl factory = new NetconfOperationServiceFactoryImpl(yangStoreService);
             logger.debug("Registering into OSGi");
-            osgiRegistration = context.registerService(NetconfOperationServiceFactory.class, factory, null);
+            Dictionary<String, String> properties = new Hashtable<>();
+            properties.put("name", "config-netconf-connector");
+            osgiRegistration = context.registerService(NetconfOperationServiceFactory.class, factory, properties);
         }
     }
 }

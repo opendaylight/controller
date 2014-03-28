@@ -24,6 +24,10 @@ final class TestingExceptionHandler implements Thread.UncaughtExceptionHandler {
         this.t = e;
     }
 
+    public void assertException(Class<? extends Exception> exType, String exMessageToContain) {
+        assertException(exMessageToContain, exType, exMessageToContain);
+    }
+
     public void assertException(String failMessageSuffix, Class<? extends Exception> exType, String exMessageToContain) {
         if(t == null) {
             fail("Should fail to " + failMessageSuffix);

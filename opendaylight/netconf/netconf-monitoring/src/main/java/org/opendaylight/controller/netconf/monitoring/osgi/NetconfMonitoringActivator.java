@@ -46,7 +46,7 @@ public class NetconfMonitoringActivator implements BundleActivator {
         }
 
         @Override
-        public NetconfOperationService createService(long netconfSessionId, String netconfSessionIdForReporting) {
+        public NetconfOperationService createService(String netconfSessionIdForReporting) {
             return operationService;
         }
     }

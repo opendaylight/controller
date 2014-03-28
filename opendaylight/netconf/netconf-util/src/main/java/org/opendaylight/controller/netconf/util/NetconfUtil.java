@@ -56,13 +56,17 @@ public final class NetconfUtil {
         return (doc == null) ? null : new NetconfMessage(doc);
     }
 
-    public static void checkIsMessageOk(NetconfMessage responseMessage) throws ConflictingVersionException {
-        XmlElement element = XmlElement.fromDomDocument(responseMessage.getDocument());
+    public static Document checkIsMessageOk(NetconfMessage responseMessage) throws ConflictingVersionException {
+        return checkIsMessageOk(responseMessage.getDocument());
+    }
+
+    public static Document checkIsMessageOk(Document response) throws ConflictingVersionException {
+        XmlElement element = XmlElement.fromDomDocument(response);
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
         element = element.getOnlyChildElement();
 
         if (element.getName().equals(XmlNetconfConstants.OK)) {
-            return;
+            return response;
         }
 
         if (element.getName().equals(XmlNetconfConstants.RPC_ERROR)) {
@@ -74,11 +78,11 @@ public final class NetconfUtil {
                 throw new ConflictingVersionException(error);
             }
             throw new IllegalStateException("Can not load last configuration, operation failed: "
-                    + XmlUtil.toString(responseMessage.getDocument()));
+                    + XmlUtil.toString(response));
         }
 
         logger.warn("Can not load last configuration. Operation failed.");
         throw new IllegalStateException("Can not load last configuration. Operation failed: "
-                + XmlUtil.toString(responseMessage.getDocument()));
+                + XmlUtil.toString(response));
     }
 }

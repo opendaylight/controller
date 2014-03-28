@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSession;
@@ -33,9 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
@@ -185,18 +184,6 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         }
         return sortedPriority;
     }
-
-    public static final NetconfOperationChainedExecution EXECUTION_TERMINATION_POINT = new NetconfOperationChainedExecution() {
-        @Override
-        public boolean isExecutionTermination() {
-            return true;
-        }
-
-        @Override
-        public Document execute(Document requestMessage) throws NetconfDocumentedException {
-            throw new IllegalStateException("This execution represents the termination point in operation execution and cannot be executed itself");
-        }
-    };
 
     private static class NetconfOperationExecution implements NetconfOperationChainedExecution {
         private final NetconfOperation netconfOperation;
