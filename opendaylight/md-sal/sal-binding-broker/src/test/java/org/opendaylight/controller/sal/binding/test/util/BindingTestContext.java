@@ -17,7 +17,9 @@ import java.util.concurrent.Future;
 
 import javassist.ClassPool;
 
+import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
 import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -107,6 +109,10 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
 
     private final List<SchemaContextListener> schemaListeners = new ArrayList<>();
 
+    private DataProviderService baData;
+
+    private DOMDataBroker newDOMDataBroker;
+
     @Override
     public SchemaContext getSchemaContext() {
         return schemaContext;
@@ -152,9 +158,9 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
                 .put(LogicalDatastoreType.CONFIGURATION, configStore)
                 .build();
 
-        DOMDataBrokerImpl newBiDataImpl = new DOMDataBrokerImpl(newDatastores, executor);
+        newDOMDataBroker = new DOMDataBrokerImpl(newDatastores, executor);
 
-        biCompatibleBroker = new BackwardsCompatibleDataBroker(newBiDataImpl);
+        biCompatibleBroker = new BackwardsCompatibleDataBroker(newDOMDataBroker);
 
         schemaListeners.add(configStore);
         schemaListeners.add(operStore);
@@ -166,24 +172,25 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
         checkState(executor != null, "Executor needs to be set");
         baDataImpl = new DataBrokerImpl();
         baDataImpl.setExecutor(executor);
+        baData = baDataImpl;
     }
 
     public void startBindingBroker() {
         checkState(executor != null, "Executor needs to be set");
-        checkState(baDataImpl != null, "Binding Data Broker must be started");
+        checkState(baData != null, "Binding Data Broker must be started");
         checkState(baNotifyImpl != null, "Notification Service must be started");
         baBrokerImpl = new DomForwardedBindingBrokerImpl("test");
 
         baBrokerImpl.getMountManager().setDataCommitExecutor(executor);
         baBrokerImpl.getMountManager().setNotificationExecutor(executor);
         baBrokerImpl.setRpcBroker(new RpcProviderRegistryImpl("test"));
-        baBrokerImpl.setDataBroker(baDataImpl);
+        baBrokerImpl.setDataBroker(baData);
         baBrokerImpl.setNotificationBroker(baNotifyImpl);
         baBrokerImpl.start();
     }
 
     public void startForwarding() {
-        checkState(baDataImpl != null, "Binding Data Broker needs to be started");
+        checkState(baData != null, "Binding Data Broker needs to be started");
         checkState(biDataLegacyBroker != null, "DOM Data Broker needs to be started.");
         checkState(mappingServiceImpl != null, "DOM Mapping Service needs to be started.");
 
@@ -315,17 +322,25 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     }
 
     public void start() {
-        startBindingDataBroker();
-        startBindingNotificationBroker();
-        startBindingBroker();
         startNewDomDataBroker();
         startDomBroker();
         startDomMountPoint();
         startBindingToDomMappingService();
+        startNewBindingDataBroker();
+
+        startBindingNotificationBroker();
+        startBindingBroker();
+
         startForwarding();
         if (startWithSchema) {
             loadYangSchemaFromClasspath();
         }
+    }
+
+    public void startNewBindingDataBroker() {
+        ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, mappingServiceImpl, executor);
+        schemaListeners.add(forwarded);
+        baData = forwarded;
     }
 
     private void startDomMountPoint() {
@@ -353,7 +368,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     }
 
     public DataProviderService getBindingDataBroker() {
-        return baDataImpl;
+        return baData;
     }
 
     public org.opendaylight.controller.sal.core.api.data.DataProviderService getDomDataBroker() {
