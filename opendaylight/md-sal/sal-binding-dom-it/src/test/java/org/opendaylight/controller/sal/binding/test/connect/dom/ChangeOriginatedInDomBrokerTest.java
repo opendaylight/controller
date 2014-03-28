@@ -15,14 +15,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
-import org.opendaylight.controller.md.sal.common.api.data.DataModification;
+import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
+import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpVersion;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
@@ -53,16 +52,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
@@ -76,7 +79,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
     private static final FlowKey FLOW_KEY = new FlowKey(FLOW_ID);
 
-    private DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modificationCapture;
+    private final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> modificationCapture = SettableFuture.create();
 
     private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
             NODE_ID);
@@ -119,40 +122,36 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             .toInstance();
 
     @Test
-    @Ignore
     public void simpleModifyOperation() throws Exception {
 
         assertNull(biDataService.readConfigurationData(FLOW_INSTANCE_ID_BI));
 
-        registerCommitHandler();
+        registerChangeListener();
 
         CompositeNode domflow = createTestFlow();
         DataModificationTransaction biTransaction = biDataService.beginTransaction();
         biTransaction.putConfigurationData(FLOW_INSTANCE_ID_BI, domflow);
         RpcResult<TransactionStatus> biResult = biTransaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, biResult.getResult());
-        assertNotNull(modificationCapture);
-        Flow flow = (Flow) modificationCapture.getCreatedConfigurationData().get(FLOW_INSTANCE_ID_BA);
+        DataChangeEvent<InstanceIdentifier<?>, DataObject> event = modificationCapture.get(1000,TimeUnit.MILLISECONDS);
+        assertNotNull(event);
+        LOG.info("Created Configuration :{}",event.getCreatedConfigurationData());
+        Flow flow = (Flow) event.getCreatedConfigurationData().get(FLOW_INSTANCE_ID_BA);
         assertNotNull(flow);
         assertNotNull(flow.getMatch());
         assertEquals(TransactionStatus.COMMITED, biResult.getResult());
 
     }
 
-    private void registerCommitHandler() {
-        DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> flowTestCommitHandler = new DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>() {
+    private void registerChangeListener() {
+        baDataService.registerDataChangeListener(FLOWS_PATH_BA, new DataChangeListener() {
 
             @Override
-            public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> requestCommit(
-                    final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
-                modificationCapture = modification;
-                return CommitHandlerTransactions.allwaysSuccessfulTransaction(modification);
+            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+                LOG.info("Data Change listener invoked.");
+                modificationCapture.set(change);
             }
-
-        };
-        Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> registration = baDataService
-                .registerCommitHandler(FLOWS_PATH_BA, flowTestCommitHandler);
-        assertNotNull(registration);
+        });
     }
 
     private CompositeNode createTestFlow() {
@@ -195,6 +194,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
         // Wrap our Apply Action in an Instruction
         InstructionBuilder ib = new InstructionBuilder();
+        ib.setOrder(0);
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         // Put our Instruction in a list of Instructions

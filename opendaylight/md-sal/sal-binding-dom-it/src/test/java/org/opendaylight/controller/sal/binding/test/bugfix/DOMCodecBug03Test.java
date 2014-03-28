@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -42,6 +43,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+
+import com.google.common.util.concurrent.SettableFuture;
 
 public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataChangeListener {
 
@@ -85,7 +88,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
                     .node(SUPPORTED_ACTIONS_QNAME) //
                     .toInstance();
 
-    private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
+    private final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> receivedChangeEvent = SettableFuture.create();
 
 
 
@@ -120,9 +123,10 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         RpcResult<TransactionStatus> result = transaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        assertNotNull(receivedChangeEvent);
+        DataChangeEvent<InstanceIdentifier<?>, DataObject> potential = receivedChangeEvent.get(1000,TimeUnit.MILLISECONDS);
+        assertNotNull(potential);
 
-        verifyNodes((Nodes) receivedChangeEvent.getUpdatedOperationalSubtree(),original);
+        verifyNodes((Nodes) potential.getUpdatedOperationalSubtree(),original);
         assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
         Nodes nodes = checkForNodes();
         verifyNodes(nodes,original);
@@ -186,7 +190,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
         assertNull(node);
     }
 
-    private void verifyNodes(Nodes nodes,Node original) {
+    private void verifyNodes(final Nodes nodes,final Node original) {
         assertNotNull(nodes);
         assertNotNull(nodes.getNode());
         assertEquals(1, nodes.getNode().size());
@@ -203,7 +207,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
     }
 
     private void assertBindingIndependentVersion(
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
+            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
         CompositeNode node = biDataService.readOperationalData(nodeId);
         assertNotNull(node);
     }
@@ -213,8 +217,8 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        receivedChangeEvent = change;
+    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        receivedChangeEvent.set(change);
     }
 
 }
