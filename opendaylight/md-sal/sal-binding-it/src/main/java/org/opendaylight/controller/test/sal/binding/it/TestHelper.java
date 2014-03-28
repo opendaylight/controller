@@ -45,6 +45,13 @@ public class TestHelper {
                 bindingAwareSalBundles(),
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
+                systemProperty("org.osgi.framework.system.packages.extra").value("sun.nio.ch"),
+                mavenBundle("io.netty", "netty-common").versionAsInProject(), //
+                mavenBundle("io.netty", "netty-buffer").versionAsInProject(), //
+                mavenBundle("io.netty", "netty-handler").versionAsInProject(), //
+                mavenBundle("io.netty", "netty-codec").versionAsInProject(), //
+                mavenBundle("io.netty", "netty-transport").versionAsInProject(), //
+
                 mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
@@ -63,12 +70,6 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //
-
-                mavenBundle("io.netty", "netty-handler").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-codec").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-buffer").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-transport").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-common").versionAsInProject(), //
 
                 mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.xerces", "2.11.0_1"),
                 mavenBundle("org.eclipse.birt.runtime.3_7_1", "org.apache.xml.resolver", "1.2.0"),
