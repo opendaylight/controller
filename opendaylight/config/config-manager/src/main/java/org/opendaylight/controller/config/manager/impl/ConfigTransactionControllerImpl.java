@@ -407,12 +407,14 @@ class ConfigTransactionControllerImpl implements
     }
 
     private void internalAbort() {
+        logger.trace("Aborting {}", this);
         transactionStatus.setAborted();
         close();
     }
 
     public void close() {
         dependencyResolverManager.close();
+        txLookupRegistry.close();
     }
 
     @Override

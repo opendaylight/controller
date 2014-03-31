@@ -326,26 +326,18 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     }
 
     @Test
-    public void testAbort() throws InstanceAlreadyExistsException, ValidationException {
+    public void testAbort() throws Exception {
         ConfigTransactionJMXClient transaction = configRegistryClient
                 .createTransaction();
         assertEquals(1, configRegistryClient.getOpenConfigs().size());
 
         transaction.abortConfig();
-        try {
-            transaction.createModule(TestingFixedThreadPoolModuleFactory.NAME,
-                    fixed1);
-            fail();
-        } catch (IllegalStateException e) {
-            assertEquals("Configuration was aborted", e.getMessage());
-        }
-        try {
-            transaction.validateConfig();
-            fail();
-        } catch (IllegalStateException e) {
-            assertEquals("Configuration was aborted", e.getMessage());
-        }
         assertEquals(0, configRegistryClient.getOpenConfigs().size());
+        try {
+            platformMBeanServer.getMBeanInfo(transaction.getObjectName());
+            fail();
+        }catch(InstanceNotFoundException e){
+        }
     }
 
     @Test
