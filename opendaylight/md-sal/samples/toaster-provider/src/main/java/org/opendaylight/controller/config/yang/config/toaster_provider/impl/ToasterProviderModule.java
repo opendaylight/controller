@@ -14,7 +14,6 @@ import org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterData;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +46,7 @@ public final class ToasterProviderModule extends org.opendaylight.controller.con
 
         // Register to md-sal
         opendaylightToaster.setNotificationProvider(getNotificationServiceDependency());
+        opendaylightToaster.setDataProvider(getDataBrokerDependency());
         final BindingAwareBroker.RpcRegistration<ToasterService> rpcRegistration = getRpcRegistryDependency()
                 .addRpcImplementation(ToasterService.class, opendaylightToaster);
 
@@ -62,6 +62,7 @@ public final class ToasterProviderModule extends org.opendaylight.controller.con
             public void close() throws Exception {
                 rpcRegistration.close();
                 runtimeReg.close();
+                opendaylightToaster.close();
                 log.info("Toaster provider (instance {}) torn down.", this);
             }
 
