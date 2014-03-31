@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_35ec73c7",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/AbstractNetconfSession.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-31T10:52:21Z",
+      "side": 1,
+      "message": "Needs explicit documentation of what is happening here.  Hard-coded name is no good, either. I would expect the new encoder to _replace_ the old one...\n\nThread safety seems to be questionable, too",
+      "revId": "cb2b5148a9c3af423728f875a4f24b1304e081a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_15d16ffb",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/AbstractNetconfSession.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-31T10:52:21Z",
+      "side": 1,
+      "message": "Document these and their thread/state safety",
+      "revId": "cb2b5148a9c3af423728f875a4f24b1304e081a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_f5cdbb5e",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/AbstractNetconfSession.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-31T10:52:21Z",
+      "side": 1,
+      "message": "Hard-coded name...",
+      "revId": "cb2b5148a9c3af423728f875a4f24b1304e081a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_95043f7f",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/NetconfSession.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-31T10:52:21Z",
+      "side": 1,
+      "message": "These are not public API and have no place here. All codec are an internal implementation, which MUST NOT be leaked to the user.",
+      "revId": "cb2b5148a9c3af423728f875a4f24b1304e081a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_75e2ebd6",
+        "filename": "opendaylight/netconf/netconf-client/src/main/resources/client_hello.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-31T10:52:21Z",
+      "side": 1,
+      "message": "Can we generate this file? Hard-coding capabilities seems a bit wrong",
+      "revId": "cb2b5148a9c3af423728f875a4f24b1304e081a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7509cb94",
+        "filename": "opendaylight/netconf/netconf-client/src/main/resources/startExi.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-03-31T10:52:21Z",
+      "side": 1,
+      "message": "This has to be generated",
+      "revId": "cb2b5148a9c3af423728f875a4f24b1304e081a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
