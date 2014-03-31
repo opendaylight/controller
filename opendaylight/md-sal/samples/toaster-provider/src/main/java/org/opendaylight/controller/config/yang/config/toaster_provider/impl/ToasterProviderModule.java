@@ -15,11 +15,15 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterData;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
 *
 */
 public final class ToasterProviderModule extends org.opendaylight.controller.config.yang.config.toaster_provider.impl.AbstractToasterProviderModule
  {
+    private static final Logger log = LoggerFactory.getLogger(ToasterProviderModule.class);
 
     public ToasterProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -58,6 +62,7 @@ public final class ToasterProviderModule extends org.opendaylight.controller.con
             public void close() throws Exception {
                 rpcRegistration.close();
                 runtimeReg.close();
+                log.info("Toaster provider (instance {}) torn down.", this);
             }
 
             @Override
@@ -66,7 +71,8 @@ public final class ToasterProviderModule extends org.opendaylight.controller.con
             }
         }
 
-        return new AutoCloseableToaster();
+        AutoCloseable ret = new AutoCloseableToaster();
+        log.info("Toaster provider (instance {}) initialized.", ret);
+        return ret;
     }
-
 }
