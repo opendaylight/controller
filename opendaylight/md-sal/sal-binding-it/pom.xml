@@ -40,7 +40,7 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
-                    <includes>org.opendaylight.controller.*</includes>
+                    <includes><include>org.opendaylight.controller.*</include></includes>
                 </configuration>
                 <executions>
                     <execution>
@@ -109,7 +109,7 @@
                     <version>${jacoco.version}</version>
                     <configuration>
                         <destFile>../sal-binding-broker/target/jacoco-it.exec</destFile>
-                        <includes>org.opendaylight.controller.*</includes>
+                        <includes><include>org.opendaylight.controller.*</include></includes>
                     </configuration>
                     <executions>
                         <execution>

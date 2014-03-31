@@ -148,7 +148,7 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <destFile>../implementation/target/jacoco-it.exec</destFile>
-          <includes>org.opendaylight.controller.*</includes>
+          <includes><include>org.opendaylight.controller.*</include></includes>
         </configuration>
         <executions>
           <execution>

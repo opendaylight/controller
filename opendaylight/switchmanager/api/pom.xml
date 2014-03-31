@@ -62,7 +62,7 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
-          <includes>org.opendaylight.controller.*</includes>
+          <includes><include>org.opendaylight.controller.*</include></includes>
         </configuration>
         <executions>
           <execution>

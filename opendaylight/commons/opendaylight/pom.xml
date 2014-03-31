@@ -64,7 +64,7 @@
     <javassist.version>3.17.1-GA</javassist.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
-    <jacoco.version>0.5.3.201107060350</jacoco.version>
+    <jacoco.version>0.6.2.201302030002</jacoco.version>
     <enforcer.version>1.3.1</enforcer.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <junit.version>4.8.1</junit.version>
