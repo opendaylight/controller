@@ -340,20 +340,10 @@
         <sonar.jacoco.itReportPath>../implementaiton/target/jacoco-it.exec</sonar.jacoco.itReportPath>
     </properties>
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.5.3.201107060350</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.5.3.201107060350</version>
                 <configuration>
                     <destFile>../implementation/target/jacoco-it.exec</destFile>
                     <includes>org.opendaylight.controller.*</includes>
