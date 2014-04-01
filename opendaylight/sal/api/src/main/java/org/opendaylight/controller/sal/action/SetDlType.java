@@ -8,11 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 
 /**
@@ -23,33 +27,37 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetDlType extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_DL_TYPE";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
     @XmlElement
     private int dlType;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private SetDlType() {
+    public SetDlType() {
+        super(NAME);
     }
 
     public SetDlType(int dlType) {
-        type = ActionType.SET_DL_TYPE;
+        super(NAME);
         this.dlType = dlType;
-        checkValue(dlType);
     }
 
     public SetDlType(EtherTypes dlType) {
-        type = ActionType.SET_DL_TYPE;
+        super(NAME);
         this.dlType = dlType.intValue();
-        checkValue(this.dlType);
     }
 
     /**
      * Returns the ethertype/lenght value that this action will set
      *
-     * @return byte[]
+     * @return The datalayer type to be set
      */
     public int getDlType() {
         return dlType;
+    }
+
+
+    public String getDlTypeAtring() {
+        return String.format("0x%s", Integer.toHexString(dlType));
     }
 
     @Override
@@ -80,6 +88,15 @@ public class SetDlType extends Action {
 
     @Override
     public String toString() {
-        return type + "[dlType = 0x" + Integer.toHexString(dlType) + "]";
+        return NAME + "=0x" + Integer.toHexString(dlType);
+    }
+
+    @Override
+    public SetDlType fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            return new SetDlType(Integer.decode(matcher.group(1)));
+        }
+        return null;
     }
 }

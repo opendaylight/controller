@@ -19,7 +19,6 @@ import java.util.Map;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6FlowMod;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Enqueue;
@@ -31,6 +30,7 @@ import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.action.SetDlDst;
 import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetNextHop;
 import org.opendaylight.controller.sal.action.SetNwDst;
 import org.opendaylight.controller.sal.action.SetNwSrc;
 import org.opendaylight.controller.sal.action.SetNwTos;
@@ -272,7 +272,7 @@ public class FlowConverter {
         if (this.actionsList == null) {
             actionsList = new ArrayList<OFAction>();
             for (Action action : flow.getActions()) {
-                if (action.getType() == ActionType.OUTPUT) {
+                if (action instanceof Output) {
                     Output a = (Output) action;
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setMaxLength((short) 0xffff);
@@ -281,7 +281,7 @@ public class FlowConverter {
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.ENQUEUE) {
+                if (action instanceof Enqueue) {
                     Enqueue a = (Enqueue) action;
                     OFActionEnqueue ofAction = new OFActionEnqueue();
                     ofAction.setPort(PortConverter.toOFPort(a.getPort()));
@@ -290,31 +290,31 @@ public class FlowConverter {
                     actionsLength += OFActionEnqueue.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.DROP) {
+                if (action instanceof Drop) {
                     continue;
                 }
-                if (action.getType() == ActionType.LOOPBACK) {
+                if (action instanceof Loopback) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_IN_PORT.getValue());
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.FLOOD) {
+                if (action instanceof Flood) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_FLOOD.getValue());
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.FLOOD_ALL) {
+                if (action instanceof FloodAll) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_ALL.getValue());
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.CONTROLLER) {
+                if (action instanceof Controller) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_CONTROLLER.getValue());
                     // We want the whole frame hitting the match be sent to the
@@ -324,21 +324,21 @@ public class FlowConverter {
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SW_PATH) {
+                if (action instanceof SwPath) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_LOCAL.getValue());
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.HW_PATH) {
+                if (action instanceof HwPath) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_NORMAL.getValue());
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_VLAN_ID) {
+                if (action instanceof SetVlanId) {
                     SetVlanId a = (SetVlanId) action;
                     OFActionVirtualLanIdentifier ofAction = new OFActionVirtualLanIdentifier();
                     ofAction.setVirtualLanIdentifier((short) a.getVlanId());
@@ -346,7 +346,7 @@ public class FlowConverter {
                     actionsLength += OFActionVirtualLanIdentifier.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_VLAN_PCP) {
+                if (action instanceof SetVlanPcp) {
                     SetVlanPcp a = (SetVlanPcp) action;
                     OFActionVirtualLanPriorityCodePoint ofAction = new OFActionVirtualLanPriorityCodePoint();
                     ofAction.setVirtualLanPriorityCodePoint(Integer.valueOf(
@@ -355,13 +355,13 @@ public class FlowConverter {
                     actionsLength += OFActionVirtualLanPriorityCodePoint.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.POP_VLAN) {
+                if (action instanceof PopVlan) {
                     OFActionStripVirtualLan ofAction = new OFActionStripVirtualLan();
                     actionsList.add(ofAction);
                     actionsLength += OFActionStripVirtualLan.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_DL_SRC) {
+                if (action instanceof SetDlSrc) {
                     SetDlSrc a = (SetDlSrc) action;
                     OFActionDataLayerSource ofAction = new OFActionDataLayerSource();
                     ofAction.setDataLayerAddress(a.getDlAddress());
@@ -369,7 +369,7 @@ public class FlowConverter {
                     actionsLength += OFActionDataLayer.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_DL_DST) {
+                if (action instanceof SetDlDst) {
                     SetDlDst a = (SetDlDst) action;
                     OFActionDataLayerDestination ofAction = new OFActionDataLayerDestination();
                     ofAction.setDataLayerAddress(a.getDlAddress());
@@ -377,7 +377,7 @@ public class FlowConverter {
                     actionsLength += OFActionDataLayer.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_NW_SRC) {
+                if (action instanceof SetNwSrc) {
                     SetNwSrc a = (SetNwSrc) action;
                     OFActionNetworkLayerSource ofAction = new OFActionNetworkLayerSource();
                     ofAction.setNetworkAddress(NetUtils.byteArray4ToInt(a
@@ -386,7 +386,7 @@ public class FlowConverter {
                     actionsLength += OFActionNetworkLayerAddress.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_NW_DST) {
+                if (action instanceof SetNwDst) {
                     SetNwDst a = (SetNwDst) action;
                     OFActionNetworkLayerDestination ofAction = new OFActionNetworkLayerDestination();
                     ofAction.setNetworkAddress(NetUtils.byteArray4ToInt(a
@@ -395,7 +395,7 @@ public class FlowConverter {
                     actionsLength += OFActionNetworkLayerAddress.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_NW_TOS) {
+                if (action instanceof SetNwTos) {
                     SetNwTos a = (SetNwTos) action;
                     OFActionNetworkTypeOfService ofAction = new OFActionNetworkTypeOfService();
                     ofAction.setNetworkTypeOfService(Integer.valueOf(
@@ -404,7 +404,7 @@ public class FlowConverter {
                     actionsLength += OFActionNetworkTypeOfService.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_TP_SRC) {
+                if (action instanceof SetTpSrc) {
                     SetTpSrc a = (SetTpSrc) action;
                     OFActionTransportLayerSource ofAction = new OFActionTransportLayerSource();
                     ofAction.setTransportPort(Integer.valueOf(a.getPort())
@@ -413,7 +413,7 @@ public class FlowConverter {
                     actionsLength += OFActionTransportLayer.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_TP_DST) {
+                if (action instanceof SetTpDst) {
                     SetTpDst a = (SetTpDst) action;
                     OFActionTransportLayerDestination ofAction = new OFActionTransportLayerDestination();
                     ofAction.setTransportPort(Integer.valueOf(a.getPort())
@@ -422,7 +422,7 @@ public class FlowConverter {
                     actionsLength += OFActionTransportLayer.MINIMUM_LENGTH;
                     continue;
                 }
-                if (action.getType() == ActionType.SET_NEXT_HOP) {
+                if (action instanceof SetNextHop) {
                     logger.warn("Unsupported action: {}", action);
                     continue;
                 }

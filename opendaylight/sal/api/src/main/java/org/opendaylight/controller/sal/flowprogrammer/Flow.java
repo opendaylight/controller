@@ -135,23 +135,18 @@ public class Flow implements Cloneable, Serializable {
     private boolean actionsAreIPv6() {
         if (this.actions != null) {
             for (Action action : actions) {
-                switch (action.getType()) {
-                case SET_NW_SRC:
+                if (action instanceof SetNwSrc) {
                     if (((SetNwSrc) action).getAddress() instanceof Inet6Address) {
                         return true;
                     }
-                    break;
-                case SET_NW_DST:
+                } else if (action instanceof SetNwDst) {
                     if (((SetNwDst) action).getAddress() instanceof Inet6Address) {
                         return true;
                     }
-                    break;
-                case SET_DL_TYPE:
+                } else if (action instanceof SetDlType) {
                     if (((SetDlType) action).getDlType() == EtherTypes.IPv6.intValue()) {
                         return true;
                     }
-                    break;
-                default:
                 }
             }
         }
@@ -296,7 +291,7 @@ public class Flow implements Cloneable, Serializable {
         Iterator<Action> actionIter = this.getActions().iterator();
         while (actionIter.hasNext()) {
             Action action = actionIter.next();
-            if (action.getType() == actionType) {
+            if (action.getName().equals(actionType.toString())) {
                 if (!this.removeAction(action)) {
                     return false;
                 }

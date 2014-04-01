@@ -349,7 +349,7 @@ public class ToSalConversionsUtils {
     private static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
         NodeConnector nodeConnector = null;
         try {
-            nodeConnector = new NodeConnector(NodeMapping.MD_SAL_TYPE,node.getNodeIDString()+":"+uri.getValue(),node);
+            nodeConnector = new NodeConnector(node.getType(), Short.valueOf(uri.getValue()), node);
         } catch (ConstructionException e) {
             e.printStackTrace();
         }
@@ -483,8 +483,9 @@ public class ToSalConversionsUtils {
     }
 
     private static void fillFrom(Match target, Layer3Match source) {
-        if (source == null)
+        if (source == null) {
             return;
+        }
         if (source instanceof Ipv4Match) {
             fillFromIpv4(target, (Ipv4Match) source);
         } else if (source instanceof Ipv6Match) {
@@ -555,8 +556,9 @@ public class ToSalConversionsUtils {
     }
 
     private static void fillFrom(Match target, EthernetMatch source) {
-        if (source == null)
+        if (source == null) {
             return;
+        }
         EthernetType ethType = source.getEthernetType();
         if (ethType != null) {
             EtherType ethInnerType = ethType.getType();
@@ -585,7 +587,7 @@ public class ToSalConversionsUtils {
         }
         return macAddress;
     }
-    
+
     public static byte[] bytesFromDpid(long dpid) {
         byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 

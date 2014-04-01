@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
+
 /**
  * Represent the action of dropping the matched packet
  */
@@ -19,8 +21,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Drop extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "DROP";
 
     public Drop() {
-        type = ActionType.DROP;
+        super(NAME);
+    }
+
+    @Override
+    public Drop fromString(String actionString, Node node) {
+        return (actionString != null && (actionString.trim().equalsIgnoreCase(NAME))) ? this : null;
     }
 }
