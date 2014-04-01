@@ -9,11 +9,16 @@
 package org.opendaylight.controller.sal.action;
 
 import java.net.InetAddress;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.NetUtils;
 
 /**
  * Set network destination address action
@@ -23,15 +28,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetNwDst extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_NW_DST";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
     InetAddress address;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private SetNwDst() {
+    public SetNwDst() {
+        super(NAME);
     }
 
     public SetNwDst(InetAddress address) {
-        type = ActionType.SET_NW_DST;
+        super(NAME);
         this.address = address;
     }
 
@@ -81,6 +87,20 @@ public class SetNwDst extends Action {
 
     @Override
     public String toString() {
-        return type + "[address = " + address + "]";
+        return NAME + "=" + getAddressAsString();
+    }
+
+    @Override
+    public SetNwDst fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            return new SetNwDst(NetUtils.parseInetAddress(matcher.group(1)));
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return address != null;
     }
 }

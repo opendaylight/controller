@@ -37,6 +37,26 @@ import org.opendaylight.controller.commons.httpclient.HTTPClient;
 import org.opendaylight.controller.commons.httpclient.HTTPRequest;
 import org.opendaylight.controller.commons.httpclient.HTTPResponse;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
+import org.opendaylight.controller.sal.action.Controller;
+import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.HwPath;
+import org.opendaylight.controller.sal.action.Loopback;
+import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.action.PushVlan;
+import org.opendaylight.controller.sal.action.SetDlDst;
+import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetDlType;
+import org.opendaylight.controller.sal.action.SetNwDst;
+import org.opendaylight.controller.sal.action.SetNwSrc;
+import org.opendaylight.controller.sal.action.SetNwTos;
+import org.opendaylight.controller.sal.action.SetTpDst;
+import org.opendaylight.controller.sal.action.SetTpSrc;
+import org.opendaylight.controller.sal.action.SetVlanCfi;
+import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.action.SetVlanPcp;
+import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
@@ -644,9 +664,10 @@ public class NorthboundIT {
 
     @Test
     public void testStatistics() throws JSONException {
-        final String actionTypes[] = { "DROP", "LOOPBACK", "FLOOD", "FLOOD_ALL", "CONTROLLER", "SW_PATH", "HW_PATH", "OUTPUT",
-                "SET_DL_SRC", "SET_DL_DST", "SET_DL_TYPE", "SET_VLAN_ID", "SET_VLAN_PCP", "SET_VLAN_CFI", "POP_VLAN", "PUSH_VLAN",
-                "SET_NW_SRC", "SET_NW_DST", "SET_NW_TOS", "SET_TP_SRC", "SET_TP_DST" };
+        final String actionTypes[] = { Drop.NAME, Loopback.NAME, Flood.NAME, FloodAll.NAME, Controller.NAME,
+                SwPath.NAME, HwPath.NAME, "OUTPUT", SetDlSrc.NAME, SetDlDst.NAME, SetDlType.NAME, SetVlanId.NAME,
+                SetVlanPcp.NAME, SetVlanCfi.NAME, PopVlan.NAME, PushVlan.NAME, SetNwSrc.NAME, SetNwDst.NAME,
+                SetNwTos.NAME, SetTpSrc.NAME, SetTpDst.NAME };
         System.out.println("Starting Statistics JAXB client.");
 
         String baseURL = baseUrlPrefix + "statistics/default/";
@@ -772,26 +793,28 @@ public class NorthboundIT {
         }
 
         if (act.getString("type").equals("SET_DL_SRC")) {
-            byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
+            byte srcMatch[] = { (byte) 6, (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
             String src = act.getString("address");
-            byte srcBytes[] = new byte[5];
+            byte srcBytes[] = new byte[6];
             srcBytes[0] = Byte.parseByte(src.substring(0, 2));
-            srcBytes[1] = Byte.parseByte(src.substring(2, 4));
-            srcBytes[2] = Byte.parseByte(src.substring(4, 6));
-            srcBytes[3] = Byte.parseByte(src.substring(6, 8));
-            srcBytes[4] = Byte.parseByte(src.substring(8, 10));
+            srcBytes[1] = Byte.parseByte(src.substring(3, 5));
+            srcBytes[2] = Byte.parseByte(src.substring(6, 8));
+            srcBytes[3] = Byte.parseByte(src.substring(9, 11));
+            srcBytes[4] = Byte.parseByte(src.substring(12, 14));
+            srcBytes[5] = Byte.parseByte(src.substring(15, 17));
             Assert.assertTrue(Arrays.equals(srcBytes, srcMatch));
         }
 
         if (act.getString("type").equals("SET_DL_DST")) {
-            byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5 };
+            byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6 };
             String dst = act.getString("address");
-            byte dstBytes[] = new byte[5];
+            byte dstBytes[] = new byte[6];
             dstBytes[0] = Byte.parseByte(dst.substring(0, 2));
-            dstBytes[1] = Byte.parseByte(dst.substring(2, 4));
-            dstBytes[2] = Byte.parseByte(dst.substring(4, 6));
-            dstBytes[3] = Byte.parseByte(dst.substring(6, 8));
-            dstBytes[4] = Byte.parseByte(dst.substring(8, 10));
+            dstBytes[1] = Byte.parseByte(dst.substring(3, 5));
+            dstBytes[2] = Byte.parseByte(dst.substring(6, 8));
+            dstBytes[3] = Byte.parseByte(dst.substring(9, 11));
+            dstBytes[4] = Byte.parseByte(dst.substring(12, 14));
+            dstBytes[5] = Byte.parseByte(dst.substring(15, 17));
             Assert.assertTrue(Arrays.equals(dstBytes, dstMatch));
         }
         if (act.getString("type").equals("SET_DL_TYPE")) {

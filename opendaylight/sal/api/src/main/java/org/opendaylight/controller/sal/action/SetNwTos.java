@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.opendaylight.controller.sal.core.Node;
 
 /**
  * Set network TOS action
@@ -20,18 +25,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetNwTos extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_NW_TOS";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
+    private static int MIN = 0;
+    private static int MAX = 0x3F;
     @XmlElement
     private int tos;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private SetNwTos() {
+    public SetNwTos() {
+        super(NAME);
     }
 
     public SetNwTos(int tos) {
-        type = ActionType.SET_NW_TOS;
+        super(NAME);
         this.tos = tos;
-        checkValue(tos);
     }
 
     /**
@@ -71,6 +78,27 @@ public class SetNwTos extends Action {
 
     @Override
     public String toString() {
-        return type + "[tos = 0x" + Integer.toHexString(tos) + "]";
+        return NAME + "=0x" + Integer.toHexString(tos);
+    }
+
+    @Override
+    public SetNwTos fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            try {
+                Integer tos = Integer.decode(matcher.group(1));
+                if (tos != null) {
+                    return new SetNwTos(tos);
+                }
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return (tos >= MIN) && (tos <= MAX);
     }
 }

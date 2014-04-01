@@ -84,7 +84,7 @@
     <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
     <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
-    <sal.version>0.8.1-SNAPSHOT</sal.version>
+    <sal.version>1.0.0-SNAPSHOT</sal.version>
     <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
@@ -921,7 +921,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal.implementation</artifactId>
-        <version>${controller.version}</version>
+        <version>${sal.version}</version>
       </dependency>
 
       <!-- SAL Extension bundles -->

@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.opendaylight.controller.sal.core.Node;
 
 /**
  * Set vlan CFI action
@@ -21,19 +26,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetVlanCfi extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_VLAN_CFI";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
+    private static int MIN = 0;
+    private static int MAX = 1;
     @XmlElement
     private int cfi;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private SetVlanCfi() {
+    public SetVlanCfi() {
+        super(NAME);
     }
 
     public SetVlanCfi(int cfi) {
-        type = ActionType.SET_VLAN_CFI;
+        super(NAME);
         this.cfi = cfi;
-        checkValue(cfi);
-    }
+       }
 
     /**
      * Returns the 802.1q CFI value that this action will set
@@ -72,6 +79,27 @@ public class SetVlanCfi extends Action {
 
     @Override
     public String toString() {
-        return type + "[cfi = " + Integer.toHexString(cfi) + "]";
+        return NAME + "=" + cfi;
+    }
+
+    @Override
+    public SetVlanCfi fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            try {
+                Integer cfi = Integer.decode(matcher.group(1));
+                if (cfi != null) {
+                    return new SetVlanCfi(cfi);
+                }
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return (cfi >= MIN) && (cfi <= MAX);
     }
 }

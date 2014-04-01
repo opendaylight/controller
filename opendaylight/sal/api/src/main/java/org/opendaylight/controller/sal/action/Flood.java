@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
+
 /**
  * Represents the action of flooding the packet out
  */
@@ -19,8 +21,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Flood extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "FLOOD";
 
     public Flood() {
-        type = ActionType.FLOOD;
+        super(NAME);
+    }
+
+    @Override
+    public Flood fromString(String actionString, Node node) {
+        return (actionString != null && (actionString.trim().equalsIgnoreCase(NAME))) ? this : null;
     }
 }

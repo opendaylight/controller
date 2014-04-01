@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.opendaylight.controller.sal.core.Node;
 
 /**
  * Set destination transport port action
@@ -20,18 +25,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetTpDst extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_TP_DST";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
+    private static int MIN = 1;
+    private static int MAX = 0xFFFF;
     @XmlElement
     private int port;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private SetTpDst() {
+    public SetTpDst() {
+        super(NAME);
     }
 
     public SetTpDst(int port) {
-        type = ActionType.SET_TP_DST;
+        super(NAME);
         this.port = port;
-        checkValue(port);
     }
 
     /**
@@ -71,6 +78,24 @@ public class SetTpDst extends Action {
 
     @Override
     public String toString() {
-        return type + "[port = " + port + "]";
+        return NAME + "=" + port;
+    }
+
+    @Override
+    public Action fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            try {
+                return new SetTpDst(Integer.decode(matcher.group(1)));
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return (port >= MIN) && (port <= MAX);
     }
 }

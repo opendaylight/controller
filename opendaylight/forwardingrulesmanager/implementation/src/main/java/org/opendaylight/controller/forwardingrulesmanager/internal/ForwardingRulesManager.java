@@ -49,7 +49,8 @@ import org.opendaylight.controller.forwardingrulesmanager.PortGroupConfig;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupProvider;
 import org.opendaylight.controller.forwardingrulesmanager.implementation.data.FlowEntryDistributionOrder;
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
+import org.opendaylight.controller.sal.action.Controller;
+import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.FloodAll;
@@ -1409,7 +1410,7 @@ public class ForwardingRulesManager implements
         newFlowEntry = currentFlowEntry.clone();
         Action target = null;
         for (Action action : newFlowEntry.getFlow().getActions()) {
-            if (action.getType() == ActionType.OUTPUT) {
+            if (action instanceof Output) {
                 target = action;
                 break;
             }
@@ -1435,7 +1436,7 @@ public class ForwardingRulesManager implements
             FlowEntryInstall flow = this.installedSwView.get(index);
             if (flow.getFlowName().equals(flowName)) {
                 for (Action action : flow.getOriginal().getFlow().getActions()) {
-                    if (action.getType() == ActionType.OUTPUT) {
+                    if (action instanceof Output) {
                         return ((Output) action).getPort();
                     }
                 }
@@ -2154,7 +2155,7 @@ public class ForwardingRulesManager implements
                 List<FlowConfig> defaultConfigs = new ArrayList<FlowConfig>();
 
                 List<String> puntAction = new ArrayList<String>();
-                puntAction.add(ActionType.CONTROLLER.toString());
+                puntAction.add(Controller.NAME);
 
                 FlowConfig allowARP = new FlowConfig();
                 allowARP.setInstallInHw(true);
@@ -2177,7 +2178,7 @@ public class ForwardingRulesManager implements
                 defaultConfigs.add(allowLLDP);
 
                 List<String> dropAction = new ArrayList<String>();
-                dropAction.add(ActionType.DROP.toString());
+                dropAction.add(Drop.NAME);
 
                 FlowConfig dropAllConfig = new FlowConfig();
                 dropAllConfig.setInstallInHw(true);

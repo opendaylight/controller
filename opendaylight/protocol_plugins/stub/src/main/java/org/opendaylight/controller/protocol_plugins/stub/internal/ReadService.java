@@ -119,8 +119,8 @@ public class ReadService implements IPluginInReadService {
         } catch (ConstructionException e) {
 
         }
-        byte dst[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5 };
-        byte src[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
+        byte dst[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6 };
+        byte src[] = { (byte) 6, (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
         actionList.add(new SetDlSrc(src));
         actionList.add(new SetDlDst(dst));
         actionList.add(new SetDlType(10));

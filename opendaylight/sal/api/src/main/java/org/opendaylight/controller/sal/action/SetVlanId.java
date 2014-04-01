@@ -8,31 +8,37 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
+
 /**
  * Set vlan id action
  */
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetVlanId extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_VLAN_ID";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
+    private static int MIN = 1;
+    private static int MAX = 0xFFF;
     @XmlElement
     private int vlanId;
 
-    @SuppressWarnings("unused")
-    private SetVlanId() {
-
+    public SetVlanId() {
+        super(NAME);
     }
 
     public SetVlanId(int vlanId) {
-        type = ActionType.SET_VLAN_ID;
+        super(NAME);
         this.vlanId = vlanId;
-        checkValue(vlanId);
     }
 
     /**
@@ -72,6 +78,27 @@ public class SetVlanId extends Action {
 
     @Override
     public String toString() {
-        return type + "[vlanId = " + vlanId + "]";
+        return NAME + "=" + vlanId;
+    }
+
+    @Override
+    public SetVlanId fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            try {
+                Integer id = Integer.decode(matcher.group(1));
+                if (id != null) {
+                    return new SetVlanId(id);
+                }
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return (vlanId >= MIN) && (vlanId <= MAX);
     }
 }

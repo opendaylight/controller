@@ -8,11 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
@@ -22,18 +26,21 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Output extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "OUTPUT";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
     @XmlElement
     private NodeConnector port;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private Output() {
+    /**
+     * Internally used constructor. Will generate an invalid Output action
+     */
+    public Output() {
+        super(NAME);
     }
 
     public Output(NodeConnector port) {
-        type = ActionType.OUTPUT;
+        super(NAME);
         this.port = port;
-        // checkValue(port);
     }
 
     public NodeConnector getPort() {
@@ -41,14 +48,22 @@ public class Output extends Action {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((port == null) ? 0 : port.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Output)) {
             return false;
         }
         Output other = (Output) obj;
@@ -63,15 +78,30 @@ public class Output extends Action {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((port == null) ? 0 : port.hashCode());
-        return result;
+    public String toString() {
+        return NAME + "=" + port;
     }
 
     @Override
-    public String toString() {
-        return type + "[" + port.toString() + "]";
+    public Output fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            String value = matcher.group(1);
+            // Accept node connector form
+            NodeConnector nc = NodeConnector.fromString(value);
+            if (nc == null) {
+                // Fall back to port number form
+                nc = NodeConnector.fromString(String.format("%s|%s@%s", node.getType(), value, node.toString()));
+            }
+            if (nc != null) {
+                return new Output(nc);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return port != null;
     }
 }

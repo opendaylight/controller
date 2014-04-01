@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.opendaylight.controller.sal.core.Node;
 
 /**
  * Set vlan PCP action
@@ -20,18 +25,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetVlanPcp extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_VLAN_PCP";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
+    private static int MIN = 0;
+    private static int MAX = 7;
     @XmlElement
     private int pcp;
 
-    @SuppressWarnings("unused")
-    private SetVlanPcp() {
-
+    public SetVlanPcp() {
+        super(NAME);
     }
 
     public SetVlanPcp(int pcp) {
-        type = ActionType.SET_VLAN_PCP;
+        super(NAME);
         this.pcp = pcp;
-        checkValue(pcp);
     }
 
     /**
@@ -71,6 +78,27 @@ public class SetVlanPcp extends Action {
 
     @Override
     public String toString() {
-        return type + "[pcp = " + Integer.toHexString(pcp) + "]";
+        return NAME + "=" + pcp;
+    }
+
+    @Override
+    public SetVlanPcp fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            try {
+                Integer pcp = Integer.decode(matcher.group(1));
+                if (pcp != null) {
+                    return new SetVlanPcp(pcp);
+                }
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return (pcp >= MIN) && (pcp <= MAX);
     }
 }
