@@ -47,6 +47,14 @@ module toaster-provider-impl {
                 }
             }
 
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal:binding-data-broker;
+                    }
+                }
+            }
         }
     }
 
