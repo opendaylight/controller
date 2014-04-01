@@ -16,6 +16,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import com.google.common.base.Optional;
+import com.google.common.primitives.UnsignedLong;
 
 class DataAndMetadataSnapshot {
 
@@ -34,9 +35,16 @@ class DataAndMetadataSnapshot {
         return new Builder();
     }
 
+    public static DataAndMetadataSnapshot createEmpty() {
+        return createEmpty(new NodeIdentifier(SchemaContext.NAME));
+    }
+
+
     public static DataAndMetadataSnapshot createEmpty(final NodeIdentifier rootNode) {
         NormalizedNode<?, ?> data = Builders.containerBuilder().withNodeIdentifier(rootNode).build();
         StoreMetadataNode metadata = StoreMetadataNode.builder()
+                .setNodeVersion(UnsignedLong.ZERO)
+                .setSubtreeVersion(UnsignedLong.ZERO)
                 .setData(data)
                 .build();
         return new DataAndMetadataSnapshot(metadata,Optional.<SchemaContext>absent());
@@ -47,6 +55,8 @@ class DataAndMetadataSnapshot {
         NormalizedNode<?, ?> data = Builders.containerBuilder().withNodeIdentifier(rootNodeIdentifier).build();
         StoreMetadataNode metadata = StoreMetadataNode.builder()
                 .setData(data)
+                .setNodeVersion(UnsignedLong.ZERO)
+                .setSubtreeVersion(UnsignedLong.ZERO)
                 .build();
         return new DataAndMetadataSnapshot(metadata, Optional.of(ctx));
     }

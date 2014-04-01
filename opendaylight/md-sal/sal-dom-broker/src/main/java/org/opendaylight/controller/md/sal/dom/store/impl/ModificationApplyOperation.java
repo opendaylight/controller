@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
+import com.google.common.primitives.UnsignedLong;
 
 /**
  *
@@ -48,6 +49,7 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
      * @param storeMeta
      *            Store Metadata Node on which NodeModification should be
      *            applied
+     * @param subtreeVersion New subtree version of parent node
      * @throws IllegalArgumentException
      *             If it is not possible to apply Operation on provided Metadata
      *             node
@@ -55,7 +57,28 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
      *         node, {@link Optional#absent()} if {@link NodeModification}
      *         resulted in deletion of this node.
      */
-    Optional<StoreMetadataNode> apply(NodeModification modification, Optional<StoreMetadataNode> storeMeta);
+    Optional<StoreMetadataNode> apply(NodeModification modification, Optional<StoreMetadataNode> storeMeta, UnsignedLong subtreeVersion);
+
+    /**
+     *
+     * Checks if provided node modification could be applied to current metadata node.
+     *
+     * @param modification Modification
+     * @param current Metadata Node to which modification should be applied
+     * @return true if modification is applicable
+     *         false if modification is no applicable
+     */
+    boolean isApplicable(NodeModification modification, Optional<StoreMetadataNode> current);
+
+    /**
+     *
+     * Performs structural verification of NodeModification, such as writen values / types
+     * uses right structural elements.
+     *
+     * @param modification to be verified.
+     * @throws IllegalArgumentException If provided NodeModification does not adhere to the structure.
+     */
+    void verifyStructure(NodeModification modification) throws IllegalArgumentException;
 
     /**
      * Returns a suboperation for specified tree node
@@ -65,5 +88,7 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
      */
     @Override
     public Optional<ModificationApplyOperation> getChild(PathArgument child);
+
+
 
 }

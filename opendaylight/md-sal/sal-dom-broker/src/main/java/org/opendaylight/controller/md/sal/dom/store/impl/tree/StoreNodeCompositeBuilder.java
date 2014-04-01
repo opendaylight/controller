@@ -10,6 +10,9 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 
+import com.google.common.base.Optional;
+import com.google.common.primitives.UnsignedLong;
+
 /**
  *
  * Helper builder
@@ -23,7 +26,6 @@ public class StoreNodeCompositeBuilder {
 
     private final NormalizedNodeContainerBuilder data;
 
-
     private StoreNodeCompositeBuilder(final NormalizedNodeContainerBuilder nodeBuilder) {
         this.metadata = StoreMetadataNode.builder();
         this.data = nodeBuilder;
@@ -36,23 +38,37 @@ public class StoreNodeCompositeBuilder {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
+    public StoreNodeCompositeBuilder addIfPresent(final Optional<StoreMetadataNode> potential) {
+        if (potential.isPresent()) {
+            StoreMetadataNode node = potential.get();
+            metadata.add(node);
+            data.addChild(node.getData());
+        }
+        return this;
+    }
 
     public StoreMetadataNode build() {
         return metadata.setData(data.build()).build();
     }
 
-
     public static StoreNodeCompositeBuilder from(final NormalizedNodeContainerBuilder nodeBuilder) {
         return new StoreNodeCompositeBuilder(nodeBuilder);
     }
 
-    public static StoreNodeCompositeBuilder from(final StoreMetadataNode previous, final NormalizedNodeContainerBuilder nodeBuilder) {
-
-        return new StoreNodeCompositeBuilder(nodeBuilder);
-    }
-
+    @SuppressWarnings("unchecked")
     public StoreNodeCompositeBuilder setIdentifier(final PathArgument identifier) {
         data.withNodeIdentifier(identifier);
+        return this;
+    }
+
+    public StoreNodeCompositeBuilder setNodeVersion(final UnsignedLong nodeVersion) {
+        metadata.setNodeVersion(nodeVersion);
+        return this;
+    }
+
+    public StoreNodeCompositeBuilder setSubtreeVersion(final UnsignedLong updatedSubtreeVersion) {
+        metadata.setSubtreeVersion(updatedSubtreeVersion);
         return this;
     }
 
