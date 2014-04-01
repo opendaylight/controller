@@ -54,18 +54,23 @@ public class ContainerFlow implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ContainerFlow other = (ContainerFlow) obj;
         if (match == null) {
-            if (other.match != null)
+            if (other.match != null) {
                 return false;
-        } else if (!match.equals(other.match))
+            }
+        } else if (!match.equals(other.match)) {
             return false;
+        }
         return true;
     }
 
@@ -94,33 +99,25 @@ public class ContainerFlow implements Serializable {
         }
         Match actionMatch = new Match();
         for (Action action : flow.getActions()) {
-            switch (action.getType()) {
-            case SET_DL_TYPE:
+            // Checks the actions which may conflict
+            if (action instanceof SetDlType) {
                 actionMatch.setField(MatchType.DL_TYPE,
                         ((Integer) ((SetDlType) action).getDlType())
                                 .shortValue());
-                break;
-            case SET_NW_SRC:
+            } else if (action instanceof SetNwSrc) {
                 actionMatch.setField(MatchType.NW_SRC, ((SetNwSrc) action)
                         .getAddress());
-                break;
-            case SET_NW_DST:
+            } else if (action instanceof SetNwDst) {
                 actionMatch.setField(MatchType.NW_DST, ((SetNwDst) action)
                         .getAddress());
-                break;
-            case SET_TP_SRC:
+            } else if (action instanceof SetTpSrc) {
                 actionMatch.setField(MatchType.TP_SRC,
                         ((Integer) ((SetTpSrc) action).getPort()).shortValue());
-                break;
-            case SET_TP_DST:
+            } else if (action instanceof SetTpDst) {
                 actionMatch.setField(MatchType.TP_DST,
                         ((Integer) ((SetTpDst) action).getPort()).shortValue());
-                break;
-            default:
-                // This action cannot conflict
             }
         }
-
         return this.allowsMatch(actionMatch);
     }
 

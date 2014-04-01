@@ -24,7 +24,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.IReadFilterInternalL
 import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerAware;
@@ -405,7 +404,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
 
         // If an outgoing port is specified, it must belong to this container
         for (Action action : flow.getActions()) {
-            if (action.getType() == ActionType.OUTPUT) {
+            if (action instanceof Output) {
                 NodeConnector outPort = ((Output) action).getPort();
                 if (!containerOwnsNodeConnector(container, outPort)) {
                     return false;

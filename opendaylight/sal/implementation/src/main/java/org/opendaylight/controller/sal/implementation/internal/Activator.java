@@ -12,6 +12,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.sal.action.IFlowActionsFactory;
+import org.opendaylight.controller.sal.action.IFlowActionsProvider;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
@@ -50,8 +52,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { Inventory.class };
+        Object[] res = { Inventory.class, FlowActionsProvider.class, FlowActionsFactory.class };
         return res;
     }
 
@@ -65,6 +68,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            Implementation class that is being configured, needed as long
      *            as the same routine can configure multiple implementations
      */
+    @Override
     public void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(Inventory.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -84,6 +88,21 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginInInventoryService.class, "(scope=Global)")
                     .setCallbacks("setPluginService", "unsetPluginService")
                     .setRequired(false));
+        }
+
+        if (imp.equals(FlowActionsFactory.class)) {
+            // export the service
+            c.setInterface(IFlowActionsFactory.class.getName(), null);
+
+            c.add(createServiceDependency()
+                    .setService(IFlowActionsProvider.class)
+                    .setCallbacks("setActionProvider", "unsetActionProvider")
+                    .setRequired(false));
+        }
+
+        if (imp.equals(FlowActionsProvider.class)) {
+            // export the service
+            c.setInterface(IFlowActionsProvider.class.getName(), null);
         }
     }
 

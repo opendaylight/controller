@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
+
 /**
  * Represents the action of sending the packet to the local hardware path for
  * processing
@@ -20,8 +22,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class HwPath extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "HW_PATH";
 
     public HwPath() {
-        type = ActionType.HW_PATH;
+        super(NAME);
+    }
+
+    @Override
+    public HwPath fromString(String actionString, Node node) {
+        return (actionString != null && (actionString.trim().equalsIgnoreCase(NAME))) ? this : null;
     }
 }

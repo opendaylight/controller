@@ -8,11 +8,15 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 
 /**
@@ -25,38 +29,37 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 @XmlAccessorType(XmlAccessType.NONE)
 public class PushVlan extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "PUSH_VLAN";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=\\((.*)\\)", Pattern.CASE_INSENSITIVE);
     private int tag; // TPID - 16 bits
     private int pcp; // PCP - 3 bits
     private int cfi; // CFI - 1 bit (drop eligible)
     private int vlanId; // VID - 12 bits
-    private transient int tci; // TCI = [PCP + CFI + VID] - 16 bits
-    private transient int header; // full 802.1q header [TPID + TCI] - 32 bits
+    private int tci; // TCI = [PCP + CFI + VID] - 16 bits
+    private int header; // full 802.1q header [TPID + TCI] - 32 bits
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private PushVlan() {
+    public PushVlan() {
+        super(NAME);
     }
 
     public PushVlan(int tag, int pcp, int cfi, int vlanId) {
-        type = ActionType.PUSH_VLAN;
+        super(NAME);
         this.tag = tag;
         this.cfi = cfi;
         this.pcp = pcp;
         this.vlanId = vlanId;
         this.tci = createTci();
         this.header = createHeader();
-        runChecks();
     }
 
     public PushVlan(EtherTypes tag, int pcp, int cfi, int vlanId) {
-        type = ActionType.PUSH_VLAN;
+        super(NAME);
         this.tag = tag.intValue();
         this.cfi = cfi;
         this.pcp = pcp;
         this.vlanId = vlanId;
         this.tci = createTci();
         this.header = createHeader();
-        runChecks();
     }
 
     private int createTci() {
@@ -65,22 +68,6 @@ public class PushVlan extends Action {
 
     private int createHeader() {
         return (tag & 0xffff) << 16 | (pcp & 0x7) << 13 | (cfi & 0x1) << 12 | (vlanId & 0xfff);
-    }
-
-    private void runChecks() {
-        checkValue(ActionType.SET_DL_TYPE, tag);
-        checkValue(ActionType.SET_VLAN_PCP, pcp);
-        checkValue(ActionType.SET_VLAN_CFI, cfi);
-        checkValue(ActionType.SET_VLAN_ID, vlanId);
-        checkValue(tci);
-
-        // Run action specific check which cannot be run by parent
-        if (tag != EtherTypes.VLANTAGGED.intValue() && tag != EtherTypes.QINQ.intValue()
-                && tag != EtherTypes.OLDQINQ.intValue() && tag != EtherTypes.CISCOQINQ.intValue()) {
-            // pass a value which will tell fail and tell something about the
-            // original wrong value
-            checkValue(ActionType.SET_DL_TYPE, 0xBAD << 16 | tag);
-        }
     }
 
     /**
@@ -143,24 +130,43 @@ public class PushVlan extends Action {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + cfi;
+        result = prime * result + header;
+        result = prime * result + pcp;
+        result = prime * result + tag;
+        result = prime * result + tci;
+        result = prime * result + vlanId;
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof PushVlan)) {
             return false;
         }
         PushVlan other = (PushVlan) obj;
         if (cfi != other.cfi) {
             return false;
         }
+        if (header != other.header) {
+            return false;
+        }
         if (pcp != other.pcp) {
             return false;
         }
         if (tag != other.tag) {
+            return false;
+        }
+        if (tci != other.tci) {
             return false;
         }
         if (vlanId != other.vlanId) {
@@ -170,19 +176,32 @@ public class PushVlan extends Action {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + cfi;
-        result = prime * result + pcp;
-        result = prime * result + tag;
-        result = prime * result + vlanId;
-        return result;
+    public String toString() {
+        return String.format("%s=(0x%s:%s:%s:%s)", NAME, Integer.toHexString(tag), pcp, cfi, vlanId);
     }
 
     @Override
-    public String toString() {
-        return type + "[tag = " + tag + ", pcp = " + pcp + ", cfi = " + cfi + ", vlanId = " + vlanId + "]";
+    public PushVlan fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            String pieces[] = matcher.group(1).replace("(","").replace(")", "").split(":");
+            if (pieces.length == 4) {
+                try {
+                    return new PushVlan(Integer.decode(pieces[0]), Integer.decode(pieces[1]),
+                            Integer.decode(pieces[2]), Integer.decode(pieces[3]));
+                } catch (NumberFormatException nfe) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return (tag == EtherTypes.VLANTAGGED.intValue() || tag == EtherTypes.QINQ.intValue()
+                || tag == EtherTypes.OLDQINQ.intValue() || tag == EtherTypes.CISCOQINQ.intValue())
+                && pcp >= 0 && pcp <= 7 && cfi >= 0 && cfi <= 1 && vlanId >= 1 && vlanId <= 4095;
     }
 
 }
