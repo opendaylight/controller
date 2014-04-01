@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChangeEvent<P,D> {
+public final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChangeEvent<P,D> {
 
     private final D updatedOperationalSubtree;
     private final Map<P, D> updatedOperational;
@@ -28,7 +28,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
     private final Map<P, D> createdConfiguration;
 
 
-    public ImmutableDataChangeEvent(Builder<P, D> builder) {
+    private ImmutableDataChangeEvent(final Builder<P, D> builder) {
 
         createdConfiguration = builder.getCreatedConfiguration().build();
         createdOperational = builder.getCreatedOperational().build();
@@ -95,11 +95,11 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
         return updatedOperationalSubtree;
     }
 
-    static final <P extends Path<P>,D> Builder<P, D> builder() {
+    public static final <P extends Path<P>,D> Builder<P, D> builder() {
         return new Builder<>();
     }
 
-    static final class Builder<P extends Path<P>,D> {
+    public static final class Builder<P extends Path<P>,D> {
 
         private  D updatedOperationalSubtree;
         private  D originalOperationalSubtree;
@@ -117,7 +117,10 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
         private final ImmutableMap.Builder<P, D> createdConfiguration = ImmutableMap.builder();
 
 
-        protected Builder<P,D> addTransaction(DataModification<P, D> data, Predicate<P> keyFilter) {
+
+
+
+        protected Builder<P,D> addTransaction(final DataModification<P, D> data, final Predicate<P> keyFilter) {
             updatedOperational.putAll(Maps.filterKeys(data.getUpdatedOperationalData(), keyFilter));
             updatedConfiguration.putAll(Maps.filterKeys(data.getUpdatedConfigurationData(), keyFilter));
             originalConfiguration.putAll(Maps.filterKeys(data.getOriginalConfigurationData(), keyFilter));
@@ -127,7 +130,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return this;
         }
 
-        protected Builder<P, D> addConfigurationChangeSet(RootedChangeSet<P, D> changeSet) {
+        protected Builder<P, D> addConfigurationChangeSet(final RootedChangeSet<P, D> changeSet) {
             if(changeSet == null) {
                 return this;
             }
@@ -139,7 +142,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return this;
         }
 
-        protected Builder<P, D> addOperationalChangeSet(RootedChangeSet<P, D> changeSet) {
+        protected Builder<P, D> addOperationalChangeSet(final RootedChangeSet<P, D> changeSet) {
             if(changeSet == null) {
                 return this;
             }
@@ -150,7 +153,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return this;
         }
 
-        protected ImmutableDataChangeEvent<P, D> build() {
+        public ImmutableDataChangeEvent<P, D> build() {
             return new ImmutableDataChangeEvent<P,D>(this);
         }
 
@@ -158,7 +161,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return updatedOperationalSubtree;
         }
 
-        protected Builder<P, D> setUpdatedOperationalSubtree(D updatedOperationalSubtree) {
+        public Builder<P, D> setUpdatedOperationalSubtree(final D updatedOperationalSubtree) {
             this.updatedOperationalSubtree = updatedOperationalSubtree;
             return this;
         }
@@ -167,7 +170,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return originalOperationalSubtree;
         }
 
-        protected Builder<P,D> setOriginalOperationalSubtree(D originalOperationalSubtree) {
+        public Builder<P,D> setOriginalOperationalSubtree(final D originalOperationalSubtree) {
             this.originalOperationalSubtree = originalOperationalSubtree;
             return this;
         }
@@ -176,7 +179,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return originalConfigurationSubtree;
         }
 
-        protected Builder<P, D> setOriginalConfigurationSubtree(D originalConfigurationSubtree) {
+        public Builder<P, D> setOriginalConfigurationSubtree(final D originalConfigurationSubtree) {
             this.originalConfigurationSubtree = originalConfigurationSubtree;
             return this;
         }
@@ -185,7 +188,7 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
             return updatedConfigurationSubtree;
         }
 
-        protected Builder<P,D> setUpdatedConfigurationSubtree(D updatedConfigurationSubtree) {
+        public Builder<P,D> setUpdatedConfigurationSubtree(final D updatedConfigurationSubtree) {
             this.updatedConfigurationSubtree = updatedConfigurationSubtree;
             return this;
         }
@@ -220,6 +223,26 @@ final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChange
 
         protected ImmutableMap.Builder<P, D> getCreatedConfiguration() {
             return createdConfiguration;
+        }
+
+        public Builder<P,D> putOriginalOperational(final Map<? extends P, ? extends D> originalData) {
+            originalOperational.putAll(originalData);
+            return this;
+        }
+
+        public Builder<P,D> putCreatedOperational(final Map<? extends P, ? extends D> originalData) {
+            createdOperational.putAll(originalData);
+            return this;
+        }
+
+        public Builder<P,D> putUpdatedOperational(final Map<? extends P, ? extends D> originalData) {
+            updatedOperational.putAll(originalData);
+            return this;
+        }
+
+        public Builder<P,D> putRemovedOperational(final Set<? extends P> originalData) {
+            removedOperational.addAll(originalData);
+            return this;
         }
     }
 

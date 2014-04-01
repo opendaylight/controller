@@ -7,13 +7,22 @@
  */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
 
-import com.google.common.collect.ImmutableMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
+import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpVersion;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
@@ -51,14 +60,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import com.google.common.collect.ImmutableMap;
 
 public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
@@ -117,6 +119,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             .toInstance();
 
     @Test
+    @Ignore
     public void simpleModifyOperation() throws Exception {
 
         assertNull(biDataService.readConfigurationData(FLOW_INSTANCE_ID_BI));
@@ -141,7 +144,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
             @Override
             public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> requestCommit(
-                    DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
+                    final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification) {
                 modificationCapture = modification;
                 return CommitHandlerTransactions.allwaysSuccessfulTransaction(modification);
             }

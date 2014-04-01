@@ -1,8 +1,8 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -20,7 +20,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
     private final ListenerRegistrationNode parent;
     private final Map<PathArgument, ListenerRegistrationNode> children;
     private final PathArgument identifier;
-    private final ConcurrentSkipListSet<DataChangeListenerRegistration<?>> listeners;
+    private final HashSet<DataChangeListenerRegistration<?>> listeners;
 
     private ListenerRegistrationNode(final PathArgument identifier) {
         this(null,identifier);
@@ -30,7 +30,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
         this.parent = parent;
         this.identifier = identifier;
         children = new HashMap<>();
-        listeners = new ConcurrentSkipListSet<>();
+        listeners = new HashSet<>();
     }
 
     public final static ListenerRegistrationNode createRoot() {
