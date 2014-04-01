@@ -8,113 +8,74 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.opendaylight.controller.sal.core.Node;
 
 /**
  * Represents the generic action to be applied to the matched
- * frame/packet/message
+ * frame/packet/message. Any existing or new SAL action class
+ * must extend this abstract Action class
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class Action implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
-    private static boolean debug = false; // Enable to find where in the code an
-    // invalid assignment is made
-    @XmlElement
-    protected ActionType type;
-    private transient boolean isValid = true;
+    protected final String name;
 
     /* Dummy constructor for JAXB */
-    public Action() {
+    @SuppressWarnings("unused")
+    private Action() {
+        name = "none";
+    }
+
+    public Action(String action) {
+        name = action;
     }
 
     /**
-     * Checks if the passed value is in the valid range for this action
+     * Generate an Action instance from its string form
      *
-     * @param value
-     * @return boolean
+     * @param actionString
+     *            The action in string form
+     * @return The corresponding Action instance
      */
-    protected void checkValue(int value) {
-        if (type.isValidTarget(value) == false) {
-            isValid = false;
-            throwValueException(value);
-        }
+    public abstract Action fromString(String actionString, Node node);
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     /**
-     * Checks if the passed value is in the valid range for the passed action
-     * type This method is used for complex Action types which are
+     * Returns the name of this action
      *
-     * @param value
-     * @return boolean
+     * @return The name of this action
      */
-    protected void checkValue(ActionType type, int value) {
-        if (type.isValidTarget(value) == false) {
-            isValid = false;
-            throwValueException(value);
-        }
+    @XmlElement(name = "type")
+    public String getName() {
+        return name;
     }
 
     /**
-     * Throw and handle the invalid value exception
+     * Returns whether the Action parameters are or are not valid
      *
-     * @param value
-     * @return void
-     */
-    private void throwValueException(int value) {
-        String error = "Invalid field value assignement. For type: " + type.getId() + " Expected: " + type.getRange()
-                + ", Got: 0x" + Integer.toHexString(value);
-        try {
-            throw new Exception(error);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            if (debug) {
-                logger.error("", e);
-            }
-        }
-    }
-
-    /**
-     * Returns the type of this action
-     *
-     * @return ActionType
-     */
-    public ActionType getType() {
-        return type;
-    }
-
-    /**
-     * Returns the id of this action
-     *
-     * @return String
-     */
-    public String getId() {
-        return type.getId();
-    }
-
-    /**
-     * Returns whether the Action is valid or not
-     *
-     * @return boolean
+     * @return true if valid, false otherwise
      */
     public boolean isValid() {
-        return isValid;
+        return true;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((type == null) ? 0 : type.calculateConsistentHashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
 
@@ -126,19 +87,21 @@ public abstract class Action implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Action)) {
             return false;
         }
         Action other = (Action) obj;
-        if (type != other.type) {
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
             return false;
         }
         return true;
     }
 
-    @Override
-    public String toString() {
-        return type.toString();
+    protected static String removeSpaces(String target) {
+        return (target == null) ? null : target.replace(" ", "");
     }
-
 }

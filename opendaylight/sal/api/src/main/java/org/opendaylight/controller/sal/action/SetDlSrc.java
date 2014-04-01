@@ -9,13 +9,17 @@
 package org.opendaylight.controller.sal.action;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.utils.NetUtils;
 
 /**
  * Set source datalayer address action
@@ -25,15 +29,17 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SetDlSrc extends Action {
     private static final long serialVersionUID = 1L;
+    public static final String NAME = "SET_DL_SRC";
+    public static final Pattern PATTERN = Pattern.compile(NAME + "=(.*)", Pattern.CASE_INSENSITIVE);
+
     private byte[] address;
 
-    /* Dummy constructor for JAXB */
-    @SuppressWarnings("unused")
-    private SetDlSrc() {
+    public SetDlSrc() {
+        super(NAME);
     }
 
     public SetDlSrc(byte[] dlAddress) {
-        type = ActionType.SET_DL_SRC;
+        super(NAME);
         if (dlAddress != null) {
             this.address = dlAddress.clone();
         } else {
@@ -52,7 +58,7 @@ public class SetDlSrc extends Action {
 
     @XmlElement(name = "address")
     public String getDlAddressString() {
-        return HexEncode.bytesToHexString(address);
+        return HexEncode.bytesToHexStringFormat(address);
     }
 
     @Override
@@ -83,6 +89,20 @@ public class SetDlSrc extends Action {
 
     @Override
     public String toString() {
-        return type + "[address = " + HexEncode.bytesToHexString(address) + "]";
+        return NAME + "=" + HexEncode.bytesToHexStringFormat(address);
+    }
+
+    @Override
+    public SetDlSrc fromString(String actionString, Node node) {
+        Matcher matcher = PATTERN.matcher(removeSpaces(actionString));
+        if (matcher.matches()) {
+            return new SetDlSrc(HexEncode.bytesFromHexString(matcher.group(1)));
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isValid() {
+        return address != null && address.length == NetUtils.MACAddrLengthInBytes;
     }
 }

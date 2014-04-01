@@ -106,7 +106,6 @@ public class Troubleshoot implements IDaylightWeb {
     @ResponseBody
     public NodeDescription getNodeInfo(HttpServletRequest request, @RequestParam(required = false) String container,
             @RequestParam(required = true) String nodeId) {
-        List<Map<String, String>> lines = new ArrayList<Map<String, String>>();
         String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
 
         // Derive the privilege this user has on the current container
@@ -406,39 +405,39 @@ public class Troubleshoot implements IDaylightWeb {
                 if (outPorts.length() > 0) {
                     outPorts.append(" ");
                 }
-                actions.append(action.getType().toString()).append(" = ").append(ao.getPort().getNodeConnectorIdAsString()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(ao.getPort().getNodeConnectorIdAsString()).append("<br>");
             } else if (action instanceof SetVlanId) {
                 SetVlanId av = (SetVlanId) action;
                 String outVlanId = String.valueOf(av.getVlanId());
-                actions.append(action.getType().toString()).append(" = ").append(outVlanId).append("<br>");
+                actions.append(action.getName()).append(" = ").append(outVlanId).append("<br>");
             } else if (action instanceof SetDlSrc) {
                 SetDlSrc ads = (SetDlSrc) action;
-                actions.append(action.getType().toString()).append(" = ").append(HexEncode.bytesToHexStringFormat(ads.getDlAddress())).append("<br>");
+                actions.append(action.getName()).append(" = ").append(HexEncode.bytesToHexStringFormat(ads.getDlAddress())).append("<br>");
             } else if (action instanceof SetDlDst) {
                 SetDlDst add = (SetDlDst) action;
-                actions.append(action.getType().toString()).append(" = ").append(HexEncode.bytesToHexStringFormat(add.getDlAddress())).append("<br>");
+                actions.append(action.getName()).append(" = ").append(HexEncode.bytesToHexStringFormat(add.getDlAddress())).append("<br>");
             } else if (action instanceof SetNwSrc) {
                 SetNwSrc ans = (SetNwSrc) action;
-                actions.append(action.getType().toString()).append(" = ").append(ans.getAddressAsString()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(ans.getAddressAsString()).append("<br>");
             } else if (action instanceof SetNwDst) {
                 SetNwDst and = (SetNwDst) action;
-                actions.append(action.getType().toString()).append(" = ").append(and.getAddressAsString()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(and.getAddressAsString()).append("<br>");
             } else if (action instanceof SetNwTos) {
                 SetNwTos ant = (SetNwTos) action;
-                actions.append(action.getType().toString()).append(" = ").append(ant.getNwTos()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(ant.getNwTos()).append("<br>");
             } else if (action instanceof SetTpSrc) {
                 SetTpSrc ads = (SetTpSrc) action;
-                actions.append(action.getType().toString()).append(" = ").append(ads.getPort()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(ads.getPort()).append("<br>");
             } else if (action instanceof SetTpDst) {
                 SetTpDst atd = (SetTpDst) action;
-                actions.append(action.getType().toString()).append(" = ").append(atd.getPort()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(atd.getPort()).append("<br>");
             } else if (action instanceof SetVlanPcp) {
                 SetVlanPcp avp = (SetVlanPcp) action;
-                actions.append(action.getType().toString()).append(" = ").append(avp.getPcp()).append("<br>");
+                actions.append(action.getName()).append(" = ").append(avp.getPcp()).append("<br>");
                 // } else if (action instanceof SetDlSrc) {
                 // SetDlSrc ads = (SetDlSrc) action;
             } else {
-                actions.append(action.getType().toString()).append("<br>");
+                actions.append(action.getName()).append("<br>");
             }
         }
         row.put("actions", actions.toString());
