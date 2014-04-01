@@ -65,7 +65,6 @@
         <osgi.version>5.0.0</osgi.version>
         <jacoco.version>0.6.2.201302030002</jacoco.version>
         <slf4j.version>1.7.2</slf4j.version>
-        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
     </properties>
 
     <dependencies>
@@ -307,26 +306,6 @@
                             <type>jar</type>
                         </dependency>
                     </dependencies>
-                </plugin>
-                <!-- tell eclipse about generated source folders -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.8</version>
-                    <executions>
-                        <execution>
-                            <id>add-source</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>${salGeneratorPath}</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
