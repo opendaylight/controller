@@ -23,9 +23,6 @@ class DataAndMetadataSnapshot {
     private final StoreMetadataNode metadataTree;
     private final Optional<SchemaContext> schemaContext;
 
-
-
-
     private DataAndMetadataSnapshot(final StoreMetadataNode metadataTree, final Optional<SchemaContext> schemaCtx) {
         this.metadataTree = metadataTree;
         this.schemaContext = schemaCtx;
