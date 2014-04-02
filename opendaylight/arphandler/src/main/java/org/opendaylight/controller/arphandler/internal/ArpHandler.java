@@ -64,6 +64,31 @@ import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The ArpHandler offers services to react on ARP requests and replies
+ * sent by network hosts. Moreover it allows for creating ARP messages
+ * by the controller itself.
+ *
+ * The ARP Handler on ODL doesn't use the requester MAC address in
+ * order to avoid to have to build a spanning tree where to forward
+ * ARP Requests. The ARP requests are broadcast packets so in order to
+ * reach everywhere need to be flooded, when you flood in a network
+ * that is not a tree (all the networks has some level of redundancy)
+ * that would create forwarding loops without a spanning tree. Given
+ * the need is only to send out the ARP requests toward all the hosts
+ * we actually don't need to implement a flooding mechanism in software
+ * (which would be expensive) we just send out the ARP request toward
+ * all the ports that are suspected to be host ports on all the
+ * switches (from the controller). Now the condition for which a port
+ * is marked as host port could potentially be incorrect so when the
+ * controller sends out the ARP Request that could come back to the
+ * controller and could cause another request not needed. So changing
+ * the source MAC address of the request to be the one of the controller,
+ * controller can protect itself from honoring twice the same request.
+ * This enables an ARP handler resolution, without the need of spanning
+ * tree and limiting software flooding to the minimum required.
+ */
+
 public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateAware<ARPEvent, Boolean> {
     private static final Logger log = LoggerFactory.getLogger(ArpHandler.class);
     static final String ARP_EVENT_CACHE_NAME = "arphandler.arpRequestReplyEvent";
