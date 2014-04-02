@@ -28,7 +28,13 @@ module test-module {
             type string;
         }
     }
-  } 
+    list lst1 {
+        key "lf11";
+        leaf lf11 {
+            type string;
+        }
+    }
+  }   
   
   
   rpc rpc-test {
