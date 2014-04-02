@@ -132,8 +132,10 @@ public class MDFlowMapping {
 
         val sourceActions = sourceFlow.actions;
         val targetActions = new ArrayList<Action>();
+        var int action = 0;
         for (sourceAction : sourceActions) {
-            targetActions.add(sourceAction.toAction());
+            targetActions.add(sourceAction.toAction(action));
+            action = action + 1;
         }
         instructions = targetActions.toApplyInstruction();
         match = sourceFlow.match.toMatch();
@@ -154,8 +156,10 @@ public class MDFlowMapping {
     
        val sourceActions = sourceFlow.actions;
        val targetActions = new ArrayList<Action>();
+       var int action = 0;
        for (sourceAction : sourceActions) {
-           targetActions.add(sourceAction.toAction());
+           targetActions.add(sourceAction.toAction(action));
+           action = action+ 1;
        }
        instructions = targetActions.toApplyInstruction();
        match = sourceFlow.match.toMatch();
@@ -199,44 +203,44 @@ public class MDFlowMapping {
         return it.build();
     }
 
-    public static dispatch def toAction(Controller sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(Controller sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new ControllerActionCaseBuilder().setControllerAction(new ControllerActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(Drop sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(Drop sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new DropActionCaseBuilder().setDropAction(new DropActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(Flood sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(Flood sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new FloodActionCaseBuilder().setFloodAction(new FloodActionBuilder().build).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(FloodAll sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(FloodAll sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new FloodAllActionCaseBuilder().setFloodAllAction(new FloodAllActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(HwPath sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(HwPath sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new HwPathActionCaseBuilder().setHwPathAction(new HwPathActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(Loopback sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(Loopback sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new LoopbackActionCaseBuilder().setLoopbackAction(new LoopbackActionBuilder().build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(Output sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(Output sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new OutputActionBuilder();
         outputNodeConnector = sourceAction.port.toUri;
         actionBuilder.action = new OutputActionCaseBuilder().setOutputAction(it.build()).build();
@@ -244,14 +248,14 @@ public class MDFlowMapping {
 
     }
 
-    public static dispatch def toAction(PopVlan sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(PopVlan sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new PopVlanActionCaseBuilder().build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(PushVlan sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(PushVlan sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new PushVlanActionBuilder();
         cfi = new VlanCfi(sourceAction.cfi);
         vlanId = new VlanId(sourceAction.vlanId);
@@ -261,32 +265,32 @@ public class MDFlowMapping {
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetDlDst sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetDlDst sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetDlDstActionBuilder();
         address = sourceAction.dlAddress.toMacAddress();
         actionBuilder.action = new SetDlDstActionCaseBuilder().setSetDlDstAction(it.build()).build;
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetDlSrc sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetDlSrc sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetDlSrcActionBuilder();
         address = sourceAction.dlAddress.toMacAddress;
         actionBuilder.action = new SetDlSrcActionCaseBuilder().setSetDlSrcAction(it.build()).build;
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetDlType sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetDlType sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetDlTypeActionBuilder();
         dlType = new EtherType(sourceAction.dlType as long);
         actionBuilder.action = new SetDlTypeActionCaseBuilder().setSetDlTypeAction(it.build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetNextHop sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetNextHop sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetNextHopActionBuilder();
         val inetAddress = sourceAction.address;
         address = inetAddress.toInetAddress;
@@ -294,8 +298,8 @@ public class MDFlowMapping {
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetNwDst sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetNwDst sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetNwDstActionBuilder();
         val inetAddress = sourceAction.address;
         address = inetAddress.toInetAddress;
@@ -303,8 +307,8 @@ public class MDFlowMapping {
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetNwSrc sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetNwSrc sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetNwSrcActionBuilder();
         val inetAddress = sourceAction.address;
         address = inetAddress.toInetAddress;
@@ -312,40 +316,40 @@ public class MDFlowMapping {
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetNwTos sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetNwTos sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetNwTosActionBuilder();
         tos = sourceAction.nwTos;
         actionBuilder.action = new SetNwTosActionCaseBuilder().setSetNwTosAction(it.build).build;
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetTpDst sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetTpDst sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetTpDstActionBuilder();
         port = new PortNumber(sourceAction.port);
         actionBuilder.action = new SetTpDstActionCaseBuilder().setSetTpDstAction(it.build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetTpSrc sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetTpSrc sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetTpSrcActionBuilder();
         port = new PortNumber(sourceAction.port);
         actionBuilder.action = new SetTpSrcActionCaseBuilder().setSetTpSrcAction(it.build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetVlanCfi sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetVlanCfi sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetVlanCfiActionBuilder();
         vlanCfi = new VlanCfi(sourceAction.cfi);
         actionBuilder.action = new SetVlanCfiActionCaseBuilder().setSetVlanCfiAction(it.build()).build();
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetVlanId sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetVlanId sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
 
         val it = new SetVlanIdActionBuilder();
         vlanId = new VlanId(sourceAction.vlanId);
@@ -353,16 +357,16 @@ public class MDFlowMapping {
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SetVlanPcp sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SetVlanPcp sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         val it = new SetVlanPcpActionBuilder();
         vlanPcp = new VlanPcp(sourceAction.pcp as short);
         actionBuilder.action = new SetVlanPcpActionCaseBuilder().setSetVlanPcpAction(it.build).build;
         return actionBuilder.build();
     }
 
-    public static dispatch def toAction(SwPath sourceAction) {
-        val actionBuilder = new ActionBuilder();
+    public static dispatch def toAction(SwPath sourceAction, int order) {
+        val actionBuilder = new ActionBuilder().setOrder(order);
         actionBuilder.action = new SwPathActionCaseBuilder().setSwPathAction(new SwPathActionBuilder().build()).build();
         return actionBuilder.build();
     }
@@ -405,8 +409,10 @@ public class MDFlowMapping {
 
         val sourceActions = sourceFlow.actions;
         val targetActions = new ArrayList<Action>();
+        var int action = 0;
         for (sourceAction : sourceActions) {
-            targetActions.add(sourceAction.toAction());
+            targetActions.add(sourceAction.toAction(action));
+            action = action + 1;
         }
         instructions = targetActions.toApplyInstruction();
         match = sourceFlow.match.toMatch();
