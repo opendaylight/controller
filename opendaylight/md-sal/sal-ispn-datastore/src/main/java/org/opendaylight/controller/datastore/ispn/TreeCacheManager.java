@@ -1,4 +1,4 @@
-package com.cisco.ispn.treecache;
+package org.opendaylight.controller.datastore.ispn;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
@@ -17,17 +17,24 @@ import org.infinispan.util.concurrent.IsolationLevel;
  * @author: syedbahm
  * Date: 4/1/14
  */
-public class TreeManager {
+public class TreeCacheManager implements AutoCloseable {
+  public
   Configuration config = null;
   DefaultCacheManager dcm = null;
 
-  TreeManager(){
-    initTreeCache(CacheMode.LOCAL, IsolationLevel.REPEATABLE_READ, LockingMode.OPTIMISTIC,TransactionMode.TRANSACTIONAL,true);
+  public TreeCacheManager(){
+    this(CacheMode.LOCAL, IsolationLevel.REPEATABLE_READ, LockingMode.OPTIMISTIC, TransactionMode.TRANSACTIONAL, true);
   }
+
   /**
-   * Initializes ISPN cache
+   * Initializes the CacheManager based on the properties specified.
+   * @param cacheMode
+   * @param isolation
+   * @param lm
+   * @param transactionMode
+   * @param writeSkewCheck
    */
-  public TreeManager initTreeCache(CacheMode cacheMode, IsolationLevel isolation, LockingMode lm,  TransactionMode transactionMode, boolean writeSkewCheck) {
+  public TreeCacheManager(CacheMode cacheMode, IsolationLevel isolation, LockingMode lm, TransactionMode transactionMode, boolean writeSkewCheck) {
 
 
 
@@ -46,31 +53,39 @@ public class TreeManager {
                                       .clustering()
                                       .versioning().scheme(VersioningScheme.SIMPLE).enable()
                                       .clustering()
+                                      .jmxStatistics().disable()
+                                      .clustering()
+
                                       .build();
+    dcm = new DefaultCacheManager(config);
 
 
-     dcm = new DefaultCacheManager(config);
 
-     return this;
 
   }
+
+
 
   /**
    * Returns the treecache based on the cache configuration
    * @return
    */
-  public TreeCache<String,String> getCache(String name){
+  public TreeCache getCache(String name){
 
     Cache flatCache = dcm.getCache(name);
 
     TreeCache<String,String> treeCache =  new TreeCacheImpl<String,String>(flatCache);
+
 
     return treeCache;
 
   }
 
 
-
-
-
+  @Override
+  public void close() throws Exception {
+    if(dcm != null){
+     dcm.stop();
+    }
+  }
 }

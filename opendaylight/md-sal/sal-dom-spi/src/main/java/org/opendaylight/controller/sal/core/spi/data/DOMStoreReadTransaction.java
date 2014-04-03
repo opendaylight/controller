@@ -7,19 +7,21 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import java.util.concurrent.Future;
-
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.Future;
 
 public interface DOMStoreReadTransaction extends DOMStoreTransaction {
 
     /**
      *
      * Reads data from provided logical data store located at provided path
+     *
+     *
+     *
      *
      *
      * @param path
