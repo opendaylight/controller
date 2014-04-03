@@ -806,6 +806,8 @@ public class FlowConverter {
         list.add(SwPath.class);
         list.add(HwPath.class);
         list.add(Drop.class);
+        list.add(Flood.class);
+        list.add(FloodAll.class);
 
         return list;
     }
