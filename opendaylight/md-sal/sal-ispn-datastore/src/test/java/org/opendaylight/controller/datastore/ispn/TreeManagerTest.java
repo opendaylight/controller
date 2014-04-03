@@ -1,10 +1,11 @@
-package com.cisco.ispn.treecache;
+package org.opendaylight.controller.datastore.ispn;
 
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.datastore.infinispan.TreeCacheManagerSingleton;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -21,19 +22,13 @@ public class TreeManagerTest {
   String nodeName = "level";
   String []reportees = {"President","CEO","SVP","VP","Senior Director","Director","Senior Manage","Manager2","Manager1","IC"} ;
   Fqn fqn =null;
-  static TreeManager tsm = null;
+  private static TreeCacheManager tsm = TreeCacheManagerSingleton.get();
 
 
 
   @org.junit.Before
   public void setUp() throws Exception {
     fqn= Fqn.fromString("/");
-
-  }
-
-  @org.junit.After
-  public void tearDown() throws Exception {
-
 
   }
 
@@ -217,7 +212,7 @@ public class TreeManagerTest {
         try{
           Random random = new Random();
           int i = random.nextInt(10);
-          System.out.println(i);
+          //System.out.println(i);
           if(i > 5){
 
           //let us form the Fqn string
@@ -273,7 +268,7 @@ public class TreeManagerTest {
 
   @BeforeClass
   public static void start() throws Exception {
-     tsm =  new TreeManager();
+
 
   }
 }
