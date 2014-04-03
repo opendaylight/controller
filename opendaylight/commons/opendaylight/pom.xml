@@ -95,7 +95,7 @@
     <commons.io.version>2.4</commons.io.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
-    <forwardingrulesmanager.version>0.5.1-SNAPSHOT</forwardingrulesmanager.version>
+    <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
     <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
