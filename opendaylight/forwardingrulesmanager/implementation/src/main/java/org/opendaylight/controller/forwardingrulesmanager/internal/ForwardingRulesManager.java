@@ -1590,6 +1590,10 @@ public class ForwardingRulesManager implements
 
     @Override
     public Status addStaticFlow(FlowConfig config) {
+        return addStaticFlow(config, false);
+    }
+
+    private Status addStaticFlow(FlowConfig config, boolean async) {
         // Configuration object validation
         Status status = config.validate();
         if (!status.isSuccess()) {
@@ -1598,7 +1602,13 @@ public class ForwardingRulesManager implements
             config.setStatus(error);
             return new Status(StatusCode.BADREQUEST, error);
         }
-        return addStaticFlowInternal(config, false);
+        return addStaticFlowInternal(config, async, false);
+    }
+
+
+    @Override
+    public Status addStaticFlowAsync(FlowConfig config) {
+        return addStaticFlow(config, true);
     }
 
     /**
@@ -1616,7 +1626,7 @@ public class ForwardingRulesManager implements
      *            installation on the network node was successful
      * @return The status of this request
      */
-    private Status addStaticFlowInternal(FlowConfig config, boolean restore) {
+    private Status addStaticFlowInternal(FlowConfig config, boolean async, boolean restore) {
         boolean multipleFlowPush = false;
         String error;
         Status status;
@@ -1653,7 +1663,7 @@ public class ForwardingRulesManager implements
             // Program hw
             if (config.installInHw()) {
                 FlowEntry entry = config.getFlowEntry();
-                status = this.installFlowEntry(entry);
+                status = async ? this.installFlowEntryAsync(entry) : this.installFlowEntry(entry);
                 if (!status.isSuccess()) {
                     config.setStatus(status.getDescription());
                     if (!restore) {
@@ -1765,6 +1775,15 @@ public class ForwardingRulesManager implements
 
     @Override
     public Status removeStaticFlow(FlowConfig config) {
+        return removeStaticFlow(config, false);
+    }
+
+    @Override
+    public Status removeStaticFlowAsync(FlowConfig config) {
+        return removeStaticFlow(config, true);
+    }
+
+    private Status removeStaticFlow(FlowConfig config, boolean async) {
         /*
          * No config.isInternal() check as NB does not take this path and GUI
          * cannot issue a delete on an internal generated flow. We need this
@@ -1788,7 +1807,8 @@ public class ForwardingRulesManager implements
         }
 
         // Program the network node
-        Status status = this.uninstallFlowEntry(config.getFlowEntry());
+        Status status = async ? this.uninstallFlowEntryAsync(config.getFlowEntry()) : this.uninstallFlowEntry(config
+                .getFlowEntry());
 
         // Update configuration database if programming was successful
         if (status.isSuccess()) {
@@ -1800,6 +1820,15 @@ public class ForwardingRulesManager implements
 
     @Override
     public Status removeStaticFlow(String name, Node node) {
+       return removeStaticFlow(name, node, false);
+    }
+
+    @Override
+    public Status removeStaticFlowAsync(String name, Node node) {
+        return removeStaticFlow(name, node, true);
+    }
+
+    private Status removeStaticFlow(String name, Node node, boolean async) {
         // Look for the target configuration entry
         Integer key = 0;
         FlowConfig target = null;
@@ -1830,7 +1859,7 @@ public class ForwardingRulesManager implements
         }
 
         // Program the network node
-        Status status = this.removeEntry(target.getFlowEntry(), false);
+        Status status = this.removeEntry(target.getFlowEntry(), async);
 
         // Update configuration database if programming was successful
         if (status.isSuccess()) {
@@ -2081,7 +2110,7 @@ public class ForwardingRulesManager implements
         }
 
         for (ConfigurationObject conf : configurationService.retrieveConfiguration(this, STATIC_FLOWS_FILE_NAME)) {
-            addStaticFlowInternal((FlowConfig) conf, true);
+            addStaticFlowInternal((FlowConfig) conf, false, true);
         }
     }
 
@@ -2193,7 +2222,7 @@ public class ForwardingRulesManager implements
                     // check if the frm really needs to act on the notification.
                     // this is to check against duplicate notifications
                     if(programInternalFlow(proactive, fc)) {
-                        Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
+                        Status status = (proactive) ? addStaticFlowInternal(fc, false, false) : removeStaticFlow(fc);
                         if (status.isSuccess()) {
                             log.trace("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
                         } else {
@@ -2376,7 +2405,7 @@ public class ForwardingRulesManager implements
             if ((staticFlow.getNode().equals(node)) && (staticFlow.getPortGroup().equals(config.getName()))) {
                 for (Short port : data.getPorts()) {
                     FlowConfig derivedFlow = getDerivedFlowConfig(staticFlow, config.getName(), port);
-                    addStaticFlowInternal(derivedFlow, false);
+                    addStaticFlowInternal(derivedFlow, false, false);
                 }
             }
         }
@@ -3240,4 +3269,5 @@ public class ForwardingRulesManager implements
         }
         return list;
     }
+
 }

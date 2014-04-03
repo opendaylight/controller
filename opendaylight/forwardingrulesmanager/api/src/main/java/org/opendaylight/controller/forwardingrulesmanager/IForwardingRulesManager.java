@@ -370,6 +370,16 @@ public interface IForwardingRulesManager {
     public Status addStaticFlow(FlowConfig config);
 
     /**
+     * Add a flow specified by the {@code FlowConfig} object on the current
+     * container, through an asynchronous call.
+     *
+     * @param config
+     *            the {@code FlowConfig} object representing the static flow
+     * @return the {@code Status} object indicating the result of this action.
+     */
+    public Status addStaticFlowAsync(FlowConfig config);
+
+    /**
      * Remove a flow specified by the {@code FlowConfig} object on the current
      * container
      *
@@ -380,13 +390,23 @@ public interface IForwardingRulesManager {
     public Status removeStaticFlow(FlowConfig config);
 
     /**
+     * Remove a flow specified by the {@code FlowConfig} object on the current
+     * container, through an asynchronous call.
+     *
+     * @param config
+     *            the {@code FlowConfig} object representing the static flow
+     * @return the {@code Status} object indicating the result of this action
+     */
+    public Status removeStaticFlowAsync(FlowConfig config);
+
+    /**
      * Replace the flow identified by the {@code FlowConfig.name} name for the
      * {@code FlowConfig.node} network node with the new flow specified by
      * {@code FlowConfig} object
      *
      * @param config
      *            the {@code FlowConfig} object
-     * @returnthe {@code Status} object indicating the result of this action
+     * @return the {@code Status} object indicating the result of this action
      */
     public Status modifyStaticFlow(FlowConfig config);
 
@@ -400,6 +420,18 @@ public interface IForwardingRulesManager {
      * @return the {@code Status} object indicating the result of this action
      */
     public Status removeStaticFlow(String name, Node node);
+
+    /**
+     * Remove the flow specified by name on the passed network node via an
+     * asynchronous call
+     *
+     * @param name
+     *            for the static flow
+     * @param node
+     *            on which the flow is attached
+     * @return the {@code Status} object indicating the result of this action
+     */
+    public Status removeStaticFlowAsync(String name, Node node);
 
     /**
      * Toggle the installation status of the specified configured flow If the
