@@ -8,7 +8,6 @@
 package org.opendaylight.controller.netconf.util;
 
 import org.junit.Test;
-import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -25,7 +24,7 @@ public class NetconfUtilTest {
         try{
             NetconfUtil.checkIsMessageOk(new NetconfMessage(document));
             fail();
-        }catch(ConflictingVersionException e){
+        }catch(IllegalStateException e){
             assertThat(e.getMessage(), containsString("Optimistic lock failed. Expected parent version 21, was 18"));
         }
     }
