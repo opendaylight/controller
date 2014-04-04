@@ -63,7 +63,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "ietf-netconf-monitoring-extension").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-monitoring").versionAsInProject(), //
 
-                mavenBundle(CONTROLLER, "netty-config-api"), //
+                mavenBundle(CONTROLLER, "netty-config-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
