@@ -96,12 +96,16 @@ public class ConfigPusher {
 
     private NetconfOperationService getOperationServiceWithRetries(Set<String> expectedCapabilities, String idForReporting) {
         Stopwatch stopwatch = new Stopwatch().start();
-        NotEnoughCapabilitiesException lastException;
+        Exception lastException;
         do {
             try {
                 return getOperationService(expectedCapabilities, idForReporting);
             } catch (NotEnoughCapabilitiesException e) {
                 logger.debug("Not enough capabilities: " + e.toString());
+                lastException = e;
+                sleep();
+            } catch (InconsistentModulesException e) {
+                logger.debug("Capability inconsistency: " + e.toString());
                 lastException = e;
                 sleep();
             }
@@ -114,6 +118,12 @@ public class ConfigPusher {
             super(message);
         }
     }
+                                   //inconsistent
+    private static class InconsistentModulesException extends Exception {
+        private InconsistentModulesException(Exception e) {
+            super(e.getMessage(), e);
+        }
+    }
 
     /**
      * Get NetconfOperationService iif all required capabilities are present.
@@ -122,8 +132,18 @@ public class ConfigPusher {
      * @param idForReporting
      * @return service if capabilities are present, otherwise absent value
      */
-    private NetconfOperationService getOperationService(Set<String> expectedCapabilities, String idForReporting) throws NotEnoughCapabilitiesException {
-        NetconfOperationService serviceCandidate = configNetconfConnector.createService(idForReporting);
+    private NetconfOperationService getOperationService(Set<String> expectedCapabilities, String idForReporting)
+            throws NotEnoughCapabilitiesException, InconsistentModulesException {
+        NetconfOperationService serviceCandidate;
+
+        try {
+            serviceCandidate = configNetconfConnector.createService(idForReporting);
+        // TODO createService might throw custom (checked) exception,
+        // illegalStateEx might be thrown for different reasons than inconsistent modules
+        } catch (IllegalStateException e) {
+            throw new InconsistentModulesException(e);
+        }
+
         Set<String> notFoundDiff = computeNotFoundCapabilities(expectedCapabilities, serviceCandidate);
         if (notFoundDiff.isEmpty()) {
             return serviceCandidate;
