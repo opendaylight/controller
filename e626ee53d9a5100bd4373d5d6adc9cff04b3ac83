@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_22e4360c",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/initial/01-md-sal.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-04-04T09:21:17Z",
+      "side": 1,
+      "message": "This NEW-DATA-BROKER start block should be removed. The \u003cname\u003e is used in \u003cinstance\u003e of \u003cservice\u003e",
+      "revId": "e626ee53d9a5100bd4373d5d6adc9cff04b3ac83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_02f132cd",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/initial/01-md-sal.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 612
+      },
+      "writtenOn": "2014-04-04T09:21:17Z",
+      "side": 1,
+      "message": "There should be original name \"binding-data-broker\" in \u003cname\u003e due to backward compatibility",
+      "revId": "e626ee53d9a5100bd4373d5d6adc9cff04b3ac83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
