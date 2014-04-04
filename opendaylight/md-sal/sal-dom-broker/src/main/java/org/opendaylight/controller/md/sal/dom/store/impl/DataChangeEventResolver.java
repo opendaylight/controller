@@ -184,6 +184,9 @@ public class DataChangeEventResolver {
                 subtree.merge(resolveSubtreeChangeEvent(childPath, childListen, childMod, childBefore.get(),
                         childAfter.get()));
                 break;
+            case UNMODIFIED:
+                // no-op
+                break;
             }
         }
         DOMImmutableDataChangeEvent oneChangeEvent = one.build();
