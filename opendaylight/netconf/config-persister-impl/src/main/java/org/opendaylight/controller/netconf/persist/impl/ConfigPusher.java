@@ -110,6 +110,10 @@ public class ConfigPusher {
     }
 
     private static class NotEnoughCapabilitiesException extends Exception {
+        private NotEnoughCapabilitiesException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
         private NotEnoughCapabilitiesException(String message) {
             super(message);
         }
@@ -123,13 +127,18 @@ public class ConfigPusher {
      * @return service if capabilities are present, otherwise absent value
      */
     private NetconfOperationService getOperationService(Set<String> expectedCapabilities, String idForReporting) throws NotEnoughCapabilitiesException {
-        NetconfOperationService serviceCandidate = configNetconfConnector.createService(idForReporting);
+        NetconfOperationService serviceCandidate;
+        try {
+            serviceCandidate = configNetconfConnector.createService(idForReporting);
+        } catch(RuntimeException e) {
+            throw new NotEnoughCapabilitiesException("Netconf service not stable for " + idForReporting, e);
+        }
         Set<String> notFoundDiff = computeNotFoundCapabilities(expectedCapabilities, serviceCandidate);
         if (notFoundDiff.isEmpty()) {
             return serviceCandidate;
         } else {
             serviceCandidate.close();
-            logger.debug("Netconf server did not provide required capabilities for {} " +
+            logger.trace("Netconf server did not provide required capabilities for {} " +
                             "Expected but not found: {}, all expected {}, current {}",
                     idForReporting, notFoundDiff, expectedCapabilities, serviceCandidate.getCapabilities()
             );
@@ -226,15 +235,13 @@ public class ConfigPusher {
         try {
             response = operation.handle(request.getDocument(), NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
         } catch (NetconfDocumentedException | RuntimeException e) {
+            if (e instanceof NetconfDocumentedException && e.getCause() instanceof ConflictingVersionException) {
+                throw (ConflictingVersionException) e.getCause();
+            }
             throw new IllegalStateException("Failed to send " + operationNameForReporting +
                     " for configuration " + configIdForReporting, e);
         }
-        try {
-            return NetconfUtil.checkIsMessageOk(response);
-        } catch (ConflictingVersionException e) {
-            logger.trace("conflicting version detected: {} while committing {}", e.toString(), configIdForReporting);
-            throw e;
-        }
+        return NetconfUtil.checkIsMessageOk(response);
     }
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
