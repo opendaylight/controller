@@ -30,7 +30,7 @@
                                     <codeGeneratorClass>
                                         org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
                                     </codeGeneratorClass>
-                                    <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
                                     <additionalConfiguration>
                                         <namespaceToPackage1>
                                             urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
@@ -73,10 +73,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -102,9 +98,6 @@
             <plugin>
                 <groupId>org.eclipse.xtend</groupId>
                 <artifactId>xtend-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
