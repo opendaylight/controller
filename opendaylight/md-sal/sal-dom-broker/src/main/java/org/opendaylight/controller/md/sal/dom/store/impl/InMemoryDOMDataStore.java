@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -61,15 +62,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private SchemaContext schemaContext;
 
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService executor) {
-        this.executor = executor;
-        this.name = name;
-        this.operationTree = new AllwaysFailOperation();
+        this.name = Preconditions.checkNotNull(name);
+        this.executor = Preconditions.checkNotNull(executor);
+        this.operationTree = new AlwaysFailOperation();
         this.snapshot = DataAndMetadataSnapshot.createEmpty();
         this.listenerTree = ListenerRegistrationNode.createRoot();
     }
 
     @Override
-    public String getIdentifier() {
+    public final String getIdentifier() {
         return name;
     }
 
@@ -360,7 +361,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     }
 
-    private class AllwaysFailOperation implements ModificationApplyOperation {
+    private static final class AlwaysFailOperation implements ModificationApplyOperation {
 
         @Override
         public Optional<StoreMetadataNode> apply(final NodeModification modification,
