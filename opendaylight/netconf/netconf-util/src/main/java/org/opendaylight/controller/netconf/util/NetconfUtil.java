@@ -8,9 +8,7 @@
 package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,31 +52,17 @@ public final class NetconfUtil {
         return (doc == null) ? null : new NetconfMessage(doc);
     }
 
-    public static Document checkIsMessageOk(NetconfMessage responseMessage) throws ConflictingVersionException {
+    public static Document checkIsMessageOk(NetconfMessage responseMessage) {
         return checkIsMessageOk(responseMessage.getDocument());
     }
 
-    public static Document checkIsMessageOk(Document response) throws ConflictingVersionException {
+    public static Document checkIsMessageOk(Document response) {
         XmlElement element = XmlElement.fromDomDocument(response);
         Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
         element = element.getOnlyChildElement();
-
         if (element.getName().equals(XmlNetconfConstants.OK)) {
             return response;
         }
-
-        if (element.getName().equals(XmlNetconfConstants.RPC_ERROR)) {
-            logger.warn("Can not load last configuration, operation failed");
-            // is it ConflictingVersionException ?
-            XPathExpression xPathExpression = XMLNetconfUtil.compileXPath("/netconf:rpc-reply/netconf:rpc-error/netconf:error-info/netconf:error");
-            String error = (String) XmlUtil.evaluateXPath(xPathExpression, element.getDomElement(), XPathConstants.STRING);
-            if (error!=null && error.contains(ConflictingVersionException.class.getCanonicalName())) {
-                throw new ConflictingVersionException(error);
-            }
-            throw new IllegalStateException("Can not load last configuration, operation failed: "
-                    + XmlUtil.toString(response));
-        }
-
         logger.warn("Can not load last configuration. Operation failed.");
         throw new IllegalStateException("Can not load last configuration. Operation failed: "
                 + XmlUtil.toString(response));
