@@ -226,15 +226,13 @@ public class ConfigPusher {
         try {
             response = operation.handle(request.getDocument(), NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
         } catch (NetconfDocumentedException | RuntimeException e) {
+            if (e instanceof NetconfDocumentedException && e.getCause() instanceof ConflictingVersionException) {
+                throw (ConflictingVersionException) e.getCause();
+            }
             throw new IllegalStateException("Failed to send " + operationNameForReporting +
                     " for configuration " + configIdForReporting, e);
         }
-        try {
-            return NetconfUtil.checkIsMessageOk(response);
-        } catch (ConflictingVersionException e) {
-            logger.trace("conflicting version detected: {} while committing {}", e.toString(), configIdForReporting);
-            throw e;
-        }
+        return NetconfUtil.checkIsMessageOk(response);
     }
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter

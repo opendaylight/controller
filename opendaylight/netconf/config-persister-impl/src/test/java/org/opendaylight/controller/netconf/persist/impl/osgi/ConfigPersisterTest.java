@@ -33,6 +33,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 public class ConfigPersisterTest {
@@ -113,26 +114,29 @@ public class ConfigPersisterTest {
     @Test
     public void testPersisterConflictingVersionException() throws Exception {
         setUpContextAndStartPersister("cap1");
-        NetconfOperationService service = getWorkingService(getConflictVersionDocument());
-        doReturn(service).when(ctx.serviceFactory).createService(anyString());
+
+        doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(2000);
         handler.assertException(IllegalStateException.class, "Max wait for conflicting version stabilization timeout");
     }
 
-    private Document getConflictVersionDocument() throws SAXException, IOException {
-        return XmlUtil.readXmlToDocument(
-                "<rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                        "<rpc-error><error-info><error>" +
-                        ConflictingVersionException.class.getCanonicalName() +
-                        "</error></error-info></rpc-error>\n" +
-                        "</rpc-reply>"
-        );
+    private NetconfOperationService getConflictingService() throws Exception {
+        NetconfOperationService service =  getWorkingService(getOKDocument());
+        ConflictingVersionException cve = new ConflictingVersionException("");
+        try {
+            NetconfDocumentedException.wrap(cve);
+            throw new AssertionError("Should throw an exception");
+        }catch(NetconfDocumentedException e) {
+            NetconfOperation mockedOperation = service.getNetconfOperations().iterator().next();
+            doThrow(e).when(mockedOperation).handle(any(Document.class), any(NetconfOperationChainedExecution.class));
+            return service;
+        }
     }
 
     @Test
     public void testSuccessConflictingVersionException() throws Exception {
         setUpContextAndStartPersister("cap1");
-        doReturn(getWorkingService(getConflictVersionDocument())).when(ctx.serviceFactory).createService(anyString());
+        doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(500);
         // working service:
         logger.info("Switching to working service **");
