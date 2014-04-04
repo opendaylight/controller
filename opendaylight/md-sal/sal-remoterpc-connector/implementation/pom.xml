@@ -157,7 +157,7 @@
                                     <codeGeneratorClass>
                                         org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
                                     </codeGeneratorClass>
-                                    <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
                                     <additionalConfiguration>
                                         <namespaceToPackage1>
                                             urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang

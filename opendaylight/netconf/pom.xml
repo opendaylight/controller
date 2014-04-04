@@ -47,7 +47,6 @@
         <osgi.version>5.0.0</osgi.version>
         <maven.bundle.version>2.4.0</maven.bundle.version>
         <slf4j.version>1.7.2</slf4j.version>
-        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
     </properties>
 
     <dependencies>
@@ -243,24 +242,6 @@
                             <version>${yangtools.version}</version>
                         </dependency>
                     </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.7</version>
-                    <executions>
-                        <execution>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>${salGeneratorPath}</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
 

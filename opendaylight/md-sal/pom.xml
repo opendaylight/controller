@@ -89,7 +89,6 @@
     </profiles>
 
     <properties>
-        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Plugin Versions -->
@@ -207,30 +206,6 @@
                     <groupId>org.eclipse.xtend</groupId>
                     <artifactId>xtend-maven-plugin</artifactId>
                     <version>${xtend.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${basedir}/src/main/xtend-gen</outputDirectory>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>${maven.clean.plugin.version}</version>
-                    <configuration>
-                        <filesets>
-                            <fileset>
-                                <directory>${basedir}/src/main/xtend-gen</directory>
-                                <includes>
-                                    <include>**</include>
-                                </includes>
-                            </fileset>
-                        </filesets>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -297,27 +272,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/config</source>
-                                <source>${project.build.directory}/generated-sources/sal</source>
-                                <source>src/main/xtend-gen</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
