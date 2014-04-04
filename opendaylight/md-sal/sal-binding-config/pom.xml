@@ -43,7 +43,7 @@
                                     <codeGeneratorClass>
                                         org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
                                     </codeGeneratorClass>
-                                    <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
                                     <additionalConfiguration>
                                         <namespaceToPackage1>
                                             urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
@@ -72,10 +72,6 @@
                         <type>jar</type>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

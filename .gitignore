@@ -19,6 +19,8 @@ opendaylight/northbound/integrationtest/logs/*
 *.iws
 .idea
 xtend-gen
+yang-gen-config
+yang-gen-sal
 classes
 out/
 .externalToolBuilders
