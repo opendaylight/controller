@@ -1,0 +1,33 @@
+module odl-datastore-test-notification {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test";
+    prefix "notification-test-using-family-model";
+
+    revision "2014-04-17" {
+        description "Family structure created on ";
+    }
+
+    container family {
+        leaf desc {
+            type string;
+        }
+        list children {
+            key child-number;
+            leaf child-number {
+                type uint16;
+            }
+            leaf child-name {
+                type string;
+            }
+           list grand-children {
+                key grand-child-number;
+                leaf grand-child-number {
+                    type uint16;
+                }
+                leaf grand-child-name {
+                    type string;
+                }
+            }
+        }
+    }
+}

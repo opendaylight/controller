@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.opendaylight.controller.md.sal.dom.store.impl.StoreUtils.increase;
-
-import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
@@ -40,14 +39,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.primitives.UnsignedLong;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.Collections;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static org.opendaylight.controller.md.sal.dom.store.impl.StoreUtils.increase;
 
 public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener {
 
@@ -223,6 +222,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             checkState(stableSnapshot != null, "Transaction is closed");
             return Futures.immediateFuture(NormalizedNodeUtils.findNode(stableSnapshot.getDataTree(), path));
         }
+
+        @Override
+        public boolean exists(InstanceIdentifier path) {
+            throw new UnsupportedOperationException("please implement");
+        }
     }
 
     private static class SnaphostBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
@@ -296,6 +300,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         @Override
         public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
             return Futures.immediateFuture(getMutatedView().read(path));
+        }
+
+        @Override
+        public boolean exists(InstanceIdentifier path) {
+            throw new UnsupportedOperationException("please implement");
         }
     }
 

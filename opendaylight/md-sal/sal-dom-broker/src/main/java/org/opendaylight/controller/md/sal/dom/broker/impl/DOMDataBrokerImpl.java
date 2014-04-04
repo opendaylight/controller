@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -40,14 +38,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
 
@@ -176,6 +175,10 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
             return getSubtransaction(store).read(path);
         }
 
+        @Override
+        public boolean exists(LogicalDatastoreType store, InstanceIdentifier path) {
+            return getSubtransaction(store).exists(path);
+        }
     }
 
     private static class WriteTransactionImpl<T extends DOMStoreWriteTransaction> extends
@@ -256,6 +259,11 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
         public void merge(final LogicalDatastoreType store, final InstanceIdentifier path,
                 final NormalizedNode<?, ?> data) {
 
+        }
+
+        @Override
+        public boolean exists(LogicalDatastoreType store, InstanceIdentifier path) {
+            return getSubtransaction(store).exists(path);
         }
     }
 

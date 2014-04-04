@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
@@ -36,12 +32,13 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 public class AbstractForwardedTransaction<T extends AsyncTransaction<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>>>
         implements Delegator<T> {
@@ -123,15 +120,9 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier currentPath = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(
                     currentArguments);
 
-            final Optional<NormalizedNode<?, ?>> d;
-            try {
-                d = writeTransaction.read(store, currentPath).get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
-                throw new IllegalStateException("Failed to read pre-existing data", e);
-            }
+            boolean nodeExists = writeTransaction.exists(store, currentPath);
 
-            if (!d.isPresent() && iterator.hasNext()) {
+            if (!nodeExists && iterator.hasNext()) {
                 writeTransaction.put(store, currentPath, currentOp.createDefault(currentArg));
             }
         }

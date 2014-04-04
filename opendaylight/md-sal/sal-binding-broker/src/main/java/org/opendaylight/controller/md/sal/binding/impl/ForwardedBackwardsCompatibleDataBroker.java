@@ -7,17 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import org.opendaylight.controller.md.sal.binding.api.BindingDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -48,12 +43,16 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.AsyncFunction;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDataBroker implements DataProviderService, AutoCloseable {
 
@@ -78,13 +77,17 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     @Override
     public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
         DataModificationTransaction tx = beginTransaction();
-        return tx.readConfigurationData(path);
+        final DataObject dataObject = tx.readConfigurationData(path);
+        ((ForwardedBackwardsCompatibleTransacion) tx).getDelegate().close();
+        return dataObject;
     }
 
     @Override
     public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
         DataModificationTransaction tx = beginTransaction();
-        return tx.readOperationalData(path);
+        final DataObject dataObject = tx.readOperationalData(path);
+        ((ForwardedBackwardsCompatibleTransacion) tx).getDelegate().close();
+        return dataObject;
     }
 
     @Override
