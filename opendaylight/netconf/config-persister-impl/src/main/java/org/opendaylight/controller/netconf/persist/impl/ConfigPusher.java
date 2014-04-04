@@ -96,12 +96,16 @@ public class ConfigPusher {
 
     private NetconfOperationService getOperationServiceWithRetries(Set<String> expectedCapabilities, String idForReporting) {
         Stopwatch stopwatch = new Stopwatch().start();
-        NotEnoughCapabilitiesException lastException;
+        Exception lastException;
         do {
             try {
                 return getOperationService(expectedCapabilities, idForReporting);
             } catch (NotEnoughCapabilitiesException e) {
                 logger.debug("Not enough capabilities: " + e.toString());
+                lastException = e;
+                sleep();
+            } catch (IllegalStateException e) {
+                logger.debug("Capability inconsistency: " + e.toString());
                 lastException = e;
                 sleep();
             }
