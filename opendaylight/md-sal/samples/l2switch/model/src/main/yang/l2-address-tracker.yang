@@ -1,0 +1,45 @@
+module l2-address-tracker {
+  yang-version 1;
+  namespace "urn:opendaylight:l2-address-tracker";
+  prefix l2-address-tracker;
+
+  import ietf-yang-types {
+    prefix yang;
+    revision-date 2010-09-24;
+  }
+  import opendaylight-inventory {
+    prefix inv;
+    revision-date 2013-08-19;
+  }
+
+  organization "Cisco Systems Inc";
+  contact
+    "Alex Fan <alefan@cisco.com>";
+  description
+    "YANG version of the  L2 Address Tracker Data Model";
+
+  revision 2014-04-02 {
+    description
+      "L2 Address Tracker module draft.";
+  }
+
+  grouping l2-address {
+    leaf mac {
+        type yang:mac-address;
+        mandatory true;
+        description
+          "the mac address of the host.";
+    }
+    leaf node-connector-ref {
+      type inv:node-connector-ref;
+    }
+  }
+
+  container l2-addresses {
+    config false;
+    list l2-address {
+      key "mac";
+      uses l2-address;
+    }
+  }
+}
