@@ -1,5 +1,5 @@
 /*
- * Copyright IBM Corporation, 2013.  All rights reserved.
+ * Copyright IBM Corporation and others, 2013.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -87,6 +87,8 @@ public class NeutronSubnetsNorthbound {
             @QueryParam("gateway_ip") String queryGatewayIP,
             @QueryParam("enable_dhcp") String queryEnableDHCP,
             @QueryParam("tenant_id") String queryTenantID,
+            @QueryParam("ipv6_address_mode") String queryIpV6AddressMode,
+            @QueryParam("ipv6_ra_mode") String queryIpV6RaMode,
             // pagination
             @QueryParam("limit") String limit,
             @QueryParam("marker") String marker,
@@ -110,7 +112,9 @@ public class NeutronSubnetsNorthbound {
                     (queryCIDR == null || queryCIDR.equals(oSS.getCidr())) &&
                     (queryGatewayIP == null || queryGatewayIP.equals(oSS.getGatewayIP())) &&
                     (queryEnableDHCP == null || queryEnableDHCP.equals(oSS.getEnableDHCP())) &&
-                    (queryTenantID == null || queryTenantID.equals(oSS.getTenantID()))) {
+                    (queryTenantID == null || queryTenantID.equals(oSS.getTenantID())) &&
+                    (queryIpV6AddressMode == null || queryIpV6AddressMode.equals(oSS.getIpV6AddressMode())) &&
+                    (queryIpV6RaMode == null || queryIpV6RaMode.equals(oSS.getIpV6RaMode()))){
                 if (fields.size() > 0) {
                     ans.add(extractFields(oSS,fields));
                 } else {
