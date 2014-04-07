@@ -945,7 +945,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         if (!src.getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
             if (type == UpdateType.ADDED) {
                 edgeMap.put(dst, edge);
-            } else {
+            } else if (type == UpdateType.REMOVED) {
                 edgeMap.remove(dst);
             }
         } else {
@@ -954,7 +954,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
              */
             if (type == UpdateType.ADDED) {
                 prodMap.put(dst, edge);
-            } else {
+            } else if (type == UpdateType.REMOVED) {
                 prodMap.remove(dst);
             }
         }
