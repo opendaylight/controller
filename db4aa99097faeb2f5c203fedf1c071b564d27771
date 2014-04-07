@@ -16,6 +16,24 @@
       "revId": "db4aa99097faeb2f5c203fedf1c071b564d27771",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_42e2b204",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationBrokerImpl.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-07T11:14:09Z",
+      "side": 1,
+      "message": "Hi Robert - this change was actually necessary because when the java class is created by xtend the generics are set up in such a way that the eclipse compiler fails to compile properly. This is happening because the eclipse compiler was treating NotificationListener\u003c?\u003e and NotificationListener\u003c? extends Object\u003e as different typing. The first being a completely unknown type, the second being a type which at least extends Object. While we can assert that is always true in the java world, the eclipse compiler doesn\u0027t seem to be that smart. :)\n\nBy making this change here we allow the eclipse compiler to pass the compilation of the generated extend file.",
+      "parentUuid": "fa82b9bf_a2b85e2b",
+      "revId": "db4aa99097faeb2f5c203fedf1c071b564d27771",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
