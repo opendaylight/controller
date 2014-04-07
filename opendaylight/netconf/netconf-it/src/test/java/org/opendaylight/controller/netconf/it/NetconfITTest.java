@@ -8,33 +8,13 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import static java.util.Collections.emptyList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-
 import junit.framework.Assert;
-
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -42,7 +22,6 @@ import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
@@ -52,6 +31,7 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
@@ -72,17 +52,34 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static java.util.Collections.emptyList;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfITTest extends AbstractNetconfConfigTest {
 
     // TODO refactor, pull common code up to AbstractNetconfITTest
 
-    private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetconfITTest.class);
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
     private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 10830);
@@ -90,7 +87,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     private static final String PASSWORD = "netconf";
 
     private NetconfMessage getConfig, getConfigCandidate, editConfig,
-    closeSession, startExi, stopExi;
+            closeSession, startExi, stopExi;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
@@ -113,7 +110,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher( nettyThreadgroup, nettyThreadgroup, 5000);
+        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
     }
 
     private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
@@ -164,13 +161,14 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
                 yangDependencies.add(resourceAsStream);
             }
         }
-        assertEquals("Some yang files were not found",emptyList(), failedToFind);
+        assertEquals("Some yang files were not found", emptyList(), failedToFind);
         return yangDependencies;
     }
 
     protected List<ModuleFactory> getModuleFactories() {
         return getModuleFactoriesS();
     }
+
     static List<ModuleFactory> getModuleFactoriesS() {
         return Lists.newArrayList(new TestImplModuleFactory(), new DepTestImplModuleFactory(),
                 new NetconfTestImplModuleFactory());
@@ -193,7 +191,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 10000, clientDispatcher))  {
+        try (NetconfClient netconfClient = new NetconfClient("1", tcpAddress, 10000, clientDispatcher)) {
             try (NetconfClient netconfClient2 = new NetconfClient("2", tcpAddress, 10000, clientDispatcher)) {
             }
         }
@@ -258,7 +256,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         NetconfTestImplModuleMXBean proxy = configRegistryClient
                 .newMXBeanProxy(impl, NetconfTestImplModuleMXBean.class);
         proxy.setTestingDep(dep);
-        proxy.setSimpleShort((short)0);
+        proxy.setSimpleShort((short) 0);
 
         transaction.commit();
 
@@ -400,12 +398,15 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         return netconfClient;
     }
 
-    private void startSSHServer() throws Exception{
+    private void startSSHServer() throws Exception {
         logger.info("Creating SSH server");
-        StubUserManager um = new StubUserManager(USERNAME,PASSWORD);
-        InputStream is = getClass().getResourceAsStream("/RSA.pk");
-        AuthProvider ap = new AuthProvider(um, is);
-        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830,tcpAddress,ap));
+        StubUserManager um = new StubUserManager(USERNAME, PASSWORD);
+        String pem;
+        try (InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
+            pem = IOUtils.toString(is);
+        }
+        AuthProvider ap = new AuthProvider(um, pem);
+        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830, tcpAddress, ap));
         sshServerThread.setDaemon(true);
         sshServerThread.start();
         logger.info("SSH server on");
@@ -415,11 +416,11 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     public void sshTest() throws Exception {
         startSSHServer();
         logger.info("creating connection");
-        Connection conn = new Connection(sshAddress.getHostName(),sshAddress.getPort());
+        Connection conn = new Connection(sshAddress.getHostName(), sshAddress.getPort());
         Assert.assertNotNull(conn);
         logger.info("connection created");
         conn.connect();
-        boolean isAuthenticated = conn.authenticateWithPassword(USERNAME,PASSWORD);
+        boolean isAuthenticated = conn.authenticateWithPassword(USERNAME, PASSWORD);
         assertTrue(isAuthenticated);
         logger.info("user authenticated");
         final Session sess = conn.openSession();
@@ -427,10 +428,10 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         logger.info("user authenticated");
         sess.getStdin().write(XmlUtil.toString(this.getConfig.getDocument()).getBytes());
 
-        new Thread(){
+        new Thread() {
             @Override
-            public void run(){
-                while (true){
+            public void run() {
+                while (true) {
                     byte[] bytes = new byte[1024];
                     int c = 0;
                     try {
@@ -438,8 +439,10 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
                     } catch (IOException e) {
                         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                     }
-                    logger.info("got data:"+bytes);
-                    if (c == 0) break;
+                    logger.info("got data:" + bytes);
+                    if (c == 0) {
+                        break;
+                    }
                 }
             }
         }.join();

@@ -8,14 +8,16 @@
 package org.opendaylight.controller.netconf;
 
 import ch.ethz.ssh2.Connection;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
 import junit.framework.Assert;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.net.InetSocketAddress;
 
 
 public class SSHServerTest {
@@ -34,8 +36,11 @@ public class SSHServerTest {
     public void startSSHServer() throws Exception{
         logger.info("Creating SSH server");
         StubUserManager um = new StubUserManager(USER,PASSWORD);
-        InputStream is = getClass().getResourceAsStream("/RSA.pk");
-        AuthProvider ap = new AuthProvider(um, is);
+        String pem;
+        try(InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
+            pem = IOUtils.toString(is);
+        }
+        AuthProvider ap = new AuthProvider(um, pem);
         NetconfSSHServer server = NetconfSSHServer.start(PORT,tcpAddress,ap);
         sshServerThread = new Thread(server);
         sshServerThread.setDaemon(true);
