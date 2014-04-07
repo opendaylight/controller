@@ -9,7 +9,6 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -20,7 +19,7 @@ import com.google.common.base.Optional;
 
 public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrationNode>, Identifiable<PathArgument> {
 
-    private final Logger LOG = LoggerFactory.getLogger(ListenerRegistrationNode.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ListenerRegistrationNode.class);
 
     private final ListenerRegistrationNode parent;
     private final Map<PathArgument, ListenerRegistrationNode> children;
@@ -49,6 +48,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Collection<org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<?>> getListeners() {
+        // FIXME: this is not thread-safe and races with listener (un)registration!
         return (Collection) listeners;
     }
 
@@ -75,7 +75,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
      * @param scope Scope of triggering event.
      * @return
      */
-    public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerDataChangeListener(final InstanceIdentifier path,
+    public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> registerDataChangeListener(final InstanceIdentifier path,
             final L listener, final DataChangeScope scope) {
 
         DataChangeListenerRegistration<L> listenerReg = new DataChangeListenerRegistration<L>(path,listener, scope, this);
