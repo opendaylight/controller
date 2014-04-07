@@ -17,7 +17,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 public class BindingBrokerTestFactory {
 
-    private static final ClassPool CLASS_POOL = new ClassPool();
+    private static final ClassPool CLASS_POOL = ClassPool.getDefault();
     private boolean startWithParsedSchema = true;
     private ExecutorService executor;
     private ClassPool classPool;
@@ -27,7 +27,7 @@ public class BindingBrokerTestFactory {
         return startWithParsedSchema;
     }
 
-    public void setStartWithParsedSchema(boolean startWithParsedSchema) {
+    public void setStartWithParsedSchema(final boolean startWithParsedSchema) {
         this.startWithParsedSchema = startWithParsedSchema;
     }
 
@@ -35,7 +35,7 @@ public class BindingBrokerTestFactory {
         return executor;
     }
 
-    public void setExecutor(ExecutorService executor) {
+    public void setExecutor(final ExecutorService executor) {
         this.executor = executor;
     }
 
@@ -54,7 +54,7 @@ public class BindingBrokerTestFactory {
         return classPool;
     }
 
-    public void setClassPool(ClassPool classPool) {
+    public void setClassPool(final ClassPool classPool) {
         this.classPool = classPool;
     }
 
