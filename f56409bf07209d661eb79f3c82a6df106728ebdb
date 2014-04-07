@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e2dae6e8",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronSubnetsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-07T20:53:21Z",
+      "side": 1,
+      "message": "Wont this change make ipv6_address_mode as a mandatory query parameter and might break existing apps that might depend on this API (without the added mandatory queryparam) ?",
+      "revId": "f56409bf07209d661eb79f3c82a6df106728ebdb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
