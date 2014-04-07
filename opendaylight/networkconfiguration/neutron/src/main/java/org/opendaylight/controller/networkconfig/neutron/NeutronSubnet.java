@@ -1,5 +1,5 @@
 /*
- * Copyright IBM Corporation, 2013.  All rights reserved.
+ * Copyright IBM Corporation and others, 2013.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -63,6 +63,12 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable {
 
     @XmlElement (name="tenant_id")
     String tenantID;
+
+    @XmlElement (name="ipv6_address_mode", nillable=true)
+    String ipV6AddressMode;
+
+    @XmlElement (name="ipv6_ra_mode", nillable=true)
+    String ipV6RaMode;
 
     /* stores the OpenStackPorts associated with an instance
      * used to determine if that instance can be deleted.
@@ -170,6 +176,14 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable {
         this.tenantID = tenantID;
     }
 
+    public String getIpV6AddressMode() { return ipV6AddressMode; }
+
+    public void setIpV6AddressMode(String ipV6AddressMode) { this.ipV6AddressMode = ipV6AddressMode; }
+
+    public String getIpV6RaMode() { return ipV6RaMode; }
+
+    public void setIpV6RaMode(String ipV6RaMode) { this.ipV6RaMode = ipV6RaMode; }
+
     /**
      * This method copies selected fields from the object and returns them
      * as a new object, suitable for marshaling.
@@ -223,6 +237,12 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable {
             }
             if (s.equals("tenant_id")) {
                 ans.setTenantID(this.getTenantID());
+            }
+            if (s.equals("ipv6_address_mode")) {
+                ans.setIpV6AddressMode(this.getIpV6AddressMode());
+            }
+            if (s.equals("ipv6_ra_mode")) {
+                ans.setIpV6RaMode(this.getIpV6RaMode());
             }
         }
         return ans;
@@ -444,6 +464,7 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable {
                 + ", ipVersion=" + ipVersion + ", cidr=" + cidr + ", gatewayIP=" + gatewayIP + ", dnsNameservers="
                 + dnsNameservers + ", allocationPools=" + allocationPools + ", hostRoutes=" + hostRoutes
                 + ", enableDHCP=" + enableDHCP + ", tenantID=" + tenantID + ", myPorts=" + myPorts
-                + ", gatewayIPAssigned=" + gatewayIPAssigned + "]";
+                + ", gatewayIPAssigned=" + gatewayIPAssigned + ", ipv6AddressMode=" + ipV6AddressMode
+                + ", ipv6RaMode=" + ipV6RaMode + "]";
     }
 }
