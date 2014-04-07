@@ -287,6 +287,14 @@
                     <artifactId>org.apache.xml.resolver</artifactId>
                     <version>1.2.0</version>
                 </dependency>
+                <dependency>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcpkix-jdk15on</artifactId>
+                </dependency>
 
                 <!-- threadpool -->
                 <dependency>

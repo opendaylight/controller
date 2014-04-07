@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.netconf.osgi;
+package org.opendaylight.controller.netconf.ssh.osgi;
 
 import com.google.common.base.Optional;
-import java.io.FileInputStream;
-import java.net.InetSocketAddress;
+import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.osgi.framework.BundleActivator;
@@ -21,6 +21,11 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 /**
  * Activator for netconf SSH bundle which creates SSH bridge between netconf client and netconf server. Activator
@@ -60,7 +65,7 @@ public class NetconfSSHActivator implements BundleActivator{
         @Override
         public void removedService(ServiceReference<IUserManager> reference, IUserManager service) {
             logger.trace("Removing service {} from netconf SSH. " +
-                    "SSH won't authenticate users until IUserManeger service will be started.", reference);
+                    "SSH won't authenticate users until IUserManager service will be started.", reference);
             removeUserManagerService();
         }
     };
@@ -87,15 +92,27 @@ public class NetconfSSHActivator implements BundleActivator{
 
         if (sshSocketAddressOptional.isPresent()){
             String path = NetconfConfigUtil.getPrivateKeyPath(context);
-            path = path.replace("\\", "/");
+            path = path.replace("\\", "/");  // FIXME: shouldn't this convert lines to system dependent path separator?
             if (path.equals("")){
                 throw new Exception("Missing netconf.ssh.pk.path key in configuration file.");
             }
 
-            try (FileInputStream fis = new FileInputStream(path)){
-                AuthProvider authProvider = new AuthProvider(iUserManager,fis);
-                this.server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
+            File privateKeyFile = new File(path);
+            String privateKeyPEMString;
+            if (privateKeyFile.exists() == false) {
+                // generate & save to file
+                privateKeyPEMString = PEMGenerator.generateTo(privateKeyFile);
+            } else {
+                // read from file
+                try (FileInputStream fis = new FileInputStream(path)) {
+                    privateKeyPEMString = IOUtils.toString(fis);
+                } catch (IOException e) {
+                    logger.error("Error reading RSA key from file '{}'", path);
+                    throw new IllegalStateException("Error reading RSA key from file " + path);
+                }
             }
+            AuthProvider authProvider = new AuthProvider(iUserManager, privateKeyPEMString);
+            this.server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
 
             Thread serverThread = new  Thread(server,"netconf SSH server thread");
             serverThread.setDaemon(true);

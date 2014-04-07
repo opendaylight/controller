@@ -7,64 +7,48 @@
  */
 package org.opendaylight.controller.netconf.ssh.authentication;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.UserConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class AuthProvider implements AuthProviderInterface {
 
-    private static IUserManager um;
+    private static IUserManager um; //FIXME static mutable state, no locks
     private static final String DEFAULT_USER = "netconf";
     private static final String DEFAULT_PASSWORD = "netconf";
-    private String PEM;
+    private final String pem;
 
-    private static final Logger logger =  LoggerFactory.getLogger(AuthProvider.class);
-
-    public AuthProvider(IUserManager ium,InputStream privateKeyFileInputStream) throws Exception {
-
+    public AuthProvider(IUserManager ium, String pemCertificate) throws Exception {
+        checkNotNull(pemCertificate, "Parameter 'pemCertificate' is null");
         AuthProvider.um = ium;
-        if (AuthProvider.um  == null){
+        if (AuthProvider.um == null) {
             throw new Exception("No usermanager service available.");
         }
 
         List<String> roles = new ArrayList<String>(1);
         roles.add(UserLevel.SYSTEMADMIN.toString());
-        AuthProvider.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles));
-
-        try {
-            PEM = IOUtils.toString(privateKeyFileInputStream);
-        } catch (IOException e) {
-            logger.error("Error reading RSA key from file.");
-            throw new IllegalStateException("Error reading RSA key from file.");
-        }
+        AuthProvider.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles)); //FIXME hardcoded auth
+        pem = pemCertificate;
     }
+
     @Override
-    public boolean authenticated(String username, String password)  throws Exception {
-        if (AuthProvider.um  == null){
+    public boolean authenticated(String username, String password) throws Exception {
+        if (AuthProvider.um == null) {
             throw new Exception("No usermanager service available.");
         }
-        AuthResultEnum authResult = AuthProvider.um.authenticate(username,password);
-        if (authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC)){
-            return true;
-        }
-        return false;
+        AuthResultEnum authResult = AuthProvider.um.authenticate(username, password);
+        return authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC);
     }
 
     @Override
-    public char[] getPEMAsCharArray() throws Exception {
-        if (null == PEM){
-            logger.error("Missing RSA key string.");
-            throw new Exception("Missing RSA key.");
-        }
-        return PEM.toCharArray();
+    public char[] getPEMAsCharArray() {
+        return pem.toCharArray();
     }
 
     @Override
@@ -76,6 +60,4 @@ public class AuthProvider implements AuthProviderInterface {
     public void addUserManagerService(IUserManager userManagerService) {
         AuthProvider.um = userManagerService;
     }
-
-
 }
