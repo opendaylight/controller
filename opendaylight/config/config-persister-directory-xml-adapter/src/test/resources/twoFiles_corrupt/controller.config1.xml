@@ -1,0 +1,10 @@
+<snapshot>
+    <required-capabilities>
+        <capability>cap1-a</capability>
+        <capability>cap2-a</capability>
+        <capability>capa a-a</capability>
+    </required-capabilities>
+    <configuration>
+        <config>1</config>
+    </configuration>
+</snapshot>

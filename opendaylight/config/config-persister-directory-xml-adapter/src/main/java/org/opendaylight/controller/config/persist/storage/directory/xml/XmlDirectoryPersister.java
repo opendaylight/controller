@@ -75,19 +75,30 @@ public class XmlDirectoryPersister implements Persister {
         List<ConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             logger.trace("Adding file '{}' to combined result", file);
-            ConfigSnapshotHolder h = fromXmlSnapshot(file);
-            result.add(h);
+            Optional<ConfigSnapshotHolder> h = fromXmlSnapshot(file);
+            // Ignore non valid snapshot
+            if(h.isPresent() == false) {
+                continue;
+            }
+
+            result.add(h.get());
         }
         return result;
     }
 
-    private ConfigSnapshotHolder fromXmlSnapshot(File file) {
+    private Optional<ConfigSnapshotHolder> fromXmlSnapshot(File file) {
         try {
-            return loadLastConfig(file);
+            return Optional.of(loadLastConfig(file));
         } catch (JAXBException e) {
-            logger.warn("Unable to restore configuration snapshot from {}", file, e);
-            throw new IllegalStateException("Unable to restore configuration snapshot from " + file, e);
+            // In case of parse error, issue a warning, ignore and continue
+            logger.warn(
+                    "Unable to parse configuration snapshot from {}. Initial config from {} will be IGNORED in this run. " +
+                    "Note that subsequent config files may fail due to this problem. " +
+                    "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                    file, file, e);
         }
+
+        return Optional.absent();
     }
 
     public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
