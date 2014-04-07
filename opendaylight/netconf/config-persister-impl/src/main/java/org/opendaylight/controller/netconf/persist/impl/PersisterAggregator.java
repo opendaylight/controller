@@ -37,12 +37,12 @@ import java.util.ListIterator;
  netconf.config.persister.1.storageAdapterClass=org.opendaylight.controller.config.persist.storage.directory.xml.XmlDirectoryStorageAdapter
  netconf.config.persister.1.properties.fileStorage=configuration/initial/
 
- netconf.config.persister.2.storageAdapterClass=org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter
+ netconf.config.persister.2.storageAdapterClass=org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter
  netconf.config.persister.2.readonly=true
- netconf.config.persister.2.properties.fileStorage=configuration/current/controller.config.1.txt
+ netconf.config.persister.2.properties.fileStorage=configuration/current/controller.config.1.xml
 
- netconf.config.persister.3.storageAdapterClass=org.opendaylight.controller.config.persist.storage.file.FileStorageAdapter
- netconf.config.persister.3.properties.fileStorage=configuration/current/controller.config.2.txt
+ netconf.config.persister.3.storageAdapterClass=org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter
+ netconf.config.persister.3.properties.fileStorage=configuration/current/controller.config.2.xml
  netconf.config.persister.3.properties.numberOfBackups=3
 
  </pre>

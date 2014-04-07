@@ -1,1 +1,0 @@
-urn:opendaylight:l2:types?module=opendaylight-l2-types&revision=2013-08-27

@@ -1353,27 +1353,12 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
-          <artifactId>config-persister-file-adapter</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-file-xml-adapter</artifactId>
           <version>${config.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
-          <artifactId>config-persister-directory-adapter</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-directory-xml-adapter</artifactId>
-          <version>${config.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>config-persister-directory-autodetect-adapter</artifactId>
           <version>${config.version}</version>
         </dependency>
 

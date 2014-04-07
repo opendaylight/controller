@@ -75,9 +75,9 @@ public class ServiceProviderController {
         InstanceIdentifier path = InstanceIdentifier.builder(InventoryUtils.INVENTORY_PATH)
                 .nodeWithKey(InventoryUtils.INVENTORY_NODE, InventoryUtils.INVENTORY_ID, "foo").toInstance();
 
-        
+
         InstanceIdentifier mountPointPath = path;
-        
+
         /** We retrive a mountpoint **/
         MountProvisionInstance mountPoint = mountService.getMountPoint(mountPointPath);
         CompositeNode data = mountPoint.readOperationalData(InstanceIdentifier.builder().node(CONFIG_MODULES)
@@ -215,7 +215,7 @@ public class ServiceProviderController {
                 mavenBundle(ODL, "yang-jmx-generator").versionAsInProject(),
                 mavenBundle(ODL, "logback-config").versionAsInProject(),
                 mavenBundle(ODL, "config-persister-api").versionAsInProject(),
-                // mavenBundle(ODL,"config-persister-file-adapter").versionAsInProject(),
+                // mavenBundle(ODL,"config-persister-file-xml-adapter").versionAsInProject(),
                 mavenBundle(ODL, "protocol-framework").versionAsInProject(),
                 mavenBundle(ODL, "netconf-api").versionAsInProject(),
                 mavenBundle(ODL, "netconf-impl").versionAsInProject(),

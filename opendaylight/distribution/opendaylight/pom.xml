@@ -204,23 +204,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.opendaylight.controller</groupId>
-                    <artifactId>config-persister-file-adapter</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.opendaylight.controller</groupId>
                     <artifactId>config-persister-file-xml-adapter</artifactId>
                 </dependency>
                 <dependency>
                     <groupId>org.opendaylight.controller</groupId>
-                    <artifactId>config-persister-directory-adapter</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.opendaylight.controller</groupId>
                     <artifactId>config-persister-directory-xml-adapter</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.opendaylight.controller</groupId>
-                    <artifactId>config-persister-directory-autodetect-adapter</artifactId>
                 </dependency>
 
                 <dependency>
