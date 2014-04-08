@@ -40,6 +40,7 @@ import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
+import org.infinispan.interceptors.distribution.BaseDistributionInterceptor;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.notifications.Listener;
@@ -62,7 +63,7 @@ import org.opendaylight.controller.clustering.services.ListenRoleChangeAddExcept
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClusterManager implements IClusterServices {
+public class ClusterManager extends BaseDistributionInterceptor implements IClusterServices {
     protected static final Logger logger = LoggerFactory
             .getLogger(ClusterManager.class);
     private DefaultCacheManager cm;
