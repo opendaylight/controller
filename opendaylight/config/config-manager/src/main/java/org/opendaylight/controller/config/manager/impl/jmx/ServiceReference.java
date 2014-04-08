@@ -15,7 +15,7 @@ public class ServiceReference {
         this.refName = refName;
     }
 
-    public String getServiceInterfaceName() {
+    public String getServiceInterfaceQName() {
         return serviceInterfaceName;
     }
 
@@ -49,5 +49,13 @@ public class ServiceReference {
         int result = serviceInterfaceName.hashCode();
         result = 31 * result + refName.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceReference{" +
+                "serviceInterfaceName='" + serviceInterfaceName + '\'' +
+                ", refName='" + refName + '\'' +
+                '}';
     }
 }

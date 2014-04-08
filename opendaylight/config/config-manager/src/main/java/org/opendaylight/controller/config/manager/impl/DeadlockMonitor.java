@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 public class DeadlockMonitor implements AutoCloseable {
@@ -16,7 +18,9 @@ public class DeadlockMonitor implements AutoCloseable {
     private final TransactionIdentifier transactionIdentifier;
     private final DeadlockMonitorRunnable thread;
     @GuardedBy("this")
-    private ModuleIdentifierWithNanos moduleIdentifierWithNanos = new ModuleIdentifierWithNanos();
+    private final Deque<ModuleIdentifierWithNanos> moduleIdentifierWithNanosStack = new LinkedList<>();
+    @GuardedBy("this")
+    private ModuleIdentifierWithNanos top = ModuleIdentifierWithNanos.EMPTY;
 
     public DeadlockMonitor(TransactionIdentifier transactionIdentifier) {
         this.transactionIdentifier = transactionIdentifier;
@@ -25,7 +29,21 @@ public class DeadlockMonitor implements AutoCloseable {
     }
 
     public synchronized void setCurrentlyInstantiatedModule(ModuleIdentifier currentlyInstantiatedModule) {
-        this.moduleIdentifierWithNanos = new ModuleIdentifierWithNanos(currentlyInstantiatedModule);
+
+        boolean popping = currentlyInstantiatedModule == null;
+        if (popping) {
+            moduleIdentifierWithNanosStack.pop();
+            if (moduleIdentifierWithNanosStack.isEmpty()) {
+                top = ModuleIdentifierWithNanos.EMPTY;
+            } else {
+                top = moduleIdentifierWithNanosStack.peekLast();
+            }
+        } else {
+            ModuleIdentifierWithNanos current = new ModuleIdentifierWithNanos(currentlyInstantiatedModule);
+            moduleIdentifierWithNanosStack.push(current);
+            top = current;
+        }
+        logger.trace("setCurrentlyInstantiatedModule {}, top {}", currentlyInstantiatedModule, top);
     }
 
     public boolean isAlive() {
@@ -52,11 +70,11 @@ public class DeadlockMonitor implements AutoCloseable {
         public void run() {
             ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos(); // null moduleId
             while (this.isInterrupted() == false) {
-                ModuleIdentifierWithNanos copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.moduleIdentifierWithNanos);
-                if (old.moduleIdentifier == null) {
+                ModuleIdentifierWithNanos copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.top);
+                if (old.moduleIdentifier == null || old.equals(copy) == false) {
                     // started
                     old = copy;
-                } else if (old.moduleIdentifier != null && old.equals(copy)) {
+                } else {
                     // is the getInstance() running longer than WARN_AFTER_MILLIS ?
                     long runningTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - copy.nanoTime);
                     if (runningTime > WARN_AFTER_MILLIS) {
@@ -78,14 +96,18 @@ public class DeadlockMonitor implements AutoCloseable {
         }
     }
 
-    private class ModuleIdentifierWithNanos {
+
+
+
+    private static class ModuleIdentifierWithNanos {
+        private static ModuleIdentifierWithNanos EMPTY = new ModuleIdentifierWithNanos();
         @Nullable
         private final ModuleIdentifier moduleIdentifier;
+
         private final long nanoTime;
 
         private ModuleIdentifierWithNanos() {
-            moduleIdentifier = null;
-            nanoTime = System.nanoTime();
+            this((ModuleIdentifier)null);
         }
 
         private ModuleIdentifierWithNanos(ModuleIdentifier moduleIdentifier) {
@@ -117,6 +139,13 @@ public class DeadlockMonitor implements AutoCloseable {
             int result = moduleIdentifier != null ? moduleIdentifier.hashCode() : 0;
             result = 31 * result + (int) (nanoTime ^ (nanoTime >>> 32));
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "ModuleIdentifierWithNanos{" +
+                    moduleIdentifier +
+                    '}';
         }
     }
 }

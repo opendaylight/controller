@@ -7,14 +7,6 @@
  */
 package org.opendaylight.controller.config.threadpool.eventbus;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -25,6 +17,14 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.threadpool.impl.EventBusModuleFactory;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.junit.matchers.JUnitMatchers.containsString;
+
 public class SyncEventBusConfigBeanTest extends AbstractConfigTest {
 
     private EventBusModuleFactory factory;
@@ -34,7 +34,7 @@ public class SyncEventBusConfigBeanTest extends AbstractConfigTest {
     public void setUp() {
 
         factory = new EventBusModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     @Test
