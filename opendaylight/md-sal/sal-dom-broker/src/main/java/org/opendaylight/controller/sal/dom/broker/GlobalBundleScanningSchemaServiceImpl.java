@@ -135,6 +135,13 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
 
     private void updateContext(final SchemaContext snapshot) {
         Object[] services = listenerTracker.getServices();
+        for (ListenerRegistration<SchemaServiceListener> listener : listeners) {
+            try {
+                listener.getInstance().onGlobalContextUpdated(snapshot);
+            } catch (Exception e) {
+                logger.error("Exception occured during invoking listener", e);
+            }
+        }
         if (services != null) {
             for (Object rawListener : services) {
                 SchemaServiceListener listener = (SchemaServiceListener) rawListener;
@@ -143,13 +150,6 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
                 } catch (Exception e) {
                     logger.error("Exception occured during invoking listener", e);
                 }
-            }
-        }
-        for (ListenerRegistration<SchemaServiceListener> listener : listeners) {
-            try {
-                listener.getInstance().onGlobalContextUpdated(snapshot);
-            } catch (Exception e) {
-                logger.error("Exception occured during invoking listener", e);
             }
         }
     }
