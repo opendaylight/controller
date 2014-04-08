@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
+import java.net.InetSocketAddress;
+
 import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
+import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
@@ -20,6 +22,12 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFa
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class AbstractNetconfConfigTest extends AbstractConfigTest {
 
@@ -57,4 +65,13 @@ public class AbstractNetconfConfigTest extends AbstractConfigTest {
         nettyThreadgroup.shutdownGracefully();
     }
 
+    public NetconfClientConfiguration getClientConfiguration(final InetSocketAddress tcpAddress, final int timeout) {
+        final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+        b.withAddress(tcpAddress);
+        b.withSessionListener(new SimpleNetconfClientSessionListener());
+        b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
+                timeout));
+        b.withConnectionTimeoutMillis(timeout);
+        return b.build();
+    }
 }
