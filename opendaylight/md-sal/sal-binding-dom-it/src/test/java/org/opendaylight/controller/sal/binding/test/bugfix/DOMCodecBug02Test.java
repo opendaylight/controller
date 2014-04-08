@@ -17,8 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javassist.ClassPool;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -77,7 +75,6 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
         ListeningExecutorService executor = MoreExecutors.sameThreadExecutor();
         BindingBrokerTestFactory factory = new BindingBrokerTestFactory();
         factory.setExecutor(executor);
-        factory.setClassPool(new ClassPool());
         factory.setStartWithParsedSchema(getStartWithSchema());
         testContext = factory.getTestContext();
         testContext.start();
