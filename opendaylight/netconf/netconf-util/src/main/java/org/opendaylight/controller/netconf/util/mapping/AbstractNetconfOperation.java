@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.netconf.util.mapping;
 
-import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -21,6 +19,8 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.util.Map;
 
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
@@ -118,8 +118,12 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("AbstractConfigNetconfOperation{");
-        sb.append("name=").append(getOperationName());
+        final StringBuffer sb = new StringBuffer(getClass().getName());
+        try {
+            sb.append("{name=").append(getOperationName());
+        } catch(UnsupportedOperationException e) {
+            // no problem
+        }
         sb.append(", namespace=").append(getOperationNamespace());
         sb.append(", session=").append(netconfSessionIdForReporting);
         sb.append('}');
