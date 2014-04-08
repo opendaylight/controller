@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.1</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <scm>
@@ -148,7 +148,7 @@
                   <type>jar</type>
                   <classifier>full-java-client-sources</classifier>
                 </artifact>
-                <artifact>
+                <!--artifact>
                   <file>${json-client}</file>
                   <type>jar</type>
                   <classifier>full-json-client</classifier>
@@ -157,7 +157,7 @@
                   <file>${json-client-sources}</file>
                   <type>jar</type>
                   <classifier>full-json-client-sources</classifier>
-                </artifact>
+                </artifact-->
               </artifacts>
             </configuration>
           </execution>
