@@ -8,9 +8,6 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GlobalEventExecutor;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -21,25 +18,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.protocol.framework.NeverReconnectStrategy;
-import org.opendaylight.protocol.framework.ReconnectStrategy;
-import org.opendaylight.protocol.framework.TimedReconnectStrategy;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
+import io.netty.util.concurrent.Future;
 
 /**
- * @deprecated Use {@link NetconfClientDispatcher.createClient()} or {@link NetconfClientDispatcher.createReconnectingClient()} instead.
+ * @deprecated Use {@link NetconfClientDispatcherImpl.createClient()} or {@link NetconfClientDispatcherImpl.createReconnectingClient()} instead.
  */
 @Deprecated
 public class NetconfClient implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClient.class);
 
-    public static final int DEFAULT_CONNECT_TIMEOUT = 5000;
     private final NetconfClientDispatcher dispatch;
     private final String label;
     private final NetconfClientSession clientSession;
@@ -47,66 +42,28 @@ public class NetconfClient implements Closeable {
     private final long sessionId;
     private final InetSocketAddress address;
 
-    // TODO test reconnecting constructor
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectionAttempts,
-            int attemptMsTimeout, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        this(clientLabelForLogging, address, getReconnectStrategy(connectionAttempts, attemptMsTimeout),
-                netconfClientDispatcher);
-    }
 
-    private NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        this.label = clientLabelForLogging;
-        dispatch = netconfClientDispatcher;
-        sessionListener = new SimpleNetconfClientSessionListener();
-        Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strat);
-        this.address = address;
-        clientSession = get(clientFuture);
-        this.sessionId = clientSession.getSessionId();
-    }
-
-    private NetconfClientSession get(Future<NetconfClientSession> clientFuture) throws InterruptedException {
+    private NetconfClientSession get(final Future<NetconfClientSession> clientFuture) throws InterruptedException {
         try {
             return clientFuture.get();
-        } catch (CancellationException e) {
+        } catch (final CancellationException e) {
             throw new RuntimeException("Cancelling " + this, e);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             throw new IllegalStateException("Unable to create " + this, e);
         }
     }
 
-    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strategy, NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        return new NetconfClient(clientLabelForLogging,address,strategy,netconfClientDispatcher);
-    }
-
-    public static NetconfClient clientFor(String clientLabelForLogging, InetSocketAddress address,
-            ReconnectStrategy strategy, NetconfClientDispatcher netconfClientDispatcher, NetconfClientSessionListener listener) throws InterruptedException {
-        return new NetconfClient(clientLabelForLogging,address,strategy,netconfClientDispatcher,listener);
-    }
-
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
-            NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        this(clientLabelForLogging, address,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), netconfClientDispatcher);
-    }
-
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address,
-            NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        this(clientLabelForLogging, address, new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
-                DEFAULT_CONNECT_TIMEOUT), netconfClientDispatcher);
-    }
-
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strategy,
-            NetconfClientDispatcher netconfClientDispatcher, NetconfClientSessionListener listener) throws InterruptedException{
+    public NetconfClient(final String clientLabelForLogging, final NetconfClientDispatcher netconfClientDispatcher, final NetconfClientConfiguration cfg) throws InterruptedException{
         this.label = clientLabelForLogging;
         dispatch = netconfClientDispatcher;
-        sessionListener = listener;
-        Future<NetconfClientSession> clientFuture = dispatch.createClient(address, sessionListener, strategy);
-        this.address = address;
+        sessionListener = cfg.getSessionListener();
+        final Future<NetconfClientSession> clientFuture = dispatch.createClient(cfg);
+        this.address = cfg.getAddress();
         clientSession = get(clientFuture);
         this.sessionId = clientSession.getSessionId();
     }
 
-    public Future<NetconfMessage> sendRequest(NetconfMessage message) {
+    public Future<NetconfMessage> sendRequest(final NetconfMessage message) {
         return ((SimpleNetconfClientSessionListener)sessionListener).sendRequest(message);
     }
 
@@ -114,7 +71,7 @@ public class NetconfClient implements Closeable {
      * @deprecated Use {@link sendRequest} instead
      */
     @Deprecated
-    public NetconfMessage sendMessage(NetconfMessage message) throws ExecutionException, InterruptedException, TimeoutException {
+    public NetconfMessage sendMessage(final NetconfMessage message) throws ExecutionException, InterruptedException, TimeoutException {
         return sendMessage(message, 5, 1000);
     }
 
@@ -122,7 +79,7 @@ public class NetconfClient implements Closeable {
      * @deprecated Use {@link sendRequest} instead
      */
     @Deprecated
-    public NetconfMessage sendMessage(NetconfMessage message, int attempts, int attemptMsDelay) throws ExecutionException, InterruptedException, TimeoutException {
+    public NetconfMessage sendMessage(final NetconfMessage message, final int attempts, final int attemptMsDelay) throws ExecutionException, InterruptedException, TimeoutException {
         //logger.debug("Sending message: {}",XmlUtil.toString(message.getDocument()));
         final Stopwatch stopwatch = new Stopwatch().start();
 
@@ -141,11 +98,6 @@ public class NetconfClient implements Closeable {
 
     public NetconfClientDispatcher getNetconfClientDispatcher() {
         return dispatch;
-    }
-
-    private static ReconnectStrategy getReconnectStrategy(int connectionAttempts, int attemptMsTimeout) {
-        return new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, attemptMsTimeout, 1000, 1.0, null,
-                Long.valueOf(connectionAttempts), null);
     }
 
     @Override

@@ -7,14 +7,7 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import org.apache.commons.io.IOUtils;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,7 +17,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
+import org.apache.commons.io.IOUtils;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class HardcodedYangStoreService implements YangStoreService {
 
