@@ -305,7 +305,7 @@ class RestconfImpl implements RestconfService {
         return callRpc(rpc, null)
     }
 
-    def resolveIdentifierInInvokeRpc(String identifier) {
+    private def resolveIdentifierInInvokeRpc(String identifier) {
         if (identifier.indexOf("/") === -1) {
             val identifierDecoded = identifier.urlPathArgDecode
             val rpc = identifierDecoded.rpcDefinition
@@ -314,8 +314,8 @@ class RestconfImpl implements RestconfService {
             }
             throw new ResponseException(NOT_FOUND, "RPC does not exist.");
         }
-        val slashErrorMsg  = String.format("Identifier %n%s%ncan't contain slash character (/). +
-            If slash is part of identifier name then use %2F placeholder.",identifier)
+        val slashErrorMsg = String.format(
+            "Identifier %n%s%ncan't contain slash character (/).%nIf slash is part of identifier name then use %%2F placeholder.", identifier)
         throw new ResponseException(NOT_FOUND, slashErrorMsg);
     }
 
