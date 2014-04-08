@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.0</version>
+        <version>1.1-1-SNAPSHOT</version>
     </parent>
     <artifactId>sal-binding-broker-impl</artifactId>
     <packaging>bundle</packaging>
@@ -11,7 +11,7 @@
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-      <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
+      <tag>stable/hydrogen</tag>
   </scm>
 
     <build>
@@ -51,7 +51,7 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
-                        <version>0.2.3</version>
+                        <version>0.2.4-1-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
@@ -156,22 +156,22 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-impl</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-util</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -209,12 +209,12 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-core-api</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-broker-impl</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -234,7 +234,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-config</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
@@ -264,17 +264,17 @@
         <dependency>
         	<groupId>org.opendaylight.controller.model</groupId>
         	<artifactId>model-flow-base</artifactId>
-        	<version>1.0</version>
+        	<version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
         	<groupId>org.opendaylight.controller.model</groupId>
         	<artifactId>model-flow-service</artifactId>
-        	<version>1.0</version>
+        	<version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
         	<groupId>org.opendaylight.controller.model</groupId>
         	<artifactId>model-flow-statistics</artifactId>
-        	<version>1.0</version>
+        	<version>1.1-1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
