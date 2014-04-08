@@ -3,21 +3,21 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.0</version>
+        <version>1.1-1-SNAPSHOT</version>
     </parent>
     <artifactId>sal-common-api</artifactId>
     <scm>
       <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
       <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
       <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-      <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
+      <tag>stable/hydrogen</tag>
   </scm>
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
