@@ -39,7 +39,7 @@ public class ScheduledThreadPoolConfigBeanTest extends AbstractConfigTest {
     public void setUp() {
 
         factory = new ScheduledThreadPoolModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, factory,
                 new NamingThreadFactoryModuleFactory()));
     }
 

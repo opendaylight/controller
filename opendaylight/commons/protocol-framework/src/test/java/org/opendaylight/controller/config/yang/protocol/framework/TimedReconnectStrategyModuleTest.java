@@ -7,15 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.protocol.framework;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.math.BigDecimal;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -26,6 +17,14 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.netty.eventexecutor.GlobalEventExecutorModuleFactory;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
+import java.math.BigDecimal;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 public class TimedReconnectStrategyModuleTest extends AbstractConfigTest {
 
     private static final String INSTANCE_NAME = "timed-reconect-stategy-facotry-impl";
@@ -33,7 +32,7 @@ public class TimedReconnectStrategyModuleTest extends AbstractConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TimedReconnectStrategyFactoryModuleFactory(), new GlobalEventExecutorModuleFactory()));
     }
 

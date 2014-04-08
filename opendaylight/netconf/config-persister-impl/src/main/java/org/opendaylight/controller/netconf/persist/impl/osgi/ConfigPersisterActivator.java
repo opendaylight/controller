@@ -61,13 +61,13 @@ public class ConfigPersisterActivator implements BundleActivator {
         final long maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesMillis(propertiesProvider);
         final List<ConfigSnapshotHolder> configs = persisterAggregator.loadLastConfigs();
         final long conflictingVersionTimeoutMillis = getConflictingVersionTimeoutMillis(propertiesProvider);
-        logger.trace("Following configs will be pushed: {}", configs);
+        logger.debug("Following configs will be pushed: {}", configs);
         ServiceTrackerCustomizer<NetconfOperationServiceFactory, NetconfOperationServiceFactory> configNetconfCustomizer = new ServiceTrackerCustomizer<NetconfOperationServiceFactory, NetconfOperationServiceFactory>() {
             @Override
             public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
                 NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
                 final ConfigPusher configPusher = new ConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
-                logger.debug("Configuration Persister got %s", service);
+                logger.debug("Configuration Persister got {}", service);
                 final Thread pushingThread = new Thread(new Runnable() {
                     @Override
                     public void run() {

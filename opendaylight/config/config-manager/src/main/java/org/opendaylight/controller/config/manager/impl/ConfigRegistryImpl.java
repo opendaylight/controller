@@ -11,8 +11,8 @@ import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
-import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
@@ -165,7 +165,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // closed by transaction controller
         ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
                 transactionName), factory, allCurrentFactories);
-        ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
+        SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 readableSRRegistry, txLookupRegistry, allCurrentFactories);
 
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
@@ -343,24 +343,20 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
             // register to JMX
             try {
-                newModuleJMXRegistrator.registerMBean(newReadableConfigBean,
-                        primaryReadOnlyON);
+                newModuleJMXRegistrator.registerMBean(newReadableConfigBean, primaryReadOnlyON);
             } catch (InstanceAlreadyExistsException e) {
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("Possible code error, already registered:" + primaryReadOnlyON,e);
             }
 
-            // register to OSGi
+            // register services to OSGi
+            Map<String, ServiceInterfaceAnnotation> annotationMapping = configTransactionController.getWritableRegistry().findServiceInterfaces(moduleIdentifier);
+            BundleContext bc = configTransactionController.getModuleFactoryBundleContext(
+                    entry.getModuleFactory().getImplementationName());
             if (osgiRegistration == null) {
-                ModuleFactory moduleFactory = entry.getModuleFactory();
-                if (moduleFactory != null) {
-                    BundleContext bc = configTransactionController.
-                            getModuleFactoryBundleContext(moduleFactory.getImplementationName());
-                    osgiRegistration = beanToOsgiServiceManager.registerToOsgi(realModule.getClass(),
-                            newReadableConfigBean.getInstance(), entry.getIdentifier(), bc);
-                } else {
-                    throw new NullPointerException(entry.getIdentifier().getFactoryName() + " ModuleFactory not found.");
-                }
-
+                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(
+                        newReadableConfigBean.getInstance(), moduleIdentifier, bc, annotationMapping);
+            } else {
+                osgiRegistration.updateRegistrations(annotationMapping, bc, instance);
             }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators

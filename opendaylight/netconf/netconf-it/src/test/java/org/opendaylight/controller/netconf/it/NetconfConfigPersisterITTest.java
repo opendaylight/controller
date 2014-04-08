@@ -75,7 +75,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(NetconfITTest.getModuleFactoriesS().toArray(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,NetconfITTest.getModuleFactoriesS().toArray(
                 new ModuleFactory[0])));
 
         NetconfMonitoringServiceImpl monitoringService = new NetconfMonitoringServiceImpl(getFactoriesListener());

@@ -36,7 +36,7 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
     @Before
     public void setUp() {
         factory = new FixedThreadPoolModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory,
                 new NamingThreadFactoryModuleFactory()));
     }
 
