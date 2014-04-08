@@ -265,7 +265,7 @@ public class ServerImpl implements RemoteRpcServer {
       while (ee.hasMoreElements()) {
         InetAddress i = (InetAddress) ee.nextElement();
         _logger.debug("Trying address {}", i);
-        if ((i instanceof Inet4Address) && (i.isSiteLocalAddress())) {
+        if ((i instanceof Inet4Address) && (!i.isLoopbackAddress())) {
           String hostAddress = i.getHostAddress();
           _logger.debug("Settled on host address {}", hostAddress);
           return hostAddress;
