@@ -15,7 +15,7 @@
             <defaultValue>2013-04-05</defaultValue>
         </requiredProperty>
         <requiredProperty key="config-api-version">
-            <defaultValue>0.2.4-SNAPSHOT</defaultValue>
+            <defaultValue>0.2.5-SNAPSHOT</defaultValue>
         </requiredProperty>
         <requiredProperty key="yang-maven-plugin-version">
             <defaultValue>0.6.2-SNAPSHOT</defaultValue>
