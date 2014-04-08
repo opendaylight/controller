@@ -29,16 +29,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.infinispan.CacheException;
+
 import org.infinispan.commands.FlagAffectedCommand;
 import org.infinispan.commands.remote.ClusteredGetCommand;
 import org.infinispan.commands.write.DataWriteCommand;
 import org.infinispan.commands.write.WriteCommand;
+import org.infinispan.commons.CacheException;
 import org.infinispan.container.entries.InternalCacheEntry;
 import org.infinispan.container.entries.InternalCacheValue;
 import org.infinispan.context.InvocationContext;
 import org.infinispan.context.impl.TxInvocationContext;
 import org.infinispan.distribution.DistributionManager;
+import org.infinispan.distribution.RemoteValueRetrievedListener;
 import org.infinispan.factories.annotations.Inject;
 import org.infinispan.interceptors.ClusteringInterceptor;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
@@ -69,6 +71,7 @@ public abstract class BaseDistributionInterceptor extends ClusteringInterceptor 
    protected DistributionManager dm;
 
    protected ClusteringDependentLogic cdl;
+   protected RemoteValueRetrievedListener rrl;
 
    private static final Log log = LogFactory.getLog(BaseDistributionInterceptor.class);
 
@@ -78,12 +81,13 @@ public abstract class BaseDistributionInterceptor extends ClusteringInterceptor 
    }
 
    @Inject
-   public void injectDependencies(DistributionManager distributionManager, ClusteringDependentLogic cdl) {
+   public void injectDependencies(DistributionManager distributionManager, ClusteringDependentLogic cdl, RemoteValueRetrievedListener rrl) {
       this.dm = distributionManager;
       this.cdl = cdl;
+      this.rrl = rrl;
    }
 
-   @Override
+/*   @Override
    protected final InternalCacheEntry retrieveFromRemoteSource(Object key, InvocationContext ctx, boolean acquireRemoteLock, FlagAffectedCommand command) throws Exception {
       GlobalTransaction gtx = acquireRemoteLock ? ((TxInvocationContext)ctx).getGlobalTransaction() : null;
       ClusteredGetCommand get = cf.buildClusteredGetCommand(key, command.getFlags(), acquireRemoteLock, gtx);
@@ -110,7 +114,36 @@ public abstract class BaseDistributionInterceptor extends ClusteringInterceptor 
       // and we'd return a null even though the key exists on
       return null;
    }
+*/
+@Override
+protected final InternalCacheEntry retrieveFromRemoteSource(Object key,InvocationContext ctx, boolean acquireRemoteLock,FlagAffectedCommand command, boolean isWrite) throws Exception {
+GlobalTransaction gtx = acquireRemoteLock ? ((TxInvocationContext) ctx).getGlobalTransaction() : null;
+ClusteredGetCommand get = cf.buildClusteredGetCommand(key,command.getFlags(), acquireRemoteLock, gtx);
 
+List<Address> targets = new ArrayList<Address>(stateTransferManager.getCacheTopology().getReadConsistentHash().locateOwners(key));
+// if any of the recipients has left the cluster since the command was
+// issued, just don't wait for its response
+targets.retainAll(rpcManager.getTransport().getMembers());
+ResponseFilter filter = new ClusteredGetResponseValidityFilter(targets,rpcManager.getAddress());
+RpcOptions options = rpcManager.getRpcOptionsBuilder(ResponseMode.WAIT_FOR_VALID_RESPONSE,false).responseFilter(filter).build();
+Map<Address, Response> responses = rpcManager.invokeRemotely(targets,get, options);
+
+if (!responses.isEmpty()) {
+for (Response r : responses.values()) {
+if (r instanceof SuccessfulResponse) {
+InternalCacheValue cacheValue = (InternalCacheValue) ((SuccessfulResponse) r).getResponseValue();
+return cacheValue.toInternalCacheEntry(key);
+}
+}
+}
+
+// TODO If everyone returned null, and the read CH has changed, retry
+// the remote get.
+// Otherwise our get command might be processed by the old owners after
+// they have invalidated their data
+// and we'd return a null even though the key exists on
+return null;
+}
    protected final Object handleNonTxWriteCommand(InvocationContext ctx, DataWriteCommand command) throws Throwable {
       if (ctx.isInTxScope()) {
          throw new CacheException("Attempted execution of non-transactional write command in a transactional invocation context");
@@ -194,7 +227,9 @@ public abstract class BaseDistributionInterceptor extends ClusteringInterceptor 
       }
    }
 
-   protected abstract void remoteGetBeforeWrite(InvocationContext ctx, WriteCommand command, RecipientGenerator keygen) throws Throwable;
+   //protected abstract void remoteGetBeforeWrite(InvocationContext ctx, WriteCommand command, RecipientGenerator keygen) throws Throwable;
+   protected void remoteGetBeforeWrite(InvocationContext ctx, WriteCommand command, RecipientGenerator keygen){
+   }
 
    interface RecipientGenerator {
 
