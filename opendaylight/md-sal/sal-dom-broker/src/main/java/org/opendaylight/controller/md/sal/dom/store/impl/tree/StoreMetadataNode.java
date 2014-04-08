@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -18,7 +19,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.UnsignedLong;
 
 public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreTreeNode<StoreMetadataNode> {
@@ -29,13 +31,19 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
 
     private final Map<PathArgument, StoreMetadataNode> children;
 
+    /**
+     *
+     * @param data
+     * @param nodeVersion
+     * @param subtreeVersion
+     * @param children Map of children, must not be modified externally
+     */
     protected StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
             final UnsignedLong subtreeVersion, final Map<PathArgument, StoreMetadataNode> children) {
         this.nodeVersion = nodeVersion;
         this.subtreeVersion = subtreeVersion;
         this.data = data;
-        this.children = ImmutableMap.copyOf(children);
-
+        this.children = Preconditions.checkNotNull(children);
     }
 
     public static Builder builder() {
@@ -60,7 +68,7 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
     }
 
     public Iterable<StoreMetadataNode> getChildren() {
-        return children.values();
+        return Iterables.unmodifiableIterable(children.values());
     }
 
     @Override
@@ -110,7 +118,8 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         private UnsignedLong nodeVersion;
         private UnsignedLong subtreeVersion;
         private NormalizedNode<?, ?> data;
-        private final ImmutableMap.Builder<PathArgument, StoreMetadataNode> children = ImmutableMap.builder();
+        private Map<PathArgument, StoreMetadataNode> children = new LinkedHashMap<>();
+        private boolean dirty = false;
 
         private Builder() {}
 
@@ -136,6 +145,10 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         }
 
         public Builder add(final StoreMetadataNode node) {
+            if (dirty) {
+                children = new LinkedHashMap<>(children);
+                dirty = false;
+            }
             children.put(node.getIdentifier(), node);
             return this;
         }
@@ -144,7 +157,8 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
             checkState(data != null, "Data node should not be null.");
             checkState(subtreeVersion.compareTo(nodeVersion) >= 0,
                     "Subtree version must be equals or greater than node version.");
-            return new StoreMetadataNode(data, nodeVersion, subtreeVersion, children.build());
+            dirty = true;
+            return new StoreMetadataNode(data, nodeVersion, subtreeVersion, children);
         }
     }
 
