@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.0</version>
+        <version>1.1-1-SNAPSHOT</version>
     </parent>
     <artifactId>sal-binding-dom-it</artifactId>
     <packaging>bundle</packaging>
@@ -11,7 +11,7 @@
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-      <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
+      <tag>stable/Hydroden</tag>
   </scm>
     <build>
         <plugins>
@@ -57,26 +57,26 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-management</artifactId>
-            <version>1.0</version>
+            <version>1.1-1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
