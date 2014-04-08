@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2-1-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <properties>
@@ -14,7 +14,7 @@
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
+    <tag>stable/hydrogen</tag>
   </scm>
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->
@@ -35,7 +35,7 @@
   </distributionManagement>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>networkconfig.neutron</artifactId>
-  <version>0.4.1</version>
+  <version>0.4.2-1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <build>
     <plugins>
@@ -71,6 +71,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
+      <version>${configuration.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

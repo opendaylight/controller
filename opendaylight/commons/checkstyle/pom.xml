@@ -2,12 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>checkstyle</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-1-SNAPSHOT</version>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>master-tagforprepareonly-controller-bulk-release-2-1</tag>
+    <tag>stable/hydrogen</tag>
   </scm>
 
   <properties>
