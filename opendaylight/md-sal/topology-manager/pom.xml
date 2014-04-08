@@ -42,10 +42,6 @@
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.xtend</groupId>
-            <artifactId>org.eclipse.xtend.lib</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -63,10 +59,6 @@
                         <Private-Package>org.opendaylight.md.controller.topology.manager</Private-Package>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.xtend</groupId>
-                <artifactId>xtend-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
