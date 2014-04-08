@@ -4,8 +4,9 @@ import static org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableData
 import static org.opendaylight.controller.md.sal.dom.store.impl.StoreUtils.append;
 import static org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils.getChild;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
@@ -23,17 +24,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class DataChangeEventResolver {
-
-
-    private  static final Logger LOG = LoggerFactory.getLogger(DataChangeEventResolver.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(DataChangeEventResolver.class);
     private static final DOMImmutableDataChangeEvent NO_CHANGE = builder().build();
+    private final ImmutableList.Builder<ChangeListenerNotifyTask> tasks = ImmutableList.builder();
     private InstanceIdentifier rootPath;
     private ListenerRegistrationNode listenerRoot;
     private NodeModification modificationRoot;
     private Optional<StoreMetadataNode> beforeRoot;
     private Optional<StoreMetadataNode> afterRoot;
-    private final ImmutableList.Builder<ChangeListenerNotifyTask> tasks = ImmutableList.builder();
 
     protected InstanceIdentifier getRootPath() {
         return rootPath;
@@ -133,11 +131,7 @@ public class DataChangeEventResolver {
             builder.merge(resolveCreateEvent(childPath, childListeners, child));
         }
 
-        DOMImmutableDataChangeEvent event = builder.build();
-        if (listeners.isPresent()) {
-            addNotifyTask(listeners.get().getListeners(), event);
-        }
-        return event;
+        return addNotifyTask(listeners, builder.build());
     }
 
     private DOMImmutableDataChangeEvent resolveDeleteEvent(final InstanceIdentifier path,
@@ -151,12 +145,7 @@ public class DataChangeEventResolver {
             InstanceIdentifier childPath = StoreUtils.append(path, childId);
             builder.merge(resolveDeleteEvent(childPath, childListeners, child));
         }
-        DOMImmutableDataChangeEvent event = builder.build();
-        if (listeners.isPresent()) {
-            addNotifyTask(listeners.get().getListeners(), event);
-        }
-        return event;
-
+        return addNotifyTask(listeners, builder.build());
     }
 
     private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final InstanceIdentifier path,
@@ -206,33 +195,35 @@ public class DataChangeEventResolver {
         return builder().build();
     }
 
+    private DOMImmutableDataChangeEvent addNotifyTask(final Optional<ListenerRegistrationNode> listeners, final DOMImmutableDataChangeEvent event) {
+        if (listeners.isPresent()) {
+            final Collection<DataChangeListenerRegistration<?>> l = listeners.get().getListeners();
+            if (!l.isEmpty()) {
+                tasks.add(new ChangeListenerNotifyTask(ImmutableSet.copyOf(l), event));
+            }
+        }
+
+        return event;
+    }
+
     private void addNotifyTask(final ListenerRegistrationNode listenerRegistrationNode, final DataChangeScope scope,
             final DOMImmutableDataChangeEvent event) {
         Collection<DataChangeListenerRegistration<?>> potential = listenerRegistrationNode.getListeners();
-        if(potential.isEmpty()) {
-            return;
-        }
-        ArrayList<DataChangeListenerRegistration<?>> toNotify = new ArrayList<>(potential.size());
-        for(DataChangeListenerRegistration<?> listener : potential) {
-            if(scope.equals(listener.getScope())) {
-                toNotify.add(listener);
+        if(!potential.isEmpty()) {
+            final Set<DataChangeListenerRegistration<?>> toNotify = new HashSet<>(potential.size());
+            for(DataChangeListenerRegistration<?> listener : potential) {
+                if(scope.equals(listener.getScope())) {
+                    toNotify.add(listener);
+                }
             }
-        }
-        addNotifyTask(toNotify, event);
 
-    }
-
-    private void addNotifyTask(final Collection<DataChangeListenerRegistration<?>> listeners,
-            final DOMImmutableDataChangeEvent event) {
-        if(!listeners.isEmpty()) {
-            tasks.add(new ChangeListenerNotifyTask(ImmutableSet.copyOf(listeners),event));
+            if (!toNotify.isEmpty()) {
+                tasks.add(new ChangeListenerNotifyTask(toNotify, event));
+            }
         }
     }
 
     public static DataChangeEventResolver create() {
         return new DataChangeEventResolver();
     }
-
-
-
 }

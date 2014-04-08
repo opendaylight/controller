@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -102,11 +103,6 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     @Override
     public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
             final InstanceIdentifier path, final L listener, final DataChangeScope scope) {
-        LOG.debug("{}: Registering data change listener {} for {}",name,listener,path);
-        ListenerRegistrationNode listenerNode = listenerTree;
-        for(PathArgument arg : path.getPath()) {
-            listenerNode = listenerNode.ensureChild(arg);
-        }
 
         /*
          * Make sure commit is not occurring right now. Listener has to be registered and its
@@ -117,6 +113,12 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
          */
         final DataChangeListenerRegistration<L> reg;
         synchronized (this) {
+            LOG.debug("{}: Registering data change listener {} for {}",name,listener,path);
+            ListenerRegistrationNode listenerNode = listenerTree;
+            for(PathArgument arg : path.getPath()) {
+                listenerNode = listenerNode.ensureChild(arg);
+            }
+
             reg = listenerNode.registerDataChangeListener(path, listener, scope);
 
             Optional<StoreMetadataNode> currentState = snapshot.get().read(path);
@@ -131,7 +133,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             }
         }
 
-        return reg;
+        return new AbstractListenerRegistration<L>(listener) {
+            @Override
+            protected void removeRegistration() {
+                synchronized (InMemoryDOMDataStore.this) {
+                    reg.close();
+                }
+            }
+        };
     }
 
     private synchronized DOMStoreThreePhaseCommitCohort submit(
@@ -145,7 +154,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private void commit(final DataAndMetadataSnapshot currentSnapshot,
-            final StoreMetadataNode newDataTree, final Iterable<ChangeListenerNotifyTask> listenerTasks) {
+            final StoreMetadataNode newDataTree, final DataChangeEventResolver listenerResolver) {
         LOG.debug("Updating Store snaphot version: {} with version:{}",currentSnapshot.getMetadataTree().getSubtreeVersion(),newDataTree.getSubtreeVersion());
 
         if(LOG.isTraceEnabled()) {
@@ -164,7 +173,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             final boolean success = snapshot.compareAndSet(currentSnapshot, newSnapshot);
             checkState(success, "Store snapshot and transaction snapshot differ. This should never happen.");
 
-            for (ChangeListenerNotifyTask task : listenerTasks) {
+            for (ChangeListenerNotifyTask task : listenerResolver.resolve()) {
                 executor.submit(task);
             }
         }
@@ -302,7 +311,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         private DataAndMetadataSnapshot storeSnapshot;
         private Optional<StoreMetadataNode> proposedSubtree;
-        private Iterable<ChangeListenerNotifyTask> listenerTasks;
+        private DataChangeEventResolver listenerResolver;
 
         public ThreePhaseCommitImpl(final SnaphostBackedWriteTransaction writeTransaction) {
             this.transaction = writeTransaction;
@@ -343,13 +352,12 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                     proposedSubtree = operationTree.apply(modification, Optional.of(metadataTree),
                             increase(metadataTree.getSubtreeVersion()));
 
-                    listenerTasks = DataChangeEventResolver.create() //
+                    listenerResolver = DataChangeEventResolver.create() //
                             .setRootPath(PUBLIC_ROOT_PATH) //
                             .setBeforeRoot(Optional.of(metadataTree)) //
                             .setAfterRoot(proposedSubtree) //
                             .setModificationRoot(modification) //
-                            .setListenerRoot(listenerTree) //
-                            .resolve();
+                            .setListenerRoot(listenerTree);
 
                     return null;
                 }
@@ -372,7 +380,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             checkState(proposedSubtree != null,"Proposed subtree must be computed");
             checkState(storeSnapshot != null,"Proposed subtree must be computed");
             // return ImmediateFuture<>;
-            InMemoryDOMDataStore.this.commit(storeSnapshot, proposedSubtree.get(),listenerTasks);
+            InMemoryDOMDataStore.this.commit(storeSnapshot, proposedSubtree.get(),listenerResolver);
             return Futures.<Void> immediateFuture(null);
         }
 

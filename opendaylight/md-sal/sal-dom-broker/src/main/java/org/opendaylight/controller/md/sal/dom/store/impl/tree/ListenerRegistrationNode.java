@@ -48,7 +48,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Collection<org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<?>> getListeners() {
-        // FIXME: this is not thread-safe and races with listener (un)registration!
+        // FIXME: this is not thread-safe and races with listener unregistration!
         return (Collection) listeners;
     }
 
@@ -67,7 +67,6 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
     }
 
     /**
-     *
      * Registers listener on this node.
      *
      * @param path Full path on which listener is registered.
@@ -75,7 +74,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
      * @param scope Scope of triggering event.
      * @return
      */
-    public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> registerDataChangeListener(final InstanceIdentifier path,
+    public synchronized <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> registerDataChangeListener(final InstanceIdentifier path,
             final L listener, final DataChangeScope scope) {
 
         DataChangeListenerRegistration<L> listenerReg = new DataChangeListenerRegistration<L>(path,listener, scope, this);
@@ -83,7 +82,7 @@ public class ListenerRegistrationNode implements StoreTreeNode<ListenerRegistrat
         return listenerReg;
     }
 
-    private void removeListener(final DataChangeListenerRegistration<?> listener) {
+    private synchronized void removeListener(final DataChangeListenerRegistration<?> listener) {
         listeners.remove(listener);
         removeThisIfUnused();
     }
