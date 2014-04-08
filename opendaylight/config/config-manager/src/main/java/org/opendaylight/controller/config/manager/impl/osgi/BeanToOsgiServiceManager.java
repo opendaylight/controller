@@ -9,107 +9,103 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
-import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Registers instantiated beans as OSGi services and unregisters these services
  * if beans are destroyed.
  */
 public class BeanToOsgiServiceManager {
-    // name of properties submitted to osgi
-    static final String INSTANCE_NAME_OSGI_PROP = "instanceName";
-    static final String IMPLEMENTATION_NAME_OSGI_PROP = "implementationName";
+    private static final String SERVICE_NAME_OSGI_PROP = "name";
 
     /**
      * To be called for every created, reconfigured and recreated config bean.
      * It is expected that before using this method OSGi service registry will
      * be cleaned from previous registrations.
      */
-    public OsgiRegistration registerToOsgi(
-            Class<? extends Module> configBeanClass, AutoCloseable instance,
-            ModuleIdentifier moduleIdentifier, BundleContext bundleContext) {
-        try {
-            final Set<Class<?>> configuresInterfaces = InterfacesHelper
-                    .getOsgiRegistrationTypes(configBeanClass);
-            checkInstanceImplementing(instance, configuresInterfaces);
-
-            // bundleContext.registerService blows up with empty 'clazzes'
-            if (configuresInterfaces.isEmpty() == false) {
-                final Dictionary<String, ?> propertiesForOsgi = getPropertiesForOsgi(moduleIdentifier);
-                final ServiceRegistration<?> serviceRegistration = bundleContext
-                        .registerService(classesToNames(configuresInterfaces), instance, propertiesForOsgi);
-                return new OsgiRegistration(serviceRegistration);
-            } else {
-                return new OsgiRegistration();
-            }
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException(
-                    "Error while registering instance into OSGi Service Registry: "
-                            + moduleIdentifier, e);
-        }
+    public OsgiRegistration registerToOsgi(AutoCloseable instance, ModuleIdentifier moduleIdentifier,
+                                           BundleContext bundleContext,
+                                           Map<String, ServiceInterfaceAnnotation> serviceNamesToAnnotations) {
+        return new OsgiRegistration(instance, moduleIdentifier, bundleContext, serviceNamesToAnnotations);
     }
 
-    private static String[] classesToNames(Set<Class<?>> cfgs) {
-        String[] result = new String[cfgs.size()];
-        int i = 0;
-        for (Class<?> cfg : cfgs) {
-            result[i] = cfg.getName();
-            i++;
-        }
+    private static Dictionary<String, String> createProps(String serviceName) {
+        Hashtable<String, String> result = new Hashtable<>();
+        result.put(SERVICE_NAME_OSGI_PROP, serviceName);
         return result;
     }
 
-    private void checkInstanceImplementing(AutoCloseable instance,
-            Set<Class<?>> configures) {
-        Set<Class<?>> missing = new HashSet<>();
-        for (Class<?> requiredIfc : configures) {
-            if (requiredIfc.isInstance(instance) == false) {
-                missing.add(requiredIfc);
-            }
-        }
-        if (missing.isEmpty() == false) {
-            throw new IllegalStateException(
-                    instance.getClass()
-                            + " does not implement following interfaces as announced by "
-                            + ServiceInterfaceAnnotation.class.getName()
-                            + " annotation :" + missing);
-        }
-    }
-
-    private static Dictionary<String, ?> getPropertiesForOsgi(
-            ModuleIdentifier moduleIdentifier) {
-        Hashtable<String, String> table = new Hashtable<>();
-        table.put(IMPLEMENTATION_NAME_OSGI_PROP,
-                moduleIdentifier.getFactoryName());
-        table.put(INSTANCE_NAME_OSGI_PROP, moduleIdentifier.getInstanceName());
-        return table;
-    }
 
     public static class OsgiRegistration implements AutoCloseable {
-        private final ServiceRegistration<?> serviceRegistration;
+        private static final Logger logger = LoggerFactory.getLogger(OsgiRegistration.class);
 
-        public OsgiRegistration(ServiceRegistration<?> serviceRegistration) {
-            this.serviceRegistration = serviceRegistration;
+        @GuardedBy("this")
+        private AutoCloseable instance;
+        private final ModuleIdentifier moduleIdentifier;
+        @GuardedBy("this")
+        private final Set<ServiceRegistration<?>> serviceRegistrations;
+        @GuardedBy("this")
+        private final Map<String, ServiceInterfaceAnnotation> serviceNamesToAnnotations;
+
+        public OsgiRegistration(AutoCloseable instance, ModuleIdentifier moduleIdentifier,
+                                BundleContext bundleContext,
+                                Map<String, ServiceInterfaceAnnotation> serviceNamesToAnnotations) {
+            this.instance = instance;
+            this.moduleIdentifier = moduleIdentifier;
+            this.serviceNamesToAnnotations = serviceNamesToAnnotations;
+            this.serviceRegistrations = registerToSR(instance, bundleContext, serviceNamesToAnnotations);
         }
 
-        public OsgiRegistration() {
-            this.serviceRegistration = null;
+        private static Set<ServiceRegistration<?>> registerToSR(AutoCloseable instance, BundleContext bundleContext,
+                                                                Map<String, ServiceInterfaceAnnotation> serviceNamesToAnnotations) {
+            Set<ServiceRegistration<?>> serviceRegistrations = new HashSet<>();
+            for (Entry<String, ServiceInterfaceAnnotation> entry : serviceNamesToAnnotations.entrySet()) {
+                Class<?> requiredInterface = entry.getValue().osgiRegistrationType();
+                checkState(requiredInterface.isInstance(instance), instance.getClass().getName() +
+                        " instance should implement " + requiredInterface.getName());
+                Dictionary<String, String> propertiesForOsgi = createProps(entry.getKey());
+                ServiceRegistration<?> serviceRegistration = bundleContext
+                        .registerService(requiredInterface.getName(), instance, propertiesForOsgi);
+                serviceRegistrations.add(serviceRegistration);
+            }
+            return serviceRegistrations;
         }
 
         @Override
-        public void close() {
-            if (serviceRegistration != null) {
+        public synchronized void close() {
+            for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
                 serviceRegistration.unregister();
+            }
+            serviceRegistrations.clear();
+        }
+
+        public synchronized void updateRegistrations(Map<String, ServiceInterfaceAnnotation> newAnnotationMapping,
+                                                     BundleContext bundleContext, AutoCloseable newInstance) {
+            boolean notEquals = this.instance != newInstance;
+            notEquals |= newAnnotationMapping.equals(serviceNamesToAnnotations) == false;
+            if (notEquals) {
+                // FIXME: changing from old state to new state can be improved by computing the diff
+                logger.debug("Detected change in service registrations for {}: old: {}, new: {}", moduleIdentifier,
+                        serviceNamesToAnnotations, newAnnotationMapping);
+                close();
+                this.instance = newInstance;
+                Set<ServiceRegistration<?>> newRegs = registerToSR(instance, bundleContext, newAnnotationMapping);
+                serviceRegistrations.clear();
+                serviceRegistrations.addAll(newRegs);
             }
         }
     }
-
 }

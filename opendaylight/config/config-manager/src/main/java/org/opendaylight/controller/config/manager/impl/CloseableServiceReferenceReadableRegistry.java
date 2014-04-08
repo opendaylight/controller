@@ -9,8 +9,11 @@ package org.opendaylight.controller.config.manager.impl;
 
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 
+/**
+ * Interface exposing some internal state on top of ServiceReferenceReadableRegistry. This will
+ * not be exposed via JMX.
+ */
 public interface CloseableServiceReferenceReadableRegistry  extends AutoCloseable, ServiceReferenceReadableRegistry {
-
 
     void close();
 

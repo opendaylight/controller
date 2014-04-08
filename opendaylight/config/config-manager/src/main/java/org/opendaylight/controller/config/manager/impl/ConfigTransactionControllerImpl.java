@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DependencyResolverManager;
@@ -81,13 +80,13 @@ class ConfigTransactionControllerImpl implements
     private final boolean blankTransaction;
 
     @GuardedBy("this")
-    private final ServiceReferenceWritableRegistry writableSRRegistry;
+    private final SearchableServiceReferenceWritableRegistry writableSRRegistry;
 
     public ConfigTransactionControllerImpl(ConfigTransactionLookupRegistry txLookupRegistry,
                                            long parentVersion, CodecRegistry codecRegistry, long currentVersion,
                                            Map<String, Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
                                            MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer,
-                                           boolean blankTransaction, ServiceReferenceWritableRegistry writableSRRegistry) {
+                                           boolean blankTransaction, SearchableServiceReferenceWritableRegistry  writableSRRegistry) {
         this.txLookupRegistry = txLookupRegistry;
         String transactionName = txLookupRegistry.getTransactionIdentifier().getName();
         this.controllerON = ObjectNameUtil.createTransactionControllerON(transactionName);
@@ -568,7 +567,7 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public ServiceReferenceWritableRegistry getWritableRegistry() {
+    public SearchableServiceReferenceWritableRegistry  getWritableRegistry() {
         return writableSRRegistry;
     }
 

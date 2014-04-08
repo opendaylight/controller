@@ -48,7 +48,7 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
     public void setUp() {
 
         factory = new NetconfTestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory,
                 new DepTestImplModuleFactory(), new IdentityTestModuleFactory()));
     }
 

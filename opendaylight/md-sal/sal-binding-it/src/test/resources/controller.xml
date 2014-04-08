@@ -147,6 +147,7 @@
                                 </provider>
                             </instance>
                         </service>
+
                         <service>
                             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
                                 binding:binding-broker-osgi-registry
@@ -156,6 +157,13 @@
                                 <provider>
                                     /config/modules/module[name='binding-broker-impl']/instance[name='binding-broker-impl']
                                 </provider>
+                            </instance>
+                        </service>
+                        <service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                            <instance>
+                                <name>binding-rpc-broker</name>
+                                <provider>/modules/module[type='binding-broker-impl'][name='binding-broker-impl']</provider>
                             </instance>
                         </service>
                         <service>
