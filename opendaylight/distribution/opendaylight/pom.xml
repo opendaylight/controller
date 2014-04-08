@@ -284,6 +284,16 @@
                     <artifactId>bcpkix-jdk15on</artifactId>
                 </dependency>
 
+                <!--Netconf config-->
+                <dependency>
+                  <groupId>org.opendaylight.controller</groupId>
+                  <artifactId>netconf-config-api</artifactId>
+                </dependency>
+                <dependency>
+                  <groupId>org.opendaylight.controller</groupId>
+                  <artifactId>netconf-config-dispatcher</artifactId>
+                </dependency>
+
                 <!-- threadpool -->
                 <dependency>
                     <groupId>org.opendaylight.controller</groupId>

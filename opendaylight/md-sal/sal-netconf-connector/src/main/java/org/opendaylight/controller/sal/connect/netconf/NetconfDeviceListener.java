@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import com.google.common.base.Preconditions;
 
-class NetconfDeviceListener extends AbstractNetconfClientNotifySessionListener {
+public class NetconfDeviceListener extends AbstractNetconfClientNotifySessionListener {
     private final NetconfDevice device;
 
     public NetconfDeviceListener(final NetconfDevice device) {
@@ -24,7 +24,7 @@ class NetconfDeviceListener extends AbstractNetconfClientNotifySessionListener {
 
     /**
      * Method intended to customize notification processing.
-     * 
+     *
      * @param session
      *            {@see
      *            NetconfClientSessionListener#onMessage(NetconfClientSession,

@@ -7,9 +7,25 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -26,7 +42,7 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -45,23 +61,9 @@ import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 
 public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
@@ -69,7 +71,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
 
 
-    private NetconfClientDispatcher clientDispatcher;
+    private NetconfClientDispatcherImpl clientDispatcher;
 
     DefaultCommitNotificationProducer commitNotifier;
 
@@ -92,7 +94,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
+        clientDispatcher = new NetconfClientDispatcherImpl(nettyThreadgroup, nettyThreadgroup);
     }
 
     @After
@@ -121,12 +123,12 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         VerifyingNotificationListener notificationVerifier = createCommitNotificationListener();
         VerifyingPersister mockedAggregator = mockAggregator();
 
-        try (NetconfClient persisterClient = new NetconfClient("persister", tcpAddress, 4000, clientDispatcher)) {
+        try (NetconfClient persisterClient = new NetconfClient("persister", clientDispatcher, getClientConfiguration(tcpAddress, 5000))) {
             try (ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
                     platformMBeanServer, mockedAggregator)) {
 
 
-                try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
+                try (NetconfClient netconfClient = new NetconfClient("client", clientDispatcher, getClientConfiguration(tcpAddress, 5000))) {
                     NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
                     assertResponse(response, "<modules");
                     assertResponse(response, "<services");
