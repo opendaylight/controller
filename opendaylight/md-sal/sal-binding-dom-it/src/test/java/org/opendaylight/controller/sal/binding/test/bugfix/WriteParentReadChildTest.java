@@ -40,7 +40,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.collect.ImmutableList;
 
-public class WriteParentReadChildTest extends AbstractDataServiceTest {
+public class WriteParentReadChildTest extends AbstractDataServiceTest{
 
     private static final String FLOW_ID = "1234";
     private static final short TABLE_ID = (short) 0;
@@ -50,30 +50,35 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
     private static final FlowKey FLOW_KEY = new FlowKey(new FlowId(FLOW_ID));
     private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier
+            .builder(Nodes.class) //
             .child(Node.class, NODE_KEY).toInstance();
 
     private static final InstanceIdentifier<Table> TABLE_INSTANCE_ID_BA = //
-    InstanceIdentifier.builder(NODE_INSTANCE_ID_BA) //
-            .augmentation(FlowCapableNode.class).child(Table.class, TABLE_KEY).build();
+    InstanceIdentifier.builder(NODE_INSTANCE_ID_BA)
+            //
+            .augmentation(FlowCapableNode.class).child(Table.class, TABLE_KEY)
+            .build();
 
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
     InstanceIdentifier.builder(TABLE_INSTANCE_ID_BA) //
             .child(Flow.class, FLOW_KEY) //
             .toInstance();
+
     /**
-     *
+     * 
      * The scenario tests writing parent node, which also contains child items
      * and then reading child directly, by specifying path to the child.
-     *
+     * 
      * Expected behaviour is child is returned.
-     *
+     * 
      * @throws Exception
      */
     @Test
-    public void writeTableReadFlow() throws Exception {
+    public void writeTableReadFlow() throws Exception{
 
-        DataModificationTransaction modification = baDataService.beginTransaction();
+        DataModificationTransaction modification = this.baDataService
+                .beginTransaction();
 
         Flow flow = new FlowBuilder() //
                 .setKey(FLOW_KEY) //
@@ -84,28 +89,28 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
                                         .build()) //
                                 .build()) //
                         .build()) //
-                        .setInstructions(new InstructionsBuilder() //
-                            .setInstruction(ImmutableList.<Instruction>builder() //
-                                    .build()) //
+                .setInstructions(new InstructionsBuilder() //
+                        .setInstruction(ImmutableList.<Instruction> builder() //
+                                .build()) //
                         .build()) //
                 .build();
 
-        Table table = new TableBuilder()
-            .setKey(TABLE_KEY)
-            .setFlow(ImmutableList.of(flow))
-        .build();
+        Table table = new TableBuilder().setKey(TABLE_KEY)
+                .setFlow(ImmutableList.of(flow)).build();
 
         modification.putConfigurationData(TABLE_INSTANCE_ID_BA, table);
         RpcResult<TransactionStatus> ret = modification.commit().get();
         assertNotNull(ret);
         assertEquals(TransactionStatus.COMMITED, ret.getResult());
 
-        DataObject readedTable = baDataService.readConfigurationData(TABLE_INSTANCE_ID_BA);
+        DataObject readedTable = this.baDataService
+                .readConfigurationData(TABLE_INSTANCE_ID_BA);
         assertNotNull("Readed table should not be nul.", readedTable);
         assertTrue(readedTable instanceof Table);
-        
-        DataObject readedFlow = baDataService.readConfigurationData(FLOW_INSTANCE_ID_BA);
-        assertNotNull("Readed flow should not be null.",readedFlow);
+
+        DataObject readedFlow = this.baDataService
+                .readConfigurationData(FLOW_INSTANCE_ID_BA);
+        assertNotNull("Readed flow should not be null.", readedFlow);
         assertTrue(readedFlow instanceof Flow);
         assertEquals(flow, readedFlow);
 
