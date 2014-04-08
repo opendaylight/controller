@@ -12,6 +12,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
+
+import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -26,11 +28,19 @@ public class DirectoryStorageAdapterTest {
     Persister tested;
     Logger logger = LoggerFactory.getLogger(DirectoryStorageAdapterTest.class.toString());
 
-    private Persister instantiatePersisterFromAdapter(File file){
+    private Persister instantiatePersisterFromAdapter(File file, Optional<String> extensions){
         PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty("directoryStorage",file.getPath());
+        pp.addProperty(XmlDirectoryStorageAdapter.DIRECTORY_STORAGE_PROP,file.getPath());
+        if(extensions.isPresent()) {
+            pp.addProperty(XmlDirectoryStorageAdapter.INCLUDE_EXT_PROP, extensions.get());
+        }
+
         XmlDirectoryStorageAdapter dsa = new XmlDirectoryStorageAdapter();
         return dsa.instantiate(pp);
+    }
+
+    private Persister instantiatePersisterFromAdapter(File file){
+        return instantiatePersisterFromAdapter(file, Optional.<String>absent());
     }
 
     @Test
@@ -69,13 +79,20 @@ public class DirectoryStorageAdapterTest {
     @Test
     public void testOneFile() throws Exception {
         File folder = getFolder("oneFile");
-        tested = instantiatePersisterFromAdapter(folder);
+        tested = instantiatePersisterFromAdapter(folder, Optional.of("xml"));
 
-        logger.info("Testing : "+tested.toString());
+        logger.info("Testing : " + tested.toString());
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(1, results.size());
         ConfigSnapshotHolder result = results.get(0);
         assertResult(result, "<config>1</config>", "cap1&rev", "cap2", "capa a");
+    }
+
+    @Test
+    public void testOneFileWrongExtension() throws Exception {
+        File folder = getFolder("oneFile");
+        tested = instantiatePersisterFromAdapter(folder, Optional.of("aa, bb"));
+        logger.info("Testing : " + tested.toString());
     }
 
     private void assertResult(ConfigSnapshotHolder result, String s, String... caps) {
@@ -87,16 +104,34 @@ public class DirectoryStorageAdapterTest {
     }
 
     @Test
-    public void testTwoFiles() throws Exception {
+    public void testTwoFilesAllExtensions() throws Exception {
         File folder = getFolder("twoFiles");
         tested = instantiatePersisterFromAdapter(folder);
-        logger.info("Testing : "+tested.toString());
+        logger.info("Testing : " + tested.toString());
         List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
         assertEquals(2, results.size());
 
         assertResult(results.get(0), "<config>1</config>", "cap1-a", "cap2-a", "capa a-a");
         assertResult(results.get(1), "<config>2</config>", "cap1-b", "cap2-b", "capa a-b");
+    }
 
+    @Test
+    public void testTwoFilesTwoExtensions() throws Exception {
+        File folder = getFolder("twoFiles");
+        tested = instantiatePersisterFromAdapter(folder, Optional.of("xml, xml2"));
+        logger.info("Testing : " + tested.toString());
+        assertEquals(2, tested.loadLastConfigs().size());
+    }
+
+    @Test
+    public void testTwoFilesOnlyOneExtension() throws Exception {
+        File folder = getFolder("twoFiles");
+        tested = instantiatePersisterFromAdapter(folder, Optional.of("xml"));
+        logger.info("Testing : " + tested.toString());
+        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        assertEquals(1, results.size());
+
+        assertResult(results.get(0), "<config>1</config>", "cap1-a", "cap2-a", "capa a-a");
     }
 
 }

@@ -154,11 +154,6 @@
                 <version>${config.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>config-persister-file-adapter</artifactId>
-                <version>${config.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>netconf-client</artifactId>
                 <version>${netconf.version}</version>

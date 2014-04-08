@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.persist.storage.directory.xml;
 
+import com.google.common.base.Optional;
+import com.google.common.io.Files;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
@@ -17,11 +19,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -30,10 +34,26 @@ public class XmlDirectoryPersister implements Persister {
     private static final Logger logger = LoggerFactory.getLogger(XmlDirectoryPersister.class);
 
     private final File storage;
+    private final Optional<FilenameFilter> extensionsFilter;
 
+    /**
+     * Creates XmlDirectoryPersister that picks up all files in specified folder
+     */
     public XmlDirectoryPersister(File storage) {
+        this(storage, Optional.<FilenameFilter>absent());
+    }
+
+    /**
+     * Creates XmlDirectoryPersister that picks up files only with specified file extension
+     */
+    public XmlDirectoryPersister(File storage, Set<String> fileExtensions) {
+        this(storage, Optional.of(getFilter(fileExtensions)));
+    }
+
+    private XmlDirectoryPersister(File storage, Optional<FilenameFilter> extensionsFilter) {
         checkArgument(storage.exists() && storage.isDirectory(), "Storage directory does not exist: " + storage);
         this.storage = storage;
+        this.extensionsFilter = extensionsFilter;
     }
 
     @Override
@@ -43,7 +63,7 @@ public class XmlDirectoryPersister implements Persister {
 
     @Override
     public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
-        File[] filesArray = storage.listFiles();
+        File[] filesArray = extensionsFilter.isPresent() ? storage.listFiles(extensionsFilter.get()) : storage.listFiles();
         if (filesArray == null || filesArray.length == 0) {
             return Collections.emptyList();
         }
@@ -96,6 +116,17 @@ public class XmlDirectoryPersister implements Persister {
         };
     }
 
+    private static FilenameFilter getFilter(final Set<String>fileExtensions) {
+        checkArgument(fileExtensions.isEmpty() == false, "No file extension provided", fileExtensions);
+
+        return new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                String ext = Files.getFileExtension(name);
+                return fileExtensions.contains(ext);
+            }
+        };
+    }
 
     @Override
     public void close() {

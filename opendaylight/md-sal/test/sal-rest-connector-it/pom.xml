@@ -43,7 +43,7 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -605,7 +605,7 @@
             <artifactId>jersey-core</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-        <!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-servlet</artifactId> 
+        <!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-servlet</artifactId>
             <version>${jersey.version}</version> </dependency> -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -667,7 +667,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-persister-file-adapter</artifactId>
+            <artifactId>config-persister-file-xml-adapter</artifactId>
             <version>${config.version}</version>
         </dependency>
         <dependency>

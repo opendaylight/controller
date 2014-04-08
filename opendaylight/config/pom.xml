@@ -23,7 +23,6 @@
         <module>config-plugin-parent</module>
         <module>config-util</module>
         <module>config-persister-api</module>
-        <module>config-persister-file-adapter</module>
         <module>config-persister-file-xml-adapter</module>
         <module>yang-jmx-generator</module>
         <module>yang-jmx-generator-plugin</module>
@@ -35,9 +34,7 @@
         <module>netty-threadgroup-config</module>
         <module>netty-event-executor-config</module>
         <module>netty-timer-config</module>
-        <module>config-persister-directory-adapter</module>
         <module>config-persister-directory-xml-adapter</module>
-        <module>config-persister-directory-autodetect-adapter</module>
         <module>yang-test-plugin</module>
         <module>shutdown-api</module>
         <module>shutdown-impl</module>

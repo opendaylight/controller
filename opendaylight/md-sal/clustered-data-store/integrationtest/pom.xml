@@ -165,7 +165,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-persister-file-adapter</artifactId>
+            <artifactId>config-persister-file-xml-adapter</artifactId>
             <version>${config.version}</version>
         </dependency>
         <dependency>
@@ -267,11 +267,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-persister-impl</artifactId>
-            <version>${config.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-persister-file-adapter</artifactId>
             <version>${config.version}</version>
         </dependency>
         <dependency>
