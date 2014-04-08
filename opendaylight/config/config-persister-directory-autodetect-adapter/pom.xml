@@ -4,7 +4,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.3</version>
+        <version>0.2.4-1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>config-persister-directory-autodetect-adapter</artifactId>
@@ -84,7 +84,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Fragment-Host>${project.groupId}.config-persister-impl;bundle-version=${osgiversion}
+                            <Fragment-Host>${project.groupId}.config-persister-impl;bundle-version=${osgiversion}
                         </Fragment-Host>
                         <Provide-Capability>org.opendaylight.controller.config.persister.storage.adapter
                         </Provide-Capability>
