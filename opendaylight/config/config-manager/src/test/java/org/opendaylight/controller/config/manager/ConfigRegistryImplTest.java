@@ -7,13 +7,6 @@
  */
 package org.opendaylight.controller.config.manager;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import java.lang.management.ManagementFactory;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBeanServerTest;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
@@ -24,6 +17,13 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.management.ManagementFactory;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class ConfigRegistryImplTest extends
         AbstractLockedPlatformMBeanServerTest {
@@ -36,7 +36,7 @@ public class ConfigRegistryImplTest extends
         BundleContext context = mock(BundleContext.class);
         ConfigRegistryImpl configRegistry = null;
         try {
-            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(
+            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(mock(BundleContext.class),
                     factory, factory);
 
             configRegistry = new ConfigRegistryImpl(resolver,

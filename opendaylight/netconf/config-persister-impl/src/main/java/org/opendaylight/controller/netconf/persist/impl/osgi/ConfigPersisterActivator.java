@@ -61,7 +61,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         long maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesMillis(propertiesProvider);
         List<ConfigSnapshotHolder> configs = persisterAggregator.loadLastConfigs();
         long conflictingVersionTimeoutMillis = getConflictingVersionTimeoutMillis(propertiesProvider);
-        logger.trace("Following configs will be pushed: {}", configs);
+        logger.debug("Following configs will be pushed: {}", configs);
 
         InnerCustomizer innerCustomizer = new InnerCustomizer(configs, maxWaitForCapabilitiesMillis,
                 conflictingVersionTimeoutMillis, persisterAggregator);

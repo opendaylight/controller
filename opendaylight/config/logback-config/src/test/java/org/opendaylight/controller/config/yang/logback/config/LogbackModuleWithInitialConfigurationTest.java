@@ -49,7 +49,7 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
     public void setUp() throws IOException, ClassNotFoundException {
 
         factory = new LogbackModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     /**

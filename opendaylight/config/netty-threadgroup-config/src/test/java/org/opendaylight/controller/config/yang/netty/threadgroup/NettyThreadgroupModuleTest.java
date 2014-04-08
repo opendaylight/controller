@@ -28,7 +28,7 @@ public class NettyThreadgroupModuleTest extends AbstractConfigTest {
     @Before
     public void setUp() {
         factory = new NettyThreadgroupModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     @Test

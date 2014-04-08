@@ -95,7 +95,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(getModuleFactories().toArray(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,getModuleFactories().toArray(
                 new ModuleFactory[0])));
 
         loadMessages();
