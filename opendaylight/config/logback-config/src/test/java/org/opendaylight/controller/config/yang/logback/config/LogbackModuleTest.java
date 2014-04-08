@@ -35,7 +35,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
     public void setUp() throws Exception {
 
         factory = new LogbackModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     @Test
