@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.opendaylight</artifactId>
+      <version>1.4.2-SNAPSHOT</version>
+      <relativePath>../../commons/opendaylight</relativePath>
+   </parent>
+   <groupId>org.opendaylight.controller</groupId>
+   <artifactId>messaging.clustering</artifactId>
+   <description>Clustering for Messaging Framework</description>
+   <version>${messaging.clustering.version}</version>
+   <name>${project.artifactId}</name>
+   <packaging>bundle</packaging>
+   <dependencies>
+      <dependency>
+         <groupId>org.scala-lang</groupId>
+         <artifactId>scala-library</artifactId>
+         <version>2.10.0</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.typesafe.akka</groupId>
+         <artifactId>akka-actor_2.10</artifactId>
+         <version>2.3.0</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.typesafe.akka</groupId>
+         <artifactId>akka-cluster_2.10</artifactId>
+         <version>2.3.0</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.typesafe.akka</groupId>
+         <artifactId>akka-contrib_2.10</artifactId>
+         <version>2.3.0</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.spray</groupId>
+         <artifactId>spray-can</artifactId>
+         <version>1.3.1</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.spray</groupId>
+         <artifactId>spray-routing</artifactId>
+         <version>1.3.1</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.spray</groupId>
+         <artifactId>spray-json_2.10</artifactId>
+         <version>1.2.5</version>
+         <scope>compile</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.fusesource</groupId>
+         <artifactId>sigar</artifactId>
+         <version>1.6.4</version>
+         <scope>compile</scope>
+      </dependency>
+   </dependencies>
+   <repositories>
+      <repository>
+         <id>TypesafeSnapshots</id>
+         <name>Typesafe Snapshots</name>
+         <url>http://repo.typesafe.com/typesafe/snapshots/</url>
+         <layout>default</layout>
+      </repository>
+      <repository>
+         <id>TypesafeReleases</id>
+         <name>Typesafe Releases</name>
+         <url>http://repo.typesafe.com/typesafe/releases/</url>
+         <layout>default</layout>
+      </repository>
+      <repository>
+         <id>SprayioNightly</id>
+         <name>Spray.io Nightly</name>
+         <url>http://nightlies.spray.io/</url>
+         <layout>default</layout>
+      </repository>
+      <repository>
+         <id>sprayrepo</id>
+         <name>spray repo</name>
+         <url>http://repo.spray.io/</url>
+         <layout>default</layout>
+      </repository>
+   </repositories>
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>${bundle.plugin.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+               <instructions>
+                  <Export-Package>
+                     org.opendaylight.controller.messaging.clustering
+                  </Export-Package>
+                  <Import-Package>
+                     javax.transaction
+                  </Import-Package>
+                  <Embed-Dependency>*;scope=compile</Embed-Dependency>
+                  <Embed-Transitive>true</Embed-Transitive>
+               </instructions>
+               <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
+
+</project>
