@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_a5bdc804",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1727,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-08T07:58:04Z",
+      "side": 1,
+      "message": "You may want to add also the xtend.dstdir to this directories list",
+      "revId": "db4aa99097faeb2f5c203fedf1c071b564d27771",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a2b85e2b",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationBrokerImpl.xtend",
         "patchSetId": 1
