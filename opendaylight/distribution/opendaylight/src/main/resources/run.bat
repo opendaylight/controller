@@ -10,6 +10,7 @@ SET basedir=%~dp0
 SET debugport=8000
 SET consoleport=2400
 SET jmxport=1088
+SET jvmMaxMemory=
 SET extraJVMOpts=
 SET consoleOpts=-console -consoleLog
 SET PID=
@@ -82,6 +83,11 @@ IF "%~1" NEQ "" (
        )
        GOTO :EOF
     )
+    IF "!CARG:~0,4!"=="-Xmx" (
+       SET jvmMaxMemory=!CARG!
+       SHIFT
+       GOTO :LOOP
+    )
     IF "!CARG:~0,2!"=="-D" (
        SET extraJVMOpts=%extraJVMOpts% !CARG!
        SHIFT
@@ -110,6 +116,13 @@ IF "%debugSuspended%" NEQ "" (
     REM ECHO "DEBUG enabled suspended"
     SET extraJVMOpts=%extraJVMOpts% -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%debugport%
 )
+
+IF "%jvmMaxMemory%"=="" (
+    SET jvmMaxMemory=-Xmx1G
+)
+
+SET extraJVMOpts=%extraJVMOpts%  %jvmMaxMemory%
+
 IF "%jmxEnabled%" NEQ "" (
     REM ECHO "JMX enabled "
     SET extraJVMOpts=%extraJVMOpts% -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=%jmxport% -Dcom.sun.management.jmxremote

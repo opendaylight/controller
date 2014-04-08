@@ -82,6 +82,7 @@ stopdaemon=0
 statusdaemon=0
 consolestart=1
 dohelp=0
+jvmMaxMemory=""
 extraJVMOpts=""
 agentPath=""
 unknown_option=0
@@ -97,6 +98,7 @@ while true ; do
         -status) statusdaemon=1; shift ;;
         -console) shift ;;
         -help) dohelp=1; shift;;
+        -Xmx*) jvmMaxMemory="$1"; shift;;
         -D*) extraJVMOpts="${extraJVMOpts} $1"; shift;;
         -X*) extraJVMOpts="${extraJVMOpts} $1"; shift;;
         -agentpath:*) agentPath="$1"; shift;;
@@ -113,6 +115,12 @@ fi
 if [ "${dohelp}" -eq 1 ]; then
     usage
 fi
+
+if [ "${jvmMaxMemory}" -eq "" ]; then
+    jvmMaxMemory="-Xmx1G"
+fi
+
+extraJVMOpts="${extraJVMOpts} ${jvmMaxMemory}"
 
 # Validate debug port
 if [[ "${debugport}" -lt 1024 ]] || [[ "${debugport}" -gt 65535 ]]; then
