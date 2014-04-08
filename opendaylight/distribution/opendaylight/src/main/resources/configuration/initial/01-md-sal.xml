@@ -37,40 +37,6 @@
                 </module>
 
                 <!--
-                     Legacy key/value in-memory data store. This is no longer supported and will
-                     be removed in a future release.
-                -->
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:hash-map-data-store</type>
-                    <name>hash-map-data-store</name>
-                </module>
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-broker-impl</type>
-                    <name>legacy-dom-broker</name>
-                    <data-store xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-data-store</type>
-                        <!--
-                             To switch to the clustered data store, comment out the
-                             hash-map-data-store <name> and uncomment the cluster-data-store one.
-                        -->
-                        <name>hash-map-data-store</name>
-                        <!-- <name>cluster-data-store</name> -->
-                    </data-store>
-                </module>
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-broker</type>
-                    <name>legacy-binding-data-broker</name>
-                    <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
-                        <name>dom-broker</name>
-                    </dom-broker>
-                    <mapping-service xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
-                        <name>runtime-mapping-singleton</name>
-                    </mapping-service>
-                </module>
-
-                <!--
                      Tree-based in-memory data store. This is the data store which is currently
                      recommended for single-node deployments.
                 -->
@@ -144,17 +110,7 @@
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
                         <instance>
                             <name>dom-broker</name>
-
-                            <!--
-                                 !!! IN-MEMORY DATASTORE !!!
-
-                                 Remove this declaration and uncomment the following one to
-                                 activate the use of legacy datastore in the BA world.
-                            -->
                             <provider>/modules/module[type='dom-broker-impl'][name='inmemory-dom-broker']</provider>
-                            <!--
-                            <provider>/modules/module[type='dom-broker-impl'][name='legacy-dom-broker']</provider>
-                            -->
                         </instance>
                     </service>
 
@@ -162,26 +118,10 @@
                         <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
                         <instance>
                             <name>binding-data-broker</name>
-                            <!--
-                                 !!! IN-MEMORY DATASTORE !!!
-
-                                 Remove this declaration and uncomment the following one to
-                                 activate the use of legacy datastore in the BI world.
-                            -->
                             <provider>/modules/module[type='binding-data-compatible-broker'][name='inmemory-binding-data-broker']</provider>
-                            <!--
-                            <provider>/modules/module[type='binding-data-broker'][name='legacy-binding-data-broker']</provider>
-                            -->
                         </instance>
                     </service>
 
-                    <service>
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-data-store</type>
-                        <instance>
-                            <name>hash-map-data-store</name>
-                            <provider>/modules/module[type='hash-map-data-store'][name='hash-map-data-store']</provider>
-                        </instance>
-                    </service>
                     <service>
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
                         <instance>
