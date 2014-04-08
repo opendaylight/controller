@@ -8,11 +8,11 @@
 
         <http pattern="/css/**" security="none" />
         <http pattern="/js/**" security="none" />
-        <http pattern="/images/**" security="none" />
+        <http pattern="/img/**" security="none" />
         <http pattern="/favicon.ico" security="none" />
         <http pattern="/controller/web/css/**" security="none" />
         <http pattern="/controller/web/js/**" security="none" />
-        <http pattern="/controller/web/images/**" security="none" />
+        <http pattern="/controller/web/img/**" security="none" />
 
 
         <http auto-config="false" authentication-manager-ref="authenticationManager"
