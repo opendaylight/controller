@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a5a94826",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-08T12:54:27Z",
+      "side": 1,
+      "message": "Create a variable for this",
+      "revId": "fc8ba321ae9b45f4eb505e46479e26561583fdb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4572bce6",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/NetconfExiSession.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-08T12:54:27Z",
+      "side": 1,
+      "message": "Move this to util? It should not be visible in the API layer...",
+      "revId": "fc8ba321ae9b45f4eb505e46479e26561583fdb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a580688c",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/NetconfServerSession.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-08T12:54:27Z",
+      "side": 1,
+      "message": "Not sure how this works, but the encoder should replace the XML encoder (e.g. EXI does DOM-\u003ebytes encoding)",
+      "revId": "fc8ba321ae9b45f4eb505e46479e26561583fdb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c57d6cb3",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/handler/NetconfEXIToMessageDecoder.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-08T12:54:27Z",
+      "side": 1,
+      "message": "isReadable()",
+      "revId": "fc8ba321ae9b45f4eb505e46479e26561583fdb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
