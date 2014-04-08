@@ -131,7 +131,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
         this.factory3 = new IdentityTestModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.factory, this.factory2,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, this.factory, this.factory2,
                 this.factory3));
 
         transactionProvider = new TransactionProvider(this.configRegistryClient, NETCONF_SESSION_ID);

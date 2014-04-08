@@ -11,7 +11,6 @@ import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
@@ -70,7 +69,7 @@ public class ConfigTransactionControllerImplTest extends
             }
         }, currentlyRegisteredFactories);
 
-        ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
+        SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 ServiceReferenceRegistryImpl.createInitialSRLookupRegistry(), txLookupRegistry, currentlyRegisteredFactories);
 
 

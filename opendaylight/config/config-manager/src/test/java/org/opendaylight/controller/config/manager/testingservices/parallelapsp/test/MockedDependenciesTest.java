@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.parallelapsp.test;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.concurrent.Executor;
-
-import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -27,6 +21,11 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
+import javax.management.ObjectName;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.concurrent.Executor;
+
 public class MockedDependenciesTest extends AbstractParallelAPSPTest {
     private final String threadPoolImplementationName = "mockedthreadpool";
 
@@ -36,7 +35,7 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         ClassBasedModuleFactory mockedThreadPoolConfigFactory = new ClassBasedModuleFactory(
                 threadPoolImplementationName, MockedThreadPoolModule.class);
 
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TestingParallelAPSPModuleFactory(),
                 mockedThreadPoolConfigFactory));
     }

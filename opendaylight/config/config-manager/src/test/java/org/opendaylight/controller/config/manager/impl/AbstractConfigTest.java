@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import com.google.common.base.Preconditions;
-import junit.framework.Assert;
 import org.junit.After;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
@@ -26,24 +25,18 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.RuntimeMBeanException;
-import java.io.Closeable;
-import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Dictionary;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -72,16 +65,37 @@ public abstract class AbstractConfigTest extends
     protected BundleContext mockedContext = mock(BundleContext.class);
     protected ServiceRegistration<?> mockedServiceRegistration;
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractConfigTest.class);
-
     // Default handler for OSGi service registration
-    private static final BundleContextServiceRegistrationHandler noopServiceRegHandler = new BundleContextServiceRegistrationHandler() {
+    protected static class RecordingBundleContextServiceRegistrationHandler implements BundleContextServiceRegistrationHandler {
+        private final List<RegistrationHolder> registrations = new LinkedList<>();
         @Override
-        public void handleServiceRegistration(Object serviceInstance) {}
-    };
+        public void handleServiceRegistration(Class<?> clazz, Object serviceInstance, Dictionary<String, ?> props) {
+
+            registrations.add(new RegistrationHolder(clazz, serviceInstance, props));
+        }
+
+        public List<RegistrationHolder> getRegistrations() {
+            return registrations;
+        }
+
+        protected static class RegistrationHolder {
+            protected final Class<?> clazz;
+            protected final Object instance;
+            protected final Dictionary<String, ?> props;
+
+            public RegistrationHolder(Class<?> clazz, Object instance, Dictionary<String, ?> props) {
+                this.clazz = clazz;
+                this.instance = instance;
+                this.props = props;
+            }
+        }
+
+    }
+
+    protected BundleContextServiceRegistrationHandler currentBundleContextServiceRegistrationHandler;
 
     protected BundleContextServiceRegistrationHandler getBundleContextServiceRegistrationHandler(Class<?> serviceType) {
-        return noopServiceRegHandler;
+        return currentBundleContextServiceRegistrationHandler;
     }
 
     // this method should be called in @Before
@@ -106,6 +120,7 @@ public abstract class AbstractConfigTest extends
             throw new RuntimeException(e);
         }
         configRegistryClient = new ConfigRegistryJMXClient(platformMBeanServer);
+        currentBundleContextServiceRegistrationHandler = new RecordingBundleContextServiceRegistrationHandler();
     }
 
     private void initBundleContext() {
@@ -114,27 +129,8 @@ public abstract class AbstractConfigTest extends
 
         RegisterServiceAnswer answer = new RegisterServiceAnswer();
 
-        doAnswer(answer).when(mockedContext).registerService(Matchers.any(String[].class),
-                any(Closeable.class), Matchers.<Dictionary<String, ?>>any());
-        doAnswer(answer).when(mockedContext).registerService(Matchers.<Class<Closeable>>any(), any(Closeable.class),
-                Matchers.<Dictionary<String, ?>>any());
-    }
+        doAnswer(answer).when(mockedContext).registerService(Matchers.<String>any(), any(), Matchers.<Dictionary<String, ?>>any());
 
-
-    public Collection<InputStream> getFilesAsInputStreams(List<String> paths) {
-        final Collection<InputStream> resources = new ArrayList<>();
-        List<String> failedToFind = new ArrayList<>();
-        for (String path : paths) {
-            InputStream resourceAsStream = getClass().getResourceAsStream(path);
-            if (resourceAsStream == null) {
-                failedToFind.add(path);
-            } else {
-                resources.add(resourceAsStream);
-            }
-        }
-        Assert.assertEquals("Some files were not found", Collections.<String>emptyList(), failedToFind);
-
-        return resources;
     }
 
     @After
@@ -161,13 +157,6 @@ public abstract class AbstractConfigTest extends
         transaction.commit();
     }
 
-    protected void assertSame(ObjectName oN1, ObjectName oN2) {
-        assertEquals(oN1.getKeyProperty("instanceName"),
-                oN2.getKeyProperty("instanceName"));
-        assertEquals(oN1.getKeyProperty("interfaceName"),
-                oN2.getKeyProperty("interfaceName"));
-    }
-
     protected void assertStatus(CommitStatus status, int expectedNewInstances,
             int expectedRecreatedInstances, int expectedReusedInstances) {
         assertEquals("New instances mismatch in " + status, expectedNewInstances, status.getNewInstances().size());
@@ -177,23 +166,10 @@ public abstract class AbstractConfigTest extends
                 .size());
     }
 
-    protected ObjectName createTestConfigBean(
-            ConfigTransactionJMXClient transaction, String implementationName,
-            String name) throws InstanceAlreadyExistsException {
-        return transaction.createModule(implementationName,
-                name);
-    }
 
     protected void assertBeanCount(int i, String configMXBeanName) {
         assertEquals(i, configRegistry.lookupConfigBeans(configMXBeanName)
                 .size());
-    }
-
-    protected void assertBeanExists(int count, String moduleName,
-            String instanceName) {
-        assertEquals(1,
-                configRegistry.lookupConfigBeans(moduleName, instanceName)
-                        .size());
     }
 
     /**
@@ -215,7 +191,7 @@ public abstract class AbstractConfigTest extends
 
     public static interface BundleContextServiceRegistrationHandler {
 
-       void handleServiceRegistration(Object serviceInstance);
+       void handleServiceRegistration(Class<?> clazz, Object serviceInstance, Dictionary<String, ?> props);
 
     }
 
@@ -229,32 +205,40 @@ public abstract class AbstractConfigTest extends
 
             Object serviceTypeRaw = args[0];
             Object serviceInstance = args[1];
+            Dictionary<String, ?> props = (Dictionary) args[2];
 
             if (serviceTypeRaw instanceof Class) {
                 Class<?> serviceType = (Class<?>) serviceTypeRaw;
-                invokeServiceHandler(serviceInstance, serviceType);
+                invokeServiceHandler(serviceInstance, serviceType, props);
 
             } else if(serviceTypeRaw instanceof String[]) {
                 for (String className : (String[]) serviceTypeRaw) {
-                    try {
-                        Class<?> serviceType = Class.forName(className);
-                        invokeServiceHandler(serviceInstance, serviceType);
-                    } catch (ClassNotFoundException e) {
-                        logger.warn("Not handling service registration of type {} ", className, e);
-                    }
+                    invokeServiceHandler(serviceInstance, className, props);
                 }
+            } else if (serviceTypeRaw instanceof String) {
+                invokeServiceHandler(serviceInstance, (String) serviceTypeRaw, props);
+            } else {
+                throw new IllegalStateException("Not handling service registration of type, Unknown type" +  serviceTypeRaw);
+            }
 
-            } else
-                logger.debug("Not handling service registration of type {}, Unknown type", serviceTypeRaw);
 
             return mockedServiceRegistration;
         }
 
-        private void invokeServiceHandler(Object serviceInstance, Class<?> serviceType) {
+        public void invokeServiceHandler(Object serviceInstance, String className, Dictionary<String, ?> props) {
+            try {
+                Class<?> serviceType = Class.forName(className);
+                invokeServiceHandler(serviceInstance, serviceType, props);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException("Not handling service registration of type " +  className, e);
+            }
+        }
+
+        private void invokeServiceHandler(Object serviceInstance, Class<?> serviceType, Dictionary<String, ?> props) {
             BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandler(serviceType);
 
             if (serviceRegistrationHandler != null) {
-                serviceRegistrationHandler.handleServiceRegistration(serviceType.cast(serviceInstance));
+                serviceRegistrationHandler.handleServiceRegistration(serviceType, serviceInstance, props);
             }
         }
     }

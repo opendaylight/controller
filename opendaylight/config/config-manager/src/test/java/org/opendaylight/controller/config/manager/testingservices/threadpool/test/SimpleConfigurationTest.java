@@ -68,7 +68,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
     @Before
     public void setUp() {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TestingFixedThreadPoolModuleFactory()));
     }
 

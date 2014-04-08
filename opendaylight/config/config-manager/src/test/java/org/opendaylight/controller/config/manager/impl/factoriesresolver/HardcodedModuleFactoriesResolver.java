@@ -60,10 +60,6 @@ public class HardcodedModuleFactoriesResolver implements ModuleFactoriesResolver
         }
     }
 
-    public HardcodedModuleFactoriesResolver(ModuleFactory... list) {
-        this(mockBundleContext(),list);
-    }
-
     private static BundleContext mockBundleContext() {
         BundleContext bundleContext = Mockito.mock(BundleContext.class);
         ServiceRegistration<ModuleFactory> serviceRegistration = mock(ServiceRegistration.class);

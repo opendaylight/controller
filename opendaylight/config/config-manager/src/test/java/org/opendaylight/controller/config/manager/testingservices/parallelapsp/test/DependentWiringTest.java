@@ -37,7 +37,7 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
 
     @Before
     public void setUp() {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TestingFixedThreadPoolModuleFactory(),
                 new TestingParallelAPSPModuleFactory()));
     }
