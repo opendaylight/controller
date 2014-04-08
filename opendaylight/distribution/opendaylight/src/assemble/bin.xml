@@ -69,6 +69,7 @@
       </directory>
       <excludes>
         <exclude>version.properties</exclude>
+        <exclude>configuration/config.ini</exclude>
       </excludes>
       <outputDirectory>
         opendaylight/
@@ -81,5 +82,10 @@
       <outputDirectory>opendaylight</outputDirectory>
       <filtered>true</filtered>
     </file>
+      <file>
+        <source>src/main/resources/configuration/config.ini</source>
+        <outputDirectory>opendaylight/configuration</outputDirectory>
+        <filtered>true</filtered>
+      </file>
   </files>
 </assembly>
