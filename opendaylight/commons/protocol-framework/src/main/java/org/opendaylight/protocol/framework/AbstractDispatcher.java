@@ -89,11 +89,23 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         });
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
 
+        customizeBootstrap(b);
+
         // Bind and start to accept incoming connections.
         final ChannelFuture f = b.bind(address);
         LOG.debug("Initiated server {} at {}.", f, address);
         return f;
+    }
 
+    /**
+     * Customize a server bootstrap before the server is created. This allows
+     * subclasses to assign non-default server options before the server is
+     * created.
+     *
+     * @param b Server bootstrap
+     */
+    protected void customizeBootstrap(final ServerBootstrap b) {
+        // The default is a no-op
     }
 
     /**
@@ -116,9 +128,23 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
                         initializer.initializeChannel(ch, p);
                     }
                 });
+
+        customizeBootstrap(b);
+
         p.connect();
         LOG.debug("Client created.");
         return p;
+    }
+
+    /**
+     * Customize a client bootstrap before the connection is attempted. This
+     * allows subclasses to assign non-default options before the client is
+     * created.
+     *
+     * @param b Client bootstrap
+     */
+    protected void customizeBootstrap(final Bootstrap b) {
+        // The default is a no-op
     }
 
     /**
@@ -138,7 +164,6 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         p.connect();
 
         return p;
-
     }
 
     /**
