@@ -43,7 +43,7 @@
           <web-resource-collection>
              <web-resource-name>free access</web-resource-name>
              <url-pattern>/js/*</url-pattern>
-             <url-pattern>/images/*</url-pattern>
+             <url-pattern>/img/*</url-pattern>
              <url-pattern>/css/*</url-pattern>
              <url-pattern>/favicon.ico</url-pattern>
              <url-pattern>/versionProperty/*</url-pattern>
