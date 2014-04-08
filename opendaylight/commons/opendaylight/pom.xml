@@ -99,6 +99,8 @@
       <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
       <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
       <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
+      <messaging.datastore.version>0.1.0-SNAPSHOT</messaging.datastore.version>
+      <messaging.clustering.version>0.1.0-SNAPSHOT</messaging.clustering.version>
       <mdsal.version>1.1-SNAPSHOT</mdsal.version>
       <netconf.version>0.2.5-SNAPSHOT</netconf.version>
       <netty.version>4.0.17.Final</netty.version>
