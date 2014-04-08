@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8563e4b0",
+        "filename": "opendaylight/clustering/services_implementation/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-08T08:13:07Z",
+      "side": 1,
+      "message": "Just wondering if you could move this in the pluginManagement section of the commons.opendaylight",
+      "revId": "6868df38db29d34c6478ff92456ae9237ef15fa2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
