@@ -7,20 +7,34 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
@@ -33,16 +47,12 @@ import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -133,6 +143,52 @@ public class RestGetOperationTest extends JerseyTest {
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
+    /**
+     * MountPoint test. URI represents mount point.
+     * 
+     * Slashes in URI behind mount point. lst1 element with key
+     * GigabitEthernet0%2F0%2F0%2F0 (GigabitEthernet0/0/0/0) is requested via
+     * GET HTTP operation. It is tested whether %2F character is replaced with
+     * simple / in InstanceIdentifier parameter in method
+     * {@link BrokerFacade#readConfigurationDataBehindMountPoint(MountInstance, InstanceIdentifier)}
+     * which is called in method {@link RestconfImpl#readConfigurationData}
+     * 
+     * 
+     * @throws ParseException
+     */
+    @Test
+    public void getDataWithSlashesBehindMountPoint() throws UnsupportedEncodingException, URISyntaxException,
+            ParseException {
+        InstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
+        when(
+                brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
+                        eq(awaitedInstanceIdentifier))).thenReturn(prepareCnDataForMountPointTest());
+        MountInstance mountInstance = mock(MountInstance.class);
+        when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
+        MountService mockMountService = mock(MountService.class);
+        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+
+        ControllerContext.getInstance().setMountService(mockMountService);
+
+        String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/lst1/GigabitEthernet0%2F0%2F0%2F0";
+        assertEquals(200, get(uri, MediaType.APPLICATION_XML));
+    }
+
+    private InstanceIdentifier prepareInstanceIdentifierForList() throws URISyntaxException, ParseException {
+        List<PathArgument> parameters = new ArrayList<>();
+
+        Date revision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-09");
+        URI uri = new URI("test:module");
+        QName qNameCont = QName.create(uri, revision, "cont");
+        QName qNameList = QName.create(uri, revision, "lst1");
+        QName qNameKeyList = QName.create(uri, revision, "lf11");
+
+        parameters.add(new InstanceIdentifier.NodeIdentifier(qNameCont));
+        parameters.add(new InstanceIdentifier.NodeIdentifierWithPredicates(qNameList, qNameKeyList,
+                "GigabitEthernet0/0/0/0"));
+        return new InstanceIdentifier(parameters);
+    }
+
     @Test
     public void getDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
         when(
@@ -162,6 +218,7 @@ public class RestGetOperationTest extends JerseyTest {
         response = target(uri).request("application/yang.api+xml").get();
         validateModulesResponseXml(response);
     }
+
     // /streams/
     @Test
     public void getStreamsTest() throws UnsupportedEncodingException, FileNotFoundException {
@@ -193,7 +250,7 @@ public class RestGetOperationTest extends JerseyTest {
         assertTrue("Module2 in xml wasn't found", prepareXmlRegex("module2", "2014-01-02", "module:2", responseBody)
                 .find());
         String[] split = responseBody.split("<module");
-        assertEquals("<module element is returned more then once",2,split.length);
+        assertEquals("<module element is returned more then once", 2, split.length);
 
         response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
@@ -201,7 +258,7 @@ public class RestGetOperationTest extends JerseyTest {
         assertTrue("Module2 in json wasn't found", prepareJsonRegex("module2", "2014-01-02", "module:2", responseBody)
                 .find());
         split = responseBody.split("\"module\"");
-        assertEquals("\"module\" element is returned more then once",2,split.length);
+        assertEquals("\"module\" element is returned more then once", 2, split.length);
 
     }
 
@@ -395,8 +452,7 @@ public class RestGetOperationTest extends JerseyTest {
                 prepareJsonRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point",
                         responseBody).find());
         String[] split = responseBody.split("\"module\"");
-        assertEquals("\"module\" element is returned more then once",2,split.length);
-
+        assertEquals("\"module\" element is returned more then once", 2, split.length);
 
         response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -406,10 +462,7 @@ public class RestGetOperationTest extends JerseyTest {
                 prepareXmlRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point", responseBody)
                         .find());
         split = responseBody.split("<module");
-        assertEquals("<module element is returned more then once",2,split.length);
-
-
-
+        assertEquals("<module element is returned more then once", 2, split.length);
 
     }
 
