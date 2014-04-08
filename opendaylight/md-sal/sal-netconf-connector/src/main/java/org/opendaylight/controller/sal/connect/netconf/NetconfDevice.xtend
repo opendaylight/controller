@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.*
 import static org.opendaylight.controller.sal.connect.netconf.InventoryUtils.*
 
 import static extension org.opendaylight.controller.sal.connect.netconf.NetconfMapping.*
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration
 
 class NetconfDevice implements Provider, // 
 DataReader<InstanceIdentifier, CompositeNode>, //
@@ -63,9 +64,6 @@ RpcImplementation, //
 AutoCloseable {
 
     var NetconfClient client;
-
-    @Property
-    var InetSocketAddress socketAddress;
 
     @Property
     var MountProvisionInstance mountInstance;
@@ -78,9 +76,6 @@ AutoCloseable {
 
     @Property
     var InstanceIdentifier path;
-
-    @Property
-    var ReconnectStrategy reconnectStrategy;
 
     @Property
     var AbstractCachingSchemaSourceProvider<String, InputStream> schemaSourceProvider;
@@ -111,6 +106,9 @@ AutoCloseable {
     @Property
     var SchemaSourceProvider<InputStream> remoteSourceProvider
     
+    @Property
+    var NetconfClientConfiguration clientConfig
+    
     DataBrokerService dataBroker
 
     public new(String name) {
@@ -125,8 +123,7 @@ AutoCloseable {
         checkState(schemaSourceProvider != null, "Schema Source Provider must be set.")
         checkState(eventExecutor != null, "Event executor must be set.");
 
-        val listener = new NetconfDeviceListener(this);
-        val task = startClientTask(dispatcher, listener)
+        val task = startClientTask(dispatcher, clientConfig)
         return processingExecutor.submit(task) as Future<Void>;
 
     }
@@ -138,11 +135,11 @@ AutoCloseable {
         return deviceContextProvider.currentContext;
     }
 
-    private def Runnable startClientTask(NetconfClientDispatcher dispatcher, NetconfDeviceListener listener) {
+    private def Runnable startClientTask(NetconfClientDispatcher dispatcher, NetconfClientConfiguration clientConfig) {
         return [ |
             try {
-                logger.info("Starting Netconf Client on: {}", socketAddress);
-                client = NetconfClient.clientFor(name, socketAddress, reconnectStrategy, dispatcher, listener);
+                logger.info("Starting Netconf Client on: {}", clientConfig.address);
+                client = new NetconfClient(name, dispatcher, clientConfig);
                 logger.debug("Initial capabilities {}", initialCapabilities);
                 var SchemaSourceProvider<String> delegate;
                 if (NetconfRemoteSchemaSourceProvider.isSupportedFor(initialCapabilities)) {
@@ -150,7 +147,7 @@ AutoCloseable {
                 }  else if(client.capabilities.contains(NetconfRemoteSchemaSourceProvider.IETF_NETCONF_MONITORING.namespace.toString)) {
                     delegate = new NetconfRemoteSchemaSourceProvider(this);
                 } else {
-                    logger.info("Netconf server {} does not support IETF Netconf Monitoring", socketAddress);
+                    logger.info("Netconf server {} does not support IETF Netconf Monitoring", clientConfig.address);
                     delegate = SchemaSourceProviders.<String>noopProvider();
                 }
                 remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);

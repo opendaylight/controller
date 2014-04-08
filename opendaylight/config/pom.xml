@@ -20,13 +20,22 @@
     <modules>
         <module>config-api</module>
         <module>config-manager</module>
-        <module>config-plugin-parent</module>
         <module>config-util</module>
+
         <module>config-persister-api</module>
         <module>config-persister-file-xml-adapter</module>
+        <module>config-persister-directory-xml-adapter</module>
+
         <module>yang-jmx-generator</module>
         <module>yang-jmx-generator-plugin</module>
+
         <module>yang-test</module>
+        <module>yang-test-plugin</module>
+
+        <module>config-module-archetype</module>
+
+        <module>config-plugin-parent</module>
+
         <module>logback-config</module>
         <module>threadpool-config-api</module>
         <module>netty-config-api</module>
@@ -34,11 +43,10 @@
         <module>netty-threadgroup-config</module>
         <module>netty-event-executor-config</module>
         <module>netty-timer-config</module>
-        <module>config-persister-directory-xml-adapter</module>
-        <module>yang-test-plugin</module>
         <module>shutdown-api</module>
         <module>shutdown-impl</module>
-        <module>config-module-archetype</module>
+        <module>netconf-config-api</module>
+        <module>netconf-config-dispatcher</module>
     </modules>
 
     <profiles>

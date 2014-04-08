@@ -1374,6 +1374,18 @@
           <version>${config.version}</version>
         </dependency>
 
+        <!--Netconf config-->
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-config-api</artifactId>
+          <version>${netconf.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-config-dispatcher</artifactId>
+          <version>${netconf.version}</version>
+        </dependency>
+
        <!-- Netconf -->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>

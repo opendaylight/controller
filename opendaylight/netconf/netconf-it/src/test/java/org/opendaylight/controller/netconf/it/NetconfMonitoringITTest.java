@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.it;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import io.netty.channel.ChannelFuture;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,12 +29,12 @@ import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
@@ -55,6 +54,7 @@ import org.w3c.dom.Document;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 
 public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
@@ -66,7 +66,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
-    private NetconfClientDispatcher clientDispatcher;
+    private NetconfClientDispatcherImpl clientDispatcher;
 
     private NetconfMonitoringServiceImpl monitoringService;
 
@@ -88,7 +88,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
+        clientDispatcher = new NetconfClientDispatcherImpl(nettyThreadgroup, nettyThreadgroup);
     }
 
     private HardcodedYangStoreService getYangStore() throws YangStoreException, IOException {
@@ -120,8 +120,8 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testGetResponseFromMonitoring() throws Exception {
-        try (NetconfClient netconfClient = new NetconfClient("client-monitoring", tcpAddress, 4000, clientDispatcher)) {
-        try (NetconfClient netconfClient2 = new NetconfClient("client-monitoring2", tcpAddress, 4000, clientDispatcher)) {
+        try (NetconfClient netconfClient = new NetconfClient("client-monitoring", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
+        try (NetconfClient netconfClient2 = new NetconfClient("client-monitoring2", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
             NetconfMessage response = netconfClient.sendMessage(loadGetMessage());
             assertSessionElementsInResponse(response.getDocument(), 2);
         }

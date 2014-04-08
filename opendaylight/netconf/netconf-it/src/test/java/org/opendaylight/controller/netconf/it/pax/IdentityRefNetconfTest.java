@@ -7,35 +7,6 @@
  */
 package org.opendaylight.controller.netconf.it.pax;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import io.netty.channel.nio.NioEventLoopGroup;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
-import org.junit.runner.RunWith;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
-import org.ops4j.pax.exam.util.Filter;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import javax.inject.Inject;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
@@ -47,6 +18,43 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import javax.inject.Inject;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
+import org.junit.runner.RunWith;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
+import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.options.DefaultCompositeOption;
+import org.ops4j.pax.exam.util.Filter;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 @Ignore
 @RunWith(PaxExam.class)
@@ -96,14 +104,14 @@ public class IdentityRefNetconfTest {
             Preconditions.checkNotNull(broker, "Controller not initialized");
 
             NioEventLoopGroup nettyThreadgroup = new NioEventLoopGroup();
-            NetconfClientDispatcher clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup,
-                    CLIENT_CONNECTION_TIMEOUT_MILLIS);
+            NetconfClientDispatcherImpl clientDispatcher = new NetconfClientDispatcherImpl(nettyThreadgroup, nettyThreadgroup
+                    );
 
             NetconfMessage edit = xmlFileToNetconfMessage("netconfMessages/editConfig_identities.xml");
             NetconfMessage commit = xmlFileToNetconfMessage("netconfMessages/commit.xml");
             NetconfMessage getConfig = xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
 
-            try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, CLIENT_CONNECTION_TIMEOUT_MILLIS, clientDispatcher)) {
+            try (NetconfClient netconfClient = new NetconfClient("client", clientDispatcher, getClientConfiguration(tcpAddress))) {
                 sendMessage(edit, netconfClient);
                 sendMessage(commit, netconfClient);
                 sendMessage(getConfig, netconfClient, "id-test",
@@ -145,5 +153,15 @@ public class IdentityRefNetconfTest {
             final Document doc = XmlUtil.readXmlToDocument(resourceAsStream);
             return doc;
         }
+    }
+
+    public NetconfClientConfiguration getClientConfiguration(final InetSocketAddress tcpAddress) {
+        final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+        b.withAddress(tcpAddress);
+        b.withSessionListener(new SimpleNetconfClientSessionListener());
+        b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
+                CLIENT_CONNECTION_TIMEOUT_MILLIS));
+        b.withConnectionTimeoutMillis(CLIENT_CONNECTION_TIMEOUT_MILLIS);
+        return b.build();
     }
 }

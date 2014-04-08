@@ -43,6 +43,7 @@
                     <instructions>
                         <Export-Package>
                             org.opendaylight.controller.netconf.client,
+                            org.opendaylight.controller.netconf.client.conf,
                         </Export-Package>
                         <Import-Package>
                             com.google.common.base,

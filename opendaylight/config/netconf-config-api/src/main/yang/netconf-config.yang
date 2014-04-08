@@ -1,0 +1,24 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module netconf-config {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:netconf";
+    prefix "cfg-net";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+        "This module contains the base YANG definitions for
+        netconf related services.";
+
+    revision "2014-04-08" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-client-dispatcher {
+
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.netconf.client.NetconfClientDispatcher";
+    }
+}
