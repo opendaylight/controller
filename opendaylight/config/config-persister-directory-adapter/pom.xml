@@ -4,7 +4,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.3</version>
+        <version>0.2.4-1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>config-persister-directory-adapter</artifactId>
@@ -51,7 +51,7 @@
     <build>
         <plugins>
             <!-- workaround for creating version according to OSGi specification (major.minor.micro[.qualifier] -->
-            <plugin>
+<!--            <plugin>
                 <groupId>org.codehaus.groovy.maven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
                 <executions>
@@ -67,7 +67,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
