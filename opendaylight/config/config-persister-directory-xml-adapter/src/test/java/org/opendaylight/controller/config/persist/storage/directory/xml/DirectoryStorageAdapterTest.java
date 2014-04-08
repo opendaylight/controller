@@ -134,4 +134,15 @@ public class DirectoryStorageAdapterTest {
         assertResult(results.get(0), "<config>1</config>", "cap1-a", "cap2-a", "capa a-a");
     }
 
+    @Test
+    public void testTwoFilesOneInvalid() throws Exception {
+        File folder = getFolder("twoFiles_corrupt");
+        tested = instantiatePersisterFromAdapter(folder, Optional.of("xml"));
+        logger.info("Testing : " + tested.toString());
+        List<ConfigSnapshotHolder> results = tested.loadLastConfigs();
+        assertEquals(1, results.size());
+
+        assertResult(results.get(0), "<config>1</config>", "cap1-a", "cap2-a", "capa a-a");
+    }
+
 }
