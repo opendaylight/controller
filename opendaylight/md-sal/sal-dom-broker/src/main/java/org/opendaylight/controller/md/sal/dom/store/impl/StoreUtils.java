@@ -24,7 +24,6 @@ import com.google.common.primitives.UnsignedLong;
 public final class StoreUtils {
 
     private final static Function<Identifiable<Object>, Object> EXTRACT_IDENTIFIER = new Function<Identifiable<Object>, Object>() {
-
         @Override
         public Object apply(final Identifiable<Object> input) {
             return input.getIdentifier();
@@ -45,6 +44,11 @@ public final class StoreUtils {
         return new InitialDataChangeEvent(path, data.getData());
     }
 
+    /*
+     * Suppressing warnings here allows us to fool the compiler enough
+     * such that we can reuse a single function for all applicable types
+     * and present it in a type-safe manner to our users.
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <V> Function<Identifiable<V>, V> identifierExtractor() {
         return (Function) EXTRACT_IDENTIFIER;
@@ -90,7 +94,6 @@ public final class StoreUtils {
         public NormalizedNode<?, ?> getUpdatedSubtree() {
             return data;
         }
-
     }
 
     public static <V> Set<V> toIdentifierSet(final Iterable<? extends Identifiable<V>> children) {
@@ -101,7 +104,6 @@ public final class StoreUtils {
         StringBuilder builder = new StringBuilder();
         toStringTree(builder, metaNode, 0);
         return builder.toString();
-
     }
 
     private static void toStringTree(final StringBuilder builder, final StoreMetadataNode metaNode, final int offset) {
@@ -109,15 +111,15 @@ public final class StoreUtils {
         builder.append(prefix).append(toStringTree(metaNode.getIdentifier()));
         NormalizedNode<?, ?> dataNode = metaNode.getData();
         if (dataNode instanceof NormalizedNodeContainer<?, ?, ?>) {
-            builder.append(" {").append("\n");
+            builder.append(" {\n");
             for (StoreMetadataNode child : metaNode.getChildren()) {
                 toStringTree(builder, child, offset + 4);
             }
-            builder.append(prefix).append("}");
+            builder.append(prefix).append('}');
         } else {
-            builder.append(" ").append(dataNode.getValue());
+            builder.append(' ').append(dataNode.getValue());
         }
-        builder.append("\n");
+        builder.append('\n');
     }
 
     private static String toStringTree(final PathArgument identifier) {
