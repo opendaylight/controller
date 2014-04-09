@@ -51,6 +51,24 @@
       "revId": "db4aa99097faeb2f5c203fedf1c071b564d27771",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a8da7f15",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationBrokerImpl.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-09T03:23:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_42e2b204",
+      "revId": "db4aa99097faeb2f5c203fedf1c071b564d27771",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
