@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
@@ -47,6 +48,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
+@Ignore
 @RunWith(PaxExam.class)
 public class IdentityRefNetconfTest {
 
