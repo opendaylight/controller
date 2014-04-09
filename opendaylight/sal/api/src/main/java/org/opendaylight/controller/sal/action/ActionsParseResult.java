@@ -45,4 +45,13 @@ public class ActionsParseResult {
     public List<Action> getActionlist() {
         return new ArrayList<Action>(list);
     }
+
+    /**
+     * Returns the status of the flow actions parsing
+     *
+     * @return The status of the parsing operation
+     */
+    public Status getStatus() {
+        return status;
+    }
 }

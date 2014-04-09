@@ -54,6 +54,7 @@ import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.IFlowActionsFactory;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.core.Config;
@@ -145,6 +146,7 @@ public class ForwardingRulesManager implements
     private IFlowProgrammerService programmer;
     private IClusterContainerServices clusterContainerService = null;
     private ISwitchManager switchManager;
+    private IFlowActionsFactory flowActionFactory;
     private Thread frmEventHandler;
     protected BlockingQueue<FRMEvent> pendingEvents;
 
@@ -1592,7 +1594,7 @@ public class ForwardingRulesManager implements
     @Override
     public Status addStaticFlow(FlowConfig config) {
         // Configuration object validation
-        Status status = config.validate();
+        Status status = config.validate(flowActionFactory);
         if (!status.isSuccess()) {
             log.warn("Invalid Configuration for flow {}. The failure is {}", config, status.getDescription());
             String error = "Invalid Configuration (" + status.getDescription() + ")";
@@ -1653,7 +1655,7 @@ public class ForwardingRulesManager implements
         if (!multipleFlowPush) {
             // Program hw
             if (config.installInHw()) {
-                FlowEntry entry = config.getFlowEntry();
+                FlowEntry entry = config.getFlowEntry(flowActionFactory);
                 status = this.installFlowEntry(entry);
                 if (!status.isSuccess()) {
                     config.setStatus(status.getDescription());
@@ -1700,7 +1702,7 @@ public class ForwardingRulesManager implements
             }
             if (config.getNode().equals(node)) {
                 if (config.installInHw() && !config.getStatus().equals(StatusCode.SUCCESS.toString())) {
-                    Status status = this.installFlowEntryAsync(config.getFlowEntry());
+                    Status status = this.installFlowEntryAsync(config.getFlowEntry(flowActionFactory));
                     config.setStatus(status.getDescription());
                 }
             }
@@ -1789,7 +1791,7 @@ public class ForwardingRulesManager implements
         }
 
         // Program the network node
-        Status status = this.uninstallFlowEntry(config.getFlowEntry());
+        Status status = this.uninstallFlowEntry(config.getFlowEntry(flowActionFactory));
 
         // Update configuration database if programming was successful
         if (status.isSuccess()) {
@@ -1831,7 +1833,7 @@ public class ForwardingRulesManager implements
         }
 
         // Program the network node
-        Status status = this.removeEntry(target.getFlowEntry(), false);
+        Status status = this.removeEntry(target.getFlowEntry(flowActionFactory), false);
 
         // Update configuration database if programming was successful
         if (status.isSuccess()) {
@@ -1852,7 +1854,7 @@ public class ForwardingRulesManager implements
         }
 
         // Validity Check
-        Status status = newFlowConfig.validate();
+        Status status = newFlowConfig.validate(flowActionFactory);
         if (!status.isSuccess()) {
             String msg = "Invalid Configuration (" + status.getDescription() + ")";
             newFlowConfig.setStatus(msg);
@@ -1888,7 +1890,8 @@ public class ForwardingRulesManager implements
         // If flow is installed, program the network node
         status = new Status(StatusCode.SUCCESS, "Saved in config");
         if (oldFlowConfig.installInHw()) {
-            status = this.modifyFlowEntry(oldFlowConfig.getFlowEntry(), newFlowConfig.getFlowEntry());
+            status = this.modifyFlowEntry(oldFlowConfig.getFlowEntry(flowActionFactory),
+                    newFlowConfig.getFlowEntry(flowActionFactory));
         }
 
         // Update configuration database if programming was successful
@@ -1932,13 +1935,13 @@ public class ForwardingRulesManager implements
             }
         }
         if (target != null) {
-            Status status = target.validate();
+            Status status = target.validate(flowActionFactory);
             if (!status.isSuccess()) {
                 log.warn(status.getDescription());
                 return status;
             }
-            status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry()) : this
-                                    .installFlowEntry(target.getFlowEntry());
+            status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry(flowActionFactory)) : this
+                    .installFlowEntry(target.getFlowEntry(flowActionFactory));
             if (status.isSuccess()) {
                 // Update Configuration database
                 target.setStatus(StatusCode.SUCCESS.toString());
@@ -2312,9 +2315,9 @@ public class ForwardingRulesManager implements
         boolean updated = false;
         List<FlowConfig> flowConfigForNode = getStaticFlows(nodeConnector.getNode());
         for (FlowConfig flowConfig : flowConfigForNode) {
-            if (doesFlowContainNodeConnector(flowConfig.getFlow(), nodeConnector)) {
+            if (doesFlowContainNodeConnector(flowConfig.getFlow(flowActionFactory), nodeConnector)) {
                 if (flowConfig.installInHw() && !flowConfig.getStatus().equals(StatusCode.SUCCESS.toString())) {
-                    Status status = this.installFlowEntry(flowConfig.getFlowEntry());
+                    Status status = this.installFlowEntry(flowConfig.getFlowEntry(flowActionFactory));
                     if (!status.isSuccess()) {
                         flowConfig.setStatus(status.getDescription());
                     } else {
@@ -2495,6 +2498,16 @@ public class ForwardingRulesManager implements
     public void unsetConfigurationContainerService(IConfigurationContainerService service) {
         log.trace("Got configuration service UNset request");
         this.configurationService = null;
+    }
+
+    public void setIFlowActionFactory(IFlowActionsFactory service) {
+        log.debug("Got configuration service set request {}", service);
+        this.flowActionFactory = service;
+    }
+
+    public void unsetIFlowActionFactory(IFlowActionsFactory service) {
+        log.debug("Got configuration service UNset request {}", service);
+        this.flowActionFactory = null;
     }
 
     @Override

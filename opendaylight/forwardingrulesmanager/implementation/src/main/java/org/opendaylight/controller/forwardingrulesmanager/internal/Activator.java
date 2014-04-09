@@ -22,6 +22,7 @@ import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManagerAware;
+import org.opendaylight.controller.sal.action.IFlowActionsFactory;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.IContainerLocalListener;
@@ -103,6 +104,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IConfigurationContainerService.class).setCallbacks(
                     "setConfigurationContainerService",
                     "unsetConfigurationContainerService").setRequired(true));
+            c.add(createServiceDependency().setService(IFlowActionsFactory.class)
+                    .setCallbacks("setIFlowActionsFactory", "unsetIFlowActionsFactory").setRequired(false));
             if (GlobalConstants.DEFAULT.toString().equals(containerName)) {
                 c.add(createServiceDependency().setService(IContainerManager.class)
                         .setCallbacks("setIContainerManager", "unsetIContainerManager").setRequired(true));
