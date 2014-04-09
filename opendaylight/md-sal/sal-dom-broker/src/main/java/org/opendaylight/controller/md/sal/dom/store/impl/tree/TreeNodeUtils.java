@@ -43,7 +43,7 @@ public class TreeNodeUtils {
 
     public static <T extends StoreTreeNode<T>> T findNodeChecked(final T tree, final InstanceIdentifier path) {
         T current = tree;
-        List<PathArgument> nested = new ArrayList<>(path.getPath());
+        List<PathArgument> nested = new ArrayList<>(path.getPath().size());
         for(PathArgument pathArg : path.getPath()) {
             Optional<T> potential = current.getChild(pathArg);
             nested.add(pathArg);
