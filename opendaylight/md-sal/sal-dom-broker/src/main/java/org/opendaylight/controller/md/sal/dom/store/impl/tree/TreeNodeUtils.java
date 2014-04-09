@@ -80,11 +80,17 @@ public class TreeNodeUtils {
             final InstanceIdentifier currentPath = new InstanceIdentifier(path.getPath().subList(0, nesting));
             return new SimpleEntry<InstanceIdentifier,T>(currentPath,current.get());
         }
-        // Nesting minus one is safe, since current is allways present when nesting = 0
-        // so this prat of code is never triggered, in cases nesting == 0;
-        final InstanceIdentifier parentPath = new InstanceIdentifier(path.getPath().subList(0, nesting - 1));
-        return new SimpleEntry<InstanceIdentifier,T>(parentPath,parent.get());
 
+        /*
+         * Subtracting 1 from nesting level at this point is safe, because we
+         * cannot reach here with nesting == 0: that would mean the above check
+         * for current.isPresent() failed, which it cannot, as current is always
+         * present. At any rate we check state just to be on the safe side.
+         */
+        Preconditions.checkState(nesting > 0);
+        final InstanceIdentifier parentPath = new InstanceIdentifier(path.getPath().subList(0, nesting - 1));
+
+        return new SimpleEntry<InstanceIdentifier,T>(parentPath,parent.get());
     }
 
     public static <T extends StoreTreeNode<T>> Optional<T> getChild(final Optional<T> parent,final PathArgument child) {
