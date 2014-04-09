@@ -9,12 +9,15 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -22,7 +25,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
@@ -60,6 +65,9 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 @Path("/networks")
 public class NeutronNetworksNorthbound {
 
+    @Context
+    UriInfo uriInfo;
+
     private NeutronNetwork extractFields(NeutronNetwork o, List<String> fields) {
         return o.extractFields(fields);
     }
@@ -72,7 +80,8 @@ public class NeutronNetworksNorthbound {
     //@TypeHint(OpenStackNetworks.class)
     @StatusCodes({
         @ResponseCode(code = 200, condition = "Operation successful"),
-        @ResponseCode(code = 401, condition = "Unauthorized") })
+        @ResponseCode(code = 401, condition = "Unauthorized"),
+        @ResponseCode(code = 500, condition = "Server Error")})
     public Response listNetworks(
             // return fields
             @QueryParam("fields") List<String> fields,
@@ -88,9 +97,9 @@ public class NeutronNetworksNorthbound {
             @QueryParam("provider_physical_network") String queryProviderPhysicalNetwork,
             @QueryParam("provider_segmentation_id") String queryProviderSegmentationID,
             // pagination
-            @QueryParam("limit") String limit,
+            @QueryParam("limit") Integer limit,
             @QueryParam("marker") String marker,
-            @QueryParam("page_reverse") String pageReverse
+            @DefaultValue("false") @QueryParam("page_reverse") Boolean pageReverse
             // sorting not supported
             ) {
         INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
@@ -130,9 +139,94 @@ public class NeutronNetworksNorthbound {
                 }
             }
         }
-        //TODO: apply pagination to results
-        return Response.status(200).entity(
-                new NeutronNetworkRequest(ans)).build();
+
+        Comparator<NeutronNetwork> neutronNetworkComparator = new Comparator<NeutronNetwork>() {
+            @Override
+            public int compare(NeutronNetwork o1, NeutronNetwork o2) {
+                return o1.getID().compareTo(o2.getID());
+            }
+        };
+
+        Collections.sort(ans, neutronNetworkComparator);
+
+        if (limit != null && ans.size() > 1) {
+            List<NeutronPageLink> links = new ArrayList<>();
+            Integer startPos = null;
+            String startMarker;
+            String endMarker;
+            Boolean firstPage = false;
+            Boolean lastPage = false;
+
+            if (marker == null) {
+                startPos = 0;
+            }
+
+            else {
+
+                NeutronNetwork markerNetwork = new NeutronNetwork();
+                markerNetwork.setNetworkUUID(marker);
+
+                startPos = Collections.binarySearch(ans, markerNetwork, neutronNetworkComparator);
+
+                if (!pageReverse){
+                    startPos = startPos + 1;
+                }
+                else {
+                    startPos = startPos - limit;
+                }
+
+            }
+
+            if (startPos == null) {
+                return Response.status(500).entity("Marker not found").build();
+            }
+
+            if (startPos == 0){
+                firstPage = true;
+            }
+
+            if (startPos + limit >= ans.size()) {
+                ans = ans.subList(startPos, ans.size());
+                startMarker = ans.get(0).getID();
+                endMarker = ans.get(ans.size() - 1).getID();
+                lastPage = true;
+            }
+            else if (startPos < 0) {
+                if (startPos + limit > 0) {
+                    ans = ans.subList(0, startPos + limit);
+                    startMarker = ans.get(0).getID();
+                    endMarker = ans.get(ans.size() - 1).getID();
+                    firstPage = true;
+                }
+                else {
+                    return Response.status(500).entity("Specified Marker and Limit are out of bounds").build();
+                }
+            }
+            else {
+                ans = ans.subList(startPos, startPos + limit);
+                startMarker = ans.get(0).getID();
+                endMarker = ans.get(limit-1).getID();
+            }
+
+            if (!lastPage) {
+                NeutronPageLink next = new NeutronPageLink();
+                next.setRef("next");
+                next.setHref(uriInfo.getAbsolutePath().toString() + "?limit=" + limit.toString() + "&marker=" + endMarker);
+                links.add(next);
+            }
+
+            if (!firstPage) {
+                NeutronPageLink previous = new NeutronPageLink();
+                previous.setRef("previous");
+                previous.setHref(uriInfo.getAbsolutePath().toString() + "?limit=" + limit.toString() + "&marker=" + startMarker + "&page_reverse=True");
+                links.add(previous);
+            }
+
+            return Response.status(200).entity(new PaginatedNeutronNetworkRequest(ans, links)).build();
+        }
+
+    return Response.status(200).entity(new NeutronNetworkRequest(ans)).build();
+
     }
 
     /**
