@@ -275,7 +275,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             if (currentMeta.isPresent()) {
                 nodeVersion = StoreUtils.increase(currentMeta.get().getNodeVersion());
             }
-            StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursivelly(newValue, nodeVersion, nodeVersion);
+            StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursively(newValue, nodeVersion, nodeVersion);
 
             if (!modification.hasAdditionalModifications()) {
                 return newValueMeta;

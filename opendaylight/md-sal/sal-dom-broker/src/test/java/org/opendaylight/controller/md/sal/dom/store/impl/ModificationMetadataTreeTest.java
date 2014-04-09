@@ -139,7 +139,7 @@ public class ModificationMetadataTreeTest {
     public void basicReadWrites() {
         MutableDataTree modificationTree = MutableDataTree.from(
                 DataAndMetadataSnapshot.builder() //
-                        .setMetadataTree(StoreMetadataNode.createRecursivelly(createDocumentOne(), UnsignedLong.valueOf(5))) //
+                        .setMetadataTree(StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5))) //
                         .setSchemaContext(schemaContext) //
                         .build(), new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.read(OUTER_LIST_2_PATH);
