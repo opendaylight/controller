@@ -20,14 +20,31 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
+import org.opendaylight.controller.sal.action.ActionsParseResult;
 import org.opendaylight.controller.sal.action.Controller;
+import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.HwPath;
+import org.opendaylight.controller.sal.action.IFlowActionsFactory;
+import org.opendaylight.controller.sal.action.Loopback;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.action.PushVlan;
 import org.opendaylight.controller.sal.action.SetDlDst;
+import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetDlType;
+import org.opendaylight.controller.sal.action.SetNextHop;
 import org.opendaylight.controller.sal.action.SetNwDst;
+import org.opendaylight.controller.sal.action.SetNwSrc;
+import org.opendaylight.controller.sal.action.SetNwTos;
+import org.opendaylight.controller.sal.action.SetTpDst;
+import org.opendaylight.controller.sal.action.SetTpSrc;
+import org.opendaylight.controller.sal.action.SetVlanCfi;
 import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.action.SetVlanPcp;
+import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -39,8 +56,81 @@ import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 public class frmTest {
+
+    private class MockFactory implements IFlowActionsFactory {
+        Set<Action> factory = new HashSet<Action>();
+
+        public MockFactory() {
+            try {
+                factory.add(Loopback.class.newInstance());
+                factory.add(Drop.class.newInstance());
+                factory.add(Flood.class.newInstance());
+                factory.add(FloodAll.class.newInstance());
+                factory.add(SwPath.class.newInstance());
+                factory.add(HwPath.class.newInstance());
+                factory.add(Controller.class.newInstance());
+                factory.add(Output.class.newInstance());
+                factory.add(Enqueue.class.newInstance());
+                factory.add(PushVlan.class.newInstance());
+                factory.add(SetVlanId.class.newInstance());
+                factory.add(SetVlanCfi.class.newInstance());
+                factory.add(SetVlanPcp.class.newInstance());
+                factory.add(PopVlan.class.newInstance());
+                factory.add(SetDlSrc.class.newInstance());
+                factory.add(SetDlDst.class.newInstance());
+                factory.add(SetDlType.class.newInstance());
+                factory.add(SetNwTos.class.newInstance());
+                factory.add(SetNwSrc.class.newInstance());
+                factory.add(SetNwDst.class.newInstance());
+                factory.add(SetNextHop.class.newInstance());
+                factory.add(SetTpSrc.class.newInstance());
+                factory.add(SetTpDst.class.newInstance());
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public List<Class<? extends Action>> getAvailableActions() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Action parseAction(String actionString, Node node) {
+            for (Action entry : factory) {
+                Action parsed = entry.fromString(actionString, node);
+                if (parsed != null) {
+                    return parsed;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public ActionsParseResult parseActionList(List<String> actionStringList, Node node) {
+            List<Action> actionList = new ArrayList<Action>();
+            StringBuffer errorBuffer = new StringBuffer();
+            for (String actionString : actionStringList) {
+                Action action = parseAction(actionString, node);
+                if (action != null) {
+                    actionList.add(action);
+                } else {
+                    errorBuffer.append(actionString);
+                    errorBuffer.append(" ");
+                }
+            }
+            Status status = (errorBuffer.length() == 0) ? new Status(StatusCode.SUCCESS) : new Status(
+                    StatusCode.BADREQUEST, "The following actions are not recognized: " + errorBuffer.toString());
+            return new ActionsParseResult(actionList, status);
+        }
+
+    }
+
+    private IFlowActionsFactory factory = new MockFactory();
 
     @Test
     public void testFlowEntryInstall() throws UnknownHostException {
@@ -257,7 +347,7 @@ public class frmTest {
         FlowConfig flowConfig = new FlowConfig();
         Assert.assertFalse(flowConfig.isInternalFlow());
         flowConfig.setName("__Internal__");
-        Status status = flowConfig.validate();
+        Status status = flowConfig.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("name"));
         Assert.assertTrue(flowConfig.isInternalFlow());
@@ -432,7 +522,7 @@ public class frmTest {
         flowC.setStatus("Invalid");
         Assert.assertFalse(flowC.isStatusSuccessful());
 
-        flowC.getActions().add(ActionType.DROP.toString());
+        flowC.getActions().add(Drop.NAME);
         Assert.assertFalse(flowC.equals(frmC));
         Assert.assertFalse(flowC.isIPv6());
         flowC.setDstIp("2001:420:281:1004:407a:57f4:4d15:c355");
@@ -509,235 +599,234 @@ public class frmTest {
     @Test
     public void testValid() throws UnknownHostException {
         FlowConfig fc2 = createSampleFlowConfig();
-        Assert.assertTrue(fc2.validate().isSuccess());
+        Assert.assertTrue(fc2.validate(factory).isSuccess());
 
         FlowConfig fc = new FlowConfig();
-        Status status = fc.validate();
+        Status status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Invalid name"));
 
         fc.setName("Config");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Node is null"));
 
         fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
-        Assert.assertFalse(fc.validate().isSuccess());
+        Assert.assertFalse(fc.validate(factory).isSuccess());
         List<String> actions = new ArrayList<String>();
         fc.setActions(actions);
-        Assert.assertFalse(fc.validate().isSuccess());
+        Assert.assertFalse(fc.validate(factory).isSuccess());
         actions.add("OUTPUT=2");
         fc.setActions(actions);
-        Assert.assertTrue(fc.validate().isSuccess());
+       // Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setPriority("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 65535"));
 
         fc.setPriority("100000");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 65535"));
 
         fc.setPriority("2000");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setCookie("100");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setIngressPort("100");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setVlanId(("-1"));
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 4095"));
 
         fc.setVlanId("5000");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 4095"));
 
         fc.setVlanId("100");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setVlanPriority("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 7"));
 
         fc.setVlanPriority("9");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("is not in the range 0 - 7"));
 
         fc.setVlanPriority("5");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setEtherType("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet type"));
 
         fc.setEtherType("0xfffff");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet type"));
 
         fc.setEtherType("0x800");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setTosBits("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP ToS bits"));
 
         fc.setTosBits("65");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP ToS bits"));
 
         fc.setTosBits("60");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setSrcPort("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport source port"));
 
         fc.setSrcPort("0xfffff");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport source port"));
 
         fc.setSrcPort("0");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setSrcPort("0x00ff");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setSrcPort("0xffff");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setDstPort("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport destination port"));
 
         fc.setDstPort("0xfffff");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport destination port"));
 
         fc.setDstPort("0");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setDstPort("0x00ff");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setDstPort("0xffff");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setSrcMac("abc");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet source address"));
 
         fc.setSrcMac("00:A0:C9:14:C8:29");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setDstMac("abc");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Ethernet destination address"));
 
         fc.setDstMac("00:A0:C9:22:AB:11");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setSrcIp("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP source address"));
 
         fc.setSrcIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Src IP"));
 
         fc.setEtherType("0x86dd");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setSrcIp("1.1.1.1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Src IP"));
 
         fc.setEtherType("0x800");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setDstIp("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP destination address"));
 
         fc.setDstIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Dst IP"));
 
         fc.setEtherType("0x86dd");
         fc.setSrcIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setDstIp("2.2.2.2");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Type mismatch between Ethernet & Dst IP"));
 
         fc.setEtherType("0x800");
         fc.setSrcIp("1.1.1.1");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setEtherType(null);
         fc.setSrcIp("2001:420:281:1004:407a:57f4:4d15:c355");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP Src Dest Type mismatch"));
 
         fc.setSrcIp("1.1.1.1");
         fc.setIdleTimeout("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Idle Timeout value"));
 
         fc.setIdleTimeout("0xfffff");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Idle Timeout value"));
 
         fc.setIdleTimeout("10");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
         fc.setHardTimeout("-1");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Hard Timeout value"));
 
         fc.setHardTimeout("0xfffff");
-        status = fc.validate();
+        status = fc.validate(factory);
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Hard Timeout value"));
 
         fc.setHardTimeout("10");
-        Assert.assertTrue(fc.validate().isSuccess());
+        Assert.assertTrue(fc.validate(factory).isSuccess());
 
     }
 
     private FlowConfig createSampleFlowConfig() throws UnknownHostException {
         ArrayList<String> actions;
         actions = createSampleActionList();
-        // actions.add(ActionType.CONTROLLER.toString());
         FlowConfig flowConfig = new FlowConfig("true", "Config1", Node.fromString(Node.NodeIDType.OPENFLOW, "1"),
                 "100", "0", "60", "2", "100", "0", "0x0800", "00:A0:C9:14:C8:29", "00:A0:C9:22:AB:11",
                 IPProtocols.TCP.toString(), "0", "1.2.3.4", "2.2.2.2", "8080", "100", "300", "1000", actions);
@@ -747,23 +836,23 @@ public class frmTest {
 
     private ArrayList<String> createSampleActionList() {
         ArrayList<String> actions = new ArrayList<String>();
-        actions.add(ActionType.DROP.toString());
-        actions.add(ActionType.LOOPBACK.toString());
-        actions.add(ActionType.FLOOD.toString());
-        actions.add(ActionType.SW_PATH.toString());
-        actions.add(ActionType.HW_PATH.toString());
-        actions.add(ActionType.SET_VLAN_PCP.toString() + "=1");
-        actions.add(ActionType.SET_VLAN_ID.toString() + "=1");
-        actions.add(ActionType.POP_VLAN.toString());
-        actions.add(ActionType.SET_DL_SRC.toString() + "=00:A0:C1:AB:22:11");
-        actions.add(ActionType.SET_DL_DST.toString() + "=00:B1:C1:00:AA:BB");
-        actions.add(ActionType.SET_NW_SRC.toString() + "=1.1.1.1");
-        actions.add(ActionType.SET_NW_DST.toString() + "=2.2.2.2");
-        actions.add(ActionType.CONTROLLER.toString());
-        actions.add(ActionType.SET_NW_TOS.toString() + "1");
-        actions.add(ActionType.SET_TP_SRC.toString() + "60");
-        actions.add(ActionType.SET_TP_DST.toString() + "8080");
-        actions.add(ActionType.SET_NEXT_HOP.toString() + "=1.1.1.1");
+        actions.add(Drop.NAME);
+        actions.add(Loopback.NAME);
+        actions.add(Flood.NAME);
+        actions.add(SwPath.NAME);
+        actions.add(HwPath.NAME);
+        actions.add(SetVlanPcp.NAME + "=1");
+        actions.add(SetVlanId.NAME + "=1");
+        actions.add(PopVlan.NAME);
+        actions.add(SetDlSrc.NAME + "=00:A0:C1:AB:22:11");
+        actions.add(SetDlDst.NAME + "=00:B1:C1:00:AA:BB");
+        actions.add(SetNwSrc.NAME + "=1.1.1.1");
+        actions.add(SetNwDst.NAME + "=2.2.2.2");
+        actions.add(Controller.NAME);
+        actions.add(SetNwTos.NAME + "=1");
+        actions.add(SetTpSrc.NAME + "=60");
+        actions.add(SetTpDst.NAME + "=8080");
+        actions.add(SetNextHop.NAME + "=1.1.1.1");
 
         return actions;
     }

@@ -54,6 +54,7 @@ import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Enqueue;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.IFlowActionsFactory;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.core.Config;
@@ -145,6 +146,7 @@ public class ForwardingRulesManager implements
     private IFlowProgrammerService programmer;
     private IClusterContainerServices clusterContainerService = null;
     private ISwitchManager switchManager;
+    private IFlowActionsFactory flowActionFactory;
     private Thread frmEventHandler;
     protected BlockingQueue<FRMEvent> pendingEvents;
 
@@ -1592,7 +1594,7 @@ public class ForwardingRulesManager implements
     @Override
     public Status addStaticFlow(FlowConfig config) {
         // Configuration object validation
-        Status status = config.validate();
+        Status status = config.validate(flowActionFactory);
         if (!status.isSuccess()) {
             log.warn("Invalid Configuration for flow {}. The failure is {}", config, status.getDescription());
             String error = "Invalid Configuration (" + status.getDescription() + ")";
@@ -1852,7 +1854,7 @@ public class ForwardingRulesManager implements
         }
 
         // Validity Check
-        Status status = newFlowConfig.validate();
+        Status status = newFlowConfig.validate(flowActionFactory);
         if (!status.isSuccess()) {
             String msg = "Invalid Configuration (" + status.getDescription() + ")";
             newFlowConfig.setStatus(msg);
@@ -1932,7 +1934,7 @@ public class ForwardingRulesManager implements
             }
         }
         if (target != null) {
-            Status status = target.validate();
+            Status status = target.validate(flowActionFactory);
             if (!status.isSuccess()) {
                 log.warn(status.getDescription());
                 return status;
@@ -2495,6 +2497,16 @@ public class ForwardingRulesManager implements
     public void unsetConfigurationContainerService(IConfigurationContainerService service) {
         log.trace("Got configuration service UNset request");
         this.configurationService = null;
+    }
+
+    public void setIFlowActionFactory(IFlowActionsFactory service) {
+        log.debug("Got configuration service set request {}", service);
+        this.flowActionFactory = service;
+    }
+
+    public void unsetIFlowActionFactory(IFlowActionsFactory service) {
+        log.debug("Got configuration service UNset request {}", service);
+        this.flowActionFactory = null;
     }
 
     @Override
