@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
@@ -22,16 +23,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
+/*
+ * FIXME: the thread safety of concurrent write/delete/read/seal operations
+ *        needs to be evaluated.
+ */
 class MutableDataTree {
-
-    private static final Logger log = LoggerFactory.getLogger(MutableDataTree.class);
-
-    final DataAndMetadataSnapshot snapshot;
-    final NodeModification rootModification;
-    final ModificationApplyOperation strategyTree;
-
-    private boolean sealed = false;
+    private static final Logger LOG = LoggerFactory.getLogger(MutableDataTree.class);
+    private final AtomicBoolean sealed = new AtomicBoolean();
+    private final ModificationApplyOperation strategyTree;
+    private final DataAndMetadataSnapshot snapshot;
+    private final NodeModification rootModification;
 
     private MutableDataTree(final DataAndMetadataSnapshot snapshot, final ModificationApplyOperation strategyTree) {
         this.snapshot = snapshot;
@@ -58,7 +61,6 @@ class MutableDataTree {
             return NormalizedNodeUtils.findNode(modification.getKey(), data, path);
         }
         return Optional.absent();
-
     }
 
     private Optional<StoreMetadataNode> resolveSnapshot(
@@ -78,13 +80,13 @@ class MutableDataTree {
             return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
                     StoreUtils.increase(snapshot.getMetadataTree().getSubtreeVersion()));
         } catch (Exception e) {
-            log.error("Could not create snapshot for {}", path,e);
+            LOG.error("Could not create snapshot for {}", path,e);
             throw e;
         }
     }
 
     private ModificationApplyOperation resolveModificationStrategy(final InstanceIdentifier path) {
-        log.trace("Resolving modification apply strategy for {}", path);
+        LOG.trace("Resolving modification apply strategy for {}", path);
         return TreeNodeUtils.findNodeChecked(strategyTree, path);
     }
 
@@ -103,12 +105,13 @@ class MutableDataTree {
     }
 
     public void seal() {
-        sealed = true;
+        final boolean success = sealed.compareAndSet(false, true);
+        Preconditions.checkState(success, "Attempted to seal an already-sealed Data Tree.");
         rootModification.seal();
     }
 
     private void checkSealed() {
-        checkState(!sealed, "Data Tree is sealed. No further modifications allowed.");
+        checkState(!sealed.get(), "Data Tree is sealed. No further modifications allowed.");
     }
 
     protected NodeModification getRootModification() {
@@ -119,6 +122,4 @@ class MutableDataTree {
     public String toString() {
         return "MutableDataTree [modification=" + rootModification + "]";
     }
-
-
 }
