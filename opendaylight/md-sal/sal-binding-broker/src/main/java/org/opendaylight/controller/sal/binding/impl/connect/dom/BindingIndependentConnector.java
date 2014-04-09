@@ -35,7 +35,6 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
@@ -46,6 +45,8 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
+import org.opendaylight.controller.sal.binding.impl.MountPointManagerImpl.BindingMountPointImpl;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.GlobalRpcRegistrationListener;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.RouterInstantiationListener;
@@ -100,8 +101,6 @@ public class BindingIndependentConnector implements //
 
     private final Logger LOG = LoggerFactory.getLogger(BindingIndependentConnector.class);
 
-    @SuppressWarnings("deprecation")
-    private static final InstanceIdentifier<? extends DataObject> ROOT = InstanceIdentifier.builder().toInstance();
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier ROOT_BI = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
             .builder().toInstance();
@@ -139,8 +138,6 @@ public class BindingIndependentConnector implements //
         }
 
     };
-
-    private Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> baDataReaderRegistration;
 
     private boolean rpcForwarding = false;
 
@@ -306,11 +303,23 @@ public class BindingIndependentConnector implements //
             dataForwarding = true;
             return;
         }
-        checkState(!dataForwarding, "Connector is already forwarding data.");
-        baDataReaderRegistration = baDataService.registerDataReader(ROOT, this);
-        baCommitHandlerRegistration = baDataService.registerCommitHandler(ROOT, bindingToDomCommitHandler);
-        biCommitHandlerRegistration = biDataService.registerCommitHandler(ROOT_BI, domToBindingCommitHandler);
-        baDataService.registerCommitHandlerListener(domToBindingCommitHandler);
+
+        final DataProviderService baData;
+        if (baDataService instanceof BindingMountPointImpl) {
+            baData = ((BindingMountPointImpl)baDataService).getDataBrokerImpl();
+            LOG.debug("Extracted BA Data provider {} from mount point {}", baData, baDataService);
+        } else {
+            baData = baDataService;
+        }
+
+        if (baData instanceof DataBrokerImpl) {
+            checkState(!dataForwarding, "Connector is already forwarding data.");
+            ((DataBrokerImpl) baData).setDataReadDelegate(this);
+            ((DataBrokerImpl) baData).setRootCommitHandler(bindingToDomCommitHandler);
+            biCommitHandlerRegistration = biDataService.registerCommitHandler(ROOT_BI, domToBindingCommitHandler);
+            baDataService.registerCommitHandlerListener(domToBindingCommitHandler);
+        }
+
         dataForwarding = true;
     }
 
