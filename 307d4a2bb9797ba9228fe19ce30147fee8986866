@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_6bba31e3",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/test/java/org/opendaylight/controller/netconf/confignetconfconnector/NetconfMappingTest.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": "you probably did not want to commit this :)",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8bbf75d0",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusher.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": "another one",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ebcde187",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": "how can this be trace? please increase to error",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0bcb6573",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": "yet another one",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_abc7d963",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/mapping/operations/DefaultGetSchema.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": ":/",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cbc49d61",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/osgi/NetconfOperationRouterImpl.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": ":/",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6ba1d1a8",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": "should not be trace",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4bb08df4",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/NetconfUtil.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": ":/",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb940146",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/mapping/AbstractNetconfOperation.java.orig",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-09T14:32:17Z",
+      "side": 1,
+      "message": ":/",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
