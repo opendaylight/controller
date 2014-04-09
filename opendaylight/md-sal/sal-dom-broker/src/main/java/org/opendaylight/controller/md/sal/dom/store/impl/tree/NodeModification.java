@@ -12,6 +12,8 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.annotation.concurrent.GuardedBy;
+
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -51,6 +53,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
 
     private final Map<PathArgument, NodeModification> childModification;
 
+    @GuardedBy("this")
     private boolean sealed = false;
 
     protected NodeModification(final PathArgument identifier, final Optional<StoreMetadataNode> original) {
@@ -173,6 +176,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
         this.value = value;
     }
 
+    @GuardedBy("this")
     private void checkSealed() {
         checkState(!sealed, "Node Modification is sealed. No further changes allowed.");
     }
@@ -202,7 +206,8 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
         return !childModification.isEmpty();
     }
 
-    public void updateModificationType(final ModificationType type) {
+    @GuardedBy("this")
+    private void updateModificationType(final ModificationType type) {
         modificationType = type;
         clearSnapshot();
     }
