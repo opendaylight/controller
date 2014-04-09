@@ -114,7 +114,9 @@
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
     <xtend.version>2.4.3</xtend.version>
-    <xtend.dstdir>${project.build.directory}/generated-sources/xtend-gen</xtend.dstdir>
+    <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
+    <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
+    <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
   </properties>
 
   <dependencyManagement>
@@ -1716,7 +1718,7 @@
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>
           <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
-          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/</excludes>
+          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/</excludes>
         </configuration>
       </plugin>
       <plugin>
@@ -1782,6 +1784,10 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -2004,6 +2010,52 @@
                   </execution>
               </executions>
           </plugin>
+          <plugin>
+              <artifactId>maven-clean-plugin</artifactId>
+              <configuration>
+                  <filesets>
+                      <fileset>
+                          <directory>${xtend.dstdir}</directory>
+                          <includes>
+                              <include>**</include>
+                          </includes>
+                      </fileset>
+                      <fileset>
+                          <directory>${jmxGeneratorPath}</directory>
+                          <includes>
+                              <include>**</include>
+                          </includes>
+                      </fileset>
+                      <fileset>
+                          <directory>${salGeneratorPath}</directory>
+                          <includes>
+                              <include>**</include>
+                          </includes>
+                      </fileset>
+                  </filesets>
+              </configuration>
+            </plugin>
+          <plugin>
+             <groupId>org.codehaus.mojo</groupId>
+             <artifactId>build-helper-maven-plugin</artifactId>
+             <version>1.8</version>
+             <executions>
+                <execution>
+                   <id>add-source</id>
+                   <phase>generate-sources</phase>
+                   <goals>
+                      <goal>add-source</goal>
+                   </goals>
+                   <configuration>
+                      <sources>
+                         <source>${jmxGeneratorPath}</source>
+                         <source>${salGeneratorPath}</source>
+                         <source>${xtend.dstdir}</source>
+                      </sources>
+                   </configuration>
+                </execution>
+             </executions>
+            </plugin>
       </plugins>
     </pluginManagement>
   </build>

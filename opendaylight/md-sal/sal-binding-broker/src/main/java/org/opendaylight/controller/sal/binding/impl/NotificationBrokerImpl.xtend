@@ -60,7 +60,7 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
     override publish(Notification notification, ExecutorService service) {
         val allTypes = notification.notificationTypes
 
-        var Iterable<NotificationListener<?>> listenerToNotify = Collections.emptySet();
+        var Iterable<NotificationListener<? extends Object>> listenerToNotify = Collections.emptySet();
         for (type : allTypes) {
             listenerToNotify = listenerToNotify + listeners.get(type as Class<? extends Notification>)
         }

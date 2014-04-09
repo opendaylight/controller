@@ -25,11 +25,6 @@
         <maven>3.0.4</maven>
     </prerequisites>
 
-    <properties>
-        <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
-        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>

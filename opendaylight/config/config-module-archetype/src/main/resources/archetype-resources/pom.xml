@@ -8,8 +8,6 @@
   <packaging>bundle</packaging>
 
     <properties>
-        <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
-        <salGeneratorPath>${project.build.directory}/generated-sources/sal</salGeneratorPath>
         <config.version>${config-api-version}</config.version>
         <yangtools.version>${yang-maven-plugin-version}</yangtools.version>
         <maven.bundle.version>${maven-bundle-plugin-version}</maven.bundle.version>
@@ -76,26 +74,6 @@
                         <version>${yangtools.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${jmxGeneratorPath}</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>

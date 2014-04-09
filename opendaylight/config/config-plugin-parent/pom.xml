@@ -14,10 +14,6 @@
         <maven>3.0.4</maven>
     </prerequisites>
 
-    <properties>
-        <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
-    </properties>
-
     <build>
         <pluginManagement>
             <plugins>
@@ -55,28 +51,6 @@
                             <version>${config.version}</version>
                         </dependency>
                     </dependencies>
-                </plugin>
-
-                <!-- tell eclipse about generated source folders -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.8</version>
-                    <executions>
-                        <execution>
-                            <id>add-source</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>${jmxGeneratorPath}</source>
-                                    <source>${salGeneratorPath}</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
