@@ -9,69 +9,80 @@ package org.opendaylight.controller.sal.binding.impl;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
+import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataBroker;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.controller.sal.binding.impl.util.BindingAwareDataReaderRouter;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.DataObjectReadingUtil;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Maps;
 
-
-public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> //
-       implements DataProviderService, AutoCloseable {
+public class DataBrokerImpl extends
+        AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> //
+        implements DataProviderService, AutoCloseable {
 
     private final static class ContainsWildcarded implements Predicate<InstanceIdentifier<? extends DataObject>> {
 
-        private final  InstanceIdentifier<? extends DataObject> key;
+        private final InstanceIdentifier<? extends DataObject> key;
 
-        public ContainsWildcarded(InstanceIdentifier<? extends DataObject> key) {
+        public ContainsWildcarded(final InstanceIdentifier<? extends DataObject> key) {
             this.key = key;
         }
 
         @Override
-        public boolean apply(InstanceIdentifier<? extends DataObject> input) {
+        public boolean apply(final InstanceIdentifier<? extends DataObject> input) {
             return key.containsWildcarded(input);
         }
     }
 
     private final static class IsContainedWildcarded implements Predicate<InstanceIdentifier<? extends DataObject>> {
 
-        private final  InstanceIdentifier<? extends DataObject> key;
+        private final InstanceIdentifier<? extends DataObject> key;
 
-        public IsContainedWildcarded(InstanceIdentifier<? extends DataObject> key) {
+        public IsContainedWildcarded(final InstanceIdentifier<? extends DataObject> key) {
             this.key = key;
         }
 
         @Override
-        public boolean apply(InstanceIdentifier<? extends DataObject> input) {
+        public boolean apply(final InstanceIdentifier<? extends DataObject> input) {
             return input.containsWildcarded(key);
         }
     }
 
     private final AtomicLong nextTransaction = new AtomicLong();
     private final AtomicLong createdTransactionsCount = new AtomicLong();
+    private final DelegatingDataReadRouter router = new DelegatingDataReadRouter();
+    private DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> rootCommitHandler;
+
+    public DataBrokerImpl() {
+        setDataReadRouter(router);
+    }
+
+    public void setDataReadDelegate(final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
+        router.setDelegate(delegate);
+    }
 
     public AtomicLong getCreatedTransactionsCount() {
         return createdTransactionsCount;
-    }
-
-    public DataBrokerImpl() {
-        setDataReadRouter(new BindingAwareDataReaderRouter());
     }
 
     @Override
     public DataTransactionImpl beginTransaction() {
         String transactionId = "BA-" + nextTransaction.getAndIncrement();
         createdTransactionsCount.getAndIncrement();
-        return new DataTransactionImpl(transactionId,this);
+        return new DataTransactionImpl(transactionId, this);
     }
 
     @Override
@@ -80,33 +91,88 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier<? exte
     }
 
     @Override
-    protected Predicate<InstanceIdentifier<? extends DataObject>> createContainsPredicate(final
-            InstanceIdentifier<? extends DataObject> key) {
+    protected Predicate<InstanceIdentifier<? extends DataObject>> createContainsPredicate(
+            final InstanceIdentifier<? extends DataObject> key) {
         return new ContainsWildcarded(key);
     }
 
     @Override
-    protected Predicate<InstanceIdentifier<? extends DataObject>> createIsContainedPredicate(final
-            InstanceIdentifier<? extends DataObject> key) {
+    protected Predicate<InstanceIdentifier<? extends DataObject>> createIsContainedPredicate(
+            final InstanceIdentifier<? extends DataObject> key) {
         return new IsContainedWildcarded(key);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected Map<InstanceIdentifier<? extends DataObject>, DataObject> deepGetBySubpath(
-            Map<InstanceIdentifier<? extends DataObject>, DataObject> dataSet,
-            InstanceIdentifier<? extends DataObject> path) {
+            final Map<InstanceIdentifier<? extends DataObject>, DataObject> dataSet,
+            final InstanceIdentifier<? extends DataObject> path) {
         Builder<InstanceIdentifier<? extends DataObject>, DataObject> builder = ImmutableMap.builder();
-        Map<InstanceIdentifier<? extends DataObject>, DataObject> potential = Maps.filterKeys(dataSet, createIsContainedPredicate(path));
-        for(Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : potential.entrySet()) {
+        Map<InstanceIdentifier<? extends DataObject>, DataObject> potential = Maps.filterKeys(dataSet,
+                createIsContainedPredicate(path));
+        for (Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : potential.entrySet()) {
             try {
-                builder.putAll(DataObjectReadingUtil.readData(entry.getValue(),(InstanceIdentifier)entry.getKey(),path));
+                builder.putAll(DataObjectReadingUtil.readData(entry.getValue(), (InstanceIdentifier) entry.getKey(),
+                        path));
             } catch (Exception e) {
                 // FIXME : Log exception;
             }
         }
         return builder.build();
 
+    }
+
+    public class DelegatingDataReadRouter extends
+            AbstractDataReadRouter<InstanceIdentifier<? extends DataObject>, DataObject> {
+
+        private DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate;
+
+        @Override
+        public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
+            return delegate.readConfigurationData(path);
+        }
+
+        public void setDelegate(final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
+            return delegate.readOperationalData(path);
+        }
+
+        @Override
+        protected DataObject merge(final InstanceIdentifier<? extends DataObject> path, final Iterable<DataObject> data) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> registerConfigurationReader(
+                final InstanceIdentifier<? extends DataObject> path,
+                final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> registerOperationalReader(
+                final InstanceIdentifier<? extends DataObject> path,
+                final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+    }
+
+    @Override
+    protected ImmutableList<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> affectedCommitHandlers(
+            final Set<InstanceIdentifier<? extends DataObject>> paths) {
+        ImmutableList.Builder<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> handlersBuilder = ImmutableList.builder();
+        return handlersBuilder //
+                .add(rootCommitHandler) //
+                .addAll(super.affectedCommitHandlers(paths)) //
+                .build();
+    }
+
+    public void setRootCommitHandler(final DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> commitHandler) {
+        rootCommitHandler = commitHandler;
     }
 
 }
