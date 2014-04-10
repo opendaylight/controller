@@ -8,12 +8,21 @@
 package org.opendaylight.controller.netconf.ssh.osgi;
 
 import com.google.common.base.Optional;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
+import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.usermanager.UserConfig;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -21,16 +30,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Activator for netconf SSH bundle which creates SSH bridge between netconf client and netconf server. Activator
  * starts SSH Server in its own thread. This thread is closed when activator calls stop() method. Server opens socket
- * and listen for client connections. Each client connection creation is handled in separate
+ * and listens for client connections. Each client connection creation is handled in separate
  * {@link org.opendaylight.controller.netconf.ssh.threads.SocketThread} thread.
  * This thread creates two additional threads {@link org.opendaylight.controller.netconf.ssh.threads.IOThread}
  * forwarding data from/to client.IOThread closes servers session and server connection when it gets -1 on input stream.
@@ -44,6 +49,8 @@ public class NetconfSSHActivator implements BundleActivator{
     private static final String EXCEPTION_MESSAGE = "Netconf ssh bridge is not available.";
     private IUserManager iUserManager;
     private BundleContext context = null;
+    private Optional<String> defaultPassword;
+    private Optional<String> defaultUser;
 
     private ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>(){
         @Override
@@ -79,20 +86,23 @@ public class NetconfSSHActivator implements BundleActivator{
 
     @Override
     public void stop(BundleContext context) throws IOException {
+        if (this.defaultUser.isPresent()){
+            this.iUserManager.removeLocalUser(this.defaultUser.get());
+        }
         if (server != null){
             server.stop();
             logger.trace("Netconf SSH bridge is down ...");
         }
     }
     private void startSSHServer() throws IllegalStateException, IOException {
+        checkNotNull(this.iUserManager, "No user manager service available.");
         logger.trace("Starting netconf SSH  bridge.");
         Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context, EXCEPTION_MESSAGE);
         InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,
                 EXCEPTION_MESSAGE, true);
 
         if (sshSocketAddressOptional.isPresent()){
-            String path = NetconfConfigUtil.getPrivateKeyPath(context);
-            path = path.replace("\\", "/");  // FIXME: shouldn't this convert lines to system dependent path separator?
+            String path =  FilenameUtils.separatorsToSystem(NetconfConfigUtil.getPrivateKeyPath(context));
             if (path.equals("")){
                 throw new IllegalStateException("Missing netconf.ssh.pk.path key in configuration file.");
             }
@@ -100,11 +110,10 @@ public class NetconfSSHActivator implements BundleActivator{
             File privateKeyFile = new File(path);
             String privateKeyPEMString = null;
             if (privateKeyFile.exists() == false) {
-                // generate & save to file
                 try {
                     privateKeyPEMString = PEMGenerator.generateTo(privateKeyFile);
                 } catch (Exception e) {
-                    logger.error("Exception occured while generating PEM string {}",e);
+                    logger.error("Exception occurred while generating PEM string {}",e);
                 }
             } else {
                 // read from file
@@ -117,6 +126,17 @@ public class NetconfSSHActivator implements BundleActivator{
             }
             AuthProvider authProvider = null;
             try {
+                this.defaultPassword = NetconfConfigUtil.getSSHDefaultPassword(context);
+                this.defaultUser = NetconfConfigUtil.getSSHDefaultUser(context);
+                // Since there is no user data store yet (ldap, ...) this adds default user/password to UserManager
+                // if these parameters are set in netconf configuration file.
+                if (defaultUser.isPresent() &&
+                        defaultPassword.isPresent()){
+                    logger.trace(String.format("Default username and password for netconf ssh bridge found. Adding user %s to user manager.",defaultUser.get()));
+                    List<String> roles = new ArrayList<String>(1);
+                    roles.add(UserLevel.SYSTEMADMIN.toString());
+                    iUserManager.addLocalUser(new UserConfig(defaultUser.get(), defaultPassword.get(), roles));
+                }
                 authProvider = new AuthProvider(iUserManager, privateKeyPEMString);
             } catch (Exception e) {
                 logger.error("Error instantiating AuthProvider {}",e);
