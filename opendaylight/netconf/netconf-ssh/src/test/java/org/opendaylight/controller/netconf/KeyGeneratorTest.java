@@ -54,7 +54,7 @@ public class KeyGeneratorTest {
     public void test() throws Exception {
         String pem = PEMGenerator.generateTo(tempFile);
 
-        AuthProvider authProvider = new AuthProvider(iUserManager, pem);
+        AuthProvider authProvider = new AuthProvider(iUserManager, pem, "netconf","netconf");
         InetSocketAddress inetSocketAddress = new InetSocketAddress(Inet4Address.getLoopbackAddress().getHostAddress(), 8383);
         NetconfSSHServer server = NetconfSSHServer.start(1830, inetSocketAddress, authProvider);
 

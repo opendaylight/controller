@@ -405,7 +405,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         try (InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
             pem = IOUtils.toString(is);
         }
-        AuthProvider ap = new AuthProvider(um, pem);
+        AuthProvider ap = new AuthProvider(um, pem,USERNAME,PASSWORD);
         Thread sshServerThread = new Thread(NetconfSSHServer.start(10830, tcpAddress, ap));
         sshServerThread.setDaemon(true);
         sshServerThread.start();
