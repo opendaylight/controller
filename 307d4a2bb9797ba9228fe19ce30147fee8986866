@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d651a4d9",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-10T06:05:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ebcde187",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0bcb6573",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java.orig",
         "patchSetId": 8
@@ -115,6 +133,24 @@
       "writtenOn": "2014-04-09T14:32:17Z",
       "side": 1,
       "message": "should not be trace",
+      "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d668c489",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-10T06:05:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6ba1d1a8",
       "revId": "307d4a2bb9797ba9228fe19ce30147fee8986866",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
