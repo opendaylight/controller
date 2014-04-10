@@ -102,6 +102,7 @@
     <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
     <protocol_plugin.stub.version>0.4.2-SNAPSHOT</protocol_plugin.stub.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
+    <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <!-- Third party version -->
     <jersey-servlet.version>1.17</jersey-servlet.version>
     <corsfilter.version>7.0.42</corsfilter.version>
@@ -809,7 +810,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>clustering.services-implementation</artifactId>
-        <version>${controller.version}</version>
+        <version>${clustering.services_implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
