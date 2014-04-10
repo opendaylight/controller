@@ -117,7 +117,10 @@ public class NetconfSSHActivator implements BundleActivator{
             }
             AuthProvider authProvider = null;
             try {
-                authProvider = new AuthProvider(iUserManager, privateKeyPEMString);
+                authProvider = new AuthProvider(iUserManager,
+                                                privateKeyPEMString,
+                                                NetconfConfigUtil.getSSHDefaultUser(context),
+                                                NetconfConfigUtil.getSSHDefaultPassword(context));
             } catch (Exception e) {
                 logger.error("Error instantiating AuthProvider {}",e);
             }
