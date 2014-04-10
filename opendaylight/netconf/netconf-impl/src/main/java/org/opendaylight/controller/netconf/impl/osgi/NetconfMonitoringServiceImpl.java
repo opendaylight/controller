@@ -16,7 +16,9 @@ import io.netty.util.internal.ConcurrentSet;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.Yang;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
@@ -40,10 +42,10 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
     private static final Logger logger = LoggerFactory.getLogger(NetconfMonitoringServiceImpl.class);
 
     private final Set<NetconfManagementSession> sessions = new ConcurrentSet<>();
-    private final NetconfOperationServiceFactoryListener factoriesListener;
+    private final NetconfOperationProvider netconfOperationProvider;
 
-    public NetconfMonitoringServiceImpl(NetconfOperationServiceFactoryListener factoriesListener) {
-        this.factoriesListener = factoriesListener;
+    public NetconfMonitoringServiceImpl(NetconfOperationProvider netconfOperationProvider) {
+        this.netconfOperationProvider = netconfOperationProvider;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
     @Override
     public void onSessionDown(NetconfManagementSession session) {
         logger.debug("Session {} down", session);
-        Preconditions.checkState(sessions.contains(session) == true, "Session %s not present", session);
+        Preconditions.checkState(sessions.contains(session), "Session %s not present", session);
         sessions.remove(session);
     }
 
@@ -67,17 +69,23 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
 
     @Override
     public Schemas getSchemas() {
-        // FIXME, session ID
         // capabilities should be split from operations (it will allow to move getSchema operation to monitoring module)
-        return transformSchemas(factoriesListener.getSnapshot(0));
+        try (NetconfOperationServiceSnapshot snapshot = netconfOperationProvider.getSnapshot("netconf-monitoring")) {
+            return transformSchemas(snapshot.getServices());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Exception while closing", e);
+        }
     }
 
-    private Schemas transformSchemas(NetconfOperationServiceSnapshot snapshot) {
+    private Schemas transformSchemas(Set<NetconfOperationService> services) {
         Set<Capability> caps = Sets.newHashSet();
 
         List<Schema> schemas = Lists.newArrayList();
 
-        for (NetconfOperationService netconfOperationService : snapshot.getServices()) {
+
+        for (NetconfOperationService netconfOperationService : services) {
             // TODO check for duplicates ? move capability merging to snapshot
             // Split capabilities from operations first and delete this duplicate code
             caps.addAll(netconfOperationService.getCapabilities());
@@ -86,8 +94,9 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
         for (Capability cap : caps) {
             SchemaBuilder builder = new SchemaBuilder();
 
-            if(cap.getCapabilitySchema().isPresent() == false)
+            if (cap.getCapabilitySchema().isPresent() == false) {
                 continue;
+            }
 
             Preconditions.checkState(cap.getModuleNamespace().isPresent());
             builder.setNamespace(new Uri(cap.getModuleNamespace().get()));
@@ -102,7 +111,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
 
             builder.setFormat(Yang.class);
 
-            builder.setLocation(transformLocations(cap.getLocation().or(Collections.<String> emptyList())));
+            builder.setLocation(transformLocations(cap.getLocation().or(Collections.<String>emptyList())));
 
             builder.setKey(new SchemaKey(Yang.class, identifier, version));
 

@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.management.MBeanServer;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -41,7 +39,6 @@ public class ConfigPersisterTest {
 
     private MockedBundleContext ctx;
     private ConfigPersisterActivator configPersisterActivator;
-    private static final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
     private TestingExceptionHandler handler;
 
 

@@ -6,14 +6,13 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.api;
+package org.opendaylight.controller.netconf.mapping.api;
 
-import org.w3c.dom.Document;
+import java.util.Set;
 
-public interface NetconfOperationRouter extends AutoCloseable {
+public interface NetconfOperationServiceSnapshot extends AutoCloseable {
+    String getNetconfSessionIdForReporting();
 
-    Document onNetconfMessage(Document message, NetconfSession session)
-            throws NetconfDocumentedException;
-
+    Set<NetconfOperationService> getServices();
 
 }

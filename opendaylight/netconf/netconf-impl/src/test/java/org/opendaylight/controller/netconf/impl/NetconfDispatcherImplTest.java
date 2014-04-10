@@ -15,7 +15,6 @@ import io.netty.util.HashedWheelTimer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 
 import java.lang.management.ManagementFactory;
@@ -34,7 +33,7 @@ public class NetconfDispatcherImplTest {
 
         commitNot = new DefaultCommitNotificationProducer(
                 ManagementFactory.getPlatformMBeanServer());
-        NetconfOperationServiceFactoryListener factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
+        NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
 
         SessionIdProvider idProvider = new SessionIdProvider();
         hashedWheelTimer = new HashedWheelTimer();

@@ -7,10 +7,39 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
+import org.mockito.Mock;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
+import org.opendaylight.controller.netconf.client.NetconfClient;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
+import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
+import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
+import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
+import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
+import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,39 +51,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Assert;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
-import org.mockito.Mock;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
-import org.opendaylight.controller.netconf.client.NetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
-import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
-import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
@@ -75,7 +75,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(NetconfITTest.getModuleFactoriesS().toArray(
                 new ModuleFactory[0])));
 
-        monitoringService = new NetconfMonitoringServiceImpl(getFactoriesListener());
+        monitoringService = new NetconfMonitoringServiceImpl(getNetconfOperationProvider());
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
@@ -171,16 +171,17 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     private void assertSessionElementsInResponse(Document document, int i) {
         int elementSize = document.getElementsByTagName("session-id").getLength();
-        Assert.assertEquals(i, elementSize);
+        Assert.assertEquals("Incorrect number of session-id tags in " + XmlUtil.toString(document),i, elementSize);
     }
 
     private NetconfMessage loadGetMessage() throws Exception {
         return XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/get.xml");
     }
 
-    public static NetconfOperationServiceFactoryListener getFactoriesListener() {
-        NetconfOperationServiceFactoryListener factoriesListener = mock(NetconfOperationServiceFactoryListener.class);
-        NetconfOperationServiceSnapshot snap = mock(NetconfOperationServiceSnapshot.class);
+    public static NetconfOperationProvider getNetconfOperationProvider() throws Exception {
+        NetconfOperationProvider factoriesListener = mock(NetconfOperationProvider.class);
+        NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
+        doNothing().when(snap).close();
         NetconfOperationService service = mock(NetconfOperationService.class);
         Set<Capability> caps = Sets.newHashSet();
         caps.add(new Capability() {
@@ -218,7 +219,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
         doReturn(caps).when(service).getCapabilities();
         Set<NetconfOperationService> services = Sets.newHashSet(service);
         doReturn(services).when(snap).getServices();
-        doReturn(snap).when(factoriesListener).getSnapshot(anyLong());
+        doReturn(snap).when(factoriesListener).getSnapshot(anyString());
 
         return factoriesListener;
     }

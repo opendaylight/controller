@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.impl.osgi;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
@@ -34,7 +35,6 @@ public class NetconfImplActivator implements BundleActivator {
 
     private NetconfOperationServiceFactoryTracker factoriesTracker;
     private DefaultCommitNotificationProducer commitNot;
-    private NetconfServerDispatcher dispatch;
     private NioEventLoopGroup eventLoopGroup;
     private HashedWheelTimer timer;
     private ServiceRegistration<NetconfMonitoringService> regMonitoring;
@@ -64,10 +64,12 @@ public class NetconfImplActivator implements BundleActivator {
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
                 serverNegotiatorFactory, listenerFactory);
-        dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
+        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
         logger.info("Starting TCP netconf server at {}", address);
         dispatch.createServer(address);
+
+        context.registerService(NetconfOperationProvider.class, factoriesListener, null);
 
     }
 

@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.DummyAdapter;
@@ -39,7 +40,7 @@ final class MockedBundleContext {
     @Mock
     private BundleContext context;
     @Mock
-    private Filter filter;
+    private Filter outerFilter, innerFilter;
     @Mock
     private ServiceReference<?> serviceReference;
     @Mock
@@ -53,12 +54,21 @@ final class MockedBundleContext {
         MockitoAnnotations.initMocks(this);
         doReturn(null).when(context).getProperty(anyString());
         initContext(maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
-        doReturn(filter).when(context).createFilter(ConfigPersisterActivator.getFilterString());
-        String filterString = "filter";
-        doReturn(filterString).when(filter).toString();
-        doNothing().when(context).addServiceListener(any(ServiceListener.class), eq(filterString));
+
+        String outerFilterString = "(objectClass=org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider)";
+        doReturn(outerFilter).when(context).createFilter(outerFilterString);
+        doNothing().when(context).addServiceListener(any(ServiceListener.class), eq(outerFilterString));
         ServiceReference<?>[] toBeReturned = {serviceReference};
-        doReturn(toBeReturned).when(context).getServiceReferences((String) null, filterString);
+        doReturn(toBeReturned).when(context).getServiceReferences(NetconfOperationProvider.class.getName(), null);
+
+        String innerFilterString = "innerfilter";
+        doReturn(innerFilterString).when(outerFilter).toString();
+
+        doReturn(innerFilter).when(context).createFilter(ConfigPersisterActivator.getFilterString());
+        doReturn(innerFilterString).when(innerFilter).toString();
+        doNothing().when(context).addServiceListener(any(ServiceListener.class), eq(innerFilterString));
+
+        doReturn(toBeReturned).when(context).getServiceReferences((String) null, innerFilterString);
         doReturn(bundle).when(serviceReference).getBundle();
         doReturn(context).when(bundle).getBundleContext();
         doReturn("").when(serviceReference).toString();
@@ -66,6 +76,7 @@ final class MockedBundleContext {
         doReturn(service).when(serviceFactory).createService(anyString());
         doReturn(Collections.emptySet()).when(service).getCapabilities();
         doNothing().when(service).close();
+        doReturn("serviceFactoryMock").when(serviceFactory).toString();
     }
 
     public BundleContext getBundleContext() {
