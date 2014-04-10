@@ -41,7 +41,7 @@ import static org.opendaylight.controller.datastore.infinispan.TestModel.VALUE_Q
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
-
+//Datastore testing
 public class DataStoreImplTest {
     private TreeCache treeCache;
     private static final Integer ONE_ID = 1;
@@ -70,9 +70,9 @@ public class DataStoreImplTest {
 
     private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
             .withChild(mapNodeBuilder(INNER_LIST_QNAME) //
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME)) //
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME)) //
-                    .build()) //
+                .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME)) //
+                .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME)) //
+                .build()) //
             .build();
 
     private SchemaContext schemaContext;
