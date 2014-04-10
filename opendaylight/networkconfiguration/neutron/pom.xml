@@ -71,6 +71,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
+      <version>${configuration.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

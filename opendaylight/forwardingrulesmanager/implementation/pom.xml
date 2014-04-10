@@ -72,7 +72,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
-      <version>0.4.1</version>
+      <version>${configuration.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
