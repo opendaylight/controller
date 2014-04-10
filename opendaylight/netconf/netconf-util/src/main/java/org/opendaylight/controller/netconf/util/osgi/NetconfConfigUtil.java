@@ -32,6 +32,8 @@ public final class NetconfConfigUtil {
     private static final String ADDRESS_SUFFIX_PROP = ".address";
     private static final String CLIENT_PROP = ".client";
     private static final String PRIVATE_KEY_PATH_PROP = ".pk.path";
+    private static final String SSH_DEFAULT_USER = ".default.user";
+    private static final String SSH_DEFAULT_PASSWORD = ".default.password";
 
     private static final String CONNECTION_TIMEOUT_MILLIS_PROP = "connectionTimeoutMillis";
     private static final long DEFAULT_TIMEOUT_MILLIS = 5000;
@@ -72,6 +74,13 @@ public final class NetconfConfigUtil {
     public static String getPrivateKeyPath(BundleContext context){
         return getPropertyValue(context,PREFIX_PROP + InfixProp.ssh +PRIVATE_KEY_PATH_PROP);
     }
+    public static String getSSHDefaultUser(BundleContext context){
+        return getPropertyValue(context,PREFIX_PROP + InfixProp.ssh +SSH_DEFAULT_USER);
+    }
+    public static String getSSHDefaultPassword(BundleContext context){
+        return getPropertyValue(context,PREFIX_PROP + InfixProp.ssh +SSH_DEFAULT_PASSWORD);
+    }
+
     private static String getPropertyValue(BundleContext context, String propertyName){
         String propertyValue = context.getProperty(propertyName);
         if (propertyValue == null){
